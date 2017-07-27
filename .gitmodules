@@ -1,0 +1,6 @@
+[submodule "fabric"]
+	path = fabric
+	url = https://gerrit.hyperledger.org/r/fabric
+[submodule "fabric-ca"]
+	path = fabric-ca
+	url = https://gerrit.hyperledger.org/r/fabric-ca

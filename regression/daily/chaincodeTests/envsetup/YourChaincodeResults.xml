@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="utf-8"?><testsuite errors="0" failures="7" name="pytest" skips="5" tests="13" time="55.726"><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="29" name="test_AFAB3843_Create_Join_Channel" time="38.0259237289"><system-err>#x1B[33m2017-05-23 21:43:48.145 UTC [bccsp] GetDefault -&gt; WARN 001#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.199 UTC [bccsp] GetDefault -&gt; WARN 002#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.240 UTC [bccsp] GetDefault -&gt; WARN 003#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.278 UTC [bccsp] GetDefault -&gt; WARN 004#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.327 UTC [bccsp] GetDefault -&gt; WARN 005#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.382 UTC [bccsp] GetDefault -&gt; WARN 006#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.471 UTC [bccsp] GetDefault -&gt; WARN 007#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.504 UTC [bccsp] GetDefault -&gt; WARN 008#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.533 UTC [bccsp] GetDefault -&gt; WARN 009#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.559 UTC [bccsp] GetDefault -&gt; WARN 00a#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.593 UTC [bccsp] GetDefault -&gt; WARN 00b#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.613 UTC [bccsp] GetDefault -&gt; WARN 00c#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+#x1B[33m2017-05-23 21:43:48.638 UTC [bccsp] GetDefault -&gt; WARN 00d#x1B[0m Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.
+2017-05-23 21:43:48.753 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:48.769 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m intermediate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/ordererOrganizations/example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/ordererOrganizations/example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:48.769 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/ordererOrganizations/example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/ordererOrganizations/example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:48.769 UTC [msp] getMspConfig -&gt; INFO 004#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/ordererOrganizations/example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/ordererOrganizations/example.com/msp/config.yaml: no such file or directory]
+2017-05-23 21:43:48.798 UTC [msp] getMspConfig -&gt; INFO 005#x1B[0m intermediate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:48.798 UTC [msp] getMspConfig -&gt; INFO 006#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:48.799 UTC [msp] getMspConfig -&gt; INFO 007#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org1.example.com/msp/config.yaml: no such file or directory]
+2017-05-23 21:43:48.805 UTC [msp] getMspConfig -&gt; INFO 008#x1B[0m intermediate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:48.805 UTC [msp] getMspConfig -&gt; INFO 009#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:48.805 UTC [msp] getMspConfig -&gt; INFO 00a#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/envsetup/crypto-config/peerOrganizations/org2.example.com/msp/config.yaml: no such file or directory]
+2017-05-23 21:43:48.806 UTC [common/configtx/tool] doOutputBlock -&gt; INFO 00b#x1B[0m Generating genesis block
+2017-05-23 21:43:48.807 UTC [common/configtx/tool] doOutputBlock -&gt; INFO 00c#x1B[0m Writing genesis block
+2017-05-23 21:43:48.904 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:48.915 UTC [common/configtx/tool] doOutputChannelCreateTx -&gt; INFO 002#x1B[0m Generating new channel configtx
+2017-05-23 21:43:48.916 UTC [common/configtx/tool] doOutputChannelCreateTx -&gt; INFO 003#x1B[0m Writing new channel tx
+2017-05-23 21:43:49.013 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:49.025 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 002#x1B[0m Generating anchor peer update
+2017-05-23 21:43:49.025 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 003#x1B[0m Writing anchor peer update
+2017-05-23 21:43:49.102 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:49.112 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 002#x1B[0m Generating anchor peer update
+2017-05-23 21:43:49.112 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 003#x1B[0m Writing anchor peer update
+2017-05-23 21:43:49.198 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:49.209 UTC [common/configtx/tool] doOutputChannelCreateTx -&gt; INFO 002#x1B[0m Generating new channel configtx
+2017-05-23 21:43:49.210 UTC [common/configtx/tool] doOutputChannelCreateTx -&gt; INFO 003#x1B[0m Writing new channel tx
+2017-05-23 21:43:49.287 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:49.299 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 002#x1B[0m Generating anchor peer update
+2017-05-23 21:43:49.300 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 003#x1B[0m Writing anchor peer update
+2017-05-23 21:43:49.398 UTC [common/configtx/tool] main -&gt; INFO 001#x1B[0m Loading configuration
+2017-05-23 21:43:49.409 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 002#x1B[0m Generating anchor peer update
+2017-05-23 21:43:49.410 UTC [common/configtx/tool] doOutputAnchorPeersUpdate -&gt; INFO 003#x1B[0m Writing anchor peer update
+2017-05-23 21:43:52.216 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:52.217 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:52.218 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:43:52.236 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:52.236 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:52.252 UTC [msp] GetLocalMSP -&gt; DEBU 006#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:52.253 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 007#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:52.254 UTC [msp] GetLocalMSP -&gt; DEBU 008#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:52.255 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 009#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:52.256 UTC [msp] Sign -&gt; DEBU 00a#x1B[0m Sign: plaintext: 0AA8060A074F7267314D5350129C062D...53616D706C65436F6E736F727469756D 
+#x1B[36m2017-05-23 21:43:52.256 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: digest: 58C0C5E9422D289FB04BBEECCD50631BE9C0284B78A9C5A54E260AA58FC9CCCC 
+#x1B[36m2017-05-23 21:43:52.258 UTC [msp] GetLocalMSP -&gt; DEBU 00c#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:52.258 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00d#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:52.260 UTC [msp] GetLocalMSP -&gt; DEBU 00e#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:52.260 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00f#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:52.261 UTC [msp] Sign -&gt; DEBU 010#x1B[0m Sign: plaintext: 0ADE060A1408021A060898DA92C90522...77312E80C240E0449CB701A072A806F2 
+#x1B[36m2017-05-23 21:43:52.261 UTC [msp] Sign -&gt; DEBU 011#x1B[0m Sign: digest: 70450026A3B7FA24ABE1478F81A9A0936D27AC714A59D41116AD51C1372862B6 
+#x1B[36m2017-05-23 21:43:54.308 UTC [msp] GetLocalMSP -&gt; DEBU 012#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.309 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 013#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.313 UTC [msp] GetLocalMSP -&gt; DEBU 014#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.317 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 015#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.317 UTC [msp] Sign -&gt; DEBU 016#x1B[0m Sign: plaintext: 0ADE060A1408021A06089ADA92C90522...00120D1A0B08FFFFFFFFFFFFFFFFFF01 
+#x1B[36m2017-05-23 21:43:54.317 UTC [msp] Sign -&gt; DEBU 017#x1B[0m Sign: digest: A0CE81EFEF2DC4C598555854A454D45E7C0F503A6E97C3346EB059A2CF202CE5 
+2017/05/23 21:43:54 proto: textWriter unindented too far
+2017/05/23 21:43:54 proto: textWriter unindented too far
+2017-05-23 21:43:54.321 UTC [main] main -&gt; INFO 018#x1B[0m Exiting.....
+2017-05-23 21:43:54.405 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:54.405 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:54.406 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:43:54.429 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.429 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.434 UTC [msp] GetLocalMSP -&gt; DEBU 006#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.434 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 007#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.434 UTC [msp] GetLocalMSP -&gt; DEBU 008#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.434 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 009#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.434 UTC [msp] Sign -&gt; DEBU 00a#x1B[0m Sign: plaintext: 0AA8060A074F7267314D5350129C062D...53616D706C65436F6E736F727469756D 
+#x1B[36m2017-05-23 21:43:54.434 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: digest: A340314D1B65EBCF36D1F56AB4618C02002633E8700108A33F82420B6240FCF1 
+#x1B[36m2017-05-23 21:43:54.435 UTC [msp] GetLocalMSP -&gt; DEBU 00c#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.435 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00d#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.435 UTC [msp] GetLocalMSP -&gt; DEBU 00e#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:54.435 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00f#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:54.435 UTC [msp] Sign -&gt; DEBU 010#x1B[0m Sign: plaintext: 0ADE060A1408021A06089ADA92C90522...B962A69D7BC568A0FE2D043B087B6B2A 
+#x1B[36m2017-05-23 21:43:54.435 UTC [msp] Sign -&gt; DEBU 011#x1B[0m Sign: digest: 05B841FE9664B5D6754BD9336020D0ED11467D81D49B01BB0B0E612D9BD4912F 
+#x1B[36m2017-05-23 21:43:56.463 UTC [msp] GetLocalMSP -&gt; DEBU 012#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:56.463 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 013#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:56.468 UTC [msp] GetLocalMSP -&gt; DEBU 014#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:56.468 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 015#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:56.468 UTC [msp] Sign -&gt; DEBU 016#x1B[0m Sign: plaintext: 0ADE060A1408021A06089CDA92C90522...00120D1A0B08FFFFFFFFFFFFFFFFFF01 
+#x1B[36m2017-05-23 21:43:56.468 UTC [msp] Sign -&gt; DEBU 017#x1B[0m Sign: digest: 11618F94E94CDCA5AB00372D66D3D7C5A90542628DEDE9685A92FA4D223260BD 
+2017-05-23 21:43:56.481 UTC [main] main -&gt; INFO 018#x1B[0m Exiting.....
+2017-05-23 21:43:56.623 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:56.624 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:56.624 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:43:56.643 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:56.643 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:56.647 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C089CDA92C90510...B5EE8AD454391A080A000A000A000A00 
+#x1B[36m2017-05-23 21:43:56.647 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 58CFD387E8B95C64BA620BF8914A100FCA9157CDCF45EF1F91C359D081029483 
+2017-05-23 21:43:56.740 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:43:58.812 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:43:58.813 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:43:58.813 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:43:58.830 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:43:58.830 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:43:58.835 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C089EDA92C90510...7834DD668A751A080A000A000A000A00 
+#x1B[36m2017-05-23 21:43:58.835 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 03E0949824373F76F73A5663704736DE3D0F1BC54C5550DF2DFEE99948295104 
+2017-05-23 21:43:58.865 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:02.966 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:02.966 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:02.967 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:02.983 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:02.983 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:02.988 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C08A2DA92C90510...B5EE8AD454391A080A000A000A000A00 
+#x1B[36m2017-05-23 21:44:02.988 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 64BA17D019C7EC1CBA34068055F0DD4C3305A5CD0D99BEEF56151120029CEAD9 
+2017-05-23 21:44:03.018 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:05.076 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:05.077 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:05.077 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:05.094 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:05.094 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:05.098 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA5070A5B08011A0B08A5DA92C90510...7834DD668A751A080A000A000A000A00 
+#x1B[36m2017-05-23 21:44:05.098 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 06C1353F031EDA3175BA71577BB7AC8D6DD7B966515B689CA27C91B220BE963A 
+2017-05-23 21:44:05.155 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:09.243 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:09.244 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:09.245 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:09.265 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:09.265 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:09.270 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C08A9DA92C90510...B5EE8AD454391A080A000A000A000A00 
+#x1B[36m2017-05-23 21:44:09.270 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 22A02BF565B3DFC094A541F637B5F6753A3C91D91B2861514949EA4F5E330522 
+2017-05-23 21:44:09.316 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:11.402 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:11.403 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:11.403 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:11.421 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:11.421 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:11.424 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C08ABDA92C90510...7834DD668A751A080A000A000A000A00 
+#x1B[36m2017-05-23 21:44:11.424 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 522004569CFFB043BB810822A74C326F15C0AF38FECB85DCED6F7AC5876C8CF2 
+2017-05-23 21:44:11.468 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:15.568 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:15.568 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:15.569 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:15.587 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:15.587 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:15.591 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C08AFDA92C90510...B5EE8AD454391A080A000A000A000A00 
+#x1B[36m2017-05-23 21:44:15.591 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 3A1903012E20CFD41E81C8134D21AAC4F520F72B90963D849547B542A3F509B2 
+2017-05-23 21:44:15.618 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:17.672 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:17.673 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:17.673 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:17.691 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:17.691 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:17.696 UTC [msp] Sign -&gt; DEBU 006#x1B[0m Sign: plaintext: 0AA6070A5C08011A0C08B1DA92C90510...7834DD668A751A080A000A000A000A00 
+#x1B[36m2017-05-23 21:44:17.696 UTC [msp] Sign -&gt; DEBU 007#x1B[0m Sign: digest: 3E62DB0655FD4C40C3D6394CB78B7CDC879B91E1521460C45114589807C83F93 
+2017-05-23 21:44:17.722 UTC [main] main -&gt; INFO 008#x1B[0m Exiting.....
+2017-05-23 21:44:21.822 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:21.823 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:21.823 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:21.850 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:21.851 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetLocalMSP -&gt; DEBU 006#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 007#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetLocalMSP -&gt; DEBU 008#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 009#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] Sign -&gt; DEBU 00a#x1B[0m Sign: plaintext: 0AA8060A074F7267314D5350129C062D...731200220B0A07577269746572731200 
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: digest: 5A8F800B6C4AED999D13C9BAA3216F623A09AC8D01B02D83B0D4D5B7C835BE73 
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetLocalMSP -&gt; DEBU 00c#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00d#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:21.855 UTC [msp] GetLocalMSP -&gt; DEBU 00e#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:21.856 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00f#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:21.856 UTC [msp] Sign -&gt; DEBU 010#x1B[0m Sign: plaintext: 0ADE060A1408021A0608B5DA92C90522...9397BF32BEC041C95B844156CE082171 
+#x1B[36m2017-05-23 21:44:21.856 UTC [msp] Sign -&gt; DEBU 011#x1B[0m Sign: digest: ACE1239E7902E1546203ED92A6947FF7495227EF20CC8FC635F1C7BF6E4C3558 
+#x1B[36m2017-05-23 21:44:23.876 UTC [msp] GetLocalMSP -&gt; DEBU 012#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.876 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 013#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.877 UTC [msp] GetLocalMSP -&gt; DEBU 014#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.877 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 015#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.878 UTC [msp] Sign -&gt; DEBU 016#x1B[0m Sign: plaintext: 0ADE060A1408021A0608B7DA92C90522...00120D1A0B08FFFFFFFFFFFFFFFFFF01 
+#x1B[36m2017-05-23 21:44:23.878 UTC [msp] Sign -&gt; DEBU 017#x1B[0m Sign: digest: 5282515DF38CB5DC709C98A6E17CF635963DB6E5ABE4B8F74BA42473D11FA64F 
+2017/05/23 21:44:23 proto: textWriter unindented too far
+2017/05/23 21:44:23 proto: textWriter unindented too far
+2017-05-23 21:44:23.897 UTC [main] main -&gt; INFO 018#x1B[0m Exiting.....
+2017-05-23 21:44:23.955 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:23.955 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:23.956 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:23.974 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.974 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetLocalMSP -&gt; DEBU 006#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 007#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetLocalMSP -&gt; DEBU 008#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 009#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] Sign -&gt; DEBU 00a#x1B[0m Sign: plaintext: 0AA8060A074F7267324D5350129C062D...72731200220A0A0641646D696E731200 
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: digest: 73F88E3E8993C175ED55A489C79B0310CACCCDAD69DF01556D155EFBDDBD43D8 
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetLocalMSP -&gt; DEBU 00c#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00d#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetLocalMSP -&gt; DEBU 00e#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:23.980 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 00f#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:23.981 UTC [msp] Sign -&gt; DEBU 010#x1B[0m Sign: plaintext: 0ADE060A1408021A0608B7DA92C90522...9B7B6F299A83BA46A1DF799A5F2528A5 
+#x1B[36m2017-05-23 21:44:23.981 UTC [msp] Sign -&gt; DEBU 011#x1B[0m Sign: digest: 8CB177383B9373150CFABD229FB637431C03AA5B0CE6B1531FF2B23B16AB5EE1 
+#x1B[36m2017-05-23 21:44:26.002 UTC [msp] GetLocalMSP -&gt; DEBU 012#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:26.002 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 013#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:26.002 UTC [msp] GetLocalMSP -&gt; DEBU 014#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:26.002 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 015#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:26.003 UTC [msp] Sign -&gt; DEBU 016#x1B[0m Sign: plaintext: 0ADE060A1408021A0608BADA92C90522...00120D1A0B08FFFFFFFFFFFFFFFFFF01 
+#x1B[36m2017-05-23 21:44:26.003 UTC [msp] Sign -&gt; DEBU 017#x1B[0m Sign: digest: CAD6FAEFBC637E256F5D5FD4B67DA0F3D3F43CA7770A245C74C01FB55A99AAD1 
+2017/05/23 21:44:26 proto: textWriter unindented too far
+2017/05/23 21:44:26 proto: textWriter unindented too far
+2017-05-23 21:44:26.016 UTC [main] main -&gt; INFO 018#x1B[0m Exiting.....
+</system-err></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="98" name="test_FAB3791_example03_negative_test_disallow_write_attempt_in_query" time="0.0851590633392"><failure message="CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example03.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3791_example03_negative_test_disallow_write_attempt_in_query&gt;
+
+    def test_FAB3791_example03_negative_test_disallow_write_attempt_in_query(self):
+        &apos;&apos;&apos; Test writing to ledger via query fails as expected
+            &apos;&apos;&apos;
+&gt;       output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_example03.sh&quot;)
+
+testYourChaincode.py:102: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+testYourChaincode.py:26: in runIt
+    output = check_output([&quot;docker exec cli {0}&quot;.format(cmd)], shell=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+popenargs = ([&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example03.sh channel 2 1 4 install&apos;],)
+kwargs = {&apos;shell&apos;: True}, process = &lt;subprocess.Popen object at 0x7f0743115390&gt;
+output = &apos;rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused ...c/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example03.sh: no such file or directory&quot;\n\r\n&apos;
+unused_err = None, retcode = 126
+cmd = [&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example03.sh channel 2 1 4 install&apos;]
+
+    def check_output(*popenargs, **kwargs):
+        r&quot;&quot;&quot;Run command with arguments and return its output as a byte string.
+    
+        If the exit code was non-zero it raises a CalledProcessError.  The
+        CalledProcessError object will have the return code in the returncode
+        attribute and output in the output attribute.
+    
+        The arguments are the same as for the Popen constructor.  Example:
+    
+        &gt;&gt;&gt; check_output([&quot;ls&quot;, &quot;-l&quot;, &quot;/dev/null&quot;])
+        &apos;crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n&apos;
+    
+        The stdout argument is not allowed as it is used internally.
+        To capture standard error in the result, use stderr=STDOUT.
+    
+        &gt;&gt;&gt; check_output([&quot;/bin/sh&quot;, &quot;-c&quot;,
+        ...               &quot;ls -l non_existent_file ; exit 0&quot;],
+        ...              stderr=STDOUT)
+        &apos;ls: non_existent_file: No such file or directory\n&apos;
+        &quot;&quot;&quot;
+        if &apos;stdout&apos; in kwargs:
+            raise ValueError(&apos;stdout argument not allowed, it will be overridden.&apos;)
+        process = Popen(stdout=PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get(&quot;args&quot;)
+            if cmd is None:
+                cmd = popenargs[0]
+&gt;           raise CalledProcessError(retcode, cmd, output=output)
+E           CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example03.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126
+
+/usr/lib/python2.7/subprocess.py:574: CalledProcessError</failure></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="139" name="test_FAB3792_marbles02_init_query_transfer_marbles" time="0.0977079868317"><failure message="CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_marbles02.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3792_marbles02_init_query_transfer_marbles&gt;
+
+    def test_FAB3792_marbles02_init_query_transfer_marbles(self):
+        &apos;&apos;&apos; This test few basic operations from marbles02 chaincode.
+            &apos;&apos;&apos;
+&gt;       output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_marbles02.sh&quot;)
+
+testYourChaincode.py:143: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+testYourChaincode.py:26: in runIt
+    output = check_output([&quot;docker exec cli {0}&quot;.format(cmd)], shell=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+popenargs = ([&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_marbles02.sh channel 2 1 4 install&apos;],)
+kwargs = {&apos;shell&apos;: True}, process = &lt;subprocess.Popen object at 0x7f0743115ed0&gt;
+output = &apos;rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused ...c/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_marbles02.sh: no such file or directory&quot;\n\r\n&apos;
+unused_err = None, retcode = 126
+cmd = [&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_marbles02.sh channel 2 1 4 install&apos;]
+
+    def check_output(*popenargs, **kwargs):
+        r&quot;&quot;&quot;Run command with arguments and return its output as a byte string.
+    
+        If the exit code was non-zero it raises a CalledProcessError.  The
+        CalledProcessError object will have the return code in the returncode
+        attribute and output in the output attribute.
+    
+        The arguments are the same as for the Popen constructor.  Example:
+    
+        &gt;&gt;&gt; check_output([&quot;ls&quot;, &quot;-l&quot;, &quot;/dev/null&quot;])
+        &apos;crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n&apos;
+    
+        The stdout argument is not allowed as it is used internally.
+        To capture standard error in the result, use stderr=STDOUT.
+    
+        &gt;&gt;&gt; check_output([&quot;/bin/sh&quot;, &quot;-c&quot;,
+        ...               &quot;ls -l non_existent_file ; exit 0&quot;],
+        ...              stderr=STDOUT)
+        &apos;ls: non_existent_file: No such file or directory\n&apos;
+        &quot;&quot;&quot;
+        if &apos;stdout&apos; in kwargs:
+            raise ValueError(&apos;stdout argument not allowed, it will be overridden.&apos;)
+        process = Popen(stdout=PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get(&quot;args&quot;)
+            if cmd is None:
+                cmd = popenargs[0]
+&gt;           raise CalledProcessError(retcode, cmd, output=output)
+E           CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_marbles02.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126
+
+/usr/lib/python2.7/subprocess.py:574: CalledProcessError</failure></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="179" name="test_FAB3793_chaincodeAPIDriver_2_exercise_chaincode_api_calls_as_direct_calls" time="0.0843532085419"><failure message="CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver_two.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3793_chaincodeAPIDriver_2_exercise_chaincode_api_calls_as_direct_calls&gt;
+
+    def test_FAB3793_chaincodeAPIDriver_2_exercise_chaincode_api_calls_as_direct_calls(self):
+        &apos;&apos;&apos; Calling functions in shim/chaincode.go.
+            &apos;&apos;&apos;
+&gt;       output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_ccapidriver_two.sh&quot;)
+
+testYourChaincode.py:183: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+testYourChaincode.py:26: in runIt
+    output = check_output([&quot;docker exec cli {0}&quot;.format(cmd)], shell=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+popenargs = ([&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver_two.sh channel 2 1 4 install&apos;],)
+kwargs = {&apos;shell&apos;: True}, process = &lt;subprocess.Popen object at 0x7f07430e6310&gt;
+output = &apos;rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused .../regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver_two.sh: no such file or directory&quot;\n\r\n&apos;
+unused_err = None, retcode = 126
+cmd = [&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver_two.sh channel 2 1 4 install&apos;]
+
+    def check_output(*popenargs, **kwargs):
+        r&quot;&quot;&quot;Run command with arguments and return its output as a byte string.
+    
+        If the exit code was non-zero it raises a CalledProcessError.  The
+        CalledProcessError object will have the return code in the returncode
+        attribute and output in the output attribute.
+    
+        The arguments are the same as for the Popen constructor.  Example:
+    
+        &gt;&gt;&gt; check_output([&quot;ls&quot;, &quot;-l&quot;, &quot;/dev/null&quot;])
+        &apos;crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n&apos;
+    
+        The stdout argument is not allowed as it is used internally.
+        To capture standard error in the result, use stderr=STDOUT.
+    
+        &gt;&gt;&gt; check_output([&quot;/bin/sh&quot;, &quot;-c&quot;,
+        ...               &quot;ls -l non_existent_file ; exit 0&quot;],
+        ...              stderr=STDOUT)
+        &apos;ls: non_existent_file: No such file or directory\n&apos;
+        &quot;&quot;&quot;
+        if &apos;stdout&apos; in kwargs:
+            raise ValueError(&apos;stdout argument not allowed, it will be overridden.&apos;)
+        process = Popen(stdout=PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get(&quot;args&quot;)
+            if cmd is None:
+                cmd = popenargs[0]
+&gt;           raise CalledProcessError(retcode, cmd, output=output)
+E           CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver_two.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126
+
+/usr/lib/python2.7/subprocess.py:574: CalledProcessError</failure></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="160" name="test_FAB3793_chaincodeAPIDriver_exercise_chaincode_api_calls_as_invoke_functions" time="0.100297927856"><failure message="CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3793_chaincodeAPIDriver_exercise_chaincode_api_calls_as_invoke_functions&gt;
+
+    def test_FAB3793_chaincodeAPIDriver_exercise_chaincode_api_calls_as_invoke_functions(self):
+        &apos;&apos;&apos; Calling functions in shim/chaincode.go.
+            &apos;&apos;&apos;
+&gt;       output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_ccapidriver.sh&quot;)
+
+testYourChaincode.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+testYourChaincode.py:26: in runIt
+    output = check_output([&quot;docker exec cli {0}&quot;.format(cmd)], shell=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+popenargs = ([&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver.sh channel 2 1 4 install&apos;],)
+kwargs = {&apos;shell&apos;: True}, process = &lt;subprocess.Popen object at 0x7f07430c4590&gt;
+output = &apos;rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused ...test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver.sh: no such file or directory&quot;\n\r\n&apos;
+unused_err = None, retcode = 126
+cmd = [&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver.sh channel 2 1 4 install&apos;]
+
+    def check_output(*popenargs, **kwargs):
+        r&quot;&quot;&quot;Run command with arguments and return its output as a byte string.
+    
+        If the exit code was non-zero it raises a CalledProcessError.  The
+        CalledProcessError object will have the return code in the returncode
+        attribute and output in the output attribute.
+    
+        The arguments are the same as for the Popen constructor.  Example:
+    
+        &gt;&gt;&gt; check_output([&quot;ls&quot;, &quot;-l&quot;, &quot;/dev/null&quot;])
+        &apos;crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n&apos;
+    
+        The stdout argument is not allowed as it is used internally.
+        To capture standard error in the result, use stderr=STDOUT.
+    
+        &gt;&gt;&gt; check_output([&quot;/bin/sh&quot;, &quot;-c&quot;,
+        ...               &quot;ls -l non_existent_file ; exit 0&quot;],
+        ...              stderr=STDOUT)
+        &apos;ls: non_existent_file: No such file or directory\n&apos;
+        &quot;&quot;&quot;
+        if &apos;stdout&apos; in kwargs:
+            raise ValueError(&apos;stdout argument not allowed, it will be overridden.&apos;)
+        process = Popen(stdout=PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get(&quot;args&quot;)
+            if cmd is None:
+                cmd = popenargs[0]
+&gt;           raise CalledProcessError(retcode, cmd, output=output)
+E           CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_ccapidriver.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126
+
+/usr/lib/python2.7/subprocess.py:574: CalledProcessError</failure></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="48" name="test_FAB3794_example02_invoke_query_inaloop_onallpeers" time="5.30563497543"><failure message="AssertionError: &quot;Chaincode &apos;myccex020&apos; is installed on PEER0 successfully&quot; not found in &quot;Inside Validate Args fun = install\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER0 successfully===================== \n\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER1 successfully===================== \n\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER2 successfully===================== \n\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER3 successfully===================== \n\n&quot;">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3794_example02_invoke_query_inaloop_onallpeers&gt;
+
+    def test_FAB3794_example02_invoke_query_inaloop_onallpeers(self):
+        &apos;&apos;&apos; This tests example02 chaincode where transfer values from assets
+                &quot;a&quot; and &quot;b&quot; via Invoke and then verify values by Querying on Ledger.
+            &apos;&apos;&apos;
+        output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_example02.sh&quot;)
+&gt;       self.assertIn(&quot;Chaincode &apos;myccex020&apos; is installed on PEER0 successfully&quot;, output)
+E       AssertionError: &quot;Chaincode &apos;myccex020&apos; is installed on PEER0 successfully&quot; not found in &quot;Inside Validate Args fun = install\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER0 successfully===================== \n\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER1 successfully===================== \n\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER2 successfully===================== \n\n===================== Chaincode &apos;myccex020&apos; is installed on remote peer PEER3 successfully===================== \n\n&quot;
+
+testYourChaincode.py:54: AssertionError</failure><system-err>2017-05-23 21:44:26.693 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:26.693 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:26.694 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:26.720 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:26.720 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:26.721 UTC [golang-platform] collectChaincodeFiles -&gt; DEBU 006#x1B[0m not using input for hash computation for path:&quot;github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02&quot; name:&quot;myccex020&quot; version:&quot;1&quot;  
+#x1B[36m2017-05-23 21:44:26.721 UTC [golang-platform] getCodeFromFS -&gt; DEBU 007#x1B[0m getCodeFromFS github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+#x1B[36m2017-05-23 21:44:26.722 UTC [util] HashFilesInDir -&gt; DEBU 008#x1B[0m hashFiles /opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+2017-05-23 21:44:27.534 UTC [golang-platform] writeGopathSrc -&gt; INFO 009#x1B[0m rootDirectory = /opt/gopath/src
+2017-05-23 21:44:27.534 UTC [container] WriteFolderToTarPackage -&gt; INFO 00a#x1B[0m rootDirectory = /opt/gopath/src
+#x1B[36m2017-05-23 21:44:27.741 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: plaintext: 0AA6070A5C08031A0C08BBDA92C90510...C9F37F030000FFFF49D5DE0A002CD700 
+#x1B[36m2017-05-23 21:44:27.742 UTC [msp] Sign -&gt; DEBU 00c#x1B[0m Sign: digest: 13788A9E8FBB57CB536A3B8D39F40D6F9884D8B5D656E81455AE3C0674F21579 
+#x1B[36m2017-05-23 21:44:27.943 UTC [chaincodeCmd] install -&gt; DEBU 00d#x1B[0m Installed remotely response:&lt;status:200 payload:&quot;OK&quot; &gt; 
+2017-05-23 21:44:27.943 UTC [main] main -&gt; INFO 00e#x1B[0m Exiting.....
+2017-05-23 21:44:27.996 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:27.997 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:27.997 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:28.025 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:28.025 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:28.025 UTC [golang-platform] collectChaincodeFiles -&gt; DEBU 006#x1B[0m not using input for hash computation for path:&quot;github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02&quot; name:&quot;myccex020&quot; version:&quot;1&quot;  
+#x1B[36m2017-05-23 21:44:28.026 UTC [golang-platform] getCodeFromFS -&gt; DEBU 007#x1B[0m getCodeFromFS github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+#x1B[36m2017-05-23 21:44:28.026 UTC [util] HashFilesInDir -&gt; DEBU 008#x1B[0m hashFiles /opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+2017-05-23 21:44:28.810 UTC [golang-platform] writeGopathSrc -&gt; INFO 009#x1B[0m rootDirectory = /opt/gopath/src
+2017-05-23 21:44:28.810 UTC [container] WriteFolderToTarPackage -&gt; INFO 00a#x1B[0m rootDirectory = /opt/gopath/src
+#x1B[36m2017-05-23 21:44:29.114 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: plaintext: 0AA5070A5B08031A0B08BDDA92C90510...C9F37F030000FFFF49D5DE0A002CD700 
+#x1B[36m2017-05-23 21:44:29.114 UTC [msp] Sign -&gt; DEBU 00c#x1B[0m Sign: digest: 8491549EB320E269EF622104AE9E8B6117E00F15F57E76C0FB7CBEDF02A2416B 
+#x1B[36m2017-05-23 21:44:29.314 UTC [chaincodeCmd] install -&gt; DEBU 00d#x1B[0m Installed remotely response:&lt;status:200 payload:&quot;OK&quot; &gt; 
+2017-05-23 21:44:29.314 UTC [main] main -&gt; INFO 00e#x1B[0m Exiting.....
+2017-05-23 21:44:29.385 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:29.385 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:29.386 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:29.406 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:29.406 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:29.407 UTC [golang-platform] collectChaincodeFiles -&gt; DEBU 006#x1B[0m not using input for hash computation for path:&quot;github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02&quot; name:&quot;myccex020&quot; version:&quot;1&quot;  
+#x1B[36m2017-05-23 21:44:29.407 UTC [golang-platform] getCodeFromFS -&gt; DEBU 007#x1B[0m getCodeFromFS github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+#x1B[36m2017-05-23 21:44:29.407 UTC [util] HashFilesInDir -&gt; DEBU 008#x1B[0m hashFiles /opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+2017-05-23 21:44:30.178 UTC [golang-platform] writeGopathSrc -&gt; INFO 009#x1B[0m rootDirectory = /opt/gopath/src
+2017-05-23 21:44:30.178 UTC [container] WriteFolderToTarPackage -&gt; INFO 00a#x1B[0m rootDirectory = /opt/gopath/src
+#x1B[36m2017-05-23 21:44:30.378 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: plaintext: 0AA6070A5C08031A0C08BEDA92C90510...C9F37F030000FFFF49D5DE0A002CD700 
+#x1B[36m2017-05-23 21:44:30.378 UTC [msp] Sign -&gt; DEBU 00c#x1B[0m Sign: digest: C3D4BE1272932F05B083EACDE3B53308825C68BDE247D26DA00FD076644DE557 
+#x1B[36m2017-05-23 21:44:30.572 UTC [chaincodeCmd] install -&gt; DEBU 00d#x1B[0m Installed remotely response:&lt;status:200 payload:&quot;OK&quot; &gt; 
+2017-05-23 21:44:30.572 UTC [main] main -&gt; INFO 00e#x1B[0m Exiting.....
+2017-05-23 21:44:30.624 UTC [msp] getMspConfig -&gt; INFO 001#x1B[0m intermidiate certs folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts: no such file or directory]
+2017-05-23 21:44:30.624 UTC [msp] getMspConfig -&gt; INFO 002#x1B[0m crls folder not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/intermediatecerts]. Skipping.: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/crls: no such file or directory]
+2017-05-23 21:44:30.625 UTC [msp] getMspConfig -&gt; INFO 003#x1B[0m MSP configuration file not found at [/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml]: [stat /opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/config.yaml: no such file or directory]
+#x1B[36m2017-05-23 21:44:30.646 UTC [msp] GetLocalMSP -&gt; DEBU 004#x1B[0m Returning existing local MSP
+#x1B[36m2017-05-23 21:44:30.646 UTC [msp] GetDefaultSigningIdentity -&gt; DEBU 005#x1B[0m Obtaining default signing identity
+#x1B[36m2017-05-23 21:44:30.647 UTC [golang-platform] collectChaincodeFiles -&gt; DEBU 006#x1B[0m not using input for hash computation for path:&quot;github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02&quot; name:&quot;myccex020&quot; version:&quot;1&quot;  
+#x1B[36m2017-05-23 21:44:30.647 UTC [golang-platform] getCodeFromFS -&gt; DEBU 007#x1B[0m getCodeFromFS github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+#x1B[36m2017-05-23 21:44:30.648 UTC [util] HashFilesInDir -&gt; DEBU 008#x1B[0m hashFiles /opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02
+2017-05-23 21:44:31.482 UTC [golang-platform] writeGopathSrc -&gt; INFO 009#x1B[0m rootDirectory = /opt/gopath/src
+2017-05-23 21:44:31.482 UTC [container] WriteFolderToTarPackage -&gt; INFO 00a#x1B[0m rootDirectory = /opt/gopath/src
+#x1B[36m2017-05-23 21:44:31.665 UTC [msp] Sign -&gt; DEBU 00b#x1B[0m Sign: plaintext: 0AA6070A5C08031A0C08BFDA92C90510...C9F37F030000FFFF49D5DE0A002CD700 
+#x1B[36m2017-05-23 21:44:31.666 UTC [msp] Sign -&gt; DEBU 00c#x1B[0m Sign: digest: FAAB396A2584A6A4280EC3ED0ECEF5AAC6C0B9F55A73C29C12C883F91969EBB1 
+#x1B[36m2017-05-23 21:44:31.885 UTC [chaincodeCmd] install -&gt; DEBU 00d#x1B[0m Installed remotely response:&lt;status:200 payload:&quot;OK&quot; &gt; 
+2017-05-23 21:44:31.885 UTC [main] main -&gt; INFO 00e#x1B[0m Exiting.....
+</system-err></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="109" name="test_FAB3796_example04_chaincode_to_chaincode_call_on_occurrence_of_an_event" time="0.0837569236755"><failure message="CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example04.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3796_example04_chaincode_to_chaincode_call_on_occurrence_of_an_event&gt;
+
+    def test_FAB3796_example04_chaincode_to_chaincode_call_on_occurrence_of_an_event(self):
+        &apos;&apos;&apos; Test chaincode to chaincode calling when an event is generated.
+            &apos;&apos;&apos;
+&gt;       output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_example04.sh&quot;)
+
+testYourChaincode.py:113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+testYourChaincode.py:26: in runIt
+    output = check_output([&quot;docker exec cli {0}&quot;.format(cmd)], shell=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+popenargs = ([&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example04.sh channel 2 1 4 install&apos;],)
+kwargs = {&apos;shell&apos;: True}, process = &lt;subprocess.Popen object at 0x7f0743098490&gt;
+output = &apos;rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused ...c/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example04.sh: no such file or directory&quot;\n\r\n&apos;
+unused_err = None, retcode = 126
+cmd = [&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example04.sh channel 2 1 4 install&apos;]
+
+    def check_output(*popenargs, **kwargs):
+        r&quot;&quot;&quot;Run command with arguments and return its output as a byte string.
+    
+        If the exit code was non-zero it raises a CalledProcessError.  The
+        CalledProcessError object will have the return code in the returncode
+        attribute and output in the output attribute.
+    
+        The arguments are the same as for the Popen constructor.  Example:
+    
+        &gt;&gt;&gt; check_output([&quot;ls&quot;, &quot;-l&quot;, &quot;/dev/null&quot;])
+        &apos;crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n&apos;
+    
+        The stdout argument is not allowed as it is used internally.
+        To capture standard error in the result, use stderr=STDOUT.
+    
+        &gt;&gt;&gt; check_output([&quot;/bin/sh&quot;, &quot;-c&quot;,
+        ...               &quot;ls -l non_existent_file ; exit 0&quot;],
+        ...              stderr=STDOUT)
+        &apos;ls: non_existent_file: No such file or directory\n&apos;
+        &quot;&quot;&quot;
+        if &apos;stdout&apos; in kwargs:
+            raise ValueError(&apos;stdout argument not allowed, it will be overridden.&apos;)
+        process = Popen(stdout=PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get(&quot;args&quot;)
+            if cmd is None:
+                cmd = popenargs[0]
+&gt;           raise CalledProcessError(retcode, cmd, output=output)
+E           CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example04.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126
+
+/usr/lib/python2.7/subprocess.py:574: CalledProcessError</failure></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="testYourChaincode.py" line="120" name="test_FAB3797_example05_chaincode_to_chaincode_call_on_same_and_different_channel" time="0.0956342220306"><failure message="CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example05.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126">self = &lt;testYourChaincode.ChaincodeAPI testMethod=test_FAB3797_example05_chaincode_to_chaincode_call_on_same_and_different_channel&gt;
+
+    def test_FAB3797_example05_chaincode_to_chaincode_call_on_same_and_different_channel(self):
+        &apos;&apos;&apos; Test chaincode to chaincode calling, when second chaincode exists
+                on a different channel.
+            &apos;&apos;&apos;
+&gt;       output = self.runIt(&quot;install&quot;, &quot;fabricFeatureChaincodes/e2e_test_example05.sh&quot;)
+
+testYourChaincode.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+testYourChaincode.py:26: in runIt
+    output = check_output([&quot;docker exec cli {0}&quot;.format(cmd)], shell=True)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+popenargs = ([&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example05.sh channel 2 1 4 install&apos;],)
+kwargs = {&apos;shell&apos;: True}, process = &lt;subprocess.Popen object at 0x7f07430e65d0&gt;
+output = &apos;rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:247: starting container process caused ...c/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example05.sh: no such file or directory&quot;\n\r\n&apos;
+unused_err = None, retcode = 126
+cmd = [&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example05.sh channel 2 1 4 install&apos;]
+
+    def check_output(*popenargs, **kwargs):
+        r&quot;&quot;&quot;Run command with arguments and return its output as a byte string.
+    
+        If the exit code was non-zero it raises a CalledProcessError.  The
+        CalledProcessError object will have the return code in the returncode
+        attribute and output in the output attribute.
+    
+        The arguments are the same as for the Popen constructor.  Example:
+    
+        &gt;&gt;&gt; check_output([&quot;ls&quot;, &quot;-l&quot;, &quot;/dev/null&quot;])
+        &apos;crw-rw-rw- 1 root root 1, 3 Oct 18  2007 /dev/null\n&apos;
+    
+        The stdout argument is not allowed as it is used internally.
+        To capture standard error in the result, use stderr=STDOUT.
+    
+        &gt;&gt;&gt; check_output([&quot;/bin/sh&quot;, &quot;-c&quot;,
+        ...               &quot;ls -l non_existent_file ; exit 0&quot;],
+        ...              stderr=STDOUT)
+        &apos;ls: non_existent_file: No such file or directory\n&apos;
+        &quot;&quot;&quot;
+        if &apos;stdout&apos; in kwargs:
+            raise ValueError(&apos;stdout argument not allowed, it will be overridden.&apos;)
+        process = Popen(stdout=PIPE, *popenargs, **kwargs)
+        output, unused_err = process.communicate()
+        retcode = process.poll()
+        if retcode:
+            cmd = kwargs.get(&quot;args&quot;)
+            if cmd is None:
+                cmd = popenargs[0]
+&gt;           raise CalledProcessError(retcode, cmd, output=output)
+E           CalledProcessError: Command &apos;[&apos;docker exec cli /opt/gopath/src/github.com/hyperledger/fabric/test/regression/daily/chaincodeTests/fabricFeatureChaincodes/e2e_test_example05.sh channel 2 1 4 install&apos;]&apos; returned non-zero exit status 126
+
+/usr/lib/python2.7/subprocess.py:574: CalledProcessError</failure></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="../../../../../../../../../../../usr/lib/python2.7/unittest/case.py" line="59" name="test_FABXXXX_ABC_Chaincode" time="0.000253200531006"><skipped message="skipping" type="pytest.skip">../../../../../../../../../../../usr/lib/python2.7/unittest/case.py:59: &lt;py._xmlgen.raw object at 0x7f07430c42d0&gt;</skipped></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="../../../../../../../../../../../usr/lib/python2.7/unittest/case.py" line="59" name="test_FABXXXX_Alpha_Chaincode" time="0.000244140625"><skipped message="skipping" type="pytest.skip">../../../../../../../../../../../usr/lib/python2.7/unittest/case.py:59: &lt;py._xmlgen.raw object at 0x7f0743115210&gt;</skipped></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="../../../../../../../../../../../usr/lib/python2.7/unittest/case.py" line="59" name="test_FABXXXX_Joe_Chaincode" time="0.000216007232666"><skipped message="skipping" type="pytest.skip">../../../../../../../../../../../usr/lib/python2.7/unittest/case.py:59: &lt;py._xmlgen.raw object at 0x7f07431153d0&gt;</skipped></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="../../../../../../../../../../../usr/lib/python2.7/unittest/case.py" line="59" name="test_FABXXXX_Laurie_Chaincode" time="0.000216007232666"><skipped message="skipping" type="pytest.skip">../../../../../../../../../../../usr/lib/python2.7/unittest/case.py:59: &lt;py._xmlgen.raw object at 0x7f0743097410&gt;</skipped></testcase><testcase classname="testYourChaincode.ChaincodeAPI" file="../../../../../../../../../../../usr/lib/python2.7/unittest/case.py" line="59" name="test_FABXXXX_XYZ_Chaincode" time="11.5381090641"><skipped message="skipping" type="pytest.skip">../../../../../../../../../../../usr/lib/python2.7/unittest/case.py:59: &lt;py._xmlgen.raw object at 0x7f0743115d50&gt;</skipped><system-err>Stopping cli ... 
+Stopping peer0.org1.example.com ... 
+Stopping peer1.org2.example.com ... 
+Stopping peer0.org2.example.com ... 
+Stopping orderer.example.com ... 
+Stopping peer1.org1.example.com ... 
+#x1B[6A#x1B[2KStopping cli ... done#x1B[6B#x1B[1A#x1B[2KStopping peer1.org1.example.com ... done#x1B[1B#x1B[2A#x1B[2KStopping orderer.example.com ... done#x1B[2B#x1B[5A#x1B[2KStopping peer0.org1.example.com ... done#x1B[5B#x1B[3A#x1B[2KStopping peer0.org2.example.com ... done#x1B[3B#x1B[4A#x1B[2KStopping peer1.org2.example.com ... done#x1B[4BRemoving cli ... 
+Removing peer0.org1.example.com ... 
+Removing peer1.org2.example.com ... 
+Removing peer0.org2.example.com ... 
+Removing orderer.example.com ... 
+Removing peer1.org1.example.com ... 
+#x1B[1A#x1B[2KRemoving peer1.org1.example.com ... done#x1B[1B#x1B[4A#x1B[2KRemoving peer1.org2.example.com ... done#x1B[4B#x1B[3A#x1B[2KRemoving peer0.org2.example.com ... done#x1B[3B#x1B[5A#x1B[2KRemoving peer0.org1.example.com ... done#x1B[5B#x1B[6A#x1B[2KRemoving cli ... done#x1B[6B#x1B[2A#x1B[2KRemoving orderer.example.com ... done#x1B[2BRemoving network envsetup_default
+</system-err></testcase></testsuite>
