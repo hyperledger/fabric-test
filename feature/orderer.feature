@@ -69,26 +69,80 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
 @skip
 Scenario: FAB-3851: Message Payloads Greater than 1MB
     Given I have a bootstrapped fabric network
-    When a user deploys chaincode
-    Then the chaincode is deployed
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
+    And I wait "30" seconds
+    # 1K
+    And a user invokes on the chaincode named "mycc" with random args ["put","a","{random}"] of length 1024
+    And I wait "10" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","a"]
+    Then a user receives a response containing a value of length 1024
+    And a user receives a response with the random value
+    # 64K
+    When a user invokes on the chaincode named "mycc" with random args ["put","b","{random}"] of length 65536
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","b"]
+    Then a user receives a response containing a value of length 65536
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","c","{random}"] of length 75000
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","c"]
+    Then a user receives a response containing a value of length 75000
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","d","{random}"] of length 100000
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","d"]
+    Then a user receives a response containing a value of length 100000
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","e","{random}"] of length 125000
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","e"]
+    Then a user receives a response containing a value of length 125000
+    And a user receives a response with the random value
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","f","{random}"] of length 130000
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","f"]
+    Then a user receives a response containing a value of length 130000
+    And a user receives a response with the random value
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random}"] of length 130734
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","g"]
+    Then a user receives a response containing a value of length 130734
+    And a user receives a response with the random value
+    #
+#    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random}"] of length 1048576
+#    And I wait "30" seconds
+#    And a user queries on the chaincode named "mycc" with args ["get","h"]
+#    Then a user receives response with length value
+#    #
+#    When a user invokes on the chaincode named "mycc" with random args ["put","i","{random}"] of length 2097152
+#    And I wait "30" seconds
+#    And a user queries on the chaincode named "mycc" with args ["get","i"]
+#    Then a user receives response with length value
+#    #
+#    When a user invokes on the chaincode named "mycc" with random args ["put","j","{random}"] of length 4194304
+#    And I wait "30" seconds
+#    And a user queries on the chaincode named "mycc" with args ["get","j"]
+#    Then a user receives response with length value
 
 @daily
 #@doNotDecompose
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     And I wait "60" seconds
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with ["init","a","1000","b","2000"] with name "mycc"
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
     And I wait "30" seconds
     Then the chaincode is deployed
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And a user queries on the chaincode named "mycc" with args ["query","a"]
-    Then a user receives expected response of 990
+    Then a user receives a success response of 990
 
     Given "kafka0" is taken down
     And I wait "5" seconds
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     When a user queries on the chaincode with args ["query","a"]
-    Then a user receives expected response of 980
+    Then a user receives a success response of 980
 
     Given "kafka1" is taken down
     And "kafka2" is taken down
@@ -96,7 +150,7 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     And I wait "5" seconds
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And a user queries on the chaincode named "mycc" with args ["query","a"]
-    Then a user receives expected response of 980
+    Then a user receives a success response of 980
     And I wait "5" seconds
 
     Given "kafka3" comes back up
@@ -105,7 +159,7 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     And I wait "240" seconds
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     When a user queries on the chaincode named "mycc" with args ["query","a"]
-    Then a user receives expected response of 970
+    Then a user receives a success response of 970
 
 @skip
 Scenario Outline: FAB-3937: Message Broadcast

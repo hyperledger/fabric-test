@@ -23,7 +23,7 @@ import endorser_util
 import config_util
 
 
-@when(u'a user deploys chaincode at path "{path}" with {args} with name "{name}" to "{containerName}" on channel "{channel}"')
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
 def deploy_impl(context, path, args, name, containerName, channel):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context.composition.projectName)
@@ -39,15 +39,15 @@ def deploy_impl(context, path, args, name, containerName, channel):
     # Save chaincode name and path and args
     context.chaincode = chaincode
 
-@when(u'a user deploys chaincode at path "{path}" with {args} with name "{name}" on channel "{channel}"')
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}"')
 def step_impl(context, path, args, name, channel):
     deploy_impl(context, path, args, name, "peer0.org1.example.com", channel)
 
-@when(u'a user deploys chaincode at path "{path}" with {args} with name "{name}"')
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}"')
 def step_impl(context, path, args, name):
     deploy_impl(context, path, args, name, "peer0.org1.example.com", endorser_util.TEST_CHANNEL_ID)
 
-@when(u'a user deploys chaincode at path "{path}" with {args}')
+@when(u'a user deploys chaincode at path "{path}" with args {args}')
 def step_impl(context, path, args):
     deploy_impl(context, path, args, "mycc", "peer0.org1.example.com", endorser_util.TEST_CHANNEL_ID)
 
@@ -171,16 +171,60 @@ def step_impl(context):
                                                  context.chaincode['name'])
     assert chaincode_container in containers, "The chaincode container is not running"
 
-@then(u'a user receives expected response of {response} from "{peer}"')
-def expected_impl(context, response, peer):
+@then(u'a user receives {status} response of {response} from "{peer}"')
+def expected_impl(context, response, peer, status="a success"):
     assert peer in context.result, "There is no response from {0}".format(peer)
-    assert context.result[peer] == "Query Result: {0}\n".format(response), "Expected response was {0}; received {1}".format(response, context.result[peer])
+    if status == "a success":
+        assert context.result[peer] == "Query Result: {0}\n".format(response), "Expected response was {0}; received {1}".format(response, context.result[peer])
+    elif status == "an error":
+        assert "Error:" in context.result[peer], "There was not an error response: {0}".format(context.result[peer])
+        assert response in context.result[peer], "Expected response was {0}; received {1}".format(response, context.result[peer])
+    else:
+        assert False, "Unknown response type: {}. Please choose success or error".format(status)
 
-@then(u'a user receives an error response of {response} from "{peer}"')
-def step_impl(context, response, peer):
+
+@then(u'a user receives {status} response of {response}')
+def step_impl(context, response, status="a success"):
+    expected_impl(context, response, "peer0.org1.example.com", status)
+
+
+@then(u'a user receives a response with the {valueType} value from "{peer}"')
+def set_response_impl(context, valueType, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
-    assert context.result[peer] == "Error: {0}\n".format(response), "Expected response was {0}; received {1}".format(response, context.result[peer])
+    assert "Error endorsing query" not in context.result[peer], "There was an error response: {0}".format(context.result[peer])
+    if valueType == "length":
+        assert len(context.result[peer])-15 == context.payload["len"], \
+             "Expected response to be of length {0}; received length {1}; Result: {2}".format(context.payload["len"], len(context.result[peer]), context.result[peer])
+    elif valueType == "random":
+        assert context.payload["payload"] in context.result[peer], \
+             "Expected response does not match the actual response; Result: {0}".format(context.result[peer])
+    else:
+        assert False, "Unknown value type {}. This type may need to be implemented in the framework.".format(valueType)
 
-@then(u'a user receives expected response of {response}')
+@then(u'a user receives a response with the {valueType} value')
+def step_impl(context, valueType):
+    set_response_impl(context, valueType, "peer0.org1.example.com")
+
+
+@then(u'a user receives a response containing a value of length {length:d} from "{peer}"')
+def length_impl(context, length, peer):
+    assert peer in context.result, "There is no response from {0}".format(peer)
+    assert "Error endorsing query" not in context.result[peer], "There was an error response: {0}".format(context.result[peer])
+    assert len(context.result[peer])-15 == length, \
+        "Expected response to be of length {0}; received length {1}; Result: {2}".format(length,
+                                                                                         len(context.result[peer]),
+                                                                                         context.result[peer])
+
+@then(u'a user receives a response containing a value of length {length:d}')
+def step_impl(context, length):
+    length_impl(context, length, "peer0.org1.example.com")
+
+
+@then(u'a user receives a response containing {response} from "{peer}"')
+def containing_impl(context, response, peer):
+    assert peer in context.result, "There is no response from {0}".format(peer)
+    assert response in context.result[peer], "Expected response was {0}; received {1}".format(response, context.result[peer])
+
+@then(u'a user receives a response containing {response}')
 def step_impl(context, response):
-    expected_impl(context, response, "peer0.org1.example.com")
+    containing_impl(context, response, "peer0.org1.example.com")
