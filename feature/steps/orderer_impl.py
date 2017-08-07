@@ -100,11 +100,11 @@ def step_impl(context, count, timeout):
 def verify_deliver_impl(context, count, numBlocks, timeout=60):
     pass
 
-@then(u'we get a successful broadcast response')
+@then(u'I get a successful broadcast response')
 def step_impl(context):
     recv_broadcast_impl(context, 1)
 
-@then(u'we get {count} successful broadcast responses')
+@then(u'I get {count} successful broadcast responses')
 def recv_broadcast_impl(context, count):
     pass
 

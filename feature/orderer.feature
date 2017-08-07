@@ -23,10 +23,10 @@ Scenario: FAB-1335: Resilient Kafka Orderer and Brokers
     And the orderer BatchTimeout is 10 minutes
     And a bootstrapped orderer network of type kafka with 3 brokers
     When 10 unique messages are broadcasted
-    Then we get 10 successful broadcast responses
+    Then I get 10 successful broadcast responses
     When the topic partition leader is stopped
     And 10 unique messages are broadcasted
-    Then we get 10 successful broadcast responses
+    Then I get 10 successful broadcast responses
     And all 20 messages are delivered in 1 block
 
 @skip
@@ -110,7 +110,7 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
 Scenario Outline: FAB-3937: Message Broadcast
   Given a bootstrapped orderer network of type <type>
   When a message is broadcasted
-  Then we get a successful broadcast response
+  Then I get a successful broadcast response
   Examples:
     | type  |
     | solo  |

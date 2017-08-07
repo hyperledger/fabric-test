@@ -36,7 +36,7 @@ PROFILE_TYPES = {"solo": "SampleInsecureSolo",
 def step_impl(context, seconds):
     time.sleep(float(seconds))
 
-@given(u'we compose "{composeYamlFile}"')
+@given(u'I compose "{composeYamlFile}"')
 def compose_impl(context, composeYamlFile, projectName=None, startContainers=True):
     composition = compose_util.Composition(context, composeYamlFile,
                                            projectName=projectName,
