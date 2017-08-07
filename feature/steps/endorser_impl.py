@@ -16,6 +16,9 @@
 from behave import *
 import json
 import time
+import subprocess
+import random
+import string
 import endorser_util
 import config_util
 
@@ -109,6 +112,28 @@ def step_impl(context, name, args):
 def step_impl(context, numInvokes):
     invokes_impl(context, numInvokes, endorser_util.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
 
+@when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}"')
+def random_invoke_impl(context, name, args, length, peer):
+    payload = ''.join(random.choice(string.ascii_letters) for _ in range(length))
+    context.payload = {"payload": payload,
+                    "len": length}
+    chaincode = {"args": args.format(random=payload),
+                 "name": name}
+    orderers = endorser_util.get_orderers(context)
+    context.result = endorser_util.invoke_chaincode(context,
+                                                    chaincode,
+                                                    orderers,
+                                                    peer,
+                                                    endorser_util.TEST_CHANNEL_ID)
+
+@when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d}')
+def step_impl(context, name, args, length):
+    random_invoke_impl(context, name, args, length, "peer0.org1.example.com")
+
+@when(u'a user invokes on the chaincode named "{name}" with random args {args}')
+def step_impl(context, name, args):
+    random_invoke_impl(context, name, args, 1024, "peer0.org1.example.com")
+
 @when(u'a user invokes on the chaincode named "{name}"')
 def step_impl(context, name):
     invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, name, '["invoke","a","b","5"]', "peer0.org1.example.com")
@@ -117,35 +142,34 @@ def step_impl(context, name):
 def step_impl(context):
     invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
 
+@when(u'a user creates a channel "{channelID}" on peer "{peer}"')
+def step_impl(context, channelID, peer):
+    orderers = endorser_util.get_orderers(context)
+    endorser_util.create_channel(context, [peer], orderers, channelID)
+
+@when(u'a user joins a channel "{channelID}" on peer "{peer}"')
+def step_impl(context, channelID, peer):
+    orderers = endorser_util.get_orderers(context)
+    endorser_util.join_channel(context, [peer], orderers, channelID)
+
+@when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}"')
+def step_impl(context, channelID, peer):
+    orderers = endorser_util.get_orderers(context)
+    endorser_util.fetch_channel(context, [peer], orderers, channelID, location=".")
+
 @then(u'the chaincode is deployed')
 def step_impl(context):
     # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using the python sdk
     time.sleep(2)
 
-    # Grab the key/value pair from the deploy
-    key = value = None
-    print(context.chaincode['args'])
-    print(json.loads(context.chaincode['args']))
-    args = json.loads(context.chaincode['args'])
-    for arg in args:
-        if arg == 'init':
-            keyIndex = args.index(arg)+1
-            valueIndex = args.index(arg)+2
-            key = args[keyIndex]
-            value = args[valueIndex]
-    assert key is not None, "The last message was not a deploy: {0}".format(context.chaincode['args'])
-
-    chaincode = {
-        "path": context.chaincode['path'],
-        "language": context.chaincode['language'],
-        "name": context.chaincode['name'],
-        "args": r'["query","{0}"]'.format(key),
-    }
-    orderers = endorser_util.get_orderers(context)
     peers = endorser_util.get_peers(context)
-    result = endorser_util.query_chaincode(context, chaincode, peers[0], endorser_util.TEST_CHANNEL_ID)
-    print(result)
-    assert result[peers[0]] == "Query Result: {0}\n".format(value), "Expect {0} = {1}, received from the deploy: {2}".format(key, value, result[peers[0]])
+
+    # Verify that a chaincode container has started
+    containers = subprocess.check_output(["docker ps -a"], shell=True)
+    chaincode_container = "{0}-{1}-{2}-0".format(context.composition.projectName,
+                                                 peers[0],
+                                                 context.chaincode['name'])
+    assert chaincode_container in containers, "The chaincode container is not running"
 
 @then(u'a user receives expected response of {response} from "{peer}"')
 def expected_impl(context, response, peer):
