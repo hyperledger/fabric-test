@@ -29,10 +29,14 @@ class ContainerData:
         self.ports = ports
 
     def getEnv(self, key):
+        """
+        Gathers the environment information from "docker inspect"
+        Returns the value that is set in the environment variable
+        """
         envValue = None
         for val in self.envFromInspect:
             if val.startswith(key):
-                envValue = val[len(key):]
+                envValue = val[len(key)+1:].strip()
                 break
         if envValue == None:
             raise Exception("ENV key not found ({0}) for container ({1})".format(key, self.containerName))

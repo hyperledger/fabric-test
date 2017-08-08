@@ -32,9 +32,9 @@ PROFILE_TYPES = {"solo": "SampleInsecureSolo",
                  "solo-msp": "SampleSingleMSPSolo"}
 
 
-@given(u'a bootstrapped orderer network of type {networkType}')
-def step_impl(context, networkType):
-    basic_impl.bootstrapped_impl(context, networkType)
+@given(u'a bootstrapped orderer network of type {ordererType}')
+def step_impl(context, ordererType):
+    basic_impl.bootstrapped_impl(context, ordererType)
 
 @given(u'an unbootstrapped network using "{dockerFile}"')
 def compose_impl(context, dockerFile):

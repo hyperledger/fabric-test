@@ -26,7 +26,7 @@ import config_util
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
 def deploy_impl(context, path, args, name, containerName, channel):
     # Be sure there is a transaction block for this channel
-    config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context.composition.projectName)
+    config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context)
 
     chaincode = {
         "path": path,

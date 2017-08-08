@@ -22,14 +22,6 @@ import config_util
 import endorser_util
 
 
-ORDERER_TYPES = ["solo",
-                 "kafka",
-                 "solo-msp"]
-
-PROFILE_TYPES = {"solo": "SampleInsecureSolo",
-                 "kafka": "SampleInsecureKafka",
-                 "solo-msp": "SampleSingleMSPSolo"}
-
 @given(u'I wait "{seconds}" seconds')
 @when(u'I wait "{seconds}" seconds')
 @then(u'I wait "{seconds}" seconds')
@@ -51,21 +43,21 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
 def step_impl(context):
     bootstrapped_impl(context, "solo")
 
-@given(u'I have a bootstrapped fabric network of type {networkType}')
-def bootstrapped_impl(context, networkType):
-    assert networkType in ORDERER_TYPES, "Unknown network type '%s'" % networkType
+@given(u'I have a bootstrapped fabric network of type {ordererType}')
+def bootstrapped_impl(context, ordererType):
+    assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
-    context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, networkType)
+    context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)
     assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
-    context.ordererProfile = PROFILE_TYPES.get(networkType, "SampleInsecureSolo")
+    context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
     channelID = endorser_util.SYS_CHANNEL_ID
     if hasattr(context,"composition"):
-       projectName = context.composition.projectName
+        context.projectName = context.composition.projectName
     else:
-        projectName = str(uuid.uuid1()).replace('-','')
-    config_util.generateCrypto(projectName)
-    config_util.generateConfig(channelID, config_util.CHANNEL_PROFILE, context.ordererProfile, projectName)
-    compose_impl(context, context.composeFile, projectName=projectName)
+        context.projectName = str(uuid.uuid1()).replace('-','')
+    config_util.generateCrypto(context)
+    config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
+    compose_impl(context, context.composeFile, projectName=context.projectName)
 
 @given(u'"{component}" is taken down')
 def step_impl(context, component):
@@ -76,3 +68,15 @@ def step_impl(context, component):
 def step_impl(context, component):
     assert component in context.composition.collectServiceNames(), "Unknown component '{0}'".format(component)
     context.composition.start([component])
+
+@when(u'I start a fabric network using a {ordererType} orderer service')
+def start_network_impl(context, ordererType):
+    assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
+    curpath = os.path.realpath('.')
+    context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)
+    assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
+    compose_impl(context, context.composeFile, projectName=context.projectName)
+
+@when(u'I start a fabric network')
+def step_impl(context):
+    start_network_impl(context, "solo")

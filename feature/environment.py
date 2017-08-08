@@ -57,11 +57,14 @@ def after_scenario(context, scenario):
 
     if 'doNotDecompose' in scenario.tags:
         if 'compose_yaml' in context:
-            print("Not going to decompose after scenario {0}, with yaml '{1}'".format(scenario.name, context.compose_yaml))
+            print("Not going to decompose after scenario {0}, with yaml '{1}'".format(scenario.name,
+                                                                                      context.compose_yaml))
     elif 'composition' in context:
         # Remove config data and docker containers
         shutil.rmtree("configs/%s" % context.composition.projectName)
         context.composition.decompose()
+    elif hasattr(context, 'projectName'):
+        shutil.rmtree("configs/%s" % context.projectName)
 
 # stop any running peer that could get in the way before starting the tests
 def before_all(context):
