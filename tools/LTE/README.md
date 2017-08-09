@@ -24,7 +24,7 @@ considered to constitute a single test-run.
 To run all the available tests, run:
 ```
 cd fabric/test/tools/LTE/scripts
-./runbenchmark.sh -f parameters_daily_CI.sh all
+./runbenchmarks.sh -f parameters_daily_CI.sh all
 ```
 where the file `parameters_daily_CI.sh` has all the necessary test parameters.
 
@@ -33,7 +33,7 @@ You can run individual tests without running all the available tests by giving
 the name of the test as parameter, instead of `all`. You can get the available
 test names by:
 ```
-./runbenchmark.sh help
+./runbenchmarks.sh help
 ```
 
 ### What the Tests Do
@@ -105,8 +105,36 @@ has all the necessary parameters to run and using that file as the input (see
 the section on how to run the tests) . The names of necessary parameters can be
 found in the file `parameters_daily_CI.sh`.
 
+### Running with optional CouchDB
+
+By default, the tests use golveldb as the state database. Fabric provides the
+option of using CouchDB as a pluggable state database. To run the existing
+tests with CouchDB, use the parameter file `parameters_couchdb_daily_CI.sh`:
+```
+./runbenchmarks.sh -f parameters_couchdb_daily_CI.sh all
+```
+Note that this parameter file (`parameters_couchdb_daily_CI.sh`) contains the
+following line, which is required to run the tests with CouchDB:
+```
+export useCouchDB="yes"
+```
+
 ## How to View the Test Results
 
 The test results can be viewed as in the stdout where it shows how long each
 single operation took to complete in a test. These results are also saved in a
 .csv file in the following directory: `/tmp/experiments`
+
+## Troubleshooting
+
+If the test stops with an error message
+```
+panic: This benchmark should be called with N=1 only. Run this with more volume
+of data
+```
+It means that the test duration was too short to consider it as a valid
+benchmark test. This usually happens when the test device has high processing
+power and/or the parameter values used for the test are too small. To fix
+this, please increase the values in the parameter file you are using. For
+example, if your test uses `parameters_daily_CI.sh`, increase the value of
+`NumTotalTx` from 100000 to 1000000.
