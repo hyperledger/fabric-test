@@ -40,7 +40,6 @@ def _testAccessPBMethods():
     envelope = common_pb2.Envelope(payload=payload.SerializeToString())
     return envelope
 
-
 envelope = _testAccessPBMethods()
 assert isinstance(envelope, common_pb2.Envelope)
 print("Successfully imported protobufs from bddtests directory")

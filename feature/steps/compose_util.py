@@ -41,13 +41,14 @@ class ContainerData:
 
 class Composition:
 
-    def __init__(self, context, composeFilesYaml, projectName = None,
+    def __init__(self, context, composeFilesYaml= None, projectName = None,
                  force_recreate = True, components = [], startContainers=True):
         if not projectName:
             projectName = str(uuid.uuid1()).replace('-','')
         self.projectName = projectName
         self.context = context
         self.containerDataList = []
+        self.environ = {}
         self.composeFilesYaml = composeFilesYaml
         if startContainers:
             self.up(force_recreate, components)
@@ -101,6 +102,7 @@ class Composition:
 
     def getEnvAdditions(self):
         myEnv = {}
+        myEnv = self.environ.copy()
         myEnv["COMPOSE_PROJECT_NAME"] = self.projectName
         myEnv["CORE_PEER_NETWORKID"] = self.projectName
         return myEnv
