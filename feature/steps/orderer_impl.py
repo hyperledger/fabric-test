@@ -17,6 +17,10 @@ from behave import *
 import os
 import subprocess
 import time
+import orderer_util
+import basic_impl
+import compose_util
+import common_util
 
 
 ORDERER_TYPES = ["solo",
@@ -30,7 +34,7 @@ PROFILE_TYPES = {"solo": "SampleInsecureSolo",
 
 @given(u'a bootstrapped orderer network of type {networkType}')
 def step_impl(context, networkType):
-    pass
+    basic_impl.bootstrapped_impl(context, networkType)
 
 @given(u'an unbootstrapped network using "{dockerFile}"')
 def compose_impl(context, dockerFile):
@@ -40,20 +44,15 @@ def compose_impl(context, dockerFile):
 def step_impl(context):
     pass
 
-@given(u'the orderer Batchsize MaxMessageCount is {maxMsgCount}')
-def step_impl(context, maxMsgCount):
-    pass
-
-@given(u'the orderer BatchTimeout is {timeout} {units}')
-def step_impl(context, timeout, units):
-    pass
+@given(u'the {key} environment variable is {value}')
+def step_impl(context, key, value):
+    if not hasattr(context,"composition"):
+       context.composition = compose_util.Composition(context,startContainers=False)
+    changedString = common_util.changeFormat(value)
+    context.composition.environ[key] = changedString
 
 @given(u'a certificate from {organization} is added to the kafka orderer network')
 def step_impl(context, organization):
-    pass
-
-@given(u'the kafka default replication factor is {factor}')
-def step_impl(context, factor):
     pass
 
 @given(u'a kafka cluster')

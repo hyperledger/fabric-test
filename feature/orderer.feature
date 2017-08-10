@@ -16,12 +16,13 @@
 Feature: Orderer Service
     As a user I want to be able to have my transactions ordered correctly
 
+#@doNotDecompose
 @skip
 Scenario: FAB-1335: Resilient Kafka Orderer and Brokers
-    Given the kafka default replication factor is 3
-    And the orderer Batchsize MaxMessageCount is 20
-    And the orderer BatchTimeout is 10 minutes
-    And a bootstrapped orderer network of type kafka with 3 brokers
+    Given the KAFKA_DEFAULT_REPLICATION_FACTOR environment variable is 1
+    And the CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT environment variable is 10
+    And the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is 10 minutes
+    And I have a bootstrapped fabric network of type kafka
     When 10 unique messages are broadcasted
     Then I get 10 successful broadcast responses
     When the topic partition leader is stopped
@@ -72,6 +73,7 @@ Scenario: FAB-3851: Message Payloads Greater than 1MB
     Then the chaincode is deployed
 
 @daily
+#@doNotDecompose
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     And I wait "60" seconds
@@ -106,7 +108,6 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Then a user receives expected response of 970
 
 @skip
-#@doNotDecompose
 Scenario Outline: FAB-3937: Message Broadcast
   Given a bootstrapped orderer network of type <type>
   When a message is broadcasted

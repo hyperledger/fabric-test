@@ -38,11 +38,14 @@ def step_impl(context, seconds):
 
 @given(u'I compose "{composeYamlFile}"')
 def compose_impl(context, composeYamlFile, projectName=None, startContainers=True):
-    composition = compose_util.Composition(context, composeYamlFile,
+    if not hasattr(context, "composition"):
+       context.composition = compose_util.Composition(context, composeYamlFile,
                                            projectName=projectName,
                                            startContainers=startContainers)
-    context.compose_containers = composition.containerDataList
-    context.composition = composition
+    else:
+        context.composition.composeFilesYaml = composeYamlFile
+        context.composition.up()
+    context.compose_containers = context.composition.collectServiceNames()
 
 @given(u'I have a bootstrapped fabric network')
 def step_impl(context):
@@ -56,7 +59,10 @@ def bootstrapped_impl(context, networkType):
     assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
     context.ordererProfile = PROFILE_TYPES.get(networkType, "SampleInsecureSolo")
     channelID = endorser_util.SYS_CHANNEL_ID
-    projectName = str(uuid.uuid1()).replace('-','')
+    if hasattr(context,"composition"):
+       projectName = context.composition.projectName
+    else:
+        projectName = str(uuid.uuid1()).replace('-','')
     config_util.generateCrypto(projectName)
     config_util.generateConfig(channelID, config_util.CHANNEL_PROFILE, context.ordererProfile, projectName)
     compose_impl(context, context.composeFile, projectName=projectName)
