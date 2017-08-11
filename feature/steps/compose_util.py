@@ -218,5 +218,7 @@ class Composition:
                 subprocess.call(['docker', 'rm', '-f', container], env=env)
 
         # Need to remove the chaincode images: docker rmi -f $(docker images | grep "example.com-" | awk '{print $3}')
-        cmd = ['docker images | grep ".example.com-" | awk \'{print $3}\' | xargs docker rmi']
-        subprocess.call(cmd, shell=True, env=env)
+        retVal = subprocess.call(['docker images | grep ".example.com-"'], env=env, shell=True)
+        if retVal != 1:
+            cmd = ['docker images | grep ".example.com-" | awk \'{print $3}\' | xargs docker rmi']
+            subprocess.call(cmd, shell=True, env=env)
