@@ -180,3 +180,66 @@ Examples:
   | type  |
   | solo  |
   | kafka |
+
+
+@daily
+# This test will be skipped until it is determined why this test fails intermittently
+Scenario: FAB-4770: Test taking down all (3) kafka brokers in the RF set, and bringing them back in LIFO order
+    # By default, the number of kafka brokers in the RF set is 3(KAFKA_DEFAULT_REPLICATION_FACTOR),
+    # and the min ISR is 2(KAFKA_MIN_INSYNC_REPLICAS)
+    Given I have a bootstrapped fabric network of type kafka
+    And I wait "60" seconds
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    And I wait "10" seconds
+    Then the chaincode is deployed
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 990
+
+    When the topic partition leader is stopped
+    And I wait "60" seconds
+    #new leader is elected
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "5" seconds
+    When a user queries on the chaincode with args ["query","a"]
+    Then a user receives a success response of 980
+
+    When the topic partition leader is stopped
+    And I wait "60" seconds
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    Then a user receives an error response of SERVICE_UNAVAILABLE
+    And I wait "5" seconds
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 980
+
+    When the topic partition leader is stopped
+    And I wait "60" seconds
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    Then a user receives an error response of SERVICE_UNAVAILABLE
+    And I wait "5" seconds
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 980
+
+    And I wait "5" seconds
+    # Stopping Queue: Last In First Out
+    When a former topic partition leader is restarted
+    And I wait "60" seconds
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "10" seconds
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 980
+
+    When a former topic partition leader is restarted
+    And I wait "60" seconds
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "10" seconds
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 970
+
+    When a former topic partition leader is restarted
+    And I wait "60" seconds
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "10" seconds
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 960

@@ -164,6 +164,8 @@ def join_channel(context, peers, orderers, channelId=TEST_CHANNEL_ID):
                    "--blockpath", '/var/hyperledger/configs/{0}/{1}.block"'.format(context.composition.projectName, channelId)]
         count = 0
         output = "Error"
+
+        # Try joining the channel 5 times with a 2 second delay between tries
         while count < 5 and "Error" in output:
             output = context.composition.docker_exec(command, [peer])
             #print("Join: {0}".format(str(output)))

@@ -34,3 +34,7 @@ Scenario: Basic operations
     When a user deploys chaincode
     Then the chaincode is deployed
 
+@smoke
+Scenario: Test access to the fabric protobuf files
+    Given I test the access to the generated python protobuf files
+    Then there are no errors

@@ -51,7 +51,7 @@ def bootstrapped_impl(context, ordererType):
     assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
     context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
     channelID = endorser_util.SYS_CHANNEL_ID
-    if hasattr(context,"composition"):
+    if hasattr(context, "composition"):
         context.projectName = context.composition.projectName
     else:
         context.projectName = str(uuid.uuid1()).replace('-','')
@@ -96,3 +96,7 @@ def start_network_impl(context, ordererType):
 @when(u'I start a fabric network')
 def step_impl(context):
     start_network_impl(context, "solo")
+
+@then(u'there are no errors')
+def step_impl(context):
+    pass

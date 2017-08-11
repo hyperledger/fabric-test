@@ -6,7 +6,7 @@
 version: '2'
 
 networks:
-    default:
+    behave:
 
 services:
 
@@ -15,7 +15,7 @@ services:
         image: hyperledger/fabric-orderer
         environment:
             - ORDERER_GENERAL_LOGLEVEL=debug
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_default
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
             - ORDERER_GENERAL_GENESISPROFILE=SampleSingleMSPSolo
             - ORDERER_GENERAL_GENESISMETHOD=file
@@ -36,7 +36,7 @@ services:
         ports:
           - '7050'
         networks:
-          default:
+          behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
 
@@ -46,7 +46,7 @@ services:
         environment:
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_default
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer0.org1.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
             - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
@@ -78,7 +78,7 @@ services:
             - orderer0.example.com
         command: peer node start
         networks:
-          default:
+          behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
 
@@ -88,7 +88,7 @@ services:
         environment:
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_default
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer0.org2.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
             - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
@@ -121,7 +121,7 @@ services:
             - orderer0.example.com
         command: peer node start
         networks:
-          default:
+          behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
 
@@ -131,7 +131,7 @@ services:
         environment:
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_default
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer1.org1.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
             - CORE_PEER_ADDRESS=peer1.org1.example.com:7051
@@ -163,7 +163,7 @@ services:
             - orderer0.example.com
         command: peer node start
         networks:
-          default:
+          behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
 
@@ -173,7 +173,7 @@ services:
         environment:
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
-            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_default
+            - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer1.org2.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
             - CORE_PEER_ADDRESS=peer1.org2.example.com:7051
@@ -205,7 +205,7 @@ services:
             - orderer0.example.com
         command: peer node start
         networks:
-          default:
+          behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
 
@@ -235,6 +235,6 @@ services:
           - peer0.org2.example.com
           - peer1.org2.example.com
         networks:
-          default:
+          behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
