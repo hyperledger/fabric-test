@@ -327,6 +327,7 @@ services:
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
             - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org1.example.com
@@ -372,6 +373,7 @@ services:
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
             - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org2.example.com
@@ -417,6 +419,7 @@ services:
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
             - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org1.example.com
@@ -463,6 +466,7 @@ services:
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
             - CORE_PEER_GOSSIP_SKIPHANDSHAKE=true
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org2.example.com

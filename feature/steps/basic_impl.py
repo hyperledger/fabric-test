@@ -59,13 +59,29 @@ def bootstrapped_impl(context, ordererType):
     config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
     compose_impl(context, context.composeFile, projectName=context.projectName)
 
+@given(u'the initial leader peer of "{org}" is taken down')
+def step_impl(context, org):
+    bringdown_impl(context, endorser_util.get_initial_leader(context, org))
+
+@given(u'the initial non-leader peer of "{org}" is taken down')
+def step_impl(context, org):
+    bringdown_impl(context, endorser_util.get_initial_non_leader(context, org))
+
 @given(u'"{component}" is taken down')
-def step_impl(context, component):
+def bringdown_impl(context, component):
     assert component in context.composition.collectServiceNames(), "Unknown component '{0}'".format(component)
     context.composition.stop([component])
 
+@given(u'the initial leader peer of "{org}" comes back up')
+def step_impl(context, org):
+    bringup_impl(context, endorser_util.get_initial_leader(context, org))
+
+@given(u'the initial non-leader peer of "{org}" comes back up')
+def step_impl(context, org):
+    bringup_impl(context, endorser_util.get_initial_non_leader(context, org))
+
 @given(u'"{component}" comes back up')
-def step_impl(context, component):
+def bringup_impl(context, component):
     assert component in context.composition.collectServiceNames(), "Unknown component '{0}'".format(component)
     context.composition.start([component])
 

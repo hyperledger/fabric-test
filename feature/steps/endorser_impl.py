@@ -60,6 +60,14 @@ def step_impl(context):
                 "peer0.org1.example.com",
                 (endorser_util.TEST_CHANNEL_ID))
 
+@when(u'a user queries on the chaincode named "{name}" with args {args} on the initial leader peer of "{org}"')
+def step_impl(context, name, args, org):
+    query_impl(context, endorser_util.TEST_CHANNEL_ID, name, args, endorser_util.get_initial_leader(context, org))
+
+@when(u'a user queries on the chaincode named "{name}" with args {args} on the initial non-leader peer of "{org}"')
+def step_impl(context, name, args, org):
+    query_impl(context, endorser_util.TEST_CHANNEL_ID, name, args, endorser_util.get_initial_non_leader(context, org))
+
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args} on "{component}"')
 def query_impl(context, channel, name, args, component):
     # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using the python sdk
@@ -103,6 +111,18 @@ def step_impl(context, numInvokes, channel, name, args):
 @when(u'a user invokes {numInvokes} times using chaincode named "{name}" with args {args}')
 def step_impl(context, numInvokes, name, args):
     invokes_impl(context, numInvokes, endorser_util.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com")
+
+@when(u'a user invokes on the chaincode named "{name}" with args {args} on the initial leader peer of "{org}"')
+def step_impl(context, name, args, org):
+    invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, name, args, endorser_util.get_initial_leader(context, org))
+
+@when(u'a user invokes on the chaincode named "{name}" with args {args} on the initial non-leader peer of "{org}"')
+def step_impl(context, name, args, org):
+    invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, name, args, endorser_util.get_initial_non_leader(context, org))
+
+@when(u'a user invokes on the chaincode named "{name}" with args {args} on {peer}')
+def step_impl(context, name, args, peer):
+    invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, name, args, peer)
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args}')
 def step_impl(context, name, args):
@@ -170,6 +190,14 @@ def step_impl(context):
                                                  peers[0],
                                                  context.chaincode['name'])
     assert chaincode_container in containers, "The chaincode container is not running"
+
+@then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
+def step_impl(context, response, org, status):
+    expected_impl(context, response, endorser_util.get_initial_leader(context, org))
+
+@then(u'a user receives {status} response of {response} from the initial non-leader peer of "{org}"')
+def step_impl(context, response, org, status):
+    expected_impl(context, response, endorser_util.get_initial_non_leader(context, org))
 
 @then(u'a user receives {status} response of {response} from "{peer}"')
 def expected_impl(context, response, peer, status="a success"):
