@@ -14,6 +14,7 @@
 #
 
 from behave import *
+import sys
 import json
 import time
 import subprocess
@@ -59,6 +60,23 @@ def step_impl(context):
                 "mycc",
                 "peer0.org1.example.com",
                 (endorser_util.TEST_CHANNEL_ID))
+
+@when(u'a user queries on the channel "{channel}" using chaincode named "{name}" for the random key with args {args} on "{component}"')
+def step_impl(context, channel, name, args, component):
+    query_impl(context, channel, name, args.format(random_key=context.random_key), component)
+
+@when(u'a user queries on the chaincode named "{name}" for the random key with args {args} on "{component}"')
+def step_impl(context, name, args, component):
+    query_impl(context, endorser_util.TEST_CHANNEL_ID, name, args.format(random_key=context.random_key), component)
+
+@when(u'a user queries on the chaincode named "{name}" for the random key with args {args}')
+def step_impl(context, name, args):
+    print("in the step_imp for random query ")
+    query_impl(context, endorser_util.TEST_CHANNEL_ID, name, args.format(random_key=context.random_key), "peer0.org1.example.com")
+
+@when(u'a user queries on the chaincode for the random key with args {args}"')
+def step_impl(context, args):
+    query_impl(context, endorser_util.TEST_CHANNEL_ID, "mycc", args.format(random_key=context.random_key), component)
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} on the initial leader peer of "{org}"')
 def step_impl(context, name, args, org):
@@ -135,9 +153,11 @@ def step_impl(context, numInvokes):
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}"')
 def random_invoke_impl(context, name, args, length, peer):
     payload = ''.join(random.choice(string.ascii_letters) for _ in range(length))
+    random_key = str(random.randint(0, sys.maxint))
     context.payload = {"payload": payload,
                     "len": length}
-    chaincode = {"args": args.format(random=payload),
+    context.random_key=random_key
+    chaincode = {"args": args.format(random_value=payload, random_key=random_key),
                  "name": name}
     orderers = endorser_util.get_orderers(context)
     context.result = endorser_util.invoke_chaincode(context,

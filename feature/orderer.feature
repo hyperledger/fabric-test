@@ -72,56 +72,56 @@ Scenario: FAB-3851: Message Payloads Greater than 1MB
     When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
     And I wait "30" seconds
     # 1K
-    And a user invokes on the chaincode named "mycc" with random args ["put","a","{random}"] of length 1024
+    And a user invokes on the chaincode named "mycc" with random args ["put","a","{random_value}"] of length 1024
     And I wait "10" seconds
     And a user queries on the chaincode named "mycc" with args ["get","a"]
     Then a user receives a response containing a value of length 1024
     And a user receives a response with the random value
     # 64K
-    When a user invokes on the chaincode named "mycc" with random args ["put","b","{random}"] of length 65536
+    When a user invokes on the chaincode named "mycc" with random args ["put","b","{random_value}"] of length 65536
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","b"]
     Then a user receives a response containing a value of length 65536
     #
-    When a user invokes on the chaincode named "mycc" with random args ["put","c","{random}"] of length 75000
+    When a user invokes on the chaincode named "mycc" with random args ["put","c","{random_value}"] of length 75000
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","c"]
     Then a user receives a response containing a value of length 75000
     #
-    When a user invokes on the chaincode named "mycc" with random args ["put","d","{random}"] of length 100000
+    When a user invokes on the chaincode named "mycc" with random args ["put","d","{random_value}"] of length 100000
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","d"]
     Then a user receives a response containing a value of length 100000
     #
-    When a user invokes on the chaincode named "mycc" with random args ["put","e","{random}"] of length 125000
+    When a user invokes on the chaincode named "mycc" with random args ["put","e","{random_value}"] of length 125000
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","e"]
     Then a user receives a response containing a value of length 125000
     And a user receives a response with the random value
     #
-    When a user invokes on the chaincode named "mycc" with random args ["put","f","{random}"] of length 130000
+    When a user invokes on the chaincode named "mycc" with random args ["put","f","{random_value}"] of length 130000
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","f"]
     Then a user receives a response containing a value of length 130000
     And a user receives a response with the random value
     #
-    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random}"] of length 130734
+    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130734
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","g"]
     Then a user receives a response containing a value of length 130734
     And a user receives a response with the random value
     #
-#    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random}"] of length 1048576
+#    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random_value}"] of length 1048576
 #    And I wait "30" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","h"]
 #    Then a user receives response with length value
 #    #
-#    When a user invokes on the chaincode named "mycc" with random args ["put","i","{random}"] of length 2097152
+#    When a user invokes on the chaincode named "mycc" with random args ["put","i","{random_value}"] of length 2097152
 #    And I wait "30" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","i"]
 #    Then a user receives response with length value
 #    #
-#    When a user invokes on the chaincode named "mycc" with random args ["put","j","{random}"] of length 4194304
+#    When a user invokes on the chaincode named "mycc" with random args ["put","j","{random_value}"] of length 4194304
 #    And I wait "30" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","j"]
 #    Then a user receives response with length value
