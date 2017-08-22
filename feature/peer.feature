@@ -64,11 +64,33 @@ Scenario: FAB-3861: Basic Chaincode Execution (example02)
     Then the chaincode is deployed
 
 
-@skip
-Scenario: FAB-3865: Multiple Channels Per Peer
-    Given this test needs to be implemented
-    When a user gets a chance
-    Then the test will run
+@daily
+Scenario Outline: FAB-3865: Multiple Channels Per Peer
+    Given I have a bootstrapped fabric network of type <type>
+    And I wait "<waitTime>" seconds
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init", "a", "1000" , "b", "2000"] with name "cc1" on channel "chn1"
+    And I wait "5" seconds
+    Then the chaincode is deployed
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "cc2" on channel "chn2"
+    And I wait "5" seconds
+    And a user invokes on the channel "chn2" using chaincode named "cc2" with args ["put", "a", "1000"]
+    And I wait "1" seconds
+    And a user queries on the channel "chn2" using chaincode named "cc2" with args ["get", "a"]
+    Then a user receives a success response of 1000
+    When a user invokes on the channel "chn2" using chaincode named "cc2" with args ["put", "b", "2000"]
+    And I wait "1" seconds
+    And a user queries on the channel "chn2" using chaincode named "cc2" with args ["get", "b"]
+    Then a user receives a success response of 2000
+    When a user invokes on the channel "chn1" using chaincode named "cc1" with args ["invoke", "a", "b", "10"]
+    And I wait "1" seconds
+    And a user queries on the channel "chn1" using chaincode named "cc1" with args ["query", "a"]
+    Then a user receives a success response of 990
+    When a user queries on the channel "chn2" using chaincode named "cc2" with args ["get", "a"]
+    Then a user receives a success response of 1000
+Examples:
+    | type  | waitTime |
+    | solo  |    5     |
+    | kafka |    60    |
 
 
 @skip

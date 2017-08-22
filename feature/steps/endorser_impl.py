@@ -94,6 +94,10 @@ def query_impl(context, channel, name, args, component):
                  "name": name}
     context.result = endorser_util.query_chaincode(context, chaincode, component, channel)
 
+@when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args}')
+def step_impl(context, channel, name, args):
+    query_impl(context, channel, name, args, "peer0.org1.example.com")
+
 @when(u'a user queries on the chaincode named "{name}" with args {args} on "{component}"')
 def step_impl(context, name, args, component):
     query_impl(context, endorser_util.TEST_CHANNEL_ID, name, args, component)
@@ -145,6 +149,10 @@ def step_impl(context, name, args, peer):
 @when(u'a user invokes on the chaincode named "{name}" with args {args}')
 def step_impl(context, name, args):
     invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com")
+
+@when(u'a user invokes on the channel "{channel}" using chaincode named "{name}" with args {args}')
+def step_impl(context, channel, name, args):
+    invokes_impl(context, 1, channel, name, args, "peer0.org1.example.com")
 
 @when(u'a user invokes {numInvokes} times on the chaincode')
 def step_impl(context, numInvokes):
