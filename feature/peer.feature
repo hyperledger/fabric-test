@@ -71,8 +71,44 @@ Scenario: FAB-3865: Multiple Channels Per Peer
     Then the test will run
 
 
-@skip
-Scenario: FAB-3866: Multiple Chaincodes Per Peer
-    Given this test needs to be implemented
-    When a user gets a chance
-    Then the test will run
+@daily
+Scenario Outline: FAB-3866: Multiple Chaincodes Per Peer
+    Given I have a bootstrapped fabric network of type <type>
+    And I wait "<waitTime>" seconds
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/eventsender" with args [] with name "eventsender"
+    And I wait "5" seconds
+    And a user invokes on the chaincode named "eventsender" with args ["invoke", "test_event"]
+    And I wait "2" seconds
+    And a user queries on the chaincode named "eventsender" with args ["query"]
+    Then a user receives a success response of {"NoEvents":"1"}
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init", "a", "1000" , "b", "2000"] with name "example02"
+    And I wait "5" seconds
+    Then the chaincode is deployed
+    When a user invokes on the chaincode named "example02" with args ["invoke", "a", "b", "10"]
+    And I wait "2" seconds
+    And a user queries on the chaincode named "example02" with args ["query", "a"]
+    Then a user receives a success response of 990
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "map"
+    And I wait "5" seconds
+    And a user invokes on the chaincode named "map" with args ["put", "a", "1000"]
+    And I wait "2" seconds
+    And a user queries on the chaincode named "map" with args ["get", "a"]
+    Then a user receives a success response of 1000
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [] with name "marbles"
+    And I wait "5" seconds
+    And a user invokes on the chaincode named "marbles" with args ["initMarble", "marble1", "blue", "35", "tom"]
+    And I wait "2" seconds
+    And a user invokes on the chaincode named "marbles" with args ["transferMarble", "marble1", "jerry"]
+    And I wait "2" seconds
+    And a user queries on the chaincode named "marbles" with args ["readMarble", "marble1"]
+    Then a user receives a success response of {"docType":"marble","name":"marble1","color":"blue","size":35,"owner":"jerry"}
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/sleeper" with args ["1"] with name "sleeper"
+    And I wait "5" seconds
+    And a user invokes on the chaincode named "sleeper" with args ["put", "a", "1000", "1"]
+    And I wait "2" seconds
+    And a user queries on the chaincode named "sleeper" with args ["get", "a", "1"]
+    Then a user receives a success response of 1000
+Examples:
+    | type  | waitTime |
+    | solo  |    5     |
+    | kafka |    60    |
