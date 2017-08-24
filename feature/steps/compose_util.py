@@ -76,9 +76,25 @@ class Composition:
         command = ["stop"]
         self.issueCommand(command, components)
 
+    def pause(self, components=[]):
+        command = ["pause"]
+        self.issueCommand(command, components)
+
+    def disconnect(self, components=[]):
+        command = ["network", "disconnect", str(self.projectName)+"_default"]
+        self.issueCommand(command, components)
+
     def start(self, components=[]):
         self.serviceNames = self.collectServiceNames()
         command = ["start"]
+        self.issueCommand(command, components)
+
+    def unpause(self, components=[]):
+        command = ["unpause"]
+        self.issueCommand(command, components)
+
+    def connect(self, components=[]):
+        command = ["network", "connect", str(self.projectName)+"_default"]
         self.issueCommand(command, components)
 
     def docker_exec(self, command, components=[]):
@@ -125,7 +141,7 @@ class Composition:
         container_ipaddress = None
         if container['State']['Running']:
             container_ipaddress = container['NetworkSettings']['IPAddress']
-            if not container_ipaddress:
+            if not container_ipaddress and container['NetworkSettings']['Networks']:
                 # ipaddress not found at the old location, try the new location
                 container_ipaddress = container['NetworkSettings']['Networks'].values()[0]['IPAddress']
         return container_ipaddress
@@ -146,6 +162,10 @@ class Composition:
                 componentList.append("%s_%s" % (self.projectName, component))
             else:
                 break
+        # If we need to perform docker network commands, use docker, not
+        # docker-compose
+        if command[0]=="network":
+            useCompose = False
 
         # If we need to perform an operation on a specific container, use
         # docker not docker-compose
@@ -156,6 +176,9 @@ class Composition:
             cmdArgs = command + componentList
             cmdList = ["docker"] + cmdArgs
             cmd = [" ".join(cmdList)]
+        elif command[0]=="network":
+            cmdArgs = command + components
+            cmd = ["docker"] + cmdArgs
         else:
             cmdArgs = command + componentList
             cmd = ["docker"] + cmdArgs
