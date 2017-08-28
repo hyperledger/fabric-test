@@ -137,13 +137,13 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     And a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 990
 
-    Given "kafka0" is taken down
+    When "kafka0" is taken down
     And I wait "5" seconds
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     When a user queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 980
 
-    Given "kafka1" is taken down
+    When "kafka1" is taken down
     And "kafka2" is taken down
     And "kafka3" is taken down
     And I wait "5" seconds
@@ -152,7 +152,7 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Then a user receives a success response of 980
     And I wait "5" seconds
 
-    Given "kafka3" comes back up
+    When "kafka3" comes back up
     And "kafka2" comes back up
     And "kafka1" comes back up
     And I wait "240" seconds

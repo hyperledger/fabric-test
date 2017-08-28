@@ -81,7 +81,7 @@ class Composition:
         self.issueCommand(command, components)
 
     def disconnect(self, components=[]):
-        command = ["network", "disconnect", str(self.projectName)+"_default"]
+        command = ["network", "disconnect", str(self.projectName)+"_behave"]
         self.issueCommand(command, components)
 
     def start(self, components=[]):
@@ -94,7 +94,7 @@ class Composition:
         self.issueCommand(command, components)
 
     def connect(self, components=[]):
-        command = ["network", "connect", str(self.projectName)+"_default"]
+        command = ["network", "connect", str(self.projectName)+"_behave"]
         self.issueCommand(command, components)
 
     def docker_exec(self, command, components=[]):
@@ -156,6 +156,8 @@ class Composition:
     def issueCommand(self, command, components=[]):
         componentList = []
         useCompose = True
+        # Some commands need to be run using "docker" and not "docker-compose"
+        docker_only_commands=["network", "start", "stop", "pause", "unpause"]
         for component in components:
             if '_' in component:
                 useCompose = False
@@ -164,7 +166,7 @@ class Composition:
                 break
         # If we need to perform docker network commands, use docker, not
         # docker-compose
-        if command[0]=="network":
+        if command[0] in docker_only_commands:
             useCompose = False
 
         # If we need to perform an operation on a specific container, use
@@ -176,13 +178,14 @@ class Composition:
             cmdArgs = command + componentList
             cmdList = ["docker"] + cmdArgs
             cmd = [" ".join(cmdList)]
-        elif command[0]=="network":
+        elif command[0] in docker_only_commands:
             cmdArgs = command + components
             cmd = ["docker"] + cmdArgs
         else:
             cmdArgs = command + componentList
             cmd = ["docker"] + cmdArgs
 
+        print("command is: "+ " ".join(cmd))
         try:
             if cmd[0].startswith("docker exec"):
                 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.getEnv())
@@ -226,7 +229,7 @@ class Composition:
             self.containerDataList.append(container_data)
 
     def decompose(self):
-        self.issueCommand(["unpause"])
+        self.issueCommand(["unpause"], self.refreshContainerIDs())
         self.issueCommand(["down"])
         self.issueCommand(["kill"])
         self.issueCommand(["rm", "-f"])

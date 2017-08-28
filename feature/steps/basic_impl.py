@@ -106,27 +106,27 @@ def step_impl(context):
 def step_impl(context):
     bootstrapped_impl(context, "solo", "leveldb", False)
 
-@given(u'the initial leader peer of "{org}" is taken down by doing a {takeDownType}')
+@when(u'the initial leader peer of "{org}" is taken down by doing a {takeDownType}')
 def step_impl(context, org, takeDownType):
     bringdown_impl(context, endorser_util.get_initial_leader(context, org), takeDownType)
 
-@given(u'the initial leader peer of "{org}" is taken down')
+@when(u'the initial leader peer of "{org}" is taken down')
 def step_impl(context, org):
     bringdown_impl(context, endorser_util.get_initial_leader(context, org))
 
-@given(u'the initial non-leader peer of "{org}" is taken down by doing a {takeDownType}')
+@when(u'the initial non-leader peer of "{org}" is taken down by doing a {takeDownType}')
 def step_impl(context, org, takeDownType):
     bringdown_impl(context, endorser_util.get_initial_non_leader(context, org), takeDownType)
 
-@given(u'the initial non-leader peer of "{org}" is taken down')
+@when(u'the initial non-leader peer of "{org}" is taken down')
 def step_impl(context, org):
     bringdown_impl(context, endorser_util.get_initial_non_leader(context, org))
 
-@given(u'"{component}" is taken down by doing a {takeDownType}')
+@when(u'"{component}" is taken down by doing a {takeDownType}')
 def step_impl(context, component, takeDownType):
     bringdown_impl(context, component, takeDownType)
 
-@given(u'"{component}" is taken down')
+@when(u'"{component}" is taken down')
 def bringdown_impl(context, component, takeDownType="stop"):
     assert component in context.composition.collectServiceNames(), "Unknown component '{0}'".format(component)
     if takeDownType=="stop":
@@ -138,27 +138,27 @@ def bringdown_impl(context, component, takeDownType="stop"):
     else:
         assert False, "takedown process undefined: {}".format(context.takeDownType)
 
-@given(u'the initial leader peer of "{org}" comes back up by doing a {bringUpType}')
+@when(u'the initial leader peer of "{org}" comes back up by doing a {bringUpType}')
 def step_impl(context, org, bringUpType):
     bringup_impl(context, endorser_util.get_initial_leader(context, org), bringUpType)
 
-@given(u'the initial leader peer of "{org}" comes back up')
+@when(u'the initial leader peer of "{org}" comes back up')
 def step_impl(context, org):
     bringup_impl(context, endorser_util.get_initial_leader(context, org))
 
-@given(u'the initial non-leader peer of "{org}" comes back up by doing a {bringUpType}')
+@when(u'the initial non-leader peer of "{org}" comes back up by doing a {bringUpType}')
 def step_impl(context, org, bringUpType):
     bringup_impl(context, endorser_util.get_initial_non_leader(context, org), bringUpType)
 
-@given(u'the initial non-leader peer of "{org}" comes back up')
+@when(u'the initial non-leader peer of "{org}" comes back up')
 def step_impl(context, org):
     bringup_impl(context, endorser_util.get_initial_non_leader(context, org))
 
-@given(u'"{component}" comes back up by doing a {bringUpType}')
+@when(u'"{component}" comes back up by doing a {bringUpType}')
 def step_impl(context, component, bringUpType):
     bringup_impl(context, component, bringUpType)
 
-@given(u'"{component}" comes back up')
+@when(u'"{component}" comes back up')
 def bringup_impl(context, component, bringUpType="start"):
     assert component in context.composition.collectServiceNames(), "Unknown component '{0}'".format(component)
     if bringUpType=="start":
@@ -181,6 +181,14 @@ def start_network_impl(context, ordererType):
 @when(u'I start a fabric network')
 def step_impl(context):
     start_network_impl(context, "solo")
+
+@then(u'the initial non-leader peer of "{org}" has become the leader')
+def step_impl(context, org):
+    if not hasattr(context, 'initial_non_leader'):
+        assert False, "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
+    else:
+        if not endorser_util.is_in_log(context.initial_non_leader[org], "Becoming a leader"):
+            assert False, "Error: initial non-lerader peer has not become leader."
 
 @then(u'there are no errors')
 def step_impl(context):

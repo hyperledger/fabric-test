@@ -279,9 +279,9 @@ Scenario Outline: FAB-3888: State Transfer Test using marbles02 chaincode fabric
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble111"]
   Then a user receives a success response of {"docType":"marble","name":"marble111","color":"pink","size":55,"owner":"jane"}
 
- Given the initial non-leader peer of "org1" is taken down
+ When the initial non-leader peer of "org1" is taken down
 
-  When a user invokes on the chaincode named "mycc" with args ["transferMarble","marble111","jerry"] on the initial leader peer of "org1"
+  And a user invokes on the chaincode named "mycc" with args ["transferMarble","marble111","jerry"] on the initial leader peer of "org1"
   And I wait "5" seconds
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble111"] on the initial leader peer of "org1"
   Then a user receives a success response of {"docType":"marble","name":"marble111","color":"pink","size":55,"owner":"jerry"} from the initial leader peer of "org1"
@@ -291,7 +291,7 @@ Scenario Outline: FAB-3888: State Transfer Test using marbles02 chaincode fabric
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble111"] on the initial leader peer of "org1"
   Then a user receives a success response of {"docType":"marble","name":"marble111","color":"pink","size":55,"owner":"tom"} from the initial leader peer of "org1"
 
-  Given the initial non-leader peer of "org1" comes back up
+  When the initial non-leader peer of "org1" comes back up
 
   And I wait "30" seconds
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble111"] on the initial non-leader peer of "org1"

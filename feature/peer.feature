@@ -22,12 +22,12 @@ Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query
   And a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 990
 
-  Given "peer0.org2.example.com" is taken down
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+  When "peer0.org2.example.com" is taken down
+  And a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
   And I wait "5" seconds
-  Given "peer0.org2.example.com" comes back up
+  And "peer0.org2.example.com" comes back up
   And I wait "10" seconds
-  When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
+  And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
   Then a user receives a success response of 980 from "peer0.org2.example.com"
   Examples:
     | type  | waitTime |
