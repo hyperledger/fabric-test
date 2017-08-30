@@ -13,22 +13,23 @@ The network Launcher can execute the following task:
 
 The usages of each script is given below so that they can be executed separately as needed.  However, the script, networkLauncher.sh, is designed to execute all tasks listed above sequentially.
 
-##Code Base
+## Code Base
 
 - fabric commit level: v1.0.0
 - fabric-sdk-node commit level: v1.0.0
 - fabric-ca commit level: v1.0.0
 
 
-#NetworkLauncher.sh
+# networkLauncher.sh
 
 This is the main script to execute all tasks.
 
 
-##Usage:
+## Usage:
 
-    ./NetworkLauncher.sh [opt] [value]
+    ./networkLauncher.sh [opt] [value]
        options:
+         -a: network action [up|down], default=up
          -x: number of CAs
          -d: ledger database type, default=goleveldb
          -f: profile string, default=test
@@ -47,15 +48,38 @@ This is the main script to execute all tasks.
          -S: TLS enablement [enabled|disabled], default=disabled
          -C: company name, default=example.com
 
+Note that when `-a down` is invoked to clean network, the company name is used as a key word in searching for docker images to be deleted.  The company name can be set using `-C`. The default company name is `example.com`.
 
-##Example:
+## Example:
+
+The following commands will clean a network with containers and docker images:
+
+    ./networkLauncher.sh -a down -C example.com
+    ./networkLauncher.sh -a down
+
+The above commands invoke cleanNetwork.sh.
+
+The following commands will generate a network:
+
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35
-    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35
+    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w localhost
     ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled
 
 The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.
 
-#cryptogen
+# cleanNetwork.sh
+
+The script is used to clean a network.
+
+## Usage
+
+    ./cleanNetwork.sh [docker image key word]
+
+## Example
+
+    ./cleanNetwork.sh sample
+
+# cryptogen
 
 The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen and is used to create crypto
 
@@ -63,17 +87,18 @@ The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryp
     apt-get install libltdl-dev
     go build
 
-##Usage
+## Usage
+
     ./cryptogen generate --output=<cryptogen dir> --config=<crypto config>
 
 
+# gen\_configtx_cfg.sh
 
-#gen_cfgtx_x.sh
+The script is used to create configtx.yaml.
 
-The script is used to create configtx.yml.
+## Usage
 
-##Usage
-    ./gen_cfgtx_x.sh [opt] [value]
+    ./gen_configtx_cfg.sh [opt] [value]
 
     options:
        -o: number of orderers, default=1
@@ -87,13 +112,15 @@ The script is used to create configtx.yml.
        -w: host ip 1, default=0.0.0.0
 
 
-##Example:"
-    ./gen_cfgtx.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
+## Example:
+
+    ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
 
 
 
-#configtx.yaml-in
-This is a sample of configtx.yaml to be used to generate the desired configtx.yml. The key words in the sample file are:
+# configtx.yaml-in
+
+This is a sample of configtx.yaml to be used to generate the desired configtx.yaml. The key words in the sample file are:
 
 + &ProfileString: the profile string
 + *Org0: used by the script to list all organizations
@@ -101,10 +128,12 @@ This is a sample of configtx.yaml to be used to generate the desired configtx.ym
 + &Org0: used for the list of peers in organization
 + OrdererType: used for the orderer service type
 
-#gen_network.sh
+# gen_network.sh
+
 The script is used to create a docker-compose.yml and launch the network with specified number of peers, orderers, orderer service type etc.
 
-##Usage
+## Usage
+
     gen_network.sh [opt] [value]
 
     options:
@@ -128,11 +157,12 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -c: batch timeout [2s|max secs before send an unfilled batch]
 
 
-##Example
+## Example
+
     ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 
-##IP address and port
+## IP address and port
 
 All IP addresses and ports of orderer, peer, event hub are specified in network.json.
 
@@ -148,7 +178,7 @@ All IP addresses and ports of orderer, peer, event hub are specified in network.
     "evtPort": "9061",
 
 
-##Images
+## Images
 
 All images (peer, kafka, and orderer etc) path (location) are specified in network.json
 
