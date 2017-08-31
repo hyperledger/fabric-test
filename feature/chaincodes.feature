@@ -11,7 +11,8 @@ Feature: FAB-5384 Chaincode Testing: As a user I want to be able verify that I c
 Scenario Outline: FAB-5797: Test chaincode - fabric/examples/chaincode_example02 deploy, invoke, and query with chaincode in all uppercase chars
     Given I have a bootstrapped fabric network of type <type>
     And I wait "<waitTime>" seconds
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "<ccName>"
+    When a user sets up a channel
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "<ccName>"
     And I wait "5" seconds
     Then the chaincode is deployed
     When a user queries on the chaincode named "<ccName>" with args ["query","a"]
@@ -33,10 +34,12 @@ Examples:
 Scenario: FAB-4703: Test chaincode calling chaincode - fabric/examples/chaincode_example04
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example04" with args ["init","Event","1"] with name "myex04"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example04" with args ["init","Event","1"] with name "myex04"
   And I wait "30" seconds
   Then the chaincode is deployed
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_a" on channel "channel2"
+  When a user sets up a channel named "channel2"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_a" on channel "channel2"
   And I wait "20" seconds
   Then the chaincode is deployed
   When a user queries on the chaincode named "myex02_a" on channel "channel2" with args ["query","a"]
@@ -51,10 +54,12 @@ Scenario: FAB-4717: chaincode-to-chaincode testing passing in channel name as a 
 #chaincode_example02 and chaincode_example05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
   And I wait "30" seconds
   Then the chaincode is deployed
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  When a user sets up a channel named "channel2"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
   And I wait "30" seconds
   Then the chaincode is deployed
   When a user queries on the chaincode named "myex02_b" on channel "channel2" with args ["query","a"]
@@ -67,10 +72,12 @@ Scenario: FAB-4718: Test chaincode calling chaincode -ve testcase passing an emp
 #chaincode_example02 and chaincode_example05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
   And I wait "30" seconds
   Then the chaincode is deployed
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  When a user sets up a channel named "channel2"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
   And I wait "30" seconds
   Then the chaincode is deployed
   When a user queries on the chaincode named "myex02_b" on channel "channel2" with args ["query","a"]
@@ -84,7 +91,8 @@ Scenario: FAB-5384: Test chaincode calling chaincode - fabric/examples/chaincode
 #chaincode_example02 and chaincode_example05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
   And I wait "30" seconds
   Then the chaincode is deployed
   When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
@@ -100,7 +108,8 @@ Scenario: FAB-4720: Test chaincode calling chaincode -ve test case passing an in
 #chaincode_example02 and chaincode_example05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
   And I wait "30" seconds
   Then the chaincode is deployed
   When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
@@ -117,7 +126,8 @@ Scenario: FAB-4722: chaincode-to-chaincode testing passing an empty string for c
 #chaincode_example02 and chaincode_example05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
   And I wait "30" seconds
   Then the chaincode is deployed
   When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
@@ -134,7 +144,8 @@ Scenario Outline: FAB-5789: Test chaincode fabric/examples/marbles02
 
   Given I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
 
@@ -191,7 +202,8 @@ Scenario Outline: FAB-5790: Test chaincode fabric/examples/marbles02
   #includes tests for : initMarble, readMarble, deleteMarble, getHistoryForMarble, getMarblesByRange
   Given I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
 
@@ -252,7 +264,8 @@ Scenario Outline: FAB-3888: State Transfer Test using marbles02 chaincode fabric
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
 
@@ -294,7 +307,8 @@ Scenario Outline: FAB-3888: State Transfer Test using marbles02 chaincode fabric
 Scenario Outline: FAB-5791: Chaincode to test shim interface API
   Given I have a bootstrapped fabric network of type <type>
   And I wait "60" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
   And I wait "5" seconds
