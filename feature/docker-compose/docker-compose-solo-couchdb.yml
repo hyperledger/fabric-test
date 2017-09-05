@@ -44,9 +44,11 @@ services:
         container_name: peer0.org1.example.com
         image: hyperledger/fabric-peer
         environment:
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb01:5984
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            - CORE_PEER_CHAINCODELISTENADDRESS=peer0.org1.example.com:7052
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
+            - CORE_PEER_CHAINCODELISTENADDRESS=peer0.org1.example.com:7052
             - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer0.org1.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
@@ -55,17 +57,19 @@ services:
             - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
-            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org1.example.com
             - CORE_LOGGING_LEVEL=DEBUG
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
         volumes:
             - /var/run/:/host/var/run/
+            - ../../../common:/opt/gopath/src/github.com/hyperledger/fabric/common
+            - ../../../vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
             - ../configs:/var/hyperledger/configs
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/var/hyperledger/tls
@@ -74,9 +78,22 @@ services:
             - '7053'
         depends_on:
             - orderer0.example.com
+            - couchdb01
         links:
             - orderer0.example.com
         command: peer node start
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
+    couchdb01:
+        container_name: couchdb01
+        image: hyperledger/fabric-couchdb
+        # Comment/Uncomment the port mapping if you want to hide/expose the CouchDB service,
+        # for example map it to utilize Fauxton User Interface in dev environments.
+        ports:
+          - "5984:5984"
         networks:
           behave:
              aliases:
@@ -86,9 +103,11 @@ services:
         image: hyperledger/fabric-peer
         container_name: peer0.org2.example.com
         environment:
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb02:5984
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            - CORE_PEER_CHAINCODELISTENADDRESS=peer0.org2.example.com:7052
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
+            - CORE_PEER_CHAINCODELISTENADDRESS=peer0.org2.example.com:7052
             - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer0.org2.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
@@ -97,17 +116,19 @@ services:
             - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
-            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org2.example.com
             - CORE_LOGGING_LEVEL=DEBUG
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
         volumes:
             - /var/run/:/host/var/run/
+            - ../../../common:/opt/gopath/src/github.com/hyperledger/fabric/common
+            - ../../../vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
             - ../configs:/var/hyperledger/configs
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/var/hyperledger/tls
@@ -117,9 +138,20 @@ services:
         depends_on:
             - orderer0.example.com
             - peer0.org1.example.com
+            - couchdb02
         links:
             - orderer0.example.com
         command: peer node start
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
+    couchdb02:
+        container_name: couchdb02
+        image: hyperledger/fabric-couchdb
+        ports:
+          - "6984:5984"
         networks:
           behave:
              aliases:
@@ -129,9 +161,11 @@ services:
         image: hyperledger/fabric-peer
         container_name: peer1.org1.example.com
         environment:
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb11:5984
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            - CORE_PEER_CHAINCODELISTENADDRESS=peer1.org1.example.com:7052
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
+            - CORE_PEER_CHAINCODELISTENADDRESS=peer1.org1.example.com:7052
             - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer1.org1.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
@@ -139,17 +173,19 @@ services:
             - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
-            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org1.example.com
             - CORE_LOGGING_LEVEL=DEBUG
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
         volumes:
             - /var/run/:/host/var/run/
+            - ../../../common:/opt/gopath/src/github.com/hyperledger/fabric/common
+            - ../../../vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
             - ../configs:/var/hyperledger/configs
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/tls:/var/hyperledger/tls
@@ -159,9 +195,20 @@ services:
         depends_on:
             - orderer0.example.com
             - peer0.org1.example.com
+            - couchdb11
         links:
             - orderer0.example.com
         command: peer node start
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
+    couchdb11:
+        container_name: couchdb11
+        image: hyperledger/fabric-couchdb
+        ports:
+          - "7984:5984"
         networks:
           behave:
              aliases:
@@ -171,9 +218,11 @@ services:
         image: hyperledger/fabric-peer
         container_name: peer1.org2.example.com
         environment:
+            - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+            - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb12:5984
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            - CORE_PEER_CHAINCODELISTENADDRESS=peer1.org2.example.com:7052
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
+            - CORE_PEER_CHAINCODELISTENADDRESS=peer1.org2.example.com:7052
             - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - CORE_PEER_ID=peer1.org2.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
@@ -181,17 +230,19 @@ services:
             - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:7051
             - CORE_PEER_GOSSIP_ORGLEADER=false
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
-            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
             - CORE_PEER_LOCALMSPID=org2.example.com
             - CORE_LOGGING_LEVEL=DEBUG
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
         volumes:
             - /var/run/:/host/var/run/
+            - ../../../common:/opt/gopath/src/github.com/hyperledger/fabric/common
+            - ../../../vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
             - ../configs:/var/hyperledger/configs
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/tls:/var/hyperledger/tls
@@ -201,9 +252,20 @@ services:
         depends_on:
             - orderer0.example.com
             - peer0.org2.example.com
+            - couchdb12
         links:
             - orderer0.example.com
         command: peer node start
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
+    couchdb12:
+        container_name: couchdb12
+        image: hyperledger/fabric-couchdb
+        ports:
+          - "8984:5984"
         networks:
           behave:
              aliases:
@@ -217,6 +279,7 @@ services:
             - GOPATH=/opt/gopath
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_LOGGING_LEVEL=DEBUG
+            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key

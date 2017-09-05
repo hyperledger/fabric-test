@@ -1,16 +1,7 @@
-# Copyright IBM Corp. 2017 All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Copyright IBM Corp. All Rights Reserved.
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 #
 
 Feature: Orderer Service
@@ -66,8 +57,8 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
     Then the Org1 is able to connect to the kafka cluster
     And the orderer functions successfully
 
-@skip
-Scenario: FAB-3851: Message Payloads Greater than 1MB
+@daily
+Scenario: Message Payloads Less than 1MB
     Given I have a bootstrapped fabric network
     When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
     And I wait "30" seconds
@@ -105,12 +96,18 @@ Scenario: FAB-3851: Message Payloads Greater than 1MB
     Then a user receives a response containing a value of length 130000
     And a user receives a response with the random value
     #
-    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130734
+    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130610
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","g"]
-    Then a user receives a response containing a value of length 130734
+    Then a user receives a response containing a value of length 130610
     And a user receives a response with the random value
     #
+#    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130734
+#    And I wait "5" seconds
+#    And a user queries on the chaincode named "mycc" with args ["get","g"]
+#    Then a user receives a response containing a value of length 130734
+#    And a user receives a response with the random value
+#    #
 #    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random_value}"] of length 1048576
 #    And I wait "30" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","h"]

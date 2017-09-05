@@ -15,6 +15,7 @@
 import os
 import sys
 import datetime
+import compose_util
 
 def changeFormat(value):
     '''
@@ -30,3 +31,12 @@ def changeFormat(value):
        elif "hour" in toChangeUnits[1]:
            changedString = toChangeUnits[0]+"h"
     return changedString
+
+def convertBoolean(boolean):
+    return str(boolean).lower()
+
+def enableTls(context, tlsEnabled):
+    if not hasattr(context, "composition"):
+        context.composition = compose_util.Composition(context, startContainers=False)
+    context.composition.environ["ORDERER_GENERAL_TLS_ENABLED"] = "true"
+    context.composition.environ["CORE_PEER_TLS_ENABLED"] = "true"

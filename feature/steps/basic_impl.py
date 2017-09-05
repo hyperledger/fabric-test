@@ -1,22 +1,14 @@
-# Copyright IBM Corp. 2017 All Rights Reserved.
 #
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
+# Copyright IBM Corp. All Rights Reserved.
 #
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: Apache-2.0
 #
 
 from behave import *
 import time
 import os
 import uuid
+import common_util
 import compose_util
 import config_util
 import endorser_util
@@ -39,16 +31,23 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
         context.composition.up()
     context.compose_containers = context.composition.collectServiceNames()
 
-@given(u'I have a bootstrapped fabric network')
-def step_impl(context):
-    bootstrapped_impl(context, "solo")
-
-@given(u'I have a bootstrapped fabric network of type {ordererType}')
-def bootstrapped_impl(context, ordererType):
+def bootstrapped_impl(context, ordererType, database, tlsEnabled):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
-    context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)
+
+    # Get the correct composition file
+    if database == "leveldb":
+        context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)
+    else:
+        context.composeFile = "%s/docker-compose/docker-compose-%s-%s.yml" % (curpath, ordererType, database)
     assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
+
+    # Should TLS be enabled
+    context.tls = tlsEnabled
+    if tlsEnabled:
+        common_util.enableTls(context, tlsEnabled)
+
+    # Perform bootstrap process
     context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
     channelID = endorser_util.SYS_CHANNEL_ID
     if hasattr(context, "composition"):
@@ -58,6 +57,54 @@ def bootstrapped_impl(context, ordererType):
     config_util.generateCrypto(context)
     config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
     compose_impl(context, context.composeFile, projectName=context.projectName)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database} with tls')
+def step_impl(context, ordererType, database):
+    bootstrapped_impl(context, ordererType, database, True)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database} without tls')
+def step_impl(context, ordererType, database):
+    bootstrapped_impl(context, ordererType, database, False)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database}')
+def step_impl(context, ordererType, database):
+    bootstrapped_impl(context, ordererType, database, False)
+
+@given(u'I have a bootstrapped fabric network using state-database {database} with tls')
+def step_impl(context, database):
+    bootstrapped_impl(context, "solo", database, True)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} with tls')
+def step_impl(context, ordererType):
+    bootstrapped_impl(context, ordererType, "leveldb", True)
+
+@given(u'I have a bootstrapped fabric network with tls')
+def step_impl(context):
+    bootstrapped_impl(context, "solo", "leveldb", True)
+
+@given(u'I have a bootstrapped fabric network using state-database {database} without tls')
+def step_impl(context, database):
+    bootstrapped_impl(context, "solo", database, False)
+
+@given(u'I have a bootstrapped fabric network using state-database {database}')
+def step_impl(context, database):
+    bootstrapped_impl(context, "solo", database, False)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} without tls')
+def step_impl(context, ordererType):
+    bootstrapped_impl(context, ordererType, "leveldb", False)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType}')
+def step_impl(context, ordererType):
+    bootstrapped_impl(context, ordererType, "leveldb", False)
+
+@given(u'I have a bootstrapped fabric network without tls')
+def step_impl(context):
+    bootstrapped_impl(context, "solo", "leveldb", False)
+
+@given(u'I have a bootstrapped fabric network')
+def step_impl(context):
+    bootstrapped_impl(context, "solo", "leveldb", False)
 
 @given(u'the initial leader peer of "{org}" is taken down by doing a {takeDownType}')
 def step_impl(context, org, takeDownType):
