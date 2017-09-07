@@ -60,7 +60,8 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
 @daily
 Scenario: Message Payloads Less than 1MB
     Given I have a bootstrapped fabric network
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
+    When a user sets up a channel
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
     And I wait "30" seconds
     # 1K
     And a user invokes on the chaincode named "mycc" with random args ["put","a","{random_value}"] of length 1024
@@ -128,7 +129,8 @@ Scenario: Message Payloads Less than 1MB
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     And I wait "60" seconds
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    When a user sets up a channel
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
     And I wait "30" seconds
     Then the chaincode is deployed
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]

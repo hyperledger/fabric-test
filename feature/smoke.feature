@@ -22,7 +22,8 @@ Scenario: Setting of environment variables
 @smoke
 Scenario: Basic operations
     Given I have a bootstrapped fabric network
-    When a user deploys chaincode
+    When a user sets up a channel
+    And a user deploys chaincode
     Then the chaincode is deployed
 
 @smoke

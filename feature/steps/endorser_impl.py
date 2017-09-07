@@ -24,6 +24,22 @@ import endorser_util
 import config_util
 
 
+@when(u'a user sets up a channel named "{channelId}"')
+def setup_channel_impl(context, channelId):
+    # Be sure there is a transaction block for this channel
+    config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
+    orderers = endorser_util.get_orderers(context)
+    peers = endorser_util.get_peers(context)
+
+    endorser_util.create_channel(context, orderers, channelId)
+    endorser_util.join_channel(context, peers, orderers, channelId)
+
+
+@when(u'a user sets up a channel')
+def step_impl(context):
+    setup_channel_impl(context, endorser_util.TEST_CHANNEL_ID)
+
+
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
 def deploy_impl(context, path, args, name, containerName, channel):
     # Be sure there is a transaction block for this channel
@@ -190,15 +206,31 @@ def step_impl(context, name):
 def step_impl(context):
     invokes_impl(context, 1, endorser_util.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
 
-@when(u'a user creates a channel "{channelID}" on peer "{peer}"')
-def step_impl(context, channelID, peer):
+@when(u'a user creates a channel named "{channelID}"')
+def create_channel_impl(context, channelID):
+    # Be sure there is a transaction block for this channel
+    config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context)
     orderers = endorser_util.get_orderers(context)
-    endorser_util.create_channel(context, [peer], orderers, channelID)
+    endorser_util.create_channel(context, orderers, channelID)
 
-@when(u'a user joins a channel "{channelID}" on peer "{peer}"')
-def step_impl(context, channelID, peer):
+@when(u'a user creates a channel')
+def step_impl(context):
+    create_channel_impl(context, endorser_util.TEST_CHANNEL_ID)
+
+@when(u'a user makes all peers join the channel "{channelId}"')
+def join_channel_impl(context, channelId):
+    peers = endorser_util.get_peers(context)
     orderers = endorser_util.get_orderers(context)
-    endorser_util.join_channel(context, [peer], orderers, channelID)
+    endorser_util.join_channel(context, peers, orderers, channelId)
+
+@when(u'a user makes all peers join the channel')
+def step_impl(context):
+    join_channel_impl(context, endorser_util.TEST_CHANNEL_ID)
+
+@when(u'a user makes peer "{peer}" join the channel "{channelId}"')
+def step_impl(context, channelId, peer):
+    orderers = endorser_util.get_orderers(context)
+    endorser_util.join_channel(context, [peer], orderers, channelId)
 
 @when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}"')
 def step_impl(context, channelID, peer):
