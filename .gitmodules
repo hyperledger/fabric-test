@@ -7,3 +7,6 @@
 [submodule "cello"]
 	path = cello
 	url = https://gerrit.hyperledger.org/r/cello
+[submodule "fabric-sdk-node"]
+	path = fabric-sdk-node
+	url = https://gerrit.hyperledger.org/r/fabric-sdk-node
