@@ -85,6 +85,12 @@ if ( process.env.CONFIGTX_ORDERER_BATCHTIMEOUT != null ) {
 console.log('ord_env_name: ', ord_env_name.length, ord_env_name);
 console.log('ord_env_val: ', ord_env_val.length, ord_env_val);
 
+if ( process.env.HOSTCONFIG_NETWORKMODE != null ) {
+    console.log(' HOSTCONFIG_NETWORKMODE= ', process.env.HOSTCONFIG_NETWORKMODE);
+    HOSTCONFIG_NETWORKMODE=process.env.HOSTCONFIG_NETWORKMODE;
+}
+console.log('HOSTCONFIG_NETWORKMODE: ', HOSTCONFIG_NETWORKMODE);
+
 // Peer environment var
 var peer_env_name=[];
 var peer_env_val=[];
@@ -693,6 +699,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_ADDRESS' ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + vp0Addr +':'+ tmp_port + '\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE' ) {
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + HOSTCONFIG_NETWORKMODE +'_default' + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_BOOTSTRAP' ) {
                                         if ( v != 0 ) {
