@@ -51,6 +51,7 @@ services:
             - CORE_PEER_ID=peer0.org1.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
             - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org1.example.com:7051
             # Set this peer as an anchor peer in configtx.yaml
             - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
             - CORE_PEER_GOSSIP_ORGLEADER=false
@@ -93,6 +94,7 @@ services:
             - CORE_PEER_ID=peer0.org2.example.com
             - CORE_PEER_ADDRESSAUTODETECT=true
             - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+            - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.example.com:7051
             # Set this peer as an anchor peer in configtx.yaml
             - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
             - CORE_PEER_GOSSIP_ORGLEADER=false
