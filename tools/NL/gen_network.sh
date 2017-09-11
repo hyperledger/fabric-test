@@ -156,6 +156,11 @@ fi
 ##OSName=`uname`
 ##echo "Operating System: $OSName"
 
+# get current dir for CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
+CWD=${PWD##*/}
+HOSTCONFIG_NETWORKMODE=$(echo $CWD | awk '{print tolower($CWD)}')
+export HOSTCONFIG_NETWORKMODE=$HOSTCONFIG_NETWORKMODE
+echo "HOSTCONFIG_NETWORKMODE: $HOSTCONFIG_NETWORKMODE"
 
 dbType=`echo "$db" | awk '{print tolower($0)}'`
 echo "action=$Req nPeerPerOrg=$nPeerPerOrg nBroker=$nBroker nOrderer=$nOrderer dbType=$dbType"
