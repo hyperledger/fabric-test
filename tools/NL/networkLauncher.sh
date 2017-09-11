@@ -7,8 +7,8 @@
 #
 
 # default directories
-FabricDir="$GOPATH/src/github.com/hyperledger/fabric"
-MSPDir="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen"
+FabricDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric"
+MSPDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
@@ -29,7 +29,7 @@ function printHelp {
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -w: host ip, default=0.0.0.0"
-   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/"
+   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS enablement [enabled|disabled], default=disabled"
    echo "    -C: company name, default=example.com "
@@ -55,12 +55,12 @@ nPeersPerOrg=1
 ledgerDB="goleveldb"
 hashType="SHA2"
 secType="256"
-CryptoBaseDir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
+TLSEnabled="disabled"
 nChannel=1
 HostIP1="0.0.0.0"
 comName="example.com"
 networkAction="up"
-BuildDir=$GOPATH/src/github.com/hyperledger/fabric/build/bin
+BuildDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/build/bin
 
 while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
   case $opt in
@@ -147,10 +147,7 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
 
     S)
       TLSEnabled=`echo $OPTARG | tr [A-Z] [a-z]`
-      if [ $TLSEnabled == "enabled" ]; then
-          TLSDir=$CryptoBaseDir"/crypto-config"
-      fi
-      echo "TLSDir: $TLSDir"
+      echo "TLSEnabled: $TLSEnabled"
       ;;
 
     C)
@@ -214,13 +211,14 @@ echo "        ####################################################### "
 echo "generate crypto ..."
 CRYPTOEXE=$BuildDir/cryptogen
 CRYPTOCFG=$CWD/crypto-config.yaml
-cd $CryptoBaseDir
+cd $MSPDir
 # remove existing crypto-config
 rm -rf crypto-config
 echo "current working directory: $PWD"
 if [ ! -f $CRYPTOEXE ]; then
 echo "build $CRYPTOEXE "
     cd $FabricDir
+    echo "current working directory: $PWD"
     make cryptogen
 fi
 cd $CWD
@@ -284,10 +282,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir"
-if [ -z $TLSDir ]; then
-    ./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -C $comName
-else
-    ./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSDir -C $comName
-fi
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSEnabled"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -C $comName
 

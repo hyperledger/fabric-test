@@ -32,7 +32,7 @@ function printHelp {
    echo "    -C: company name, default=example.com"
    echo " "
    echo "Example:"
-   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
+   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
@@ -92,7 +92,7 @@ peersPerOrg=1
 hashType="SHA2"
 SecType="256"
 PROFILE_STRING="testOrg"
-MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
 comName="example.com"
 
 k=0
