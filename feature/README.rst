@@ -45,7 +45,7 @@ Ensure that you have Docker for `Linux`_, `Mac`_ or `Windows`_ 1.12 or higher pr
 .. _Mac: https://docs.docker.com/engine/installation/mac/
 .. _Windows: https://docs.docker.com/engine/installation/windows/
 
-You can install Behave and additional packages either using the ``scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager) or following the links for your specific OS environment.
+You can install Behave and additional packages either using the ``fabric/scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager) or following the links for your specific OS environment.
     * `pip`_
     * `python-setuptools`_
     * `python-dev`_
@@ -54,6 +54,9 @@ You can install Behave and additional packages either using the ``scripts/instal
     * `google`_
     * `protobuf`_
     * `pyyaml`_
+
+In addition, you should also install the following packages using `pip`_.
+    * `pykafka`_
 
 .. _pip: https://packaging.python.org/installing/#requirements-for-installing-packages
 .. _python-setuptools: https://packaging.python.org/installing/
@@ -68,9 +71,11 @@ You can install Behave and additional packages either using the ``scripts/instal
 The following repositories are dependencies and are included as submodules at the designated locations
     * `hyperledger-fabric`_: /path/to/fabric-test/fabric
     * `hyperledger-fabric-ca`_: /path/to/fabric-test/fabric-ca
+    * `cello`_: /path/to/fabric-test/cello
 
 .. _hyperledger-fabric: https://github.com/hyperledger/fabric
 .. _hyperledger-fabric-ca: https://github.com/hyperledger/fabric-ca
+.. _cello: https://github.com/hyperledger/cello
 
 ================
 Using VirtualEnv

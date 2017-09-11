@@ -5,37 +5,36 @@ You are in the right place if you are interested in testing the Hyperledger Fabr
 ## Getting Started
 Here are some recommended setup steps.
 
-#### Clone the repositories.
+#### Clone the repositories
+The `fabric-test` repository contains submodules of other Hyperledger Fabric projects that are used in testing.
 
-```
-  cd $GOPATH/github.com/hyperledger
-  clone the fabric-ca
-  clone the fabric
-  clone the cello
-  clone the fabric-test
-```
+The following repositories will need to be cloned separately with their corresponding images built.
+* fabric
+    * fabric-orderer
+    * fabric-peer
+    * fabric-kafka
+    * fabric-zookeeper
+    * fabric-tools
+    * fabric-couchdb
+    * fabric-testenv
+* fabric-ca
+    * fabric-ca
+
 
 #### Update git submodules
-
-Execute this command the first time after cloning the repo.
-
+The git submodules need to be initialized when the repository is first cloned. Use the following command.
 ```
   cd fabric-test
   git submodule update --init --recursive
 ```
+**When making changes for committing to a submodule, make the change in the actual repository and not in the submodule. This makes managing changes much easier when working with submodules.**
 
-All subsequent times, to update, execute:
-
+When updating the git submodules with a more recent commit sha from the repository master, use the following command:
 ```
-  cd $GOPATH/github.com/hyperledger/fabric-test
-  git submodule foreach git pull origin master
+git submodule foreach git pull origin master
 ```
 
-#### Get and build the latest code in the targeted repositories
-Note: Currently, this must be done in the corresponding repos, outside of this fabric-test repo (not in the fabric-test submodules).
-We have hopeful plans to modify the makefiles in the targeted repositories to allow building them from here,
-which would reduce inconsistencies and complexity by eliminating the necessary coordination of the commit levels used to
-build the targeted repositories and the commit levels of those repositories that are set here.
+#### Get and build the latest code
 
 ```
   cd ../fabric-ca
@@ -47,24 +46,29 @@ build the targeted repositories and the commit levels of those repositories that
   # cello instructions coming soon  #WIP
 ```
 
-## Run some tests
+## Tools Used to Execute Tests
 
-#### Run test suites or individual tests in behave
+#### Behave - functional and system tests
+Please see the README located in the `feature` directory for more detailed information for using and contributing to the Fabric system behave framework.
 
-```
-  cd $GOPATH/hyperledger/fabric-test/feature
-  behave -t smoke
-  behave -t daily
-  behave -n 4770
-```
+The tests that utilize this framework cover atleast one of the following categories:
+* basic functionality
+* feature behaviors
+* configuration settings - both network and component based
+* negative testing
+* upgrades and fallbacks
+* chaincode API testing
 
-#### Start a network using networkLauncher tool, save logs, and clean up afterwards
+The following are not covered in using this tool:
+* scalability
+* performance
+* long running tests
+* stress testing
+* timed tests
 
-```
-  cd $GOPATH/hyperledger/fabric-test/tools/NL
-  ./networkLauncher.sh -h
-  ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled
-  ./savelogs.sh   ### script to save all logs ### WIP ###
-  ./cleanup.sh    ### script to tear down network and remove artifacts ### WIP ###
-```
+#### NetworkLauncher - dynamically build a Fabric network
+Please see the README located in the `tools/NL` directory for more detailed information for using the Networker Launcher to dynamically build a Fabric network.
 
+
+.. Licensed under Creative Commons Attribution 4.0 International License
+   https://creativecommons.org/licenses/by/4.0/
