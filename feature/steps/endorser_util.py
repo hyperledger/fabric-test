@@ -99,7 +99,7 @@ def instantiate_chaincode(context, chaincode, peers):
     return output
 
 
-def create_channel(context, containers, orderers, channelId=TEST_CHANNEL_ID):
+def create_channel(context, orderers, channelId=TEST_CHANNEL_ID):
     configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
     setup = get_env_vars(context, "peer0.org1.example.com")
     command = ["peer", "channel", "create",
@@ -248,9 +248,7 @@ def deploy_chaincode(context, chaincode, containers, channelId=TEST_CHANNEL_ID):
     chaincode.update({"orderers": orderers,
                       "channelID": channelId,
                       })
-    create_channel(context, containers, orderers, channelId)
     #fetch_channel(context, peers, orderers, channelId)
-    join_channel(context, peers, orderers, channelId)
     install_chaincode(context, chaincode, peers)
     instantiate_chaincode(context, chaincode, containers)
 
