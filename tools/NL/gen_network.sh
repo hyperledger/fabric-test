@@ -20,9 +20,9 @@ function printHelp {
    echo "       -o: number of orderers "
    echo "       -k: number of brokers "
    echo "       -r: number of organiztions "
-   echo "       -S: TLS base directory "
+   echo "       -S: TLS enablement [enabled|disabled], default=disabled "
    echo "       -x: number of ca "
-   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo " "
    echo "    peer environment variables"
@@ -35,8 +35,8 @@ function printHelp {
    echo "       -c: batch timeout [10s|max secs before send an unfilled batch] "
    echo " "
    echo "Example:"
-   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
-   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S /root/gopath/src/github.com/hyperledger/fabric-sdk-node/test/fixtures/tls "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S enabled "
    echo " "
    exit
 }
@@ -44,16 +44,17 @@ function printHelp {
 #init var
 nBroker=0
 nPeerPerOrg=1
-MSPDIR="$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config"
+MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
+TLSEnabled="disabled"
 
 while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     S)
-      TLSDIR=$OPTARG
-      export TLSDIR=$TLSDIR
-      echo "TLSDIR: $TLSDIR"
+      TLSEnabled=$OPTARG
+      export TLSEnabled=$TLSEnabled
+      echo "TLSEnabled: $TLSEnabled"
       ;;
     x)
       nCA=$OPTARG
@@ -81,14 +82,14 @@ while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
       echo "CONFIGTX_ORDERER_BATCHTIMEOUT: $CONFIGTX_ORDERER_BATCHTIMEOUT"
       ;;
     F)
-      SRCMSPDIR=$OPTARG
-      export SRCMSPDIR=$SRCMSPDIR
-      echo "SRCMSPDIR: $SRCMSPDIR"
-      ;;
-    G)
       MSPDIR=$OPTARG
       export MSPDIR=$MSPDIR
       echo "MSPDIR: $MSPDIR"
+      ;;
+    G)
+      SRCMSPDIR=$OPTARG
+      export SRCMSPDIR=$SRCMSPDIR
+      echo "SRCMSPDIR: $SRCMSPDIR"
       ;;
 
     t)
@@ -206,16 +207,26 @@ CWD=$PWD
 echo $CWD
 echo "GOPATH: $GOPATH"
 
+OS=`uname -s`
+
+myOS=$(echo $OS | awk '{print tolower($OS)}')
+if [ $myOS == 'darwin' ]; then
+   sedOpt="-it"
+else
+   sedOpt="-i"
+fi
+echo "OS: $OS, sedOpt: $sedOpt"
+
 for (( i=0; i<$nCA; i++ ))
 do
     j=$[ i + 1 ]
-    Dir=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org$j"."$comName"/ca"
+    Dir=$MSPDIR/crypto-config/peerOrganizations/org$j"."$comName"/ca"
     cd $Dir
     tt=`ls *sk`
 
     cd $CWD
 
-    sed '-i' "s/CA_SK$i/$tt/g" docker-compose.yml
+    sed $sedOpt "s/CA_SK$i/$tt/g" docker-compose.yml
 
 done
 
