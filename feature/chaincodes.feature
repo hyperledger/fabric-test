@@ -6,7 +6,6 @@
 
 Feature: FAB-5384 Chaincode Testing: As a user I want to be able verify that I can execute different chaincodes
 
-
 @daily
 Scenario Outline: FAB-5797: Test chaincode - fabric/examples/chaincode_example02 deploy, invoke, and query with chaincode in all uppercase chars
     Given I have a bootstrapped fabric network of type <type>
@@ -30,8 +29,8 @@ Examples:
     | kafka |    30    |   MYCC    |
     | kafka |    30    | MYcc_Test |
 
-@skip
-Scenario: FAB-4703: Test chaincode calling chaincode - fabric/examples/chaincode_example04
+@daily
+Scenario: FAB-4703: <FAB-5663> Test chaincode calling chaincode - fabric/examples/chaincode_example04
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
   When a user sets up a channel
@@ -48,8 +47,8 @@ Scenario: FAB-4703: Test chaincode calling chaincode - fabric/examples/chaincode
   Then a user receives a success response of 1000
 
 
-@skip
-Scenario: FAB-4717: chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05
+@daily
+Scenario: FAB-4717: <FAB-5663> chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05
 #chaincode-to-chaicode testing passing when cc_05 and cc_02 are on different channels
 #chaincode_example02 and chaincode_example05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
@@ -67,8 +66,8 @@ Scenario: FAB-4717: chaincode-to-chaincode testing passing in channel name as a 
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel2"]
   Then a user receives a success response of 3000
 
-@skip
-Scenario: FAB-4718: Test chaincode calling chaincode -ve testcase passing an empty string for channelname- fabric/examples/chaincode_example05
+@daily
+Scenario: FAB-4718: <FAB-5663> Test chaincode calling chaincode -ve testcase passing an empty string for channelname- fabric/examples/chaincode_example05
 #chaincode_example02 and chaincode_example05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
@@ -86,8 +85,8 @@ Scenario: FAB-4718: Test chaincode calling chaincode -ve testcase passing an emp
   Then a user receives a success response of status: 500
   #Then a user receives a success response of 3000
 
-@skip
-Scenario: FAB-5384: Test chaincode calling chaincode - fabric/examples/chaincode_example05
+@daily
+Scenario: FAB-5384: <FAB-5663> Test chaincode calling chaincode - fabric/examples/chaincode_example05
 #chaincode_example02 and chaincode_example05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
@@ -103,8 +102,8 @@ Scenario: FAB-5384: Test chaincode calling chaincode - fabric/examples/chaincode
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum"]
   Then a user receives a success response of 3000
 
-@skip
-Scenario: FAB-4720: Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name in query fabric/examples/chaincode_example05
+@daily
+Scenario: FAB-4720: <FAB-5663> Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name in query fabric/examples/chaincode_example05
 #chaincode_example02 and chaincode_example05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
@@ -121,8 +120,8 @@ Scenario: FAB-4720: Test chaincode calling chaincode -ve test case passing an in
   Then a user receives an error response of status: 500
   #Then a user receives an error response of 3000
 
-@skip
-Scenario: FAB-4722: chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
+@daily
+Scenario: FAB-4722: <FAB-5663> chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
 #chaincode_example02 and chaincode_example05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
@@ -302,13 +301,12 @@ Scenario Outline: FAB-3888: State Transfer Test using marbles02 chaincode fabric
     | solo  |    20    |
     | kafka |    30    |
 
-
-@skip
+@daily
 Scenario Outline: FAB-5791: Chaincode to test shim interface API
   Given I have a bootstrapped fabric network of type <type>
   And I wait "60" seconds
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric-test/feature/chaincode/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
   And I wait "5" seconds
