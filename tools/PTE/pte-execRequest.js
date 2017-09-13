@@ -211,7 +211,7 @@ function getMoveRequest() {
 
     if ( inv_m == nRequest ) {
         if (invokeCheck.toUpperCase() == 'TRUE') {
-            logger.info('request_invoke: ', request_invoke);
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: ', Nid, channel.getName(), org, pid, request_invoke);
         }
     }
 
@@ -1385,6 +1385,10 @@ function invoke_move_mix(freq) {
 
     var t1 = new Date().getTime();
     getMoveRequest();
+
+    if (mixQuery.toUpperCase() == 'TRUE') {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] invoke request:', Nid, channelName, org, pid, request_invoke);
+    }
 
     channel.sendTransactionProposal(request_invoke)
     .then((results) => {
