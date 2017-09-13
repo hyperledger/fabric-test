@@ -1,5 +1,8 @@
 Welcome to fabric-test
 -------
+
+[![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-test-merge-x86_64)](https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-merge-x86_64/)
+
 You are in the right place if you are interested in testing the Hyperledger Fabric and related repositories.
 
 ## Getting Started
@@ -19,7 +22,10 @@ The following repositories will need to be cloned separately with their correspo
     * fabric-testenv
 * fabric-ca
     * fabric-ca
-
+* fabric-sdk-node
+    * fabric-sdk-node
+* fabric-cello
+    * fabric-cello
 
 #### Update git submodules
 The git submodules need to be initialized when the repository is first cloned. Use the following command.
@@ -51,7 +57,7 @@ git submodule foreach git pull origin master
 #### Behave - functional and system tests
 Please see the README located in the `feature` directory for more detailed information for using and contributing to the Fabric system behave framework.
 
-The tests that utilize this framework cover atleast one of the following categories:
+The tests that utilize this framework cover at least one of the following categories:
 * basic functionality
 * feature behaviors
 * configuration settings - both network and component based
@@ -67,8 +73,36 @@ The following are not covered in using this tool:
 * timed tests
 
 #### NetworkLauncher - dynamically build a Fabric network
-Please see the README located in the `tools/NL` directory for more detailed information for using the Networker Launcher to dynamically build a Fabric network.
+Please see the README located in the `tools/NL` directory for more detailed information for using the command line to run the Networker Launcher to dynamically create a Fabric network on a single host machine.
 
+#### Performance Traffic Engine
+Please see the README located in the `tools/PTE` directory for more detailed information for using the Performance Traffic Engine to drive transactions through a Fabric network.
+
+#### Orderer Traffic Engine
+Please see the README located in the `tools/OTE` directory for more detailed information for using the Orderer Traffic Engine to use broadcast clients to drive transactions through an Ordering Service and verify counts with deliver clients.
+
+#### Ledger Traffic Engine
+Please see the README located in the `tools/LTE` directory for more detailed information for using the Ledger Traffic Engine to execute APIs to test the functionality and throughput of Ledger code that exists inside the peer.
+
+#### Cello
+Cello resides in its own repository, fabric-cello: https://www.hyperledger.org/projects/cello. It is an easy-to-use method to create and manage a network on one or more hosts in the cloud.
+
+
+# Continuous Integration
+
+Many tests are now integrated into CI. Every patch set triggers a `fabric-test-verify` job and executes `smoke` tests. Once the build is successfully executed, the CI job sends gerrit a +1 vote back to the corresponding gerrit patch set; otherwise it sends -1. Please see the  fabric-test CI job page:
+
+https://jenkins.hyperledger.org/view/fabric-test/
+
+Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/) to execute `daily` tests as identified in fabric-test/regression/daily/runDailyTests.sh. It clones the latest commits of fabric, fabric-ca, and other required repositories, and performs the following steps:
+
+* Clone the latest commits for repositories being tested, including fabric, fabric-ca, and more
+* Build docker images and binary files
+* Build fabric-ca and fabric peer, orderer, cryptogen and configtxgen
+* Update git submodules and install all the python required modules in virtual env
+* Run `behave daily` tests, and other tests identified in fabric-test/regression/daily/runDailyTests.sh
+* After the tests are completed, the CI job reports test results and populates the Job console. Click here to view the Test Results report display:
+https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
