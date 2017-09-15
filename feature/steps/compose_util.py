@@ -176,7 +176,6 @@ class Composition:
             cmdArgs = command + componentList
             cmd = ["docker"] + cmdArgs
 
-        print("command is: "+ " ".join(cmd))
         try:
             if cmd[0].startswith("docker exec"):
                 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.getEnv())

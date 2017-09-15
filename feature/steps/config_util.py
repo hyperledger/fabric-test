@@ -101,7 +101,7 @@ def inspectOrdererConfig(context, filename):
     testConfigs = makeProjectConfigDir(context)
     try:
         command = ["configtxgen", "-inspectBlock", filename]
-        return subprocess.check_output(command, cwd=testConfigs)
+        return subprocess.check_output(command, cwd=testConfigs, env=os.environ)
     except:
         print("Unable to inspect orderer config data: {0}".format(sys.exc_info()[1]))
 
@@ -109,12 +109,14 @@ def inspectChannelConfig(context, filename):
     testConfigs = makeProjectConfigDir(context)
     try:
         command = ["configtxgen", "-inspectChannelCreateTx", filename]
-        return subprocess.check_output(command, cwd=testConfigs)
+        return subprocess.check_output(command, cwd=testConfigs, env=os.environ)
     except:
         print("Unable to inspect channel config data: {0}".format(sys.exc_info()[1]))
 
 def generateConfig(context, channelID, profile, ordererProfile, block="orderer.block"):
     setupConfigs(context, channelID)
+    if hasattr(context, "composition"):
+        os.environ.update(context.composition.environ)
     generateOrdererConfig(context, channelID, ordererProfile, block)
     generateChannelConfig(channelID, profile, context)
     generateChannelAnchorConfig(channelID, profile, context)
@@ -125,7 +127,7 @@ def generateOrdererConfig(context, channelID, ordererProfile, block):
         command = ["configtxgen", "-profile", ordererProfile,
                    "-outputBlock", block,
                    "-channelID", channelID]
-        subprocess.check_call(command, cwd=testConfigs)
+        subprocess.check_call(command, cwd=testConfigs, env=os.environ)
     except:
         print("Unable to generate orderer config data: {0}".format(sys.exc_info()[1]))
 
@@ -135,7 +137,7 @@ def generateChannelConfig(channelID, profile, context):
         command = ["configtxgen", "-profile", profile,
                    "-outputCreateChannelTx", "%s.tx" % channelID,
                    "-channelID", channelID]
-        subprocess.check_call(command, cwd=testConfigs)
+        subprocess.check_call(command, cwd=testConfigs, env=os.environ)
     except:
         print("Unable to generate channel config data: {0}".format(sys.exc_info()[1]))
 
@@ -147,7 +149,7 @@ def generateChannelAnchorConfig(channelID, profile, context):
                        "-outputAnchorPeersUpdate", "{0}{1}Anchor.tx".format(org, channelID),
                        "-channelID", channelID,
                        "-asOrg", org.title().replace('.', '')]
-            subprocess.check_call(command, cwd=testConfigs)
+            subprocess.check_call(command, cwd=testConfigs, env=os.environ)
         except:
             print("Unable to generate channel anchor config data: {0}".format(sys.exc_info()[1]))
 

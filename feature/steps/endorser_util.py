@@ -78,7 +78,7 @@ class InterfaceBase:
             context.initial_leader={}
         if org not in context.initial_leader:
             for container in self.get_peers(context):
-                if ((org in container) and self.is_in_log(container, "Becoming a leader")):
+                if ((org in container) and common_util.is_in_log(container, "Becoming a leader")):
                     context.initial_leader[org]=container
                     print("initial leader is "+context.initial_leader[org])
                     return context.initial_leader[org]
@@ -90,20 +90,12 @@ class InterfaceBase:
             context.initial_non_leader={}
         if org not in context.initial_non_leader:
             for container in self.get_peers(context):
-                if ((org in container) and not self.is_in_log(container, "Becoming a leader")):
+                if ((org in container) and not common_util.is_in_log(container, "Becoming a leader")):
                     context.initial_non_leader[org]=container
                     print("initial non-leader is "+context.initial_non_leader[org])
                     return context.initial_non_leader[org]
             assert org in context.initial_non_leader.keys(), "Error: No gossip-leader found by looking at the logs, for "+org
         return context.initial_non_leader[org]
-
-    def is_in_log(self, container, keyText):
-        rc = subprocess.call(
-                "docker logs "+container+" 2>&1 | grep "+"\""+keyText+"\"",
-                shell=True)
-        if rc==0:
-            return True
-        return False
 
 
 class ToolInterface(InterfaceBase):
@@ -206,10 +198,11 @@ class CLIInterface(InterfaceBase):
     def create_channel(self, context, orderers, channelId=TEST_CHANNEL_ID):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         setup = self.get_env_vars(context, "peer0.org1.example.com")
+        timeout = str(120 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s')))
         command = ["peer", "channel", "create",
                    "--file", "/var/hyperledger/configs/{0}/{1}.tx".format(context.composition.projectName, channelId),
                    "--channelID", channelId,
-                   "--timeout", "120", # This sets the timeout for the channel creation instead of the default 5 seconds
+                   "--timeout", timeout,
                    "--orderer", '{0}:7050'.format(orderers[0])]
         if context.tls:
             command = command + ["--tls",

@@ -45,7 +45,7 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
         context.composition.up()
     context.compose_containers = context.composition.collectServiceNames()
 
-def bootstrapped_impl(context, ordererType, database, tlsEnabled):
+def bootstrapped_impl(context, ordererType, database, tlsEnabled=False):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
@@ -58,8 +58,7 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled):
 
     # Should TLS be enabled
     context.tls = tlsEnabled
-    if tlsEnabled:
-        common_util.enableTls(context, tlsEnabled)
+    common_util.enableTls(context, tlsEnabled)
 
     # Perform bootstrap process
     context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
@@ -209,12 +208,12 @@ def step_impl(context):
 @then(u'the initial non-leader peer of "{org}" has become the leader')
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-    assert context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-lerader peer has not become leader."
+    assert common_util.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-lerader peer has not become leader."
 
 @then(u'the initial non-leader peer of "{org}" has not become the leader')
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-    assert not context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
+    assert not common_util.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
 
 @then(u'there are no errors')
 def step_impl(context):
