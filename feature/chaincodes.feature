@@ -7,7 +7,7 @@
 Feature: FAB-5384 Chaincode Testing: As a user I want to be able verify that I can execute different chaincodes
 
 @daily
-Scenario Outline: FAB-5797: Test chaincode - fabric/examples/chaincode_example02 deploy, invoke, and query with chaincode in all uppercase chars
+Scenario Outline: FAB-5797: Test chaincode fabric/examples/chaincode_example02 deploy, invoke, and query with chaincode install name in all uppercase/lowercase/mixedcase chars
     Given I have a bootstrapped fabric network of type <type>
     And I wait "<waitTime>" seconds
     When a user sets up a channel
@@ -41,16 +41,13 @@ Scenario: FAB-4703: <FAB-5663> Test chaincode calling chaincode - fabric/example
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_a" on channel "channel2"
   And I wait "20" seconds
   Then the chaincode is deployed
-  When a user queries on the chaincode named "myex02_a" on channel "channel2" with args ["query","a"]
+  When a user queries on the channel "channel2" using chaincode named "myex02_a" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex04" with args ["query","Event", "myex02_a", "a", "channel2"]
   Then a user receives a success response of 1000
 
-
 @daily
-Scenario: FAB-4717: <FAB-5663> chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05
-#chaincode-to-chaicode testing passing when cc_05 and cc_02 are on different channels
-#chaincode_example02 and chaincode_example05 installed on different channels
+Scenario: FAB-4717: <FAB-5663> chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05 when cc_05 and cc_02 are on different channels
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
   When a user sets up a channel
@@ -61,68 +58,13 @@ Scenario: FAB-4717: <FAB-5663> chaincode-to-chaincode testing passing in channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
   And I wait "30" seconds
   Then the chaincode is deployed
-  When a user queries on the chaincode named "myex02_b" on channel "channel2" with args ["query","a"]
+  When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel2"]
   Then a user receives a success response of 3000
 
 @daily
-Scenario: FAB-4718: <FAB-5663> Test chaincode calling chaincode -ve testcase passing an empty string for channelname- fabric/examples/chaincode_example05
-#chaincode_example02 and chaincode_example05 installed on different channels
-  Given I have a bootstrapped fabric network of type kafka
-  And I wait "30" seconds
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
-  And I wait "30" seconds
-  Then the chaincode is deployed
-  When a user sets up a channel named "channel2"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
-  And I wait "30" seconds
-  Then the chaincode is deployed
-  When a user queries on the chaincode named "myex02_b" on channel "channel2" with args ["query","a"]
-  Then a user receives a success response of 1000
-  Then a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", ""]
-  Then a user receives a success response of status: 500
-  #Then a user receives a success response of 3000
-
-@daily
-Scenario: FAB-5384: <FAB-5663> Test chaincode calling chaincode - fabric/examples/chaincode_example05
-#chaincode_example02 and chaincode_example05 installed on same channels
-  Given I have a bootstrapped fabric network of type kafka
-  And I wait "30" seconds
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
-  And I wait "30" seconds
-  Then the chaincode is deployed
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
-  And I wait "30" seconds
-  Then the chaincode is deployed
-  When a user queries on the chaincode named "myex02_b" with args ["query","a"]
-  Then a user receives a success response of 1000
-  When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum"]
-  Then a user receives a success response of 3000
-
-@daily
-Scenario: FAB-4720: <FAB-5663> Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name in query fabric/examples/chaincode_example05
-#chaincode_example02 and chaincode_example05 installed on same channels
-  Given I have a bootstrapped fabric network of type kafka
-  And I wait "30" seconds
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
-  And I wait "30" seconds
-  Then the chaincode is deployed
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
-  And I wait "30" seconds
-  Then the chaincode is deployed
-  When a user queries on the chaincode named "myex02_b" with args ["query","a"]
-  Then a user receives a success response of 1000
-  When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel3"]
-  Then a user receives an error response of status: 500
-  #Then a user receives an error response of 3000
-
-@daily
-Scenario: FAB-4722: <FAB-5663> chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
-#chaincode_example02 and chaincode_example05 installed on same channels
+Scenario: FAB-4718: <FAB-5663> chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
   Given I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
   When a user sets up a channel
@@ -138,8 +80,74 @@ Scenario: FAB-4722: <FAB-5663> chaincode-to-chaincode testing passing an empty s
   Then a user receives a success response of 3000
 
 @daily
-Scenario Outline: FAB-5789: Test chaincode fabric/examples/marbles02
-#includes tests for : initMarble, readMarble, transferMarble, transferMarblesBasedOnColor
+Scenario: FAB-4720: <FAB-5663> Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name when cc_ex02 and cc_ex05 installed on same channels
+  Given I have a bootstrapped fabric network of type kafka
+  And I wait "30" seconds
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user queries on the chaincode named "myex02_b" with args ["query","a"]
+  Then a user receives a success response of 1000
+  When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel3"]
+  Then a user receives an error response of status: 500
+
+@daily
+Scenario: FAB-4721: <FAB-5663> Test chaincode calling chaincode -ve testcase passing an incorrect ot non-existing string for channelname when cc_ex02 and cc_ex05 installed on different channels
+  Given I have a bootstrapped fabric network of type kafka
+  And I wait "30" seconds
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user sets up a channel named "channel2"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
+  Then a user receives a success response of 1000
+  When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel3"]
+  Then a user receives a success response of status: 500
+
+
+@daily
+Scenario: FAB-4722: <FAB-5663> Test chaincode calling chaincode -ve testcase passing an empty string for channelname when cc_ex02 and cc_ex05 installed on different channels
+  Given I have a bootstrapped fabric network of type kafka
+  And I wait "30" seconds
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user sets up a channel named "channel2"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
+  Then a user receives a success response of 1000
+  When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", ""]
+  Then a user receives a success response of status: 500
+
+@daily
+Scenario: FAB-5384: <FAB-5663> Test chaincode calling chaincode with two args cc_ex02 and cc_ex05 installed on same channels
+  Given I have a bootstrapped fabric network of type kafka
+  And I wait "30" seconds
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example05" with args ["init","sum","0"] with name "myex05"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "myex02_b"
+  And I wait "30" seconds
+  Then the chaincode is deployed
+  When a user queries on the chaincode named "myex02_b" with args ["query","a"]
+  Then a user receives a success response of 1000
+  When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum"]
+  Then a user receives a success response of 3000
+
+@daily
+Scenario Outline: FAB-5789: Test chaincode fabric/examples/marbles02 : initMarble, readMarble, transferMarble, transferMarblesBasedOnColor
 
   Given I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
@@ -197,8 +205,7 @@ Scenario Outline: FAB-5789: Test chaincode fabric/examples/marbles02
 
 
 @daily
-Scenario Outline: FAB-5790: Test chaincode fabric/examples/marbles02
-  #includes tests for : initMarble, readMarble, deleteMarble, getHistoryForMarble, getMarblesByRange
+Scenario Outline: FAB-5790: Test chaincode fabric/examples/marbles02: initMarble, readMarble, deleteMarble, getHistoryForMarble, getMarblesByRange
   Given I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
   When a user sets up a channel
@@ -257,8 +264,7 @@ Scenario Outline: FAB-5790: Test chaincode fabric/examples/marbles02
     | solo  |    20    |
     | kafka |    30    |
 
-Scenario Outline: FAB-3888: State Transfer Test using marbles02 chaincode fabric/examples/marbles02
-#includes statetransfer test where a non-leader is brought down , and then after few invokes it is brought back up, to check if the non-leader successfully receives the blocks and update itself
+Scenario Outline: FAB-3888: State Transfer Test using marbles02 where a non-leader is brought down , and then after few invokes it is brought back up, to check if the non-leader successfully receives the blocks and update itself
 
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type <type>
