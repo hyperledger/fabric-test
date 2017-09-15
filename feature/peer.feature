@@ -10,26 +10,26 @@ Feature: Peer Service
 #@doNotDecompose
 @daily
 Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query
-  Given I have a bootstrapped fabric network of type <type>
-  And I wait "<waitTime>" seconds
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "10" seconds
-  Then the chaincode is deployed
-  When a user queries on the chaincode named "mycc" with args ["query","a"]
-  Then a user receives a success response of 1000
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
-  And a user queries on the chaincode named "mycc" with args ["query","a"]
-  Then a user receives a success response of 990
+    Given I have a bootstrapped fabric network of type <type>
+    And I wait "<waitTime>" seconds
+    When a user sets up a channel
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    And I wait "10" seconds
+    Then the chaincode is deployed
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 1000
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 990
 
-  When "peer0.org2.example.com" is taken down
-  And a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
-  And I wait "5" seconds
-  And "peer0.org2.example.com" comes back up
-  And I wait "10" seconds
-  And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
-  Then a user receives a success response of 980 from "peer0.org2.example.com"
-  Examples:
+    When "peer0.org2.example.com" is taken down
+    And a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "5" seconds
+    And "peer0.org2.example.com" comes back up
+    And I wait "10" seconds
+    And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
+    Then a user receives a success response of 980 from "peer0.org2.example.com"
+Examples:
     | type  | waitTime |
     | solo  |    5     |
     | kafka |    60    |
@@ -37,14 +37,14 @@ Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query
 
 @daily
 Scenario Outline: FAB-1440: Test basic chaincode deploy, invoke, query
-  Given I have a bootstrapped fabric network of type <type>
-  And I wait "<waitTime>" seconds
-  When a user sets up a channel
-  And a user deploys chaincode
-  Then the chaincode is deployed
-  When a user queries on the chaincode with args ["query","a"]
-  Then a user receives a success response of 100
-  Examples:
+    Given I have a bootstrapped fabric network of type <type>
+    And I wait "<waitTime>" seconds
+    When a user sets up a channel
+    And a user deploys chaincode
+    Then the chaincode is deployed
+    When a user queries on the chaincode with args ["query","a"]
+    Then a user receives a success response of 100
+Examples:
     | type  | waitTime |
     | solo  |    5     |
     | kafka |    60    |

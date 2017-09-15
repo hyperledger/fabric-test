@@ -11,7 +11,7 @@ import uuid
 import common_util
 import compose_util
 import config_util
-import endorser_util
+from endorser_util import CLIInterface, ToolInterface, SDKInterface
 
 
 @given(u'I wait "{seconds}" seconds')
@@ -19,6 +19,20 @@ import endorser_util
 @then(u'I wait "{seconds}" seconds')
 def step_impl(context, seconds):
     time.sleep(float(seconds))
+
+@given(u'I use the {language} SDK interface')
+def step_impl(context, language):
+    context.interface = SDKInterface(language)
+
+@given(u'I use the CLI interface')
+def step_impl(context):
+    context.interface = CLIInterface()
+
+@given(u'I use the tool interface {toolCommand}')
+def step_impl(context, toolCommand):
+    # The tool command is what is used to generate the network that will be setup for use in the tests
+    context.network = toolCommand
+    context.interface = ToolInterface(context)
 
 @given(u'I compose "{composeYamlFile}"')
 def compose_impl(context, composeYamlFile, projectName=None, startContainers=True):
@@ -49,7 +63,7 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled):
 
     # Perform bootstrap process
     context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
-    channelID = endorser_util.SYS_CHANNEL_ID
+    channelID = context.interface.SYS_CHANNEL_ID
     if hasattr(context, "composition"):
         context.projectName = context.composition.projectName
     else:
@@ -108,19 +122,19 @@ def step_impl(context):
 
 @when(u'the initial leader peer of "{org}" is taken down by doing a {takeDownType}')
 def step_impl(context, org, takeDownType):
-    bringdown_impl(context, endorser_util.get_initial_leader(context, org), takeDownType)
+    bringdown_impl(context, context.interface.get_initial_leader(context, org), takeDownType)
 
 @when(u'the initial leader peer of "{org}" is taken down')
 def step_impl(context, org):
-    bringdown_impl(context, endorser_util.get_initial_leader(context, org))
+    bringdown_impl(context, context.interface.get_initial_leader(context, org))
 
 @when(u'the initial non-leader peer of "{org}" is taken down by doing a {takeDownType}')
 def step_impl(context, org, takeDownType):
-    bringdown_impl(context, endorser_util.get_initial_non_leader(context, org), takeDownType)
+    bringdown_impl(context, context.interface.get_initial_non_leader(context, org), takeDownType)
 
 @when(u'the initial non-leader peer of "{org}" is taken down')
 def step_impl(context, org):
-    bringdown_impl(context, endorser_util.get_initial_non_leader(context, org))
+    bringdown_impl(context, context.interface.get_initial_non_leader(context, org))
 
 @when(u'"{component}" is taken down by doing a {takeDownType}')
 def step_impl(context, component, takeDownType):
@@ -140,19 +154,19 @@ def bringdown_impl(context, component, takeDownType="stop"):
 
 @when(u'the initial leader peer of "{org}" comes back up by doing a {bringUpType}')
 def step_impl(context, org, bringUpType):
-    bringup_impl(context, endorser_util.get_initial_leader(context, org), bringUpType)
+    bringup_impl(context, context.interface.get_initial_leader(context, org), bringUpType)
 
 @when(u'the initial leader peer of "{org}" comes back up')
 def step_impl(context, org):
-    bringup_impl(context, endorser_util.get_initial_leader(context, org))
+    bringup_impl(context, context.interface.get_initial_leader(context, org))
 
 @when(u'the initial non-leader peer of "{org}" comes back up by doing a {bringUpType}')
 def step_impl(context, org, bringUpType):
-    bringup_impl(context, endorser_util.get_initial_non_leader(context, org), bringUpType)
+    bringup_impl(context, context.interface.get_initial_non_leader(context, org), bringUpType)
 
 @when(u'the initial non-leader peer of "{org}" comes back up')
 def step_impl(context, org):
-    bringup_impl(context, endorser_util.get_initial_non_leader(context, org))
+    bringup_impl(context, context.interface.get_initial_non_leader(context, org))
 
 @when(u'"{component}" comes back up by doing a {bringUpType}')
 def step_impl(context, component, bringUpType):
@@ -170,25 +184,36 @@ def bringup_impl(context, component, bringUpType="start"):
     else:
         assert False, "Bringing-up process undefined: {}".format(context.bringUpType)
 
-@when(u'I start a fabric network using a {ordererType} orderer service')
-def start_network_impl(context, ordererType):
+@when(u'I start a fabric network using a {ordererType} orderer service with tls')
+def start_network_impl(context, ordererType, tlsEnabled=True):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
     context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)
     assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
+
+    # Should TLS be enabled
+    context.tls = tlsEnabled
+    if tlsEnabled:
+        common_util.enableTls(context, tlsEnabled)
+
     compose_impl(context, context.composeFile, projectName=context.projectName)
+
+@when(u'I start a fabric network using a {ordererType} orderer service')
+def step_impl(context, ordererType):
+    start_network_impl(context, ordererType, False)
 
 @when(u'I start a fabric network')
 def step_impl(context):
-    start_network_impl(context, "solo")
+    start_network_impl(context, "solo", False)
 
 @then(u'the initial non-leader peer of "{org}" has become the leader')
 def step_impl(context, org):
-    if not hasattr(context, 'initial_non_leader'):
-        assert False, "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-    else:
-        if not endorser_util.is_in_log(context.initial_non_leader[org], "Becoming a leader"):
-            assert False, "Error: initial non-lerader peer has not become leader."
+    assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
+    assert context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-lerader peer has not become leader."
+#    if not hasattr(context, 'initial_non_leader'):
+#        assert False, "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
+#    elif not context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"):
+#        assert False, "Error: initial non-lerader peer has not become leader."
 
 @then(u'there are no errors')
 def step_impl(context):
