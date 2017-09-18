@@ -210,10 +210,11 @@ def step_impl(context):
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
     assert context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-lerader peer has not become leader."
-#    if not hasattr(context, 'initial_non_leader'):
-#        assert False, "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-#    elif not context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"):
-#        assert False, "Error: initial non-lerader peer has not become leader."
+
+@then(u'the initial non-leader peer of "{org}" has not become the leader')
+def step_impl(context, org):
+    assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
+    assert not context.interface.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
 
 @then(u'there are no errors')
 def step_impl(context):

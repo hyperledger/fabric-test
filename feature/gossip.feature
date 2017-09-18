@@ -112,3 +112,45 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
     | kafka |    60    |  stop        | start       |
     | kafka |    60    |  pause       | unpause     |
     | kafka |    60    | disconnect   | connect     |
+
+@newtest
+@daily
+Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <takeDownType>, comes back up *before* another leader is elected, catches up
+  Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
+  And I have a bootstrapped fabric network of type <type>
+  And I wait "<waitTime>" seconds
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And I wait "10" seconds
+  Then the chaincode is deployed
+
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial leader peer of "org1"
+  And I wait "5" seconds
+  And a user queries on the chaincode named "mycc" with args ["query","a"] on the initial leader peer of "org1"
+  Then a user receives a success response of 990 from the initial leader peer of "org1"
+
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial non-leader peer of "org1"
+  And I wait "5" seconds
+  And a user queries on the chaincode named "mycc" with args ["query","a"] on the initial non-leader peer of "org1"
+  Then a user receives a success response of 980 from the initial non-leader peer of "org1"
+
+  ## take down leader, invoke in non-leader, wait 5 seconds and bring back up the initial leader
+  When the initial leader peer of "org1" is taken down by doing a <takeDownType>
+  And I wait "1" seconds
+  And a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial non-leader peer of "org1"
+  And I wait " 5" seconds
+  Then the initial non-leader peer of "org1" has not become the leader
+  When the initial leader peer of "org1" comes back up by doing a <bringUpType>
+  And I wait "20" seconds
+
+  When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial leader peer of "org1"
+  Then a user receives a success response of 970 from the initial leader peer of "org1"
+
+  Examples:
+    | type  | waitTime | takeDownType | bringUpType |
+    | solo  |    5     |  stop        | start       |
+    | solo  |    5     |  pause       | unpause     |
+    | solo  |    5     | disconnect   | connect     |
+    | kafka |    60    |  stop        | start       |
+    | kafka |    60    |  pause       | unpause     |
+    | kafka |    60    | disconnect   | connect     |
