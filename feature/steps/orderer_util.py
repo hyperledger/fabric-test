@@ -55,16 +55,17 @@ def getKafkaTopic(kafkaBrokers=["0.0.0.0:9092"], channel=endorser_util.SYS_CHANN
 
     # Print brokers in ISR
     print("ISR: {}".format(["kafka{}".format(broker.id) for broker in topic.partitions[0].isr]))
-    return topic
+    isr_set = ["kafka{}".format(broker.id) for broker in topic.partitions[0].isr]
+    return topic, isr_set
 
 def getKafkaPartitionLeader(kafkaBrokers=["0.0.0.0:9092"], channel=endorser_util.SYS_CHANNEL_ID):
-    topic = getKafkaTopic(kafkaBrokers, channel)
+    topic, isr_set = getKafkaTopic(kafkaBrokers, channel)
     leader = "kafka{0}".format(topic.partitions[0].leader.id)
     print("current leader: {}".format(leader))
     return leader
 
 def getNonISRKafkaBroker(kafkaBrokers=["0.0.0.0:9092"], channel=endorser_util.SYS_CHANNEL_ID):
-    topic = getKafkaTopic(kafkaBrokers, channel)
+    topic, isr_set = getKafkaTopic(kafkaBrokers, channel)
     kafka = None
     for kafkaNum in range(len(kafkaBrokers)):
         if str(kafkaNum) not in topic.partitions[0].isr:
