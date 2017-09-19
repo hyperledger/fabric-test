@@ -31,14 +31,14 @@ def step_impl(context):
     setup_channel_impl(context, context.interface.TEST_CHANNEL_ID)
 
 
-@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
-def deploy_impl(context, path, args, name, containerName, channel):
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{containerName}" on channel "{channel}"')
+def deploy_impl(context, path, args, name, language, containerName, channel):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context)
 
     chaincode = {
         "path": path,
-        "language": "GOLANG",
+        "language": language,
         "name": name,
         "channelID": channel,
         "args": args,
@@ -47,17 +47,30 @@ def deploy_impl(context, path, args, name, containerName, channel):
     # Save chaincode name and path and args
     context.chaincode = chaincode
 
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
+def step_impl(context, path, args, name, channel):
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}"')
+def step_impl(context, path, args, name, language, channel):
+    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel)
+
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}"')
+def step_impl(context, path, args, name, language):
+    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
+
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}"')
 def step_impl(context, path, args, name, channel):
-    deploy_impl(context, path, args, name, "peer0.org1.example.com", channel)
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}"')
 def step_impl(context, path, args, name):
-    deploy_impl(context, path, args, name, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args}')
 def step_impl(context, path, args):
-    deploy_impl(context, path, args, "mycc", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
+    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user deploys chaincode on channel "{channel}" with args {args}')
 def step_impl(context, channel, args):
@@ -65,6 +78,7 @@ def step_impl(context, channel, args):
                 "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
+                "GOLANG",
                 "peer0.org1.example.com",
                 channel)
 
@@ -74,6 +88,7 @@ def step_impl(context, channel):
                 "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
+                "GOLANG",
                 "peer0.org1.example.com",
                 channel)
 
@@ -83,6 +98,7 @@ def step_impl(context, name, channel):
                 "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 name,
+                "GOLANG",
                 "peer0.org1.example.com",
                 channel)
 
@@ -92,6 +108,7 @@ def step_impl(context, args):
                 "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
+                "GOLANG",
                 "peer0.org1.example.com",
                 context.interface.TEST_CHANNEL_ID)
 
@@ -101,6 +118,7 @@ def step_impl(context):
                 "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
+                "GOLANG",
                 "peer0.org1.example.com",
                 context.interface.TEST_CHANNEL_ID)
 

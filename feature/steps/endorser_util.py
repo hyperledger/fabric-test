@@ -158,6 +158,7 @@ class CLIInterface(InterfaceBase):
             setup = self.get_env_vars(context, peer)
             command = ["peer", "chaincode", "install",
                        "--name", chaincode['name'],
+                       "--lang", chaincode['language'],
                        "--version", str(chaincode.get('version', 0)),
                        "--path", chaincode['path']]
             if "orderers" in chaincode:
@@ -183,6 +184,7 @@ class CLIInterface(InterfaceBase):
             command = ["peer", "chaincode", "instantiate",
                        "--name", chaincode['name'],
                        "--version", str(chaincode.get('version', 0)),
+                       "--lang", chaincode['language'],
                        "--channelID", str(chaincode.get('channelID', TEST_CHANNEL_ID)),
                        "--ctor", r"""'{\"Args\": %s}'""" % (args)]
             if context.tls:
@@ -286,8 +288,14 @@ class CLIInterface(InterfaceBase):
         command = ["peer", "chaincode", "invoke",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (args),
-                   "--channelID", channelId,
-                   "--orderer", '{0}:7050"'.format(orderers[0])]
+                   "--channelID", channelId]
+        if context.tls:
+            command = command + ["--tls",
+                                 common_util.convertBoolean(context.tls),
+                                 "--cafile",
+                                 '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
+        command = command + ["--orderer", '{0}:7050'.format(orderers[0])]
+        command.append('"')
         output = context.composition.docker_exec(setup+command, [peer])
         print("Invoke[{0}]: {1}".format(" ".join(setup+command), str(output)))
         return output
