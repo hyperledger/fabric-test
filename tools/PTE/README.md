@@ -136,14 +136,14 @@ There are two ways to execute PTE: pte_mgr.sh and pte_driver.sh. pte_mgr.sh can 
 
     * Example
 
-        `./pte_mgr.sh userInputs/PTEMgr.txt`
+        `./pte_mgr.sh sampleccInputs/PTEMgr.txt`
 
-        `userInputs/PTEMgr.txt` contains the list of user specified run cases to be executed.  Each line is a PTE run case and includes two parameters: **driver type** and **run case file**.
+        `sampleccInputs/PTEMgr.txt` contains the list of user specified run cases to be executed.  Each line is a PTE run case and includes two parameters: **driver type** and **run case file**.
 
         For instance, a PTE mgr file containing two run cases files would be:
 
-            driver=pte userInputs/runCases-constant-i-TLS.txt
-            driver=pte userInputs/runCases-constant-q-TLS.txt
+            driver=pte sampleccInputs/runCases-constant-i-TLS.txt
+            driver=pte sampleccInputs/runCases-constant-q-TLS.txt
 
         **Note:** Available driver type is pte only.
 
@@ -153,15 +153,15 @@ There are two ways to execute PTE: pte_mgr.sh and pte_driver.sh. pte_mgr.sh can 
 
     * Example
 
-        `./pte_driver.sh userInputs/runCases.txt`
+        `./pte_driver.sh sampleccInputs/runCases.txt`
 
-        `userInputs/runCases.txt` contains the list of test cases to be executed. Each line is a test case and includes two parameters: **SDK type** and **user input file**.
+        `sampleccInputs/runCases.txt` contains the list of test cases to be executed. Each line is a test case and includes two parameters: **SDK type** and **user input file**.
 
         For instance, a run cases file containing three test cases using the node SDK would be:
 
-            sdk=node userInputs/samplecc-chan1-i-TLS.json
-            sdk=node userInputs/samplecc-chan2-i-TLS.json
-            sdk=node userInputs/samplecc-chan3-i-TLS.json
+            sdk=node sampleccInputs/samplecc-chan1-i-TLS.json
+            sdk=node sampleccInputs/samplecc-chan2-i-TLS.json
+            sdk=node sampleccInputs/samplecc-chan3-i-TLS.json
 
 
         **Note:** Available SDK types are node, go, python and java; however, only the node SDK is currently supported.
@@ -229,16 +229,16 @@ A single test case is described by a user input file. User input files define al
 
 ### Sample Use Cases
 * ### Latency
-    Example: `userInputs/samplecc-latency-i.json`
+    Example: `sampleccInputs/samplecc-latency-i.json`
     Performs 1000 invokes (Move) with 1 process on 1 network using the sample_cc chaincode. The average of the execution result (execution time (ms)/1000 transactions) represents the latency of 1 invoke (Move).
 * ### Long run
-    Example: `userInputs/samplecc-longrun-i.json`
+    Example: `sampleccInputs/samplecc-longrun-i.json`
     Performs invokes (Move) of various payload size ranging from 1kb-2kb with 1 processes on one network using sample_cc chaincode for 72 hours at 1 transaction per second.
 * ### Concurrency
-    Example: `userInputs/samplecc-concurrency-i.json`
+    Example: `sampleccInputs/samplecc-concurrency-i.json`
     Performs invokes (Move) of 1kb payload with 50 processes on one 4-peer network using sample_cc chaincode for 10 minutes.
 * ### Complex
-    Example: `userInputs/samplecc-complex-i.json`
+    Example: `sampleccInputs/samplecc-complex-i.json`
     Performs invokes (Move) of various payload size ranging from 10kb-500kb with 10 processes on one 4-peer network using sample_cc chaincode for 10 minutes. Each invoke (Move) is followed by an invoke (Query).
 * ### More complicated scenarios
     * For multiple chaincodes deployments and transactions, configure each user input file to install and instantiate chaincodes and drive the transactions appropriately.
@@ -326,7 +326,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
                 ]
             },
 
-        Note that action is ignored. PTE instantiates chaincode on all peers of each organization listed in channelOpt.orgName. 
+        Note that action is ignored. PTE instantiates chaincode on all peers of each organization listed in channelOpt.orgName.
 
         **Recommendation: instantiate a chaincode on the organization before sending a transaction to any peer of that organization.**
 
@@ -336,7 +336,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
         "transMode": "Constant",
         "transType": "QueryBlock",
         "invokeType": "Move",
- 
+
     * ### Query Blockchain height
         To query the length (number of transactions) in blocks, set org, peer, startBlock, and endBlock in queryBlockOpt:
 
@@ -364,11 +364,23 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
 The following chaincodes are tested and supported:
 
 * **example02**: This is a simple chaincode with limited capability.  This chaincode is **NOT** suitable for performance benchmark.
-* **sample_cc**: This chaincode supports variable (randomized) payload sizes and performs encryption and decryption on the payload. Specify ccType as ccchecker when using this chaincode.
-See userInput-samplecc.json for example of userInput file. Take the following steps to install this chaincode:
-  - `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/fixtures/src/github.com`
-  - `mkdir sample_cc`
-  - download chaincode_sample.go into sample_cc directory
+
+* **sample_cc**: This chaincode supports variable (randomized) payload sizes and performs encryption and decryption on the payload. Specify ccType as ccchecker when using this chaincode. See directory `sampleccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/go`.  Set the deploy.chaincodePath to this directory in the user input file.
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+            "fcn": "init",
+            "args": []
+        },
+
+* **marbles_cc**: [Marbles chaincode](https://github.com/hyperledger/fabric/tree/master/examples/chaincode/go/marbles02). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify ccType as marblescc when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02`.  Set the deploy.chaincodePath to this directory in the user input file.
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
+            "fcn": "init",
+            "args": []
+        },
+
 
 ## Output
 The output includes network id, process id, transaction type, total transactions, completed transactions, failed transactions, starting time, ending time, and elapsed time.

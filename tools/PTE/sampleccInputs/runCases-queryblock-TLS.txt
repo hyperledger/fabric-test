@@ -1,0 +1,3 @@
+sdk=node sampleccInputs/samplecc-chan1-queryblock-TLS.json
+#sdk=node sampleccInputs/samplecc-chan2-queryblock-TLS.json
+#sdk=node sampleccInputs/samplecc-chan3-queryblock-TLS.json

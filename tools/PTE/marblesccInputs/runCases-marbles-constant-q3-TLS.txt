@@ -1,0 +1,3 @@
+#sdk=node marblesccInputs/marblescc-chan1-constant-q-TLS.json
+#sdk=node marblesccInputs/marblescc-chan2-constant-q-TLS.json
+sdk=node marblesccInputs/marblescc-chan3-constant-q-TLS.json

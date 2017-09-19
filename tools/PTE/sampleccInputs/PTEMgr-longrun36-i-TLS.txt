@@ -1,0 +1,3 @@
+driver=pte sampleccInputs/runCases-longrun-i1-TLS.txt
+driver=pte sampleccInputs/runCases-longrun-i2-TLS.txt
+driver=pte sampleccInputs/runCases-longrun-i3-TLS.txt

@@ -1,0 +1,3 @@
+driver=pte sampleccInputs/runCases-constant-i1-TLS.txt
+driver=pte sampleccInputs/runCases-constant-i2-TLS.txt
+driver=pte sampleccInputs/runCases-constant-i3-TLS.txt

@@ -167,14 +167,31 @@ var keyStart=0;
 var payLoadMin=0;
 var payLoadMax=0;
 var arg0=0;
+var keyIdx = [];
+for (i=0; i<uiContent.ccOpt.keyIdx.length; i++) {
+    keyIdx.push(uiContent.ccOpt.keyIdx[i]);
+}
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyIdx: ', Nid, channel.getName(), org, pid, keyIdx);
+var keyPayLoad = [];
+for (i=0; i<uiContent.ccOpt.keyPayLoad.length; i++) {
+    keyPayLoad.push(uiContent.ccOpt.keyPayLoad[i]);
+}
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyPayLoad: ', Nid, channel.getName(), org, pid, keyPayLoad);
 
-if ( ccType == 'ccchecker') {
+if ( ccType == 'ccchecker' ) {
     keyStart = parseInt(uiContent.ccOpt.keyStart);
     payLoadMin = parseInt(uiContent.ccOpt.payLoadMin)/2;
     payLoadMax = parseInt(uiContent.ccOpt.payLoadMax)/2;
-    arg0 = keyStart;
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] ccchecker chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 Nid, channel.getName(), org, pid, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+    arg0 = parseInt(keyStart);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
+                 Nid, channel.getName(), org, pid, ccType,keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+} else if ( ccType == 'marblescc' ) {
+    keyStart = parseInt(uiContent.ccOpt.keyStart);
+    payLoadMin = parseInt(uiContent.ccOpt.payLoadMin);
+    payLoadMax = parseInt(uiContent.ccOpt.payLoadMax);
+    arg0 = parseInt(keyStart);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
+                 Nid, channel.getName(), org, pid, ccType,keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] ccType: %s, keyStart: %d', Nid, channel.getName(), org, pid, ccType, keyStart);
 //construct invoke request
@@ -187,18 +204,30 @@ var request_invoke;
 function getMoveRequest() {
     if ( ccType == 'ccchecker') {
         arg0 ++;
-        testInvokeArgs[1] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        for ( i=0; i<keyIdx.length; i++ ) {
+            testInvokeArgs[keyIdx[i]] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        }
         // random payload
         var r = Math.floor(Math.random() * (payLoadMax - payLoadMin)) + payLoadMin;
 
         var buf = crypto.randomBytes(r);
-        testInvokeArgs[2] = buf.toString('hex');
+        for ( i=0; i<keyPayLoad.length; i++ ) {
+            testInvokeArgs[keyPayLoad[i]] = buf.toString('hex');
+        }
+    } else if ( ccType == 'marblescc' ) {
+        arg0 ++;
+        for ( i=0; i<keyIdx.length; i++ ) {
+            testInvokeArgs[keyIdx[i]] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        }
+        // random marble size
+        var r = Math.floor((Math.random() * (payLoadMax - payLoadMin)) + payLoadMin);
+        for ( i=0; i<keyPayLoad.length; i++ ) {
+            testInvokeArgs[keyPayLoad[i]] = String(r);
+        }
     }
-    //logger.info('d:id:chan:org=%d:%s:%s:%d getMoveRequest] testInvokeArgs[1]', Nid, channelName, org, pid, testInvokeArgs[1]);
 
     tx_id = client.newTransactionID();
     txidList.insert(tx_id._transaction_id);
-    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] tx_id: %s', Nid, channel.getName(), org, pid, tx_id._transaction_id);
     utils.setConfigSetting('E2E_TX_ID', tx_id.getTransactionID());
 
     request_invoke = {
@@ -208,8 +237,9 @@ function getMoveRequest() {
         txId: tx_id
     };
 
-
-    if ( inv_m == nRequest ) {
+    if ( (transMode.toUpperCase() == 'MIX') && (mixQuery.toUpperCase() == 'TRUE') ) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: ', Nid, channel.getName(), org, pid, request_invoke);
+    } else if ( inv_m == nRequest ) {
         if (invokeCheck.toUpperCase() == 'TRUE') {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: ', Nid, channel.getName(), org, pid, request_invoke);
         }
@@ -227,7 +257,15 @@ var request_query;
 function getQueryRequest() {
     if ( ccType == 'ccchecker') {
         arg0 ++;
-        testQueryArgs[1] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        for ( i=0; i<keyIdx.length; i++ ) {
+            testQueryArgs[keyIdx[i]] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        }
+    } else if ( ccType == 'marblescc' ) {
+        arg0 ++;
+        for ( i=0; i<keyIdx.length; i++ ) {
+            testQueryArgs[keyIdx[i]] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        }
+        //testQueryArgs[0] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
     }
     //logger.info('d:id:chan:org=%d:%s:%s:%d getQueryRequest] testQueryArgs[1]', Nid, channelName, org, pid, testQueryArgs[1]);
 
@@ -590,7 +628,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                     }
                     eh.connect();
                     eventHubs.push(eh);
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] requests: %s, events: %s: %s', Nid, channelName, org, pid, ORGS[key].peer1.requests, ORGS[key].peer1.events);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] requests: %s, events: %s', Nid, channelName, org, pid, ORGS[key].peer1.requests, ORGS[key].peer1.events);
                 }
         }
     }

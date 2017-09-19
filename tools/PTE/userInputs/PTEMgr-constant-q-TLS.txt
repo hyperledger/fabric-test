@@ -1,3 +1,0 @@
-driver=pte userInputs/runCases-constant-q1-TLS.txt
-driver=pte userInputs/runCases-constant-q2-TLS.txt
-driver=pte userInputs/runCases-constant-q3-TLS.txt

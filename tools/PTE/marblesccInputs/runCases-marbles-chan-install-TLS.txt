@@ -1,0 +1,6 @@
+sdk=node marblesccInputs/marblescc-chan1-install1-TLS.json
+sdk=node marblesccInputs/marblescc-chan1-install2-TLS.json
+sdk=node marblesccInputs/marblescc-chan2-install3-TLS.json
+sdk=node marblesccInputs/marblescc-chan2-install4-TLS.json
+sdk=node marblesccInputs/marblescc-chan3-install5-TLS.json
+sdk=node marblesccInputs/marblescc-chan3-install6-TLS.json

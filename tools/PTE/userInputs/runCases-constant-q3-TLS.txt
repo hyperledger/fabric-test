@@ -1,3 +1,0 @@
-#sdk=node userInputs/samplecc-chan1-constant-q-TLS.json
-#sdk=node userInputs/samplecc-chan2-constant-q-TLS.json
-sdk=node userInputs/samplecc-chan3-constant-q-TLS.json
