@@ -331,3 +331,24 @@ Scenario Outline: FAB-5791: Chaincode to test shim interface API
     | type  | waitTime |
     | solo  |    20    |
     | kafka |    30    |
+
+@smoke
+Scenario Outline: FAB-6211: Test example02 chaincode written in various languages
+    Given I have a bootstrapped fabric network of type <type> <security>
+    And I wait "<waitTime>" seconds
+    When a user sets up a channel
+    And a user deploys chaincode at path "<path>" with args ["init","a","1000","b","2000"] with name "mycc" with language "<lang>"
+    And I wait "5" seconds
+    Then the chaincode is deployed
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 1000
+    When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "3" seconds
+    When a user queries on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 990
+Examples:
+    | type  | waitTime | path                                                                    | lang   | security    |
+    | kafka |    30    | github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 | GOLANG | with tls    |
+    | kafka |    30    | github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 | GOLANG | without tls |
+    | kafka |    30    | ../../fabric-test/chaincodes/example02/node                             | NODE   | with tls    |
+    | kafka |    30    | ../../fabric-test/chaincodes/example02/node                             | NODE   | without tls |
