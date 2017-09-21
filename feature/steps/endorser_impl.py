@@ -55,10 +55,13 @@ def step_impl(context, path, args, name, channel):
 def step_impl(context, path, args, name, language, channel):
     deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel)
 
-
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}"')
 def step_impl(context, path, args, name, language):
     deploy_impl(context, path, args, name, language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with language "{language}"')
+def step_impl(context, path, args, language):
+    deploy_impl(context, path, args, "mycc", language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}"')
 def step_impl(context, path, args, name, channel):

@@ -302,7 +302,7 @@ class CLIInterface(InterfaceBase):
         setup = self.get_env_vars(context, peer)
         command = ["peer", "chaincode", "query",
                    "--name", chaincode['name'],
-                   "--ctor", r"""'{\"Args\": %s}'""" % (args),
+                   "--ctor", r"""'{\"Args\": %s}'""" % (str(args)), # This should work for rich queries as well
                    "--channelID", channelId, '"']
         print("Query Exec command: {0}".format(" ".join(setup+command)))
         return context.composition.docker_exec(setup+command, [peer])
