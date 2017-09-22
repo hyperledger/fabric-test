@@ -111,9 +111,7 @@ var Chaincode = class {
     let A = args[0];
 
     // Delete the key from the state in ledger
-    await stub.DelState(A)
-
-    return shim.success(nil)
+    await stub.deleteState(A);
   }
 
   // query callback representing the query of a chaincode
@@ -129,7 +127,7 @@ var Chaincode = class {
     let Avalbytes = await stub.getState(A);
     if (!Avalbytes) {
       jsonResp.error = 'Failed to get state for ' + A;
-      throw new Error(jsonResp);
+      throw new Error(JSON.stringify(jsonResp));
     }
 
     jsonResp.name = A;

@@ -17,7 +17,7 @@ Scenario Outline: FAB-6036-1: Test marbles02_private initMarble, readMarble, del
   Given I have a bootstrapped fabric network of type <type>
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I wait "<waitTime>" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric-test/feature/chaincode/marbles02_private" with args [""] with name "mycc"
+  When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
 
@@ -194,7 +194,7 @@ Given the initial non-leader peer of "org1" comes back up
 Scenario Outline: FAB-6036-2: Test marbles02_private : getHistoryForMarble
   Given I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
-  When a user deploys chaincode at path "github.com/hyperledger/fabric-test/feature/chaincode/marbles02_private" with args [""] with name "mycc"
+  When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
 

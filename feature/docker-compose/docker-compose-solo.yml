@@ -229,7 +229,6 @@ services:
             - /var/run/:/host/var/run/
             - ../../fabric/examples/chaincode:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode
             - ../../chaincodes:/opt/gopath/src/github.com/hyperledger/fabric-test/chaincodes
-            - ../chaincode:/opt/gopath/src/github.com/hyperledger/fabric-test/feature/chaincode
             - ../../fabric/common:/opt/gopath/src/github.com/hyperledger/fabric/common
             - ../../fabric/vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
             - ../configs:/var/hyperledger/configs

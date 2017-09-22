@@ -312,7 +312,7 @@ Scenario Outline: FAB-5791: Chaincode to test shim interface API
   Given I have a bootstrapped fabric network of type <type>
   And I wait "60" seconds
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric-test/feature/chaincode/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   Then the chaincode is deployed
   And I wait "5" seconds
