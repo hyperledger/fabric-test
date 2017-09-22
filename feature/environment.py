@@ -50,6 +50,8 @@ def after_scenario(context, scenario):
     elif 'composition' in context:
         # Remove config data and docker containers
         shutil.rmtree("configs/%s" % context.composition.projectName)
+        shutil.rmtree("/tmp/fabric-client-kvs_org1", ignore_errors=True)
+        shutil.rmtree("/tmp/fabric-client-kvs_org2", ignore_errors=True)
         context.composition.decompose()
     elif hasattr(context, 'projectName'):
         shutil.rmtree("configs/%s" % context.projectName)
@@ -57,8 +59,10 @@ def after_scenario(context, scenario):
 # stop any running peer that could get in the way before starting the tests
 def before_all(context):
     context.interface = CLIInterface()
+    context.remote = False
     if context.config.userdata.get("network", None) is not None:
         context.network = context.config.userdata["network"]
+        context.remote = True
         context.interface = ToolInterface(context)
 
 # stop any running peer that could get in the way before starting the tests

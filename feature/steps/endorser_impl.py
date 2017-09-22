@@ -14,21 +14,23 @@ import subprocess
 import config_util
 
 
-@when(u'a user sets up a channel named "{channelId}"')
-def setup_channel_impl(context, channelId):
+@when(u'a user sets up a channel named "{channelId}" using orderer "{orderer}"')
+def setup_channel_impl(context, channelId, orderer):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
-    orderers = context.interface.get_orderers(context)
     peers = context.interface.get_peers(context)
 
-    context.interface.create_channel(context, orderers, channelId)
-    context.interface.fetch_channel(context, peers, orderers, channelId)
-    context.interface.join_channel(context, peers, orderers, channelId)
+    context.interface.create_channel(context, orderer, channelId)
+    context.interface.fetch_channel(context, peers, orderer, channelId)
+    context.interface.join_channel(context, peers, channelId)
 
+@when(u'a user sets up a channel named "{channelId}"')
+def step_impl(context, channelId):
+    setup_channel_impl(context, channelId, "orderer0.example.com")
 
 @when(u'a user sets up a channel')
 def step_impl(context):
-    setup_channel_impl(context, context.interface.TEST_CHANNEL_ID)
+    setup_channel_impl(context, context.interface.TEST_CHANNEL_ID, "orderer0.example.com")
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
 def deploy_impl(context, path, args, name, language, peer, channel, timeout=120):
@@ -239,7 +241,8 @@ def query_impl(context, channel, name, args, peer, targs=''):
     # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using events for being sure the invokes are complete
     time.sleep(2)
     chaincode = {"args": args,
-                 "name": name}
+                 "chaincodeId": str(name),
+                 "name": str(name)}
     context.result = context.interface.query_chaincode(context, chaincode, peer, channel, targs)
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} and generated transient args {targs} on "{peer}"')
@@ -282,6 +285,10 @@ def step_impl(context, channel, name, args):
 def step_impl(context, channel, args):
     query_impl(context, channel, "mycc", args, "peer0.org1.example.com")
 
+@when(u'a user queries on the chaincode with args {args} from "{peer}"')
+def step_impl(context, args, peer):
+    query_impl(context, context.interface.TEST_CHANNEL_ID, "mycc", args, peer)
+
 @when(u'a user queries on the chaincode with args {args}')
 def step_impl(context, args):
     query_impl(context, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com")
@@ -294,13 +301,17 @@ def step_impl(context, name):
 def step_impl(context):
     query_impl(context, context.interface.TEST_CHANNEL_ID, "mycc", '["query","a"]', "peer0.org1.example.com")
 
-@when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
-def invokes_impl(context, numInvokes, channel, name, args, peer, targs=''):
+@when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}" using orderer "{orderer}"')
+def invokes_impl(context, numInvokes, channel, name, args, peer, orderer="orderer0.example.com", targs=''):
     chaincode = {"args": args,
-                 "name": name}
-    orderers = context.interface.get_orderers(context)
+                 "name": str(name),
+                 "chaincodeId": str(name)}
     for count in range(numInvokes):
-        context.result = context.interface.invoke_chaincode(context, chaincode, orderers, peer, channel, targs)
+        context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, channel, targs)
+
+@when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
+def step_impl(context, numInvokes, channel, name, args):
+    invokes_impl(context, numInvokes, channel, name, args, "peer0.org1.example.com")
 
 @when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args}')
 def step_impl(context, numInvokes, channel, name, args):
@@ -370,25 +381,29 @@ def step_impl(context, name, args):
 def step_impl(context, numInvokes):
     invokes_impl(context, numInvokes, context.interface.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
 
-@when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}"')
-def random_invoke_impl(context, name, args, length, peer):
+@when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}" using orderer "{orderer}"')
+def random_invoke_impl(context, name, args, length, peer, orderer):
     payload = ''.join(random.choice(string.ascii_letters) for _ in range(length))
     random_key = str(random.randint(0, sys.maxint))
     context.payload = {"payload": payload,
                     "len": length}
     context.random_key=random_key
     chaincode = {"args": args.format(random_value=payload, random_key=random_key),
-                 "name": name}
-    orderers = context.interface.get_orderers(context)
-    context.result = context.interface.invoke_chaincode(context, chaincode, orderers, peer, context.interface.TEST_CHANNEL_ID)
+                 "chaincodeId": str(name),
+                 "name": str(name)}
+    context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}"')
+def step_impl(context, name, args, length):
+    random_invoke_impl(context, name, args, length, "peer0.org1.example.com", "orderer0.example.com")
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d}')
 def step_impl(context, name, args, length):
-    random_invoke_impl(context, name, args, length, "peer0.org1.example.com")
+    random_invoke_impl(context, name, args, length, "peer0.org1.example.com", "orderer0.example.com")
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args}')
 def step_impl(context, name, args):
-    random_invoke_impl(context, name, args, 1024, "peer0.org1.example.com")
+    random_invoke_impl(context, name, args, 1024, "peer0.org1.example.com", "orderer0.example.com")
 
 @when(u'a user invokes on the chaincode named "{name}"')
 def step_impl(context, name):
@@ -398,22 +413,24 @@ def step_impl(context, name):
 def step_impl(context):
     invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
 
-@when(u'a user creates a channel named "{channelId}"')
-def create_channel_impl(context, channelId):
+@when(u'a user creates a channel named "{channelId}" using orderer "{orderer}')
+def create_channel_impl(context, channelId, orderer):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
-    orderers = context.interface.get_orderers(context)
-    context.interface.create_channel(context, orderers, channelId)
+    context.interface.create_channel(context, orderer, channelId)
+
+@when(u'a user creates a channel named "{channelId}"')
+def step_impl(context, channelId):
+    create_channel_impl(context, channelId, "orderer0.example.com")
 
 @when(u'a user creates a channel')
 def step_impl(context):
-    create_channel_impl(context, context.interface.TEST_CHANNEL_ID)
+    create_channel_impl(context, context.interface.TEST_CHANNEL_ID, "orderer0.example.com")
 
 @when(u'a user makes all peers join the channel "{channelId}"')
 def join_channel_impl(context, channelId):
     peers = context.interface.get_peers(context)
-    orderers = context.interface.get_orderers(context)
-    context.interface.join_channel(context, peers, orderers, channelId)
+    context.interface.join_channel(context, peers, channelId)
 
 @when(u'a user makes all peers join the channel')
 def step_impl(context):
@@ -421,13 +438,19 @@ def step_impl(context):
 
 @when(u'a user makes peer "{peer}" join the channel "{channelId}"')
 def step_impl(context, channelId, peer):
-    orderers = context.interface.get_orderers(context)
-    context.interface.join_channel(context, [peer], orderers, channelId)
+    context.interface.join_channel(context, [peer], channelId)
+
+@when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}" using orderer "{orderer}"')
+def fetch_impl(context, channelID, peer, orderer):
+    context.interface.fetch_channel(context, [peer], orderer, channelID, location=".")
 
 @when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}"')
 def step_impl(context, channelID, peer):
-    orderers = context.interface.get_orderers(context)
-    context.interface.fetch_channel(context, [peer], orderers, channelID, location=".")
+    fetch_impl(context, channelID, peer, "orderer0.example.com")
+
+@when(u'a user fetches genesis information from peer "{peer}" using "{orderer}"')
+def step_impl(context, peer, orderer):
+    fetch_impl(context, context.interface.TEST_CHANNEL_ID, peer, orderer)
 
 @then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
 def step_impl(context, response, org, status):
@@ -511,3 +534,13 @@ def containing_impl(context, response, peer):
 @then(u'a user receives a response containing {response}')
 def step_impl(context, response):
     containing_impl(context, response, "peer0.org1.example.com")
+
+@then(u'the block file is fetched from peer "{peer}"')
+def step_impl(context, peer):
+    output = context.composition.docker_exec(["ls", "."], [peer])
+    assert "{0}.block".format(context.interface.TEST_CHANNEL_ID) in output[peer], "The channel block file has not been fetched"
+
+@then(u'the file "{channelID}.block" file is fetched from peer "{peer}"')
+def step_impl(context, channelID, peer):
+    output = context.composition.docker_exec(["ls", "."], [peer])
+    assert "{0}.block".format(channelID) in output[peer], "The channel block file has not been fetched"

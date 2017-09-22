@@ -120,9 +120,9 @@ Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum"]
   Then a user receives a success response of 3000
 
+
 @daily
 Scenario Outline: FAB-5789: Test chaincode marbles02 initMarble/readMarble/transferMarble/transferMarblesBasedOnColor in <language> language and <database> database for <type> orderer
-
     Given I have a bootstrapped fabric network of type <type> using state-database <database>
     When a user sets up a channel
     And a user deploys chaincode at path "<path>" with args [""] with language "<language>"
@@ -263,13 +263,12 @@ Scenario Outline: FAB-5790: Test chaincode marbles02 initMarble/readMarble/delet
     | type  |                       path                                     | language |
     | solo  |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |
     | kafka |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |
-#   | solo  |       ../../fabric-test/chaincodes/marbles/node                | NODE     |
-#   | kafka |       ../../fabric-test/chaincodes/marbles/node                | NODE     |
+#    | solo  |       ../../fabric-test/chaincodes/marbles/node                | NODE     |
+#    | kafka |       ../../fabric-test/chaincodes/marbles/node                | NODE     |
 # FAB-6678 : skip FAB-5790 parts 3 & 4, until FAB-6271 gets fixed and we receive an an error code in addition to the error message
 
 @daily
 Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, using marbles02, for <type> orderer
-
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type <type>
   When a user sets up a channel
@@ -326,6 +325,7 @@ Scenario Outline: FAB-5791: Chaincode to test shim interface API, for <type> ord
     | solo  |
     | kafka |
 
+
 @smoke
 Scenario Outline: FAB-6211: Test example02 chaincode written using <language> <security>
     Given I have a bootstrapped fabric network of type solo <security>
@@ -345,6 +345,7 @@ Examples:
     | github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 | GOLANG   | without tls |
     |        ../../fabric-test/chaincodes/example02/node                      | NODE     | with tls    |
     |        ../../fabric-test/chaincodes/example02/node                      | NODE     | without tls |
+
 
 @daily
 Scenario Outline: FAB-6256: Test rich queries using marbles chaincode using <language>

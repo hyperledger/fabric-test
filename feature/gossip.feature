@@ -201,7 +201,6 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a 
 
   # Bootstrap the network create channel, deploy chaincode
   And I have a bootstrapped fabric network of type kafka
-  And I wait "30" seconds
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
 

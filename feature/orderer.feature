@@ -58,13 +58,11 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
     Then the Org1 is able to connect to the kafka cluster
     And the orderer functions successfully
 
-@daily
-Scenario Outline: Message Payloads Less than 1MB, for <type> orderer
-    # This test has limitations when using the CLI interface to execute the commands due to cli
-    # argument size limits. You can only have command line arguments of a certain size.
-    # Larger payload sizes can be tested and should pass when using SDK interfaces that should
-    # not have these limitations.
-    Given I have a bootstrapped fabric network of type <type> 
+
+@smoke
+Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer using the <interface> interface
+    Given I have a bootstrapped fabric network of type <type>
+    And I use the <interface> interface
     When a user sets up a channel
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
     # 1K
@@ -90,39 +88,55 @@ Scenario Outline: Message Payloads Less than 1MB, for <type> orderer
     Then a user receives a response containing a value of length 130610
     And a user receives a response with the random value
 Examples:
-    | type  |
-    | solo  |
-    | kafka |
+    | type  |  interface |
+    | solo  |     CLI    |
+    | kafka |     CLI    |
+    | solo  | NodeJS SDK |
+    | kafka | NodeJS SDK |
 
+
+# 2MB - FAILS (FAB-5117): Error: Received message larger than max (4195324 vs. 4194304)
 @skip
+@daily
 Scenario Outline: FAB-3851: Message Payloads More than 1MB, for <type> orderer
-    Given I have a bootstrapped fabric network of type <type> 
+    Given I have a bootstrapped fabric network of type <type> using state-database couchdb
+    And I use the NodeJS SDK interface
     When a user sets up a channel
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
-#    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130734
-#    And I wait "5" seconds
-#    And a user queries on the chaincode named "mycc" with args ["get","g"]
-#    Then a user receives a response containing a value of length 130734
-#    And a user receives a response with the random value
-#    #
-#    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random_value}"] of length 1048576
-#    And I wait "30" seconds
-#    And a user queries on the chaincode named "mycc" with args ["get","h"]
-#    Then a user receives response with length value
-#    #
-#    When a user invokes on the chaincode named "mycc" with random args ["put","i","{random_value}"] of length 2097152
-#    And I wait "30" seconds
-#    And a user queries on the chaincode named "mycc" with args ["get","i"]
-#    Then a user receives response with length value
-#    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130734
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","g"]
+    Then a user receives a response containing a value of length 130734
+    And a user receives a response with the random value
+
+    # 1MB
+    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random_value}"] of length 1048576
+    And I wait "7" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","h"]
+    Then a user receives a response containing a value of length 1048576
+
+    # 1.5MB
+    When a user invokes on the chaincode named "mycc" with random args ["put","h","{random_value}"] of length 1572864
+    And I wait "7" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","h"]
+    Then a user receives a response containing a value of length 1572864
+
+    # 2MB - FAILS (FAB-5117): Error: Received message larger than max (4195324 vs. 4194304)
+    When a user invokes on the chaincode named "mycc" with random args ["put","i","{random_value}"] of length 2097152
+    And I wait "7" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","i"]
+    Then a user receives a response containing a value of length 2097152
+
+#    # 4MB Fails: Error: Received message larger than max (4195324 vs. 4194304)
 #    When a user invokes on the chaincode named "mycc" with random args ["put","j","{random_value}"] of length 4194304
-#    And I wait "30" seconds
+#    And I wait "7" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","j"]
-#    Then a user receives response with length value
+#    Then a user receives a response containing a value of length 4194304
 Examples:
     | type  |
     | solo  |
     | kafka |
+
 
 @daily
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
@@ -187,7 +201,6 @@ Examples:
 Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the RF set, and <bringUpType> in LIFO order
     # By default, the number of kafka brokers in the RF set is 3(KAFKA_DEFAULT_REPLICATION_FACTOR),
     # and the min ISR is 2(KAFKA_MIN_INSYNC_REPLICAS)
-
     Given I have a bootstrapped fabric network of type kafka
     When a user sets up a channel
     When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"

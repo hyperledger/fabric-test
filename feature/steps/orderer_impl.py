@@ -67,19 +67,16 @@ def stop_leader_impl(context, orderer, takeDownType):
     brokers = orderer_util.getKafkaBrokerList(context, orderer)
     kafkas = orderer_util.getKafkaIPs(context, brokers)
     leader = orderer_util.getKafkaPartitionLeader(kafkaBrokers=kafkas)
-    topic, isr_list = orderer_util.getKafkaTopic(kafkaBrokers=kafkas)
-    print(leader)
 
     # Save stopped broker
     if not hasattr(context, "stopped_brokers"):
         context.stopped_brokers = []
     context.stopped_brokers.append(leader)
     # Now that we know the kafka leader, stop it
-    #context.composition.stop([leader])
     basic_impl.bringdown_impl(context, leader, takeDownType)
 
     if not hasattr(context, "prevLeader"):
-       context.prevLeader=leader
+       context.prevLeader = leader
 
 @when(u'I {bringUpType} a former kafka topic partition leader')
 def step_impl(context, bringUpType):
@@ -108,9 +105,7 @@ def step_impl(context):
 def start_leader_impl(context, orderer, bringUpType):
     # Get the last stopped kafka broker from the stopped broker list
     broker = context.stopped_brokers.pop()
-    #context.composition.start([broker])
     basic_impl.bringup_impl(context, broker, bringUpType)
-
 
 @when(u'a new organization {organization} certificate is added')
 def step_impl(context, organization):
@@ -124,19 +119,19 @@ def step_impl(context, organization):
 def step_impl(context, organization):
     pass
 
-@then(u'ensure kafka ISR set contains {count} brokers')
+@then(u'ensure kafka ISR set contains {count:d} brokers')
 def step_impl(context, count):
     brokers = orderer_util.getKafkaBrokerList(context, "orderer0.example.com")
     kafkas = orderer_util.getKafkaIPs(context, brokers)
-    topic, isr_list = orderer_util.getKafkaTopic(kafkaBrokers=kafkas)
-    assert len(isr_list)==int(count), "len of isr_list: {} does not match expected number of brokersi: {}".format(len(isr_list), int(count))
- 
+    _, isr_list = orderer_util.getKafkaTopic(kafkaBrokers=kafkas)
+    assert len(isr_list) == count, "len of isr_list: {0} does not match expected number of brokers: {1}".format(len(isr_list), count)
 
 @then(u'the broker is reported as down')
 def step_impl(context):
     brokers = orderer_util.getKafkaBrokerList(context, "orderer0.example.com")
     kafkas = orderer_util.getKafkaIPs(context, brokers)
-    topic, isr_list = orderer_util.getKafkaTopic(kafkaBrokers=kafkas)
+    _, isr_list = orderer_util.getKafkaTopic(kafkaBrokers=kafkas)
+
     #as long as we have 1 broker in isr_list, check that none from stopped_brokers list exist in isr_list
     if isr_list >= 1:
         for kafka in context.stopped_brokers:
@@ -144,7 +139,8 @@ def step_impl(context):
 
     #for each broker in isr_list check logs
     for kafka in isr_list:
-        assert common_util.is_in_log([kafka], "Shutdown completed (kafka.server.ReplicaFetcherThread)"), "could not verify in the remaining broker logs that prevLeader is down"
+        assert common_util.is_in_log([kafka], "Shutdown completed (kafka.server.ReplicaFetcherThread)"), \
+                                          "could not verify in the remaining broker logs that prevLeader is down"
 
 @then(u'the broadcasted message is delivered')
 def step_impl(context):
