@@ -674,7 +674,7 @@ function chaincodeInstantiate(channel, client, org) {
             tx_id = request.txId;
 
             // sendInstantiateProposal
-            //logger.info('request_instantiate: ', request_instantiate);
+            logger.info('request instantiate proposal: ', request);
             return channel.sendInstantiateProposal(request);
         },
         function(err) {

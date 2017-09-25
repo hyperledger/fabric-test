@@ -184,14 +184,14 @@ if ( ccType == 'ccchecker' ) {
     payLoadMax = parseInt(uiContent.ccOpt.payLoadMax)/2;
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 Nid, channel.getName(), org, pid, ccType,keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+                 Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
 } else if ( ccType == 'marblescc' ) {
     keyStart = parseInt(uiContent.ccOpt.keyStart);
     payLoadMin = parseInt(uiContent.ccOpt.payLoadMin);
     payLoadMax = parseInt(uiContent.ccOpt.payLoadMax);
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 Nid, channel.getName(), org, pid, ccType,keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+                 Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] ccType: %s, keyStart: %d', Nid, channel.getName(), org, pid, ccType, keyStart);
 //construct invoke request
@@ -262,12 +262,19 @@ function getQueryRequest() {
         }
     } else if ( ccType == 'marblescc' ) {
         arg0 ++;
-        for ( i=0; i<keyIdx.length; i++ ) {
-            testQueryArgs[keyIdx[i]] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        var keyA = keyStart;
+        if ( arg0 - keyStart > 10 ) {
+            keyA = arg0 - 10;
         }
-        //testQueryArgs[0] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        if ( uiContent.invoke.query.fcn == 'getMarblesByRange' ) {
+            testQueryArgs[0] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+keyA;
+            testQueryArgs[1] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+        } else {
+            for ( i=0; i<keyIdx.length; i++ ) {
+                testQueryArgs[keyIdx[i]] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+            }
+        }
     }
-    //logger.info('d:id:chan:org=%d:%s:%s:%d getQueryRequest] testQueryArgs[1]', Nid, channelName, org, pid, testQueryArgs[1]);
 
     tx_id = client.newTransactionID();
     request_query = {
@@ -1085,7 +1092,6 @@ function invoke_query_simple(freq) {
             } else {
                 tCurr = new Date().getTime();
                 if (response_payloads) {
-                    logger.info('response_payloads length:', response_payloads.length);
                     for(let j = 0; j < response_payloads.length; j++) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] query result:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
                     }

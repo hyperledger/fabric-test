@@ -2,7 +2,6 @@
     "channelID": "_ch2",
     "chaincodeID": "marbles_cc",
     "chaincodeVer": "v0",
-    "chainID": "testchainid",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Constant",
@@ -63,7 +62,7 @@
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom"]
+            "args": ["marble", "white","35","tom"]
         }
     },
     "SCFile": [

@@ -48,7 +48,7 @@
         "keyIdx": [0],
         "keyPayLoad": [2],
         "keyStart": "0",
-        "payLoadMin": "1024",
+        "payLoadMin": "1",
         "payLoadMax": "1024"
     },
     "deploy": {
@@ -63,7 +63,7 @@
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom"]
+            "args": ["marble", "white","35","tom"]
         }
     },
     "SCFile": [

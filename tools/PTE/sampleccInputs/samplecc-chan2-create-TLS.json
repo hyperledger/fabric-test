@@ -2,7 +2,6 @@
     "channelID": "_ch2",
     "chaincodeID": "sample_cc",
     "chaincodeVer": "v0",
-    "chainID": "testchainid",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Simple",

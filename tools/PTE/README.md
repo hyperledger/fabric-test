@@ -400,7 +400,6 @@ The output includes network id, process id, transaction type, total transactions
         "channelID": "_ch1",
         "chaincodeID": "sample_cc",
         "chaincodeVer": "v0",
-        "chainID": "testchainid",
         "logLevel": "ERROR",
         "invokeCheck": "TRUE",
         "transMode": "Constant",
@@ -478,7 +477,6 @@ where:
 * **channelID**: channel ID for the run.
 * **chaincodeID**: chaincode ID for the run.
 * **chaincodeVer**: chaincode version.
-* **chainID**: chain ID for the run. **DO NOT CHANGE.**
 * **logLevel**: logging level for the run. Options are ERROR, DEBUG, or INFO.  Set to ERROR for performance test. The default value is ERROR.
 * **invokeCheck**: if this is TRUE, then a query will be executed for the last invoke upon the receiving of the event of the last invoke. This value is ignored for query test.
 * **transMode**: transaction mode

@@ -63,7 +63,7 @@
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom"]
+            "args": ["marble", "yellow","35","tom"]
         }
     },
     "SCFile": [
