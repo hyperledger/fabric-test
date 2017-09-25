@@ -97,14 +97,7 @@ class Composition:
         return results
 
     def parseComposeFilesArg(self, composeFileArgs):
-        composeFileList = []
-        for composeFile in composeFileArgs.split():
-            if not os.path.isdir(composeFile):
-                composeFileList.append(composeFile)
-            else:
-                composeFileList.append(os.path.join(composeFile, 'docker-compose.yml'))
-
-        argSubList = [["-f", composeFile] for composeFile in composeFileList]
+        argSubList = [["-f", composeFile] for composeFile in composeFileArgs]
         args = [arg for sublist in argSubList for arg in sublist]
         return args
 
