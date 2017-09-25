@@ -301,6 +301,8 @@ Scenario Outline: FAB-5790: Test chaincode fabric/examples/marbles02: initMarble
     | solo  |    5     | ../../fabric-test/chaincodes/marbles/node                     | NODE     |
     | kafka |    30    | ../../fabric-test/chaincodes/marbles/node                     | NODE     |
 
+
+@daily
 Scenario Outline: FAB-3888: State Transfer Test using marbles02 where a non-leader is brought down , and then after few invokes it is brought back up, to check if the non-leader successfully receives the blocks and update itself
 
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
