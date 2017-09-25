@@ -31,11 +31,11 @@ This is the main script to execute all tasks.
     ./networkLauncher.sh [opt] [value]
        options:
          -a: network action [up|down], default=up
-         -x: number of CAs
+         -x: number of ca, default=0
          -d: ledger database type, default=goleveldb
          -f: profile string, default=test
          -h: hash type, default=SHA2
-         -k: number of kafka, default=solo
+         -k: number of kafka, default=0
          -z: number of zookeepers, default=0
          -n: number of channels, default=1
          -o: number of orderers, default=1
@@ -44,7 +44,10 @@ This is the main script to execute all tasks.
          -s: security type, default=256
          -t: ledger orderer service type [solo|kafka], default=solo
          -w: host ip 1, default=0.0.0.0
-         -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+         -l: core logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR
+         -c: batch timeout, default=2s
+         -B: batch size, default=10
+         -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
          -S: TLS enablement [enabled|disabled], default=disabled
          -C: company name, default=example.com
@@ -109,13 +112,18 @@ The script is used to create configtx.yaml.
        -r: number of organization, default=1
        -s: security service type, default=256
        -t: orderer service [solo|kafka], default=solo
-       -b: MSP directory, default=/mnt/crypto-config
+       -f: profile name, default=test
+       -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
        -w: host ip 1, default=0.0.0.0
+       -c: batch timeout, default=2s
+       -B: batch size, default=10
+       -v: array of organization name, default=0
+       -C: company name, default=example.com
 
 
 ## Example:
 
-    ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/ -w 10.120.223.35
+    ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -w 10.120.223.35
 
 
 
@@ -140,27 +148,28 @@ The script is used to create a docker-compose.yml and launch the network with sp
     options:
        network variables
        -a: action [create|add]
-       -z: number of CAs
-       -p: number of peers
+       -p: number of peers per organization
        -o: number of orderers
        -k: number of brokers
+       -z: number of zookeeper
        -r: number of organiztions
-       -F: local MSP base directory, default=/root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config
+       -S: TLS enablement [enabled|disabled], default=disabled
+       -x: number of ca
+       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
        -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
+       -C: company name, default=example.com
 
        peer environment variables
        -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]
        -d: core ledger state DB [goleveldb|couchdb]
 
        orderer environment variables
-       -b: batch size [10|msgs in batch/block]
        -t: orderer type [solo|kafka]
-       -c: batch timeout [2s|max secs before send an unfilled batch]
 
 
 ## Example
 
-    ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
+    ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 
 ## IP address and port
