@@ -45,28 +45,7 @@ Ensure that you have Docker for `Linux`_, `Mac`_ or `Windows`_ 1.12 or higher pr
 .. _Mac: https://docs.docker.com/engine/installation/mac/
 .. _Windows: https://docs.docker.com/engine/installation/windows/
 
-You can install Behave and additional packages either using the ``fabric/scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager) or following the links for your specific OS environment.
-    * `pip`_
-    * `python-setuptools`_
-    * `python-dev`_
-    * `build-essential`_
-    * `behave`_
-    * `google`_
-    * `protobuf`_
-    * `pyyaml`_
-
-In addition, you should also install the following packages using `pip`_.
-    * `pykafka`_
-
-.. _pip: https://packaging.python.org/installing/#requirements-for-installing-packages
-.. _python-setuptools: https://packaging.python.org/installing/
-.. _python-dev: https://packaging.python.org/installing/
-.. _build-essential: http://py-generic-project.readthedocs.io/en/latest/installing.html
-.. _behave: http://pythonhosted.org/behave/install.html
-.. _google: https://pypi.python.org/pypi/google
-.. _protobuf: https://pypi.python.org/pypi/protobuf/2.6.1
-.. _pyyaml: https://pypi.python.org/pypi/PyYAML
-.. _pykafka: https://pypi.python.org/pypi/pykafka
+You can install Behave and additional packages using the ``./scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager). This script installs additional packages into your OS environment.
 
 The following repositories are dependencies and are included as submodules at the designated locations
     * `hyperledger-fabric`_: /path/to/fabric-test/fabric
@@ -119,7 +98,6 @@ The following are not covered in these BDD tests:
    * performance
    * long running tests
    * stress testing
-   * timed tests
 
 
 ======================
@@ -145,6 +123,10 @@ There are different ways that you can contribute in this area.
  * Writing feature files
  * Writing python test code to execute the feature files
  * Adding docker-compose files for different network configurations
+
+To add your contributions to the Hyperledger Fabric-test project, please refer to the `Hyperledger Fabric Contribution`_ page for more details.
+
+.. _Hyperledger Fabric Contribution: http://hyperledger-fabric.readthedocs.io/en/latest/CONTRIBUTING.html
 
 ===================================
 How Do I Write My Own Feature File?
@@ -266,6 +248,11 @@ Behave and the BDD ecosystem have a number of `tools`_ and extensions to assist 
 
 Helpful Docker Commands
 -----------------------
+There are many helpful Docker tutorials available online. Feel free to take a look at some helpful hints found in the `Hyperledger Fabric Docker Tips`_ page.
+
+.. _Hyperledger Fabric Docker Tips: https://hyperledger-fabric.readthedocs.io/en/latest/chaincode4ade.html#download-docker-images
+
+Some helpful docker commands when debugging:
    * View running containers
       * ``$ docker ps``
    * View all containers (active and non-active)
