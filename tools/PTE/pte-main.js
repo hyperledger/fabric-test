@@ -16,9 +16,11 @@
 
 /*
  *   usage:
- *      node pte-main.js <ui file> <Nid>
- *        - ui file: user input file
+ *      node pte-main.js <Nid> <uiFile> <tStart> <PTEid>
  *        - Nid: Network id
+ *        - uiFile: user input file
+ *        - tStart: tStart
+ *        - PTEid: PTE id
  */
 // This is an end-to-end test that focuses on exercising all parts of the fabric APIs
 // in a happy-path scenario

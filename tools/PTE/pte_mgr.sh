@@ -48,7 +48,7 @@ function pteProc {
 
     iPTE=0
     for i in ${pteArray[@]}; do
-        echo "./$EXEPTE $i $iPTE $tStartE &"
+        echo "./$EXEPTE $i $iPTE $tStart &"
         ./$EXEPTE $i $iPTE $tStart &
         let iPTE+=1
     done
