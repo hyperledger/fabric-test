@@ -59,44 +59,50 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
     And the orderer functions successfully
 
 @daily
-Scenario: Message Payloads Less than 1MB
+Scenario Outline: Message Payloads Less than 1MB, for <type> orderer
     # This test has limitations when using the CLI interface to execute the commands due to cli
     # argument size limits. You can only have command line arguments of a certain size.
     # Larger payload sizes can be tested and should pass when using SDK interfaces that should
     # not have these limitations.
-    Given I have a bootstrapped fabric network
+    Given I have a bootstrapped fabric network of type <type> 
+    And I wait "<waitTime>" seconds
     When a user sets up a channel
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
-    And I wait "30" seconds
+    And I wait "15" seconds
     # 1K
     And a user invokes on the chaincode named "mycc" with random args ["put","a","{random_value}"] of length 1024
-    And I wait "10" seconds
+    And I wait "3" seconds
     And a user queries on the chaincode named "mycc" with args ["get","a"]
     Then a user receives a response containing a value of length 1024
     And a user receives a response with the random value
     # 64K
     When a user invokes on the chaincode named "mycc" with random args ["put","b","{random_value}"] of length 65536
-    And I wait "5" seconds
+    And I wait "3" seconds
     And a user queries on the chaincode named "mycc" with args ["get","b"]
     Then a user receives a response containing a value of length 65536
     #
     When a user invokes on the chaincode named "mycc" with random args ["put","d","{random_value}"] of length 100000
-    And I wait "5" seconds
+    And I wait "3" seconds
     And a user queries on the chaincode named "mycc" with args ["get","d"]
     Then a user receives a response containing a value of length 100000
     #
     When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130610
-    And I wait "5" seconds
+    And I wait "3" seconds
     And a user queries on the chaincode named "mycc" with args ["get","g"]
     Then a user receives a response containing a value of length 130610
     And a user receives a response with the random value
-
+Examples:
+    | type  | waitTime |
+    | solo  |     5    |
+    | kafka |    30    |
 
 @skip
-Scenario: FAB-3851: Message Payloads More than 1MB
-    Given I have a bootstrapped fabric network
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
-    And I wait "30" seconds
+Scenario Outline: FAB-3851: Message Payloads More than 1MB, for <type> orderer
+    Given I have a bootstrapped fabric network of type <type> 
+    And I wait "<waitTime>" seconds
+    When a user sets up a channel
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
+    And I wait "15" seconds
 #    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130734
 #    And I wait "5" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","g"]
@@ -117,15 +123,19 @@ Scenario: FAB-3851: Message Payloads More than 1MB
 #    And I wait "30" seconds
 #    And a user queries on the chaincode named "mycc" with args ["get","j"]
 #    Then a user receives response with length value
+Examples:
+    | type  | waitTime |
+    | solo  |     5    |
+    | kafka |    30    |
 
 @daily
 #@doNotDecompose
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
-    And I wait "60" seconds
+    And I wait "30" seconds
     When a user sets up a channel
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-    And I wait "30" seconds
+    And I wait "15" seconds
     Then the chaincode is deployed
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "10" seconds
@@ -158,7 +168,7 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Then a user receives a success response of 970
 
 @skip
-Scenario Outline: FAB-3937: Message Broadcast
+Scenario Outline: FAB-3937: Message Broadcast, for <type> orderer
     Given a bootstrapped orderer network of type <type>
     When a message is broadcasted
     Then I get a successful broadcast response
@@ -168,7 +178,7 @@ Examples:
     | kafka |
 
 @skip
-Scenario Outline: FAB-3938: Broadcasted message delivered.
+Scenario Outline: FAB-3938: Broadcasted message delivered, for <type> orderer
     Given a bootstrapped orderer network of type <type>
     When 1 unique messages are broadcasted
     Then all 1 messages are delivered within 10 seconds
@@ -178,17 +188,15 @@ Examples:
     | kafka |
 
 @daily
-# This test will be skipped until it is determined why this test fails intermittently
-Scenario Outline: [FAB-4770] [FAB-4845]: Test taking down all (3) kafka brokers in the RF set, and bringing them back in LIFO order
+Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the RF set, and <bringUpType> in LIFO order
     # By default, the number of kafka brokers in the RF set is 3(KAFKA_DEFAULT_REPLICATION_FACTOR),
     # and the min ISR is 2(KAFKA_MIN_INSYNC_REPLICAS)
 
-
     Given I have a bootstrapped fabric network of type kafka
-    And I wait "<waitTime>" seconds
+    And I wait "30" seconds
     When a user sets up a channel
     When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-    And I wait "10" seconds
+    And I wait "15" seconds
     Then the chaincode is deployed
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "5" seconds
@@ -247,19 +255,19 @@ Scenario Outline: [FAB-4770] [FAB-4845]: Test taking down all (3) kafka brokers 
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 960
     Examples:
-        | waitTime | takeDownType | bringUpType |  count |
-        |    60    |  stop        | start       |    1   |
-        |    60    |  pause       | unpause     |    1   |
-        |    60    | disconnect   | connect     |    1   |
+        | takeDownType | bringUpType |  count |
+        | stop         | start       |    1   |
+        | pause        | unpause     |    1   |
+        | disconnect   | connect     |    1   |
 
-@daily
-Scenario Outline: FAB-4808: Orderer_BatchTimeOut is honored
+@skip
+Scenario Outline: FAB-4808: Orderer_BatchTimeOut is honored, for <type> orderer
     Given the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is <envValue>
     And I have a bootstrapped fabric network of type <type>
     And I wait "<waitTime>" seconds
     When a user sets up a channel
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-    And I wait "20" seconds
+    And I wait "15" seconds
     Then the chaincode is deployed
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 1000
@@ -272,7 +280,7 @@ Scenario Outline: FAB-4808: Orderer_BatchTimeOut is honored
     Then a user receives a success response of <lastQuery>
 Examples:
     | type  | waitTime |  envValue  | firstQuery | lastQuery |
-    | solo  |    20    | 2 seconds  |    990     |   990     |
+    | solo  |     5    | 2 seconds  |    990     |   990     |
     | kafka |    30    | 2 seconds  |    990     |   990     |
-    | solo  |    20    | 10 seconds |    1000    |   990     |
+    | solo  |     5    | 10 seconds |    1000    |   990     |
     | kafka |    30    | 10 seconds |    1000    |   990     |

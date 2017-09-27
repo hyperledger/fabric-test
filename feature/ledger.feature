@@ -14,11 +14,11 @@ Feature: Ledger Service
 
 @skip
 Scenario Outline: FAB-6036-1: Test marbles02_private initMarble, readMarble, deleteMarble, transferMarble, getMarblesByRange, stateTransfer
-  Given I have a bootstrapped fabric network of type <type>
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
+  And I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
   When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
-  And I wait "5" seconds
+  And I wait "15" seconds
   Then the chaincode is deployed
 
 
@@ -184,8 +184,8 @@ Given the initial non-leader peer of "org1" comes back up
 
   Examples:
    | type  | database | waitTime |
-   | kafka |  leveldb |   30     |
-   | kafka |  couchdb |   30     |
+   | kafka |  leveldb |   70     |
+   | kafka |  couchdb |   70     |
    | solo  |  leveldb |   20     |
    | solo  |  couchdb |   20     |
 
@@ -195,7 +195,7 @@ Scenario Outline: FAB-6036-2: Test marbles02_private : getHistoryForMarble
   Given I have a bootstrapped fabric network of type <type>
   And I wait "<waitTime>" seconds
   When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
-  And I wait "5" seconds
+  And I wait "30" seconds
   Then the chaincode is deployed
 
   When a user invokes on the chaincode named "mycc" with args ["initMarble","marble1","red","35","tom"]
@@ -244,5 +244,5 @@ Scenario Outline: FAB-6036-2: Test marbles02_private : getHistoryForMarble
     | type  | database | waitTime |
     | solo  |  leveldb |   20     |
     | solo  |  couchdb |   20     |
-    | kafka |  leveldb |   30     |
-    | kafka |  couchdb |   30     |
+    | kafka |  leveldb |   70     |
+    | kafka |  couchdb |   70     |
