@@ -44,13 +44,14 @@ In brief, PTE has the following features:
     - [User Input File](#user-input-file)
     - [Service Credentials File](#service-credentials-file)
     - [Creating a Local Fabric Network](#creating-a-local-fabric-network)
+    - [CI Test](#ci-test)
 
 ---
 ### Code Base for v1.0.0
 - Fabric commit level: e4b47043270f2293daabf7d24984dd46901e04e7
 - fabric-sdk-node commit level: 974bafcb1059c4cb8dda54a9e9d0afc6d87854c5
 - fabric-ca commit level: 74f8f4d4c29e45a79a8849efb057dbd8de3ae8d0
-- PTE commit level: `latest`
+- PTE commit level: 359dbfb39f507a737ad52129ac0e4fac9cc03c0b
 
 
 ### Future items
@@ -643,7 +644,9 @@ The service credentials contain the information of the network and are stored in
     - `cd tools/NL`
     - `./networkLauncher.sh -?`
 
+## CI Test
 
+A set of predefined tests are designed for CI daily or weekly execution and are available in the directory, `CITest`, under PTE.
 ---
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.

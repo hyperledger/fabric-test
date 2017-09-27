@@ -1,0 +1,4 @@
+sdk=node CITest/preconfig/samplecc/samplecc-chan1-install1-TLS.json
+sdk=node CITest/preconfig/samplecc/samplecc-chan1-install2-TLS.json
+sdk=node CITest/preconfig/samplecc/samplecc-chan2-install3-TLS.json
+sdk=node CITest/preconfig/samplecc/samplecc-chan2-install4-TLS.json

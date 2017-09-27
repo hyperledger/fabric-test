@@ -1,0 +1,2 @@
+sdk=node CITest/preconfig/marblescc/marblescc-chan1-instantiate-TLS.json
+sdk=node CITest/preconfig/marblescc/marblescc-chan2-instantiate-TLS.json

@@ -1,0 +1,2 @@
+driver=pte CITest/FAB-3989-4q-TLS/samplecc/runCases-FAB-3989-4q1-TLS.txt
+driver=pte CITest/FAB-3989-4q-TLS/samplecc/runCases-FAB-3989-4q2-TLS.txt

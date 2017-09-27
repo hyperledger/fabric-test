@@ -91,11 +91,23 @@ module.exports.existsSync = function(absolutePath /*string*/) {
 module.exports.readFile = readFile;
 
 var ORGS;
+var goPath;
 
 var	tlsOptions = {
 	trustedRoots: [],
 	verify: false
 };
+
+function getgoPath() {
+
+        if ( typeof(ORGS.gopath) === 'undefined' ) {
+            goPath = '';
+        } else if ( ORGS.gopath == 'GOPATH' ) {
+            goPath = process.env['GOPATH'];
+        } else {
+            goPath = ORGS.gopath;
+        }
+}
 
 function getMember(username, password, client, nid, userOrg, svcFile) {
 	hfc.addConfigFile(svcFile);
@@ -162,10 +174,11 @@ function getAdmin(client, nid, userOrg, svcFile) {
             keyPEM = ORGS[userOrg].priv;
             certPEM = ORGS[userOrg].admin_cert;
         } else {
+            getgoPath();
             logger.info(' %s admin_cert undefined', userOrg);
-            keyPath =  ORGS[userOrg].adminPath + '/keystore';
+            keyPath =  path.join(goPath, ORGS[userOrg].adminPath , 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = ORGS[userOrg].adminPath + '/signcerts';
+            certPath = path.join(goPath, ORGS[userOrg].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getAdmin] keyPath: %s', keyPath);
             logger.debug('[getAdmin] certPath: %s', certPath);
@@ -195,15 +208,17 @@ function getOrdererAdmin(client, userOrg, svcFile) {
         var certPath;
         var certPEM;
         var ordererID = ORGS[userOrg].ordererID;
+
         if (typeof ORGS['orderer'][ordererID].admin_cert !== 'undefined') {
             logger.info(' %s admin_cert defined', userOrg);
             keyPEM = ORGS['orderer'][ordererID].priv;
             certPEM = ORGS['orderer'][ordererID].admin_cert;
         } else {
+            getgoPath();
             logger.info(' %s admin_cert undefined', userOrg);
-            keyPath =  ORGS['orderer'][ordererID].adminPath + '/keystore';
+            keyPath = path.join(goPath, ORGS['orderer'][ordererID].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = ORGS['orderer'][ordererID].adminPath + '/signcerts';
+            certPath = path.join(goPath, ORGS['orderer'][ordererID].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
             logger.debug('[getOrdererAdmin] certPath: %s', certPath);

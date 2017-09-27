@@ -1,0 +1,4 @@
+sdk=node CITest/preconfig/channels/samplecc-chan1-join1-TLS.json
+sdk=node CITest/preconfig/channels/samplecc-chan1-join2-TLS.json
+sdk=node CITest/preconfig/channels/samplecc-chan2-join3-TLS.json
+sdk=node CITest/preconfig/channels/samplecc-chan2-join4-TLS.json
