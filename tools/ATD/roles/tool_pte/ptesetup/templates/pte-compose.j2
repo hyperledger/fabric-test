@@ -1,0 +1,23 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+version: '2'
+
+services:
+
+  PTE:
+    container_name: PTE
+    image: pte:latest
+    network_mode: bridge
+    hostname: PTE
+    environment:
+      - TESTCASE={{ testcase }}
+      - CHAINCODE={{ chaincode }}
+    volumes:
+      - {{ fabricworkdir }}/keyfiles:/var/hyperledger/fabric/artifacts
+      - {{ fabricworkdir }}/CISCFiles:/root/gopath/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/CISCFiles
+      - {{ fabrictestpath }}/chaincodes:/root/gopath/src/github.com/hyperledger/fabric-test/chaincodes
+      - {{ fabricworkdir }}/run/keyfiles:/var/hyperledger/allorgs

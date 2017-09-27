@@ -1,0 +1,46 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+- name: Setup variables
+  set_fact:
+    goroot: "/opt/go"
+    gopath: "/opt/gopath/{{ env }}"
+    fabricworkdir: "/opt/gopath/{{ env }}/fabric"
+    fabricpath: "/opt/gopath/{{ env}}/src/github.com/hyperledger/fabric"
+    fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
+
+- name: Check docker compose file stats
+  stat:
+    path: "{{ fabricworkdir }}/run/pte-compose.yml"
+  register: pfile
+
+- name: Shut down PTE container
+  command: "docker-compose -p {{ env }}.pte-compose -f {{ fabricworkdir }}/run/pte-compose.yml down"
+  no_log: true
+
+- name: Check if there are dead containers
+  command: docker ps -a -f status=exited -f name=PTE -q
+  register: deadcontainers
+
+- name: Clean up the finished containers as well
+  shell: docker rm -f $(docker ps -a -f status=exited -f name=PTE -q)
+  when: deadcontainers.stdout_lines | length > 0
+  no_log: true
+
+- name: Test if there are any chaincode container images
+  shell: docker images | grep "pte" | cat | awk '{print $1}'
+  register: images
+  no_log: true
+
+- name: Remove these chaincode container images
+  shell: docker images | grep "pte" | cat | awk '{print $1}' | xargs docker rmi -f
+  when: images.stdout != ""
+  no_log: true
+
+- name: Make sure that working directory is removed
+  file:
+    path: "{{ fabrictestpath }}"
+    state: absent
