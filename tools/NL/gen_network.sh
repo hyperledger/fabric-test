@@ -15,21 +15,21 @@ function printHelp {
    echo "Usage: "
    echo " ./gen_network.sh [opt] [value] "
    echo "    network variables"
-   echo "       -a: action [create|add] "
-   echo "       -p: number of peers per organization"
-   echo "       -o: number of orderers "
-   echo "       -k: number of brokers "
-   echo "       -z: number of zookeeper "
-   echo "       -r: number of organiztions "
+   echo "       -a: action [create|add], default=create"
+   echo "       -p: number of peers per organization, default=1"
+   echo "       -o: number of orderers, default=1"
+   echo "       -k: number of brokers, default=0"
+   echo "       -z: number of zookeeper, default=0"
+   echo "       -r: number of organiztions, default=1"
    echo "       -S: TLS enablement [enabled|disabled], default=disabled "
-   echo "       -x: number of ca "
+   echo "       -x: number of ca, default=0"
    echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "       -C: company name, default=example.com"
    echo " "
    echo "    peer environment variables"
    echo "       -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
-   echo "       -d: core ledger state DB [goleveldb|couchdb] "
+   echo "       -d: core ledger state DB [goleveldb|couchdb], default=goleveldb"
    echo " "
    echo "    orderer environment variables"
    echo "       -t: orderer type [solo|kafka] "
@@ -42,12 +42,18 @@ function printHelp {
 }
 
 #init var
+Req="create"
 nBroker=0
+nZoo=0
 nPeerPerOrg=1
+nOrg=1
+nOrderer=1
+nCA=0
 MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 TLSEnabled="disabled"
 db="goleveldb"
+comName="example.com"
 
 while getopts ":x:z:l:d:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in
@@ -211,7 +217,7 @@ echo "OS: $OS, sedOpt: $sedOpt"
 for (( i=0; i<$nCA; i++ ))
 do
     j=$[ i + 1 ]
-    Dir=$MSPDIR/crypto-config/peerOrganizations/org$j"."$comName"/ca"
+    Dir=$MSPDIR/peerOrganizations/org$j"."$comName"/ca"
     cd $Dir
     tt=`ls *sk`
 
