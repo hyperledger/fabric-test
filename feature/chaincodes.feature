@@ -93,7 +93,7 @@ Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case pas
   When a user queries on the chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel3"]
-  Then a user receives an error response of status: 500
+  Then a user receives an error response of status: 400
 
 @daily
 Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase passing an incorrect ot non-existing string for channelname when cc_ex02 and cc_ex05 installed on different channels
@@ -110,7 +110,7 @@ Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase pass
   When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel3"]
-  Then a user receives a success response of status: 500
+  Then a user receives a success response of status: 400
 
 
 @daily
@@ -128,7 +128,7 @@ Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase pass
   When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", ""]
-  Then a user receives a success response of status: 500
+  Then a user receives a success response of status: 400
 
 @daily
 Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_ex02 and cc_ex05 installed on same channels
@@ -346,6 +346,7 @@ Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, usi
     | solo  |     5    |
     | kafka |    30    |
 
+#TBD: To verify values returned from queries wherever possible
 @daily
 Scenario Outline: FAB-5791: Chaincode to test shim interface API, for <type> orderer
   Given I have a bootstrapped fabric network of type <type>
@@ -354,16 +355,12 @@ Scenario Outline: FAB-5791: Chaincode to test shim interface API, for <type> ord
   And a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "15" seconds
   Then the chaincode is deployed
-  When a user invokes on the chaincode named "mycc" with args ["invoke","getTxTimeStamp"]
   And I wait "5" seconds
-  When a user invokes on the chaincode named "mycc" with args ["invoke","getCreator"]
-  And I wait "5" seconds
-  When a user invokes on the chaincode named "mycc" with args ["invoke","getBinding"]
-  And I wait "5" seconds
-  When a user invokes on the chaincode named "mycc" with args ["invoke","getSignedProposal"]
-  And I wait "5" seconds
-  When a user invokes on the chaincode named "mycc" with args ["invoke","getTransient"]
-  And I wait "5" seconds
+  When a user queries on the chaincode named "mycc" with args ["getTxTimeStamp"]
+  When a user queries on the chaincode named "mycc" with args ["getCreator"]
+  When a user queries on the chaincode named "mycc" with args ["getBinding"]
+  When a user queries on the chaincode named "mycc" with args ["getSignedProposal"]
+  When a user queries on the chaincode named "mycc" with args ["getTransient"]
 
   Examples:
     | type  | waitTime |
