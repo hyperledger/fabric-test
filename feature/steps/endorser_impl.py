@@ -48,8 +48,8 @@ def deploy_impl(context, path, args, name, language, containerName, channel):
     context.chaincode = chaincode
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
-def step_impl(context, path, args, name, channel):
-    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel)
+def step_impl(context, path, args, name, containerName, channel):
+    deploy_impl(context, path, args, name, "GOLANG", containerName, channel)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}"')
 def step_impl(context, path, args, name, language, channel):
