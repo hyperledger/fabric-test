@@ -77,12 +77,12 @@ function nodeProc {
     done
 }
 
-# node requests
+# python requests
 function pythonProc {
     echo "python has not supported yet."
 }
 
-# node requests
+# java requests
 function javaProc {
     echo "java has not supported yet."
 }

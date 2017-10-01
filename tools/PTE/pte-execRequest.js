@@ -16,9 +16,13 @@
 
 /*
  *   usage:
- *      node pte-execRequest.js pid Nid uiFile tStart
- *        - action: deploy, invoke, query
- *        - recurrence: integer number
+ *      node pte-execRequest.js <pid> <Nid> <uiFile> <tStart> <org> <PTEid>
+ *        - pid: process id
+ *        - Nid: Network id
+ *        - uiFile: user input file
+ *        - tStart: tStart
+ *        - org: organization
+ *        - PTEid: PTE id
  */
 // This is an end-to-end test that focuses on exercising all parts of the fabric APIs
 // in a happy-path scenario
