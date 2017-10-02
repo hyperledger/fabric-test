@@ -10,10 +10,10 @@ Feature: Gossip Service
 Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down by <takeDownType>, comes back up and catches up eventually
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
-  And I wait "60" seconds
+  And I wait "70" seconds
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "10" seconds
+  And I wait "15" seconds
   Then the chaincode is deployed
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
@@ -58,10 +58,10 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
 Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <takeDownType>, comes back up *after* another leader is elected, catches up
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
-  And I wait "60" seconds
+  And I wait "70" seconds
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "10" seconds
+  And I wait "15" seconds
   Then the chaincode is deployed
 
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial leader peer of "org1"
@@ -112,16 +112,16 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
 Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization go down via <takeDownType>, then catch up after <bringUpType>"
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
-  And I wait "60" seconds
+  And I wait "70" seconds
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "20" seconds
+  And I wait "15" seconds
   Then the chaincode is deployed
 
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","20"]
-  And I wait "20" seconds
+  And I wait "3" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 980
 
