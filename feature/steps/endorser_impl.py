@@ -210,6 +210,14 @@ def step_impl(context, numInvokes, name, args):
 def step_impl(context, numInvokes, name, args):
     invokes_impl(context, numInvokes, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com")
 
+@when(u'a user invokes on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
+def step_impl(context, channel, name, args, peer):
+    invokes_impl(context, 1, channel, name, args, peer)
+
+@when(u'a user invokes on the chaincode named "{name}" with args {args} on "{peer}"')
+def step_impl(context, name, args, peer):
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer)
+
 @when(u'a user invokes on the chaincode with args {args}')
 def step_impl(context, args):
     invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com")
