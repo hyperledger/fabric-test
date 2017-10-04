@@ -1,6 +1,12 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]; then
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+if [ $# -gt 2 ]; then
     echo "[$0] invalid number of arguments: $#"
     ./test_help.sh test_pte.sh
     exit
@@ -12,6 +18,7 @@ CIDir=$FabricTestDir/fabric-sdk-node/test/PTE/CITest
 ScriptsDir=$CIDir/scripts
 
 TCase=$1
+TStart=$2
 echo "[$0] test case: $TCase"
 
 cd $PTEDir
@@ -31,7 +38,7 @@ if [ $TCase == "robust-i-TLS" ]; then
     echo "*************** [$0] executing: ***************"
     echo "    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& CITest/$TCase/samplecc/$TCase.log"
     sleep 20s
-    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& $CIDir/$TCase/samplecc/$TCase.log &
+    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt $TSTART >& $CIDir/$TCase/samplecc/$TCase.log &
     cd $ScriptsDir
     ./test_robust.sh
     echo "[$0] kill node processes"
@@ -50,7 +57,7 @@ else
             echo "*************** [$0] executing: ***************"
             echo "    ./pte_mgr.sh CITest/$TCase/$cc/$pte > CITest/$TCase/$cc/$pte.log"
             sleep 20s
-            ./pte_mgr.sh CITest/$TCase/$cc/$pte > CITest/$TCase/$cc/$pte.log
+            ./pte_mgr.sh CITest/$TCase/$cc/$pte $TStart > CITest/$TCase/$cc/$pte.log
         done
     done
     cd $PTEDir

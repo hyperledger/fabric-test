@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Usage:
-#    ./test_driver.sh
-#        TCase:
-
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
 
 SETUP="notSetup"
 NL="notCreate"
@@ -11,6 +12,7 @@ CHANNEL="notCreate"
 SYNCHUP="notSynchup"
 CHAINCODE="noCC"
 TCases=()
+TStart=0
 
 function testDriverHelp {
 
@@ -22,6 +24,7 @@ function testDriverHelp {
    echo "    -s: synchup peer ledgers, recommended when network brought up, default=no"
    echo "    -c: chaincode to be installed and instantiated [all|chaincode], default=no"
    echo "    -t [value1 value2 value3 ...]: test cases to be executed"
+   echo "    -b [value]: test cases starting time"
    echo " "
    echo "  available test cases:"
    echo "    FAB-query-TLS: 4 processes X 1000 queries, TLS"
@@ -44,7 +47,7 @@ function testDriverHelp {
    exit
 }
 
-while getopts ":t:c:nps" opt; do
+while getopts ":t:c:b:enps" opt; do
   case $opt in
     # parse environment options
     e)
@@ -71,11 +74,14 @@ while getopts ":t:c:nps" opt; do
           TCases+=($(eval "echo \${$OPTIND}"))
           OPTIND=$((OPTIND + 1))
       done
-
       ;;
     s)
       SYNCHUP="synchup"
       echo "synch up ledger action: $SYNCHUP"
+      ;;
+    b)
+      TStart=$OPTARG
+      echo "TStart: $TStart"
       ;;
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -92,7 +98,7 @@ while getopts ":t:c:nps" opt; do
   esac
 done
 
-echo "SETUP $SETUP, NL $NL, CHANNEL $CHANNEL CHAINCODE $CHAINCODE"
+echo "SETUP $SETUP, NL $NL, CHANNEL $CHANNEL, CHAINCODE $CHAINCODE, TStart $TStart"
 echo "total: ${#TCases[@]} test cases: ${TCases[@]}"
 
 #CIDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest
@@ -102,7 +108,7 @@ CWD=$PWD
 if [ $SETUP == "setup" ]; then
     ./test_setup.sh
     cd $CWD
-    echo "[test_driver] current dir: $PWD"
+    echo "[$0] current dir: $PWD"
     sleep 60
 fi
 
@@ -110,7 +116,7 @@ fi
 if [ $NL == "create" ]; then
     ./test_nl.sh
     cd $CWD
-    echo "[test_driver] current dir: $PWD"
+    echo "[$0] current dir: $PWD"
     sleep 60
 fi
 
@@ -118,7 +124,7 @@ fi
 if [ $CHANNEL == "create" ]; then
     ./test_channel.sh $CHAINCODE
     cd $CWD
-    echo "[test_driver] current dir: $PWD"
+    echo "[$0] current dir: $PWD"
     sleep 60
 fi
 
@@ -126,26 +132,26 @@ fi
 if [ $CHAINCODE != "noCC" ]; then
     ./test_chaincode.sh $CHAINCODE
     cd $CWD
-    echo "[test_driver] current dir: $PWD"
+    echo "[$0] current dir: $PWD"
     sleep 60
 fi
 
 # execute PTE
 # ledger synch-up
 if [ $SYNCHUP == "synchup" ]; then
-    ./test_pte.sh "FAB-query-TLS"
+    ./test_pte.sh "FAB-query-TLS" $TStart
     cd $CWD
-    echo "[test_driver] current dir: $PWD"
+    echo "[$0] current dir: $PWD"
     sleep 60
 fi
 
 cd $CWD
-echo "[test_driver] current dir: $PWD"
+echo "[$0] current dir: $PWD"
 
 
 for t in "${TCases[@]}"
 do
-    ./test_pte.sh $t
+    ./test_pte.sh $t $TStart
     sleep 100
 done
 

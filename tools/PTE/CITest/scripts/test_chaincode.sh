@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
 SDKDir=$FabricTestDir/fabric-sdk-node
 
@@ -16,7 +22,7 @@ if [ $cc == "all" ]; then
     echo "[$0] ccDir: $ccDir"
     cd $SDKDir/test/PTE
     for c1 in $ccDir; do
-        if [ $c1 == 'channels' ]; then 
+        if [ $c1 == 'channels' ]; then
             echo "[$0] The directory [$c1] is not for chaincode!"
         else
             echo "[$0] ***************************************************"
@@ -48,16 +54,9 @@ else
         echo "[$0] *******   instantiate chaincode: $cc  *******"
         echo "[$0] ***************************************************"
         ./pte_driver.sh CITest/preconfig/$cc/runCases-$cc"-instantiate-TLS.txt"
-       
+
     fi
 fi
 
-#echo "[test_channel.sh] install chaincode"
-#./pte_driver.sh CITest/preconfig/runCases-chan-install-TLS.txt
-#sleep 20s
-
-#echo "[test_channel.sh] instantiate chaincode"
-#./pte_driver.sh CITest/preconfig/runCases-chan-instantiate-TLS.txt
-
 cd $CWD
-echo "[test_channel.sh] current dir: $PWD"
+echo "[$0] current dir: $PWD"

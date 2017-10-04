@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
 NLDir=$FabricTestDir/tools/NL
 PTEDir=$FabricTestDir/tools/PTE
@@ -7,7 +13,7 @@ SDKDir=$FabricTestDir/fabric-sdk-node
 
 # setup fabric-test
 CWD=$PWD
-echo "[test_setup.sh] clone fabric-test"
+echo "[$0] clone fabric-test"
 cd $GOPATH/src/github.com/hyperledger
 git clone https://github.com/hyperledger/fabric-test
 
@@ -35,4 +41,4 @@ npm install singly-linked-list --save
 cp -rf $PTEDir $SDKDir/test
 
 cd $CWD
-echo "[test_setup.sh] current dir: $PWD"
+echo "[$0] current dir: $PWD"
