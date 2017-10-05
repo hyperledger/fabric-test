@@ -49,7 +49,6 @@ class Composition:
             self.up(force_recreate, components)
 
     def collectServiceNames(self):
-        'First collect the services names.'
         servicesList = [service for service in self.issueCommand(["config", "--services"]).splitlines() if "WARNING" not in service]
         return servicesList
 

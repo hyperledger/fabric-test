@@ -30,9 +30,8 @@ def setup_channel_impl(context, channelId):
 def step_impl(context):
     setup_channel_impl(context, context.interface.TEST_CHANNEL_ID)
 
-
-@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{containerName}" on channel "{channel}"')
-def deploy_impl(context, path, args, name, language, containerName, channel):
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
+def deploy_impl(context, path, args, name, language, peer, channel, timeout=120):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context)
 
@@ -43,37 +42,82 @@ def deploy_impl(context, path, args, name, language, containerName, channel):
         "channelID": channel,
         "args": args,
     }
-    context.results = context.interface.deploy_chaincode(context, chaincode, [containerName], channel)
+    context.results = context.interface.deploy_chaincode(context, chaincode, [peer], channel)
     # Save chaincode name and path and args
     context.chaincode = chaincode
 
-@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{containerName}" on channel "{channel}"')
-def step_impl(context, path, args, name, containerName, channel):
-    deploy_impl(context, path, args, name, "GOLANG", containerName, channel)
+    chaincode_container = "{0}-{1}-{2}-0".format(context.projectName, peer, chaincode['name'])
+    context.interface.wait_for_deploy_completion(context, chaincode_container, timeout)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}"')
+def step_impl(context, path, args, name, language, peer, channel):
+    deploy_impl(context, path, args, name, language, peer, channel, 120)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
+def step_impl(context, path, args, name, peer, channel, timeout):
+    deploy_impl(context, path, args, name, "GOLANG", peer, channel, timeout)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{peer}" on channel "{channel}"')
+def step_impl(context, path, args, name, peer, channel):
+    deploy_impl(context, path, args, name, "GOLANG", peer, channel)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}" within {timeout:d} seconds')
+def step_impl(context, path, args, name, language, channel, timeout):
+    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel, timeout)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}"')
 def step_impl(context, path, args, name, language, channel):
     deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel)
 
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" within {timeout:d} seconds')
+def step_impl(context, path, args, name, language, timeout):
+    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
+
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}"')
 def step_impl(context, path, args, name, language):
     deploy_impl(context, path, args, name, language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with language "{language}" within {timeout:d} seconds')
+def step_impl(context, path, args, language, timeout):
+    deploy_impl(context, path, args, "mycc", language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with language "{language}"')
 def step_impl(context, path, args, language):
     deploy_impl(context, path, args, "mycc", language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
 
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}" within {timeout:d} seconds')
+def step_impl(context, path, args, name, channel, timeout):
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel, timeout)
+
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}"')
 def step_impl(context, path, args, name, channel):
     deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" within {timeout:d} seconds')
+def step_impl(context, path, args, name, timeout):
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}"')
 def step_impl(context, path, args, name):
     deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
 
+@when(u'a user deploys chaincode at path "{path}" with args {args} within {timeout:d} seconds')
+def step_impl(context, path, args, timeout):
+    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
+
 @when(u'a user deploys chaincode at path "{path}" with args {args}')
 def step_impl(context, path, args):
     deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user deploys chaincode on channel "{channel}" with args {args} within {timeout:d} seconds')
+def step_impl(context, channel, args, timeout):
+    deploy_impl(context,
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
+                args,
+                "mycc",
+                "GOLANG",
+                "peer0.org1.example.com",
+                channel, timeout)
 
 @when(u'a user deploys chaincode on channel "{channel}" with args {args}')
 def step_impl(context, channel, args):
@@ -85,6 +129,16 @@ def step_impl(context, channel, args):
                 "peer0.org1.example.com",
                 channel)
 
+@when(u'a user deploys chaincode on channel "{channel}" within {timeout:d} seconds')
+def step_impl(context, channel, timeout):
+    deploy_impl(context,
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
+                '["init", "a", "100" , "b", "200"]',
+                "mycc",
+                "GOLANG",
+                "peer0.org1.example.com",
+                channel, timeout)
+
 @when(u'a user deploys chaincode on channel "{channel}"')
 def step_impl(context, channel):
     deploy_impl(context,
@@ -94,6 +148,16 @@ def step_impl(context, channel):
                 "GOLANG",
                 "peer0.org1.example.com",
                 channel)
+
+@when(u'a user deploys chaincode with name "{name}" on channel "{channel}" within {timeout:d} seconds')
+def step_impl(context, name, channel, timeout):
+    deploy_impl(context,
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
+                '["init", "a", "100" , "b", "200"]',
+                name,
+                "GOLANG",
+                "peer0.org1.example.com",
+                channel, timeout)
 
 @when(u'a user deploys chaincode with name "{name}" on channel "{channel}"')
 def step_impl(context, name, channel):
@@ -105,6 +169,16 @@ def step_impl(context, name, channel):
                 "peer0.org1.example.com",
                 channel)
 
+@when(u'a user deploys chaincode with args {args} within {timeout:d} seconds')
+def step_impl(context, args, timeout):
+    deploy_impl(context,
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
+                args,
+                "mycc",
+                "GOLANG",
+                "peer0.org1.example.com",
+                context.interface.TEST_CHANNEL_ID, timeout)
+
 @when(u'a user deploys chaincode with args {args}')
 def step_impl(context, args):
     deploy_impl(context,
@@ -114,6 +188,16 @@ def step_impl(context, args):
                 "GOLANG",
                 "peer0.org1.example.com",
                 context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user deploys chaincode within {timeout:d} seconds')
+def step_impl(context, timeout):
+    deploy_impl(context,
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
+                '["init", "a", "100" , "b", "200"]',
+                "mycc",
+                "GOLANG",
+                "peer0.org1.example.com",
+                context.interface.TEST_CHANNEL_ID, timeout)
 
 @when(u'a user deploys chaincode')
 def step_impl(context):
@@ -152,7 +236,7 @@ def step_impl(context, name, args, org):
 
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def query_impl(context, channel, name, args, peer):
-    # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using the python sdk
+    # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using events for being sure the invokes are complete
     time.sleep(2)
     chaincode = {"args": args,
                  "name": name}
@@ -296,20 +380,6 @@ def step_impl(context, channelId, peer):
 def step_impl(context, channelID, peer):
     orderers = context.interface.get_orderers(context)
     context.interface.fetch_channel(context, [peer], orderers, channelID, location=".")
-
-@then(u'the chaincode is deployed on peer "{peer}"')
-def deployed_impl(context, peer):
-    # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using the python sdk
-    time.sleep(2)
-
-    # Verify that a chaincode container has started
-    containers = subprocess.check_output(["docker ps -a"], shell=True)
-    chaincode_container = "{0}-{1}-{2}-0".format(context.projectName, peer, context.chaincode['name'])
-    assert chaincode_container in containers, "The chaincode container is not running"
-
-@then(u'the chaincode is deployed')
-def step_impl(context):
-    deployed_impl(context, "peer0.org1.example.com")
 
 @then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
 def step_impl(context, response, org, status):
