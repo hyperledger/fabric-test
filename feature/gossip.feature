@@ -197,3 +197,66 @@ Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization
     |  stop        | start       |
     |  pause       | unpause     |
     | disconnect   | connect     |
+
+@daily
+Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a non-leader peer goes down by <takeDownType>, comes back up and catches up eventually
+  # Select Peer0 of both org as leader and turn leader election off
+
+  Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
+  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER0_ORG1 environment variable is false
+  And the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG2 environment variable is true
+  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER0_ORG2 environment variable is false
+  And the CORE_PEER_GOSSIP_ORGLEADER_PEER1_ORG1 environment variable is false
+  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER1_ORG1 environment variable is false
+  And the CORE_PEER_GOSSIP_ORGLEADER_PEER1_ORG2 environment variable is false
+  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER1_ORG2 environment variable is false
+
+  # Bootstrap the network create channl, deploy chaincode
+  And I have a bootstrapped fabric network of type kafka
+  And I wait "30" seconds
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And I wait "15" seconds
+  Then the chaincode is deployed
+  When a user queries on the chaincode named "mycc" with args ["query","a"]
+  Then a user receives a success response of 1000
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+  And I wait "5" seconds
+  When a user queries on the chaincode named "mycc" with args ["query","a"]
+  Then a user receives a success response of 990
+
+  # Take down the non-leader peer
+  When "peer1.org1.example.com" is taken down by doing a <takeDownType>
+  And I wait "5" seconds
+
+  # Now do three invoke-query pairs
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer0.org1.example.com"
+  And I wait "5" seconds
+  And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 980 from "peer0.org1.example.com"
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","20"] on "peer0.org1.example.com"
+  And I wait "5" seconds
+  When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 960 from "peer0.org1.example.com"
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","30"] on "peer0.org1.example.com"
+  And I wait "5" seconds
+  When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 930 from "peer0.org1.example.com"
+
+  # Bring back up the non-leader peer
+  When "peer1.org1.example.com" comes back up by doing a <bringUpType>
+  And I wait "20" seconds
+
+  # Test with the non-leader peer
+  When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org1.example.com"
+  Then a user receives a success response of 930 from "peer1.org1.example.com"
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","40"] on "peer1.org1.example.com"
+  And I wait "5" seconds
+  And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org1.example.com"
+  Then a user receives a success response of 890 from "peer1.org1.example.com"
+
+  Examples:
+    | takeDownType | bringUpType |
+    |  stop        | start       |
+    |  pause       | unpause     |
+    | disconnect   | connect     |
