@@ -1,5 +1,11 @@
 #!/bin/bash
 
+#
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
 CMD=$1
 
 function printHelp {

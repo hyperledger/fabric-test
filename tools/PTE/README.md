@@ -45,6 +45,7 @@ In brief, PTE has the following features:
     - [Service Credentials File](#service-credentials-file)
     - [Creating a Local Fabric Network](#creating-a-local-fabric-network)
     - [CI Test](#ci-test)
+    - [Remote PTE](#remote-pte)
 
 ---
 ### Code Base for v1.0.0
@@ -168,6 +169,8 @@ There are two ways to execute PTE: pte_mgr.sh and pte_driver.sh. pte_mgr.sh can 
         **Note:** Available SDK types are node, go, python and java; however, only the node SDK is currently supported.
 
     See [User Input file](#user-input-file) in the Reference section below for more information about these files.
+
+
 
 ### Transaction Execution
 A single test case is described by a user input file. User input files define all the parameters for executing a test; including transaction type, number of processes, number of transactions, duration, etc. All processes in one test case will concurrently execute the specified transaction. Different transactions may be used in different test cases and then combined into a single run cases file, making it possible to create more complicated scenarios. For example, in a single run of PTE, a user could send a specific number of invokes to all peers and then query each peer separately.
@@ -645,8 +648,57 @@ The service credentials contain the information of the network and are stored in
     - `./networkLauncher.sh -?`
 
 ## CI Test
+A set of predefined tests are designed for CI daily or weekly execution and are available in the directory, [CITest](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE/CITest), under PTE.
 
-A set of predefined tests are designed for CI daily or weekly execution and are available in the directory, `CITest`, under PTE.
+
+## Remote PTE
+This feature allows user to execute PTE (PTE manager and/or driver) to send transactions from remote hosts to Blockchain networks, see diagram below.
+
+![](PTE-ctlr.png)
+
+
+In order to execute PTE remotely, the PTE controller host will need to have access to the remote PTE hosts.  **In the setup below, ssh auto login without password is illustrated. However, users should choose any preferred remote access method between PTE controller host and remote PTE hosts for their environment.**
+
+* ### Usage
+    `./pte_ctlr.sh <PTE controller file>`
+
+    * Example
+
+        `./pte_ctlr.sh ctlrInputs/PTECtlr.txt`
+
+        `ctlrInputs/PTECtlr.txt` contains the list of testcases to be executed on the remote hosts. Each line is a PTE controller case and inlcude three parameters: driver type, user/host, and a script.  The available driver type is `ctlr` only.
+
+        For instance, this sample PTE controller file conatins two control testcases:
+
+            driver=ctlr pteuser@remotePTEhost.com ctlrInputs/remotePTEhost-samplecc-q.sh
+            driver=ctlr pteuser@remotePTEhost.com ctlrInputs/remotePTEhost-samplecc-i.sh
+
+
+* ### Setup
+   * On the local host where the PTE controller resides
+       * setup ssh auto login to remote systems without password. Note that users may choose a preferred method for remote access.
+       * a PTECtlr.txt file containing the controller testcases, e.g., `PTE/ctlrInputs/PTECtlr.txt`
+       * all controller testcases files, e.g., `PTE/ctlrInputs/pteHost11-samplecc-q.sh`
+   * On the remote host where the PTE manager/driver resides
+       * setup PTE
+       * contains crypto keys of the Blockchain network
+       * a script to execute PTE, e.g., `PTE/CITest/scripts/test_driver_remote.sh`, Users can create scripts for their testcases.
+   * Blockchain network
+       * can be a single host or multi hosts network
+
+* ### Setup ssh auto login without password
+   **Note that ssh is just one method for the PTE controller host to access remote PTE.  Users should choose a method suitable for their environment.**
+
+   * On PTE controller host (assuming the remote access is pteuser@remotePTEhost.com):
+       * `ssh-keygen -t rsa` (You can just hit return for each question.)
+       * `ssh pteuser@remotePTEhost.com mkdir -p .ssh`
+
+            pteuser@remotePTEhost.com's password:
+       * `cat .ssh/id_rsa.pub | ssh pteuser@remotePTEhost.com 'cat >> .ssh/authorized_keys'`
+
+            pteuser@remotePTEhost.com's password:
+
+
 ---
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
