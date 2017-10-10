@@ -56,6 +56,13 @@ The following repositories are dependencies and are included as submodules at th
 .. _hyperledger-fabric-ca: https://github.com/hyperledger/fabric-ca
 .. _cello: https://github.com/hyperledger/cello
 
+Caveats and Gotchas
+-------------------
+This framework uses the `signal`_ package, which currently only works well in NIX environments.
+
+.. _signal: https://docs.python.org/2/library/signal.html
+
+
 ================
 Using VirtualEnv
 ================

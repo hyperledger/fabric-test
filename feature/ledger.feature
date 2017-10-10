@@ -16,11 +16,7 @@ Feature: Ledger Service
 Scenario Outline: FAB-6036-1: Test marbles02_private initMarble, readMarble, deleteMarble, transferMarble, getMarblesByRange, stateTransfer
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type <type>
-  And I wait "<waitTime>" seconds
   When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
-  And I wait "15" seconds
-  Then the chaincode is deployed
-
 
   #comment or remove the following 6 lines once we are in phase2
   Given "peer1.org1.example.com" is taken down
@@ -29,7 +25,6 @@ Scenario Outline: FAB-6036-1: Test marbles02_private initMarble, readMarble, del
   And I wait "10" seconds
   Given "peer0.org2.example.com" is taken down
   And I wait "10" seconds
-
 
   #These two marbles are used for getMarblesByRange
   When a user invokes on the chaincode named "mycc" with args ["initMarble","001m1","indigo","35","saleem"]
@@ -183,20 +178,17 @@ Given the initial non-leader peer of "org1" comes back up
   And a user receives a response containing "owner":"dire straits"
 
   Examples:
-   | type  | database | waitTime |
-   | kafka |  leveldb |   70     |
-   | kafka |  couchdb |   70     |
-   | solo  |  leveldb |   20     |
-   | solo  |  couchdb |   20     |
+   | type  | database |
+   | kafka |  leveldb |
+   | kafka |  couchdb |
+   | solo  |  leveldb |
+   | solo  |  couchdb |
 
 
 @skip
 Scenario Outline: FAB-6036-2: Test marbles02_private : getHistoryForMarble
   Given I have a bootstrapped fabric network of type <type>
-  And I wait "<waitTime>" seconds
   When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
-  And I wait "30" seconds
-  Then the chaincode is deployed
 
   When a user invokes on the chaincode named "mycc" with args ["initMarble","marble1","red","35","tom"]
   And I wait "10" seconds
@@ -241,8 +233,8 @@ Scenario Outline: FAB-6036-2: Test marbles02_private : getHistoryForMarble
   And a user receives a success response containing "IsDelete":"true"
 
   Examples:
-    | type  | database | waitTime |
-    | solo  |  leveldb |   20     |
-    | solo  |  couchdb |   20     |
-    | kafka |  leveldb |   70     |
-    | kafka |  couchdb |   70     |
+    | type  | database |
+    | solo  |  leveldb |
+    | solo  |  couchdb |
+    | kafka |  leveldb |
+    | kafka |  couchdb |

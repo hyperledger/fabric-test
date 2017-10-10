@@ -70,11 +70,8 @@ Scenario: Access to the fabric protobuf files
 @smoke
 Scenario: Basic operations to create a useful blockchain network
     Given I have a bootstrapped fabric network
-    When I wait "5" seconds
-    And a user sets up a channel
+    When a user sets up a channel
     And a user deploys chaincode
-    When I wait "15" seconds
-    Then the chaincode is deployed
 
 @skip
 Scenario: Setting of environment variables
@@ -98,4 +95,3 @@ Scenario: Setting of environment variables
    #And the ORDERER_GENERAL_TLS_ENABLED environment variable is true on node "orderer2.example.com"
    #And the CORE_PEER_TLS_ENABLED environment variable is true on node "peer0.org1.example.com"
    #And the CORE_LOGGING_GOSSIP environment variable is INFO on node "peer1.org2.example.com"
-

@@ -144,7 +144,7 @@ def step_impl(context):
 
     #for each broker in isr_list check logs
     for kafka in isr_list:
-        assert common_util.is_in_log(kafka, "Shutdown completed (kafka.server.ReplicaFetcherThread)"), "could not verify in the remaining broker logs that prevLeader is down"
+        assert common_util.is_in_log([kafka], "Shutdown completed (kafka.server.ReplicaFetcherThread)"), "could not verify in the remaining broker logs that prevLeader is down"
 
 @then(u'the broadcasted message is delivered')
 def step_impl(context):

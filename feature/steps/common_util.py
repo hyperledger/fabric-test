@@ -8,11 +8,14 @@ import os
 import sys
 import datetime
 import subprocess
-import compose_util
+from compose_util import Composition
+import time
+import signal
 
 def changeFormat(value):
     '''
-    Here is the function that returns by changing the format of time. For example 'Seconds' to "s"
+    Here is the function that returns by changing the format of time.
+    For example 'Seconds' to "s"
     '''
     changedString = value
     toChangeUnits = value.split(" ")
@@ -30,7 +33,7 @@ def convertBoolean(boolean):
 
 def enableTls(context, tlsEnabled):
     if not hasattr(context, "composition"):
-        context.composition = compose_util.Composition(context, startContainers=False)
+        context.composition = Composition(context, startContainers=False)
     context.composition.environ["ORDERER_GENERAL_TLS_ENABLED"] = convertBoolean(tlsEnabled)
     context.composition.environ["CORE_PEER_TLS_ENABLED"] = convertBoolean(tlsEnabled)
 
@@ -45,10 +48,34 @@ def convertToSeconds(envValue):
         raise "'{0}' is not in the expected format".format(envValue)
     return value
 
-def is_in_log(container, keyText):
-    rc = subprocess.call(
-            "docker logs "+container+" 2>&1 | grep "+"\""+keyText+"\"",
-            shell=True)
-    if rc==0:
-        return True
-    return False
+def is_in_log(containers, keyText):
+    for container in containers:
+        rc = subprocess.call(
+           "docker logs " + container + " 2>&1 | grep " + "\"" + keyText + "\"",
+           shell=True)
+        if rc != 0:
+            return False
+    return True
+
+def wait_until_in_log(containers, keyText):
+    while not is_in_log(containers, keyText):
+        time.sleep(1)
+    return True
+
+
+class Timeout():
+    class TimeoutException(Exception):
+        pass
+
+    def __init__(self, sec):
+        self.sec = sec
+
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.raise_timeout)
+        signal.alarm(self.sec)
+
+    def __exit__(self, *args):
+        signal.alarm(0)
+
+    def raise_timeout(self, *args):
+        raise Timeout.TimeoutException()

@@ -78,7 +78,7 @@ class InterfaceBase:
             context.initial_leader={}
         if org not in context.initial_leader:
             for container in self.get_peers(context):
-                if ((org in container) and common_util.is_in_log(container, "Becoming a leader")):
+                if ((org in container) and common_util.is_in_log([container], "Becoming a leader")):
                     context.initial_leader[org]=container
                     print("initial leader is "+context.initial_leader[org])
                     return context.initial_leader[org]
@@ -90,12 +90,15 @@ class InterfaceBase:
             context.initial_non_leader={}
         if org not in context.initial_non_leader:
             for container in self.get_peers(context):
-                if ((org in container) and not common_util.is_in_log(container, "Becoming a leader")):
+                if ((org in container) and not common_util.is_in_log([container], "Becoming a leader")):
                     context.initial_non_leader[org]=container
                     print("initial non-leader is "+context.initial_non_leader[org])
                     return context.initial_non_leader[org]
             assert org in context.initial_non_leader.keys(), "Error: No gossip-leader found by looking at the logs, for "+org
         return context.initial_non_leader[org]
+
+    def wait_for_deploy_completion(self, context, chaincode_container, timeout):
+        pass
 
 
 class ToolInterface(InterfaceBase):
@@ -216,14 +219,12 @@ class CLIInterface(InterfaceBase):
 
         output = context.composition.docker_exec(setup+command, ['cli'])
         print("[{0}]: {1}".format(" ".join(setup+command), output))
+        if "SERVICE_UNAVAILABLE" in output['cli']:
+            time.sleep(5)
+            print("Received: {0}, Trying again...".format(output['cli']))
+            output = context.composition.docker_exec(setup+command, ['cli'])
         assert "Error:" not in output, "Unable to successfully create channel {}".format(channelId)
 
-#        # For now, copy the channel block to the config directory
-#        output = context.composition.docker_exec(["cp",
-#                                                  "{0}.block".format(channelId),
-#                                                  configDir],
-#                                                 ['cli'])
-#        print("[{0}]: {1}".format(" ".join(command), output))
         return output
 
     def fetch_channel(self, context, peers, orderers, channelId=TEST_CHANNEL_ID, location=None):
@@ -291,6 +292,7 @@ class CLIInterface(InterfaceBase):
         command.append('"')
         output = context.composition.docker_exec(setup+command, [peer])
         print("Invoke[{0}]: {1}".format(" ".join(setup+command), str(output)))
+        output = self.retry(context, output, peer, setup, command)
         return output
 
 
@@ -304,5 +306,27 @@ class CLIInterface(InterfaceBase):
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (str(args)), # This should work for rich queries as well
                    "--channelID", channelId, '"']
+        result = context.composition.docker_exec(setup+command, [peer])
         print("Query Exec command: {0}".format(" ".join(setup+command)))
-        return context.composition.docker_exec(setup+command, [peer])
+        result = self.retry(context, result, peer, setup, command)
+        return result
+
+    def wait_for_deploy_completion(self, context, chaincode_container, timeout):
+        containers = subprocess.check_output(["docker ps -a"], shell=True)
+        try:
+            with common_util.Timeout(timeout):
+                while chaincode_container not in containers:
+                    containers = subprocess.check_output(["docker ps -a"], shell=True)
+                    time.sleep(1)
+        finally:
+            assert chaincode_container in containers, "The expected chaincode container {} is not running".format(chaincode_container)
+
+    def retry(self, context, output, peer, setup, command):
+        count = 0
+        while count < 3:
+            count += 1
+            if "been successfully instantiated and try again" in output[peer]:
+                time.sleep(5)
+                print("Received: {0}, Trying again({1})...".format(output[peer], count))
+                output = context.composition.docker_exec(setup+command, [peer])
+        return output

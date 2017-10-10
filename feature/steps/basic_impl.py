@@ -10,8 +10,10 @@ import os
 import uuid
 import common_util
 import compose_util
+import orderer_util
 import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
+import time
 
 
 @given(u'I wait "{seconds}" seconds')
@@ -45,7 +47,7 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
         context.composition.up()
     context.compose_containers = context.composition.collectServiceNames()
 
-def bootstrapped_impl(context, ordererType, database, tlsEnabled=False):
+def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=120):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
@@ -71,6 +73,30 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False):
     config_util.generateCrypto(context)
     config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
     compose_impl(context, context.composeFile, projectName=context.projectName)
+
+    wait_for_bootstrap_completion(context, timeout)
+
+def wait_for_bootstrap_completion(context, timeout):
+    peers = context.interface.get_peers(context)
+    brokers = []
+    try:
+        with common_util.Timeout(timeout):
+            common_util.wait_until_in_log(peers, "Starting profiling server with listenAddress = 0.0.0.0:6060")
+
+            # Check Kafka logs
+            if "kafka0" in context.composition.collectServiceNames():
+                kafkas = orderer_util.getKafkaBrokerList(context, "orderer0.example.com")
+                # Remove the ports from the list
+                for kafka in kafkas:
+                    broker = kafka.split(":")
+                    brokers.append(broker[0])
+                common_util.wait_until_in_log(brokers, ", started (kafka.server.KafkaServer)")
+    finally:
+        assert common_util.is_in_log(peers, "Starting profiling server with listenAddress = 0.0.0.0:6060"), "The containers are not ready in the allotted time ({} seconds)".format(timeout)
+        assert common_util.is_in_log(brokers, ", started (kafka.server.KafkaServer)"), "The containers are not ready in the allotted time ({} seconds)".format(timeout)
+
+    # A 5-second additional delay ensures ready state
+    time.sleep(5)
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database} with tls')
 def step_impl(context, ordererType, database):
@@ -209,12 +235,12 @@ def step_impl(context):
 @then(u'the initial non-leader peer of "{org}" has become the leader')
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-    assert common_util.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-lerader peer has not become leader."
+    assert common_util.is_in_log([context.initial_non_leader[org]], "Becoming a leader"), "Error: initial non-leader peer has not become leader."
 
 @then(u'the initial non-leader peer of "{org}" has not become the leader')
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-    assert not common_util.is_in_log(context.initial_non_leader[org], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
+    assert not common_util.is_in_log([context.initial_non_leader[org]], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
 
 @then(u'there are no errors')
 def step_impl(context):
