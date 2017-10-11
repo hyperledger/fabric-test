@@ -39,6 +39,12 @@ PEER_ORG_STR = '''
       Count: {numUsers}
 '''
 
+def updateEnviron(context):
+    updated_env = os.environ.copy()
+    if hasattr(context, "composition"):
+        updated_env.update(context.composition.environ)
+    return updated_env
+
 def makeProjectConfigDir(context):
     # Save all the files to a specific directory for the test
     if not hasattr(context, "projectName") and not hasattr(context, "composition"):
@@ -99,67 +105,71 @@ def setupConfigs(context, channelID):
 
 def inspectOrdererConfig(context, filename):
     testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
     try:
         command = ["configtxgen", "-inspectBlock", filename]
-        return subprocess.check_output(command, cwd=testConfigs, env=os.environ)
+        return subprocess.check_output(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to inspect orderer config data: {0}".format(sys.exc_info()[1]))
 
 def inspectChannelConfig(context, filename):
     testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
     try:
         command = ["configtxgen", "-inspectChannelCreateTx", filename]
-        return subprocess.check_output(command, cwd=testConfigs, env=os.environ)
+        return subprocess.check_output(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to inspect channel config data: {0}".format(sys.exc_info()[1]))
 
 def generateConfig(context, channelID, profile, ordererProfile, block="orderer.block"):
     setupConfigs(context, channelID)
-    if hasattr(context, "composition"):
-        os.environ.update(context.composition.environ)
     generateOrdererConfig(context, channelID, ordererProfile, block)
     generateChannelConfig(channelID, profile, context)
     generateChannelAnchorConfig(channelID, profile, context)
 
 def generateOrdererConfig(context, channelID, ordererProfile, block):
     testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
     try:
         command = ["configtxgen", "-profile", ordererProfile,
                    "-outputBlock", block,
                    "-channelID", channelID]
-        subprocess.check_call(command, cwd=testConfigs, env=os.environ)
+        subprocess.check_call(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to generate orderer config data: {0}".format(sys.exc_info()[1]))
 
 def generateChannelConfig(channelID, profile, context):
     testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
     try:
         command = ["configtxgen", "-profile", profile,
                    "-outputCreateChannelTx", "%s.tx" % channelID,
                    "-channelID", channelID]
-        subprocess.check_call(command, cwd=testConfigs, env=os.environ)
+        subprocess.check_call(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to generate channel config data: {0}".format(sys.exc_info()[1]))
 
 def generateChannelAnchorConfig(channelID, profile, context):
     testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
     for org in os.listdir("./{0}/peerOrganizations".format(testConfigs)):
         try:
             command = ["configtxgen", "-profile", profile,
                        "-outputAnchorPeersUpdate", "{0}{1}Anchor.tx".format(org, channelID),
                        "-channelID", channelID,
                        "-asOrg", org.title().replace('.', '')]
-            subprocess.check_call(command, cwd=testConfigs, env=os.environ)
+            subprocess.check_call(command, cwd=testConfigs, env=updated_env)
         except:
             print("Unable to generate channel anchor config data: {0}".format(sys.exc_info()[1]))
 
 def generateCrypto(context, cryptoLoc="./configs/crypto.yaml"):
     testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
     try:
         subprocess.check_call(["cryptogen", "generate",
                                '--output={0}'.format(testConfigs),
                                '--config={0}'.format(cryptoLoc)],
-                              env=os.environ)
+                              env=updated_env)
     except:
         print("Unable to generate crypto material: {0}".format(sys.exc_info()[1]))
 

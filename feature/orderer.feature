@@ -252,7 +252,7 @@ Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the
         | pause        | unpause     |
         | disconnect   | connect     |
 
-@skip
+@daily
 Scenario Outline: FAB-4808: Orderer_BatchTimeOut is honored, for <type> orderer
     Given the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is <envValue>
     And I have a bootstrapped fabric network of type <type>

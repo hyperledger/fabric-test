@@ -8,13 +8,6 @@ import subprocess
 import shutil
 from steps.endorser_util import CLIInterface, ToolInterface
 
-def getDockerComposeFileArgsFromYamlFile(composeYaml):
-    parts = composeYaml.split()
-    args = []
-    for part in parts:
-        args = args + ["-f"] + [part]
-    return args
-
 
 def getLogFiles(containers, fileSuffix):
     """ This will gather the logs for the different component containers as well as

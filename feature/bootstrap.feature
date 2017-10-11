@@ -73,25 +73,16 @@ Scenario: Basic operations to create a useful blockchain network
     When a user sets up a channel
     And a user deploys chaincode
 
-@skip
+@smoke
 Scenario: Setting of environment variables
     Given the KAFKA_DEFAULT_REPLICATION_FACTOR environment variable is 1
     And the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is 10 minutes
     And the CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT environment variable is 10
+    And the CORE_LOGGING_GOSSIP environment variable is INFO
     And I have a bootstrapped fabric network of type kafka with tls
-    When I wait "30" seconds
     Then the KAFKA_DEFAULT_REPLICATION_FACTOR environment variable is 1 on node "kafka1"
     And the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is 10 minutes on node "orderer0.example.com"
     And the CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT environment variable is 10 on node "orderer1.example.com"
-
-   #TODO: set variables in core.yaml and orderer.yaml too, which are in our .env file.
-    # And the CORE_LOGGING_GOSSIP environment variable is INFO
-    # ORDERER_GENERAL_TLS_ENABLED and CORE_PEER_TLS_ENABLED are also
-    # defined (default to false) in file fabric-test/feature/.env.
-    # They are set to true when we process the bootstrap statement "with tls".
-   # Check these three, so we can say we can set variables in all 3 config files:
-   #configtx.yaml, orderer.yaml, core.yaml; they are all defined, but adding these checks cause
-   #all following subsequent tests to fail to deploy or query, so let's do this later separately.
-   #And the ORDERER_GENERAL_TLS_ENABLED environment variable is true on node "orderer2.example.com"
-   #And the CORE_PEER_TLS_ENABLED environment variable is true on node "peer0.org1.example.com"
-   #And the CORE_LOGGING_GOSSIP environment variable is INFO on node "peer1.org2.example.com"
+    And the ORDERER_GENERAL_TLS_ENABLED environment variable is true on node "orderer2.example.com"
+    And the CORE_PEER_TLS_ENABLED environment variable is true on node "peer0.org1.example.com"
+    And the CORE_LOGGING_GOSSIP environment variable is INFO on node "peer1.org2.example.com"
