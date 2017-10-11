@@ -199,13 +199,12 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a 
   And the CORE_PEER_GOSSIP_ORGLEADER_PEER1_ORG2 environment variable is false
   And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER1_ORG2 environment variable is false
 
-  # Bootstrap the network create channl, deploy chaincode
+  # Bootstrap the network create channel, deploy chaincode
   And I have a bootstrapped fabric network of type kafka
   And I wait "30" seconds
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "15" seconds
-  Then the chaincode is deployed
+
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
