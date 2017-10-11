@@ -8,6 +8,8 @@
     "transType": "Invoke",
     "invokeType": "Move",
     "targetPeers": "OrgAnchor",
+    "peerFailover": "TRUE",
+    "ordererFailover": "TRUE",
     "nProcPerOrg": "1",
     "nRequest": "1000",
     "runDur": "600",

@@ -8,6 +8,8 @@
     "transType": "Invoke",
     "invokeType": "Move",
     "targetPeers": "OrgAnchor",
+    "peerFailover": "TRUE",
+    "ordererFailover": "TRUE",
     "nProcPerOrg": "1",
     "nRequest": "1000",
     "runDur": "600",
@@ -36,8 +38,8 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
+        "org3": ["peer1"],
+        "org4": ["peer1"]
     },
     "eventOpt": {
         "listener": "Transaction",

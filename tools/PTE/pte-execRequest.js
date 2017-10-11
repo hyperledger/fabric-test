@@ -84,8 +84,6 @@ var eventHubs=[];
 var targets = [];
 var eventPromises = [];
 
-//testUtil.setupChaincodeDeploy();
-
 // need to override the default key size 384 to match the member service backend
 // otherwise the client will not be able to decrypt the enrollment challenge
 utils.setConfigSetting('crypto-keysize', 256);
@@ -160,6 +158,22 @@ var invokeType = uiContent.invokeType;
 var nRequest = parseInt(uiContent.nRequest);
 
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] transMode: %s, transType: %s, invokeType: %s, nRequest: %d', Nid, channel.getName(), org, pid,  transMode, transType, invokeType, nRequest);
+
+//failover parameters
+var peerList = [];
+var currPeerId = 0;
+var ordererList = [];
+var currOrdererId = 0;
+var peerFO = 'FALSE';
+var ordererFO = 'FALSE';
+if (typeof( uiContent.peerFailover ) !== 'undefined') {
+    peerFO = uiContent.peerFailover.toUpperCase();
+}
+if (typeof( uiContent.ordererFailover ) !== 'undefined') {
+    ordererFO = uiContent.ordererFailover.toUpperCase();
+}
+logger.info('', peerFO, ordererFO);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: peerFO=%s, ordererFO=%s', Nid, channelName, org, pid, peerFO, ordererFO);
 
 var runDur=0;
 if ( nRequest == 0 ) {
@@ -298,6 +312,94 @@ function getQueryRequest() {
     };
 
     //logger.info('request_query: ', request_query);
+}
+
+function peerFailover(channel, client) {
+    var currId = currPeerId;
+    channel.removePeer(peerList[currPeerId]);
+    currPeerId = currPeerId + 1;
+    currPeerId = currPeerId%peerList.length;
+    channel.addPeer(peerList[currPeerId]);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d peerFailover] from (%s) to (%s)', Nid, channel.getName(), org, pid, peerList[currId]._url, peerList[currPeerId]._url);
+}
+
+// set currPeerId
+function setCurrPeerId(channel, client, org) {
+    var peerUrl = channel.getPeers()[0]._url;
+    var i;
+    for (i=0; i<peerList.length; i++) {
+        if (peerList[i]._url === peerUrl) {
+            currPeerId = i;
+        }
+    }
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrPeerId] currPeerId:  ', Nid, channelName, org, pid, currPeerId);
+}
+
+// assign thread the peers from List
+function assignPeerListFromList(channel, client, org) {
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignPeerListFromList]', Nid, channel.getName(), org, pid);
+    var peerTmp;
+    var eh;
+    var data;
+    var listOpt=uiContent.listOpt;
+    var peername;
+    var event_connected = false;
+    for(var key in listOpt) {
+        for (i = 0; i < listOpt[key].length; i++) {
+            if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
+                peername = listOpt[key][i];
+                if (peername.indexOf('peer') === 0) {
+                    if (TLS.toUpperCase() == 'ENABLED') {
+                        data = fs.readFileSync(path.join(goPath, ORGS[key][peername]['tls_cacerts']));
+                        peerTmp = client.newPeer(
+                            ORGS[key][peername].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                            }
+                        );
+                        peerList.push(peerTmp);
+                    } else {
+                        peerTmp = client.newPeer(ORGS[key][peername].requests);
+                        peerList.push(peerTmp);
+                    }
+                }
+            }
+        }
+    }
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignPeerListFromList] peerList: %j', Nid, channelName, org, pid, peerList);
+}
+
+// assign thread peers from all org
+function assignPeerList(channel, client, org) {
+    logger.info('[Nid:chan:id=%d:%s:%d assignPeerList]', Nid, channel.getName(), pid);
+    var peerTmp;
+    var eh;
+    var data;
+    for (let key1 in ORGS) {
+        if (ORGS.hasOwnProperty(key1)) {
+            for (let key in ORGS[key1]) {
+                if (key.indexOf('peer') === 0) {
+                    if (TLS.toUpperCase() == 'ENABLED') {
+
+                        data = fs.readFileSync(path.join(goPath, ORGS[key1][key]['tls_cacerts']));
+                        peerTmp = client.newPeer(
+                            ORGS[key1][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                            }
+                        );
+                        peerList.push(peerTmp);
+                    } else {
+                        peerTmp = client.newPeer( ORGS[key1][key].requests);
+                        peerList.push(peerTmp);
+                    }
+                }
+            }
+        }
+    }
+    logger.info('[Nid:chan:id=%d:%s:%d assignPeerList] peerList', Nid, channel.getName(), pid, peerList);
 }
 
 // assign thread peers from all org
@@ -538,46 +640,100 @@ function channelAddPeer(channel, client, org) {
 
 function channelAddPeerEvent(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent]', Nid, channelName, org, pid);
-            var eh;
-            var peerTmp;
-            for (let key in ORGS[org]) {
-                logger.info('key: ', key);
-                if (ORGS[org].hasOwnProperty(key)) {
-                    if (key.indexOf('peer') === 0) {
-                        if (TLS.toUpperCase() == 'ENABLED') {
-                            let data = fs.readFileSync(path.join(goPath, ORGS[org][key]['tls_cacerts']));
-                            peerTmp = client.newPeer(
-                                ORGS[org][key].requests,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[key]['server-hostname']
-                                }
-                            );
-                        } else {
-                            peerTmp = client.newPeer( ORGS[org][key].requests);
-                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] peer: ', Nid, channelName, org, pid, ORGS[org][key].requests);
+    var eh;
+    var peerTmp;
+    for (let key in ORGS[org]) {
+        logger.info('key: ', key);
+        if (ORGS[org].hasOwnProperty(key)) {
+            if (key.indexOf('peer') === 0) {
+                if (TLS.toUpperCase() == 'ENABLED') {
+                    let data = fs.readFileSync(path.join(goPath, ORGS[org][key]['tls_cacerts']));
+                    peerTmp = client.newPeer(
+                        ORGS[org][key].requests,
+                        {
+                            pem: Buffer.from(data).toString(),
+                            'ssl-target-name-override': ORGS[key]['server-hostname']
                         }
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-
-                        eh=client.newEventHub();
-                        if (TLS.toUpperCase() == 'ENABLED') {
-                            eh.setPeerAddr(
-                                ORGS[org][key].events,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                }
-                            );
-                        } else {
-                            eh.setPeerAddr(ORGS[org][key].events);
-                        }
-                        eh.connect();
-                        eventHubs.push(eh);
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] requests: %s, events: %s ', Nid, channelName, org, pid, ORGS[org][key].requests, ORGS[org][key].events);
-                    }
+                    );
+                } else {
+                    peerTmp = client.newPeer( ORGS[org][key].requests);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] peer: ', Nid, channelName, org, pid, ORGS[org][key].requests);
                 }
+                targets.push(peerTmp);
+                channel.addPeer(peerTmp);
+
+                eh=client.newEventHub();
+                if (TLS.toUpperCase() == 'ENABLED') {
+                    eh.setPeerAddr(
+                        ORGS[org][key].events,
+                        {
+                            pem: Buffer.from(data).toString(),
+                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                        }
+                    );
+                } else {
+                    eh.setPeerAddr(ORGS[org][key].events);
+                }
+                eh.connect();
+                eventHubs.push(eh);
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] requests: %s, events: %s ', Nid, channelName, org, pid, ORGS[org][key].requests, ORGS[org][key].events);
             }
+        }
+    }
+}
+
+// update orderer
+function ordererFailover(channel, client) {
+    var currId = currOrdererId;
+    channel.removeOrderer(ordererList[currOrdererId]);
+    currOrdererId = currOrdererId + 1;
+    currOrdererId = currOrdererId%ordererList.length;
+    channel.addOrderer(ordererList[currOrdererId]);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d ordererFailover] Orderer failover from (%s) to (%s):', Nid, channel.getName(), org, pid, ordererList[currId]._url, ordererList[currOrdererId]._url);
+}
+
+// set currOrdererId
+function setCurrOrdererId(channel, client, org) {
+    var ordererID = ORGS[org].ordererID;
+    var i;
+    for (i=0; i<ordererList.length; i++) {
+        if (ordererList[i]._url === ORGS['orderer'][ordererID].url) {
+            currOrdererId = i;
+        }
+    }
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrOrdererId] currOrdererId:', Nid, channelName, org, pid, currOrdererId);
+}
+
+// assign Orderer List
+function assignOrdererList(channel, client) {
+    logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s assignOrdererList] ', Nid, channelName, org, pid);
+    var ordererTmp;
+    for (let key in ORGS['orderer']) {
+        if (key.indexOf('orderer') === 0) {
+            if (TLS.toUpperCase() == 'ENABLED') {
+                var caRootsPath = path.join(goPath, ORGS['orderer'][key].tls_cacerts);
+                if (fs.existsSync(caRootsPath)) {
+                    let data = fs.readFileSync(caRootsPath);
+                    let caroots = Buffer.from(data).toString();
+
+                    ordererTmp = client.newOrderer(
+                        ORGS['orderer'][key].url,
+                        {
+                            'pem': caroots,
+                            'ssl-target-name-override': ORGS['orderer'][key]['server-hostname']
+                        }
+                    )
+                    ordererList.push(ordererTmp);
+                } else {
+                    logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d assignOrdererList] file does not exist: %s', Nid, channelName, org, pid, caRootsPath);
+                }
+            } else {
+                ordererTmp = client.newOrderer(ORGS['orderer'][key].url);
+                ordererList.push(ordererTmp);
+            }
+        }
+    }
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] orderer list: %j', Nid, channelName, org, pid, ordererList);
 }
 
 function channelAddOrderer(channel, client, org) {
@@ -700,7 +856,12 @@ function execTransMode() {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] Successfully loaded user \'admin\'', Nid, channelName, org, pid);
                     the_user = admin;
 
-                    channelAddOrderer(channel, client, org)
+                    assignOrdererList(channel, client);
+                    channelAddOrderer(channel, client, org);
+                    setCurrOrdererId(channel, client, org);
+
+                    assignPeerList(channel, client, org);
+                    //assignPeerListFromList(channel, client, org);
 
                     if (targetPeers.toUpperCase() == 'ORGANCHOR') {
                         assignThreadOrgAnchorPeer(channel, client, org);
@@ -717,7 +878,9 @@ function execTransMode() {
                         process.exit(1);
                     }
 
-	            tCurr = new Date().getTime();
+                    setCurrPeerId(channel, client, org);
+                    
+                    tCurr = new Date().getTime();
                     var tSynchUp=tStart-tCurr;
                     if ( tSynchUp < 10000 ) {
                         tSynchUp=10000;
@@ -1186,6 +1349,9 @@ function invoke_move_const_evtBlock(freq) {
             var proposalResponses = results[0];
             if ( results[0][0].response && results[0][0].response.status != 200 ) {
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0][0].response.status);
+                if (peerFO == 'TRUE') {
+                    peerFailover(channel, client);
+                }
                 invoke_move_const_go(t1, freq);
                 return;
             }
@@ -1197,6 +1363,9 @@ function invoke_move_const_evtBlock(freq) {
 
                     if ( results.status != 'SUCCESS' ) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results);
+                        if (ordererFO == 'TRUE') {
+                            ordererFailover(channel, client);
+                        }
                         invoke_move_const_go(t1, freq);
                         return;
                     }
@@ -1228,12 +1397,18 @@ function invoke_move_const_evtBlock(freq) {
 
                 }).catch((err) => {
                     logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                    if (ordererFO == 'TRUE') {
+                        ordererFailover(channel, client);
+                    }
                     invoke_move_const_go_evtBlock(t1, freq);
                     //evtDisconnect();
                     //return;
                 })
         }).catch((err) => {
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if (peerFO == 'TRUE') {
+                    peerFailover(channel, client);
+                }
                 invoke_move_const_go_evtBlock(t1, freq);
         });
 }
@@ -1268,6 +1443,9 @@ function invoke_move_const(freq) {
             var proposalResponses = results[0];
             if ( results[0][0].response && results[0][0].response.status != 200 ) {
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0][0].response.status);
+                if (peerFO == 'TRUE') {
+                    peerFailover(channel, client);
+                }
                 invoke_move_const_go(t1, freq);
                 return;
             }
@@ -1281,6 +1459,9 @@ function invoke_move_const(freq) {
 
                     if ( results[0].status != 'SUCCESS' ) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results[0]);
+                        if (ordererFO == 'TRUE') {
+                            ordererFailover(channel, client);
+                        }
                         invoke_move_const_go(t1, freq);
                         return;
                     }
@@ -1312,6 +1493,9 @@ function invoke_move_const(freq) {
 
                 }).catch((err) => {
                     logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                    if (ordererFO == 'TRUE') {
+                        ordererFailover(channel, client);
+                    }
                     invoke_move_const_go(t1, freq);
                     //evtDisconnect();
                     //return;
@@ -1325,6 +1509,9 @@ function invoke_move_const(freq) {
 
         }).catch((err) => {
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if (peerFO == 'TRUE') {
+                    peerFailover(channel, client);
+                }
                 invoke_move_const_go(t1, freq);
         });
 }
