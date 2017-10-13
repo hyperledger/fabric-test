@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+
 Feature: FAB-5384 Chaincode Testing: As a user I want to be able verify that I can execute different chaincodes
+
 
 @daily
 Scenario Outline: FAB-5797: Test chaincode fabric/examples/chaincode_example02 deploy, invoke, and query with chaincode install name in all lowercase/uppercase/mixedcase chars, for <type> orderer
@@ -38,6 +40,7 @@ Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric/examples
   When a user queries on the chaincode named "myex04" with args ["query","Event", "myex02_a", "a", "channel2"]
   Then a user receives a success response of 1000
 
+
 @daily
 Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05 when cc_05 and cc_02 are on different channels
   Given I have a bootstrapped fabric network of type kafka
@@ -49,6 +52,7 @@ Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel 
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel2"]
   Then a user receives a success response of 3000
+
 
 @daily
 Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
@@ -390,3 +394,66 @@ Examples:
     |                             path                              | language |
     | github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |
     |        ../../fabric-test/chaincodes/marbles/node              | NODE     |
+
+@daily
+Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim library extensions.
+    #To generate good keys, we followed instructions as in the README.md under "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" folder
+    # ENCKEY=`openssl rand 32 -base64`
+    # IV=`openssl rand 16 -base64`
+    # SIGKEY=`openssl ecparam -name prime256v1 -genkey | tail -n5 | base64 -w0`
+    Given I have a bootstrapped fabric network of type <type>
+    When a user sets up a channel
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
+
+    When I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
+    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    And I wait "3" seconds
+    When a user queries on the chaincode named "mycc" with args ["ENC","GET", "Social-Security-Number"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    Then a user receives a success response of 123-45-6789
+    When I locally execute the command "openssl rand 16 -base64" saving the results as "IV"
+    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Tax-Id","1234-012"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"IV\\":\\"{IV}\\"}"
+    And I wait "3" seconds
+    When a user queries on the chaincode named "mycc" with args ["ENC","GET","Tax-Id"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"IV\\":\\"{IV}\\"}"
+    Then a user receives a response containing 1234-012
+    When I locally execute the command "openssl ecparam -name prime256v1 -genkey | tail -n5 | base64 -w0" saving the results as "SIGKEY"
+    When a user invokes on the chaincode named "mycc" with args ["SIG","PUT","Passport-Number","M9037"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"SIGKEY\\":\\"{SIGKEY}\\"}"
+    And I wait "3" seconds
+    When a user queries on the chaincode named "mycc" with args ["SIG","GET","Passport-Number"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"SIGKEY\\":\\"{SIGKEY}\\"}"
+    Then a user receives a response containing M9037
+    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","WellsFargo-Savings-Account","09675879"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","BankOfAmerica-Savings-Account","08123456"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    And I wait "3" seconds
+    When a user queries on the chaincode named "mycc" with args ["RANGE"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    Then a user receives a response containing "key":"BankOfAmerica-Savings-Account"
+    And a user receives a response containing "Passport-Number"
+    And a user receives a response containing WellsFargo-Savings-Account
+    And a user receives a response containing BankOfAmerica-Savings-Account
+Examples:
+    |  type  |
+    |  solo  |
+    | kafka  |
+
+
+@daily
+Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, passing in bad ENCRYPTION(ENC), IV, and SIGNATURE(SIG) KEYS
+  #To generate good keys, we followed instructions as in the README.md under "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" folder
+  # ENCKEY=`openssl rand 32 -base64`
+  # IV=`openssl rand 16 -base64`
+  # SIGKEY=`openssl ecparam -name prime256v1 -genkey | tail -n5 | base64 -w0`
+  # For the things we called BAD keys in this test,  we deleted last character from the generated good keys to corrupt them.
+
+  Given I have a bootstrapped fabric network of type kafka
+  When a user sets up a channel
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
+
+  When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
+  Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 40 - <nil>
+  When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Tax-Id","1234-012"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\",\\"IV\\":\\"<BAD_IV_KEY>\\"}"
+  Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 23 - <nil>
+  When a user invokes on the chaincode named "mycc" with args ["SIG","PUT","Passport-Number","M9037"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\",\\"SIGKEY\\":\\"<BAD_SIG_KEY>\\"}"
+  Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 300 - <nil>
+
+Examples:
+    |                   GOOD_ENC_KEY                         |                BAD_ENC_KEY                            |     BAD_IV_KEY              | BAD_SIG_KEY    |
+    |   L6P9jLWR6d6E1KdGJBsUpzEm5QS6uVlS4onsteB+KaQ=         |    L6P9jLWR6d6E1KdGJBsUpzEm5QS6uVlS4onsteB+KaQ        |    +4DANc5uYLTnsH6Yy7v32g=  |  LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUhYRkd1eWxyTlQ1WUdtd1E0MVBWeTJqVlZrcXhMMTdBN1pSM0lDL1RGakJvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFVHdWSEhrbklmUnUyZ3YwWU50R210akpDSHJzdThhekZ1OWZvUy9raUlPN2Q2aWhTWWRjdgpHbEoyNlF0WmtTTlhWNkJDLy91Z25ycGN3bldTdERsc1lRPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo                                                                                                                         |
+
