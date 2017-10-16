@@ -1,0 +1,25 @@
+{
+    "channelID": "_ch{{ item.1|int }}",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "nProcPerOrg": "4",
+    "transType": "Channel",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "{{ item.0.name }}",
+        "channelTX": "/var/hyperledger/fabric/artifacts/{{ item.0.name }}.tx",
+        "action":  "create",
+        "orgName": [
+            "org{{ (item.1|int * item.0.orgs|length) - (item.0.orgs|length - 1) }}"
+        ]
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+        "fcn": "init",
+        "args": []
+    },
+    "SCFile": [
+               {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.1|int }}-TLS.json"}
+       ]
+}

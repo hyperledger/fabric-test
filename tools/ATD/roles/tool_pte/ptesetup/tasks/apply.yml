@@ -1,0 +1,57 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+- name: Setup few variables
+  set_fact:
+    fabricworkdir: "/opt/gopath/{{ env }}/fabric"
+    fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
+    gopath: "/opt/gopath/{{ env }}"
+
+- name: Create testcases.sh for PTE
+  template:
+    src: "{{ playbook_dir }}/../../images/pte/testcases.sh"
+    dest: "{{ fabrictestpath }}/testcases.sh"
+    mode: 0755
+
+- name: Create samplecc-create file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-create-TLS.j2"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/channels/samplecc-chan{{ item.1 }}-create-TLS.json"
+  with_together: 
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
+- name: Generating the Dockerfile for PTE
+  copy:
+    src: "{{ playbook_dir }}/../../images/pte/Dockerfile"
+    dest: "{{ fabrictestpath }}/Dockerfile"
+
+- name: Building the docker image for PTE
+  shell: "docker build -t pte:latest . "
+  args:
+    chdir: "{{ fabrictestpath }}"
+
+- name: Create CISCFiles directory
+  file:
+    path: "{{ fabricworkdir }}/CISCFiles"
+    state: directory
+    mode: 0755
+
+- name: Create config file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/config-chan-TLS.j2"
+    dest: "{{ fabricworkdir }}/CISCFiles/config-chan{{ item.1 }}-TLS.json"
+  with_together: 
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
+- name: Create docker compose file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/pte-compose.j2"
+    dest: "{{ fabricworkdir }}/run/pte-compose.yml"
+
+- name: Start PTE docker container
+  command: "docker-compose -p {{ env }}.pte-compose -f {{ fabricworkdir }}/run/pte-compose.yml up -d"

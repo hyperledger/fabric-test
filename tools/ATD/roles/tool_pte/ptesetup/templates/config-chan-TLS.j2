@@ -1,0 +1,59 @@
+{
+"test-network": {
+  "orderer": {
+{% for orderer in orderers %}
+    "orderer{{ loop.index0 }}": {
+        "name": "{{ orderer.org }}",
+        "mspid": "{{ orderer.org }}",
+        "mspPath": "/var/hyperledger/fabric/artifacts",
+	"adminPath": "/var/hyperledger/fabric/artifacts/{{ orderer.org }}/users/Admin@{{ orderer.org }}/msp",
+	"comName": "{{ orderer.org }}",
+	"url": "grpcs://{{ orderer.name }}:7050",
+        "server-hostname": "{{ orderer.name }}",
+	"tls_cacerts": "/var/hyperledger/fabric/artifacts/{{ orderer.org }}/orderers/{{ orderer.name }}.{{ orderer.org }}/msp/tlscacerts/tlsca.{{ orderer.org }}-cert.pem"
+{% if not loop.last %}
+    },
+{% else %}
+    }
+{% endif %}
+{% endfor %}
+  },
+{% set index = ((item.1|int * item.0.orgs|length) - (item.0.orgs|length - 1)) -%}
+{% for peerorg in item.0.orgs if peerorg in peerorgs %}
+  "org{{ index + loop.index0 }}": {
+    "name": "{{ peerorg }}",
+    "mspid": "{{ peerorg }}",
+    "mspPath": "/var/hyperledger/fabric/artifacts",
+    "adminPath": "/var/hyperledger/fabric/artifacts/{{ peerorg }}/users/Admin@{{ peerorg }}/msp",
+    "comName": "{{ peerorg }}",
+    "ordererID": "{{ item.0.orderer }}",
+    "ca": {
+{% for ca in cas if ca.org == peerorg %}
+      "url":"https://{{ ca.name }}:7054",
+      "name": "{{ ca.name }}"
+{% endfor %}
+    },
+    "username": "{{ fabric.ca.admin }}",
+    "secret": "{{ fabric.ca.adminpw }}",
+{%  for peer in peers if peer.org == peerorg %}
+    "peer{{ loop.index }}": {
+      "requests": "grpcs://{{ peer.name }}:7051",
+      "events": "grpcs://{{ peer.name }}:7053",
+      "server-hostname": "{{ peer.name }}",
+      "tls_cacerts": "/var/hyperledger/fabric/artifacts/{{ peer.org }}/peers/{{ peer.name }}.{{ peer.org }}/msp/tlscacerts/tlsca.{{ peer.org }}-cert.pem"
+{%  if not loop.last %}
+    },
+{%  else %}
+    }
+{%  endif %}
+{%  endfor %}
+{% with len = item.0.orgs|length %}
+{% if loop.index is divisibleby len %}
+  }
+{% else %}
+  },
+{% endif %}
+{% endwith %}
+{% endfor %}
+}
+}

@@ -1,0 +1,38 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+- name: Setup variables
+  set_fact:
+    goroot: "/opt/go"
+    gopath: "/opt/gopath/{{ env }}"
+    fabricworkdir: "/opt/gopath/{{ env }}/fabric"
+    fabricpath: "/opt/gopath/{{ env}}/src/github.com/hyperledger/fabric"
+    fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
+    target: "{{ target | default('configtxgen') }}"
+
+- name : Create channel and channel orgs list
+  set_fact:
+    channels: |
+      {{ channels | default([]) + [{'index': item.key | default([]),
+        'name':item.value.name | default(),
+        'orgs':item.value.orgs | default([]),
+        'orderer': item.value.orderer | default() }] }}
+  with_dict: "{{ pte.ptechannels }}"
+
+- name: Sort the channel list
+  set_fact:
+    channels: "{{ channels | unique | sort }}"
+
+- name: Remove the channel artifacts
+  file:
+    path: "{{ fabricworkdir }}/keyfiles/{{ item.name }}.tx"
+    state: absent
+  with_items: "{{ channels }}"
+
+- name: Remove the fabric directory
+  file:
+    path: "{{ fabricpath }}"
+    state: absent
