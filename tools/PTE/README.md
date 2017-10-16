@@ -387,13 +387,64 @@ The following chaincodes are tested and supported:
 
 
 ## Output
-The output includes network id, process id, transaction type, total transactions, completed transactions, failed transactions, starting time, ending time, and elapsed time.
-* For example, consider a test case that has 4 processes driving a single peer. The output shows that network 0 process 0 executed 1000 moves with no failure in 406530 ms, network 0 process 1 executed 1000 moves with no failure in 400421 ms, and so on.  Note that the starting and ending timestamps are provided:
+* **Statistical Output Message**
 
-    stdout: [Nid:id=0:3] eventRegister: completed 1000(1000) Invoke(Move) in 259473 ms, timestamp: start 1492024894518 end 1492025153991
-    stdout: [Nid:id=0:2] eventRegister: completed 1000(1000) Invoke(Move) in 364174 ms, timestamp: start 1492024894499 end 1492025258673
-    stdout: [Nid:id=0:1] eventRegister: completed 1000(1000) Invoke(Move) in 400421 ms, timestamp: start 1492024894500 end 1492025294921
-    stdout: [Nid:id=0:0] eventRegister: completed 1000(1000) Invoke(Move) in 406530 ms, timestamp: start 1492024894498 end 1492025301028
+    The statistical output message includes PTE id, network id, channel name, org name, process id, transaction type, total transactions received and sent, elapsed time, starting time, ending time, and number of un-received events.
+
+    For example, the following is the statistical output message for a test case with 4 processes.
+
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:0 eventRegister] completed Rcvd(sent)=1000(1000) Invoke(Move) in 46199 ms, timestamp: start 1508185534030 end 1508185580229, #event timeout: 0
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:1 eventRegister] completed Rcvd(sent)=1000(1000) Invoke(Move) in 46266 ms, timestamp: start 1508185533969 end 1508185580235, #event timeout: 0
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:0 eventRegister] completed Rcvd(sent)=1000(1000) Invoke(Move) in 54232 ms, timestamp: start 1508185533962 end 1508185588194, #event timeout: 0
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:1 eventRegister] completed Rcvd(sent)=1000(1000) Invoke(Move) in 54613 ms, timestamp: start 1508185533985 end 1508185588598, #event timeout: 0
+
+* **Completed Message**
+
+    For each process, One message of `pte-exec:completed` is logged in PTE output upon the status of completion of each process. For each pte_driver.sh (each line in runCase.txt) execution, one message of `pte-main:completed` is logged in the PTE output upon completion of all associated pte_driver.sh.
+
+    * **pte-main:completed** For each runCases.txt, a `pte-main:completed` message is logged in PTE output.
+
+    * **pte-exec:completed** If PTE completed normally, then the message `pte-exec:completed` is logged.
+
+    * **pte-exec:completed:timeout** If PTE completed but with any event timeout, then the message `pte-exec:completed:timeout` is logged.
+
+    * **pte-exec:completed:error** If PTE exits due to any error, then the message `pte-exec:completed:error` is logged.
+
+
+
+
+
+    For example, if pte_mgr.sh is executed with a mgr.txt contains:
+
+        driver=pte CITest/FAB-3832-4i/samplecc/runCases-FAB-3832-4i1-TLS.txt
+
+    and runCases-FAB-3832-4i1-TLS.txt contains
+
+        sdk=node CITest/FAB-3832-4i/samplecc/samplecc-chan1-FAB-3832-4i-TLS.json
+
+    and `samplecc-chan1-FAB-3832-4i-TLS.json` contains
+
+        ...
+        "nProcPerOrg": "2",
+        ...
+        "channelOpt": {
+            ...
+            "orgName": [
+                "org1",
+                "org2"
+            ]
+        },
+
+    Then there will be 4 `pte-exec:completed` messages since there are 4 processes, 2 org and 2 processes per org. And there will be 1 `pte-main:completed` since 1 pte_driver.sh is executed (only one line of sdk=node in runCases.txt).  The completed message will be as follow:
+
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:0 eventRegister] pte-exec:completed
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:1 eventRegister] pte-exec:completed
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:0 eventRegister] pte-exec:completed
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:1 eventRegister] pte-exec:completed
+        info: [PTE 0 main]: [performance_main] pte-main:completed
+
+
+
 
 ## Reference
 

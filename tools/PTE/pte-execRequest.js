@@ -874,12 +874,12 @@ function execTransMode() {
                     } else if (targetPeers.toUpperCase() == 'LIST'){
                         assignThreadPeerList(channel,client,org);
                     } else {
-	                logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: invalid targetPeers= %s', Nid, channelName, org, pid, targetPeers.toUpperCase());
+	                logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, targetPeers.toUpperCase());
                         process.exit(1);
                     }
 
                     setCurrPeerId(channel, client, org);
-                    
+
                     tCurr = new Date().getTime();
                     var tSynchUp=tStart-tCurr;
                     if ( tSynchUp < 10000 ) {
@@ -904,7 +904,7 @@ function execTransMode() {
                             execModeProposal();
                         } else {
                             // invalid transaction request
-                            logger.error(util.format("[Nid:chan:org:id=%d:%s:%s:%d execTransMode] Transaction %j and/or mode %s invalid", Nid, channelName, org, pid, transType, transMode));
+                            logger.error(util.format("[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error Transaction %j and/or mode %s invalid", Nid, channelName, org, pid, transType, transMode));
                             process.exit(1);
                         }
                     }, tSynchUp);
@@ -1014,6 +1014,7 @@ function eventRegisterBlock() {
                             logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList.getSize());
                             txidList.printList();
                         }
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] pte-exec:completed', Nid, channelName, org, pid);
                         evtDisconnect();
                     }
                 }
@@ -1041,7 +1042,6 @@ function eventRegister(tx, cb) {
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
             let handle = setTimeout(function(){eh.unregisterTxEvent(deployId);
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] txidList size: %d, timeout tx_id: %s ', Nid, channelName, org, pid, txidList.getSize(), deployId.toString());
             evtTimeoutCnt++;
             evtCount = evtRcv + evtTimeoutCnt;
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) timeout (%d).', Nid, channelName, org, pid, deployId.toString(), evtTimeoutCnt);
@@ -1052,6 +1052,7 @@ function eventRegister(tx, cb) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList.getSize());
                     txidList.printList();
                 }
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] pte-exec:completed:timeout', Nid, channelName, org, pid);
             }
             evtDisconnect();resolve()}, evtTimeout);
 
@@ -1059,7 +1060,6 @@ function eventRegister(tx, cb) {
                 clearTimeout(handle);
                 eh.unregisterTxEvent(deployId);
                 txidList.removeNode(deployId.toString());
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] txidList size: %d, remove tx_id: %s ', Nid, channelName, org, pid, txidList.getSize(), deployId.toString());
                 evtRcv++;
 
                 if (code !== 'VALID') {
@@ -1078,6 +1078,7 @@ function eventRegister(tx, cb) {
                             logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList.getSize());
                             txidList.printList()
                         }
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] pte-exec:completed', Nid, channelName, org, pid);
                         evtDisconnect();
                         resolve();
                     }
@@ -1276,13 +1277,13 @@ function invoke_query_simple(freq) {
             }
         },
         function(err) {
-            logger.error('[[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] Failed to send query due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+            logger.error('[[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] pte-exec:completed:error Failed to send query due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
             process.exit();
             return;
         })
     .catch(
         function(err) {
-            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
+            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] pte-exec:completed:error %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
             process.exit();
         }
     );
@@ -1548,16 +1549,17 @@ function invoke_query_const(freq) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] query result:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
                 }
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_q, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed', Nid, channelName, org, pid);
                 process.exit();
             }
         },
         function(err) {
-            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] Failed to send query due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed:error Failed to send query due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
             process.exit();
         })
     .catch(
         function(err) {
-            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
+            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed:error %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
             process.exit();
         }
     );
@@ -1608,7 +1610,7 @@ function execModeConstant() {
             invoke_query_const(freq);
         }
     } else {
-        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeConstant] invalid transType= %s', Nid, channelName, org, pid, transType);
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeConstant] pte-exec:completed:error invalid transType= %s', Nid, channelName, org, pid, transType);
         evtDisconnect();
     }
 }
@@ -1928,6 +1930,7 @@ function invoke_query_burst() {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_burst] query result:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
                 }
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_burst] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_q, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_burst] pte-exec:completed', Nid, channelName, org, pid);
                 //return;
             }
         },

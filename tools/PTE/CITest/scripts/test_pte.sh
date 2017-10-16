@@ -41,10 +41,12 @@ fi
 # execute test cases
 if [ $TCase == "robust-i-TLS" ]; then
     # robustness test: in addition to pte_mgr.sh, requires test_robust.sh to restart orderers and peers
+    tCurr=`date +%m%d%H%M%S`
     echo "*************** [$0] executing: ***************"
-    echo "    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& $LogsDir/$TCase.log"
+    echo "    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& $LogsDir/$TCase$tCurr.log"
+    echo "    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& $LogsDir/$TCase$tCurr.log" > $LogsDir/$TCase$tCurr.log
     sleep 20s
-    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt $TSTART >& $LogsDir/$TCase.log &
+    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt $TSTART >> $LogsDir/$TCase$tCurr.log 2>&1 &
     cd $ScriptsDir
     ./test_robust.sh
     echo "[$0] kill node processes"
@@ -54,6 +56,7 @@ else
     cd $CIDir
     ccDir=`ls $TCase`
     echo "[$0] ccDir $ccDir"
+    tCurr=`date +%m%d%H%M%S`
     for cc in $ccDir; do
         echo "[$0] cc: $cc"
         cd $CIDir/$TCase/$cc
@@ -61,9 +64,10 @@ else
         cd $PTEDir
         for pte in $ptemgr; do
             echo "*************** [$0] executing: ***************"
-            echo "    ./pte_mgr.sh CITest/$TCase/$cc/$pte > $LogsDir/$pte.log"
+            echo "    ./pte_mgr.sh CITest/$TCase/$cc/$pte > $LogsDir/$pte$tCurr.log"
+            echo "    ./pte_mgr.sh CITest/$TCase/$cc/$pte > $LogsDir/$pte$tCurr.log" > $LogsDir/$pte$tCurr.log
             sleep 20s
-            ./pte_mgr.sh CITest/$TCase/$cc/$pte $TStart > $LogsDir/$pte.log
+            ./pte_mgr.sh CITest/$TCase/$cc/$pte $TStart >> $LogsDir/$pte$tCurr.log 2>&1
         done
     done
     cd $PTEDir
