@@ -16,12 +16,18 @@ FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
 PTEDir=$FabricTestDir/fabric-sdk-node/test/PTE
 CIDir=$FabricTestDir/fabric-sdk-node/test/PTE/CITest
 ScriptsDir=$CIDir/scripts
+LogsDir=$CIDir/Logs
 
 TCase=$1
 TStart=$2
 echo "[$0] test case: $TCase"
 
 cd $PTEDir
+
+if [[ ! -d CITest/Logs ]]; then
+    echo "[$0] create log directory: $LogsDir"
+    mkdir $LogsDir
+fi
 
 # sanity check if the test case directory exists
 if [[ ! -e CITest/$TCase ]]; then
@@ -34,18 +40,18 @@ fi
 
 # execute test cases
 if [ $TCase == "robust-i-TLS" ]; then
-    # robustness test
+    # robustness test: in addition to pte_mgr.sh, requires test_robust.sh to restart orderers and peers
     echo "*************** [$0] executing: ***************"
-    echo "    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& CITest/$TCase/samplecc/$TCase.log"
+    echo "    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt >& $LogsDir/$TCase.log"
     sleep 20s
-    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt $TSTART >& $CIDir/$TCase/samplecc/$TCase.log &
+    ./pte_mgr.sh CITest/$TCase/samplecc/PTEMgr-$TCase.txt $TSTART >& $LogsDir/$TCase.log &
     cd $ScriptsDir
     ./test_robust.sh
     echo "[$0] kill node processes"
     kill -9 $(ps -a | grep node | awk '{print $1}')
 else
-    # others
-    cd CITest
+    # others: test requires execution of pte_mgr.sh only
+    cd $CIDir
     ccDir=`ls $TCase`
     echo "[$0] ccDir $ccDir"
     for cc in $ccDir; do
@@ -55,9 +61,9 @@ else
         cd $PTEDir
         for pte in $ptemgr; do
             echo "*************** [$0] executing: ***************"
-            echo "    ./pte_mgr.sh CITest/$TCase/$cc/$pte > CITest/$TCase/$cc/$pte.log"
+            echo "    ./pte_mgr.sh CITest/$TCase/$cc/$pte > $LogsDir/$pte.log"
             sleep 20s
-            ./pte_mgr.sh CITest/$TCase/$cc/$pte $TStart > CITest/$TCase/$cc/$pte.log
+            ./pte_mgr.sh CITest/$TCase/$cc/$pte $TStart > $LogsDir/$pte.log
         done
     done
     cd $PTEDir
