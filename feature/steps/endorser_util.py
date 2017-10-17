@@ -273,7 +273,7 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def invoke_chaincode(self, context, chaincode, orderers, peer, channelId=TEST_CHANNEL_ID):
+    def invoke_chaincode(self, context, chaincode, orderers, peer, channelId=TEST_CHANNEL_ID, targs=''):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = chaincode.get('args', '[]').replace('"', r'\"')
         peerParts = peer.split('.')
@@ -288,15 +288,21 @@ class CLIInterface(InterfaceBase):
                                  common_util.convertBoolean(context.tls),
                                  "--cafile",
                                  '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
+        if targs:
+            #to escape " so that targs are compatible with cli command
+            targs = targs.replace('"', r'\"')
+            command = command + ["--transient", targs]
+
         command = command + ["--orderer", '{0}:7050'.format(orderers[0])]
         command.append('"')
         output = context.composition.docker_exec(setup+command, [peer])
+        print("Invoke {0}]: {1}".format(" ".join(setup+command), targs))
         print("Invoke[{0}]: {1}".format(" ".join(setup+command), str(output)))
         output = self.retry(context, output, peer, setup, command)
         return output
 
 
-    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID):
+    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs=''):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
@@ -305,7 +311,13 @@ class CLIInterface(InterfaceBase):
         command = ["peer", "chaincode", "query",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (str(args)), # This should work for rich queries as well
-                   "--channelID", channelId, '"']
+                   "--channelID", channelId]
+        if targs:
+            #to escape " so that targs are compatible with cli command
+            targs = targs.replace('"', r'\"')
+            command = command +["--transient", targs]
+
+        command.append('"')
         result = context.composition.docker_exec(setup+command, [peer])
         print("Query Exec command: {0}".format(" ".join(setup+command)))
         result = self.retry(context, result, peer, setup, command)

@@ -54,3 +54,6 @@ apt-get install --yes tcl tclx tcllib
 
 # Install NPM for the SDK
 apt-get install --yes npm
+
+# Initialize vendor for executing certain chaincodes
+cd ../fabric/examples/chaincode/go/enccc_example && govendor init && govendor add +external && cd -

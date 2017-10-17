@@ -8,12 +8,12 @@ from behave import *
 import time
 import os
 import uuid
+import subprocess
 import common_util
 import compose_util
 import orderer_util
 import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
-import time
 
 
 @given(u'I wait "{seconds}" seconds')
@@ -231,6 +231,20 @@ def step_impl(context, ordererType):
 @when(u'I start a fabric network')
 def step_impl(context):
     start_network_impl(context, "solo", False)
+
+@when(u'I locally execute the command "{command}" saving the results as "{key}"')
+def step_impl(context, command, key):
+    # This is a workaround to allow sending piped commands to behave without conflicting with the pipes in the table. 
+    command = command.replace("!", "|")
+    if not hasattr(context, "command_result"):
+        context.command_result = {}
+
+    if "|" in command:
+        context.command_result[key] = subprocess.check_output(command, shell=True).strip()
+    else:
+        cmd = command.split()
+        context.command_result[key] = subprocess.check_output(cmd, env=os.environ).strip()
+    print("command result: {}".format(context.command_result))
 
 @then(u'the initial non-leader peer of "{org}" has become the leader')
 def step_impl(context, org):

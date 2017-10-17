@@ -47,6 +47,11 @@ Ensure that you have Docker for `Linux`_, `Mac`_ or `Windows`_ 1.12 or higher pr
 
 You can install Behave and additional packages using the ``./scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager). This script installs additional packages into your OS environment.
 
+::
+
+    $ cd /path/to/fabric-test/feature; ./scripts/install_behave.sh
+
+
 The following repositories are dependencies and are included as submodules at the designated locations
     * `hyperledger-fabric`_: /path/to/fabric-test/fabric
     * `hyperledger-fabric-ca`_: /path/to/fabric-test/fabric-ca
@@ -56,9 +61,22 @@ The following repositories are dependencies and are included as submodules at th
 .. _hyperledger-fabric-ca: https://github.com/hyperledger/fabric-ca
 .. _cello: https://github.com/hyperledger/cello
 
+.. _Chaincode Vendoring:
+Following commands must be executed
+      `govendor init`
+      `govendor add +external`
+ 
+inside the chaincodes folder for any chaincode(go programs) that imports packages, outside the shim or protos folder.
+
+If the chaincode has imports from external third party, i.e. other than the packages in fabric outside the shim or protos, execute:
+     `govendor fetch << fully qualified package name here >>`
+
+
 Caveats and Gotchas
 -------------------
-This framework uses the `signal`_ package, which currently only works well in NIX environments.
+* This framework uses the `signal`_ package, which currently only works well in NIX environments.
+* When there is a need for executing commands that contain pipes (|) in a table, the user will need to use bang (!) instead.
+This is to make sure that the pipe in the command does not conflict with the pipe in the behave table.
 
 .. _signal: https://docs.python.org/2/library/signal.html
 
