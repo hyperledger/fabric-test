@@ -34,9 +34,9 @@ def after_scenario(context, scenario):
         print("Scenario {0} failed. Getting container logs".format(scenario.name))
         fileSuffix = "_" + scenario.name.replace(" ", "_") + ".log"
         # get logs from the peer containers
-        getLogFiles(containers, fileSuffix)
+        getLogFiles(context.composition.containerDataList, fileSuffix)
         # get logs from the chaincode containers
-        chaincodeContainers = subprocess.call(["docker",  "ps", "-f",  "name=dev-", "--format", "{{.Names}}"])
+        chaincodeContainers = subprocess.check_output(["docker",  "ps", "-f",  "name=-peer", "--format", "{{.Names}}"])
         getLogFiles(chaincodeContainers.splitlines(), fileSuffix)
 
     if 'doNotDecompose' in scenario.tags:

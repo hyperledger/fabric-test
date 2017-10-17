@@ -214,8 +214,11 @@ def bringup_impl(context, component, bringUpType="start"):
 def start_network_impl(context, ordererType, tlsEnabled=True):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
-    context.composeFile = "%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)
-    assert os.path.exists(context.composeFile), "The docker compose file does not exist: {0}".format(context.composeFile)
+
+    context.composeFile = ["%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)]
+    context.composeFile.append("%s/docker-compose/docker-compose-cli.yml" % (curpath))
+    for composeFile in context.composeFile:
+        assert os.path.exists(composeFile), "The docker compose file does not exist: {0}".format(composeFile)
 
     # Should TLS be enabled
     context.tls = tlsEnabled

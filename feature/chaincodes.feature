@@ -334,8 +334,8 @@ Examples:
     |                            path                                         | language | security    |
     | github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 | GOLANG   | with tls    |
     | github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02 | GOLANG   | without tls |
-    |        ../../fabric-test/chaincodes/example02/node                      | NODE     | with tls    |
-    |        ../../fabric-test/chaincodes/example02/node                      | NODE     | without tls |
+#    |        ../../fabric-test/chaincodes/example02/node                      | NODE     | with tls    |
+#    |        ../../fabric-test/chaincodes/example02/node                      | NODE     | without tls |
 
 @daily
 Scenario Outline: FAB-6256: Test rich queries using marbles chaincode using <language>
