@@ -52,6 +52,7 @@ const child_process = require('child_process');
 var webUser = null;
 var tmp;
 var i=0;
+var procDone=0;
 
 // input: userinput json file
 var PTEid = parseInt(process.argv[5]);
@@ -1201,6 +1202,13 @@ function performance_main() {
 
                 workerProcess.stdout.on('data', function (data) {
                     logger.info('stdout: ' + data);
+                    if (data.indexOf('pte-exec:completed') > -1) {
+                        procDone = procDone+1;
+                        logger.info('[performance_main] procDone: ', procDone);
+                        if ( procDone === nProcPerOrg*channelOrgName.length ) {
+                            logger.info('[performance_main] pte-main:completed');
+                        }
+                    }
                 });
 
                 workerProcess.stderr.on('data', function (data) {
@@ -1209,6 +1217,7 @@ function performance_main() {
 
                 workerProcess.on('close', function (code) {
                 });
+
             }
         } else {
             logger.error('[Nid=%d] invalid transType: %s', Nid, transType);
