@@ -181,6 +181,8 @@ Examples:
     | solo  |
     | kafka |
 
+# skip FAB-4770 until FAB-6335 gets fixed so that we reliably stop the correct kafkabroker
+@skip
 @daily
 Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the RF set, and <bringUpType> in LIFO order
     # By default, the number of kafka brokers in the RF set is 3(KAFKA_DEFAULT_REPLICATION_FACTOR),
