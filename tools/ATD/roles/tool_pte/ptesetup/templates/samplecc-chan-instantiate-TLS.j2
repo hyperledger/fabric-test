@@ -3,12 +3,12 @@
     "chaincodeID": "sample_cc",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transType": "instantiate",
     "nProcPerOrg": "4",
-    "transType": "Channel",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "{{ item.name }}",
-        "channelTX": "/var/hyperledger/fabric/artifacts/{{ item.name }}.tx",
+        "name":  "{{ item.name }}",
         "action":  "create",
         "orgName": [
             "org{{ (item.channelnum|int * item.orgs|length) - (item.orgs|length - 1) }}"
@@ -19,7 +19,17 @@
         "fcn": "init",
         "args": []
     },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
     "SCFile": [
-               {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}
-       ]
+                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}
+	]
 }

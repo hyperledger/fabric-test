@@ -20,4 +20,5 @@ services:
       - {{ fabricworkdir }}/keyfiles:/var/hyperledger/fabric/artifacts
       - {{ fabricworkdir }}/CISCFiles:/root/gopath/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/CISCFiles
       - {{ fabrictestpath }}/chaincodes:/root/gopath/src/github.com/hyperledger/fabric-test/chaincodes
+      - {{ fabrictestpath }}/Logs:/root/gopath/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/Logs
       - {{ fabricworkdir }}/run/keyfiles:/var/hyperledger/allorgs

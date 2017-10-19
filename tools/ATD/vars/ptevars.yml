@@ -5,9 +5,6 @@
 ---
 # This variable defines fabric network attributes
 pte: {
-
-  # The user to connect to the server
-  ssh_user: "ubuntu",
   ptechannels: [
     {name: "testorgschannel1", orgs: ["orga", "orgb"], orderer: "orderer0"},
     {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer0"}

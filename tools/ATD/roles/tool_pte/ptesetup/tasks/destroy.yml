@@ -12,6 +12,25 @@
     fabricpath: "/opt/gopath/{{ env}}/src/github.com/hyperledger/fabric"
     fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
 
+- name: Archive the logs directory
+  archive:
+    path: "{{ fabrictestpath }}/Logs"
+    dest: "{{ fabrictestpath }}/{{ testcase }}-{{ lookup('pipe', 'date +%m%d%Y-%H%M%S') }}.tgz"
+  register: logfile
+
+- find:
+    paths: "{{ fabrictestpath }}"
+    recurse: yes
+    patterns: '{{ testcase }}-*.tgz'
+  register: file_to_copy
+
+- fetch:
+    src: "{{ item }}"
+    dest: "/home/{{ fabric.ssh_user }}"
+    flat: yes
+    fail_on_missing: yes
+  with_items: "{{ file_to_copy.files[0].path }}"
+
 - name: Check docker compose file stats
   stat:
     path: "{{ fabricworkdir }}/run/pte-compose.yml"
