@@ -261,8 +261,6 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             for ( m=0; m< lvl3_key.length; m++ ) {
                                 if ( lvl3_key[m] == 'CORE_PEER_ID' ) {
                                     buff = '  ' + '    - ' + lvl3_key[m] + '=' + tmp_name + '\n';
-                                } else if ( lvl3_key[m] == 'CORE_PEER_ADDRESS' ) {
-                                    buff = '  ' + '    - ' + lvl3_key[m] + '=' + vp0Addr +':'+ tmp_port + '\n';
                                 } else if ( lvl3_key[m] == 'CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS' ) {
                                     buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'couchdb'+v +':'+ couchdbPort + '\n';
                                 } else {
@@ -696,9 +694,6 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     } else if ( lvl3_key[m] == 'CORE_PEER_NETWORKID' ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + tmp_name + '\n';
                                         fs.appendFileSync(dFile, buff);
-                                    } else if ( lvl3_key[m] == 'CORE_PEER_ADDRESS' ) {
-                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + vp0Addr +':'+ tmp_port + '\n';
-                                        fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE' ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + HOSTCONFIG_NETWORKMODE +'_default' + '\n';
                                         fs.appendFileSync(dFile, buff);
@@ -740,13 +735,15 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     }
 
                                 }
+
+                                buff = '  ' + '    - CORE_PEER_ADDRESS=' + peerName +':7051\n';
+                                fs.appendFileSync(dFile, buff);
+                                buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':7051' + '\n';
+                                fs.appendFileSync(dFile, buff);
+
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var t = Math.floor(v / nPeerPerOrg) + 1;
                                     var s = (v % nPeerPerOrg);
-                                    buff = '  ' + '    - CORE_PEER_ADDRESS='+peerName+':7051' + '\n';
-                                    fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':7051' + '\n';
-                                    fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - CORE_PEER_TLS_ENABLED=true' + '\n';
                                     fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/server.key'+'\n';
