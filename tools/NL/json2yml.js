@@ -528,6 +528,13 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         }
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + ktmp + '\n';
                                             fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'KAFKA_MIN_INSYNC_REPLICAS' ) {
+                                        var nk = 1;
+                                        if ( addBroker > 2 ) {
+                                             nk = 2;
+                                        }
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + nk + '\n';
+                                        fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
                                         fs.appendFileSync(dFile, buff);
@@ -723,15 +730,13 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LOCALMSPID' ) {
-                                        var t = (v - v%2)/2 + 1;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'PeerOrg'+t + '\n';
+                                            var t1 = Math.floor(v / nPeerPerOrg) + 1;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'PeerOrg'+t1 + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_MSPCONFIGPATH' ) {
-                                            //var t = (v - v%2)/2 + 1;
-                                            var t = Math.floor(v / nPeerPerOrg) + 1;
-                                            var s = (v % nPeerPerOrg);
-                                            //console.log('CORE_PEER_MSPCONFIGPATH: ', v, t, s);
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/msp'+'\n';
+                                            var t1 = Math.floor(v / nPeerPerOrg) + 1;
+                                            var s1 = (v % nPeerPerOrg);
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerMSPDir + '/org'+t1 +'.'+comName+'/peers/peer'+s1+'.org'+t1+'.'+comName+'/msp'+'\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -773,8 +778,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             fs.appendFileSync(dFile, buff);
 
                             //if ( v == 0 ) {
-                                var t = evtPort + v;
-                                buff = '  ' + '    - ' + t + ':' + 7053 + '\n';
+                                var t1 = evtPort + v;
+                                buff = '  ' + '    - ' + t1 + ':' + 7053 + '\n';
                                 fs.appendFileSync(dFile, buff);
                             //}
 

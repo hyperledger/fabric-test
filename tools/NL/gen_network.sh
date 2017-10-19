@@ -47,6 +47,7 @@ nPeerPerOrg=1
 MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 TLSEnabled="disabled"
+db="goleveldb"
 
 while getopts ":x:z:l:d:b:c:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in

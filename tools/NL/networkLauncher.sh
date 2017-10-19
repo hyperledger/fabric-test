@@ -35,9 +35,9 @@ function printHelp {
    echo "    -C: company name, default=example.com "
    echo " "
    echo " example: "
-   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 "
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 "
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
-   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled "
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled "
    echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w localhost -S enabled "
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled "
    exit
@@ -282,6 +282,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSEnabled"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ordServType -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -C $comName
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -C $comName
 
