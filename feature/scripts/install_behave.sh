@@ -17,6 +17,8 @@ apt-get update -qq
 # Install Python, pip, behave, nose
 #
 # install python-dev and libyaml-dev to get compiled speedups
+apt-get install --yes python
+apt-get install --yes python-pytest
 apt-get install --yes python-dev
 apt-get install --yes libyaml-dev
 

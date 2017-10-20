@@ -95,13 +95,13 @@ Many tests are now integrated into CI. Every patch set triggers a `fabric-test-v
 
 https://jenkins.hyperledger.org/view/fabric-test/
 
-Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/) to execute `daily` tests as identified in fabric-test/regression/daily/runDailyTests.sh. It clones the latest commits of fabric, fabric-ca, and other required repositories, and performs the following steps:
+Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/) to execute `daily` tests as identified in fabric-test/regression/daily/runDailyTestSuite.sh. It clones the latest commits of fabric, fabric-ca, and other required repositories, and performs the following steps:
 
 * Clone the latest commits for repositories being tested, including fabric, fabric-ca, and more
 * Build docker images and binary files
 * Build fabric-ca and fabric peer, orderer, cryptogen and configtxgen
-* Update git submodules and install all the python required modules in virtual env
-* Run `behave daily` tests, and other tests identified in fabric-test/regression/daily/runDailyTests.sh
+* Update git submodules and install all the python required modules, including python, python-pytest, and everything else identified in fabric-test/feature/scripts/install_behave.sh.
+* Run `behave daily` tests, and other tests identified in fabric-test/regression/daily/runDailyTestSuite.sh
 * After the tests are completed, the CI job reports test results and populates the Job console. Click here to view the Test Results report display:
 https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/
 

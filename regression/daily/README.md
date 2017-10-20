@@ -1,6 +1,6 @@
 # Daily Test Suite
 
-This readme explains everything there is to know about our daily regression test suite.  **Note 1**: This applies similarly for both the *test/regression/daily/* and *test/regression/weekly/* test suites.  **Note 2**: The Release Criteria (*test/regression/release/*) test suite is a subset of all the Daily and Weekly tests.
+This readme explains everything there is to know about our daily regression test suite *fabric-test/regression/daily/runDailyTestSuite.sh* and all the test suites.
 
 - How to Run the Tests
 - Where to View the Results produced by the daily automation tests
@@ -13,19 +13,19 @@ This readme explains everything there is to know about our daily regression test
 
 ## How to Run the Tests, and Where to View the Results
 
-Everything starts with [runDailyTestSuite.sh](./runDailyTestSuite.sh), which invokes all test driver scripts, such as *systest_pte.py* and *chaincodes.py*. Together, these driver scripts initiate all tests in the daily test suite. You can manually execute *runDailyTestSuite.sh* in its entirety, or, run one any one of the test driver scripts on the command line. Or, you may simply view the results generated daily by an automated Continuous Improvement (CI) tool which executes *runDailyTestSuite.sh*. Reports are displayed on the [Daily Test Suite Results Page](https://jenkins.hyperledger.org/view/Daily/job/fabric-daily-chaincode-tests-x86_64/test_results_analyzer). When you look at the reports; click the buttons in the **'See children'** column to see the results breakdown by component and by individual tests.
+Everything starts with [runDailyTestSuite.sh](./runDailyTestSuite.sh), which invokes all test driver scripts, such as *systest_pte.py*, and the behave tests. Together, these driver scripts initiate all tests in the daily test suite. You can manually execute *runDailyTestSuite.sh* in its entirety, or, run one any one of the test driver scripts on the command line. Or, you may simply view the results generated daily by an automated Continuous Improvement (CI) tool which executes *runDailyTestSuite.sh*. Reports are displayed on the [Daily Test Suite Results Page](https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/). When you look at the reports; click the *Expand All* button or click the buttons in the **'See children'** column to see the results breakdown by component and by individual tests.
 
 #### Where to Find Existing Tests
 
-Examine the driver scripts to find the individual tests, which are actually stored in several locations under */path/to/fabric/test/*. Some tests are located in test suite subdirectories such as
+Examine the driver scripts to find the individual tests, which are actually stored in several locations under */path/to/fabric-test/*. Some tests are located in test suite subdirectories such as
 
-- *test/regression/daily/chaincodeTests/*
+- *fabric-test/regression/daily/*
 
 whereas other tests are located in the tools directories themselves, such as
 
-- *test/feature/ft/* - User-friendly **Behave** functional tests feature files
-- *test/tools/PTE/* - Performance Traffic Engine **(PTE)** tool and tests
-- *test/tools/OTE/* - Orderer Traffic Engine **(OTE)** tool and tests
+- *fabric-test/feature/* - User-friendly **Behave** functional tests feature files
+- *fabric-test/tools/PTE/* - Performance Traffic Engine **(PTE)** tool and tests
+- *fabric-test/tools/OTE/* - Orderer Traffic Engine **(OTE)** tool and tests
 
 Each testcase title should provide the test objective and a Jira FAB issue which can be referenced for more information. Test steps and specific details can be found in the summary comments of the test scripts themselves. Additional information can be found in the README files associated with the various test directories.
 
@@ -35,10 +35,10 @@ We love contributors! Anyone may add a new test to an existing test driver scrip
 
 - Before linking a test case into the CI automation tests, please merge your (tool and) testcase into gerrit, and create a Jira task, as follows:
 
-  1. First merge your tool and tests to gerrit in appropriate folders under */path/to/fabric/test/*.
+  1. First merge your tool and tests to gerrit in appropriate folders under */path/to/fabric-test/*.
   1. Of course, all tests must pass before being submitted. We do not want to see any false positives for test case failures.
   1. To integrate your new tests into the CI automation test suite, create a new Jira task FAB-nnnn for each testcase, and use 'relates-to' to link it to epic FAB-3770.
-  1. You will this new Jira task to submit a changeset to gerrit, to invoke your testcase from a driver script similar to */path/to/fabric/test/regression/daily/Example.py*. In the comments of the gerrit merge request submission, include the
+  1. You will this new Jira task to submit a changeset to gerrit, to invoke your testcase from a driver script similar to */path/to/fabric-test/regression/daily/Example.py*. In the comments of the gerrit merge request submission, include the
       - Jira task FAB-nnnn
       - the testcase title and objective
       - copy and fill in the template from Jira epic FAB-3770
@@ -51,14 +51,14 @@ The Continuous Improvement (CI) team utilizes a Jenkins job to execute the full 
   1. Invoke the individual testcase from within a test driver script in *regression/daily/*. There are many examples here, such as *Example.py* and *systest_pte.py*. These test driver scripts are basically wrappers written in python, which makes it easy to produce the desired junitxml output format required for displaying reports. This method is useful for almost any test language, including bash, tool binaries, and more. More details are provided below explaining how to call testcases from within a test driver script. Here we show how simple it is to execute the test driver and all the testcases within it. **Note:** File *results_sample.xml* will be created, containing the sample testcases output.
 
   ```
-     cd /path/to/fabric/test/regression/daily
+     cd /path/to/fabric-test/regression/daily
      py.test -v --junitxml example_results.xml ./Example.py
   ```
 
   1. Execute 'go test', and pipe the output through tool github.com/jstemmer/go-junit-report to convert to xml. **Note:** In the example shown, file 'results.xml' will be created with the test output.
 
   ```
-     cd /path/to/fabric/test/tools/OTE
+     cd /path/to/fabric-test/tools/OTE
      go get github.com/jstemmer/go-junit-report
      go test -run ORD77 -v | go-junit-report >> results.xml
   ```
@@ -79,6 +79,7 @@ Refer to *Example.py* for a model to clone and get started quickly. The testcase
   ```
       def test_FAB9876_1K_Payload(self):
         '''
+        Description:
         Launch standard network.
         Use PTE stress mode to send 100 invoke transactions
         concurrently to all peers on all channels on all
@@ -86,7 +87,7 @@ Refer to *Example.py* for a model to clone and get started quickly. The testcase
         each to ensure the last transaction was written,
         calculate tps, and remove network and cleanup
         '''
-        result = subprocess.check_output("../../tools/PTE/tests/run1KPayloadTest.sh", shell=True)
+        result = subprocess.check_output("../fabric-test/tools/PTE/CITest/run1KPayloadTest.sh", shell=True)
         self.assertIn(TEST_PASS_STRING, result)
   ```
 
@@ -94,8 +95,8 @@ Refer to *Example.py* for a model to clone and get started quickly. The testcase
 
 Adding a new test with a new tool involves a few more steps.
 
-  1. Create and merge a new tool, for example, */path/to/fabric/test/tools/NewTool/newTool.sh*
-  1. Create a new test driver script such as */path/to/fabric/test/regression/daily/newTool.py*.  Model it after others like *Example.py*, found under driver scripts under */path/to/test/regression/daily/* and *test/regression/weekly/*.
+  1. Create and merge a new tool, for example, */path/to/fabric-test/tools/NewTool/newTool.sh*
+  1. Create a new test driver script such as */path/to/fabric-test/regression/daily/newTool.py*.  Model it after others like *Example.py*, found under driver scripts under */path/to/fabric-test/regression/daily/* and *test/regression/weekly/*.
   1. Add your new testcases to *newTool.py*. The testcases should use the following format. Refer also to the steps described in Alternative 1, above.
 
   ```
@@ -109,7 +110,7 @@ Adding a new test with a new tool involves a few more steps.
         self.assertIn("<string from stdout of newTool that indicates PASS>", result)
   ```
 
-  1. Edit */path/to/test/regression/daily/runDailyTestSuite.sh* to run the new testcases. Add a new line, or append your new test driver scriptname *newTool.py* to an existing line:
+  1. Edit */path/to/fabric-test/regression/daily/runDailyTestSuite.sh* to run the new testcases. Add a new line, or append your new test driver scriptname *newTool.py* to an existing line:
 
   ```
      py.test -v --junitxml results_newTool.xml newTool.py
