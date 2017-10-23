@@ -22,17 +22,21 @@ def getLogFiles(containers, fileSuffix):
         else:
             namePart = container.containerName
             containerName = container.containerName
-        with open(namePart + fileSuffix, "w+") as logfile:
-            rc = subprocess.call(["docker", "logs", containerName], stdout=logfile, stderr=logfile)
-            if rc !=0 :
-                print("Cannot get logs for {0}. Docker rc = {1}".format(namePart, rc))
+        try:
+            with open(namePart + fileSuffix, "w+") as logfile:
+                rc = subprocess.call(["docker", "logs", containerName], stdout=logfile, stderr=logfile)
+                if rc !=0 :
+                    print("Cannot get logs for {0}. Docker rc = {1}".format(namePart, rc))
+        except:
+            print("Unable to get the logs for {}".format(namePart + fileSuffix))
 
 
 def after_scenario(context, scenario):
     getLogs = context.config.userdata.get("logs", "N")
     if getLogs.lower() == "force" or (scenario.status == "failed" and getLogs.lower() == "y" and "compose_containers" in context):
         print("Scenario {0} failed. Getting container logs".format(scenario.name))
-        fileSuffix = "_" + scenario.name.replace(" ", "_") + ".log"
+        # Replace spaces and slashes with underscores
+        fileSuffix = "_" + scenario.name.replace(" ", "_").replace("/", "_") + ".log"
         # get logs from the peer containers
         getLogFiles(context.composition.containerDataList, fileSuffix)
         # get logs from the chaincode containers
