@@ -29,6 +29,8 @@ function printHelp {
    echo "    -f: profile name, default=testOrg"
    echo "    -b: MSP directory, default=/mnt/crypto-config"
    echo "    -w: host ip 1, default=0.0.0.0"
+   echo "    -c: batch timeout, default=2s"
+   echo "    -B: batch size, default=10"
    echo "    -C: company name, default=example.com"
    echo " "
    echo "Example:"
@@ -94,9 +96,11 @@ SecType="256"
 PROFILE_STRING="testOrg"
 MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
 comName="example.com"
+batchTimeOut="2s"
+batchSize=10
 
 k=0
-while getopts ":o:k:p:s:h:r:t:f:b:w:v:C:" opt; do
+while getopts ":o:k:p:s:h:r:t:f:b:w:v:c:B:C:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -157,6 +161,16 @@ while getopts ":o:k:p:s:h:r:t:f:b:w:v:C:" opt; do
       k=$[ k + 1 ]
       OrgArray[$k]=$OPTARG
       echo "k:  $k, ${#OrgArray[@]}, OrgArray=${OrgArray[@]}"
+      ;;
+
+    c)
+      batchTimeOut=$OPTARG
+      echo "batchTimeOut:  $batchTimeOut"
+      ;;
+
+    B)
+      batchSize=$OPTARG
+      echo "batchSize:  $batchSize"
       ;;
 
     C)
@@ -245,6 +259,12 @@ do
           do
               echo "             - kafka"$i":"$kafkaPort >> $cfgOutFile
           done
+
+      elif [ "$t1" == "BatchTimeout:" ]; then
+          echo "    $t1 $batchTimeOut" >> $cfgOutFile
+
+      elif [ "$t1" == "MaxMessageCount:" ]; then
+          echo "        $t1 $batchSize" >> $cfgOutFile
 
       elif [ "$t2" == "*OrdererOrg" ]; then
           echo "*OrdererOrg ... "

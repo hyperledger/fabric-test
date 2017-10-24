@@ -711,14 +711,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         if (dbType == 'couchdb') {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'CouchDB' + '\n';
                                             fs.appendFileSync(dFile, buff);
-                                        } else if (dbType == 'goleveldb') {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'goleveldb' + '\n';
-                                            fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS' ) {
                                         if (dbType == 'couchdb') {
-                                            tmp = couchdbPort+v;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'couchdb'+v +':'+ tmp + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'couchdb'+v +':'+ couchdbPort + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_ORGLEADER' ) {
@@ -843,20 +839,26 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             // header 4
                             for ( m=0; m< lvl2_obj.length; m++ ) {
                                 //buff = '  ' + '    - ' +lvl2_obj[m]+m + '\n';
-                                buff = '  ' + '    - ' +ordererName + '\n';
+                                var t1 = Math.floor(v / nPeerPerOrg);
+                                var s1 = t1 % addOrderer;
+                                var peerOrdererName = 'orderer'+s1+'.'+comName;
+                                buff = '  ' + '    - ' +peerOrdererName + '\n';
                                 fs.appendFileSync(dFile, buff);
                             }
                             // header 4
                             var t = Math.floor(v / nPeerPerOrg) * nPeerPerOrg;
                             for ( m=t; m< v; m++ ) {
-                    var t1 = Math.floor(v / nPeerPerOrg) + 1;
-                    var s1 = (m % nPeerPerOrg);
-                    var peerName1 = 'peer'+s1+'.org'+t1+'.'+comName;
-                    //console.log('v: %d, t:%d, t1: %d, s1: %d, peerName1: %s', v, t, t1, s1, peerName1);
+                                var t1 = Math.floor(v / nPeerPerOrg) + 1;
+                                var s1 = (m % nPeerPerOrg);
+                                var peerName1 = 'peer'+s1+'.org'+t1+'.'+comName;
                                 buff = '  ' + '    - ' +peerName1 + '\n';
                                 fs.appendFileSync(dFile, buff);
                             }
-
+                            // head 4: couchDB
+                            if (dbType == 'couchdb') {
+                                buff = '  ' + '    - ' + 'couchdb'+v + '\n';
+                                fs.appendFileSync(dFile, buff);
+                            }
                         } else {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
                             fs.appendFileSync(dFile, buff);

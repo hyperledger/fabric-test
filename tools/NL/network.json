@@ -95,6 +95,8 @@
                  "CORE_PEER_ID": "peer",
                  "CORE_PEER_GOSSIP_BOOTSTRAP": "peer0:5005",
                  "CORE_PEER_MSPCONFIGPATH": "/var/hyperledger/msp/peer0/localMspConfig",
+                 "CORE_LEDGER_STATE_STATEDATABASE": "CouchDB",
+                 "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS": "couchdb:5984",
                  "CORE_PEER_LOCALMSPID": "Org0MSP"
             },
             "volumes": [
@@ -109,6 +111,13 @@
             "working_dir": "/opt/gopath/src/github.com/hyperledger/fabric/peer",
             "command": "peer node start --peer-defaultchain=false",
             "container_name": "vpID"
+        },
+        "couchdb": {
+            "image": "hyperledger/fabric-couchdb",
+            "ports": [
+                "5984:5984"
+            ],
+            "container_name": "couchdb"
         }
     }
 }

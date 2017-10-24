@@ -19,6 +19,7 @@ The usages of each script is given below so that they can be executed separately
 - fabric-sdk-node commit level: v1.0.0
 - fabric-ca commit level: v1.0.0
 
+It is user's responsibility to install related docker images on the system. User can either create docker images using `make docker` or use the bootstrap scripts in fabric-test/fabric/scripts to pull docker images from dockerhub.
 
 # networkLauncher.sh
 

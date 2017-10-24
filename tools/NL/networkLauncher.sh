@@ -29,6 +29,9 @@ function printHelp {
    echo "    -s: security type, default=256"
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -w: host ip, default=0.0.0.0"
+   echo "    -l: core logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
+   echo "    -c: batch timeout, default=2s"
+   echo "    -B: batch size, default=10"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS enablement [enabled|disabled], default=disabled"
@@ -61,8 +64,11 @@ HostIP1="0.0.0.0"
 comName="example.com"
 networkAction="up"
 BuildDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/build/bin
+logLevel="ERROR"
+batchTimeOut="2s"
+batchSize=10
 
-while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:c:B:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     a)
@@ -131,6 +137,21 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:F:G:S:C:" opt; do
     w)
       HostIP1=$OPTARG
       echo "HostIP1:  $HostIP1"
+      ;;
+
+    c)
+      batchTimeOut=$OPTARG
+      echo "batchTimeOut:  $batchTimeOut"
+      ;;
+
+    l)
+      logLevel=$OPTARG
+      echo "logLevel:  $logLevel"
+      ;;
+
+    B)
+      batchSize=$OPTARG
+      echo "batchSize:  $batchSize"
       ;;
 
     F)
@@ -236,8 +257,8 @@ echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config"
-./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config
+echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config -c $batchTimeOut -B $batchSize"
+./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config -c $batchTimeOut -B $batchSize
 
 echo " "
 echo "        ####################################################### "
@@ -282,6 +303,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -C $comName
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -l $logLevel"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -C $comName -l $logLevel
 
