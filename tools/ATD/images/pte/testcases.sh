@@ -19,3 +19,4 @@ echo "STARTING THE TESTS"
 echo "##################"
 
 ./test_driver.sh -p -c $CHAINCODE -t $TESTCASE
+while ps axg | grep -vw grep | grep -w "node ./pte-execRequest.js" > /dev/null; do sleep 120; done

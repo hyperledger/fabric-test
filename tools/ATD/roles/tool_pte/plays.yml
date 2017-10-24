@@ -5,7 +5,7 @@
 
 ---
 - name: Setting Fabric-test repository
-  hosts: '{{ host }}'
+  hosts: builders
   gather_facts: true
   user: "{{ fabric.ssh_user }}"
   vars_files:
@@ -16,7 +16,7 @@
   tags: "fabrictestsetup"
 
 - name: Launching PTE container
-  hosts: '{{ host }}'
+  hosts: builders
   gather_facts: true
   user: "{{ fabric.ssh_user }}"
   vars_files:

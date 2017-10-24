@@ -41,6 +41,18 @@
 - name: make channelnum list
   set_fact:
     channelnum: "{{ channelnum | list }}"
+
+- name: Create list
+  set_fact:
+    channellists: |
+      {{ channellists | default([]) + [{ 'name':item.0.name | default(),
+        'orgs':item.0.orgs | default([]),
+        'orderer': item.0.orderer | default(),
+        'channelnum': item.1|int }] }}
+  with_together:
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
 - debug:
     var: kafkals
 

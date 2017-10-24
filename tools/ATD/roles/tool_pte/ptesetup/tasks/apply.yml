@@ -10,6 +10,20 @@
     fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
     gopath: "/opt/gopath/{{ env }}"
 
+- name: Create orgs list
+  set_fact:
+    channelorgs: "{{ channelorgs | default([]) + item.orgs | default([]) }}"
+  with_items: "{{ pte.ptechannels }}"
+
+- name: Number of orgs in channels
+  set_fact:
+    numorgs: "{{ numorgs | default([]) + [ item | default() ] }}"
+  with_sequence: count={{ channelorgs|length }}
+
+- name: make numorgs list
+  set_fact:
+    numorgs: "{{ numorgs | list }}"
+
 - name: Create testcases.sh for PTE
   template:
     src: "{{ playbook_dir }}/../../images/pte/testcases.sh"
@@ -19,10 +33,38 @@
 - name: Create samplecc-create file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-create-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/channels/samplecc-chan{{ item.1 }}-create-TLS.json"
-  with_together: 
-    - "{{ channels }}"
-    - "{{ channelnum }}"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/channels/samplecc-chan{{ item.channelnum }}-create-TLS.json"
+  with_items: "{{ channellists }}"
+
+- name: Create samplecc-join file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-join-TLS.j2"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/channels/samplecc-chan{{ item[0].channelnum }}-join{{ item[1] }}-TLS.json"
+  with_nested:
+    - "{{ channellists }}"
+    - "{{ numorgs }}"
+  when: (((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1)) + item[0].orgs|length) > item[1]|int >= ((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1))
+
+- name: Create samplecc-install file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-install-TLS.j2"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item[0].channelnum }}-install{{ item[1] }}-TLS.json"
+  with_nested:
+    - "{{ channellists }}"
+    - "{{ numorgs }}"
+  when: (((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1)) + item[0].orgs|length) > item[1]|int >= ((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1))
+
+- name: Create samplecc-instantiate file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-instantiate-TLS.j2"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-instantiate-TLS.json"
+  with_items: "{{ channellists }}"
+
+- replace:
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/samplecc/samplecc-chan{{ item.channelnum }}-{{ testcase }}.json"
+    regexp: '^(.*)name(.*)$'
+    replace: '    "name": "{{ item.name }}",'
+  with_items: "{{ channellists }}"
 
 - name: Generating the Dockerfile for PTE
   copy:
@@ -44,7 +86,7 @@
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/config-chan-TLS.j2"
     dest: "{{ fabricworkdir }}/CISCFiles/config-chan{{ item.1 }}-TLS.json"
-  with_together: 
+  with_together:
     - "{{ channels }}"
     - "{{ channelnum }}"
 
@@ -53,5 +95,15 @@
     src: "{{ playbook_dir }}/ptesetup/templates/pte-compose.j2"
     dest: "{{ fabricworkdir }}/run/pte-compose.yml"
 
+- name: Create Log directory
+  file:
+    path: "{{ fabrictestpath }}/Logs"
+    state: directory
+    mode: 0755
+
 - name: Start PTE docker container
   command: "docker-compose -p {{ env }}.pte-compose -f {{ fabricworkdir }}/run/pte-compose.yml up -d"
+
+- name: Checking the health of PTE container
+  shell: while [ $(docker ps -f status=exited -f name=PTE -q | wc -c) -eq 0 ]; do echo "PTE container is running - {{ lookup('pipe', 'date +%m%d%Y-%H%M%S') }}";sleep 120; done
+  tags: check

@@ -40,7 +40,8 @@ and running the create, join, install, instantiate, invokes and queries separate
 ```
   cd .../path/to/fabric-test/cello/src/agent/ansible                 # and launch the network; then:
 ```
- - (Refer [Cello - Hyperledger Fabric Deployment](https://github.com/hyperledger/cello/tree/master/src/agent/ansible)) for launching the Hyperledger Fabric Network.
+ - (Refer [Cello - Hyperledger Fabric Deployment to provision the machines and launch the network](https://github.com/hyperledger/cello/tree/master/src/agent/ansible)) for launching the Hyperledger Fabric Network.
+ - To use a single machine as ansible controller and for launching network on it, refer [All-in-one.md](https://github.com/hyperledger/cello/blob/master/src/agent/ansible/vars/All-in-one.md)
 
 ## Using ATD to drive PTE
 
@@ -65,7 +66,7 @@ Now, run the following command to launch the PTE in a container
 ```
   cd .../path/to/fabric-test/tools/ATD/
   ansible-playbook -i ../../cello/src/agent/ansible/run/runhosts \
-  --extra-vars "host=osfabric004 chaincode=samplecc testcase=FAB-3983-i-TLS" -e "mode=apply env=bc1st tool_type=pte" ptesetup.yml
+  --extra-vars "chaincode=samplecc testcase=FAB-3983-i-TLS" -e "mode=apply env=bc1st tool_type=pte" ptesetup.yml
 ```
 
 Behind the scenes, it will use templates under `roles/tool_pte/ptesetup/templates/` to generate the chan-config-TLS.json,
@@ -75,7 +76,6 @@ In the above command,
  - `-i <filename>` is used to provide an input file like host file which is needed by ansible to run against
     - `-i ../../cello/src/ansible/run/runhosts` refers the runhosts file generated while provisioning the machines using cello/src/agent/ansible
  - `--extra-vars "var=<value>"` is used to pass in a variable to the playbook
-    - `host=<name of the machine>` is used to pass the name of the host where PTE has to run.
     - `testcase=<Testcase Number>` is used to run a specific testcase that is defined in the PTE/CITest directory. Refer the list of available testcases in PTE/CITest/scripts/test_driver.sh.
     - `chaincode=<chaincode name>` is used to specify which chaincode to use. It can be chaincode=samplecc | all | marbles.
  - `env=<value>`to pass the environment variable file

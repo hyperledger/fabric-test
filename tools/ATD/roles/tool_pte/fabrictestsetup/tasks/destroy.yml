@@ -16,11 +16,10 @@
 - name : Create channel and channel orgs list
   set_fact:
     channels: |
-      {{ channels | default([]) + [{'index': item.key | default([]),
-        'name':item.value.name | default(),
-        'orgs':item.value.orgs | default([]),
-        'orderer': item.value.orderer | default() }] }}
-  with_dict: "{{ pte.ptechannels }}"
+      {{ channels | default([]) + [{ 'name':item.name | default(),
+        'orgs':item.orgs | default([]),
+        'orderer': item.orderer | default() }] }}
+  with_items: "{{ pte.ptechannels }}"
 
 - name: Sort the channel list
   set_fact:
@@ -36,3 +35,4 @@
   file:
     path: "{{ fabricpath }}"
     state: absent
+  tags: cleanfabric
