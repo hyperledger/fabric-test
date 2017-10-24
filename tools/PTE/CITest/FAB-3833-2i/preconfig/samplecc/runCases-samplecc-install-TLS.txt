@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-3833-2i/preconfig/samplecc/samplecc-chan1-install1-TLS.json
+sdk=node CITest/FAB-3833-2i/preconfig/samplecc/samplecc-chan1-install2-TLS.json

@@ -1,16 +1,16 @@
 
-# Automation CI Test Using PTE
+# PTE Automation CI Test
 
 ---
 # Introduction
 
-The purpose of this CI test is to automatically execute the predefined tests daily or weekly that any unexpected or undesired code changes may be uncovered as soon as possible.  And easy to incorporate an user supplied chaincode test.  The CI test uses [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) to driver transactions.  The functions of the CI tool include the following:
+The purpose of this CI test is to automatically execute the predefined tests daily or weekly that any unexpected or undesired code changes may be uncovered as soon as possible and to flexibly incorporate an user supplied chaincode test.  The CI test uses [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) to driver transactions.  The functions of the CI tool include the following:
 
 - setup PTE environment, see [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) for detail
 
 - create Blockchain network using [Network Launcher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL)
 
-- pre-configure Blockchain network including create/join channels and install/instantiate chaincodes
+- configure Blockchain network including create/join channels and install/instantiate chaincodes
 
 - execute test cases
 
@@ -20,16 +20,18 @@ The purpose of this CI test is to automatically execute the predefined tests dai
 The command is located in `PTE/CITest/scripts`
 
 * ### command
- 
+
         ./test_driver.sh [opt] [values]
                 -e: environment setup, default=no
                 -n: create network, default=no
+                -m: directory containing test_nl.sh to be used to create network and PTE config input files to be used to configure channels and to install and instantiate chaincode, default=scripts
                 -p: preconfigure creation/join channels, default=no
                 -s: synchup peer ledgers, recommended when network brought up, default=no
                 -c: chaincode to be installed and instantiated [all|chaincode], default=no
                 -t [value1 value2 value3 ...]: test cases to be executed
 
 * ### available test cases
+
         FAB-query-TLS: 4 processes X 1000 queries, TLS
         FAB-3983-i-TLS: FAB-3983, longrun: 4 processes X 60 hours invokes, constant mode, 1k payload, TLS
         FAB-4162-i-TLS: FAB-4162, longrun: 4 processes X 60 hours mix mode, vary 1k-2k payload, TLS
@@ -41,32 +43,61 @@ The command is located in `PTE/CITest/scripts`
         marbles-i-TLS: marbles chaincode, 4 processes X 1000 invokes, constant mode, TLS
         marbles-q-TLS: marbles chaincode, 4 processes X 1000 queries, constant mode, TLS
         robust-i-TLS: robustness: 4 processes X invokes, constant mode, 1k payload, TLS
+        FAB-3833-2i: 2 processes X 10000 invokes, TLS, couchDB
+        FAB-3810-2q: 2 processes X 10000 queries, TLS, couchDB
+        FAB-3832-4i: 4 processes X 10000 invokes, TLS, couchDB
+        FAB-3834-4q: 4 processes X 10000 queries, TLS, couchDB
+        FAB-3808-2i: 2 processes X 10000 invokes, TLS
+        FAB-3811-2q: 2 processes X 10000 queries, TLS
+        FAB-3807-4i: 4 processes X 10000 invokes, TLS
+        FAB-3835-4q: 4 processes X 10000 queries, TLS
 
 
 * ### Examples
 
+    - The following command
 
-    - The following command will create a network, create/join channels and install/instantiate all chaincode in preconfig directory and execute test cases: FAB-3989-4i-TLS and FAB-3989-4q-TLS.
+            ./test_driver.sh -n -m FAB-3808-2i -p -c samplecc -t FAB-3808-2i
+
+        - creates a network using FAB-3808-2i/test_nl.sh
+        - creates and joins channels using PTE files in FAB-3808-2i/preconfig/channels
+        - installs and instantiates samplecc chaincode using PTE files in FAB-3808-2i/preconfig/samplecc
+        - executes test case defined in FAB-3808-2i/samplecc, see [FAB-3808](https://jira.hyperledger.org/browse/FAB-3808) for detail description of the test.
+
+
+    - The following command
 
             ./test_driver.sh -n -p -c all -t FAB-3989-4i-TLS FAB-3989-4q-TLS
 
-    - The following command will create/join channel and install/instantiate samplecc chaincode and execute test case: FAB-3989-4i-TLS.
+        - creates a network using the test_nl.sh from the default directory, `scripts/test_nl.sh`
+        - creates and joins channels using PTE files from the default directory, `preconfig/channels`
+        - installs and instantiates all chaincodes using PTE files from default directory. Currently there are two chaincodes in the default dircetory: `preconfig/samplecc` and `preconfig/marblescc`
+        - executes test cases: FAB-3989-4i-TLS and FAB-3989-4q-TLS, see [FAB-3989](https://jira.hyperledger.org/browse/FAB-3989) for detail description of the test.
 
-            ./test_driver.sh -p -c samplecc -t FAB-3989-4i-TLS
 
-    - The following command will install/instantiate samplecc chaincode and execute test case FAB-3989-4q-TLS
+    - The following command
 
-            ./test_driver.sh -c samplecc -t FAB-3989-4q-TLS
+            ./test_driver.sh -n -p -c samplecc
 
-    - The following command will execute test cases: FAB-3989-4i-TLS, FAB-3989-4q-TLS, and robust-i-TLS.
+        - creates a network using the test_nl.sh from the default directory, `scripts/test_nl.sh`
+        - creates and joins channels using PTE files from the default directory, `preconfig/channels`
+        - installs and instantiates all chaincodes using PTE files from default directory, `preconfig/samplecc`
 
-            ./test_driver.sh -t FAB-3989-4i-TLS FAB-3989-4q-TLS robust-i-TLS
+
+    - The following command
+
+            ./test_driver.sh -t FAB-3811-2q FAB-3808-2i
+
+        - executes test cases [FAB-3811-2q](https://jira.hyperledger.org/browse/FAB-3808) and [FAB-3808-2i](https://jira.hyperledger.org/browse/FAB-3811).
+
+
+
 
 
 * ### Network
 
-    When `-n` is invoked, the Blockchain network configuration is
-            
+    When `-n` is invoked, the default network configuration is as follow:
+
             2 orderers
             4 ca
             4 organizations
@@ -77,9 +108,14 @@ The command is located in `PTE/CITest/scripts`
             TLS enabled
             localhost endpoints
 
+    if `-m` is invoked too, then the network configuration will be based on the test_nl.sh in the specified directory.
+
 * ### Log
 
-PTE log is saved in `<test case>/<chaincode>/PTEMgr-<test case>.txt.log` 
+    PTE log is in `PTE/CITest/Logs/<Test Case>_<Current mmddHHMMSS>.log`.
+
+    - For example, `PTE/CITest/Logs/FAB-3811-2q_1027105544.log` is the log of executing test case FAB-3811-2q in Oct. 27, 10:55:44.
+
 
 ---
 # Chaincode
@@ -103,10 +139,11 @@ The directory structure of the CI test is shown in the diagram.
      - CITest: CI test direcotry
           - SCFiles: contains all service credentials json
           - scripts: all bash scritps
-          - preconfig: PTE run cases and user inputs for create/join channels and install/instantiate chaincode
+          - preconfig: default directory for PTE run cases and user inputs for channels and chaincode configuration
                * marblescc: files for marbles chaincode installation and instantiation
                * samplecc: files for sample chaincode installation and instantiation
-          - FAB-3983-i-TLS: test case
+          - FAB-3807-4i: test case
+               * preconfig (optional): PTE run cases and user inputs for channels and chaincode configuration for this test case
                * samplecc: contains PTEMgr txt, run cases txt, and use inputs json for chaincode samplecc
                * myCC: contains PTEMgr txt, run cases txt, and use inputs json for chaincode myCC
           - FAB-3989-4i-TLS: test case
@@ -121,11 +158,12 @@ The tool allows users to create a customized test case easily.  For example, the
 - create a test directory, namely `myTest`, under `PTE/CITest`, see diagram above
 - create a chaincode directory, namely `myCC`, under `PTE/CITest/myTest`
 - create a test directory, namely MyCase, under `PTE/CITest/myTest/myCC`
-- create PTE manager, run cases, and user inputs under `PTE/CITest/myTest/myCC/MyCase` based on his test scenarios
+- create `preconfig` directory containing channels and chaincode PTE input files if the default will not be used
+- create PTE manager, run cases, and user inputs under `PTE/CITest/myTest/myCC` based on his test scenarios
 - go to `PTE/CITest/scripts`
 - execute command `./test_driver.sh -t myTest`
 
-It will be easier if copy and change an available test case. 
+It will be easier if copy and change an available test case.
 
 
 ---
