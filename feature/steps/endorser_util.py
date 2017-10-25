@@ -340,6 +340,9 @@ class CLIInterface(InterfaceBase):
         finally:
             assert chaincode_container in containers, "The expected chaincode container {} is not running".format(chaincode_container)
 
+        # Allow time for chaincode initialization to complete
+        time.sleep(10)
+
     def retry(self, context, output, peer, setup, command):
         count = 0
         while count < 3:
