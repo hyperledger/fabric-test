@@ -45,7 +45,9 @@ Ensure that you have Docker for `Linux`_, `Mac`_ or `Windows`_ 1.12 or higher pr
 .. _Mac: https://docs.docker.com/engine/installation/mac/
 .. _Windows: https://docs.docker.com/engine/installation/windows/
 
-You can install Behave and additional packages using the ``./scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager). This script installs additional packages into your OS environment.
+You can install Behave and additional packages, such as the `Govendor`_, using the ``./scripts/install_behave.sh`` (useful for linux distros that use the apt packaging manager). This script installs additional packages into your OS environment.
+
+.. _Govendor: https://github.com/kardianos/govendor/
 
 ::
 
