@@ -97,11 +97,11 @@ class InterfaceBase:
             context.initial_non_leader={}
         if org not in context.initial_non_leader:
             for container in self.get_peers(context):
-                if ((org in container) and not common_util.is_in_log([container], "Becoming a leader")):
+                if (org in container) and (not common_util.is_in_log([container], "Becoming a leader")):
                     context.initial_non_leader[org]=container
                     print("initial non-leader is "+context.initial_non_leader[org])
                     return context.initial_non_leader[org]
-        assert org in context.initial_leader, "Error: No gossip-non-leader found by looking at the logs, for "+org
+        assert org in context.initial_non_leader, "Error: No gossip-non-leader found by looking at the logs, for "+org
         return context.initial_non_leader[org]
 
     def wait_for_deploy_completion(self, context, chaincode_container, timeout):
