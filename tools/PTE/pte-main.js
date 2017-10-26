@@ -129,6 +129,8 @@ var eBlock = 0;
 var qOrg ;
 var qPeer ;
 
+var testSummaryArray=[];
+
 function printChainInfo(channel) {
     logger.info('[printChainInfo] channel name: ', channel.getName());
     logger.info('[printChainInfo] orderers: ', channel.getOrderers());
@@ -623,7 +625,9 @@ function buildChaincodeProposal(client, the_user, upgrade, transientMap) {
                 fcn: uiContent.deploy.fcn,
                 args: testDeployArgs,
                 chainId: channelName,
+
                 txId: tx_id
+
                 // use this to demonstrate the following policy:
                 // 'if signed by org1 admin, then that's the only signature required,
                 // but if that signature is missing, then the policy can also be fulfilled
@@ -1202,11 +1206,15 @@ function performance_main() {
                 workerProcess.stdout.on('data', function (data) {
                     logger.info('stdout: ' + data);
                     if (data.indexOf('pte-exec:completed') > -1) {
-                        procDone = procDone+1;
-                        logger.info('[performance_main] procDone: ', procDone);
-                        if ( procDone === nProcPerOrg*channelOrgName.length ) {
-                            logger.info('[performance_main] pte-main:completed');
+                        var dataStr=data.toString();
+                        var tempDataArray =dataStr.split("\n");
+                        for (var i=0; i<tempDataArray.length;i++) {
+                            if (tempDataArray[i].indexOf('pte-exec:completed') > -1) {
+                                testSummaryArray.push(tempDataArray[i]);
+                            }
                         }
+
+
                     }
                 });
 
@@ -1215,6 +1223,120 @@ function performance_main() {
                 });
 
                 workerProcess.on('close', function (code) {
+                });
+
+                workerProcess.on('exit', function (code) {
+                    procDone = procDone+1;
+                    logger.info("Child proc exited, procId=%d ,exit code=%d",procDone, code );
+
+                    if ( procDone === nProcPerOrg*channelOrgName.length ) {
+
+                        var summaryIndex;
+
+                        var maxInvokeDuration=0;
+                        var minInvokeDuration=0;
+                        var maxQueryDuration=0;
+                        var minQueryDuration=0;
+                        var maxMixedDuration=0;
+                        var minMixedDuration=0;
+                        var totalInvokeTimeout=0;
+
+                        var totalInvokeTrans=0;
+                        var totalInvokeTps=0;
+                        var totalQueryTrans=0;
+                        var totalQueryTps=0;
+                        var totalInvokeTime=0;
+                        var totalQueryTime=0;
+                        var totalMixedTPS=0;
+                        var totalMixedTime=0;
+                        var totalMixedInvoke=0;
+                        var totalMixedQuery=0;
+
+                        for (summaryIndex in testSummaryArray ) {
+                            var rawText=testSummaryArray[summaryIndex].toString();
+                            logger.info('Test Summary[%d]: %s',summaryIndex, rawText.substring(rawText.indexOf("[Nid")));
+                            if (rawText.indexOf("execTransMode")>-1) {
+                                logger.info("ERROR occurred:" +rawText);
+                                continue;
+                            };
+                            if (rawText.indexOf("execModeConstant")>-1) {
+                                logger.info("ERROR occurred:" +rawText);
+                                continue;
+                            };
+                            if (rawText.indexOf("eventRegister")>-1) {
+                                var transNum= parseInt(rawText.substring(rawText.indexOf("(sent)=")+7,rawText.indexOf("(",rawText.indexOf("(sent)=")+7)).trim());
+                                totalInvokeTrans=totalInvokeTrans+transNum;
+                                var tempTimeoutNum=parseInt(rawText.substring(rawText.indexOf("timeout:")+8).trim());
+                                totalInvokeTimeout=totalInvokeTimeout+tempTimeoutNum;
+                                var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
+                                totalInvokeTime=totalInvokeTime+tempDur;
+                                if (tempDur >maxInvokeDuration ) {
+                                    maxInvokeDuration= tempDur;
+                                }
+                                if ((tempDur <minInvokeDuration ) ||(minInvokeDuration ==0) ) {
+                                    minInvokeDuration= tempDur;
+                                }
+                                var tempInvokeTps=parseInt(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
+                                if (tempInvokeTps >0 ) {
+                                    totalInvokeTps =totalInvokeTps+tempInvokeTps;
+                                }
+
+                                continue;
+                            };
+                            if (rawText.indexOf("invoke_query_mix")>-1) {
+                                var mixedTransNum= parseInt(rawText.substring(rawText.indexOf("pte-exec:completed")+18,rawText.indexOf("Invoke(move)")).trim());
+                                totalMixedInvoke=totalMixedInvoke+mixedTransNum;
+                                var mixedQueryNum=parseInt(rawText.substring(rawText.indexOf("and")+3, rawText.indexOf("Invoke(query)")).trim());
+                                totalMixedQuery=totalMixedQuery+mixedQueryNum;
+                                var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
+                                totalMixedTime=totalMixedTime+tempDur;
+                                if (tempDur >maxMixedDuration ) {
+                                    maxMixedDuration= tempDur;
+                                }
+                                if ((tempDur <minMixedDuration ) ||(minMixedDuration ==0) ) {
+                                    minMixedDuration= tempDur;
+                                }
+                                var tempMixedTps=parseInt(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
+                                if (tempMixedTps >0 ) {
+                                    totalMixedTPS =totalMixedTPS+tempMixedTps;
+                                }
+
+                                continue;
+                            };
+                            if (rawText.indexOf("invoke_query_")>-1) {
+                                var queryTransNum= parseInt(rawText.substring(rawText.indexOf("pte-exec:completed")+18,rawText.indexOf("transaction",rawText.indexOf("pte-exec:completed")+18)).trim());
+                                totalQueryTrans=totalQueryTrans+queryTransNum;
+
+                                var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
+                                totalQueryTime=totalQueryTime+tempDur;
+                                if (tempDur >maxQueryDuration ) {
+                                    maxQueryDuration= tempDur;
+                                }
+                                if ((tempDur <minQueryDuration ) ||(minQueryDuration ==0) ) {
+                                    minQueryDuration= tempDur;
+                                }
+                                var tempQueryTps=parseInt(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
+                                if (tempQueryTps >0 ) {
+                                    totalQueryTps =totalQueryTps+tempQueryTps;
+                                }
+
+                                continue;
+                            };
+                        }
+                        logger.info("Test Summary: Total %d Threads run completed",procDone);
+                        if (totalInvokeTrans>0) {
+                            logger.info("Test Summary:Total INVOKE transaction=%d, timeout transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", totalInvokeTrans, totalInvokeTimeout, minInvokeDuration, maxInvokeDuration,totalInvokeTime/procDone, totalInvokeTps.toFixed(2));
+                        }
+                        if (totalQueryTrans>0) {
+                            logger.info("Test Summary:Total  QUERY transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", totalQueryTrans, minQueryDuration, maxQueryDuration, totalQueryTime/procDone,totalQueryTps.toFixed(2));
+                        }
+                        if (totalMixedTPS) {
+                            logger.info("Test Summary:Total mixed transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", totalMixedInvoke+totalMixedQuery , minMixedDuration, maxMixedDuration, (totalMixedTime)/(procDone),(totalMixedTPS).toFixed(2));
+                        }
+                        logger.info('[performance_main] pte-main:completed:');
+
+                    }
+
                 });
 
             }
