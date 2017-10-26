@@ -47,6 +47,36 @@ git submodule foreach git pull origin master
   cd ../fabric
   make docker configtxgen cryptogen
 ```
+#### Install git hooks
+After cloning the fabric-test dir, setup the git hooks.
+Replace  <LFID> with your Linux Foundation Account ID.
+
+```
+
+  cd fabric-test
+  scp -p -P 29418 <LFID>@gerrit.hyperledger.org:hooks/commit-msg fabric-test/.git/hooks/
+
+```
+
+
+#### Install and configure git review
+
+```
+  apt-get install git-review
+  git-review -s
+
+```
+
+To configure git review add the following section to .git/config, and replace <LFID> with your gerrit id.
+
+```
+
+  [remote "gerrit"]
+    url = ssh://<LFID>@gerrit.hyperledger.org:29418/fabric-test.git
+    fetch = +refs/heads/*:refs/remotes/gerrit/*
+
+```
+
 
 ## Tools Used to Execute Tests
 
