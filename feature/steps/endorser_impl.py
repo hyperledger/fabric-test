@@ -460,10 +460,18 @@ def set_response_impl(context, valueType, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
     assert "Error endorsing query" not in context.result[peer], "There was an error response: {0}".format(context.result[peer])
     if valueType == "length":
-        assert len(context.result[peer])-15 == context.payload["len"], \
-             "Expected response to be of length {0}; received length {1}; Result: {2}".format(context.payload["len"],
-                                                                                              len(context.result[peer]),
-                                                                                              context.result[peer])
+        try:
+            assert len(context.result[peer])-15 == context.payload["len"], \
+                 "Expected response to be of length {0}; received length {1}; Result: {2}".format(context.payload["len"],
+                                                                                                  len(context.result[peer]),
+                                                                                                  context.result[peer])
+        except:
+            # There are some chaincodes that are adding quotes around their responses (such as map), so we check for quotes as well
+            # Take a look at the 15th character so that the "Query Result: " string is not included and the second to last (last is \n)
+            assert (len(context.result[peer])-17 == context.payload["len"]) and (context.result[peer][14] == '"' and context.result[peer][-2] == '"'), \
+                 "Expected response to be of length {0}; received length {1}; Result: {2}".format(context.payload["len"],
+                                                                                                  len(context.result[peer]),
+                                                                                                  context.result[peer])
     elif valueType == "random":
         assert context.payload["payload"] in context.result[peer], \
              "Expected response does not match the actual response; Result: {0}".format(context.result[peer])
@@ -478,10 +486,18 @@ def step_impl(context, valueType):
 def length_impl(context, length, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
     assert "Error endorsing query" not in context.result[peer], "There was an error response: {0}".format(context.result[peer])
-    assert len(context.result[peer])-15 == length, \
-        "Expected response to be of length {0}; received length {1}; Result: {2}".format(length,
-                                                                                         len(context.result[peer]),
-                                                                                         context.result[peer])
+    try:
+        assert len(context.result[peer])-15 == length, \
+            "Expected response to be of length {0}; received length {1}; Result: {2}".format(length,
+                                                                                             len(context.result[peer]),
+                                                                                             context.result[peer])
+    except:
+        # There are some chaincodes that are adding quotes around their responses (such as map), so we check for quotes as well
+        # Take a look at the 15th character so that the "Query Result: " string is not included and the second to last (last is \n)
+        assert (len(context.result[peer])-17 == length) and (context.result[peer][14] == '"' and context.result[peer][-2] == '"'), \
+            "Expected response to be of length {0}; received length {1}; Result: {2}".format(length,
+                                                                                             len(context.result[peer]),
+                                                                                             context.result[peer])
 
 @then(u'a user receives a response containing a value of length {length:d}')
 def step_impl(context, length):

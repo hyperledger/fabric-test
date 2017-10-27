@@ -67,17 +67,20 @@ Scenario Outline: FAB-3865: Multiple Channels Per Peer, with <type> orderer
     When a user invokes on the channel "chn2" using chaincode named "cc2" with args ["put", "a", "1000"]
     And I wait "5" seconds
     And a user queries on the channel "chn2" using chaincode named "cc2" with args ["get", "a"]
-    Then a user receives a success response of 1000
+    # the "map" chaincode adds quotes around the result
+    Then a user receives a success response of "1000"
     When a user invokes on the channel "chn2" using chaincode named "cc2" with args ["put", "b", "2000"]
     And I wait "5" seconds
     And a user queries on the channel "chn2" using chaincode named "cc2" with args ["get", "b"]
-    Then a user receives a success response of 2000
+    # the "map" chaincode adds quotes around the result
+    Then a user receives a success response of "2000"
     When a user invokes on the channel "chn1" using chaincode named "cc1" with args ["invoke", "a", "b", "10"]
     And I wait "5" seconds
     And a user queries on the channel "chn1" using chaincode named "cc1" with args ["query", "a"]
     Then a user receives a success response of 990
     When a user queries on the channel "chn2" using chaincode named "cc2" with args ["get", "a"]
-    Then a user receives a success response of 1000
+    # the "map" chaincode adds quotes around the result
+    Then a user receives a success response of "1000"
 Examples:
     | type  |
     | solo  |
@@ -102,7 +105,8 @@ Scenario Outline: FAB-3866: Multiple Chaincodes Per Peer, with <type> orderer
     When a user invokes on the chaincode named "map" with args ["put", "a", "1000"]
     And I wait "5" seconds
     And a user queries on the chaincode named "map" with args ["get", "a"]
-    Then a user receives a success response of 1000
+    # the "map" chaincode adds quotes around the result
+    Then a user receives a success response of "1000"
     When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [] with name "marbles"
     When a user invokes on the chaincode named "marbles" with args ["initMarble", "marble1", "blue", "35", "tom"]
     And I wait "5" seconds
