@@ -58,6 +58,17 @@ Replace  <LFID> with your Linux Foundation Account ID.
 
 ```
 
+Add a local git hook to set 'signed-off-by' automatically to all commits.
+Open fabric-test/.git/hooks/commit-msg, add the commands below after the line
+"add_ChangeId":
+
+```
+
+  SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+  grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+
+
+```
 
 #### Install and configure git review
 
@@ -76,7 +87,6 @@ To configure git review add the following section to .git/config, and replace <L
     fetch = +refs/heads/*:refs/remotes/gerrit/*
 
 ```
-
 
 ## Tools Used to Execute Tests
 
