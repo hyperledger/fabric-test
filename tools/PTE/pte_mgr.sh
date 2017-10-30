@@ -20,6 +20,7 @@ inFile=$1
 EXEPTE=pte_driver.sh
 nPTE=0
 tStart=0
+PIDS=""
 
 echo "num $#"
 
@@ -66,6 +67,7 @@ function pteProc {
     for i in ${pteArray[@]}; do
         echo "./$EXEPTE $i $iPTE $tStart &"
         ./$EXEPTE $i $iPTE $tStart &
+        PIDS="$PIDS $!"
         let iPTE+=1
     done
 }
@@ -78,4 +80,14 @@ else
     echo "no PTE requests"
 fi
 
-exit
+# wait for pte_driver.sh to complete
+RET=0
+for p in $PIDS; do
+	wait $p
+	# return the error code of the process failed last if any
+	if [ $? -ne 0 ]; then
+		RET=$?
+	fi
+done
+
+exit $RET

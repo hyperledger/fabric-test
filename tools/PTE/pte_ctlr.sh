@@ -16,6 +16,7 @@
 #
 
 inFile=$1
+PIDS=""
 
 # set starting time for each pte
 tWait=50000
@@ -41,6 +42,7 @@ do
        echo "[$0] driver type supported: $driverType"
        #echo "[$0] ./$exeScript -b $tStart -u $rUser -h $rHost >& $exeScript.log &"
        ./$exeScript -b $tStart -h $userHost>& $exeScript.log &
+       PIDS="$PIDS $!"
        echo ""
        ;;
 
@@ -52,4 +54,14 @@ do
 
 done < $inFile
 
-exit
+# wait for processes to complete
+RET=0
+for p in $PIDS; do
+	wait $p
+	# return the error code of the process failed last if any
+	if [ $? -ne 0 ]; then
+		RET=$?
+	fi
+done
+
+exit $RET
