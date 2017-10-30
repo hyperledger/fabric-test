@@ -412,21 +412,21 @@ Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim l
     # SIGKEY=`openssl ecparam -name prime256v1 -genkey | tail -n5 | base64 -w0`
     Given I have a bootstrapped fabric network of type <type>
     When a user sets up a channel
+    And I vendor go packages for fabric-based chaincode at "../fabric/examples/chaincode/go/enccc_example"
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
-
-    When I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
-    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
-    And I wait "3" seconds
+    And I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
+    And a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    And I wait "5" seconds
     When a user queries on the chaincode named "mycc" with args ["ENC","GET", "Social-Security-Number"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
     Then a user receives a success response of 123-45-6789
     When I locally execute the command "openssl rand 16 -base64" saving the results as "IV"
     When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Tax-Id","1234-012"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"IV\\":\\"{IV}\\"}"
-    And I wait "3" seconds
+    And I wait "5" seconds
     When a user queries on the chaincode named "mycc" with args ["ENC","GET","Tax-Id"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"IV\\":\\"{IV}\\"}"
     Then a user receives a response containing 1234-012
     When I locally execute the command "openssl ecparam -name prime256v1 -genkey | tail -n5 | base64 -w0" saving the results as "SIGKEY"
     When a user invokes on the chaincode named "mycc" with args ["SIG","PUT","Passport-Number","M9037"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"SIGKEY\\":\\"{SIGKEY}\\"}"
-    And I wait "3" seconds
+    And I wait "5" seconds
     When a user queries on the chaincode named "mycc" with args ["SIG","GET","Passport-Number"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\",\\"SIGKEY\\":\\"{SIGKEY}\\"}"
     Then a user receives a response containing M9037
     When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","WellsFargo-Savings-Account","09675879"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
@@ -453,6 +453,7 @@ Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, p
 
   Given I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
+  And I vendor go packages for fabric-based chaincode at "../fabric/examples/chaincode/go/enccc_example"
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
 
   When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
