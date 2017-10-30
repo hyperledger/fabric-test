@@ -26,15 +26,16 @@ function printHelp {
    echo "    -r: number of organization, default=1"
    echo "    -s: security service type, default=256"
    echo "    -t: orderer service [solo|kafka], default=solo"
-   echo "    -f: profile name, default=testOrg"
-   echo "    -b: MSP directory, default=/mnt/crypto-config"
+   echo "    -f: profile name, default=test"
+   echo "    -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "    -w: host ip 1, default=0.0.0.0"
    echo "    -c: batch timeout, default=2s"
    echo "    -B: batch size, default=10"
+   echo "    -v: array of organization name, default=0"
    echo "    -C: company name, default=example.com"
    echo " "
    echo "Example:"
-   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/ -w 10.120.223.35 -v 1 -v 3"
+   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
