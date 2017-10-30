@@ -57,5 +57,8 @@ apt-get install --yes tcl tclx tcllib
 # Install NPM for the SDK
 apt-get install --yes npm
 
+# Install Govendor
+go get -u github.com/kardianos/govendor
+
 # Initialize vendor for executing certain chaincodes
 cd ../fabric/examples/chaincode/go/enccc_example && govendor init && govendor add +external && cd -
