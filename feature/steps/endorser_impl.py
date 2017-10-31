@@ -333,21 +333,21 @@ def step_impl(context, channel, name, args, peer):
 def step_impl(context, name, args, targs, peer):
     # This is a workaround to allow targs to send a json structure
     generated = targs[2:-2].format(**context.command_result)
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, targs[:2] + generated + targs[-2:])
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, targs=targs[:2] + generated + targs[-2:])
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} and generated transient args {targs}')
 def step_impl(context, name, args, targs):
     # This is a workaround to allow targs to send a json structure
     generated = targs[2:-2].format(**context.command_result)
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", targs[:2] + generated + targs[-2:])
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", targs=targs[:2] + generated + targs[-2:])
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} and transient args {targs} on "{peer}"')
 def step_impl(context, name, args, peer, targs):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, targs)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, targs=targs)
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} and transient args {targs}')
 def step_impl(context, name, args, targs):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", targs)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", targs=targs)
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, name, args, peer):

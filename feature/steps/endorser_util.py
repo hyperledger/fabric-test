@@ -334,7 +334,7 @@ class CLIInterface(InterfaceBase):
                        "--version", str(chaincode.get('version', 0)),
                        "--path", chaincode['path']]
             if "orderers" in chaincode:
-                command = command + ["--orderer", '{0}:7050'.format(chaincode["orderers"][0])]
+                command = command + ["--orderer", 'orderer0.example.com:7050']
             if "user" in chaincode:
                 command = command + ["--username", chaincode["user"]]
             if "policy" in chaincode:
@@ -365,7 +365,7 @@ class CLIInterface(InterfaceBase):
                                      "--cafile",
                                      '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
             if "orderers" in chaincode:
-                command = command + ["--orderer", '{0}:7050'.format(chaincode["orderers"][0])]
+                command = command + ["--orderer", 'orderer0.example.com:7050']
             if "user" in chaincode:
                 command = command + ["--username", chaincode["user"]]
             if "policy" in chaincode:
@@ -459,13 +459,18 @@ class CLIInterface(InterfaceBase):
         command = ["peer", "chaincode", "invoke",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (args),
-                   "--channelID", channelId,
-                   "--orderer", '{0}:7050'.format(orderer)]
+                   "--channelID", channelId]
         if context.tls:
             command = command + ["--tls",
                                  common_util.convertBoolean(context.tls),
                                  "--cafile",
                                  '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
+        if targs:
+            #to escape " so that targs are compatible with cli command
+            targs = targs.replace('"', r'\"')
+            command = command + ["--transient", targs]
+
+        command = command + ["--orderer", '{0}:7050'.format(orderer)]
         command.append('"')
         output = context.composition.docker_exec(setup+command, [peer])
         print("Invoke[{0}]: {1}".format(" ".join(setup+command), str(output)))
@@ -482,7 +487,13 @@ class CLIInterface(InterfaceBase):
         command = ["peer", "chaincode", "query",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (str(args)), # This should work for rich queries as well
-                   "--channelID", channelId, '"']
+                   "--channelID", channelId]
+        if targs:
+            #to escape " so that targs are compatible with cli command
+            targs = targs.replace('"', r'\"')
+            command = command +["--transient", targs]
+
+        command.append('"')
         result = context.composition.docker_exec(setup+command, [peer])
         print("Query Exec command: {0}".format(" ".join(setup+command)))
         result = self.retry(context, result, peer, setup, command)
