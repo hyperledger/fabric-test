@@ -125,7 +125,7 @@ Many tests are now integrated into CI. Every patch set triggers a `fabric-test-v
 
 https://jenkins.hyperledger.org/view/fabric-test/
 
-Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/) to execute `daily` tests as identified in fabric-test/regression/daily/runDailyTestSuite.sh. It clones the latest commits of fabric, fabric-ca, and other required repositories, and performs the following steps:
+Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/) to execute `daily` tests as identified in fabric-test/regression/daily/runDailyTestSuite.sh. It clones the latest commits of fabric, fabric-ca, and other required repositories, and perform the following steps:
 
 * Clone the latest commits for repositories being tested, including fabric, fabric-ca, and more
 * Build docker images and binary files
