@@ -24,7 +24,7 @@ def step_impl(context, seconds):
 
 @given(u'I use the {language} SDK interface')
 def step_impl(context, language):
-    context.interface = SDKInterface(language)
+    context.interface = SDKInterface(context, language)
 
 @given(u'I use the CLI interface')
 def step_impl(context):
@@ -46,6 +46,7 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
         context.composition.composeFilesYaml = composeYamlFile
         context.composition.up()
     context.compose_containers = context.composition.collectServiceNames()
+
 
 def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=120):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
@@ -76,6 +77,7 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=
 
     wait_for_bootstrap_completion(context, timeout)
 
+
 def wait_for_bootstrap_completion(context, timeout):
     peers = context.interface.get_peers(context)
     brokers = []
@@ -97,6 +99,7 @@ def wait_for_bootstrap_completion(context, timeout):
 
     # A 5-second additional delay ensures ready state
     time.sleep(5)
+
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database} with tls')
 def step_impl(context, ordererType, database):
@@ -273,6 +276,10 @@ def step_impl(context, org):
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
     assert not common_util.is_in_log([context.initial_non_leader[org]], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
+
+@then(u'the logs on {component} contains {data}')
+def step_impl(context, component, data):
+    assert common_util.is_in_log(component, data), "Error: the {0} log does not contain {1}.".format(component, data)
 
 @then(u'there are no errors')
 def step_impl(context):

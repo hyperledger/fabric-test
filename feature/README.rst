@@ -35,12 +35,16 @@ You must have the following installed:
     * `python`_ (You must have 2.7 due to package incompatibilities)
     * `docker`_
     * `docker-compose`_
+    * `nodejs`_
+    * `npm`_
 
 Ensure that you have Docker for `Linux`_, `Mac`_ or `Windows`_ 1.12 or higher properly installed on your machine.
 
 .. _python: https://www.python.org/
 .. _docker: https://www.docker.com/
 .. _docker-compose: https://docs.docker.com/compose/
+.. _nodejs: https://nodejs.org/
+.. _npm: https://www.npmjs.com/
 .. _Linux: https://docs.docker.com/engine/installation/#supported-platforms
 .. _Mac: https://docs.docker.com/engine/installation/mac/
 .. _Windows: https://docs.docker.com/engine/installation/windows/
@@ -67,7 +71,7 @@ The following repositories are dependencies and are included as submodules at th
 Following commands must be executed
       `govendor init`
       `govendor add +external`
- 
+
 inside the chaincodes folder for any chaincode(go programs) that imports packages, outside the shim or protos folder.
 
 If the chaincode has imports from external third party, i.e. other than the packages in fabric outside the shim or protos, execute:
@@ -236,14 +240,20 @@ These docker composition files are used when setting up and tearing down network
 .. _version 2 docker compose: https://docs.docker.com/compose/compose-file/compose-file-v2/
 
 
+============================
 How to execute Feature tests
-----------------------------
+============================
 There are multiple ways to execute behave tests.
    * Execute all feature tests in the current directory
    * Execute all tests in a specific feature file
    * Execute all tests with a specified tag
    * Execute a specific test
+   * Remote execution
+   * Execute with logs
 
+Local Execution
+---------------
+When executing the behave tests locally, there are some simple commands that may be useful.
 
 **Executes all tests in directory**
 ::
@@ -260,10 +270,37 @@ There are multiple ways to execute behave tests.
 
     $ behave -t mytag
 
+**Executes tests labelled with tags not running the tests with skip label**
+::
+
+    $ behave --tags=mytag1 --tags=mytag2 --tags=-skip
+
 **Executes a specific test**
 ::
 
     $ behave -n 'my scenario name'
+
+**Executes a specific test saving logs of containers only when there are failures**
+::
+
+    $ behave -n 'my scenario name' -D logs=y
+
+**Executes a specific test saving logs of containers**
+::
+
+    $ behave -n 'my scenario name' -D logs=force
+
+**Executes a suite of tests on a remote network**
+::
+
+    $ behave -t remote -D network=<filename of the remote network config file>
+
+
+Remote Execution
+---------------
+When executing the behave tests remotely, there is some setup that needs to take place. Namely, it is important to know the information for the network that you are testing on.
+
+Also, note that any tests that are deemed well-suited for execution on a remote network are tagged with "remote".
 
 
 Helpful Tools

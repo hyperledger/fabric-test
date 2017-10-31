@@ -141,6 +141,8 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 7050:7050
 
     orderer1.example.com:
         extends:
@@ -166,6 +168,8 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 8050:7050
 
     orderer2.example.com:
         extends:
@@ -191,6 +195,8 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 9050:7050
 
     peer0.org1.example.com:
         extends:
@@ -217,6 +223,9 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 7051:7051
+          - 7053:7053
 
     peer0.org2.example.com:
         extends:
@@ -243,6 +252,9 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 9051:7051
+          - 9053:7053
 
     peer1.org1.example.com:
         extends:
@@ -269,6 +281,9 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 8051:7051
+          - 8053:7053
 
     peer1.org2.example.com:
         extends:
@@ -295,3 +310,6 @@ services:
           behave:
              aliases:
                - ${CORE_PEER_NETWORKID}
+        ports:
+          - 10051:7051
+          - 10053:7053

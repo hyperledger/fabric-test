@@ -1,0 +1,23 @@
+{
+  "name": "Integration",
+  "version": "1.0.0",
+  "description": "Behave Node.js SDK Integration",
+  "keywords": [
+    "Behave node-sdk integration",
+    "Call node-sdk apis from behave"
+  ],
+  "engines": {
+    "node": ">=6.9.5 <7.0",
+    "npm": ">=3.10.10 <4.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fabric-ca-client": "unstable",
+    "fabric-client": "unstable",
+    "fs-extra": "^2.0.0",
+    "log4js": "^0.6.38"
+  },
+  "devDependencies": {
+    "sync-dir": "^1.5.1"
+  }
+}

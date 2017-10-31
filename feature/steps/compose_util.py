@@ -36,8 +36,8 @@ class ContainerData:
 
 class Composition:
 
-    def __init__(self, context, composeFilesYaml= None, projectName = None,
-                 force_recreate = True, components = [], startContainers=True):
+    def __init__(self, context, composeFilesYaml=None, projectName=None,
+                 force_recreate=True, components=[], startContainers=True):
         if not projectName:
             projectName = str(uuid.uuid1()).replace('-','')
         self.projectName = projectName
@@ -75,7 +75,6 @@ class Composition:
         self.issueCommand(command, components)
 
     def start(self, components=[]):
-        self.serviceNames = self.collectServiceNames()
         command = ["start"]
         self.issueCommand(command, components)
 
@@ -192,7 +191,13 @@ class Composition:
         self.containerDataList = []
         for containerID in self.refreshContainerIDs():
             # get container metadata
-            container = json.loads(str(subprocess.check_output(["docker", "inspect", containerID])))[0]
+            cmd = ["docker", "inspect", containerID]
+            try:
+                output = subprocess.check_output(cmd)
+            except:
+                err = "Error occurred {0}: {1}".format(cmd, sys.exc_info()[1])
+                continue
+            container = json.loads(str(output))[0]
             # container name
             container_name = container['Name'][1:]
             # container ip address (only if container is running)

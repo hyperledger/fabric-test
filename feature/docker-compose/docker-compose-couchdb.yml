@@ -97,4 +97,3 @@ services:
         depends_on:
             - orderer0.example.com
             - couchdb12
-

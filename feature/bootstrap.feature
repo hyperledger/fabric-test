@@ -86,3 +86,37 @@ Scenario: Setting of environment variables
     And the ORDERER_GENERAL_TLS_ENABLED environment variable is true on node "orderer2.example.com"
     And the CORE_PEER_TLS_ENABLED environment variable is true on node "peer0.org1.example.com"
     And the CORE_LOGGING_GOSSIP environment variable is INFO on node "peer1.org2.example.com"
+
+
+@daily
+Scenario Outline: FAB-4776/FAB-4777: Bring up a kafka based network and check peers
+    Given I have a bootstrapped fabric network of type kafka using state-database <database>
+    When a user sets up a channel
+    And a user deploys chaincode
+    And a user queries on the chaincode with args ["query","a"]
+    Then a user receives a success response of 100
+    When a user fetches genesis information from peer "peer1.org1.example.com" using "orderer0.example.com"
+    Then the block file is fetched from peer "peer1.org1.example.com"
+    When a user queries on the chaincode with args ["query","a"] from "peer1.org1.example.com"
+    Then a user receives a success response of 100 from "peer1.org1.example.com"
+    When a user fetches genesis information from peer "peer1.org2.example.com" using "orderer1.example.com"
+    Then the block file is fetched from peer "peer1.org2.example.com"
+    When a user queries on the chaincode with args ["query","a"] from "peer1.org2.example.com"
+    Then a user receives a success response of 100 from "peer1.org2.example.com"
+Examples:
+    | database |
+    | leveldb  |
+    | couchdb  |
+
+
+@daily
+Scenario: FAB-4773: Fetching of a channel genesis block
+    Given I have a crypto config file with 2 orgs, 2 peers, 3 orderers, and 2 users
+    And I have a fabric config file
+    When the crypto material is generated for TLS network
+    And the network is bootstrapped for an orderer
+    And the network is bootstrapped for a channel named "mychannel"
+    And I start a fabric network
+    And a user creates a channel named "mychannel"
+    And a user fetches genesis information for a channel "mychannel" from peer "peer1.org1.example.com"
+    Then the file "mychannel.block" file is fetched from peer "peer1.org1.example.com"

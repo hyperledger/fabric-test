@@ -6,12 +6,15 @@
 
 import config_util
 import json
+import yaml
 import os
+import remote_util
 import shutil
 import subprocess
 import sys
 import time
 import common_util
+import execjs
 
 try:
     pbFilePath = "../fabric/bddtests"
@@ -107,17 +110,184 @@ class InterfaceBase:
     def wait_for_deploy_completion(self, context, chaincode_container, timeout):
         pass
 
+    def install_chaincode(self, context, chaincode, peers):
+        return self.cli.install_chaincode(context, chaincode, peers)
+
+    def instantiate_chaincode(self, context, chaincode, peers):
+        return self.cli.instantiate_chaincode(context, chaincode, peers)
+
+    def create_channel(self, context, orderer, channelId):
+        return self.cli.create_channel(context, orderer, channelId)
+
+    def fetch_channel(self, context, peers, orderer, channelId):
+        return self.cli.fetch_channel(context, peers, orderer, channelId)
+
+    def join_channel(self, context, peers, channelId):
+        return self.cli.join_channel(context, peers, channelId)
+
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId):
+        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId)
+
+    def query_chaincode(self, context, chaincode, peer, channelId):
+        return self.cli.query_chaincode(context, chaincode, peer, channelId)
+
 
 class ToolInterface(InterfaceBase):
     def __init__(self, context):
-        pass
+        remote_util.getNetworkDetails(context)
+
+        # use CLI for non implemented functions
+        self.cli = CLIInterface()
+
+    def install_chaincode(self, context, chaincode, peers):
+        results = {}
+        for peer in peers:
+            peer_name = context.networkInfo["nodes"][peer]["nodeName"]
+            cmd = "node v1.0_sdk_tests/app.js installcc -i {0} -v 1 -p {1}".format(chaincode['name'],
+                                                                    peer_name)
+            print(cmd)
+            results[peer] = subprocess.check_call(cmd.split(), env=os.environ)
+        return results
+
+    def instantiate_chaincode(self, context, chaincode, containers):
+        channel = str(chaincode.get('channelID', self.TEST_CHANNEL_ID))
+        args = json.loads(chaincode["args"])
+        print(args)
+        peer_name = context.networkInfo["nodes"]["peer0.org1.example.com"]["nodeName"]
+        cmd = "node v1.0_sdk_tests/app.js instantiatecc -c {0} -i {1} -v 1 -a {2} -b {3} -p {4}".format(channel,
+                                                                                        chaincode["name"],
+                                                                                        args[2],
+                                                                                        args[4],
+                                                                                        peer_name)
+        print(cmd)
+        return subprocess.check_call(cmd.split(), env=os.environ)
+
+    def create_channel(self, context, orderer, channelId):
+        orderer_name = context.networkInfo["nodes"][orderer]["nodeName"]
+        peer_name = context.networkInfo["nodes"]["peer0.org1.example.com"]["nodeName"]
+
+        # Config Setup for tool
+        cmd = "node v1.0_sdk_tests/app.js configtxn -c {0} -r {1}".format(channelId, "1,3")
+        ret = subprocess.check_call(cmd.split(), env=os.environ)
+        shutil.copyfile("{}.pb".format(channelId), "v1.0_sdk_tests/{}.pb".format(channelId))
+
+        cmd = "node v1.0_sdk_tests/app.js createchannel -c {0} -o {1} -r {2} -p {3}".format(channelId,
+                                                                      orderer_name,
+                                                                      "1,3",
+                                                                      peer_name)
+        print(cmd)
+        return subprocess.check_call(cmd.split(), env=os.environ)
+
+    def join_channel(self, context, peers, channelId):
+        results = {}
+        for peer in peers:
+            peer_name = context.networkInfo["nodes"][peer]["nodeName"]
+            cmd = "node v1.0_sdk_tests/app.js joinchannel -c {0} -p {1}".format(channelId, peer_name)
+            print(cmd)
+            results[peer] = subprocess.check_call(cmd.split(), env=os.environ)
+        return results
+
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId):
+        args = json.loads(chaincode["args"])
+        peer_name = context.networkInfo["nodes"][peer]["nodeName"]
+        cmd = "node v1.0_sdk_tests/app.js invoke -c {0} -i {1} -v 1 -p {2} -m {3}".format(channelId,
+                                                                         chaincode["name"],
+                                                                         peer_name,
+                                                                         args[-1])
+        print(cmd)
+        return {peer: subprocess.check_call(cmd.split(), env=os.environ)}
+
+    def query_chaincode(self, context, chaincode, peer, channelId):
+        peer_name = context.networkInfo["nodes"][peer]["nodeName"]
+        cmd = "node v1.0_sdk_tests/app.js query -c {0} -i {1} -v 1 -p {2}".format(channelId,
+                                                                   chaincode["name"],
+                                                                   peer_name)
+        print(cmd)
+        return {peer: subprocess.check_call(cmd.split(), env=os.environ)}
+
+    def update_chaincode(self, context, chaincode, peer, channelId):
+        peer_name = context.networkInfo["nodes"][peer]["nodeName"]
 
 
 class SDKInterface(InterfaceBase):
-    def __init__(self, language):
+    def __init__(self, context, language):
         # use PyExecJS for executing NodeJS code - https://pypi.python.org/pypi/PyExecJS
         # use Pyjnius for executing Java code - http://pyjnius.readthedocs.io/en/latest/index.html
-        pass
+        if context.remote:
+            remote_util.getNetwork()
+        self.networkConfigFile = self.generateNetworkConfig(context)
+
+        if language.lower() == "nodejs":
+            self.initializeNode()
+        else:
+            raise "Language {} is not supported in the test framework yet.".format(language)
+
+        # use CLI for non implemented functions
+        self.cli = CLIInterface()
+
+    def generateNetworkConfig(self, context):
+        with open("./configs/network-config.json", "r") as fd:
+            networkConfig = fd.read()
+
+        grpcType = "grpc"
+        if context.tls:
+            grpcType = "grpcs"
+        networkConfigFile = "{0}/configs/{1}/network-config.json".format(os.path.abspath('.'),
+                                                                         context.projectName)
+        with open(networkConfigFile, "w+") as fd:
+            structure = {"config": "{0}/configs/{1}".format(os.path.abspath('.'),
+                                                            context.projectName),
+                         "tls": common_util.convertBoolean(context.tls),
+                         "grpcType": grpcType,
+                         "networkId": context.projectName}
+            updated = networkConfig % (structure)
+            fd.write(updated)
+        return networkConfigFile
+
+    def initializeNode(self):
+        shutil.rmtree("./node_modules", ignore_errors=True)
+        shutil.copyfile("package.json", "../../package.json")
+        node = execjs.get(execjs.runtime_names.Node)
+        print("node info: {}".format(node.name))
+        npminstall =  subprocess.check_output(["npm install --silent"],
+                                            env=os.environ,
+                                            cwd="../..",
+                                            shell=True)
+        print("npm install: {}".format(npminstall))
+        shutil.copytree("../../node_modules", "./node_modules")
+
+        with open("./sdk/node/invoke.js", "r") as fd:
+            invoke_text = fd.read()
+        self.invoke_func = execjs.compile(invoke_text)
+        with open("./sdk/node/query.js", "r") as fd:
+            query_text = fd.read()
+        self.query_func = execjs.compile(query_text)
+
+    def reformat_chaincode(self, chaincode, channelId):
+        reformatted = yaml.safe_load(chaincode.get('args', '[]'))
+        function = reformatted.pop(0)
+        chaincode['fcn'] = str(function)
+        chaincode['args'] = reformatted
+        chaincode['channelId'] = str(channelId)
+        return chaincode
+
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs=""):
+        reformatted = self.reformat_chaincode(chaincode, channelId)
+        peerParts = peer.split('.')
+        org = '.'.join(peerParts[1:])
+        orgName = org.title().replace('.', '')
+        result = self.invoke_func.call("invoke", "User1@{}".format(org), orgName, reformatted, [peer], orderer, self.networkConfigFile)
+        print("Invoke: {}".format(result))
+        return {peer: result}
+
+    def query_chaincode(self, context, chaincode, peer, channelId, targs):
+        reformatted = self.reformat_chaincode(chaincode, channelId)
+        peerParts = peer.split('.')
+        org = '.'.join(peerParts[1:])
+        orgName = org.title().replace('.', '')
+        print("Query Info: User1@{0}, {1}, {2}, {3}".format(org, orgName, reformatted, peer))
+        result = self.query_func.call("query", "User1@{}".format(org), orgName, reformatted, [peer], self.networkConfigFile)
+        return {peer: result}
 
 
 class CLIInterface(InterfaceBase):
@@ -135,9 +305,9 @@ class CLIInterface(InterfaceBase):
                       'CORE_PEER_ADDRESS={0}:7051'.format(peer)]
 
         if context.tls:
-            setup.append('CORE_PEER_TLS_ROOTCERT_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/ca.crt'.format(configDir, org, peer))
-            setup.append('CORE_PEER_TLS_CERT_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/server.crt'.format(configDir, org, peer))
-            setup.append('CORE_PEER_TLS_KEY_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/server.key'.format(configDir, org, peer))
+            setup += ['CORE_PEER_TLS_ROOTCERT_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/ca.crt'.format(configDir, org, peer),
+                      'CORE_PEER_TLS_CERT_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/server.crt'.format(configDir, org, peer),
+                      'CORE_PEER_TLS_KEY_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/server.key'.format(configDir, org, peer)]
         return setup
 
     def get_chaincode_deploy_spec(self, projectDir, ccType, path, name, args):
@@ -207,7 +377,7 @@ class CLIInterface(InterfaceBase):
         return output
 
 
-    def create_channel(self, context, orderers, channelId=TEST_CHANNEL_ID):
+    def create_channel(self, context, orderer, channelId=TEST_CHANNEL_ID):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         setup = self.get_env_vars(context, "peer0.org1.example.com")
         timeout = str(120 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s')))
@@ -215,12 +385,12 @@ class CLIInterface(InterfaceBase):
                    "--file", "/var/hyperledger/configs/{0}/{1}.tx".format(context.composition.projectName, channelId),
                    "--channelID", channelId,
                    "--timeout", timeout,
-                   "--orderer", '{0}:7050'.format(orderers[0])]
+                   "--orderer", '{0}:7050'.format(orderer)]
         if context.tls:
             command = command + ["--tls",
                                  common_util.convertBoolean(context.tls),
                                  "--cafile",
-                                 '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
+                                 '{0}/ordererOrganizations/example.com/orderers/{1}/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir, orderer)]
 
         command.append('"')
 
@@ -234,7 +404,7 @@ class CLIInterface(InterfaceBase):
 
         return output
 
-    def fetch_channel(self, context, peers, orderers, channelId=TEST_CHANNEL_ID, location=None):
+    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         if not location:
             location = configDir
@@ -246,11 +416,11 @@ class CLIInterface(InterfaceBase):
             command = ["peer", "channel", "fetch", "config",
                        "{0}/{1}.block".format(location, channelId),
                        "--channelID", channelId,
-                       "--orderer", '{0}:7050'.format(orderers[0])]
+                       "--orderer", '{0}:7050'.format(orderer)]
             if context.tls:
                 command = command + ["--tls",
                                      "--cafile",
-                                     '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
+                                     '{0}/ordererOrganizations/example.com/orderers/{1}/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir, orderer)]
 
             command.append('"')
 
@@ -258,7 +428,7 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def join_channel(self, context, peers, orderers, channelId=TEST_CHANNEL_ID):
+    def join_channel(self, context, peers, channelId=TEST_CHANNEL_ID):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
 
         for peer in peers:
@@ -280,7 +450,7 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def invoke_chaincode(self, context, chaincode, orderers, peer, channelId=TEST_CHANNEL_ID, targs=''):
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs=""):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = chaincode.get('args', '[]').replace('"', r'\"')
         peerParts = peer.split('.')
@@ -289,27 +459,21 @@ class CLIInterface(InterfaceBase):
         command = ["peer", "chaincode", "invoke",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (args),
-                   "--channelID", channelId]
+                   "--channelID", channelId,
+                   "--orderer", '{0}:7050'.format(orderer)]
         if context.tls:
             command = command + ["--tls",
                                  common_util.convertBoolean(context.tls),
                                  "--cafile",
                                  '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
-        if targs:
-            #to escape " so that targs are compatible with cli command
-            targs = targs.replace('"', r'\"')
-            command = command + ["--transient", targs]
-
-        command = command + ["--orderer", '{0}:7050'.format(orderers[0])]
         command.append('"')
         output = context.composition.docker_exec(setup+command, [peer])
-        print("Invoke {0}]: {1}".format(" ".join(setup+command), targs))
         print("Invoke[{0}]: {1}".format(" ".join(setup+command), str(output)))
         output = self.retry(context, output, peer, setup, command)
         return output
 
 
-    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs=''):
+    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs=""):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
@@ -318,13 +482,7 @@ class CLIInterface(InterfaceBase):
         command = ["peer", "chaincode", "query",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (str(args)), # This should work for rich queries as well
-                   "--channelID", channelId]
-        if targs:
-            #to escape " so that targs are compatible with cli command
-            targs = targs.replace('"', r'\"')
-            command = command +["--transient", targs]
-
-        command.append('"')
+                   "--channelID", channelId, '"']
         result = context.composition.docker_exec(setup+command, [peer])
         print("Query Exec command: {0}".format(" ".join(setup+command)))
         result = self.retry(context, result, peer, setup, command)

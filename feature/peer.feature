@@ -10,7 +10,8 @@ Feature: Peer Service
 #@doNotDecompose
 @daily
 Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query, with <type> orderer
-    Given I have a bootstrapped fabric network of type <type>
+    Given I have a bootstrapped fabric network of type <type> <security>
+    And I use the <interface> interface
     When a user sets up a channel
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user queries on the chaincode named "mycc" with args ["query","a"]
@@ -28,12 +29,13 @@ Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query, 
     And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
     Then a user receives a success response of 980 from "peer0.org2.example.com"
 Examples:
-    | type  |
-    | solo  |
-    | kafka |
+    | type  |   security  |  interface |
+    | solo  | without tls | NodeJS SDK |
+    | kafka |   with tls  | NodeJS SDK |
+    | solo  | without tls |     CLI    |
+    | kafka |   with tls  |     CLI    |
 
 
-#@doNotDecompose
 @smoke
 Scenario Outline: FAB-1440, FAB-3861: Basic Chaincode Execution - <type> orderer type, using <database>, <security>
     Given I have a bootstrapped fabric network of type <type> using state-database <database> <security>
