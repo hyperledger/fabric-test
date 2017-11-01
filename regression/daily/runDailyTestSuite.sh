@@ -27,3 +27,6 @@ py.test -v --junitxml results_ledger_lte.xml ledger_lte.py
 
 echo "========== Fabric-CA ACL smoke test..."
 py.test -v --junitxml results_acl.xml acl_happy_path.py
+
+echo "========== Fabric-CA Clustering test..."
+py.test -v --junitxml results_cluster.xml ca_cluster.py
