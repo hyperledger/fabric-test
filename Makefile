@@ -26,7 +26,7 @@ INSTALL_BEHAVE_DEPS = $(GOPATH)/src/github.com/hyperledger/fabric-test/feature/s
 FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
 CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
 DOCKER_ORG = hyperledger
-PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/feature/scripts/pre_setup.sh
+PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/pre_setup.sh
 
 .PHONY: ci-smoke
 ci-smoke: git-update fabric ca pre-setup docker-images smoke-tests clean-all
