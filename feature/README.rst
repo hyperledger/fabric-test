@@ -68,21 +68,21 @@ The following repositories are dependencies and are included as submodules at th
 .. _cello: https://github.com/hyperledger/cello
 
 .. _Chaincode Vendoring:
-Following commands must be executed
+The following commands must be executed
       `govendor init`
       `govendor add +external`
 
-inside the chaincodes folder for any chaincode(go programs) that imports packages, outside the shim or protos folder.
+inside the chaincodes folder for any chaincode (GO language program) that imports packages, outside the shim or protos folder.
 
 If the chaincode has imports from external third party, i.e. other than the packages in fabric outside the shim or protos, execute:
      `govendor fetch << fully qualified package name here >>`
 
+Note: This vendoring can be done automatically for you, wherever your chaincode is located, by using some predefined feature steps. For exact syntax, search for "vendor" in the steps/basic_impl.py file, or search for "vendor" in an example testcase in the chaincodes.feature file.
 
 Caveats and Gotchas
 -------------------
 * This framework uses the `signal`_ package, which currently only works well in NIX environments.
-* When there is a need for executing commands that contain pipes (|) in a table, the user will need to use bang (!) instead.
-This is to make sure that the pipe in the command does not conflict with the pipe in the behave table.
+* When there is a need for executing commands that contain pipes (|) in a table, the user will need to use bang (!) instead. This is to make sure that the pipe in the command does not conflict with the pipe in the behave table.
 
 .. _signal: https://docs.python.org/2/library/signal.html
 

@@ -433,11 +433,21 @@ Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim l
     When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","WellsFargo-Savings-Account","09675879"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
     When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","BankOfAmerica-Savings-Account","08123456"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
     And I wait "3" seconds
+    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Employee-Number1","123-00-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    And I wait "3" seconds
+    When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Employee-Number2","123-45-0089"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+    And I wait "3" seconds
+    #for range use keys encrypted with 'ENC' 'PUT'
     When a user queries on the chaincode named "mycc" with args ["RANGE"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
-    Then a user receives a response containing "key":"BankOfAmerica-Savings-Account"
-    And a user receives a response containing "Passport-Number"
-    And a user receives a response containing WellsFargo-Savings-Account
-    And a user receives a response containing BankOfAmerica-Savings-Account
+    Then a user receives a response containing "key":"Employee-Number1"
+    And a user receives a response containing "value":"123-00-6789"
+    And a user receives a response containing "key":"Employee-Number2"
+    And a user receives a response containing "value":"123-45-0089"
+    And a user receives a response containing "key":"WellsFargo-Savings-Account"
+    And a user receives a response containing "value":"09675879"
+    And a user receives a response containing "key":"BankOfAmerica-Savings-Account"
+    And a user receives a response containing "value":"08123456"
+
 Examples:
     |  type  |
     |  solo  |
@@ -457,12 +467,27 @@ Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, p
   And I vendor go packages for fabric-based chaincode at "../fabric/examples/chaincode/go/enccc_example"
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
 
+  #first we test for invoke failures by passing in bad keys
   When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
   Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 40 - <nil>
   When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Tax-Id","1234-012"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\",\\"IV\\":\\"<BAD_IV_KEY>\\"}"
   Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 23 - <nil>
   When a user invokes on the chaincode named "mycc" with args ["SIG","PUT","Passport-Number","M9037"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\",\\"SIGKEY\\":\\"<BAD_SIG_KEY>\\"}"
   Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 300 - <nil>
+
+  #here we make sure invokes pass but test for query failures by passing in bad keys
+  When I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
+  When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Employee-Number1","123-00-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
+  And I wait "5" seconds
+  #query an encrypted entity without passing Encryption key
+  When a user queries on the chaincode named "mycc" with args ["ENC","GET", "Social-Security-Number"]
+  Then a user receives an error response of status: 500
+  And a user receives an error response of Expected transient key ENCKEY
+  #query passing in bad_enc_key
+  When a user invokes on the chaincode named "mycc" with args ["ENC","PUT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\"}"
+  And I wait "5" seconds
+  When a user queries on the chaincode named "mycc" with args ["ENC","GET", "Social-Security-Number"] and generated transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
+  Then a user receives an error response of Error: Error parsing transient string: illegal base64 data at input byte 40 - <nil>
 
 Examples:
     |                   GOOD_ENC_KEY                         |                BAD_ENC_KEY                            |     BAD_IV_KEY              | BAD_SIG_KEY    |
