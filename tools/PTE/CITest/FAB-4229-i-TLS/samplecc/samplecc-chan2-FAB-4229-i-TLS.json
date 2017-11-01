@@ -10,14 +10,14 @@
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "2",
     "nRequest": "0",
-    "runDur": "129600",
+    "runDur": "43200",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel2",
         "action":  "create",
         "orgName": [
-            "org3",
-            "org4"
+            "org1",
+            "org2"
         ]
     },
     "burstOpt": {
@@ -40,7 +40,7 @@
         "org2": ["peer1"]
     },
     "eventOpt": {
-        "listener": "Transaction",
+        "listener": "None",
         "timeout": "240000"
     },
     "ccType": "ccchecker",
@@ -67,6 +67,6 @@
         }
     },
     "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
+		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
 	]
 }

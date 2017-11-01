@@ -16,8 +16,8 @@
         "name": "testorgschannel2",
         "action":  "create",
         "orgName": [
-            "org3",
-            "org4"
+            "org1",
+            "org2"
         ]
     },
     "burstOpt": {
@@ -66,6 +66,6 @@
         }
     },
     "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
+		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
 	]
 }

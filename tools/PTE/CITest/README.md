@@ -98,12 +98,12 @@ The command is located in `PTE/CITest/scripts`
 
     When `-n` is invoked, the default network configuration is as follow:
 
-            2 orderers
-            4 ca
-            4 organizations
+            3 orderers
+            2 ca
+            2 organizations
             2 peers per org
-            2 kafka
-            2 zookeepers
+            4 kafka
+            3 zookeepers
             2 channels
             TLS enabled
             localhost endpoints

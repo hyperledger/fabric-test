@@ -10,7 +10,7 @@
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "2",
     "nRequest": "0",
-    "runDur": "129600",
+    "runDur": "43200",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel1",
@@ -40,7 +40,7 @@
         "org2": ["peer1"]
     },
     "eventOpt": {
-        "listener": "Transaction",
+        "listener": "None",
         "timeout": "240000"
     },
     "ccType": "ccchecker",
