@@ -166,14 +166,21 @@ var ordererList = [];
 var currOrdererId = 0;
 var peerFO = 'FALSE';
 var ordererFO = 'FALSE';
+var peerFOList = 'TARGETPEERS';
 if (typeof( uiContent.peerFailover ) !== 'undefined') {
     peerFO = uiContent.peerFailover.toUpperCase();
 }
 if (typeof( uiContent.ordererFailover ) !== 'undefined') {
     ordererFO = uiContent.ordererFailover.toUpperCase();
 }
-logger.info('', peerFO, ordererFO);
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: peerFO=%s, ordererFO=%s', Nid, channelName, org, pid, peerFO, ordererFO);
+if ( peerFO == 'TRUE' ) {
+    if (typeof( uiContent.failoverOpt ) !== 'undefined') {
+        if (typeof( uiContent.failoverOpt.list ) !== 'undefined') {
+            peerFOList = uiContent.failoverOpt.list.toUpperCase();
+        }
+    }
+}
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: peerFO=%s, ordererFO=%s, peerFOList=%s', Nid, channelName, org, pid, peerFO, ordererFO, peerFOList);
 
 var runDur=0;
 if ( nRequest == 0 ) {
@@ -425,10 +432,16 @@ function assignThreadAllPeers(channel, client, org) {
                     );
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[key1][key].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 }
 
                 if ( (invokeType.toUpperCase() == 'MOVE') && ( key1 == org ) && !event_connected) {
@@ -478,10 +491,16 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                     );
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[key1][key].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 }
 
                 if ( (invokeType.toUpperCase() == 'MOVE') && ( key1 == org ) ) {
@@ -527,9 +546,15 @@ function assignThreadOrgPeer(channel, client, org) {
                     );
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 }
 
                 eh=client.newEventHub();
@@ -578,10 +603,16 @@ function assignThreadPeerList(channel, client, org) {
                         );
                         targets.push(peerTmp);
                         channel.addPeer(peerTmp);
+                        if ( peerFOList == 'TARGETPEERS' ) {
+                            peerList.push(peerTmp);
+                        }
                     } else {
                         peerTmp = client.newPeer(ORGS[key][peername].requests);
                         //targets.push(peerTmp);
                         channel.addPeer(peerTmp);
+                        if ( peerFOList == 'TARGETPEERS' ) {
+                            peerList.push(peerTmp);
+                        }
                     }
 
                     if ( (invokeType.toUpperCase() == 'MOVE') && ( key == org ) && !event_connected ) {
@@ -781,11 +812,17 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                     );
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 } else {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, peer1: %s', Nid, channelName, org, pid, key, ORGS[org].peer1.requests);
                     peerTmp = client.newPeer( ORGS[key].peer1.requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
                 }
                 }
 
@@ -860,7 +897,9 @@ function execTransMode() {
                     channelAddOrderer(channel, client, org);
                     setCurrOrdererId(channel, client, org);
 
-                    assignPeerList(channel, client, org);
+                    if ( peerFOList == 'ALL' ) {
+                        assignPeerList(channel, client, org);
+                    }
                     //assignPeerListFromList(channel, client, org);
 
                     if (targetPeers.toUpperCase() == 'ORGANCHOR') {
@@ -879,6 +918,7 @@ function execTransMode() {
                     }
 
                     setCurrPeerId(channel, client, org);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] peerList: ' , Nid, channelName, org, pid, peerList);
 
                     tCurr = new Date().getTime();
                     var tSynchUp=tStart-tCurr;

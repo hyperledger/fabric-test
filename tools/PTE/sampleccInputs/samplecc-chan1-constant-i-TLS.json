@@ -38,12 +38,15 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"],
+        "org1": ["peer0"],
         "org2": ["peer1"]
     },
     "eventOpt": {
         "listener": "Transaction",
         "timeout": "240000"
+    },
+    "failoverOpt": {
+        "list": "targetPeers"
     },
     "ccType": "ccchecker",
     "ccOpt": {
@@ -61,11 +64,11 @@
     "invoke": {
         "query": {
             "fcn": "invoke",
-            "args": ["get", "a1"]
+            "args": ["get","a1"]
         },
         "move": {
             "fcn": "invoke",
-            "args": ["put", "a1","1"]
+            "args": ["put","a1","1"]
         }
     },
     "SCFile": [

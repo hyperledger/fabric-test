@@ -99,7 +99,6 @@ var users =  hfc.getConfigSetting('users');
 
 
 var transType = uiContent.transType;
-var nRequest = parseInt(uiContent.nRequest);
 var nProcPerOrg = parseInt(uiContent.nProcPerOrg);
 logger.info('nProcPerOrg ', nProcPerOrg);
 var tCurr;
