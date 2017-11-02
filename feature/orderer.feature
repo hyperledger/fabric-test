@@ -175,25 +175,6 @@ Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 970
 
-@skip
-Scenario Outline: FAB-3937: Message Broadcast, for <type> orderer
-    Given a bootstrapped orderer network of type <type>
-    When a message is broadcasted
-    Then I get a successful broadcast response
-Examples:
-    | type  |
-    | solo  |
-    | kafka |
-
-@skip
-Scenario Outline: FAB-3938: Broadcasted message delivered, for <type> orderer
-    Given a bootstrapped orderer network of type <type>
-    When 1 unique messages are broadcasted
-    Then all 1 messages are delivered within 10 seconds
-Examples:
-    | type  |
-    | solo  |
-    | kafka |
 
 # skip FAB-4770 until FAB-6335 gets fixed so that we reliably stop the correct kafkabroker
 @skip
@@ -268,7 +249,7 @@ Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the
         | disconnect   | connect     |
 
 @daily
-Scenario Outline: FAB-4808: Orderer_BatchTimeOut is honored, for <type> orderer
+Scenario Outline: FAB-4808,FAB-3937,FAB-3938: Orderer_BatchTimeOut is honored, for <type> orderer
     Given the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is <envValue>
     And I have a bootstrapped fabric network of type <type>
     When a user sets up a channel
