@@ -45,6 +45,9 @@
         "listener": "Transaction",
         "timeout": "240000"
     },
+    "failoverOpt": {
+        "list": "targetPeers"
+    },
     "ccType": "ccchecker",
     "ccOpt": {
         "keyIdx": [1],

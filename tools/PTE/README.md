@@ -503,6 +503,9 @@ The following chaincodes are tested and supported:
             "listener": "Transaction",
             "timeout": "240000"
         },
+        "failoverOpt": {
+            "list": "targetPeers"
+        },
         "ccType": "general",
         "ccOpt": {
             "keyStart": "5000",
@@ -601,6 +604,10 @@ where:
         * **Block**: PTE registers a block listener to receive every block event on all channels. PTE will parse the received block event for the transactions sent. The block listener option applies to tranMode CONSTANT only.
         * **None**: PTE will not register any event listener.
     * **timeout**: event timeout, applied to the transaction listener only, unit ms
+* **failoverOpt**: failover options
+    * **list**: peer failover candidate list
+         * **targetPeers**: the peer candidate list is the same as the peers specified in the `targetPeers`
+         * **all**: the peer candidate list is made of all peers listed in the associated service confidential file
 * **ccType**: chaincode type
     * **ccchecker**: The first argument (key) in the query and invoke request is incremented by 1 for every transaction.  The prefix of the key is made of process ID, ex, all keys issued from process 4 will have prefix of **key3_**. And, the second argument (payload) in an invoke (Move) is a random string of size ranging between payLoadMin and payLoadMax defined in ccOpt.
     * **general**: The arguments of transaction request are taken from the user input json file without any changes.
