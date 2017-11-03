@@ -7,11 +7,13 @@ Feature: Gossip Service
     As a user I expect the gossip component work correctly
 
 @daily
-Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down by <takeDownType>, comes back up and catches up eventually
+Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down by <takeDownType>, comes back up and catches up eventually. Disconnect test may fail due to FAB-6333.
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  # the following wait is for Gossip leadership states to be stabilized
+  And I wait "30" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -52,11 +54,13 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <takeDownType>, comes back up *after* another leader is elected, catches up
+Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <takeDownType>, comes back up *after* another leader is elected, catches up. Disconnect test may fail due to FAB-6333.
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  # the following wait is for Gossip leadership states to be stabilized
+  And I wait "30" seconds
 
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial leader peer of "org1"
   And I wait "5" seconds
@@ -103,11 +107,13 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <takeDownType>, comes back up *before* another leader is elected, catches up
+Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <takeDownType>, comes back up *before* another leader is elected, catches up. Disconnect test may fail due to FAB-6333.
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  # the following wait is for Gossip leadership states to be stabilized
+  And I wait "30" seconds
 
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial leader peer of "org1"
   And I wait "5" seconds
@@ -138,11 +144,13 @@ Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <t
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization go down via <takeDownType>, then catch up after <bringUpType>"
+Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization go down via <takeDownType>, then catch up after <bringUpType>". Disconnect test may fail due to FAB-6333.
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  # the following wait is for Gossip leadership states to be stabilized
+  And I wait "30" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
@@ -187,7 +195,7 @@ Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a non-leader peer goes down by <takeDownType>, comes back up and catches up eventually
+Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a non-leader peer goes down by <takeDownType>, comes back up and catches up eventually. Disconnect test may fail due to FAB-6333.
   # Select Peer0 of both org as leader and turn leader election off
 
   Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
@@ -248,7 +256,7 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a 
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, leader peer goes down by <takeDownType> for at least <minDownDuration> seconds, comes back up and catches up eventually
+Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, leader peer goes down by <takeDownType> for at least <minDownDuration> seconds, comes back up and catches up eventually. Disconnect test may fail due to FAB-6333.
 
   # Select Peer0 of both org as leader and turn leader election off
   Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
