@@ -447,7 +447,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
 
                             }
-                                buff = '  ' + '    - ' + MSPDir+'/crypto-config' + ':' + srcMSPDir + '\n';
+                                buff = '  ' + '    - ' + MSPDir + ':' + srcMSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'ports' ) {
@@ -824,7 +824,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
 
                             }
-                                buff = '  ' + '    - ' + MSPDir+'/crypto-config'+':'+ srcMSPDir + '\n';
+                                buff = '  ' + '    - ' + MSPDir+':'+ srcMSPDir + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'depends_on'  ){
@@ -946,7 +946,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             fs.appendFileSync(dFile, buff);
 
                         }
-                            buff = '  ' + '    - ' + MSPDir+'/crypto-config'+':'+ srcMSPDir + '\n';
+                            buff = '  ' + '    - ' + MSPDir+':'+ srcMSPDir + '\n';
                             fs.appendFileSync(dFile, buff);
 
                     } else {
@@ -1037,7 +1037,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 // header 4
                                 var t0 = v+1;
                                 var t1 = 'org'+t0+'.'+comName;
-                                var tmp = MSPDir+'/crypto-config'+'/peerOrganizations/'+t1+'/ca/:/etc/hyperledger/fabric-ca-server-config';
+                                var tmp = MSPDir+'/peerOrganizations/'+t1+'/ca/:/etc/hyperledger/fabric-ca-server-config';
                                 buff = '  ' + '    - ' + tmp + '\n';
                                 //buff = '  ' + '    - ' +lvl2_obj[m] + '\n';
                                 fs.appendFileSync(dFile, buff);

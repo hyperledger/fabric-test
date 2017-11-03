@@ -20,7 +20,7 @@ function printHelp {
    echo "    -d: ledger database type, default=goleveldb"
    echo "    -f: profile string, default=test"
    echo "    -h: hash type, default=SHA2"
-   echo "    -k: number of kafka, default=solo"
+   echo "    -k: number of kafka, default=0"
    echo "    -z: number of zookeepers, default=0"
    echo "    -n: number of channels, default=1"
    echo "    -o: number of orderers, default=1"
@@ -303,6 +303,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -l $logLevel"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir -G $SRCMSPDir -S $TLSEnabled -C $comName -l $logLevel
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled  -l $logLevel"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -C $comName -l $logLevel
 
