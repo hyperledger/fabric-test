@@ -93,7 +93,7 @@ class InterfaceBase:
                             break
                     time.sleep(waittime)
         finally:
-            assert org in context.initial_leader, "Error: After polling for" + str(max_waittime) + " seconds, no gossip-leader found by looking at the logs, for "+org
+            assert org in context.initial_leader, "Error: After polling for " + str(max_waittime) + " seconds, no gossip-leader found by looking at the logs, for "+org
         return context.initial_leader[org]
 
     def get_initial_non_leader(self, context, org):
@@ -107,7 +107,7 @@ class InterfaceBase:
                     context.initial_non_leader[org]=container
                     print("initial non-leader is "+context.initial_non_leader[org])
                     return context.initial_non_leader[org]
-        assert org in context.initial_non_leader, "Error: After polling for" + str(max_waittime) + " seconds, no gossip-non-leader found by looking at the logs, for "+org
+        assert org in context.initial_non_leader, "Error: After polling for " + str(max_waittime) + " seconds, no gossip-non-leader found by looking at the logs, for "+org
         return context.initial_non_leader[org]
 
     def wait_for_deploy_completion(self, context, chaincode_container, timeout):
