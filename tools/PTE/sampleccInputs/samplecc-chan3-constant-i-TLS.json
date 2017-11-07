@@ -46,6 +46,7 @@
         "timeout": "240000"
     },
     "failoverOpt": {
+        "method": "RoundRobin",
         "list": "targetPeers"
     },
     "ccType": "ccchecker",

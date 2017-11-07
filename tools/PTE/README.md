@@ -504,6 +504,7 @@ The following chaincodes are tested and supported:
             "timeout": "240000"
         },
         "failoverOpt": {
+            "method": "RoundRobin",
             "list": "targetPeers"
         },
         "ccType": "general",
@@ -604,8 +605,11 @@ where:
         * **Block**: PTE registers a block listener to receive every block event on all channels. PTE will parse the received block event for the transactions sent. The block listener option applies to tranMode CONSTANT only.
         * **None**: PTE will not register any event listener.
     * **timeout**: event timeout, applied to the transaction listener only, unit ms
-* **failoverOpt**: failover options
-    * **list**: peer failover candidate list
+* **failoverOpt**: peer failover options
+    * **method**: peer failover selection method, default is `RoundRobin`
+         * **random**: a peer is selected randomly from the list for failover
+         * **RoundRobin**: the peer listed next to the current peer is selected for failover
+    * **list**: peer failover candidate list, default is `targetPeers`
          * **targetPeers**: the peer candidate list is the same as the peers specified in the `targetPeers`
          * **all**: the peer candidate list is made of all peers listed in the associated service confidential file
 * **ccType**: chaincode type
