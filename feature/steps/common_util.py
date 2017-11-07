@@ -51,7 +51,7 @@ def convertToSeconds(envValue):
 def get_leadership_status(container):
     #Checks the last occurence of "IsLeader" and its result
     rc = subprocess.call(
-            "docker logs " + container + " 2>&1 | grep \"IsLeader\" | tail -1 | grep \"Returning true\"",
+            "docker logs " + container + " 2>&1 | grep -a \"IsLeader\" | tail -n 1 | grep -a \"Returning true\"",
             shell=True)
     if rc != 0:
         return False
