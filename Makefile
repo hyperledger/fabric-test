@@ -14,7 +14,7 @@
 #   - smoke-tests - runs Smoke Test Suite
 #   - daily-tests - runs Daily Test Suite
 #   - git-update - updates git submodules
-#   - pre_setup  - installs node, govendor and behave pre-requisites
+#   - pre-setup - installs node, govendor and behave pre-requisites
 #   - clean  - cleans the docker containers and images
 #
 # ------------------------------------------------------------------
