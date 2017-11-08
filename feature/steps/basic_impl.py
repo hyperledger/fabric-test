@@ -267,15 +267,15 @@ def step_impl(context, org):
     waittime=5
     try:
         with common_util.Timeout(max_waittime):
-            while not common_util.is_in_log([context.initial_non_leader[org]], "Becoming a leader"):
+            while not common_util.get_leadership_status(context.initial_non_leader[org]):
                 time.sleep(waittime)
     finally:
-        assert common_util.is_in_log([context.initial_non_leader[org]], "Becoming a leader"), "The initial non-leader peer has not become leader, after "+str(max_waittime)+" seconds."
+        assert common_util.get_leadership_status(context.initial_non_leader[org]), "Error: The initial non-leader peer has not become leader, after "+str(max_waittime)+" seconds."
 
 @then(u'the initial non-leader peer of "{org}" has not become the leader')
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
-    assert not common_util.is_in_log([context.initial_non_leader[org]], "Becoming a leader"), "Error: initial non-leader peer has already become leader."
+    assert not common_util.get_leadership_status(context.initial_non_leader[org]), "Error: initial non-leader peer has already become leader."
 
 @then(u'the logs on {component} contains {data}')
 def step_impl(context, component, data):
