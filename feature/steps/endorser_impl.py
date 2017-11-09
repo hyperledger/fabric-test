@@ -63,6 +63,14 @@ def step_impl(context, path, args, name, peer, channel, timeout):
 def step_impl(context, path, args, name, peer, channel):
     deploy_impl(context, path, args, name, "GOLANG", peer, channel)
 
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on the initial leader peer of "{org}"')
+def step_impl(context, path, args, name, org):
+    deploy_impl(context, path, args, name, "GOLANG", context.interface.get_initial_leader(context, org), context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" on the initial non-leader peer of "{org}"')
+def step_impl(context, path, args, name, org):
+    deploy_impl(context, path, args, name, "GOLANG", context.interface.get_initial_non_leader(context, org), context.interface.TEST_CHANNEL_ID)
+
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, language, channel, timeout):
     deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel, timeout)
