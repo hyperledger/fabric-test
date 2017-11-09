@@ -15,7 +15,7 @@
 #   - daily-tests - runs Daily Test Suite
 #   - git-update - updates git submodules
 #   - pre_setup  - installs node, govendor and behave pre-requisites
-#   - clean-all  - cleans the docker containers and images
+#   - clean  - cleans the docker containers and images
 #
 # ------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ DOCKER_ORG = hyperledger
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/pre_setup.sh
 
 .PHONY: ci-smoke
-ci-smoke: git-update fabric ca pre-setup docker-images smoke-tests clean-all
+ci-smoke: git-update fabric ca pre-setup docker-images smoke-tests clean
 
 .PHONY: git-update
 git-update:
@@ -41,7 +41,7 @@ pre-setup:
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: ci-daily
-ci-daily: git-update fabric ca pre-setup docker-images daily-tests clean-all
+ci-daily: git-update fabric ca pre-setup docker-images daily-tests clean
 
 .PHONY: fabric
 fabric:
@@ -75,7 +75,7 @@ smoke-tests:
 daily-tests:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runDailyTestSuite.sh
 
-.PHONY: clean-all
-clean-all:
+.PHONY: clean
+clean:
 	-docker ps -aq | xargs -I '{}' docker rm -f '{}'
 	-docker images -q $(DOCKER_ORG)/fabric-* | xargs -I '{}' docker rmi -f '{}'
