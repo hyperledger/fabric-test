@@ -1,0 +1,7 @@
+{
+        "profile": "testOrgsOrdererGenesis",
+        "channel": "testorgschannel",
+        "seek": -2,
+        "tls": true,
+        "quiet": true
+}

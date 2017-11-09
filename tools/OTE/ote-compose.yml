@@ -1,0 +1,28 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+version: '2'
+
+services:
+  OTE:
+    container_name: OTE
+    image: hyperledger/fabric-tools
+    hostname: OTE
+    network_mode: nl_default
+    environment:
+      - GOPATH=/opt/gopath
+      - TESTCASE=$testcase
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_PEER_LOCALMSPID=PeerOrg1
+      - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/fabric/artifacts/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+      - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/fabric/artifacts/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+    volumes:
+      - ../.:/opt/gopath/src/github.com/hyperledger/fabric
+      - ../../fabric-test/tools/NL/configtx.yaml:/etc/hyperledger/fabric/configtx.yaml
+      - ../../fabric-test/fabric/common/tools/cryptogen/crypto-config:/var/hyperledger/fabric/artifacts
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/OTE
+    command: sh -c './script.sh'
