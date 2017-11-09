@@ -167,6 +167,7 @@ var currOrdererId = 0;
 var peerFO = 'FALSE';
 var ordererFO = 'FALSE';
 var peerFOList = 'TARGETPEERS';
+var peerFOMethod = 'ROUNDROBIN';
 if (typeof( uiContent.peerFailover ) !== 'undefined') {
     peerFO = uiContent.peerFailover.toUpperCase();
 }
@@ -178,9 +179,12 @@ if ( peerFO == 'TRUE' ) {
         if (typeof( uiContent.failoverOpt.list ) !== 'undefined') {
             peerFOList = uiContent.failoverOpt.list.toUpperCase();
         }
+        if (typeof( uiContent.failoverOpt.method ) !== 'undefined') {
+            peerFOMethod = uiContent.failoverOpt.method.toUpperCase();
+        }
     }
 }
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: peerFO=%s, ordererFO=%s, peerFOList=%s', Nid, channelName, org, pid, peerFO, ordererFO, peerFOList);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: peerFO=%s, ordererFO=%s, peerFOList=%s, peerFOMethod=%s', Nid, channelName, org, pid, peerFO, ordererFO, peerFOList, peerFOMethod);
 
 var runDur=0;
 if ( nRequest == 0 ) {
@@ -324,7 +328,16 @@ function getQueryRequest() {
 function peerFailover(channel, client) {
     var currId = currPeerId;
     channel.removePeer(peerList[currPeerId]);
-    currPeerId = currPeerId + 1;
+    if ( peerFOMethod == 'RANDOM' ) {
+        var r = Math.floor(Math.random() * (peerList.length - 1));
+        if ( r >= currPeerId ) {
+             currPeerId = r + 1;
+        } else {
+             currPeerId = r;
+        }
+    } else if ( method.toUpperCase == 'ROUNDROBIN' ) {
+        currPeerId = currPeerId + 1;
+    }
     currPeerId = currPeerId%peerList.length;
     channel.addPeer(peerList[currPeerId]);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d peerFailover] from (%s) to (%s)', Nid, channel.getName(), org, pid, peerList[currId]._url, peerList[currPeerId]._url);
