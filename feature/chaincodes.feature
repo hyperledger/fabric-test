@@ -5,7 +5,7 @@
 #
 
 
-Feature: FAB-5384 Chaincode Testing: As a user I want to be able verify that I can execute different chaincodes
+Feature: Chaincodes Testing
 
 
 @daily
@@ -41,6 +41,7 @@ Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric/examples
   Then a user receives a success response of 1000
 
 
+@shimAPI
 @daily
 Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05 when cc_05 and cc_02 are on different channels
   Given I have a bootstrapped fabric network of type kafka
@@ -122,152 +123,6 @@ Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_
 
 
 @daily
-Scenario Outline: FAB-5789: Test chaincode marbles02 initMarble/readMarble/transferMarble/transferMarblesBasedOnColor in <language> language and <database> database for <type> orderer
-    Given I have a bootstrapped fabric network of type <type> using state-database <database>
-    When a user sets up a channel
-    And a user deploys chaincode at path "<path>" with args [""] with language "<language>"
-
-    When a user invokes on the chaincode with args ["initMarble","marble1","red","35","tom"]
-    And I wait "5" seconds
-    When a user queries on the chaincode with args ["readMarble","marble1"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble1"
-    And a user receives a response containing "color":"red"
-    And a user receives a response containing "size":35
-    And a user receives a response containing "owner":"tom"
-
-    When a user invokes on the chaincode with args ["initMarble","marble2","blue","55","jerry"]
-    And I wait "5" seconds
-    When a user queries on the chaincode with args ["readMarble","marble2"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble2"
-    And a user receives a response containing "color":"blue"
-    And a user receives a response containing "size":55
-    And a user receives a response containing "owner":"jerry"
-
-    #Test transferMarble
-    When a user invokes on the chaincode with args ["transferMarble","marble1","jerry"]
-    And I wait "5" seconds
-    When a user queries on the chaincode with args ["readMarble","marble1"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble1"
-    And a user receives a response containing "color":"red"
-    And a user receives a response containing "size":35
-    And a user receives a response containing "owner":"jerry"
-
-    # Begin creating marbles to test transferMarblesBasedOnColor
-    When a user invokes on the chaincode with args ["initMarble","marble100","red","5","cassey"]
-    And I wait "5" seconds
-
-    When a user invokes on the chaincode with args ["initMarble","marble101","blue","6","cassey"]
-    And I wait "5" seconds
-
-    When a user invokes on the chaincode with args ["initMarble","marble200","purple","5","ram"]
-    And I wait "5" seconds
-
-    When a user invokes on the chaincode with args ["initMarble","marble201","blue","6","ram"]
-    And I wait "5" seconds
-
-    When a user invokes on the chaincode with args ["transferMarblesBasedOnColor","blue","jerry"]
-    And I wait "5" seconds
-    When a user queries on the chaincode with args ["readMarble","marble100"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble100"
-    And a user receives a response containing "color":"red"
-    And a user receives a response containing "size":5
-    And a user receives a response containing "owner":"cassey"
-
-    When a user queries on the chaincode with args ["readMarble","marble101"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble101"
-    And a user receives a response containing "color":"blue"
-    And a user receives a response containing "size":6
-    And a user receives a response containing "owner":"jerry"
-
-    When a user queries on the chaincode with args ["readMarble","marble200"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble200"
-    And a user receives a response containing "color":"purple"
-    And a user receives a response containing "size":5
-    And a user receives a response containing "owner":"ram"
-
-    When a user queries on the chaincode with args ["readMarble","marble201"]
-    Then a user receives a response containing "docType":"marble"
-    And a user receives a response containing "name":"marble201"
-    And a user receives a response containing "color":"blue"
-    And a user receives a response containing "size":6
-    And a user receives a response containing "owner":"jerry"
-Examples:
-    | type  |                       path                                      | language | database |
-    | solo  |   github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |  leveldb |
-    | kafka |   github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |  leveldb |
-    | solo  |        ../../fabric-test/chaincodes/marbles/node                | NODE     |  leveldb |
-    | kafka |        ../../fabric-test/chaincodes/marbles/node                | NODE     |  leveldb |
-    | solo  |   github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |  couchdb |
-    | kafka |   github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |  couchdb |
-    | solo  |        ../../fabric-test/chaincodes/marbles/node                | NODE     |  couchdb |
-    | kafka |        ../../fabric-test/chaincodes/marbles/node                | NODE     |  couchdb |
-
-
-@daily
-Scenario Outline: FAB-5790: Test chaincode marbles02 initMarble/readMarble/deleteMarble/getHistoryForMarble/getMarblesByRange in <language> language for <type> orderer
-  Given I have a bootstrapped fabric network of type <type>
-  When a user sets up a channel
-  And a user deploys chaincode at path "<path>" with args [""] with name "mycc" with language "<language>"
-
-  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble1","red","35","tom"]
-  And I wait "3" seconds
-  When a user queries on the chaincode named "mycc" with args ["readMarble","marble1"]
-  Then a user receives a success response of {"docType":"marble","name":"marble1","color":"red","size":35,"owner":"tom"}
-
-  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble201","blue","6","ram"]
-  And I wait "3" seconds
-  # Test getHistoryForMarble
-  When a user queries on the chaincode named "mycc" with args ["getHistoryForMarble","marble1"]
-  Then a user receives a response containing "TxId"
-  And a user receives a response containing "Value":{"docType":"marble","name":"marble1","color":"red","size":35,"owner":"tom"}
-  And a user receives a response containing "Timestamp"
-  And a user receives a response containing "IsDelete":"false"
-
-  #delete a marble
-  When a user invokes on the chaincode named "mycc" with args ["delete","marble201"]
-  And I wait "10" seconds
-  When a user queries on the chaincode named "mycc" with args ["readMarble","marble201"]
-  Then a user receives an error response of status: 500
-  And a user receives an error response of {"Error":"Marble does not exist: marble201"}
-  And I wait "3" seconds
-
-  #Test getHistoryForDeletedMarble
-  When a user queries on the chaincode named "mycc" with args ["getHistoryForMarble","marble201"]
-  Then a user receives a response containing "TxId"
-  And a user receives a response containing "Value":{"docType":"marble","name":"marble201","color":"blue","size":6,"owner":"ram"}
-  And a user receives a response containing "Timestamp"
-  And a user receives a response containing "IsDelete":"false"
-  And I wait "3" seconds
-  Then a user receives a response containing "TxId"
-  And a user receives a response containing "Value":{"docType":"marble","name":"marble201","color":"blue","size":6,"owner":"ram"}
-  And a user receives a response containing "Timestamp"
-  And a user receives a response containing "IsDelete":"true"
-
-  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble101","red","35","tom"]
-  And I wait "3" seconds
-
-  # Test getMarblesByRange
-  When a user queries on the chaincode named "mycc" with args ["getMarblesByRange","marble1", "marble201"]
-  Then a user receives a response containing "Key":"marble1"
-  And  a user receives a response containing "Record":{"docType":"marble","name":"marble1","color":"red","size":35,"owner":"tom"}
-  And a user receives a response containing "Key":"marble101"
-  And a user receives a response containing "Record":{"docType":"marble","name":"marble101","color":"red","size":35,"owner":"tom"}
-
-  Examples:
-    | type  |                       path                                     | language |
-    | solo  |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |
-    | kafka |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | GOLANG   |
-#    | solo  |       ../../fabric-test/chaincodes/marbles/node                | NODE     |
-#    | kafka |       ../../fabric-test/chaincodes/marbles/node                | NODE     |
-# FAB-6678 : skip FAB-5790 parts 3 & 4, until FAB-6271 gets fixed and we receive an an error code in addition to the error message
-
-@daily
 Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, using marbles02, for <type> orderer
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type <type>
@@ -307,25 +162,6 @@ Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, usi
     | solo  |
     | kafka |
 
-#TBD: To verify values returned from queries wherever possible
-@daily
-Scenario Outline: FAB-5791: Chaincode to test shim interface API, for <type> orderer
-  Given I have a bootstrapped fabric network of type <type>
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/chaincodeAPIDriver" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "5" seconds
-  When a user queries on the chaincode named "mycc" with args ["getTxTimeStamp"]
-  When a user queries on the chaincode named "mycc" with args ["getCreator"]
-  When a user queries on the chaincode named "mycc" with args ["getBinding"]
-  When a user queries on the chaincode named "mycc" with args ["getSignedProposal"]
-  When a user queries on the chaincode named "mycc" with args ["getTransient"]
-
-  Examples:
-    | type  |
-    | solo  |
-    | kafka |
-
-
 @smoke
 Scenario Outline: FAB-6211: Test example02 chaincode written using <language> <security>
     Given I have a bootstrapped fabric network of type solo <security>
@@ -347,20 +183,20 @@ Examples:
     |        ../../fabric-test/chaincodes/example02/node                      | NODE     | without tls |
 
 
+@shimAPI
 @daily
-Scenario Outline: FAB-6256: Test rich queries using marbles chaincode using <language>
+Scenario Outline: FAB-6256: Test support of rich queries in SHIM API: queryMarbles and queryMarblesByOwner using marbles chaincode on couchdb 
     Given I have a bootstrapped fabric network of type solo using state-database couchdb with tls
     When a user sets up a channel
     And a user deploys chaincode at path "<path>" with args [""] with language "<language>"
 
     When a user invokes on the chaincode with args ["initMarble","marble1","blue","35","tom"]
+    When a user invokes on the chaincode with args ["initMarble","marble2","red","50","tom"]
     And I wait "3" seconds
     When a user queries on the chaincode with args ["readMarble","marble1"]
     Then a user receives a response containing "name":"marble1"
     And a user receives a response containing "owner":"tom"
 
-    When a user invokes on the chaincode with args ["initMarble","marble2","red","50","tom"]
-    And I wait "3" seconds
     When a user queries on the chaincode with args ["readMarble","marble2"]
     Then a user receives a response containing "name":"marble2"
     And a user receives a response containing "owner":"tom"
@@ -380,6 +216,16 @@ Scenario Outline: FAB-6256: Test rich queries using marbles chaincode using <lan
     And a user receives a response containing "owner":"tom"
     And a user receives a response containing "Key":"marble2"
     And a user receives a response containing "name":"marble2"
+
+    # queryMarbles on more than one selector
+    When a user queries on the chaincode with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\",\\"color\\":\\"red\\"}}"]
+
+    Then a user receives a response containing "Key":"marble2"
+    And a user receives a response containing "name":"marble2"
+    And a user receives a response containing "color":"red"
+    And a user receives a response containing "owner":"tom"
+    Then a user receives a response not containing "Key":"marble1"
+    And a user receives a response not containing "color":"blue"
 
     When a user invokes on the chaincode with args ["transferMarble","marble1","jerry"]
     And I wait "3" seconds
@@ -493,3 +339,180 @@ Examples:
     |                   GOOD_ENC_KEY                         |                BAD_ENC_KEY                            |     BAD_IV_KEY              | BAD_SIG_KEY    |
     |   L6P9jLWR6d6E1KdGJBsUpzEm5QS6uVlS4onsteB+KaQ=         |    L6P9jLWR6d6E1KdGJBsUpzEm5QS6uVlS4onsteB+KaQ        |    +4DANc5uYLTnsH6Yy7v32g=  |  LS0tLS1CRUdJTiBFQyBQUklWQVRFIEtFWS0tLS0tCk1IY0NBUUVFSUhYRkd1eWxyTlQ1WUdtd1E0MVBWeTJqVlZrcXhMMTdBN1pSM0lDL1RGakJvQW9HQ0NxR1NNNDkKQXdFSG9VUURRZ0FFVHdWSEhrbklmUnUyZ3YwWU50R210akpDSHJzdThhekZ1OWZvUy9raUlPN2Q2aWhTWWRjdgpHbEoyNlF0WmtTTlhWNkJDLy91Z25ycGN3bldTdERsc1lRPT0KLS0tLS1FTkQgRUMgUFJJVkFURSBLRVktLS0tLQo                                                                                                                         |
 
+
+@shimAPI
+@smoke
+Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimApiDriver chaincodes
+# |  shim API in fabric/core/shim/chaincode.go	|   Covered in marbles02  chaincode                     |
+# |        for chaincode invocation
+# |        Init	                                |                init                                   |
+# |        Invoke	                        |               invoke                                  |
+# |        GetState 	                        | readMarble, initMarble, transferMarble                |
+# |        PutState 	                        |    initMarble, transferMarble                         |
+# |        DelState 	                        |             deleteMarble                              |
+# |        CreateCompositeKey 	                |       initMarble, deleteMarble                        |
+# |        SplitCompositeKey 	                |         transferMarblesBasedOnColor                   |
+# |        GetStateByRange 	                |         transferMarblesBasedOnColor                   |
+# |        GetQueryResult 	                | FAB-6256 readMarbles,queryMarbles,queryMarblesByOwner |
+# |        GetHistoryForKey 	                |       getHistoryForMarble                             |
+# | GetStatePartialCompositeKeyQuery	        |       transferMarblesBasedOnColor                     |
+
+# |                                             |      Covered in shimApiDriver chaincode
+# |        GetArgs                              |              getArgs                                  |
+# |        GetArgsSlice                         |              getArgsSlice                             |
+# |        GetStringArgs                        |              getStringArgs                            |
+# |        GetFunctionAndParameters             |              getFunctionAndParameters                 |
+
+# |        GetBinding                           |              getBinding                               |
+# |        GetCreator                           |              getCreator                               |
+# |        GetTxTimeStamp                       |              getTxTimeStamp                           |
+# |        GetSignedProposal                    |              getSignedProposal                        |
+# |        GetTransient                         |              getTransient                             |
+# |        GetTxID                              |                                                       |
+# |        GetDecorations                       |                                                       |
+# |        SetEvent                             |                                                       |
+
+# |        InvokeChaincode                      |           FAB-4717  ch_ex05 calling ch_ex02           |
+
+  Given I have a bootstrapped fabric network of type <type>
+  When a user sets up a channel
+  And I vendor go packages for fabric-based chaincode at "../chaincodes/shimApiDriver/go/"
+  When a user deploys chaincode at path "<marbles02Path>" with args [""] with name "mycc" with language "<language>"
+  When a user deploys chaincode at path "<shimAPIDriverPath>" with args [""] with name "myShimAPI" with language "<language>"
+
+
+  #first two marbles are used for getMarblesByRange
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","001m1","indigo","35","saleem"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","004m4","green","35","dire straits"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble1","red","35","tom"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble2","blue","55","jerry"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble111","pink","55","jane"]
+  And I wait "5" seconds
+
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble1"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "size":35
+  And a user receives a response containing "owner":"tom"
+
+
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble2"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble2"
+  And a user receives a response containing "color":"blue"
+  And a user receives a response containing "size":55
+  And a user receives a response containing "owner":"jerry"
+
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble111"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble111"
+  And a user receives a response containing "color":"pink"
+  And a user receives a response containing "size":55
+  And a user receives a response containing "owner":"jane"
+
+#Test transferMarble
+  When a user invokes on the chaincode named "mycc" with args ["transferMarble","marble1","jerry"]
+  And I wait "3" seconds
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble1"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "size":35
+  And a user receives a response containing "owner":"jerry"
+
+# Begin creating marbles to to test transferMarblesBasedOnColor
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble100","red","5","cassey"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble101","blue","6","cassey"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble200","purple","5","ram"]
+  When a user invokes on the chaincode named "mycc" with args ["initMarble","marble201","blue","6","ram"]
+  And I wait "3" seconds
+
+  When a user invokes on the chaincode named "mycc" with args ["transferMarblesBasedOnColor","blue","jerry"]
+  And I wait "3" seconds
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble100"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble100"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "size":5
+  And a user receives a response containing "owner":"cassey"
+
+
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble101"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble101"
+  And a user receives a response containing "color":"blue"
+  And a user receives a response containing "size":6
+  And a user receives a response containing "owner":"jerry"
+
+
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble200"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble200"
+  And a user receives a response containing "color":"purple"
+  And a user receives a response containing "size":5
+  And a user receives a response containing "owner":"ram"
+
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble201"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble201"
+  And a user receives a response containing "color":"blue"
+  And a user receives a response containing "size":6
+  And a user receives a response containing "owner":"jerry"
+
+
+# Test getMarblesByRange
+  When a user queries on the chaincode named "mycc" with args ["getMarblesByRange","001m1", "005m4"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"001m1"
+  And a user receives a response containing "color":"indigo"
+  And a user receives a response containing "size":35
+  And a user receives a response containing "owner":"saleem"
+
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"004m4"
+  And a user receives a response containing "color":"green"
+  And a user receives a response containing "size":35
+  And a user receives a response containing "owner":"dire straits"
+
+
+  # Test getHistoryForMarble
+  When a user queries on the chaincode named "mycc" with args ["getHistoryForMarble","marble1"]
+  Then a user receives a response containing "TxId"
+  And a user receives a response containing "Value":{"docType":"marble","name":"marble1","color":"red","size":35,"owner":"tom"}
+  And a user receives a response containing "Timestamp"
+  And a user receives a response containing "IsDelete":"false"
+
+  #delete a marble
+  When a user invokes on the chaincode named "mycc" with args ["delete","marble201"]
+  And I wait "3" seconds
+  When a user queries on the chaincode named "mycc" with args ["readMarble","marble201"]
+  Then a user receives an error response of status: 500
+  And a user receives an error response of {"Error":"Marble does not exist: marble201"}
+
+
+  #Test getHistoryForDeletedMarble
+  When a user queries on the chaincode named "mycc" with args ["getHistoryForMarble","marble201"]
+  Then a user receives a response containing "TxId"
+  And a user receives a response containing "Value":{"docType":"marble","name":"marble201","color":"blue","size":6,"owner":"ram"}
+  And a user receives a response containing "Timestamp"
+  And a user receives a response containing "IsDelete":"false"
+  Then a user receives a response containing "TxId"
+  And a user receives a response containing "Value":{"docType":"marble","name":"marble201","color":"blue","size":6,"owner":"ram"}
+  And a user receives a response containing "Timestamp"
+  And a user receives a response containing "IsDelete":"true"
+
+  When a user queries on the chaincode named "myShimAPI" with args ["getTxTimeStamp"]
+  When a user queries on the chaincode named "myShimAPI" with args ["getCreator"]
+  When a user invokes on the chaincode named "myShimAPI" with args ["testTxBinding"]
+  When a user queries on the chaincode named "myShimAPI" with args ["getSignedProposal"]
+  When a user queries on the chaincode named "myShimAPI" with args ["getTransient"]
+
+
+  Examples:
+   | type  | database |                       marbles02Path                                            |         shimAPIDriverPath                                         | language|
+   | solo  |  leveldb |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02                 |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/go  | GOLANG  |
+   | kafka |  couchdb |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02                 |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/go  | GOLANG  |
+#   | solo  |  leveldb |   20     | ../../fabrici-test/chaincodes/marbles/node                                    |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/node| NODE    |
+#   | kafka |  couchdb |   30     |  ../../fabric-test/chaincodes/marbles/node                                    |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/node| NODE    |
+# skip parts 3 & 4 using node chaincodes, until FAB-6271 gets fixed and we receive an an error code in addition to the error message:

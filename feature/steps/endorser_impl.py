@@ -535,6 +535,15 @@ def containing_impl(context, response, peer):
 def step_impl(context, response):
     containing_impl(context, response, "peer0.org1.example.com")
 
+@then(u'a user receives a response not containing {response} from "{peer}"')
+def not_containing_impl(context, response, peer):
+    assert peer in context.result, "There is no response from {0}".format(peer)
+    assert response not in context.result[peer], "Received response {0} (Expected it to NOT contain {1})".format(context.result[peer], response)
+
+@then(u'a user receives a response not containing {response}')
+def step_impl(context, response):
+    not_containing_impl(context, response, "peer0.org1.example.com")
+
 @then(u'the block file is fetched from peer "{peer}"')
 def step_impl(context, peer):
     output = context.composition.docker_exec(["ls", "."], [peer])
