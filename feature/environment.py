@@ -52,6 +52,8 @@ def after_scenario(context, scenario):
         shutil.rmtree("configs/%s" % context.composition.projectName)
         shutil.rmtree("/tmp/fabric-client-kvs_org1", ignore_errors=True)
         shutil.rmtree("/tmp/fabric-client-kvs_org2", ignore_errors=True)
+        shutil.rmtree("./node_modules", ignore_errors=True)
+        shutil.rmtree("../../node_modules", ignore_errors=True)
         context.composition.decompose()
     elif hasattr(context, 'projectName'):
         shutil.rmtree("configs/%s" % context.projectName)
