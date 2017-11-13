@@ -296,7 +296,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
 
   # Bring back up the leader peer
   When "peer0.org2.example.com" comes back up by doing a <bringUpType>
-  And I wait "10" seconds
+  And I wait "20" seconds
 
   # Query the leader peer
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
