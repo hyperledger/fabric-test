@@ -200,6 +200,11 @@ if ( ( nRequest == 0 ) && ( runDur == 0 ) ) {
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] runForever: %d', Nid, channel.getName(), org, pid,  runForever);
 
+// init latencies matrix: tx num/avg/min/max
+var latency_peer = [0, 0, 99999999, 0];
+var latency_orderer = [0, 0, 99999999, 0];
+var latency_event = [0, 0, 99999999, 0];
+
 var ccType = uiContent.ccType;
 var keyStart=0;
 var payLoadMin=0;
@@ -1037,22 +1042,14 @@ function eventRegisterBlock() {
 
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
-            //let handle = setTimeout(reject, evtTimeout);
 
             eh.registerBlockEvent((block) => {
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcvB=%d:%d block: %j ', Nid, channelName, org, pid, inv_m, evtRcvB, block);
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcvB=%d:%d block length: %d ', Nid, channelName, org, pid, inv_m, evtRcvB, block.data.data.length);
-                //clearTimeout(handle);
                 for (i=0; i<block.data.data.length; i++) {
                     if ( txidList.find(block.data.data[i].payload.header.channel_header.tx_id) != -1 ) {
                         evtRcvB = evtRcvB + 1;
-                        //txidList.printList();
-                        //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] evtRcvB:inv_m = %d:%d, found tx_id: %s ', Nid, channelName, org, pid, evtRcvB, inv_m, block.data.data[i].payload.header.channel_header.tx_id);
                         txidList.removeNode(block.data.data[i].payload.header.channel_header.tx_id);
-                       // logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] txidList size: %d ', Nid, channelName, org, pid, txidList.getSize());
                     }
                 }
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcvB=%d:%d ', Nid, channelName, org, pid, inv_m, evtRcvB);
 
                 if ( inv_m == evtRcvB  ) {
                     if ( IDone == 1 ) {
@@ -1069,6 +1066,7 @@ function eventRegisterBlock() {
                         }
 
                         evtDisconnect();
+                        latency_output();
                     }
                 }
                     resolve();
@@ -1105,6 +1103,7 @@ function eventRegister(tx, cb) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList.getSize());
                     txidList.printList();
                 }
+                latency_output();
 
             }
             evtDisconnect();resolve()}, evtTimeout);
@@ -1134,6 +1133,7 @@ function eventRegister(tx, cb) {
 
                         evtDisconnect();
                         resolve();
+                        latency_output();
                     }
                 }
             });
@@ -1367,6 +1367,38 @@ function execModeSimple() {
     }
 }
 
+// output latency matrix
+function latency_output() {
+
+    // output peers latency
+    if ( latency_peer[0] != 0 ) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d latency_output] peer latency stats: tx num= %d, total time: %d ms, avg= %d ms, min= %d ms, max= %d ms', Nid, channelName, org, pid, latency_peer[0], latency_peer[1], (latency_peer[1]/latency_peer[0]).toFixed(2), latency_peer[2], latency_peer[3]);
+    } else {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d latency_output] peer latency stats: tx num= %d, total time: %d ms, avg= NA ms, min= %d ms, max= %d ms', Nid, channelName, org, pid, latency_peer[0], latency_peer[1], latency_peer[2], latency_peer[3]);
+    }
+
+    // output orderer latency
+    if ( latency_orderer[0] != 0 ) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d latency_output] orderer latency stats: tx num= %d, total time: %d ms, avg= %d ms, min= %d ms, max= %d ms', Nid, channelName, org, pid, latency_orderer[0], latency_orderer[1], (latency_orderer[1]/latency_orderer[0]).toFixed(2), latency_orderer[2], latency_orderer[3]);
+    } else {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d latency_output] orderer latency stats: tx num= %d, total time: %d ms, avg= NA ms, min= %d ms, max= %d ms', Nid, channelName, org, pid, latency_orderer[0], latency_orderer[1], latency_orderer[2], latency_orderer[3]);
+    }
+
+}
+
+// calculate latency matrix
+function latency_update(inv_m, td, latency) {
+
+    latency[0] = inv_m;
+    latency[1] = latency[1] + td;
+    if ( td < latency[2] ) {
+        latency[2] = td;
+    }
+    if ( td > latency[3] ) {
+        latency[3] = td;
+    }
+
+}
 var devFreq;
 function getRandomNum(min0, max0) {
         return Math.floor(Math.random() * (max0-min0)) + min0;
@@ -1398,8 +1430,13 @@ function invoke_move_const_evtBlock(freq) {
     var t1 = new Date().getTime();
     getMoveRequest();
 
+    var ts = new Date().getTime();
     channel.sendTransactionProposal(request_invoke)
     .then((results) => {
+
+            var te = new Date().getTime();
+            latency_update(inv_m, te-ts, latency_peer);
+
             var proposalResponses = results[0];
             if ( results[0][0].response && results[0][0].response.status != 200 ) {
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0][0].response.status);
@@ -1412,8 +1449,12 @@ function invoke_move_const_evtBlock(freq) {
 
             getTxRequest(results);
 
+                var tos = new Date().getTime();
                 return channel.sendTransaction(txRequest)
                 .then((results) => {
+
+                    var toe = new Date().getTime();
+                    latency_update(inv_m, toe-tos, latency_orderer);
 
                     if ( results.status != 'SUCCESS' ) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results);
@@ -1450,6 +1491,9 @@ function invoke_move_const_evtBlock(freq) {
                     //return results[0];
 
                 }).catch((err) => {
+                    var toe = new Date().getTime();
+                    latency_update(inv_m, toe-tos, latency_orderer);
+
                     logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
                     if (ordererFO == 'TRUE') {
                         ordererFailover(channel, client);
@@ -1459,6 +1503,9 @@ function invoke_move_const_evtBlock(freq) {
                     //return;
                 })
         }).catch((err) => {
+                var te = new Date().getTime();
+                latency_update(inv_m, te-ts, latency_peer);
+
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
                 if (peerFO == 'TRUE') {
                     peerFailover(channel, client);
@@ -1492,8 +1539,13 @@ function invoke_move_const(freq) {
     var t1 = new Date().getTime();
     getMoveRequest();
 
+    var ts = new Date().getTime();
     channel.sendTransactionProposal(request_invoke)
     .then((results) => {
+
+            var te = new Date().getTime();
+            latency_update(inv_m, te-ts, latency_peer);
+
             var proposalResponses = results[0];
             if ( results[0][0].response && results[0][0].response.status != 200 ) {
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0][0].response.status);
@@ -1507,9 +1559,13 @@ function invoke_move_const(freq) {
             getTxRequest(results);
             eventRegister(tx_id, function(sendPromise) {
 
+                var tos = new Date().getTime();
                 var sendPromise = channel.sendTransaction(txRequest);
                 return Promise.all([sendPromise].concat(eventPromises))
                 .then((results) => {
+
+                    var toe = new Date().getTime();
+                    latency_update(inv_m, toe-tos, latency_orderer);
 
                     if ( results[0].status != 'SUCCESS' ) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results[0]);
