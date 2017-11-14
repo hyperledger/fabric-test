@@ -17,6 +17,7 @@ services:
         container_name: orderer0.example.com
         environment:
             - ORDERER_GENERAL_GENESISPROFILE=SampleSingleMSPSolo
+            - ORDERER_HOST=orderer0.example.com
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer0.example.com/tls:/var/hyperledger/tls

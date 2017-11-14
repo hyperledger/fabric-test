@@ -9,6 +9,15 @@ import sys
 import subprocess
 import json
 import uuid
+import time
+from common_util import Timeout, convertBoolean
+
+
+def enableTls(context, tlsEnabled):
+    if not hasattr(context, "composition"):
+        context.composition = Composition(context, startContainers=False)
+    context.composition.environ["ORDERER_GENERAL_TLS_ENABLED"] = convertBoolean(tlsEnabled)
+    context.composition.environ["CORE_PEER_TLS_ENABLED"] = convertBoolean(tlsEnabled)
 
 
 class ContainerData:
@@ -101,6 +110,14 @@ class Composition:
 
     def getFileArgs(self):
         return self.parseComposeFilesArg(self.composeFilesYaml)
+
+    def getEnvFromContainer(self, container_name, key):
+        value = ""
+        for container in self.containerDataList:
+            if container_name in container.containerName:
+                value = container.getEnv(key)
+                break
+        return value
 
     def getEnvAdditions(self):
         myEnv = {}

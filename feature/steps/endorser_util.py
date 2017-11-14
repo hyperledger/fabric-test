@@ -48,7 +48,7 @@ class InterfaceBase:
                 peers.append(container)
         return peers
 
-    def deploy_chaincode(self, context, chaincode, containers, channelId=TEST_CHANNEL_ID):
+    def deploy_chaincode(self, context, chaincode, containers, channelId=TEST_CHANNEL_ID, user="Admin"):
         for container in containers:
             assert container in context.composition.collectServiceNames(), "Unknown component '{0}'".format(container)
 
@@ -63,8 +63,8 @@ class InterfaceBase:
         if not hasattr(context, "network") and not self.channel_block_present(context, containers, channelId):
             config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
 
-        self.install_chaincode(context, chaincode, peers)
-        self.instantiate_chaincode(context, chaincode, containers)
+        self.install_chaincode(context, chaincode, peers, user)
+        self.instantiate_chaincode(context, chaincode, containers, user)
 
     def channel_block_present(self, context, containers, channelId):
         ret = False
@@ -113,26 +113,26 @@ class InterfaceBase:
     def wait_for_deploy_completion(self, context, chaincode_container, timeout):
         pass
 
-    def install_chaincode(self, context, chaincode, peers):
-        return self.cli.install_chaincode(context, chaincode, peers)
+    def install_chaincode(self, context, chaincode, peers, user="Admin"):
+        return self.cli.install_chaincode(context, chaincode, peers, user=user)
 
-    def instantiate_chaincode(self, context, chaincode, peers):
-        return self.cli.instantiate_chaincode(context, chaincode, peers)
+    def instantiate_chaincode(self, context, chaincode, peers, user="Admin"):
+        return self.cli.instantiate_chaincode(context, chaincode, peers, user=user)
 
-    def create_channel(self, context, orderer, channelId):
-        return self.cli.create_channel(context, orderer, channelId)
+    def create_channel(self, context, orderer, channelId, user="Admin"):
+        return self.cli.create_channel(context, orderer, channelId, user=user)
 
-    def fetch_channel(self, context, peers, orderer, channelId):
-        return self.cli.fetch_channel(context, peers, orderer, channelId)
+    def fetch_channel(self, context, peers, orderer, channelId, user="Admin"):
+        return self.cli.fetch_channel(context, peers, orderer, channelId, user=user)
 
-    def join_channel(self, context, peers, channelId):
-        return self.cli.join_channel(context, peers, channelId)
+    def join_channel(self, context, peers, channelId, user="Admin"):
+        return self.cli.join_channel(context, peers, channelId, user=user)
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId):
-        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId)
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, user="User1"):
+        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId, user=user)
 
-    def query_chaincode(self, context, chaincode, peer, channelId):
-        return self.cli.query_chaincode(context, chaincode, peer, channelId)
+    def query_chaincode(self, context, chaincode, peer, channelId, user="User1"):
+        return self.cli.query_chaincode(context, chaincode, peer, channelId, user=user)
 
 
 class ToolInterface(InterfaceBase):
@@ -142,7 +142,7 @@ class ToolInterface(InterfaceBase):
         # use CLI for non implemented functions
         self.cli = CLIInterface()
 
-    def install_chaincode(self, context, chaincode, peers):
+    def install_chaincode(self, context, chaincode, peers, user="Admin"):
         results = {}
         for peer in peers:
             peer_name = context.networkInfo["nodes"][peer]["nodeName"]
@@ -152,7 +152,7 @@ class ToolInterface(InterfaceBase):
             results[peer] = subprocess.check_call(cmd.split(), env=os.environ)
         return results
 
-    def instantiate_chaincode(self, context, chaincode, containers):
+    def instantiate_chaincode(self, context, chaincode, containers, user="Admin"):
         channel = str(chaincode.get('channelID', self.TEST_CHANNEL_ID))
         args = json.loads(chaincode["args"])
         print(args)
@@ -165,7 +165,7 @@ class ToolInterface(InterfaceBase):
         print(cmd)
         return subprocess.check_call(cmd.split(), env=os.environ)
 
-    def create_channel(self, context, orderer, channelId):
+    def create_channel(self, context, orderer, channelId, user="Admin"):
         orderer_name = context.networkInfo["nodes"][orderer]["nodeName"]
         peer_name = context.networkInfo["nodes"]["peer0.org1.example.com"]["nodeName"]
 
@@ -181,7 +181,7 @@ class ToolInterface(InterfaceBase):
         print(cmd)
         return subprocess.check_call(cmd.split(), env=os.environ)
 
-    def join_channel(self, context, peers, channelId):
+    def join_channel(self, context, peers, channelId, user="Admin"):
         results = {}
         for peer in peers:
             peer_name = context.networkInfo["nodes"][peer]["nodeName"]
@@ -190,7 +190,7 @@ class ToolInterface(InterfaceBase):
             results[peer] = subprocess.check_call(cmd.split(), env=os.environ)
         return results
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId):
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, user="User1"):
         args = json.loads(chaincode["args"])
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
         cmd = "node v1.0_sdk_tests/app.js invoke -c {0} -i {1} -v 1 -p {2} -m {3}".format(channelId,
@@ -200,7 +200,7 @@ class ToolInterface(InterfaceBase):
         print(cmd)
         return {peer: subprocess.check_call(cmd.split(), env=os.environ)}
 
-    def query_chaincode(self, context, chaincode, peer, channelId):
+    def query_chaincode(self, context, chaincode, peer, channelId, user="User1"):
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
         cmd = "node v1.0_sdk_tests/app.js query -c {0} -i {1} -v 1 -p {2}".format(channelId,
                                                                    chaincode["name"],
@@ -208,7 +208,7 @@ class ToolInterface(InterfaceBase):
         print(cmd)
         return {peer: subprocess.check_call(cmd.split(), env=os.environ)}
 
-    def update_chaincode(self, context, chaincode, peer, channelId):
+    def update_chaincode(self, context, chaincode, peer, channelId, user="Admin"):
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
 
 
@@ -274,33 +274,33 @@ class SDKInterface(InterfaceBase):
         chaincode['channelId'] = str(channelId)
         return chaincode
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs=""):
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
         reformatted = self.reformat_chaincode(chaincode, channelId)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         orgName = org.title().replace('.', '')
-        result = self.invoke_func.call("invoke", "User1@{}".format(org), orgName, reformatted, [peer], orderer, self.networkConfigFile)
+        result = self.invoke_func.call("invoke", "{0}@{1}".format(user, org), orgName, reformatted, [peer], orderer, self.networkConfigFile)
         print("Invoke: {}".format(result))
         return {peer: result}
 
-    def query_chaincode(self, context, chaincode, peer, channelId, targs):
+    def query_chaincode(self, context, chaincode, peer, channelId, targs, user="User1"):
         reformatted = self.reformat_chaincode(chaincode, channelId)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         orgName = org.title().replace('.', '')
-        print("Query Info: User1@{0}, {1}, {2}, {3}".format(org, orgName, reformatted, peer))
-        result = self.query_func.call("query", "User1@{}".format(org), orgName, reformatted, [peer], self.networkConfigFile)
+        print("Query Info: {0}@{1}, {2}, {3}, {4}".format(user, org, orgName, reformatted, peer))
+        result = self.query_func.call("query", "{0}@{1}".format(user, org), orgName, reformatted, [peer], self.networkConfigFile)
         return {peer: result}
 
 
 class CLIInterface(InterfaceBase):
 
-    def get_env_vars(self, context, peer="peer0.org1.example.com", includeAll=True):
+    def get_env_vars(self, context, peer="peer0.org1.example.com", user="Admin", includeAll=True):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         setup = ["/bin/bash", "-c",
-                 '"CORE_PEER_MSPCONFIGPATH={0}/peerOrganizations/{1}/users/Admin@{1}/msp'.format(configDir, org)]
+                 '"CORE_PEER_MSPCONFIGPATH={0}/peerOrganizations/{2}/users/{1}@{2}/msp'.format(configDir, user, org)]
 
         if includeAll:
             setup += ['CORE_PEER_LOCALMSPID={0}'.format(org),
@@ -324,13 +324,13 @@ class CLIInterface(InterfaceBase):
             ccDeploymentSpec.ParseFromString(f.read())
         return ccDeploymentSpec
 
-    def install_chaincode(self, context, chaincode, peers):
+    def install_chaincode(self, context, chaincode, peers, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         output = {}
         for peer in peers:
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
-            setup = self.get_env_vars(context, peer)
+            setup = self.get_env_vars(context, peer, user=user)
             command = ["peer", "chaincode", "install",
                        "--name", chaincode['name'],
                        "--lang", chaincode['language'],
@@ -348,19 +348,19 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup + command), output))
         return output
 
-    def instantiate_chaincode(self, context, chaincode, peers):
+    def instantiate_chaincode(self, context, chaincode, peers, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = chaincode.get('args', '[]').replace('"', r'\"')
         output = {}
         for peer in peers:
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
-            setup = self.get_env_vars(context, peer)
+            setup = self.get_env_vars(context, peer, user=user)
             command = ["peer", "chaincode", "instantiate",
                        "--name", chaincode['name'],
                        "--version", str(chaincode.get('version', 0)),
                        "--lang", chaincode['language'],
-                       "--channelID", str(chaincode.get('channelID', TEST_CHANNEL_ID)),
+                       "--channelID", str(chaincode.get('channelID', self.TEST_CHANNEL_ID)),
                        "--ctor", r"""'{\"Args\": %s}'""" % (args)]
             if context.tls:
                 command = command + ["--tls",
@@ -380,9 +380,9 @@ class CLIInterface(InterfaceBase):
         return output
 
 
-    def create_channel(self, context, orderer, channelId=TEST_CHANNEL_ID):
+    def create_channel(self, context, orderer, channelId=TEST_CHANNEL_ID, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
-        setup = self.get_env_vars(context, "peer0.org1.example.com")
+        setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
         timeout = str(120 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s')))
         command = ["peer", "channel", "create",
                    "--file", "/var/hyperledger/configs/{0}/{1}.tx".format(context.composition.projectName, channelId),
@@ -407,7 +407,7 @@ class CLIInterface(InterfaceBase):
 
         return output
 
-    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None):
+    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         if not location:
             location = configDir
@@ -415,7 +415,7 @@ class CLIInterface(InterfaceBase):
         for peer in peers:
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
-            setup = self.get_env_vars(context, peer, False)
+            setup = self.get_env_vars(context, peer, includeAll=False, user=user)
             command = ["peer", "channel", "fetch", "config",
                        "{0}/{1}.block".format(location, channelId),
                        "--channelID", channelId,
@@ -431,13 +431,13 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def join_channel(self, context, peers, channelId=TEST_CHANNEL_ID):
+    def join_channel(self, context, peers, channelId=TEST_CHANNEL_ID, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
 
         for peer in peers:
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
-            setup = self.get_env_vars(context, peer)
+            setup = self.get_env_vars(context, peer, user=user)
             command = ["peer", "channel", "join",
                        "--blockpath", '/var/hyperledger/configs/{0}/{1}.block"'.format(context.composition.projectName, channelId)]
             count = 0
@@ -453,12 +453,12 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs=""):
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = chaincode.get('args', '[]').replace('"', r'\"')
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
-        setup = self.get_env_vars(context, peer)
+        setup = self.get_env_vars(context, peer, user=user)
         command = ["peer", "chaincode", "invoke",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (args),
@@ -481,12 +481,12 @@ class CLIInterface(InterfaceBase):
         return output
 
 
-    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs=""):
+    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         args = chaincode.get('args', '[]').replace('"', r'\"')
-        setup = self.get_env_vars(context, peer)
+        setup = self.get_env_vars(context, peer, user=user)
         command = ["peer", "chaincode", "query",
                    "--name", chaincode['name'],
                    "--ctor", r"""'{\"Args\": %s}'""" % (str(args)), # This should work for rich queries as well
