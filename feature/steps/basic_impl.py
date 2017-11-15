@@ -62,7 +62,7 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=
 
     # Should TLS be enabled
     context.tls = tlsEnabled
-    common_util.enableTls(context, tlsEnabled)
+    compose_util.enableTls(context, tlsEnabled)
 
     # Perform bootstrap process
     context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
@@ -234,7 +234,7 @@ def start_network_impl(context, ordererType, tlsEnabled=True):
     # Should TLS be enabled
     context.tls = tlsEnabled
     if tlsEnabled:
-        common_util.enableTls(context, tlsEnabled)
+        compose_util.enableTls(context, tlsEnabled)
 
     compose_impl(context, context.composeFile, projectName=context.projectName)
 

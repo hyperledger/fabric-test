@@ -123,6 +123,7 @@ services:
             service: orderer
         container_name: orderer0.example.com
         environment:
+            - ORDERER_HOST=orderer0.example.com
             - CONFIGTX_ORDERER_ORDERERTYPE=kafka
             - CONFIGTX_ORDERER_KAFKA_BROKERS=[kafka0:9092,kafka1:9092,kafka2:9092,kafka3:9092]
             - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
@@ -150,6 +151,7 @@ services:
             service: orderer
         container_name: orderer1.example.com
         environment:
+            - ORDERER_HOST=orderer1.example.com
             - CONFIGTX_ORDERER_ORDERERTYPE=kafka
             - CONFIGTX_ORDERER_KAFKA_BROKERS=[kafka0:9092,kafka1:9092,kafka2:9092,kafka3:9092]
             - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
@@ -177,6 +179,7 @@ services:
             service: orderer
         container_name: orderer2.example.com
         environment:
+            - ORDERER_HOST=orderer2.example.com
             - CONFIGTX_ORDERER_ORDERERTYPE=kafka
             - CONFIGTX_ORDERER_KAFKA_BROKERS=[kafka0:9092,kafka1:9092,kafka2:9092,kafka3:9092]
             - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s

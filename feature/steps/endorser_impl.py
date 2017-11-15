@@ -15,14 +15,14 @@ import config_util
 
 
 @when(u'a user sets up a channel named "{channelId}" using orderer "{orderer}"')
-def setup_channel_impl(context, channelId, orderer):
+def setup_channel_impl(context, channelId, orderer, username="Admin"):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
     peers = context.interface.get_peers(context)
 
-    context.interface.create_channel(context, orderer, channelId)
-    context.interface.fetch_channel(context, peers, orderer, channelId)
-    context.interface.join_channel(context, peers, channelId)
+    context.interface.create_channel(context, orderer, channelId, user=username)
+    context.interface.fetch_channel(context, peers, orderer, channelId, user=username)
+    context.interface.join_channel(context, peers, channelId, user=username)
 
 @when(u'a user sets up a channel named "{channelId}"')
 def step_impl(context, channelId):
@@ -33,7 +33,7 @@ def step_impl(context):
     setup_channel_impl(context, context.interface.TEST_CHANNEL_ID, "orderer0.example.com")
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
-def deploy_impl(context, path, args, name, language, peer, channel, timeout=120):
+def deploy_impl(context, path, args, name, language, peer, channel, timeout=120, username="Admin"):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context)
 
@@ -44,7 +44,7 @@ def deploy_impl(context, path, args, name, language, peer, channel, timeout=120)
         "channelID": channel,
         "args": args,
     }
-    context.results = context.interface.deploy_chaincode(context, chaincode, [peer], channel)
+    context.results = context.interface.deploy_chaincode(context, chaincode, [peer], channel, user=username)
     # Save chaincode name and path and args
     context.chaincode = chaincode
 

@@ -8,7 +8,6 @@ import os
 import sys
 import datetime
 import subprocess
-from compose_util import Composition
 import time
 import signal
 
@@ -30,12 +29,6 @@ def changeFormat(value):
 
 def convertBoolean(boolean):
     return str(boolean).lower()
-
-def enableTls(context, tlsEnabled):
-    if not hasattr(context, "composition"):
-        context.composition = Composition(context, startContainers=False)
-    context.composition.environ["ORDERER_GENERAL_TLS_ENABLED"] = convertBoolean(tlsEnabled)
-    context.composition.environ["CORE_PEER_TLS_ENABLED"] = convertBoolean(tlsEnabled)
 
 def convertToSeconds(envValue):
     if envValue[-1] == 'm':

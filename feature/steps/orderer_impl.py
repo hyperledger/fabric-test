@@ -191,6 +191,5 @@ def step_impl(context):
 def step_impl(context, key, value, node):
     assert hasattr(context, "composition"), "There are no containers running for this test"
     changedString = common_util.changeFormat(value)
-    container = context.composition.getContainerFromName(node, context.composition.containerDataList)
-    containerValue = container.getEnv(key)
-    assert containerValue == changedString, "The environment variable on the container was set to {}".format(containerValue)
+    containerValue = context.composition.getEnvFromContainer(node, key)
+    assert containerValue == changedString, "The environment variable on the container was set to '{0}' (expected value: '{1}')".format(containerValue, changedString)
