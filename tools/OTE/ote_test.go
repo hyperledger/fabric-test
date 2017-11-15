@@ -309,3 +309,9 @@ func Test_ORD105_500000TX_1ch_3ord_kafka_4kbs(t *testing.T) {
         passResult, finalResultSummaryString := ote("ORD-105", 500000, 1, 3, "kafka", 4, spyDefer, 1 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
+
+//FAB-6996 - send 30000 txns to solo orderer with default batchsize and default payload
+func Test_FAB6996_30000TX_1ch_1ord_solo(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-6996", 30000, 1, 1, "solo", 0, spyOff, 1 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}

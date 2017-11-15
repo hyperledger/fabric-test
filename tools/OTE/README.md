@@ -85,6 +85,7 @@ Check your Docker and Docker-Compose versions with the following commands:
 ## Launching OTE container
 
 - ote-compose.yml is used to launch the OTE container by mounting the certificates and channel artifacts into the container and starts running a testcase from ote_test.go when testcase number is passed with ote-compose.yml
+- If using Network Launcher for launching the network, OTE container should be joined to the same network bridge as `network_mode: nl_default` in ote-compose.yml. Otherwise, `network_mode: nl_default` can be changed to `network_mode: <bridge name>` in ote-compose.yml to get connected to the network bridge to which fabric containers are connected
 - If using Network Launcher for launching the network with default location i.e, $GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen for crypto-config, channel-artifacts, current ote-compose.yml can be used as is. If not, the lines shown below for volumes, can be changed on the left side of the `:` to reflect the exact location of the certificates and channel artifacts in the ote-compose.yml
    ```bash
       volumes:
@@ -104,7 +105,7 @@ Check your Docker and Docker-Compose versions with the following commands:
    ```
 
 ## Execute OTE GO Tests
-- To run a particular testcase from ote_test.go, testcase number should be passed as shown below, while launching the OTE container
+- To run a particular testcase from ote_test.go, testcase number should be passed as shown below, while launching the OTE container (prefer running one testcase for every new network)
    ```bash
      cd $GOPATH/src/github.com/hyperledger/fabric/OTE
      testcase=<testcase_number> docker-compose -f ote-compose.yml up -d
@@ -123,7 +124,18 @@ Check your Docker and Docker-Compose versions with the following commands:
      testcase=Test_11tx_1ch_1ord_Solo_Basic_CI docker-compose -f ote-compose.yml up -d
      docker logs -f OTE
      # Now look for test results logs in ./logs/${testcase}.log
-     docker-compose ote-compose.yml down
+     docker-compose -f ote-compose.yml down
      cd <correct_path_to>/tools/NL
      ./networkLauncher.sh -a down
    ```
+
+## Run all the above steps from a single script
+
+- Use runote.sh under OTE to run all steps of launching fabric network using Network Launcher, launching OTE container by passing testcase number and tearing down OTE container and fabric network
+  ```bash
+    Usage:
+      ./runote.sh [opt] [value]
+                   -t: testcase number, default=FAB-6996
+    example:
+      ./runote.sh -t FAB-6996
+  ```

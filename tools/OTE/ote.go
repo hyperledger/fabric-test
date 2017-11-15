@@ -744,7 +744,7 @@ func computeTotals(txSent *[][]int64, totalNumTxSent *int64, txSentFailures *[][
         if debugflag2 { logger(fmt.Sprintf("in compute(): totalTxRecv[]= %v, totalBlockRecv[]= %v", *totalTxRecv, *totalBlockRecv)) }
 }
 
-func reportTotals(testname string, numTxToSendTotal int64, countToSend [][]int64, txSent [][]int64, totalNumTxSent int64, txSentFailures [][]int64, totalNumTxSentFailures int64, batchSize int64, txRecv [][]int64, totalTxRecv []int64, totalTxRecvMismatch bool, blockRecv [][]int64, totalBlockRecv []int64, totalBlockRecvMismatch bool, channelIDs *[]string) (successResult bool, resultStr string) {
+func reportTotals(testname string, numTxToSendTotal int64, countToSend [][]int64, txSent [][]int64, totalNumTxSent int64, txSentFailures [][]int64, totalNumTxSentFailures int64, batchSize int64, txRecv [][]int64, totalTxRecv []int64, totalTxRecvMismatch bool, blockRecv [][]int64, totalBlockRecv []int64, totalBlockRecvMismatch bool, channelIDs *[]string, testDuration int64) (successResult bool, resultStr string) {
 
         // default to failed
         var passFailStr = "FAILED"
@@ -879,8 +879,19 @@ func reportTotals(testname string, numTxToSendTotal int64, countToSend [][]int64
                 logger(fmt.Sprintf("Total deliveries received Blocks on each ordrr %7d", totalBlockRecv))
         }
 
+        var overallTPS int64 = 0
+        if testDuration > 0 {
+                overallTPS = (numTxToSendTotal/testDuration)
+                logger(fmt.Sprintf("THROUGHPUT TPS = %d , %s using batchSize=%d numChannels=%d numOrdsInNtwk=%d ordType=%s numKafkaBrokers=%d", overallTPS, testname, batchSize, numChannels, numOrdsInNtwk, ordererType, numKBrokers))
+                logger(fmt.Sprintf("TPS - Overall Transactions per second %9d", overallTPS))
+                logger(fmt.Sprintf("TPS per channel                       %9d", (numTxToSendTotal/int64(numChannels)/testDuration)))
+                logger(fmt.Sprintf("TPS per orderer                       %9d", (numTxToSendTotal/int64(numOrdsInNtwk)/testDuration)))
+                logger(fmt.Sprintf("BPS - Overall Blocks per second       %9d", (totalBlockRecv[0]/testDuration)))
+                logger(fmt.Sprintf("BPS per channel                       %9d", (totalBlockRecv[0]/int64(numChannels)/testDuration)))
+                logger(fmt.Sprintf("BPS per orderer                       %9d", (totalBlockRecv[0]/int64(numOrdsInNtwk)/testDuration)))
+        }
         // print output result and counts : overall summary
-        resultStr += fmt.Sprintf(" RESULT=%s: TX Req=%d BrdcstACK=%d NACK=%d DelivBlk=%d DelivTX=%d numChannels=%d batchSize=%d", passFailStr, numTxToSendTotal, totalNumTxSent, totalNumTxSentFailures, totalBlockRecv, totalTxRecv, numChannels, batchSize)
+        resultStr += fmt.Sprintf(" RESULT=%s: TX Req=%d BrdcstACK=%d NACK=%d DelivBlk=%d DelivTX=%d numChannels=%d batchSize=%d TPS=%d", passFailStr, numTxToSendTotal, totalNumTxSent, totalNumTxSentFailures, totalBlockRecv, totalTxRecv, numChannels, batchSize, overallTPS)
         logger(fmt.Sprintf(resultStr))
 
         return successResult, resultStr
@@ -1249,7 +1260,8 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
                 logger(fmt.Sprintf("Finished creating all %d PRODUCERs at %v", numOrdsInNtwk * numChannels, time.Now()))
         }
         producersWG.Wait()
-        logger(fmt.Sprintf("Send Duration (seconds): %4d", time.Now().Unix() - sendStart))
+	sendDuration := (time.Now().Unix() - sendStart - 5) //5 is for time waited after creating the producer client to send the first transaction
+        logger(fmt.Sprintf("Send Duration (seconds): %4d", sendDuration))
         recoverStart := time.Now().Unix()
 
         ////////////////////////////////////////////////////////////////////////
@@ -1264,7 +1276,7 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
 
         computeTotals(&txSent, &totalNumTxSent, &txSentFailures, &totalNumTxSentFailures, &txRecv, &totalTxRecv, &totalTxRecvMismatch, &blockRecv, &totalBlockRecv, &totalBlockRecvMismatch)
 
-        idleTime := 0
+        idleCount := 0
         waitSecs := 0
         for !sendEqualRecv(numTxToSend, &totalTxRecv, totalTxRecvMismatch, totalBlockRecvMismatch) {
                 waitSecs += 1
@@ -1275,8 +1287,7 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
                         // This is a stopgap, in case of code error miscount, or lost messages.
                         idleCount++
                         if idleCount >= (batchTimeout+30) {
-                                // adjust waitSecs, so the TPS calculations below will be accurate
-                                waitSecs-=(batchTimeout+30);
+                                waitSecs-=(batchTimeout+30)
                                 break
                         }
                 } else { idleCount=0 }
@@ -1285,9 +1296,11 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
         // Recovery Duration = time spent waiting for orderer service to finish delivering transactions,
         // after all producers finished sending them. AND if transactions were still missing, then
         // this includes the extra time (batchTimeout+30) we wasted, hoping they would arrive.
-        logger(fmt.Sprintf("Recovery Duration (secs):%4d", time.Now().Unix() - recoverStart))
+        recoveryDuration := (time.Now().Unix() - recoverStart)
+        logger(fmt.Sprintf("Recovery Duration (secs):%4d", recoveryDuration))
         logger(fmt.Sprintf("waitSecs for last batch: %4d", waitSecs))
-        passed, resultSummary = reportTotals(testname, numTxToSend, countToSend, txSent, totalNumTxSent, txSentFailures, totalNumTxSentFailures, batchSize, txRecv, totalTxRecv, totalTxRecvMismatch, blockRecv, totalBlockRecv, totalBlockRecvMismatch, &channelIDs)
+        testDuration := sendDuration + recoveryDuration - int64(idleCount)
+        passed, resultSummary = reportTotals(testname, numTxToSend, countToSend, txSent, totalNumTxSent, txSentFailures, totalNumTxSentFailures, batchSize, txRecv, totalTxRecv, totalTxRecvMismatch, blockRecv, totalBlockRecv, totalBlockRecvMismatch, &channelIDs, testDuration)
 
         return passed, resultSummary
 }

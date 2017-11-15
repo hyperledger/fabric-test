@@ -30,3 +30,6 @@ py.test -v --junitxml results_acl.xml acl_happy_path.py
 
 echo "========== Fabric-CA Clustering test..."
 py.test -v --junitxml results_cluster.xml ca_cluster.py
+
+echo "========== Orderer Performance tests..."
+py.test -v --junitxml results_orderer_ote.xml orderer_ote.py
