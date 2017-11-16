@@ -26,7 +26,7 @@
 
 - fetch:
     src: "{{ item }}"
-    dest: "/home/{{ fabric.ssh_user }}"
+    dest: "/tmp/"
     flat: yes
     fail_on_missing: yes
   with_items: "{{ file_to_copy.files[0].path }}"
