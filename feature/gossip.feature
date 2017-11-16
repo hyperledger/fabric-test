@@ -39,7 +39,7 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
   Then a user receives a success response of 930 from the initial leader peer of "org1"
 
   When the initial non-leader peer of "org1" comes back up by doing a <bringUpType>
-  And I wait "20" seconds
+  And I wait "60" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial non-leader peer of "org1"
   Then a user receives a success response of 930 from the initial non-leader peer of "org1"
@@ -89,7 +89,7 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
   Then a user receives a success response of 930 from the initial non-leader peer of "org1"
 
   When the initial leader peer of "org1" comes back up by doing a <bringUpType>
-  And I wait "20" seconds
+  And I wait "60" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial leader peer of "org1"
   Then a user receives a success response of 930 from the initial leader peer of "org1"
@@ -127,7 +127,7 @@ Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <t
   And I wait "3" seconds
   Then the initial non-leader peer of "org1" has not become the leader
   When the initial leader peer of "org1" comes back up by doing a <bringUpType>
-  And I wait "20" seconds
+  And I wait "60" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial leader peer of "org1"
   Then a user receives a success response of 980 from the initial leader peer of "org1"
@@ -174,9 +174,9 @@ Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization
   Then a user receives a success response of 920
 
   When "peer0.org2.example.com" comes back up by doing a <bringUpType>
-  And I wait "20" seconds
+  And I wait "60" seconds
   When "peer1.org2.example.com" comes back up by doing a <bringUpType>
-  And I wait "40" seconds
+  And I wait "60" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
   Then a user receives a success response of 920 from "peer0.org2.example.com"
@@ -234,7 +234,7 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a 
 
   # Bring back up the non-leader peer
   When "peer1.org1.example.com" comes back up by doing a <bringUpType>
-  And I wait "20" seconds
+  And I wait "60" seconds
 
   # Test with the non-leader peer
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org1.example.com"
@@ -296,7 +296,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
 
   # Bring back up the leader peer
   When "peer0.org2.example.com" comes back up by doing a <bringUpType>
-  And I wait "20" seconds
+  And I wait "60" seconds
 
   # Query the leader peer
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
