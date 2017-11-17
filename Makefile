@@ -29,7 +29,7 @@ DOCKER_ORG = hyperledger
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/pre_setup.sh
 
 .PHONY: ci-smoke
-ci-smoke: git-update fabric ca pre-setup docker-images smoke-tests clean
+ci-smoke: clean git-update fabric ca pre-setup docker-images smoke-tests
 
 .PHONY: git-update
 git-update:
@@ -41,7 +41,7 @@ pre-setup:
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: ci-daily
-ci-daily: git-update fabric ca pre-setup docker-images daily-tests clean
+ci-daily: clean git-update fabric ca pre-setup docker-images daily-tests
 
 .PHONY: fabric
 fabric:
