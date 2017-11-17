@@ -11,7 +11,7 @@ export NVM_DIR="$HOME/.nvm"
 nvm install 8.9.0 || true
 
 # use nodejs 8.9.0 version
-nvm use 8.9.0
+nvm use --delete-prefix v8.9.0
 
 echo "npm version ======>"
 npm -v
