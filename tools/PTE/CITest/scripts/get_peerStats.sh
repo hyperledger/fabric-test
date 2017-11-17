@@ -19,7 +19,7 @@ usage () {
     echo -e " requirement: set CORE_LOGGING_LEVEL to INFO for peers"
     echo
     echo -e "\nUSAGE:\t./get_peerStats.sh [options] [values]"
-    echo -e "\tThe output file is <output dir>/<prefix name>_<runid>.txt"
+    echo -e "\tThe output file is <output dir>/<prefix name>_<runid>.log"
     echo
     echo -e "-h, --help\tView this help message."
     echo
@@ -40,7 +40,7 @@ usage () {
     echo
     echo -e "examples:"
     echo -e " ./get_peerStats.sh -r myTestID -p peer0.org1.example.com peer0.org2.example.com -n myTest -o myDir -v"
-    echo -e "\tThe output file is myDir/myTest_myTestID.txt"
+    echo -e "\tThe output file is myDir/myTest_myTestID.log"
     echo
     exit
 }
@@ -155,7 +155,7 @@ getPeerStats () {
 #           Gathers data for an entire run.
 getAllStats () {
 
-    outfile=$OUTPUTPATH/$LOGNAME"_"$RUNID".txt"
+    outfile=$OUTPUTPATH/$LOGNAME"_"$RUNID".log"
     echo -e "[getAllStats] outfile:  $outfile"
     # output headers
     echo -n "" > $outfile
