@@ -57,6 +57,7 @@ docker-images:
 	@make docker -C $(FABRIC_DIR)
 	@make native -C $(FABRIC_DIR)
 	@make docker -C $(CA_DIR)
+	@make docker-fvt -C $(CA_DIR)
 
 .PHONY: ca
 ca:
