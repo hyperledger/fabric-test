@@ -55,6 +55,7 @@ import (
         "time"
         "sync"
         "path/filepath"
+        "math/rand"
         "github.com/hyperledger/fabric/common/crypto"
 
         genesisconfig "github.com/hyperledger/fabric/common/tools/configtxgen/localconfig" // config for genesis.yaml
@@ -64,6 +65,7 @@ import (
         mspmgmt "github.com/hyperledger/fabric/msp/mgmt"
         cb "github.com/hyperledger/fabric/protos/common"
         ab "github.com/hyperledger/fabric/protos/orderer"
+        "github.com/hyperledger/fabric/core/comm"
         "github.com/hyperledger/fabric/protos/utils"
         "golang.org/x/net/context"
         "google.golang.org/grpc"
@@ -84,16 +86,13 @@ var debugflag1 = false
 var debugflag2 = false
 var debugflag3 = false // most detailed and voluminous
 
-// To increase size of transactions, add data to this string:
-var extraTxData = ""
-// var extraTxData = "00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef00abcdef"
-
 var masterSpyReadyWG sync.WaitGroup
 var producersWG sync.WaitGroup
 var logFile *os.File
 var logEnabled = false
 var envvar string
 
+var payloadSize = 0
 var numChannels = 1
 var numOrdsInNtwk  = 1
 var numOrdsToWatch = 1
@@ -141,6 +140,16 @@ func spyStatus(spyState int) string {
         if spyState == spyOn { return "ON" }
         if spyState == spyDefer { return "DEFER" }
         return ( fmt.Sprintf("UNKNOWN (%d)", spyState) )
+}
+
+const randomString = "abcdef1234567890"
+
+func extraDataSend(size int) string {
+    extraTxData := make([]byte, size * 1024) //size in kb
+    for i := range extraTxData {
+        extraTxData[i] = randomString[rand.Intn(len(randomString))]
+    }
+    return string(extraTxData)
 }
 
 func initialize() {
@@ -206,6 +215,7 @@ var (
 
 type config struct {
         Profile  string `json:"profile"`
+        MSPID    string `json:"mspid"`
         Channel  string `json:"channel"`
         Seek     int `json:"seek"`
         TLS      bool `json:"tls"`
@@ -218,14 +228,17 @@ type ordererdriveClient struct {
         signer  crypto.LocalSigner
         quiet   bool
 }
+
 type broadcastClient struct {
         client  ab.AtomicBroadcast_BroadcastClient
         chanID string
         signer crypto.LocalSigner
 }
+
 func newOrdererdriveClient(client ab.AtomicBroadcast_DeliverClient, chanID string, signer crypto.LocalSigner, quiet bool) *ordererdriveClient {
         return &ordererdriveClient{client: client, chanID: chanID, signer: signer, quiet: quiet}
 }
+
 func newBroadcastClient(client ab.AtomicBroadcast_BroadcastClient, chanID string, signer crypto.LocalSigner) *broadcastClient {
         return &broadcastClient{client: client, chanID: chanID, signer: signer}
 }
@@ -314,47 +327,52 @@ func (b *broadcastClient) getAck() error {
        return nil
 }
 
-func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txRecvCntrP *int64, blockRecvCntrP *int64, consumerConnP **grpc.ClientConn, seek int, quiet bool, tlsEnabled bool) {
+func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txRecvCntrP *int64, blockRecvCntrP *int64, consumerConnP **grpc.ClientConn, seek int, quiet bool, tlsEnabled bool, orgMSPID string) {
         myName := clientName("Consumer", ordererIndex, channelIndex)
         signer := localmsp.NewSigner()
-        for orgIndex := 0; orgIndex < len(genConf.Orderer.Organizations); orgIndex++ {
-                if strings.Contains(serverAddr, genConf.Orderer.Addresses[ordererIndex]) == true {
-                        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%s", ordStartPort))
-                        matches, _ := filepath.Glob(fmt.Sprintf("/var/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
-                        err := mspmgmt.LoadLocalMsp(fmt.Sprintf("%s/msp", matches[0]), ordConf.General.BCCSP, genConf.Orderer.Organizations[orgIndex].ID)
-                        if err != nil { // Handle errors reading the config file
-                                fmt.Println("Failed to initialize local MSP:", err)
-                                //os.Exit(0)
-                        }
-                        if seek < -2 {
-                                fmt.Println("Wrong seek value.")
-                        }
-                        var conn *grpc.ClientConn
-                        if tlsEnabled {
-                                creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
-                                conn, err = grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
-                                if err != nil {
-                                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
-                                }
-                        } else {
-                                conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
-                                if err != nil {
-                                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
-                                }
-                        }
-                        (*consumerConnP) = conn
-                        client, err := ab.NewAtomicBroadcastClient(*consumerConnP).Deliver(context.TODO())
-                        if err != nil {
-                                panic(fmt.Sprintf("Error on client %s invoking Deliver() on grpc connection to %s, err: %v", myName, serverAddr, err))
-                        }
-                        s := newOrdererdriveClient(client, chanID, signer, quiet)
-                        if err = s.seekOldest(); err != nil {
-                                panic(fmt.Sprintf("ERROR starting client %s srvr=%s chID=%s; err: %v", myName, serverAddr, chanID, err))
-                        }
-                        if debugflag1 { logger(fmt.Sprintf("Started client %s to recv delivered batches srvr=%s chID=%s", myName, serverAddr, chanID)) }
-                        s.readUntilClose(ordererIndex, channelIndex, txRecvCntrP, blockRecvCntrP)
-               }
+        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%s", ordStartPort))
+        matches, _ := filepath.Glob(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
+        ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
+        if ordererIndex == 0 { // Loading the msp's of orderer0 for every channel is enough to create the deliver client
+                err := mspmgmt.LoadLocalMsp(fmt.Sprintf("%s/msp", matches[0]), ordConf.General.BCCSP, orgMSPID)
+                if err != nil { // Handle errors reading the config file
+                        fmt.Printf("\nFailed to initialize local MSP for %s on chan %s: %s\n", myName, chanID, err)
+                        os.Exit(0)
+                }
         }
+        if seek < -2 {
+                fmt.Println("Wrong seek value.")
+        }
+        var conn *grpc.ClientConn
+        var err error
+        comm.SetMaxRecvMsgSize(1000 * 1024 * 1024)
+        if tlsEnabled {
+                var dialOpts []grpc.DialOption
+                // set max send/recv msg sizes
+                dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(comm.MaxRecvMsgSize())))
+                creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
+                dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
+                conn, err = grpc.Dial(serverAddr, dialOpts...)
+                if err != nil {
+                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+                }
+        } else {
+                conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
+                if err != nil {
+                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+                }
+        }
+        (*consumerConnP) = conn
+        client, err := ab.NewAtomicBroadcastClient(*consumerConnP).Deliver(context.TODO())
+        if err != nil {
+                panic(fmt.Sprintf("Error on client %s invoking Deliver() on grpc connection to %s, err: %v", myName, serverAddr, err))
+        }
+        s := newOrdererdriveClient(client, chanID, signer, quiet)
+        if err = s.seekOldest(); err != nil {
+                panic(fmt.Sprintf("ERROR starting client %s srvr=%s chID=%s; err: %v", myName, serverAddr, chanID, err))
+        }
+        if debugflag1 { logger(fmt.Sprintf("Started client %s to recv delivered batches srvr=%s chID=%s", myName, serverAddr, chanID)) }
+        s.readUntilClose(ordererIndex, channelIndex, txRecvCntrP, blockRecvCntrP)
 }
 
 func startConsumerMaster(serverAddr string, chanIdsP *[]string, ordererIndex int, txRecvCntrsP *[]int64, blockRecvCntrsP *[]int64, consumerConnP **grpc.ClientConn) {
@@ -529,110 +547,107 @@ func moreDeliveries(txSentP *[][]int64, totalNumTxSentP *int64, txSentFailuresP 
         return moreReceived
 }
 
-func startProducer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txReq int64, txSentCntrP *int64, txSentFailureCntrP *int64, tlsEnabled bool) {
+func startProducer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txReq int64, txSentCntrP *int64, txSentFailureCntrP *int64, tlsEnabled bool, payload int) {
         myName := clientName("Producer", ordererIndex, channelIndex)
         signer := localmsp.NewSigner()
-        for orgIndex := 0; orgIndex < len(genConf.Orderer.Organizations); orgIndex++ {
-                if strings.Contains(serverAddr, genConf.Orderer.Addresses[ordererIndex]) == true {
-                        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%s", ordStartPort))
-                        matches, _ := filepath.Glob(fmt.Sprintf("/var/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
-                        var conn *grpc.ClientConn
-                        var err error
-                        if tlsEnabled {
-                                creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
-                                conn, err = grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
-                                if err != nil {
-                                          panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
-                                }
-                        } else {
-                                conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
-                                if err != nil {
-                                          panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
-                                }
-                        }
-                        defer func() {
-                                _ = conn.Close()
-                        }()
-                        if err != nil {
-                                panic(fmt.Sprintf("Error creating connection for Producer for ord[%d] ch[%d], err: %v", ordererIndex, channelIndex, err))
-                        }
-                        client, err := ab.NewAtomicBroadcastClient(conn).Broadcast(context.TODO())
-                        if err != nil {
-                                panic(fmt.Sprintf("Error creating Producer for ord[%d] ch[%d], err: %v", ordererIndex, channelIndex, err))
-                        }
-
-                        time.Sleep(3 * time.Second)
-                        if debugflag1 { logger(fmt.Sprintf("Starting Producer to send %d TXs to ord[%d] ch[%d] srvr=%s chID=%s, %v", txReq, ordererIndex, channelIndex, serverAddr, chanID, time.Now())) }
-                        b := newBroadcastClient(client, chanID, signer)
-                        time.Sleep(2 * time.Second)
-
-                        // print a log after sending mulitples of this percentage of requested TX: 25,50,75%...
-                        // only on one producer, and assume all producers are generating at same rate.
-                        // e.g. when txReq = 50, to print log every 10. set progressPercentage = 20
-                        printProgressLogs := false
-                        var progressPercentage int64 = 25    // set this between 1 and 99
-                        printLogCnt := txReq * progressPercentage / 100
-                        if printLogCnt > 0 {
-                                if debugflag1 {
-                                          printProgressLogs = true     // to test logs for all producers
-                                } else {
-                                          if txReq > 10000 && printLogCnt > 0 && ordererIndex==0 && channelIndex==0 {
-                                                    printProgressLogs = true
-                                          }
-                                }
-                        }
-                        var mult int64
-
-                        // For tests that stop all kafka-brokers, and any others that temporarily interrupt traffic,
-                        // let's slow doWN THE TRansaction broadcasts to one-per-second for awhile, before letting
-                        // it spin quickly to get NACKs for all remaining transactions to be sent.
-                        // Define the number of seconds for allowin continual failures, to wait around for recovery.
-                        delayLimit := 120
-                        errDelay := 0
-
-                        prevMsgAck := false
-                        for i := int64(0); i < txReq ; i++ {
-                                b.broadcast([]byte(fmt.Sprintf("Testing %s TX=%d %v %s", myName, i, time.Now(), extraTxData)))
-                                err = b.getAck()
-                                if err == nil {
-                                          (*txSentCntrP)++
-                                          if !prevMsgAck { logger(fmt.Sprintf("%s successfully broadcast TX %d (ACK=%d NACK=%d), %v", myName, i, *txSentCntrP, *txSentFailureCntrP, time.Now())) }
-                                          prevMsgAck = true
-                                          if printProgressLogs && ((*txSentCntrP)%printLogCnt == 0) {
-                                                    mult++
-                                                    if debugflag1 {
-                                                                logger(fmt.Sprintf("%s sent %4d /%4d = ~ %3d%%, %v", myName, (*txSentCntrP), txReq, progressPercentage*mult, time.Now()))
-                                                    } else {
-                                                                logger(fmt.Sprintf("Sent ~ %3d%%, %v", progressPercentage*mult, time.Now()))
-                                                    }
-                                          }
-                                } else {
-                                          (*txSentFailureCntrP)++
-                                          if prevMsgAck || (*txSentFailureCntrP)==1 { logger(fmt.Sprintf("%s failed to broadcast TX %d (ACK=%d NACK=%d), %v, err: %v", myName, i, *txSentCntrP, *txSentFailureCntrP, time.Now(), err)) }
-                                          prevMsgAck = false
-                                          if errDelay < delayLimit {
-                                                    errDelay++
-                                                    time.Sleep(1 * time.Second)
-                                                    if errDelay == delayLimit {
-                                                                logger(fmt.Sprintf("%s broadcast error delay period (%d) ended (ACK=%d NACK=%d), %v", myName, errDelay, *txSentCntrP, *txSentFailureCntrP, time.Now()))
-                                                    }
-                                          }
-                                }
-                      }
-                      if err != nil {
-                                logger(fmt.Sprintf("Broadcast error on last TX %d of %s: %v", txReq, myName, err))
-                      }
-                      if txReq == *txSentCntrP {
-                                if debugflag1 { logger(fmt.Sprintf("%s finished sending broadcast msgs: ACKs  %9d  (100%%) , %v", myName, *txSentCntrP, time.Now())) }
-                      } else {
-                                logger(fmt.Sprintf("%s finished sending broadcast msgs: ACKs  %9d  NACK %d (errDelayCntr %d)  Other %d , %v", myName, *txSentCntrP, *txSentFailureCntrP, errDelay, txReq - *txSentFailureCntrP - *txSentCntrP, time.Now()))
-                      }
-                      producersWG.Done()
+        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%s", ordStartPort))
+        matches, _ := filepath.Glob(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
+        ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
+        var conn *grpc.ClientConn
+        var err error
+        if tlsEnabled {
+                creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
+                conn, err = grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
+                if err != nil {
+                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+                }
+        } else {
+                conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
+                if err != nil {
+                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
                 }
         }
+        defer func() {
+                _ = conn.Close()
+        }()
+        if err != nil {
+                panic(fmt.Sprintf("Error creating connection for Producer for ord[%d] ch[%d], err: %v", ordererIndex, channelIndex, err))
+        }
+        client, err := ab.NewAtomicBroadcastClient(conn).Broadcast(context.TODO())
+        if err != nil {
+                panic(fmt.Sprintf("Error creating Producer for ord[%d] ch[%d], err: %v", ordererIndex, channelIndex, err))
+        }
+
+        time.Sleep(3 * time.Second)
+        if debugflag1 { logger(fmt.Sprintf("Starting Producer to send %d TXs to ord[%d] ch[%d] srvr=%s chID=%s, %v", txReq, ordererIndex, channelIndex, serverAddr, chanID, time.Now())) }
+        b := newBroadcastClient(client, chanID, signer)
+        time.Sleep(2 * time.Second)
+        // print a log after sending mulitples of this percentage of requested TX: 25,50,75%...
+        // only on one producer, and assume all producers are generating at same rate.
+        // e.g. when txReq = 50, to print log every 10. set progressPercentage = 20
+        printProgressLogs := false
+        var progressPercentage int64 = 25    // set this between 1 and 99
+        printLogCnt := txReq * progressPercentage / 100
+        if printLogCnt > 0 {
+                if debugflag1 {
+                        printProgressLogs = true     // to test logs for all producers
+                } else {
+                        if txReq > 10000 && printLogCnt > 0 && ordererIndex==0 && channelIndex==0 {
+                                  printProgressLogs = true
+                        }
+                }
+        }
+        var mult int64
+
+        // For tests that stop all kafka-brokers, and any others that temporarily interrupt traffic,
+        // let's slow doWN THE TRansaction broadcasts to one-per-second for awhile, before letting
+        // it spin quickly to get NACKs for all remaining transactions to be sent.
+        // Define the number of seconds for allowin continual failures, to wait around for recovery.
+        delayLimit := 120
+        errDelay := 0
+
+        prevMsgAck := false
+        txData := extraDataSend(payload)   //create the extra payload
+        for i := int64(0); i < txReq ; i++ {
+                b.broadcast([]byte(fmt.Sprintf("Testing %s TX=%d %v %s", myName, i, time.Now(), txData)))
+                err = b.getAck()
+                if err == nil {
+                        (*txSentCntrP)++
+                        if !prevMsgAck { logger(fmt.Sprintf("%s successfully broadcast TX %d (ACK=%d NACK=%d), %v", myName, i, *txSentCntrP, *txSentFailureCntrP, time.Now())) }
+                        prevMsgAck = true
+                        if printProgressLogs && ((*txSentCntrP)%printLogCnt == 0) {
+                                mult++
+                                if debugflag1 {
+                                        logger(fmt.Sprintf("%s sent %4d /%4d = ~ %3d%%, %v", myName, (*txSentCntrP), txReq, progressPercentage*mult, time.Now()))
+                                } else {
+                                        logger(fmt.Sprintf("Sent ~ %3d%%, %v", progressPercentage*mult, time.Now()))
+                                }
+                        }
+                } else {
+                        (*txSentFailureCntrP)++
+                        if prevMsgAck || (*txSentFailureCntrP)==1 { logger(fmt.Sprintf("%s failed to broadcast TX %d (ACK=%d NACK=%d), %v, err: %v", myName, i, *txSentCntrP, *txSentFailureCntrP, time.Now(), err)) }
+                        prevMsgAck = false
+                        if errDelay < delayLimit {
+                                errDelay++
+                                time.Sleep(1 * time.Second)
+                                if errDelay == delayLimit {
+                                        logger(fmt.Sprintf("%s broadcast error delay period (%d) ended (ACK=%d NACK=%d), %v", myName, errDelay, *txSentCntrP, *txSentFailureCntrP, time.Now()))
+                                }
+                        }
+                }
+        }
+        if err != nil {
+                logger(fmt.Sprintf("Broadcast error on last TX %d of %s: %v", txReq, myName, err))
+        }
+        if txReq == *txSentCntrP {
+                if debugflag1 { logger(fmt.Sprintf("%s finished sending broadcast msgs: ACKs  %9d  (100%%) , %v", myName, *txSentCntrP, time.Now())) }
+        } else {
+                logger(fmt.Sprintf("%s finished sending broadcast msgs: ACKs  %9d  NACK %d (errDelayCntr %d)  Other %d , %v", myName, *txSentCntrP, *txSentFailureCntrP, errDelay, txReq - *txSentFailureCntrP - *txSentCntrP, time.Now()))
+        }
+        producersWG.Done()
 }
 
-func startProducerMaster(serverAddr string, chanIdsP *[]string, ordererIndex int, txReqP *[]int64, txSentCntrP *[]int64, txSentFailureCntrP *[]int64) {
+func startProducerMaster(serverAddr string, chanIdsP *[]string, ordererIndex int, txReqP *[]int64, txSentCntrP *[]int64, txSentFailureCntrP *[]int64, payload int) {
         // This function creates a grpc connection to one orderer,
         // creates multiple clients (one per numChannels) for that one orderer,
         // and sends a TX to all channels repeatedly until no more to send.
@@ -666,12 +681,13 @@ func startProducerMaster(serverAddr string, chanIdsP *[]string, ordererIndex int
         }
 
         firstErr := false
+        txData := extraDataSend(payload)
         for i := int64(0); i < txMax; i++ {
                 // send one TX to every broadcast client (one TX on each chnl)
                 for c := 0; c < numChannels; c++ {
                         if i < (*txReqP)[c] {
                                 // more TXs to send on this channel
-                                bc[c].broadcast([]byte(fmt.Sprintf("Testing %s %v %s", myName, time.Now(), extraTxData)))
+                                bc[c].broadcast([]byte(fmt.Sprintf("Testing %s %v %s", myName, time.Now(), txData)))
                                 err = bc[c].getAck()
                                 if err == nil {
                                         (*txSentCntrP)[c]++
@@ -841,16 +857,16 @@ func reportTotals(testname string, numTxToSendTotal int64, countToSend [][]int64
                 expectedBlocksOnChan[c] = chanSentTotal / batchSize
                 if chanSentTotal % batchSize > 0 { expectedBlocksOnChan[c]++ }
                 for ord := 0; ord < numOrdsToWatch; ord++ {
-                        if expectedBlocksOnChan[c] != blockRecv[ord][c] - 1 { // ignore genesis block
+                        recvBlocks := blockRecv[ord][c] - 1 // ignore genesis block
+                        if expectedBlocksOnChan[c] > recvBlocks {
                                 successResult = false
                                 passFailStr = "FAILED"
-                                logger(fmt.Sprintf("Error: Unexpected Block count %d (expected %d) on ordIndx=%d channelIDs[%d]=%s, chanSentTxTotal=%d BatchSize=%d", blockRecv[ord][c]-1, expectedBlocksOnChan[c], ord, c, (*channelIDs)[c], chanSentTotal, batchSize))
+                                logger(fmt.Sprintf("Error: Unexpected Block count %d (expected %d) on ordIndx=%d channelIDs[%d]=%s, chanSentTxTotal=%d BatchSize=%d", recvBlocks, expectedBlocksOnChan[c], ord, c, (*channelIDs)[c], chanSentTotal, batchSize))
                         } else {
-                                if debugflag1 { logger(fmt.Sprintf("GOOD block count %d on ordIndx=%d channelIDs[%d]=%s chanSentTxTotal=%d BatchSize=%d", expectedBlocksOnChan[c], ord, c, (*channelIDs)[c], chanSentTotal, batchSize)) }
+                                if debugflag1 { logger(fmt.Sprintf("GOOD block count received %d (expected %d) on ordIndx=%d channelIDs[%d]=%s chanSentTxTotal=%d BatchSize=%d", recvBlocks, expectedBlocksOnChan[c], ord, c, (*channelIDs)[c], chanSentTotal, batchSize)) }
                         }
                 }
         }
-
 
         // TODO - Verify the contents of the last block of transactions.
         //        Since we do not know exactly what should be in the block,
@@ -900,7 +916,7 @@ func reportTotals(testname string, numTxToSendTotal int64, countToSend [][]int64
 // Function:    ote - the Orderer Test Engine
 // Outputs:     print report to stdout with lots of counters
 // Returns:     passed bool, resultSummary string
-func ote( testname string, txs int64, chans int, orderers int, ordType string, kbs int, oteSpy int, pPerCh int ) (passed bool, resultSummary string) {
+func ote( testname string, txs int64, chans int, orderers int, ordType string, kbs int, oteSpy int, pPerCh int, payload int) (passed bool, resultSummary string) {
 
         initialize() // multiple go tests could be run; we must call initialize() each time
 
@@ -908,7 +924,7 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
         resultSummary = testname + " test not completed: INPUT ERROR: "
         defer closeLogger()
 
-        logger(fmt.Sprintf("==========\n========== OTE testname=%s TX=%d Channels=%d Orderers=%d ordererType=%s kafka-brokers=%d oteSpy=%s producersPerCh=%d", testname, txs, chans, orderers, ordType, kbs, spyStatus(oteSpy), pPerCh))
+        logger(fmt.Sprintf("==========\n========== OTE testname=%s TX=%d Channels=%d Orderers=%d ordererType=%s kafka-brokers=%d oteSpy=%s producersPerCh=%d payloadSizeKB=%d", testname, txs, chans, orderers, ordType, kbs, spyStatus(oteSpy), pPerCh, payload))
 
         raw, err := ioutil.ReadFile("./config.json")
         if err != nil {
@@ -921,6 +937,7 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
         seek := p.Seek
         quiet := p.Quiet
         tlsEnabled := p.TLS
+        orgMSPID := p.MSPID
 
         // Establish the default configuration from yaml files - and this also
         // picks up any variables overridden on command line or in environment
@@ -1149,7 +1166,7 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
         ////////////////////////////////////////////////////////////////////////
 
         //launchNetwork(launchAppendFlags)
-        time.Sleep(12 * time.Second)
+        //time.Sleep(12 * time.Second)
 
         ////////////////////////////////////////////////////////////////////////
         // Create the 1D slice of channel IDs, and create names for them
@@ -1172,8 +1189,6 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
                 // CONFIGTX_ORDERER_ADDRESSES is the list of orderers. use the first one. Default is [127.0.0.1:7050]
                 for c:=0; c < numChannels; c++ {
                           channelIDs[c] = fmt.Sprintf("%s%d", p.Channel, c+1)
-                          cmd := fmt.Sprintf("peer channel create -o orderer0.example.com:7050 -c %s -f /var/hyperledger/fabric/artifacts/ordererOrganizations/%s.tx --tls --cafile /var/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem",  channelIDs[c],  channelIDs[c])
-                          executeCmd(cmd)
                 }
         }
 
@@ -1215,14 +1230,15 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
                         // go-thread for each channel on each orderer.
                         for c := 0 ; c < numChannels ; c++ {
                                 //consumerIdx := ord*numOrdsToWatch + c
-                                go startConsumer(serverAddr, channelIDs[c], ord, c, &(txRecv[ord][c]), &(blockRecv[ord][c]), &(consumerConns[ord][c]), seek, quiet, tlsEnabled)
+                                go startConsumer(serverAddr, channelIDs[c], ord, c, &(txRecv[ord][c]), &(blockRecv[ord][c]), &(consumerConns[ord][c]), seek, quiet, tlsEnabled, orgMSPID)
+                                time.Sleep(1 * time.Second)
                         }
                 }
 
         }
 
         logger("Finished creating all CONSUMERS clients")
-        time.Sleep(5 * time.Second)
+        time.Sleep(2 * time.Second)
         defer cleanNetwork(&consumerConns)
 
         ////////////////////////////////////////////////////////////////////////
@@ -1244,12 +1260,12 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
                 }
                 if optimizeClientsMode {
                         // create one Producer for all channels on this orderer
-                        go startProducerMaster(serverAddr, &channelIDs, ord, &(countToSend[ord]), &(txSent[ord]), &(txSentFailures[ord]))
+                        go startProducerMaster(serverAddr, &channelIDs, ord, &(countToSend[ord]), &(txSent[ord]), &(txSentFailures[ord]), payload)
                 } else {
                         // Normal mode: create a unique consumer client
                         // go thread for each channel
                         for c := 0 ; c < numChannels ; c++ {
-                                go startProducer(serverAddr, channelIDs[c], ord, c, countToSend[ord][c], &(txSent[ord][c]), &(txSentFailures[ord][c]), tlsEnabled)
+                                go startProducer(serverAddr, channelIDs[c], ord, c, countToSend[ord][c], &(txSent[ord][c]), &(txSentFailures[ord][c]), tlsEnabled, payload)
                         }
                 }
         }
@@ -1317,6 +1333,7 @@ func main() {
         kbs      := numKBrokers
 
         pPerCh := producersPerCh
+        payload := payloadSize
         // TODO lPerCh := listenersPerCh
 
         // Read env vars
@@ -1346,5 +1363,9 @@ func main() {
         if envvar != "" { pPerCh, _ = strconv.Atoi(envvar); testcmd += " OTE_PRODUCERS_PER_CHANNEL="+envvar }
         if debugflagAPI { logger(fmt.Sprintf("%-50s %s=%d", "OTE_PRODUCERS_PER_CHANNEL="+envvar, "producersPerCh", pPerCh)) }
 
-        _, _ = ote( "<commandline>"+testcmd+" ote", txs, chans, orderers, ordType, kbs, -1, pPerCh)
+        envvar = os.Getenv("OTE_PAYLOAD_SIZE")
+        if envvar != "" { payload, _ = strconv.Atoi(envvar); testcmd += " OTE_PAYLOAD_SIZE="+envvar }
+        if debugflagAPI { logger(fmt.Sprintf("%-50s %s=%d", "OTE_PAYLOAD_SIZE="+envvar, "payload", payload)) }
+
+        _, _ = ote( "<commandline>"+testcmd+" ote", txs, chans, orderers, ordType, kbs, -1, pPerCh, payload)
 }

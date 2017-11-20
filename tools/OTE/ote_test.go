@@ -79,7 +79,7 @@ func pauseAndUnpauseAllTargetOneAtATime(target string, num int) {
 // simplest testcase for Solo
 func Test_11tx_1ch_1ord_Solo_Basic_CI(t *testing.T) {
         fmt.Println("\nBasic Solo test: Send 11 TX on 1 channel to 1 Solo orderer-type")
-        passResult, finalResultSummaryString := ote("Test_11tx_1ch_1ord_Solo", 11, 1, 1, "solo", 0, spyOff, 1 )
+        passResult, finalResultSummaryString := ote("Test_11tx_1ch_1ord_Solo", 11, 1, 1, "solo", 0, spyOff, 1, 0 )
         t.Log(finalResultSummaryString)
         if !passResult { t.Fail() }
 }
@@ -87,7 +87,7 @@ func Test_11tx_1ch_1ord_Solo_Basic_CI(t *testing.T) {
 // simplest testcase for Kafka
 func Test_11tx_1ch_1ord_kafka_3kb_Basic_CI(t *testing.T) {
         fmt.Println("\nBasic Kafka test: Send 11 TX on 1 channel to 1 Kafka orderer-type with 3 Kafka-Brokers and ZooKeeper")
-        passResult, finalResultSummaryString := ote("Test_11tx_1ch_1ord_kafka_3kb", 11, 1, 1, "kafka", 3, spyOff, 1 )
+        passResult, finalResultSummaryString := ote("Test_11tx_1ch_1ord_kafka_3kb", 11, 1, 1, "kafka", 3, spyOff, 1, 0 )
         t.Log(finalResultSummaryString)
         if !passResult { t.Fail() }
 }
@@ -96,28 +96,27 @@ func Test_11tx_1ch_1ord_kafka_3kb_Basic_CI(t *testing.T) {
 // 76 - moved below
 
 // 77, 78 = rerun with batchsize = 500 // CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT=500
-func Test_ORD77_ORD78_10000TX_1ch_1ord_solo_batchSz(t *testing.T) {
-        //fmt.Println("Send 10,000 TX on 1 channel to 1 Solo orderer")
-        passResult, finalResultSummaryString := ote("ORD-77_ORD-78", 150, 1, 1, "solo", 0, spyOff, 1 )
+func Test_ORD77_ORD78_1ch_1ord_solo_batchSz(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-77_ORD-78", 10000, 1, 1, "solo", 0, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 79, 80 = rerun with batchsize = 500
-func Test_ORD79_ORD80_10000TX_1ch_1ord_kafka_1kbs_batchSz(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-79,ORD-80", 100, 1, 3, "kafka", 4, spyOn, 1 )
+func Test_ORD79_ORD80_1ch_1ord_kafka_1kbs_batchSz(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-79,ORD-80", 10000, 1, 3, "kafka", 4, spyOn, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 81, 82 = rerun with batchsize = 500
 // this one is a first good attempt at multiple channels
-func Test_multchans_ORD81_ORD82_10000TX_3ch_1ord_kafka_3kbs_batchSz_CI(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-81,ORD-82", 10000, 3, 3, "kafka", 4, spyOff, 1 )
+func Test_multchans_ORD81_ORD82_3ch_1ord_kafka_3kbs_batchSz_CI(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-81,ORD-82", 10000, 3, 3, "kafka", 4, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // this one is not in the testplan, but is a first good attempt at multiple orderers
-func Test_multords_10000TX_1ch_3ord_kafka_3kbs_batchSz_CI(t *testing.T) {
-        passResult, finalResultSummaryString := ote("multords", 100, 1, 3, "kafka", 3, spyOff, 1 )
+func Test_multords_1ch_3ord_kafka_3kbs_batchSz_CI(t *testing.T) {
+        passResult, finalResultSummaryString := ote("multords", 100, 1, 3, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
@@ -131,26 +130,26 @@ func Test_multords_10000TX_1ch_3ord_kafka_3kbs_batchSz_CI(t *testing.T) {
 
 // 83, 84 = rerun with batchsize = 500
 // this one is a first good attempt at multiple channels AND multiple orderers
-func Test_ORD83_ORD84_10000TX_3ch_3ord_kafka_3kbs_batchSz_CI(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-83,ORD-84", 10000, 3, 3, "kafka", 3, spyOff, 1 )
+func Test_ORD83_ORD84_3ch_3ord_kafka_3kbs_batchSz_CI(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-83,ORD-84", 10000, 3, 3, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 85
-func Test_ORD85_100000TX_1ch_3ord_kafka_3kbs_spy(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-85", 100000, 1, 3, "kafka", 4, spyOn, 1 )
+func Test_ORD85_1ch_3ord_kafka_3kbs_spy(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-85", 100000, 1, 3, "kafka", 4, spyOn, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 86
-func Test_ORD86_1000000TX_3ch_1ord_kafka_3kbs_spy(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-86", 100000, 3, 1, "kafka", 4, spyOff, 1 )
+func Test_ORD86_3ch_1ord_kafka_3kbs_spy(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-86", 100000, 3, 1, "kafka", 4, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 87
-func Test_ORD87_1000000TX_3ch_3ord_kafka_3kbs_spy(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-87", 100000, 3, 3, "kafka", 3, spyOff, 1 )
+func Test_ORD87_3ch_3ord_kafka_3kbs_spy(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-87", 100000, 3, 3, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
@@ -158,59 +157,59 @@ func Test_ORD87_1000000TX_3ch_3ord_kafka_3kbs_spy(t *testing.T) {
 // The "multiple producers" functionality option is not yet supported, so skip these tests.
 //
 //  // 88
-//  func Test_ORD88_1000000TX_1ch_1ord_kafka_3kbs_spy_3ppc(t *testing.T) {
+//  func Test_ORD88_1ch_1ord_kafka_3kbs_spy_3ppc(t *testing.T) {
 //          passResult, finalResultSummaryString := ote("ORD-88", 1000000, 1, 1, "kafka", 3, spyOn, 3 )
 //          if !passResult { t.Error(finalResultSummaryString) }
 //  }
 //
 //  // 89
-//  func Test_ORD89_1000000TX_3ch_3ord_kafka_3kbs_spy_3ppc(t *testing.T) {
+//  func Test_ORD89_3ch_3ord_kafka_3kbs_spy_3ppc(t *testing.T) {
 //          passResult, finalResultSummaryString := ote("ORD-89", 1000000, 3, 3, "kafka", 3, spyOn, 3 )
 //          if !passResult { t.Error(finalResultSummaryString) }
 //  }
 ////////////////////////////////////////////////////////////////////////////////
 
 // 90
-func Test_ORD90_1000000TX_100ch_1ord_kafka_3kbs_spy(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-90", 100000, 100, 1, "kafka", 4, spyOn, 1 )
+func Test_ORD90_100ch_1ord_kafka_3kbs_spy(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-90", 100000, 100, 1, "kafka", 4, spyOn, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 91
-func Test_ORD91_1000000TX_100ch_3ord_kafka_3kbs_spy(t *testing.T) {
-        passResult, finalResultSummaryString := ote("ORD-91", 100000, 100, 3, "kafka", 4, spyOff, 1 )
+func Test_ORD91_100ch_3ord_kafka_3kbs_spy(t *testing.T) {
+        passResult, finalResultSummaryString := ote("ORD-91", 100000, 100, 3, "kafka", 4, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 76
-func Test_ORD76_40000TX_1ch_1ord_kafka_3kbs(t *testing.T) {
+func Test_ORD76_1ch_1ord_kafka_3kbs(t *testing.T) {
         go stopAndStart("kafka0")
-        passResult, finalResultSummaryString := ote("ORD-76", 40000, 1, 1, "kafka", 3, spyOff, 1 )
+        passResult, finalResultSummaryString := ote("ORD-76", 40000, 1, 1, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 // 92 and 93 - orderer tests, moved below
 
 //94 - stopAndStartAll KafkaBrokers OneAtATime
-func Test_ORD94_500000TX_1ch_3ord_kafka_3kbs(t *testing.T) {
+func Test_ORD94_1ch_3ord_kafka_3kbs(t *testing.T) {
         go stopAndStartAllTargetOneAtATime("kafka", 4)
         spyOnOrdererAfterSecs(1, 450)
-        passResult, finalResultSummaryString := ote("ORD-94", 350000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-94", 350000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 //95 - pauseAndUnpauseAll KafkaBrokers OneAtATime
-func Test_ORD95_500000TX_1ch_3ord_kafka_4kbs(t *testing.T) {
+func Test_ORD95_1ch_3ord_kafka_4kbs(t *testing.T) {
         go pauseAndUnpauseAllTargetOneAtATime("kafka", 4)
         spyOnOrdererAfterSecs(1, 500)
-        passResult, finalResultSummaryString := ote("ORD-95", 500000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-95", 500000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 //96 - stopping K-1 KBs
-func Test_ORD96_100000TX_1ch_3ord_kafka_3kbs(t *testing.T) {
+func Test_ORD96_1ch_3ord_kafka_3kbs(t *testing.T) {
         go kafka3kbRestart2kbDelay("stop")
-        passResult, finalResultSummaryString := ote("ORD-96", 50000, 1, 2, "kafka", 3, spyOff, 1 )
+        passResult, finalResultSummaryString := ote("ORD-96", 50000, 1, 2, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 func kafka3kbRestart2kbDelay(pauseOrStop string) {
@@ -226,11 +225,11 @@ func kafka3kbRestart2kbDelay(pauseOrStop string) {
 }
 
 //97 - stopping all the kafka brokers at once
-func Test_ORD97_100000TX_1ch_3ord_kafka_3kbs(t *testing.T) {
+func Test_ORD97_1ch_3ord_kafka_3kbs(t *testing.T) {
         // Note: Sending 20K msgs on one channel, split among 3 orderers, takes about 55 secs on x86 laptop.
         go kafka3kbRestart3kb("stop")
         spyOnOrdererAfterSecs(1, 300)
-        passResult, finalResultSummaryString := ote("ORD-97", 500000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-97", 500000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 func kafka3kbRestart3kb(pauseOrStop string) {
@@ -259,18 +258,18 @@ func kafka3kbRestart3kb(pauseOrStop string) {
 }
 
 //98 - pausing K-1 KBs
-func Test_ORD98_50000TX_1ch_3ord_kafka_4kbs(t *testing.T) {
+func Test_ORD98_1ch_3ord_kafka_4kbs(t *testing.T) {
         go kafka3kbRestart2kbDelay("pause")
         //spyOnOrdererAfterSecs(1, 140)
-        passResult, finalResultSummaryString := ote("ORD-98", 50000, 1, 3, "kafka", 4, spyOff, 1 )
+        passResult, finalResultSummaryString := ote("ORD-98", 50000, 1, 3, "kafka", 4, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 //99 pausing all the kafka brokers at once
-func Test_ORD99_50000TX_1ch_3ord_kafka_4kbs(t *testing.T) {
+func Test_ORD99_1ch_3ord_kafka_4kbs(t *testing.T) {
         go kafka3kbRestart3kb("pause")
         spyOnOrdererAfterSecs(1, 160)
-        passResult, finalResultSummaryString := ote("ORD-99", 50000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-99", 50000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
@@ -280,38 +279,176 @@ func Test_ORD99_50000TX_1ch_3ord_kafka_4kbs(t *testing.T) {
 // orderer will be lower. So the OTE testcase will fail - BUT
 // we could manually verify the ACK'd TXs match the delivered.
 
-func Test_ORD92_50000TX_1ch_3ord_kafka_3kbs(t *testing.T) {
+func Test_ORD92_1ch_3ord_kafka_3kbs(t *testing.T) {
         go stopAndStart("orderer1.example.com") // sleep 40 && docker stop orderer1 && sleep 30 && docker start orderer1
         spyOnOrdererAfterSecs(1, 160)  // returns immediately after starting a go thread which waits (20=launchDelaySecs + 120) seconds and then starts MasterSpy on orderer1
-        passResult, finalResultSummaryString := ote("ORD-92", 50000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-92", 50000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 //93 pause an orderer
-func Test_ORD93_50000TX_1ch_3ord_kafka_3kbs(t *testing.T) {
+func Test_ORD93_1ch_3ord_kafka_3kbs(t *testing.T) {
         go pauseAndUnpause("orderer1.example.com")
         spyOnOrdererAfterSecs(1, 160)  // returns immediately after starting a go thread which waits (20=launchDelaySecs + 120) seconds and then starts MasterSpy on orderer1
-        passResult, finalResultSummaryString := ote("ORD-93", 50000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-93", 50000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 //104 Pausing all the orderers
-func Test_ORD104_50000TX_1ch_3ord_kafka_3kbs(t *testing.T) {
+func Test_ORD104_1ch_3ord_kafka_3kbs(t *testing.T) {
         go pauseAndUnpauseAllTargetOneAtATime("orderer", 3)
         spyOnOrdererAfterSecs(1, 400)  // returns immediately after starting a go thread which waits (20=launchDelaySecs + 120) seconds and then starts MasterSpy on orderer1
-        passResult, finalResultSummaryString := ote("ORD-104", 250000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-104", 250000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
 //95 - pauseAndUnpauseAll KafkaBrokers OneAtATime
-func Test_ORD105_500000TX_1ch_3ord_kafka_4kbs(t *testing.T) {
+func Test_ORD105_1ch_3ord_kafka_4kbs(t *testing.T) {
         go pauseAndUnpauseAllTargetOneAtATime("kafka", 4)
         spyOnOrdererAfterSecs(1, 650)
-        passResult, finalResultSummaryString := ote("ORD-105", 500000, 1, 3, "kafka", 4, spyDefer, 1 )
+        passResult, finalResultSummaryString := ote("ORD-105", 500000, 1, 3, "kafka", 4, spyDefer, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-6996 - send 30000 txns to solo orderer with default batchsize and default payload
-func Test_FAB6996_30000TX_1ch_1ord_solo(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-6996", 30000, 1, 1, "solo", 0, spyOff, 1 )
+//FAB-6996 - send txns to solo orderer with default batchsize and default payload
+func Test_FAB6996_1ch_1ord_solo(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-6996", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7070 - send txns to solo orderer with default batchsize and higher payload
+func Test_FAB7070_1ch_1ord_solo_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7070", 30000, 1, 1, "solo", 0, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7024 - send txns to solo orderer with higher batchsize and default payload
+func Test_FAB7024_1ch_1ord_solo_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7024", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7071 - send txns to solo orderer with higher batchsize and higher payload
+func Test_FAB7071_1ch_1ord_solo_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7071", 30000, 1, 1, "solo", 0, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7026 - send txns to solo orderer on 3 channels with default batchsize and default payload
+func Test_FAB7026_3ch_1ord_solo(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7026", 30000, 3, 1, "solo", 0, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7072 - send txns to solo orderer on 3 channels with default batchsize and higher payload
+func Test_FAB7072_3ch_1ord_solo_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7072", 30000, 3, 1, "solo", 0, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7027 - send txns to solo orderer on 3 channels with higher batchsize and default payload
+func Test_FAB7027_3ch_1ord_solo_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7027", 30000, 3, 1, "solo", 0, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7073 - send txns to solo orderer on 3 channels with higher batchsize and higher payload
+func Test_FAB7073_3ch_1ord_solo_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7073", 30000, 3, 1, "solo", 0, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7036 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7036_1ch_3ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7036", 30000, 1, 3, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7074 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7074_1ch_3ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7074", 15000, 1, 3, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7037 - send txns to 3 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7037_1ch_3ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7037", 30000, 1, 3, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7075 - send txns to 3 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7075_1ch_3ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7075", 15000, 1, 3, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7038 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7038_3ch_3ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7038", 30000, 3, 3, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7076 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7076_3ch_3ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7076", 15000, 3, 3, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7039 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7039_3ch_3ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7039", 30000, 3, 3, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7077 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7077_3ch_3ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7077", 15000, 3, 3, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7058 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7058_1ch_6ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7058", 30000, 1, 6, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7078 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7078_1ch_6ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7078", 15000, 1, 6, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7059 - send txns to 6 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7059_1ch_6ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7059", 30000, 1, 6, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7079 - send txns to 6 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7079_1ch_6ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7079", 15000, 1, 6, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7060 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7060_3ch_6ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7060", 30000, 3, 6, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7080 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7080_3ch_6ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7080", 15000, 3, 6, "kafka", 5, spyOff, 1, 10 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7061 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7061_3ch_6ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7061", 30000, 3, 6, "kafka", 5, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7081 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7081_3ch_6ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7081", 15000, 3, 6, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
