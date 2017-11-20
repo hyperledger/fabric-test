@@ -111,7 +111,7 @@ If planning to run your Fabric network locally, you'll need docker and a bit mor
         * `npm install`
             *  you should be able to safely ignore any warnings
         *  `gulp ca`
-        *  `npm install singly-linked-list --save`
+
 
 4. Install PTE:
     - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools`
@@ -442,6 +442,25 @@ The following chaincodes are tested and supported:
         info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:0 eventRegister] pte-exec:completed
         info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:1 eventRegister] pte-exec:completed
         info: [PTE 0 main]: [performance_main] pte-main:completed
+
+
+    When the transmode is `CONSTANT`, the latency metrics for `proposal`, `transaction` and `event` of each process are provided.  Where
+
+       * **proposal**: the time between the prosoal is sent to peers and the response is received.
+       * **transaction**: the time between the transaction is sent to orderer and response is received.
+       * **event**: the time between the event is registered, the transaction is sent to orderer, and the event is received.
+
+    The output of the latency metrics include average, minimum, and maximum of all transactions for that process.  The following is an example of the output with two processes, one targets org1 and one targets org2 with 1000 transactions each:
+
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:0 latency_output] peer latency stats: tx num= 1000, total time: 10240 ms, avg= 10.24 ms, min= 5 ms, max= 92 ms
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:0 latency_output] orderer latency stats: tx num= 1000, total time: 8735 ms, avg= 8.73 ms, min= 4 ms, max= 79 ms
+        info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org1:0 latency_output] event latency stats: tx num= 1000, total time: 837918 ms, avg= 837.92 ms, min= 307 ms, max= 2130 ms
+
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:0 latency_output] peer latency stats: tx num= 1000, total time: 9991 ms, avg= 9.99 ms, min= 5 ms, max= 111 ms
+        info: [PTE 0 main]: stdout: info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:0 latency_output] orderer latency stats: tx num= 1000, total time: 9128 ms, avg= 9.13 ms, min= 4 ms, max= 126 ms
+        info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:0 latency_output] event latency stats: tx num= 1000, total time: 828433 ms, avg= 828.43 ms, min= 284 ms, max= 2195 ms
+
+
 
 
 
