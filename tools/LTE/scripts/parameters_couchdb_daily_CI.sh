@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-OUTPUT_DIR_ROOT=".."
+OUTPUT_DIR_ROOT="$GOPATH/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults"
 export useCouchDB="yes"
 DataDir="/tmp/fabric/test/tools/LTE/data"
 NumChains=10
