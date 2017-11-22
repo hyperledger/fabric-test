@@ -1276,7 +1276,7 @@ function performance_main() {
                                 if ((tempDur <minInvokeDuration ) ||(minInvokeDuration ==0) ) {
                                     minInvokeDuration= tempDur;
                                 }
-                                var tempInvokeTps=parseInt(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
+                                var tempInvokeTps=parseFloat(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
                                 if (tempInvokeTps >0 ) {
                                     totalInvokeTps =totalInvokeTps+tempInvokeTps;
                                 }
@@ -1296,7 +1296,7 @@ function performance_main() {
                                 if ((tempDur <minMixedDuration ) ||(minMixedDuration ==0) ) {
                                     minMixedDuration= tempDur;
                                 }
-                                var tempMixedTps=parseInt(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
+                                var tempMixedTps=parseFloat(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
                                 if (tempMixedTps >0 ) {
                                     totalMixedTPS =totalMixedTPS+tempMixedTps;
                                 }
@@ -1315,7 +1315,7 @@ function performance_main() {
                                 if ((tempDur <minQueryDuration ) ||(minQueryDuration ==0) ) {
                                     minQueryDuration= tempDur;
                                 }
-                                var tempQueryTps=parseInt(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
+                                var tempQueryTps=parseFloat(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
                                 if (tempQueryTps >0 ) {
                                     totalQueryTps =totalQueryTps+tempQueryTps;
                                 }
