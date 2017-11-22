@@ -47,7 +47,6 @@ func TestMain(m *testing.M) {
 	if os.Getenv("useCouchDB") == "yes" {
 		viper.Set("ledger.state.stateDatabase", "CouchDB")
 	}
-
 	logger.Infof("Running experiment with configuration: %s\n", spew.Sdump(conf))
 	disableLogging()
 	os.Exit(m.Run())

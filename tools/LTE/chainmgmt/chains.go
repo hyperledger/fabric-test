@@ -47,7 +47,7 @@ type chainsMgr struct {
 }
 
 func newChainsMgr(mgrConf *ChainMgrConf, batchConf *BatchConf, initOp chainInitOp) *chainsMgr {
-	ledgermgmt.Initialize()
+	ledgermgmt.Initialize(nil)
 	return &chainsMgr{mgrConf, batchConf, initOp, make(map[ChainID]*Chain), &sync.WaitGroup{}}
 }
 
@@ -109,7 +109,7 @@ func (c *Chain) startBlockPollingAndCommit() {
 			if block == nil {
 				break
 			}
-			benchcommon.PanicOnError(c.PeerLedger.Commit(block))
+			benchcommon.PanicOnError(c.PeerLedger.CommitWithPvtData(&ledger.BlockAndPvtData{Block: block}))
 		}
 	}()
 }

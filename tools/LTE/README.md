@@ -21,13 +21,26 @@ considered to constitute a single test-run.
 
 ## How to Run The tests
 
+### Prerequisites
+
+LTE assumes that the Hyperledger Fabric repo is present in the `$GOPATH` and
+the necessary prerequisites for Hyperledger Fabric are met. For more details,
+please refer to the Fabric getting-started guide [here](http://hyperledger-fabric.readthedocs.io/en/release/getting_started.html).
+
+### Run Tests
+
 To run all the available tests, run:
 ```
-cd fabric/test/tools/LTE/scripts
+cd fabric-test/tools/LTE/scripts
 ./runbenchmarks.sh -f parameters_daily_CI.sh all
 ```
 where the file `parameters_daily_CI.sh` has all the necessary test parameters.
 
+To run a single test, named *varyNumChains* (test explained below), run:
+```
+cd fabric-test/tools/LTE/scripts
+./runbenchmarks.sh -f parameters_daily_CI.sh varyNumChains
+```
 
 You can run individual tests without running all the available tests by giving
 the name of the test as parameter, instead of `all`. You can get the available
@@ -38,9 +51,9 @@ test names by:
 
 ### What the Tests Do
 
-Each test reads test parameters from the provided parameter file and
-conducts several test-runs by varying one or two of the parameters. The
-parameters are:
+LTE copies itself in the Fabric repo before running the tests. Each test reads
+test parameters from the provided parameter file and conducts several test-runs
+by varying one or two of the parameters. The parameters are:
 * number of chains (ledger),
 * number of parallel transactions in each chain,
 * number of Key-value pairs,
