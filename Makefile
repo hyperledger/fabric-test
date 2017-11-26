@@ -79,4 +79,5 @@ daily-tests:
 .PHONY: clean
 clean:
 	-docker ps -aq | xargs -I '{}' docker rm -f '{}'
-	-docker images -q $(DOCKER_ORG)/fabric-* | xargs -I '{}' docker rmi -f '{}'
+	@make docker-clean -C $(FABRIC_DIR)
+	@make docker-clean -C $(CA_DIR)
