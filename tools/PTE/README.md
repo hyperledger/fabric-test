@@ -291,6 +291,26 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
             "fcn": "init",
             "args": []
         },
+    In above example, a default endorsement policy of "a signature by any member from any of the organizations corresponding to the array of member service providers" is used.
+    If the test need a specific endorsement policy when chaincode instantiate, the 'endorsement' section need be configured like below format:
+
+         "deploy": {
+             "chaincodePath": "github.com/hyperledger/fabric-sdk-node/test/fixtures/src/github.com/sample_cc",
+             "fcn": "init",
+             "endorsement": {
+                           "identities": [
+                            { "role": { "name": "member", "mspId": "Org1MSP" }},
+                            { "role": { "name": "member", "mspId": "Org2MSP" }}
+                               ],
+                           "policy": {
+                              "2-of": [{ "signed-by": 0 }, { "signed-by": 1 }]
+                             }
+                          },
+            "args": []
+        },
+
+    The policy syntax definition in :
+        [Polciy Specification](https://fabric-sdk-node.github.io/global.html#PolicySpec)
 
     * ### Install a chaincode
         To install a chaincode, set the transType to `install`:
