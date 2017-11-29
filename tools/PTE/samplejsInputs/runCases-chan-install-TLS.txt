@@ -1,0 +1,6 @@
+sdk=node samplejsInputs/samplejs-chan1-install1-TLS.json
+sdk=node samplejsInputs/samplejs-chan1-install2-TLS.json
+sdk=node samplejsInputs/samplejs-chan2-install3-TLS.json
+sdk=node samplejsInputs/samplejs-chan2-install4-TLS.json
+sdk=node samplejsInputs/samplejs-chan3-install5-TLS.json
+sdk=node samplejsInputs/samplejs-chan3-install6-TLS.json

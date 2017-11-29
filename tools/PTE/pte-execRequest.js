@@ -1374,7 +1374,7 @@ function execModeSimple() {
 function cleanup(array) {
 
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d cleanup] cleanup ...', Nid, channelName, org, pid);
-    for (key in array) {
+    for (var key in array) {
       delete array[key];
       console.log('[Nid:chan:org:id=%d:%s:%s:%d cleanup] array key[%s] deleted ', Nid, channelName, org, pid, key);
     }

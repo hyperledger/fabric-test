@@ -1,0 +1,6 @@
+sdk=node samplejsInputs/samplejs-chan1-join1-TLS.json
+sdk=node samplejsInputs/samplejs-chan1-join2-TLS.json
+sdk=node samplejsInputs/samplejs-chan2-join3-TLS.json
+sdk=node samplejsInputs/samplejs-chan2-join4-TLS.json
+sdk=node samplejsInputs/samplejs-chan3-join5-TLS.json
+sdk=node samplejsInputs/samplejs-chan3-join6-TLS.json

@@ -385,6 +385,14 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
+* **sample_js**: This is the Node JS chaincode of sample_cc. See directory `samplejsInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node`.  Set the deploy.chaincodePath to this directory in the user input file.
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+            "fcn": "init",
+            "language": "node",
+            "args": []
+        },
 
 ## Output
 * **Statistical Output Message**
@@ -535,6 +543,7 @@ The following chaincodes are tested and supported:
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/fabric-sdk-node/test/fixtures/src/github.com/sample_cc",
             "fcn": "init",
+            "language": "golang"
             "args": []
         },
         "invoke": {
@@ -639,6 +648,9 @@ where:
     * **payLoadMin**: minimum size in bytes of the payload. The payload is made of random string with various size between payLoadMin and payLoadMax.
     * **payLoadMax**: maximum size in bytes of the payload
 * **deploy**: deploy transaction contents
+    * language: the chaincode language including:
+        * **golang**: golang chaincode, this is the default language
+        * **node**: Node JS chaincode
 * **invoke** invoke transaction contents
     * **query**: query content
     * **move**: move content

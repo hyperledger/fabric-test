@@ -104,9 +104,24 @@ logger.info('nProcPerOrg ', nProcPerOrg);
 var tCurr;
 
 
+// default chaincode language: golang
+var language='golang';
 var testDeployArgs = [];
-for (i=0; i<uiContent.deploy.args.length; i++) {
-    testDeployArgs.push(uiContent.deploy.args[i]);
+var chaincodePath;
+function initDeploy() {
+    if ((typeof( uiContent.deploy.language ) !== 'undefined')) {
+        language=uiContent.deploy.language.toLowerCase();
+    }
+
+    for (i=0; i<uiContent.deploy.args.length; i++) {
+        testDeployArgs.push(uiContent.deploy.args[i]);
+    }
+
+    chaincodePath = uiContent.deploy.chaincodePath;
+    if ( language === 'node' ) {
+        chaincodePath = path.join(goPath, 'src', chaincodePath);
+    }
+    logger.info('chaincode language: %s, path: %s', language, chaincodePath)
 }
 
 var tx_id = null;
@@ -572,8 +587,9 @@ function chaincodeInstall(channel, client, org) {
     //sendInstallProposal
     var request_install = {
         targets: targets,
-        chaincodePath: uiContent.deploy.chaincodePath,
+        chaincodePath: chaincodePath,
         chaincodeId: chaincode_id,
+        chaincodeType: language,
         chaincodeVersion: chaincode_ver
     };
 
@@ -614,18 +630,19 @@ function chaincodeInstall(channel, client, org) {
         });
 }
 
-function buildChaincodeProposal(client, the_user, upgrade, transientMap) {
+function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
         let tx_id = client.newTransactionID();
 
         // send proposal to endorser
         var request = {
-                chaincodePath: uiContent.deploy.chaincodePath,
+                chaincodePath: chaincodePath,
                 chaincodeId: chaincode_id,
                 chaincodeVersion: chaincode_ver,
                 fcn: uiContent.deploy.fcn,
                 args: testDeployArgs,
                 chainId: channelName,
 
+                chaincodeType: type,
                 txId: tx_id
 
                 // use this to demonstrate the following policy:
@@ -683,12 +700,12 @@ function chaincodeInstantiate(channel, client, org) {
 
             var badTransientMap = { 'test1': 'transientValue' }; // have a different key than what the chaincode example_cc1.go expects in Init()
             var transientMap = { 'test': 'transientValue' };
-            var request = buildChaincodeProposal(client, the_user, upgrade, badTransientMap);
+            var request = buildChaincodeProposal(client, the_user, language, upgrade, badTransientMap);
             tx_id = request.txId;
 
             // sendInstantiateProposal
             //logger.info('request_instantiate: ', request_instantiate);
-            return channel.sendInstantiateProposal(request);
+            return channel.sendInstantiateProposal(request, 120000);
         },
         function(err) {
             logger.error('[chaincodeInstantiate:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);
@@ -1127,6 +1144,7 @@ function performance_main() {
         var client = new hfc();
 
         if ( transType.toUpperCase() == 'INSTALL' ) {
+            initDeploy();
             var username = ORGS[org].username;
             var secret = ORGS[org].secret;
             logger.info('[performance_main] Deploy: user= %s, secret= %s', username, secret);
@@ -1156,6 +1174,7 @@ function performance_main() {
                 evtDisconnect();
             });
         } else if ( transType.toUpperCase() == 'INSTANTIATE' ) {
+            initDeploy();
             var username = ORGS[org].username;
             var secret = ORGS[org].secret;
             logger.info('[performance_main] instantiate: user= %s, secret= %s', username, secret);
