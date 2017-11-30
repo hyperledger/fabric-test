@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-4036-2q/samplejs/samplejs-chan1-FAB-4036-2q1-TLS.json
