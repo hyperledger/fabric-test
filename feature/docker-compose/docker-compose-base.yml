@@ -74,6 +74,8 @@ services:
             - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
             # TLS settings
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
+            - CORE_PEER_TLS_CLIENTAUTHREQUIRED=${CORE_PEER_TLS_CLIENTAUTHREQUIRED}
+            - CORE_PEER_TLS_CLIENTROOTCAS_FILES=[/var/hyperledger/tls/ca.crt]
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
