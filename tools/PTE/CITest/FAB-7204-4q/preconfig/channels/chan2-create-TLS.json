@@ -1,11 +1,11 @@
 {
-    "channelID": "_ch1",
+    "channelID": "_ch2",
     "chaincodeID": "sample_js",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Simple",
-    "transType": "install",
+    "transType": "Channel",
     "invokeType": "Move",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
@@ -13,7 +13,8 @@
     "runDur": "600",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "testorgschannel1",
+        "name": "testorgschannel2",
+        "channelTX": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
         "action":  "create",
         "orgName": [
             "org1"
@@ -38,22 +39,6 @@
         "keyStart": "50000",
         "payLoadMin": "1024",
         "payLoadMax": "1024"
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
-        "fcn": "init",
-        "language": "node",
-        "args": []
-    },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
     },
     "SCFile": [
 		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}

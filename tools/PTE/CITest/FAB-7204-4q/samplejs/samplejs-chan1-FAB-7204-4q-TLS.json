@@ -4,19 +4,20 @@
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
-    "transMode": "Simple",
-    "transType": "install",
-    "invokeType": "Move",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Query",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
-    "nRequest": "1000",
-    "runDur": "600",
+    "nRequest": "100",
+    "runDur": "43200",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "testorgschannel1",
+        "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
-            "org1"
+            "org1",
+            "org2"
         ]
     },
     "burstOpt": {
@@ -26,24 +27,29 @@
         "burstDur1": "10000"
     },
     "mixOpt": {
-        "mixFreq": "3000"
+        "mixQuery": "FALSE",
+        "mixFreq": "1000"
     },
     "constantOpt": {
         "recHist": "HIST",
-        "constFreq": "1",
-        "devFreq": "0"
+        "constFreq": "1000",
+        "devFreq": "10"
+    },
+    "listOpt": {
+        "org1": ["peer1"],
+        "org2": ["peer1"]
+    },
+    "eventOpt": {
+        "listener": "Transaction",
+        "timeout": "240000"
     },
     "ccType": "ccchecker",
     "ccOpt": {
-        "keyStart": "50000",
+        "keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "0",
         "payLoadMin": "1024",
-        "payLoadMax": "1024"
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
-        "fcn": "init",
-        "language": "node",
-        "args": []
+        "payLoadMax": "2048"
     },
     "invoke": {
         "query": {

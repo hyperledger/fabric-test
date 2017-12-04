@@ -34,10 +34,6 @@
         "constFreq": "1",
         "devFreq": "0"
     },
-    "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
-    },
     "ccType": "ccchecker",
     "ccOpt": {
         "keyStart": "50000",

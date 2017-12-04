@@ -1,0 +1,2 @@
+driver=pte CITest/FAB-7204-4i/samplejs/runCases-FAB-7204-4i1-TLS.txt
+driver=pte CITest/FAB-7204-4i/samplejs/runCases-FAB-7204-4i2-TLS.txt

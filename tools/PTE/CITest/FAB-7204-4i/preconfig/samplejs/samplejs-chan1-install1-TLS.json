@@ -45,16 +45,6 @@
         "language": "node",
         "args": []
     },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
-    },
     "SCFile": [
 		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
 	]

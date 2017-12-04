@@ -5,7 +5,7 @@
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Simple",
-    "transType": "install",
+    "transType": "instantiate",
     "invokeType": "Move",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
@@ -44,16 +44,6 @@
         "fcn": "init",
         "language": "node",
         "args": []
-    },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
     },
     "SCFile": [
 		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
