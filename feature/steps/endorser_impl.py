@@ -33,7 +33,7 @@ def step_impl(context):
     setup_channel_impl(context, context.interface.TEST_CHANNEL_ID, "orderer0.example.com")
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
-def deploy_impl(context, path, args, name, language, peer, channel, timeout=120, username="Admin"):
+def deploy_impl(context, path, args, name, language, peer, channel, timeout=300, username="Admin"):
     # Be sure there is a transaction block for this channel
     config_util.generateChannelConfig(channel, config_util.CHANNEL_PROFILE, context)
 
@@ -53,7 +53,7 @@ def deploy_impl(context, path, args, name, language, peer, channel, timeout=120,
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}"')
 def step_impl(context, path, args, name, language, peer, channel):
-    deploy_impl(context, path, args, name, language, peer, channel, 120)
+    deploy_impl(context, path, args, name, language, peer, channel, 300)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, peer, channel, timeout):

@@ -48,7 +48,7 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
     context.compose_containers = context.composition.collectServiceNames()
 
 
-def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=120):
+def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=300):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
