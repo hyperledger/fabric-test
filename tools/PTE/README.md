@@ -79,8 +79,11 @@ If planning to run your Fabric network locally, you'll need docker and a bit mor
 `
 ## Setup
 1. Download fabric-test sources:
-    - `go get -d github.com/hyperledger/fabric-test`
-
+    Deprecated (Do git clone instead) - `go get -d github.com/hyperledger/fabric-test` 
+    
+    Clone the Repo
+    - 'https://github.com/hyperledger/fabric-test.git'
+    
 2. Download or update fabric, fabric-ca, and fabric-sdk-node sources, see [Hyperledger fabric-test](https://github.com/hyperledger/fabric-test) for details:
     - `cd $GOPATH/src/github.com/hyperledger/fabric-test`
     - if first time:
