@@ -14,7 +14,7 @@ usage () {
     echo -e "get_peerStats.sh:"
     echo -e " 1. uses docker command to retrieve peers logs"
     echo -e " 2. parses block information in the peers logs"
-    echo -e " 3. calculates TPS"
+    echo -e " 3. calculates TPS for specified channels in addition to all channels"
     echo
     echo -e " requirement: set CORE_LOGGING_LEVEL to INFO for peers"
     echo
@@ -29,6 +29,9 @@ usage () {
     echo -e "-o, --output\t Directory of output files."
     echo -e "\t\t(Default: peerStatsOutput)"
     echo
+    echo -e "-c, --channel\tSpecify channels in addition to all channels for which to search in the specified peer logs."
+    echo -e "\t\t(Default: all channels)"
+    echo
     echo -e "-p, --peer\tSpecify peers for which to search for peer logs."
     echo -e "\t\t(required)"
     echo
@@ -39,7 +42,7 @@ usage () {
     echo -e "\t\t(Output will be written to files regardless.)"
     echo
     echo -e "examples:"
-    echo -e " ./get_peerStats.sh -r myTestID -p peer0.org1.example.com peer0.org2.example.com -n myTest -o myDir -v"
+    echo -e " ./get_peerStats.sh -r myTestID -p peer0.org1.example.com peer0.org2.example.com -c myChannel1 myChannel2 -n myTest -o myDir -v"
     echo -e "\tThe output file is myDir/myTest_myTestID.log"
     echo
     exit
@@ -74,9 +77,15 @@ output () {
 readLog () {
     # SETUP VARIABLES
     infile="$1"
-    outfile="$2"
+    channel="$2"
+    outfile="$3"
 
-    lines=$(cat "$infile" | grep "Committed block")  # only look at lines when block created
+    if [ $channel == "all" ]; then
+        lines=$(cat "$infile" | grep "Committed block")  # look at all blocks
+    else
+        lines=$(cat "$infile" | grep "Committed block" | grep "$channel")  # only look channels related blocks
+    fi
+
     preLines=$OUTPUTPATH"/prelines"
     if [ -e $preLines ]; then
        rm -f $preLines
@@ -111,9 +120,9 @@ readLog () {
     TPS=$(echo "$txNum" "$totalMSec" | awk '{printf "%.2f", $1/$2*1000}')
     BPS=$(echo "$blkNum" "$totalMSec" | awk '{printf "%.2f", $1/$2*1000}')
     #output "peer: $peer" "$2"
-    output "\tstart time: $sTime, end time: $eTime, total time: $totalMSec ms" "$2"
-    output "\tblk Num: $blkNum, BPS: $BPS" "$2"
-    output "\ttx Num: $txNum, TPS: $TPS\n" "$2"
+    output "\tstart time: $sTime, end time: $eTime, total time: $totalMSec ms" "$outfile"
+    output "\tblk Num: $blkNum, BPS: $BPS" "$outfile"
+    output "\ttx Num: $txNum, TPS: $TPS\n" "$outfile"
 
     #echo "[readLog] remove $preLines"
     rm -f $preLines
@@ -127,8 +136,9 @@ getPeerStats () {
     # examine peer log for every peer listed (default: peer1)
     i=0
     for peer in "${PEERS[@]}"; do
+    for chan in "${CHANNELS[@]}"; do
     #for peer in "$1"; do
-        echo "[getPeerStats] peer: $peer"
+        echo "[getPeerStats] channel: $chan, peer: $peer"
         peerlog="tmpPeerLog$i"
         docker logs $peer >& $peerlog
         i=$[ i + 1 ]
@@ -140,14 +150,16 @@ getPeerStats () {
                 echo "Searched: $infile"
             # gather data
             else
-                output "\nPeer:\t$peer" "$1"
-                readLog "$infile" "$1"
+                output "\nPeer: $peer" "$1"
+                output "\tChannel: $chan" "$1"
+                readLog "$infile" "$chan" "$1"
             fi
         else
             echo -e "\nERROR: Log file does not exist: $infile"
         fi
         # echo "[getPeerStats] remove tmp log file."
         rm -f $peerlog
+    done
     done
 }
 
@@ -176,6 +188,7 @@ VERBOSE="False"                  # display output to terminal?
 OUTPUTPATH="peerStatsOutput"     # path to output files
 LOGNAME="peer"                   # prefix name of logfiles
 RUNID="CITest"
+CHANNELS[0]="all"
 
 # GET CUSTOM OPTIONS
 echo -e "\nAny optional arguments chosen:\n"
@@ -193,6 +206,20 @@ while [[ $# -gt 0 ]]; do
           RUNID=$1 # ID for run being examined
           echo -e "\t- Specify RUNID: $RUNID\n"
           shift
+          ;;
+
+      -c | --channel)
+          shift
+          i=1    # default: CHANNELS[0]="all"
+          CHANNELS[$i]=$1
+          shift
+          until [[ $(eval "echo \$1") =~ ^-.* ]] || [ -z $(eval "echo \$1") ]; do
+              i=$[ i + 1]
+              CHANNELS[$i]=$1
+              shift
+          done
+          echo -e "\t- Specify channels: ${CHANNELS[@]}"
+          echo -e ""
           ;;
 
       -p | --peer)
