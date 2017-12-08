@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-7331-4i/preconfig/samplejs/samplejs-chan1-instantiate-TLS.json

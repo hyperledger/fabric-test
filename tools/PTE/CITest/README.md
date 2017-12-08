@@ -55,6 +55,8 @@ The command is located in `PTE/CITest/scripts`
         FAB-4038-2i: samplecc Node JS chaincode, 2 processes X 10000 invokes, TLS, levelDB
         FAB-7204-4i: samplecc Node JS chaincode, 4 processes X 12 hours invokes, constant mode, TLS, levelDB
         FAB-7204-4q: samplecc Node JS chaincode, 4 processes X 100 invokes, TLS, levelDB
+        FAB-7331-4i: samplecc Node JS chaincode, 4 processes X 10000 invokes, TLS, levelDB, 1 channel, event listener: per transaction
+        FAB-7332-4i: samplecc Node JS chaincode, 4 processes X 10000 invokes, TLS, levelDB, 2 channel, event listener: per transaction
 
 
 * ### Examples
@@ -96,7 +98,7 @@ The command is located in `PTE/CITest/scripts`
 
 
 * ### Scenarios
-    The PTE behave test scenarios scripts locate in directory `PTE/CITest/scenarios`.  Each script will create a network, create/join channels, install/instantiate chaincode, and execute test. The TPS results will be documented in a file, namely `result_<scenarios script>.log`, located in the `PTE/CITest/scenarios` if applicable. For example, `result_FAB-3808-2i.log` is the results of executing FAB-3808-2i.sh. The available scenarios scripts includes the following:
+    The PTE test scenarios scripts are located in directory `PTE/CITest/scenarios`.  Each script will create a network, create/join channels, install/instantiate chaincode, and execute test. The TPS results will be documented in a file, namely `result_<scenarios script>.log`, located in the `PTE/CITest/scenarios` if applicable. For example, `result_FAB-3808-2i.log` is the results of executing FAB-3808-2i.sh. The available scenarios scripts includes the following:
 
         FAB-3807-4i.sh: execute both FAB-3807-4i and FAB-3835-4q
         FAB-3808-2i.sh: execute both FAB-3808-2i and FAB-3811-2q
@@ -104,6 +106,8 @@ The command is located in `PTE/CITest/scripts`
         FAB-3833-2i.sh: execute both FAB-3833-2i and FAB-3810-2q
         FAB-4038-2i.sh: execute both FAB-4038-2i and FAB-4036-2q
         FAB-7204-4i.sh: execute FAB-7204-4i (TPS result not applicable)
+        FAB-7331-4i.sh: execute FAB-7331-4i
+        FAB-7332-4i.sh: execute FAB-7332-4i
 
 
 * ### Network
