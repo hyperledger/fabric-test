@@ -18,6 +18,13 @@ except:
     print("ERROR! Unable to import the protobuf libraries from the ../fabric/bddtests directory: {0}".format(sys.exc_info()[0]))
     sys.exit(1)
 
+def getOrdererList(context):
+    # Get the Orderers list from the orderer container name
+    orderers = list()
+    for container in context.composition.containerDataList:
+        if 'orderer' in container.containerName:
+             orderers.append(container.containerName)
+    return orderers
 
 def getKafkaBrokerList(context, orderer):
     # Get the kafka broker list from the orderer environment var
