@@ -1,0 +1,19 @@
+*.pyc
+.idea
+*.iml
+# Emacs backup files
+*~
+*#
+.#*
+# Vim file artifacts
+.*.sw*
+# bddtest log files
+*.log
+# bddtest coverage files
+coverage
+tmp
+volumes
+*.cov
+.settings
+.project
+.gradle

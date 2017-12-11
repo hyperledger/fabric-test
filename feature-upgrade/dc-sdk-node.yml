@@ -1,0 +1,12 @@
+version: "2"
+
+services:
+
+    sdknode0:
+        image: fabric-sdk-node:49ed64e
+        command: /bin/bash
+        environment:
+          - FABRIC_SDK_INFO=kostas
+        ports:
+          - '7051'
+          - '7053'
