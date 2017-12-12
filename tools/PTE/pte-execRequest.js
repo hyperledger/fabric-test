@@ -206,6 +206,7 @@ var ccType = uiContent.ccType;
 var keyStart=0;
 var payLoadMin=0;
 var payLoadMax=0;
+var payLoadType='RANDOM'
 var arg0=0;
 var keyIdx = [];
 for (i=0; i<uiContent.ccOpt.keyIdx.length; i++) {
@@ -222,6 +223,8 @@ if ( ccType == 'ccchecker' ) {
     keyStart = parseInt(uiContent.ccOpt.keyStart);
     payLoadMin = parseInt(uiContent.ccOpt.payLoadMin)/2;
     payLoadMax = parseInt(uiContent.ccOpt.payLoadMax)/2;
+    if ( uiContent.ccOpt.payLoadType )
+        payLoadType = uiContent.ccOpt.payLoadType.toUpperCase();
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
                  Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
@@ -247,12 +250,15 @@ function getMoveRequest() {
         for ( i=0; i<keyIdx.length; i++ ) {
             testInvokeArgs[keyIdx[i]] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
         }
-        // random payload
-        var r = Math.floor(Math.random() * (payLoadMax - payLoadMin)) + payLoadMin;
 
-        var buf = crypto.randomBytes(r);
-        for ( i=0; i<keyPayLoad.length; i++ ) {
-            testInvokeArgs[keyPayLoad[i]] = buf.toString('hex');
+        // randomise length of payload
+        var rlen = Math.floor(Math.random() * (payLoadMax - payLoadMin)) + payLoadMin;
+
+        if ( payLoadType == 'RANDOM' ) {
+            var buf = crypto.randomBytes(rlen);
+            for ( i = 0; i < keyPayLoad.length; i++ ) {
+                testInvokeArgs[keyPayLoad[i]] = buf.toString('hex');
+            }
         }
     } else if ( ccType == 'marblescc' ) {
         arg0 ++;
@@ -1709,6 +1715,14 @@ function execModeConstant() {
             recHist = uiContent.constantOpt.recHist.toUpperCase();
         }
         logger.info('recHist: ', recHist);
+
+        if ( payLoadType == 'FIXED' ) {
+            var rlen = payLoadMin;
+            var buf = String(PTEid).repeat(rlen).substring(0, rlen);
+            for ( i = 0; i < keyPayLoad.length; i++ ) {
+                testInvokeArgs[keyPayLoad[i]] = buf;
+            }
+        }
 
         tLocal = new Date().getTime();
         if ( runDur > 0 ) {

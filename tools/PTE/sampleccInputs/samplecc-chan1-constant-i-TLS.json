@@ -54,6 +54,7 @@
 	"keyIdx": [1],
         "keyPayLoad": [2],
         "keyStart": "0",
+        "payLoadType": "Random",
         "payLoadMin": "1024",
         "payLoadMax": "1024"
     },
