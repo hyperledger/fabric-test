@@ -9,6 +9,7 @@ import time
 import os
 import uuid
 import subprocess
+from shutil import copyfile
 import common_util
 import compose_util
 import orderer_util
@@ -259,6 +260,54 @@ def step_impl(context, command, key):
         cmd = command.split()
         context.command_result[key] = subprocess.check_output(cmd, env=os.environ).strip()
     print("command result: {}".format(context.command_result))
+
+@when(u'an admin adds an organization to the {channelName} channel')
+def step_impl(context, channelName):
+    add_org_impl(context, "org3.example.com", channelName)
+
+@when(u'an admin adds an organization named {orgName} to the {channelName} channel')
+def add_org_impl(context, orgName, channelName):
+    #Save original crypto.yaml file
+    copyfile("./configs/{0}/crypto.yaml".format(context.projectName),
+             "./configs/{0}/crypto_orig.yaml".format(context.projectName))
+
+    # Add cryptogen info for 3rd org
+    config_util.buildCryptoFile(context, 1, 2, 0, 2, orgName=orgName)
+    config_util.generateCrypto(context, "./configs/{0}/crypto.yaml".format(context.projectName))
+    config_util.generateCryptoDir(context, 1, 2, 0, 2, tlsExist=context.tlsEnabled, orgName=orgName)
+
+    # Format the args for adding a new org with the orgName (TitleCase name and remove '.' for MSPID)
+    # Example: org3.example.com (MSPID:Org3ExampleCom)
+
+    update_impl(context, 'peer', channelName, args, userName='Admin')
+
+@when(u'an admin removes an organization named {orgName} from the {channelName} channel')
+def step_impl(context, orgName, channelName):
+    # Format the args for removing orgName
+
+    update_impl(context, 'peer', channelName, args, userName='Admin')
+
+@when(u'an {component} admin updates the {channelName} channel with {args}')
+def step_impl(context, component, channelName, args):
+    update_impl(context, component, channelName, args, userName='Admin')
+
+@when(u'an {component} admin with username {userName} updates the {channelName} channel with {args}')
+def update_impl(context, component, channelName, args, userName='Admin'):
+    assert component in ('peer', 'orderer'), "Error: the component type must be either 'peer' or 'orderer' instead of '{}'.".format(component)
+    if channelName == "system":
+        assert component == 'orderer', "Error: Only an orderer admin may update the system channel."
+        channelName = context.interface.SYS_CHANNEL_ID
+
+    # fetch the block for the specified channel
+    peers = context.interface.get_peers(context)
+    assert len(peers) > 0, "Error: There are no peers on this fabric network."
+    context.interface.fetch_channel(context, peers, 'orderer0.example.com', channelName, user=username)
+
+    # Start configtxlator
+    # Convert block file to json
+    # Prep args for update
+    # have other peers sign updated channel block
+    # send signed, updated block to the channel
 
 @then(u'the initial non-leader peer of "{org}" has become the leader')
 def step_impl(context, org):

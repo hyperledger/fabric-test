@@ -12,6 +12,7 @@ import random
 import string
 import subprocess
 import config_util
+from endorser_util import CLIInterface, ToolInterface, SDKInterface
 
 
 @when(u'a user sets up a channel named "{channelId}" using orderer "{orderer}"')
@@ -23,6 +24,11 @@ def setup_channel_impl(context, channelId, orderer, username="Admin"):
     context.interface.create_channel(context, orderer, channelId, user=username)
     context.interface.fetch_channel(context, peers, orderer, channelId, user=username)
     context.interface.join_channel(context, peers, channelId, user=username)
+
+    # If using any interface besides the CLI, we should add a few seconds delay to be sure
+    # that the code executes successfully
+    if not isinstance(context.interface, CLIInterface):
+        time.sleep(3)
 
 @when(u'a user sets up a channel named "{channelId}"')
 def step_impl(context, channelId):
