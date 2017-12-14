@@ -5,14 +5,11 @@ Developers will find these mechanisms useful for prototyping variant Hyperledger
 
 ### Installation
 
-#### Prerequisites
-Make sure you have a properly configured Hyperledger Fabric development environment.
-
-#### Clone this repo into fabric root folder
-From the fabric root folder
+#### Prerequisites Setup
+Make sure you have a properly configured Hyperledger Fabric development environment, and have already cloned the fabric-test repository.
+Go to the folder that contains our diverged copy of the files from "git clone https://github.com/jeffgarratt/fabric-prototype.git".
 ```
-git clone https://github.com/jeffgarratt/fabric-prototype.git
-cd fabric-prototype
+cd $GOPATH/src/github.com/hyperledger/fabric-test/feature-upgrade
 ```
 
 #### Setup python virtual environment wrapper usage
@@ -32,7 +29,7 @@ cd fabric-prototype
     mkvirtualenv -p /usr/bin/python2.7 behave_venv
 ```
 
-This will automaticall switch you to the new environment if successful.  In the future, you can switch to the virtual environment using the workon command as shown below.
+This will automatically switch you to the new environment if successful.  In the future, you can switch to the virtual environment using the workon command as shown below.
 
 ```
     workon behave_venv
@@ -43,15 +40,15 @@ This will automaticall switch you to the new environment if successful.  In the 
 
 **NOTE**: If you have issues installing the modules below, and you are running the vagrant environment, consider performing a **vagrant destroy** followed by a **vagrant up**.
 
-You can install either using fixed versions with a requirments file or by installing the latest based upon pip.
+You can install either using fixed versions with a requirements file, or by installing the latest based upon pip.
 
-##### Installing using a requirements.txt file with fixed versions
+##### Option 1: Installing using a requirements.txt file with fixed versions
 
 ```
 pip install -r requirements.txt
 ```
 
-##### Installing using latest versions from pip
+##### Option 2: Installing using latest versions from pip
 
 ```
     pip install behave
@@ -70,22 +67,23 @@ pip install -r requirements.txt
 
 #### Peer Executable and Docker containers
 
-Behave requires the peer executable for packaging deployments.  To make the peer execute the following command.
-
+Behave requires the peer executable for packaging deployments.  To make the peer, execute the following command.
 
 ```
-#Change to the root fabric folder to perform the following commands.
-cd ..
+# Change to the fabric folder to perform the following commands.
+cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric
 
-# Optionally perform the following clean if you are unsure of your environments state.
+# Optionally perform the following clean if you are unsure of your environment state.
 make clean
+
+# make the peer executable
 make peer
 ```
 
 The peer executable will be located in the build/bin folder. Make sure that your PATH enviroment variable contains the location.
 Execute the following command if necessary.
 ```
-    export PATH=$PATH:$GOPATH/src/github.com/hyperledger/fabric/build/bin
+    export PATH=$PATH:$GOPATH/src/github.com/hyperledger/fabric-test/fabric/build/bin
 ```
 
 The behave system also uses several docker containers.  Execute the following commands to create the required docker containers.
@@ -95,24 +93,23 @@ The behave system also uses several docker containers.  Execute the following co
     make orderer-docker
 ```
 
-Change back to the bddtests folder (Where this readme is located) to execute subsequent behave commands.
+Change back to the upgrade test folder (where this readme is located) to execute subsequent behave commands.
 
 ```
-    cd fabric-prototype
+    cd $GOPATH/src/github.com/hyperledger/fabric-test/feature-upgrade
 ```
 
-#### Running all of the behave features and suppressing skipped steps (-k)
-
-The following behave commands should be executed from within this folder.
+#### Example: Run all of the behave features and suppressing skipped steps (-k)
 
 ```
     behave -k
 ```
 
-#### Running a specific feature
+#### Examples: Run test scenarios in a specific feature file
 
 ```
     behave -k features/bootstrap.feature
+    behave -k features/upgrade.feature
 ```
 
 ### Deactivating your behave virtual environment
