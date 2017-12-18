@@ -7,6 +7,6 @@
 pte: {
   ptechannels: [
     {name: "testorgschannel1", orgs: ["orga", "orgb"], orderer: "orderer0"},
-    {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer0"}
+    {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer1"}
   ]
 }
