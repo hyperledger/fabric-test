@@ -133,7 +133,7 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] chaincode_id: %s', Ni
 
 var svcFile = uiContent.SCFile[0].ServiceCredentials;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] svcFile: %s, org: %s', Nid, channel.getName(), org, pid, svcFile, org);
-hfc.addConfigFile(path.join(__dirname, svcFile));
+hfc.addConfigFile(path.resolve(__dirname, svcFile));
 var ORGS = hfc.getConfigSetting('test-network');
 var goPath;
 if ( typeof(ORGS.gopath) === 'undefined' ) {
@@ -377,7 +377,7 @@ function assignPeerListFromList(channel, client, org) {
                 peername = listOpt[key][i];
                 if (peername.indexOf('peer') === 0) {
                     if (TLS.toUpperCase() == 'ENABLED') {
-                        data = fs.readFileSync(path.join(goPath, ORGS[key][peername]['tls_cacerts']));
+                        data = fs.readFileSync(path.resolve(goPath, ORGS[key][peername]['tls_cacerts']));
                         peerTmp = client.newPeer(
                             ORGS[key][peername].requests,
                             {
@@ -409,7 +409,7 @@ function assignPeerList(channel, client, org) {
                 if (key.indexOf('peer') === 0) {
                     if (TLS.toUpperCase() == 'ENABLED') {
 
-                        data = fs.readFileSync(path.join(goPath, ORGS[key1][key]['tls_cacerts']));
+                        data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key]['tls_cacerts']));
                         peerTmp = client.newPeer(
                             ORGS[key1][key].requests,
                             {
@@ -442,7 +442,7 @@ function assignThreadAllPeers(channel, client, org) {
             if (key.indexOf('peer') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
 
-                    data = fs.readFileSync(path.join(goPath, ORGS[key1][key]['tls_cacerts']));
+                    data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key]['tls_cacerts']));
                     peerTmp = client.newPeer(
                         ORGS[key1][key].requests,
                         {
@@ -501,7 +501,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
             if (key.indexOf('peer1') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
 
-                    data = fs.readFileSync(path.join(goPath, ORGS[key1][key]['tls_cacerts']));
+                    data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key]['tls_cacerts']));
                     peerTmp = client.newPeer(
                         ORGS[key1][key].requests,
                         {
@@ -556,7 +556,7 @@ function assignThreadOrgPeer(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    data = fs.readFileSync(goPath, ORGS[org][key]['tls_cacerts']);
+                    data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
                     peerTmp = client.newPeer(
                         ORGS[org][key].requests,
                         {
@@ -613,7 +613,7 @@ function assignThreadPeerList(channel, client, org) {
                 peername = listOpt[key][i];
                 if (peername.indexOf('peer') === 0) {
                     if (TLS.toUpperCase() == 'ENABLED') {
-                        data = fs.readFileSync(path.join(goPath, ORGS[key][peername]['tls_cacerts']));
+                        data = fs.readFileSync(path.resolve(goPath, ORGS[key][peername]['tls_cacerts']));
                         peerTmp = client.newPeer(
                             ORGS[key][peername].requests,
                             {
@@ -667,7 +667,7 @@ function channelAddPeer(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    let data = fs.readFileSync(path.join(goPath, ORGS[org][key]['tls_cacerts']));
+                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
                     peerTmp = client.newPeer(
                         ORGS[org][key].requests,
                         {
@@ -698,7 +698,7 @@ function channelAddPeerEvent(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    let data = fs.readFileSync(path.join(goPath, ORGS[org][key]['tls_cacerts']));
+                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
                     peerTmp = client.newPeer(
                         ORGS[org][key].requests,
                         {
@@ -762,7 +762,7 @@ function assignOrdererList(channel, client) {
     for (let key in ORGS['orderer']) {
         if (key.indexOf('orderer') === 0) {
             if (TLS.toUpperCase() == 'ENABLED') {
-                var caRootsPath = path.join(goPath, ORGS['orderer'][key].tls_cacerts);
+                var caRootsPath = path.resolve(goPath, ORGS['orderer'][key].tls_cacerts);
                 if (fs.existsSync(caRootsPath)) {
                     let data = fs.readFileSync(caRootsPath);
                     let caroots = Buffer.from(data).toString();
@@ -791,7 +791,7 @@ function channelAddOrderer(channel, client, org) {
     var ordererID = ORGS[org].ordererID;
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s channelAddOrderer] ', Nid, channelName, org, pid, ordererID );
     if (TLS.toUpperCase() == 'ENABLED') {
-        var caRootsPath = path.join(goPath, ORGS['orderer'][ordererID].tls_cacerts);
+        var caRootsPath = path.resolve(goPath, ORGS['orderer'][ordererID].tls_cacerts);
         let data = fs.readFileSync(caRootsPath);
         let caroots = Buffer.from(data).toString();
 
@@ -822,7 +822,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
         if (ORGS.hasOwnProperty(key) && typeof ORGS[key].peer1 !== 'undefined') {
                 if ( key == org ) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    data = fs.readFileSync(path.join(goPath, ORGS[key].peer1['tls_cacerts']));
+                    data = fs.readFileSync(path.resolve(goPath, ORGS[key].peer1['tls_cacerts']));
                     peerTmp = client.newPeer(
                         ORGS[key].peer1.requests,
                         {

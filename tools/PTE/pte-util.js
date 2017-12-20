@@ -61,7 +61,7 @@ module.exports.resetDefaults = function() {
 };
 
 module.exports.cleanupDir = function(keyValStorePath) {
-	var absPath = path.join(process.cwd(), keyValStorePath);
+	var absPath = path.resolve(process.cwd(), keyValStorePath);
 	var exists = module.exports.existsSync(absPath);
 	if (exists) {
 		fs.removeSync(absPath);
@@ -176,9 +176,9 @@ function getAdmin(client, nid, userOrg, svcFile) {
         } else {
             getgoPath();
             logger.info(' %s admin_cert undefined', userOrg);
-            keyPath =  path.join(goPath, ORGS[userOrg].adminPath , 'keystore');
+            keyPath =  path.resolve(goPath, ORGS[userOrg].adminPath , 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = path.join(goPath, ORGS[userOrg].adminPath, 'signcerts');
+            certPath = path.resolve(goPath, ORGS[userOrg].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getAdmin] keyPath: %s', keyPath);
             logger.debug('[getAdmin] certPath: %s', certPath);
@@ -216,9 +216,9 @@ function getOrdererAdmin(client, userOrg, svcFile) {
         } else {
             getgoPath();
             logger.info(' %s admin_cert undefined', userOrg);
-            keyPath = path.join(goPath, ORGS['orderer'][ordererID].adminPath, 'keystore');
+            keyPath = path.resolve(goPath, ORGS['orderer'][ordererID].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = path.join(goPath, ORGS['orderer'][ordererID].adminPath, 'signcerts');
+            certPath = path.resolve(goPath, ORGS['orderer'][ordererID].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
             logger.debug('[getOrdererAdmin] certPath: %s', certPath);
@@ -249,7 +249,7 @@ function readAllFiles(dir) {
 	var files = fs.readdirSync(dir);
 	var certs = [];
 	files.forEach((file_name) => {
-		let file_path = path.join(dir,file_name);
+		let file_path = path.resolve(dir,file_name);
 		logger.debug('[readAllFiles] looking at file ::'+file_path);
 		let data = fs.readFileSync(file_path);
 		certs.push(data);
