@@ -209,13 +209,17 @@ var payLoadMax=0;
 var payLoadType='RANDOM'
 var arg0=0;
 var keyIdx = [];
-for (i=0; i<uiContent.ccOpt.keyIdx.length; i++) {
-    keyIdx.push(uiContent.ccOpt.keyIdx[i]);
+if (typeof( uiContent.ccOpt.keyIdx ) !== 'undefined') {
+    for (i=0; i<uiContent.ccOpt.keyIdx.length; i++) {
+        keyIdx.push(uiContent.ccOpt.keyIdx[i]);
+    }
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyIdx: ', Nid, channel.getName(), org, pid, keyIdx);
 var keyPayLoad = [];
-for (i=0; i<uiContent.ccOpt.keyPayLoad.length; i++) {
-    keyPayLoad.push(uiContent.ccOpt.keyPayLoad[i]);
+if (typeof( uiContent.ccOpt.keyPayLoad ) !== 'undefined') {
+    for (i=0; i<uiContent.ccOpt.keyPayLoad.length; i++) {
+        keyPayLoad.push(uiContent.ccOpt.keyPayLoad[i]);
+    }
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyPayLoad: ', Nid, channel.getName(), org, pid, keyPayLoad);
 
