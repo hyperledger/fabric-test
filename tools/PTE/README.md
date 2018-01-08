@@ -547,6 +547,7 @@ The following chaincodes are tested and supported:
             "org2": ["peer1"]
         },
         "eventOpt": {
+            "type": "Channel",
             "listener": "Transaction",
             "timeout": "240000"
         },
@@ -651,11 +652,14 @@ where:
              }
 
 * **eventOpt**: event hub options
-    * **listener**: event listener
+    * **type**: event type, default: Peer
+        * **Channel**: events at channel level
+        * **Peer**: events at peer level
+    * **listener**: event listener, default: Transaction
         * **Transaction**: PTE registers a transaction listener to receive a registered transaction event. This is the default event listener.
         * **Block**: PTE registers a block listener to receive every block event on all channels. PTE will parse the received block event for the transactions sent. The block listener option applies to tranMode CONSTANT only.
         * **None**: PTE will not register any event listener.
-    * **timeout**: event timeout, applied to the transaction listener only, unit ms
+    * **timeout**: event timeout, applied to the transaction listener only, unit ms, default: 120000 ms
 * **failoverOpt**: peer failover options
     * **method**: peer failover selection method, default is `RoundRobin`
          * **random**: a peer is selected randomly from the list for failover
