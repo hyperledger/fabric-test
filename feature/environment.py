@@ -6,6 +6,7 @@
 
 import subprocess
 import shutil
+import gc
 from steps.endorser_util import CLIInterface, ToolInterface
 
 
@@ -34,7 +35,7 @@ def getLogFiles(containers, fileSuffix):
 def after_scenario(context, scenario):
     getLogs = context.config.userdata.get("logs", "N")
     if getLogs.lower() == "force" or (scenario.status == "failed" and getLogs.lower() == "y" and "compose_containers" in context):
-        print("Scenario {0} failed. Getting container logs".format(scenario.name))
+        print("Collecting container logs for Scenario '{}'".format(scenario.name))
         # Replace spaces and slashes with underscores
         fileSuffix = "_" + scenario.name.replace(" ", "_").replace("/", "_") + ".log"
         # get logs from the peer containers
@@ -57,6 +58,11 @@ def after_scenario(context, scenario):
         context.composition.decompose()
     elif hasattr(context, 'projectName'):
         shutil.rmtree("configs/%s" % context.projectName)
+
+    # Clean up memory in between scenarios, just in case
+    if hasattr(context, "random_key"):
+        del context.random_key
+    gc.collect()
 
 # stop any running peer that could get in the way before starting the tests
 def before_all(context):
