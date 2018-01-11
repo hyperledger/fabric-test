@@ -179,9 +179,14 @@ def step_impl(context):
 def step_impl(context):
     bootstrapped_impl(context, "solo", "leveldb", False)
 
-@when(u'I vendor go packages for fabric-based chaincode at "{path}"')
-def step_impl(context, path):
-    print(subprocess.check_output(["govendor init && govendor add +external"], cwd=path, shell=True))
+@when(u'I vendor "{language}" packages for fabric-based chaincode at "{path}"')
+def step_impl(context, language, path):
+    if language=="GOLANG":
+        print(subprocess.check_output(["govendor init && govendor add +external"], cwd=path, shell=True))
+    elif language=="NODE":
+        print(subprocess.check_output(["npm install"], cwd=path, shell=True))
+    else:
+        assert False, "undefined language: {}".format(context.language)
 
 @when(u'I vendor go packages for non-fabric-based chaincode at "{path}"')
 def step_impl(context, path):

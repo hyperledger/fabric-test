@@ -378,7 +378,7 @@ Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimA
 
   Given I have a bootstrapped fabric network of type <type>
   When a user sets up a channel
-  And I vendor go packages for fabric-based chaincode at "../chaincodes/shimApiDriver/go/"
+  And I vendor "<language>" packages for fabric-based chaincode at "<VendorPath>"
   When a user deploys chaincode at path "<marbles02Path>" with args [""] with name "mycc" with language "<language>"
   When a user deploys chaincode at path "<shimAPIDriverPath>" with args [""] with name "myShimAPI" with language "<language>"
 
@@ -490,7 +490,7 @@ Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimA
   And I wait "3" seconds
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble201"]
   Then a user receives an error response of status:500
-  And a user receives an error response of {"Error":"Marble does not exist: marble201"}
+  And a user receives an error response of {\"Error\":\"Marble does not exist: marble201\"}
 
 
   #Test getHistoryForDeletedMarble
@@ -504,17 +504,16 @@ Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimA
   And a user receives a response containing "Timestamp"
   And a user receives a response containing "IsDelete":"true"
 
-  When a user queries on the chaincode named "myShimAPI" with args ["getTxTimeStamp"]
+  When a user queries on the chaincode named "myShimAPI" with args ["getTxTimestamp"]
   When a user queries on the chaincode named "myShimAPI" with args ["getCreator"]
-  When a user invokes on the chaincode named "myShimAPI" with args ["testTxBinding"]
+  When a user invokes on the chaincode named "myShimAPI" with args ["getBinding"]
   When a user queries on the chaincode named "myShimAPI" with args ["getSignedProposal"]
   When a user queries on the chaincode named "myShimAPI" with args ["getTransient"]
 
 
   Examples:
-   | type  | database |                       marbles02Path                                            |         shimAPIDriverPath                                         | language|
-   | solo  |  leveldb |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02                 |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/go  | GOLANG  |
-   | kafka |  couchdb |  github.com/hyperledger/fabric/examples/chaincode/go/marbles02                 |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/go  | GOLANG  |
-#   | solo  |  leveldb |   20     | ../../fabrici-test/chaincodes/marbles/node                                    |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/node| NODE    |
-#   | kafka |  couchdb |   30     |  ../../fabric-test/chaincodes/marbles/node                                    |   github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/node| NODE    |
-# skip parts 3 & 4 using node chaincodes, until FAB-6271 gets fixed and we receive an an error code in addition to the error message:
+   | type  | database |                      marbles02Path                            | VendorPath                       | shimAPIDriverPath                                              | language |
+   | solo  |  leveldb | github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | ../chaincodes/shimApiDriver/go   | github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/go | GOLANG   |
+   | kafka |  couchdb | github.com/hyperledger/fabric/examples/chaincode/go/marbles02 | ../chaincodes/shimApiDriver/go   | github.com/hyperledger/fabric-test/chaincodes/shimApiDriver/go | GOLANG   |
+   | solo  |  leveldb | ../../fabric-test/chaincodes/marbles/node                     | ../chaincodes/shimApiDriver/node | ../../fabric-test/chaincodes/shimApiDriver/node                | NODE     |
+   | kafka |  couchdb | ../../fabric-test/chaincodes/marbles/node                     | ../chaincodes/shimApiDriver/node | ../../fabric-test/chaincodes/shimApiDriver/node                | NODE     |
