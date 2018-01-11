@@ -74,7 +74,6 @@ class InterfaceBase:
         chaincode_container = "{0}-{1}-{2}-0".format(context.projectName, peer, context.chaincode['name'])
         context.interface.wait_for_deploy_completion(context, chaincode_container, timeout)
 
-
     def channel_block_present(self, context, containers, channelId):
         ret = False
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
@@ -172,7 +171,7 @@ class ToolInterface(InterfaceBase):
                                                                                     args[4],
                                                                                     peer_name)
         print(cmd)
-        subprocess.check_call(cmd.split(), env=os.environ)
+        return subprocess.check_call(cmd.split(), env=os.environ)
 
     def create_channel(self, context, orderer, channelId, user="Admin"):
         orderer_name = context.networkInfo["nodes"][orderer]["nodeName"]
@@ -301,6 +300,21 @@ class SDKInterface(InterfaceBase):
         result = self.query_func.call("query", "{0}@{1}".format(user, org), orgName, reformatted, [peer], self.networkConfigFile)
         return {peer: result}
 
+    def wait_for_deploy_completion(self, context, chaincode_container, timeout):
+        if context.remote:
+            time.sleep(30)
+
+        containers = subprocess.check_output(["docker ps -a"], shell=True)
+        try:
+            with common_util.Timeout(timeout):
+                while chaincode_container not in containers:
+                    containers = subprocess.check_output(["docker ps -a"], shell=True)
+                    time.sleep(1)
+        finally:
+            assert chaincode_container in containers, "The expected chaincode container {} is not running".format(chaincode_container)
+
+        # Allow time for chaincode initialization to complete
+        time.sleep(15)
 
 class CLIInterface(InterfaceBase):
 
@@ -386,7 +400,6 @@ class CLIInterface(InterfaceBase):
         output[peer] = context.composition.docker_exec(setup + command, [peer])
         print("[{0}]: {1}".format(" ".join(setup + command), output))
         return output
-
 
     def create_channel(self, context, orderer, channelId=TEST_CHANNEL_ID, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)

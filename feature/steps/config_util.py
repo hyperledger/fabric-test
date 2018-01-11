@@ -31,8 +31,8 @@ ORDERER_HOST = '''
       - Hostname: orderer{count} '''
 
 PEER_ORG_STR = '''
-  - Name: Org{count}ExampleCom
-    Domain: org{count}.example.com
+  - Name: {name}
+    Domain: {domain}
     Template:
       Count: {numPeers}
     Users:
@@ -60,7 +60,7 @@ def makeProjectConfigDir(context):
         os.mkdir(testConfigs)
     return testConfigs
 
-def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers):
+def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgName=None):
     testConfigs = makeProjectConfigDir(context)
 
     # Orderer Stanza
@@ -72,7 +72,12 @@ def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers):
     # Peer Stanza
     peerStanzas = ""
     for count in range(int(numOrgs)):
-        peerStanzas += PEER_ORG_STR.format(count=count, numPeers=numPeers, numUsers=numUsers)
+        name = "Org{0}ExampleCom".format(count)
+        domain = "org{0}.example.com".format(count)
+        if orgName is not None:
+            name = orgName.title().replace('.', '')
+            domain = orgName
+        peerStanzas += PEER_ORG_STR.format(name=name, domain=domain, numPeers=numPeers, numUsers=numUsers)
     peerStr = "PeerOrgs:" + peerStanzas
 
     cryptoStr = ordererStr + "\n\n" + peerStr
@@ -189,12 +194,14 @@ def traverse_orderer(projectname, numOrderers, tlsExist):
     userpath = opath + 'users/Admin@example.com/'
     mspandtlsCheck(userpath, tlsExist)
 
-def traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist):
+def traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgName=None):
     # Peer stanza
     pppath = 'configs/' +projectname+ '/peerOrganizations/'
     for orgNum in range(int(numOrgs)):
+        if orgName is None:
+            orgName = "org" + str(orgNum) + ".example.com"
         for peerNum in range(int(numPeers)):
-            orgpath = "org"+str(orgNum)+".example.com/"
+            orgpath = orgName + "/"
             ppath = pppath + orgpath
             peerpath = ppath +"peers/"+"peer"+str(peerNum)+ "."+ orgpath
 
@@ -214,9 +221,9 @@ def traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist):
                 userpath = ppath + "users/"+"User"+str(count)+"@"+orgpath
                 mspandtlsCheck(userpath, tlsExist)
 
-def generateCryptoDir(context, numOrgs, numPeers, numOrderers, numUsers, tlsExist=True):
+def generateCryptoDir(context, numOrgs, numPeers, numOrderers, numUsers, tlsExist=True, orgName=None):
     projectname = context.projectName
-    traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist)
+    traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgName)
     traverse_orderer(projectname, numOrderers, tlsExist)
 
 def mspandtlsCheck(path, tlsExist):
