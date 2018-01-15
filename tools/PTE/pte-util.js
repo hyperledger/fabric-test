@@ -14,20 +14,18 @@
  *  limitations under the License.
  */
 
-var path = require('path');
 var fs = require('fs-extra');
+var hfc = require('fabric-client');
+var jsrsa = require('jsrsasign');
 var os = require('os');
+var path = require('path');
 var util = require('util');
 
-var jsrsa = require('jsrsasign');
 var KEYUTIL = jsrsa.KEYUTIL;
 
-var hfc = require('fabric-client');
+
 var copService = require('fabric-ca-client/lib/FabricCAClientImpl.js');
 var User = require('fabric-client/lib/User.js');
-var CryptoSuite = require('fabric-client/lib/impl/CryptoSuite_ECDSA_AES.js');
-var KeyStore = require('fabric-client/lib/impl/CryptoKeyStore.js');
-var ecdsaKey = require('fabric-client/lib/impl/ecdsa/key.js');
 //var Constants = require('./constants.js');
 
 var logger = require('fabric-client/lib/utils.js').getLogger('PTE util');

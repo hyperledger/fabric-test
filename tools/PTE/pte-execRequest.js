@@ -28,30 +28,20 @@
 // in a happy-path scenario
 'use strict';
 
-var path = require('path');
-
-var hfc = require('fabric-client');
+const crypto = require('crypto');
 
 var fs = require('fs');
 var grpc = require('grpc');
-var util = require('util');
+var hfc = require('fabric-client');
+var path = require('path');
 var testUtil = require('./pte-util.js');
+var util = require('util');
+
 var utils = require('fabric-client/lib/utils.js');
-var Peer = require('fabric-client/lib/Peer.js');
-var Orderer = require('fabric-client/lib/Orderer.js');
-var EventHub = require('fabric-client/lib/EventHub.js');
-var FabricCAServices = require('fabric-ca-client/lib/FabricCAClientImpl');
-var FabricCAClient = FabricCAServices.FabricCAClient;
-var User = require('fabric-client/lib/User.js');
-var Client = require('fabric-client/lib/Client.js');
 
 var PTEid=process.argv[7];
 var loggerMsg='PTE '+PTEid+' exec';
 var logger = utils.getLogger(loggerMsg);
-
-const crypto = require('crypto');
-
-utils.setConfigSetting('crypto-keysize', 256);
 
 
 // local vars
@@ -84,11 +74,11 @@ var txidList = [];
 
 // need to override the default key size 384 to match the member service backend
 // otherwise the client will not be able to decrypt the enrollment challenge
-utils.setConfigSetting('crypto-keysize', 256);
+hfc.setConfigSetting('crypto-keysize', 256);
 
 // need to override the default hash algorithm (SHA3) to SHA2 (aka SHA256 when combined
 // with the key size 256 above), in order to match what the peer and COP use
-utils.setConfigSetting('crypto-hash-algo', 'SHA2');
+hfc.setConfigSetting('crypto-hash-algo', 'SHA2');
 
 //input args
 var pid = parseInt(process.argv[2]);
@@ -277,7 +267,7 @@ function getMoveRequest() {
     }
 
     tx_id = client.newTransactionID();
-    utils.setConfigSetting('E2E_TX_ID', tx_id.getTransactionID());
+    hfc.setConfigSetting('E2E_TX_ID', tx_id.getTransactionID());
     //logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] tx id= %s', Nid, channelName, org, pid, tx_id.getTransactionID().toString());
 
     request_invoke = {
@@ -887,7 +877,7 @@ function channelAddOrderer(channel, client, org) {
         let caroots = Buffer.from(data).toString();
 
         channel.addOrderer(
-            new Orderer(
+            client.newOrderer(
                 ORGS['orderer'][ordererID].url,
                 {
                     'pem': caroots,
@@ -896,7 +886,7 @@ function channelAddOrderer(channel, client, org) {
             )
         );
     } else {
-        channel.addOrderer(new Orderer(ORGS['orderer'][ordererID].url));
+        channel.addOrderer(client.newOrderer(ORGS['orderer'][ordererID].url));
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, ORGS['orderer'][ordererID].url);
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %j ', Nid, channelName, org, pid, channel.getOrderers());

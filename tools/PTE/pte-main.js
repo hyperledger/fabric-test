@@ -26,28 +26,21 @@
 // in a happy-path scenario
 'use strict';
 
-var path = require('path');
-
-var hfc = require('fabric-client');
-var X509 = require('jsrsasign').X509;
-
-var fs = require('fs');
-var grpc = require('grpc');
-var util = require('util');
-var testUtil = require('./pte-util.js');
-var utils = require('fabric-client/lib/utils.js');
-var Peer = require('fabric-client/lib/Peer.js');
-var Orderer = require('fabric-client/lib/Orderer.js');
-var EventHub = require('fabric-client/lib/EventHub.js');
-var FabricCAServices = require('fabric-ca-client/lib/FabricCAClientImpl');
-var FabricCAClient = FabricCAServices.FabricCAClient;
-var User = require('fabric-client/lib/User.js');
-var Client = require('fabric-client/lib/Client.js');
-
-
-utils.setConfigSetting('crypto-keysize', 256);
 
 const child_process = require('child_process');
+
+var hfc = require('fabric-client');
+var fs = require('fs');
+var grpc = require('grpc');
+var path = require('path');
+var util = require('util');
+
+var testUtil = require('./pte-util.js');
+var utils = require('fabric-client/lib/utils.js');
+
+
+hfc.setConfigSetting('crypto-keysize', 256);
+
 
 var webUser = null;
 var tmp;
@@ -676,8 +669,8 @@ function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
 
 //instantiate chaincode
 function chaincodeInstantiate(channel, client, org) {
-        var cryptoSuite = Client.newCryptoSuite();
-        cryptoSuite.setCryptoKeyStore(Client.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
+        var cryptoSuite = hfc.newCryptoSuite();
+        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
         client.setCryptoSuite(cryptoSuite);
 
         logger.info('[chaincodeInstantiate] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
@@ -832,7 +825,7 @@ function createOneChannel(client ,channelOrgName) {
     var secret;
     var submitter = null;
 
-    utils.setConfigSetting('key-value-store', 'fabric-client/lib/impl/FileKeyValueStore.js');
+    hfc.setConfigSetting('key-value-store', 'fabric-client/lib/impl/FileKeyValueStore.js');
 
     var channelTX=channelOpt.channelTX;
     logger.info('[createOneChannel] channelTX: ', channelTX);
@@ -892,8 +885,8 @@ function createOneChannel(client ,channelOrgName) {
         logger.info('[createOneChannel] done signing: %s', channelName);
 
         // build up the create request
-        let nonce = utils.getNonce();
         let tx_id = client.newTransactionID();
+	let nonce = tx_id.getNonce();
         var request = {
             config: config,
             signatures : signatures,
@@ -1070,7 +1063,7 @@ function queryBlockchainInfo(channel, client, org) {
     qPeer = uiContent.queryBlockOpt.peer;
     logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%s:%d:%d', qOrg, qPeer, sBlock, eBlock);
 
-    utils.setConfigSetting('key-value-store','fabric-client/lib/impl/FileKeyValueStore.js');
+    hfc.setConfigSetting('key-value-store','fabric-client/lib/impl/FileKeyValueStore.js');
     var cryptoSuite = hfc.newCryptoSuite();
     cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
     client.setCryptoSuite(cryptoSuite);
@@ -1079,7 +1072,7 @@ function queryBlockchainInfo(channel, client, org) {
 
     channelAddQIPeer(channel, client, qOrg, qPeer);
 
-    return Client.newDefaultKeyValueStore({
+    return hfc.newDefaultKeyValueStore({
             path: testUtil.storePathForOrg(orgName)
     }).then( function (store) {
             client.setStateStore(store);
