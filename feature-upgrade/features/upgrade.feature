@@ -406,65 +406,199 @@ Feature: Bootstrap
     # NOTE: If you do NOT upgrade ALL of the orderers before using any of the capabilities, it is possible to have a state fork for any channel (i.e. orderer system or peers)
     #
 
-    Given all orderer admins agree to upgrade
     Given all users disconnect from orderers
     # All orderer admins stop their respective orderer nodes (NOTE:  ALL orderers in the network must be stopped prior to subsequent steps to allay fork)
 
+#    And we "stop" service "kafka0"
+#    And I wait "6" seconds
+#    And we "stop" service "kafka1"
+#    And I wait "6" seconds
+#    And we "stop" service "kafka2"
+#    And I wait "6" seconds
+#    And we "stop" service "kafka3"
+#    And I wait "6" seconds
+
+#    And we "stop" service "zookeeper0"
+#    And I wait "6" seconds
+#    And we "stop" service "zookeeper1"
+#    And I wait "6" seconds
+#    And we "stop" service "zookeeper2"
+#    And I wait "6" seconds
+
+#    And user "orderer0Admin" upgrades "zookeeper0" to version "<OrdererUpgradeVersion>"
+#    And user "orderer0Admin" upgrades "zookeeper1" to version "<OrdererUpgradeVersion>"
+#    And user "orderer0Admin" upgrades "zookeeper2" to version "<OrdererUpgradeVersion>"
+
+#    And I wait "<RestartOrdererWaitTime>" seconds
+
+
+#    And user "orderer0Admin" upgrades "kafka0" to version "<OrdererUpgradeVersion>"
+#    And user "orderer0Admin" upgrades "kafka1" to version "<OrdererUpgradeVersion>"
+#    And user "orderer0Admin" upgrades "kafka2" to version "<OrdererUpgradeVersion>"
+#    And user "orderer0Admin" upgrades "kafka3" to version "<OrdererUpgradeVersion>"
+#    And I wait "<SystemUpWaitTime>" seconds
+
+    ###########################################################################
+    #
+    # Upgrading orderer0 and entry point for invoking after upgrading orderer0
+    #
+    ###########################################################################
+
+    Given all orderer admins agree to upgrade
+
     And we "stop" service "<orderer0>"
-    And we "stop" service "<orderer1>"
-    And we "stop" service "<orderer2>"
-
-
-    And we "stop" service "kafka0"
-    And I wait "6" seconds
-    And we "stop" service "kafka1"
-    And I wait "6" seconds
-    And we "stop" service "kafka2"
-    And I wait "6" seconds
-    And we "stop" service "kafka3"
-    And I wait "6" seconds
-
-    And we "stop" service "zookeeper0"
-    And I wait "6" seconds
-    And we "stop" service "zookeeper1"
-    And I wait "6" seconds
-    And we "stop" service "zookeeper2"
-    And I wait "6" seconds
-
-    And user "orderer0Admin" upgrades "zookeeper0" to version "<OrdererUpgradeVersion>"
-    And user "orderer0Admin" upgrades "zookeeper1" to version "<OrdererUpgradeVersion>"
-    And user "orderer0Admin" upgrades "zookeeper2" to version "<OrdererUpgradeVersion>"
-
-    And I wait "<RestartOrdererWaitTime>" seconds
-
-
-    And user "orderer0Admin" upgrades "kafka0" to version "<OrdererUpgradeVersion>"
-    And user "orderer0Admin" upgrades "kafka1" to version "<OrdererUpgradeVersion>"
-    And user "orderer0Admin" upgrades "kafka2" to version "<OrdererUpgradeVersion>"
-    And user "orderer0Admin" upgrades "kafka3" to version "<OrdererUpgradeVersion>"
-    And I wait "<SystemUpWaitTime>" seconds
-
 
     And user "orderer0Admin" upgrades "<orderer0>" to version "<OrdererUpgradeVersion>"
     And I wait "<RestartOrdererWaitTime>" seconds
 
+    And I wait "<VerifyAllBlockHeightsWaitTime>" seconds
+
+    And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer0>" using port "7050"
+    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgradeOfOrderersFromOrderer0" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
+
+    When user "dev0Org0" creates a chaincode invocation spec "invocationSpec2" using spec "ccSpec" with input:
+      | funcName | arg1 | arg2 | arg3 |
+      | invoke   | a    | b    | 10   |
+
+    And user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "invokeProposal2" for channel "com.acme.blockchain.jdoe.channel1" using chaincode spec "invocationSpec2"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "invokeProposal2" to endorsers with timeout of "30" seconds with proposal responses "invokeProposal2Responses":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    Then user "dev0Org0" expects proposal responses "invokeProposal2Responses" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    And user "dev0Org0" expects proposal responses "invokeProposal2Responses" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    When the user "dev0Org0" creates transaction "invokeTx2" from proposal "invokeProposal2" and proposal responses "invokeProposal2Responses" for channel "com.acme.blockchain.jdoe.channel1"
+
+    And the user "dev0Org0" broadcasts transaction "invokeTx2" to orderer "<orderer0>"
+
+      # Sleep as the local orderer ledger needs to create the block that corresponds to the start number of the seek request
+    And I wait "<BroadcastWaitTime>" seconds
+
+    And user "dev0Org0" sends deliver a seek request on node "<orderer0>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel1 | 4     | 4   |
+
+    Then user "dev0Org0" should get a delivery "deliveredInvokeTx2Block" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
+
+    ###########################################################################
+
+    ###########################################################################
+    #
+    # Upgrading orderer1 and entry point for invoking after upgrading orderer1
+    #
+    ###########################################################################
+
+    Given all orderer admins agree to upgrade
+
+    And we "stop" service "<orderer1>"
+
     And user "orderer1Admin" upgrades "<orderer1>" to version "<OrdererUpgradeVersion>"
     And I wait "<RestartOrdererWaitTime>" seconds
+
+    And I wait "<VerifyAllBlockHeightsWaitTime>" seconds
+
+    And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer1>" using port "7050"
+    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgradeOfOrderersFromOrderer1" from orderer "<orderer1>" for channel "com.acme.blockchain.jdoe.channel1"
+
+    When user "dev0Org0" creates a chaincode invocation spec "invocationSpec3" using spec "ccSpec" with input:
+      | funcName | arg1 | arg2 | arg3 |
+      | invoke   | a    | b    | 10   |
+
+    And user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "invokeProposal3" for channel "com.acme.blockchain.jdoe.channel1" using chaincode spec "invocationSpec3"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "invokeProposal3" to endorsers with timeout of "30" seconds with proposal responses "invokeProposal3Responses":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    Then user "dev0Org0" expects proposal responses "invokeProposal3Responses" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    And user "dev0Org0" expects proposal responses "invokeProposal3Responses" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    When the user "dev0Org0" creates transaction "invokeTx3" from proposal "invokeProposal3" and proposal responses "invokeProposal3Responses" for channel "com.acme.blockchain.jdoe.channel1"
+
+    And the user "dev0Org0" broadcasts transaction "invokeTx3" to orderer "<orderer1>"
+
+      # Sleep as the local orderer ledger needs to create the block that corresponds to the start number of the seek request
+    And I wait "<BroadcastWaitTime>" seconds
+
+    And user "dev0Org0" sends deliver a seek request on node "<orderer1>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel1 | 5     | 5   |
+
+    Then user "dev0Org0" should get a delivery "deliveredInvokeTx3Block" from "<orderer1>" of "1" blocks with "1" messages within "1" seconds
+
+    ###########################################################################
+
+    ###########################################################################
+    #
+    # Upgrading orderer2 and entry point for invoking after upgrading orderer2
+    #
+    ###########################################################################
+
+    Given all orderer admins agree to upgrade
+
+    And we "stop" service "<orderer2>"
 
     And user "orderer2Admin" upgrades "<orderer2>" to version "<OrdererUpgradeVersion>"
     And I wait "<RestartOrdererWaitTime>" seconds
 
     And I wait "<VerifyAllBlockHeightsWaitTime>" seconds
 
-#    And all orderer nodes are verified ready
-    And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer0>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgradeOfOrderersFromOrderer0" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
-
-    And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer1>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgradeOfOrderersFromOrderer1" from orderer "<orderer1>" for channel "com.acme.blockchain.jdoe.channel1"
-
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer2>" using port "7050"
     And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgradeOfOrderersFromOrderer2" from orderer "<orderer2>" for channel "com.acme.blockchain.jdoe.channel1"
+
+    When user "dev0Org0" creates a chaincode invocation spec "invocationSpec4" using spec "ccSpec" with input:
+      | funcName | arg1 | arg2 | arg3 |
+      | invoke   | a    | b    | 10   |
+
+    And user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "invokeProposal4" for channel "com.acme.blockchain.jdoe.channel1" using chaincode spec "invocationSpec4"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "invokeProposal4" to endorsers with timeout of "30" seconds with proposal responses "invokeProposal4Responses":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    Then user "dev0Org0" expects proposal responses "invokeProposal4Responses" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    And user "dev0Org0" expects proposal responses "invokeProposal4Responses" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    When the user "dev0Org0" creates transaction "invokeTx4" from proposal "invokeProposal4" and proposal responses "invokeProposal4Responses" for channel "com.acme.blockchain.jdoe.channel1"
+
+    And the user "dev0Org0" broadcasts transaction "invokeTx4" to orderer "<orderer2>"
+
+      # Sleep as the local orderer ledger needs to create the block that corresponds to the start number of the seek request
+    And I wait "<BroadcastWaitTime>" seconds
+
+    And user "dev0Org0" sends deliver a seek request on node "<orderer2>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel1 | 6     | 6   |
+
+    Then user "dev0Org0" should get a delivery "deliveredInvokeTx4Block" from "<orderer2>" of "1" blocks with "1" messages within "1" seconds
+
+    ###########################################################################
 
 
 #    When when I submit a capabilities to an orderer
@@ -498,7 +632,7 @@ Feature: Bootstrap
 
     And user "dev0Org0" sends deliver a seek request on node "<orderer0>" with properties:
       | ChainId                           | Start | End |
-      | com.acme.blockchain.jdoe.channel1 | 4     | 4   |
+      | com.acme.blockchain.jdoe.channel1 | 7     | 7   |
 
     Then user "dev0Org0" should get a delivery "deliveredinvokeTxPostUpgradeBlock" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
 
@@ -560,7 +694,6 @@ Feature: Bootstrap
     And the user "configAdminOrdererOrg0" creates a ConfigUpdate Tx "capabilitiesConfigUpdateTx2" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForOrderer2"
 
     And the user "configAdminOrdererOrg0" using cert alias "config-admin-cert" broadcasts ConfigUpdate Tx "capabilitiesConfigUpdateTx2" to orderer "<orderer0>"
-
 
     #  So if you create a new Channel post orderer fix, you will now have a correctly set mod_policy at channel level vs prior channel genesis block.
 
@@ -702,11 +835,11 @@ Feature: Bootstrap
 
     # TODO: Once events are working, consider listen event listener as well.
 
-    # FabricBaseVersion normally is 'x86_64-1.0.3'
+    # FabricBaseVersion normally is 'x86_64-1.0.4'
     Examples: Orderer Options
       | ComposeFile                       | SystemUpWaitTime | ConsensusType | ChannelJoinDelay | BroadcastWaitTime | orderer0 | orderer1 | orderer2 | Orderer Specific Info | RestartOrdererWaitTime | FabricBaseVersion | OrdererUpgradeVersion | RestartPeerWaitTime | PeerUpgradeVersion | VerifyAllBlockHeightsWaitTime |
 #      | dc-base.yml                       | 0                | solo          | 2                | 2                 | orderer0 | orderer0 | orderer0 |                       | 0                      | x86_64-1.0.3      | latest                | 2                   | latest             | 10                            |
 #      | dc-base.yml  dc-peer-couchdb.yml                      | 10               | solo          | 2                | 2                 | orderer0 | orderer0 | orderer0 |                       | 2                      | latest                | 2                   | latest             |
-      | dc-base.yml  dc-orderer-kafka.yml | 40               | kafka         | 10               | 5                 | orderer0 | orderer1 | orderer2 |                       | 2                      | x86_64-1.0.1      | latest                | 0                   | latest             | 30                            |
+      | dc-base.yml  dc-orderer-kafka.yml | 40               | kafka         | 10               | 5                 | orderer0 | orderer1 | orderer2 |                       | 2                      | x86_64-1.0.4      | latest                | 0                   | latest             | 30                            |
 #      | dc-base.yml  dc-peer-couchdb.yml dc-orderer-kafka.yml | 40               | kafka         | 10               | 5                 | orderer0 | orderer1 | orderer2 |                       | 2                      | latest                | 0                   | latest             |
 #      | dc-base.yml  dc-peer-couchdb.yml dc-composer.yml      | 10               | solo          | 2                | 2                 | orderer0 | orderer0 | orderer0 |                       | 2                      | latest                | 0                   | latest             |
