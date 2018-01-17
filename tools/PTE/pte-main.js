@@ -128,8 +128,6 @@ var allEventhubs = [];
 var org;
 var orgName;
 
-var targets = [];
-var eventHubs=[];
 var orderer;
 
 var sBlock = 0;
@@ -143,7 +141,7 @@ function printChainInfo(channel) {
     logger.info('[printChainInfo] channel name: ', channel.getName());
     logger.info('[printChainInfo] orderers: ', channel.getOrderers());
     logger.info('[printChainInfo] peers: ', channel.getPeers());
-    logger.info('[printChainInfo] events: ', eventHubs);
+    logger.info('[printChainInfo] events: ', allEventhubs);
 }
 
 function clientNewOrderer(client, org) {
@@ -192,137 +190,11 @@ function chainAddOrderer(channel, client, org) {
     logger.info('[chainAddOrderer] channel orderers: ', channel.getOrderers());
 }
 
-function channelAddAllPeer(chain, client) {
-    logger.info('[channelAddAllPeer] channel name: ', channel.getName());
-    var peerTmp;
-    var data;
-    var eh;
-    for (let key1 in ORGS) {
-        if (ORGS.hasOwnProperty(key1)) {
-            for (let key in ORGS[key1]) {
-            if (key.indexOf('peer') === 0) {
-                if (TLS.toUpperCase() == 'ENABLED') {
-                    data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key].tls_cacerts));
-                    peerTmp = client.newPeer(
-                        ORGS[key1][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key1][key]['server-hostname']
-                        }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                } else {
-                    peerTmp = client.newPeer( ORGS[key1][key].requests);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                }
-
-                eh=client.newEventHub();
-                if (TLS.toUpperCase() == 'ENABLED') {
-                    eh.setPeerAddr(
-                        ORGS[key1][key].events,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key1][key]['server-hostname']
-                        }
-                    );
-                } else {
-                    eh.setPeerAddr(ORGS[key1][key].events);
-                }
-                eh.connect();
-                eventHubs.push(eh);
-            }
-            }
-        }
-    }
-    logger.debug('[channelAddAllPeer] channel peers: ', channel.getPeers());
-}
-
-function channelRemoveAllPeer(channel, client) {
-    logger.info('[channelRemoveAllPeer] channel name: ', channel.getName());
-    var peerTmp;
-    var data;
-    var eh;
-    for (let key1 in ORGS) {
-        if (ORGS.hasOwnProperty(key1)) {
-            for (let key in ORGS[key1]) {
-            if (key.indexOf('peer') === 0) {
-                if (TLS.toUpperCase() == 'ENABLED') {
-                    data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key].tls_cacerts));
-                    peerTmp = client.newPeer(
-                        ORGS[key1][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key1][key]['server-hostname']
-                        }
-                    );
-                    logger.info('[channelRemoveAllPeer] channel remove peer: ', ORGS[key1][key].requests);
-                    channel.removePeer(peerTmp);
-                } else {
-                    peerTmp = client.newPeer( ORGS[key1][key].requests);
-                    logger.info('[channelRemoveAllPeer] channel remove peer: ', ORGS[key1][key].requests);
-                    channel.removePeer(peerTmp);
-                }
-
-            }
-            }
-        }
-    }
-}
-
-function channelAddAnchorPeer(channel, client, org) {
-    logger.info('[channelAddAnchorPeer] channel name: ', channel.getName());
-    var peerTmp;
-    var data;
-    var eh;
-    for (let key in ORGS) {
-        if (ORGS.hasOwnProperty(key) && typeof ORGS[key].peer1 !== 'undefined') {
-            if (TLS.toUpperCase() == 'ENABLED') {
-                data = fs.readFileSync(path.resolve(goPath, ORGS[key].peer1['tls_cacerts']));
-                peerTmp = client.newPeer(
-                    ORGS[key].peer1.requests,
-                    {
-                        pem: Buffer.from(data).toString(),
-                        'ssl-target-name-override': ORGS[key].peer1['server-hostname']
-                    }
-                );
-                targets.push(peerTmp);
-                channel.addPeer(peerTmp);
-            } else {
-                peerTmp = client.newPeer( ORGS[key].peer1.requests);
-                targets.push(peerTmp);
-                channel.addPeer(peerTmp);
-            }
-            logger.info('[channelAddAnchorPeer] requests: %s', ORGS[key].peer1.requests);
-
-            //an event listener can only register with a peer in its own org
-            if ( key == org ) {
-                eh=client.newEventHub();
-                if (TLS.toUpperCase() == 'ENABLED') {
-                    eh.setPeerAddr(
-                        ORGS[key].peer1.events,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key].peer1['server-hostname']
-                        }
-                    );
-                } else {
-                    eh.setPeerAddr(ORGS[key].peer1.events);
-                }
-                eh.connect();
-                eventHubs.push(eh);
-                logger.info('[channelAddAnchorPeer] events: %s ', ORGS[key].peer1.events);
-            }
-        }
-    }
-    logger.debug('[channelAddAnchorPeer] channel peers: ', channel.getPeers());
-}
-
 function channelAddPeer(channel, client, org) {
     logger.info('[channelAddPeer] channel name: ', channel.getName());
     var peerTmp;
-    var eh;
+    var targets = [];
+
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
@@ -346,13 +218,16 @@ function channelAddPeer(channel, client, org) {
         }
     }
     logger.info('[channelAddPeer] channel peers: ', channel.getPeers());
+
+    return targets;
 }
 
 function channelAddQIPeer(channel, client, qorg, qpeer) {
     logger.info('[channelAddQIPeer] channel name: ', channel.getName());
     logger.info('[channelAddQIPeer] qorg %s qpeer: ', qorg,qpeer);
     var peerTmp;
-    var eh;
+    var targets = [];
+
     for (let key in ORGS[qorg]) {
         if (ORGS[qorg].hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
@@ -376,12 +251,15 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
         }
     }
     logger.info('[channelAddQIPeer] channel peers: ', channel.getPeers());
+
+    return targets;
 }
 
 function channelAddPeer1(channel, client, org) {
     logger.info('[channelAddPeer1] channel name: %s, org: %s', channel.getName(), org);
     var peerTmp;
-    var eh;
+    var targets = [];
+
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
@@ -406,40 +284,18 @@ function channelAddPeer1(channel, client, org) {
         }
     }
     logger.debug('[channelAddPeer1] org: %s, channel peers: ', org, channel.getPeers());
-}
 
-function channelRemovePeer(channel, client, org) {
-    logger.info('[channelRemovePeer] channel name: ', channel.getName());
-    var peerTmp;
-    var eh;
-    for (let key in ORGS[org]) {
-        if (ORGS[org].hasOwnProperty(key)) {
-            if (key.indexOf('peer') === 0) {
-                if (TLS.toUpperCase() == 'ENABLED') {
-                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[org][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                        }
-                    );
-                    channel.removePeer(peerTmp);
-                } else {
-                    peerTmp = client.newPeer( ORGS[org][key].requests);
-                    targets.push(peerTmp);
-                    channel.removePeer(peerTmp);
-                }
-            }
-        }
-    }
+    return targets;
 }
-
 
 function channelAddPeerEventJoin(channel, client, org) {
     logger.info('[channelAddPeerEvent] channel name: ', channel.getName());
             var eh;
             var peerTmp;
+
+            var targets = [];
+            var eventHubs = [];
+
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
                     if (key.indexOf('peer') === 0) {
@@ -482,58 +338,17 @@ function channelAddPeerEventJoin(channel, client, org) {
                     }
                 }
             }
+
+    allEventhubs = allEventhubs.concat(eventHubs);
+    return { targets: targets, eventHubs: eventHubs };
 }
 
-function channelAddPeerEvent(channel, client, org) {
-    logger.info('[channelAddPeerEvent] channel name: ', channel.getName());
-            var eh;
-            var peerTmp;
-            for (let key in ORGS[org]) {
-                if (ORGS[org].hasOwnProperty(key)) {
-                    if (key.indexOf('peer') === 0) {
-                        if (TLS.toUpperCase() == 'ENABLED') {
-                            let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                            peerTmp = client.newPeer(
-                                    ORGS[org][key].requests,
-                                    {
-                                        pem: Buffer.from(data).toString(),
-                                        'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                    }
-                            );
-                            targets.push(peerTmp);
-                            channel.addPeer(peerTmp);
-                        } else {
-                            peerTmp = client.newPeer(
-                                    ORGS[org][key].requests
-                            );
-                            channel.addPeer(peerTmp);
-                            logger.info('[channelAddPeerEvent] peer: ', ORGS[org][key].requests);
-                        }
-
-                        eh=client.newEventHub();
-                        if (TLS.toUpperCase() == 'ENABLED') {
-                            let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                            eh.setPeerAddr(
-                                ORGS[org][key].events,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                }
-                            );
-                        } else {
-                            eh.setPeerAddr(ORGS[org][key].events);
-                        }
-                        eh.connect();
-                        eventHubs.push(eh);
-                        logger.info('[channelAddPeerEvent] requests: %s, events: %s ', ORGS[org][key].requests, ORGS[org][key].events);
-                    }
-                }
-            }
-}
 function channelAddEvent(channel, client, org) {
     logger.info('[channelAddEvent] channel name: ', channel.getName());
             var eh;
             var peerTmp;
+            var eventHubs = [];
+
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
                     if (key.indexOf('peer') === 0) {
@@ -558,6 +373,9 @@ function channelAddEvent(channel, client, org) {
                     }
                 }
             }
+
+    allEventhubs = allEventhubs.concat(eventHubs);
+    return eventHubs;
 }
 
 // test begins ....
@@ -565,7 +383,7 @@ performance_main();
 
 // install chaincode
 function chaincodeInstall(channel, client, org) {
-    orgName = ORGS[org].name;
+    var orgName = ORGS[org].name;
     logger.info('[chaincodeInstall] org: %s, org Name: %s, channel name: %s', org, orgName, channel.getName());
 
     var cryptoSuite = hfc.newCryptoSuite();
@@ -574,7 +392,7 @@ function chaincodeInstall(channel, client, org) {
 
     chainAddOrderer(channel, client, org);
 
-    channelAddPeer(channel, client, org);
+    var targets = channelAddPeer(channel, client, org);
     //printChainInfo(channel);
 
     //sendInstallProposal
@@ -608,7 +426,6 @@ function chaincodeInstall(channel, client, org) {
             if (all_good) {
                 logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s:%s) and received ProposalResponse: Status - %s', channelName, orgName, proposalResponses[0].response.status));
                 evtDisconnect();
-                process.exit();
             } else {
                 logger.error('[chaincodeInstall] Failed to send install Proposal in (%s:%s) or receive valid response. Response null or status is not 200. exiting...', channelName, orgName);
                 evtDisconnect();
@@ -617,7 +434,7 @@ function chaincodeInstall(channel, client, org) {
 
         }, (err) => {
             logger.error('Failed to enroll user \'admin\'. ' + err);
-            evtDisconn;
+            evtDisconnect();
             process.exit();
 
         });
@@ -683,7 +500,7 @@ function chaincodeInstantiate(channel, client, org) {
             var orgInstantiate = channelOrgName[ivar];
             channelAddPeer1(channel, client, orgInstantiate);
         }
-        channelAddEvent(channel, client, org);
+        let eventHubs = channelAddEvent(channel, client, org);
         //printChainInfo(channel);
 
         channel.initialize()
@@ -713,7 +530,7 @@ function chaincodeInstantiate(channel, client, org) {
             var all_good = true;
             for(var i in proposalResponses) {
                 let one_good = false;
-                if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
+                if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
                     one_good = true;
                     logger.info('[chaincodeInstantiate] channelName(%s) chaincode instantiation was good', channelName);
                 } else {
@@ -788,7 +605,6 @@ function chaincodeInstantiate(channel, client, org) {
             if (response.status === 'SUCCESS') {
                 logger.info('[chaincodeInstantiate(Nid=%d)] Successfully instantiate transaction on %s. ', Nid, channelName);
                 evtDisconnect();
-                return;
             } else {
                 logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error code: ', Nid, channelName, response.status);
                 evtDisconnect();
@@ -924,12 +740,14 @@ function createOneChannel(client ,channelOrgName) {
 
 // join channel
 function joinChannel(channel, client, org) {
-        orgName = ORGS[org].name;
+        var orgName = ORGS[org].name;
         logger.info('[joinChannel] Calling peers in organization (%s) to join the channel (%s)', orgName, channelName);
         var username = ORGS[org].username;
         var secret = ORGS[org].secret;
         logger.info('[joinChannel] user=%s, secret=%s', username, secret);
         var genesis_block = null;
+        var eventHubs = [];
+        var blockCallbacks = [];
 
         // add orderers
         chainAddOrderer(channel, client, org);
@@ -964,7 +782,9 @@ function joinChannel(channel, client, org) {
                 logger.debug('[joinChannel] org admin: ', admin);
 
                 // add peers and events
-                channelAddPeerEventJoin(channel, client, org);
+                var targeteh = channelAddPeerEventJoin(channel, client, org);
+                eventHubs = targeteh.eventHubs;
+                var targets = targeteh.targets;
 
                 var eventPromises = [];
 
@@ -972,7 +792,7 @@ function joinChannel(channel, client, org) {
                         let txPromise = new Promise((resolve, reject) => {
                                 let handle = setTimeout(reject, 30000);
 
-                                eh.registerBlockEvent((block) => {
+                                var cb = eh.registerBlockEvent((block) => {
                                         clearTimeout(handle);
 
                                         // in real-world situations, a peer may have more than one channels so
@@ -993,6 +813,7 @@ function joinChannel(channel, client, org) {
                                     logger.error('[joinChannel] Failed to registerBlockEvent due to error: ' + err.stack ? err.stack : err);
                                     throw new Error('[joinChannel] Failed to registerBlockEvent due to error: ' + err.stack ? err.stack : err);
                                 });
+                                blockCallbacks.push(cb);
                         }, (err) => {
                             logger.error('[joinChannel] Failed to Promise due to error: ' + err.stack ? err.stack : err);
                             throw new Error('Failed to Promise due to error: ' + err.stack ? err.stack : err);
@@ -1020,16 +841,15 @@ function joinChannel(channel, client, org) {
 
                 if(results[0] && results[0][0] && results[0][0].response && results[0][0].response.status == 200) {
                         logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
-                        process.exit();
-                        //evtDisconnect();
+                        evtDisconnect(eventHubs, blockCallbacks);
                 } else {
                         logger.error('[joinChannel] Failed to join peers in (%s:%s)', channelName, orgName);
-                        evtDisconnect();
+                        evtDisconnect(eventHubs, blockCallbacks);
                         throw new Error('[joinChannel] Failed to join channel');
                 }
         }, (err) => {
                 logger.error('[joinChannel] Failed to join channel due to error: ' + err.stack ? err.stack : err);
-                evtDisconnect();
+                evtDisconnect(eventHubs, blockCallbacks);
         });
 }
 
@@ -1130,16 +950,16 @@ function queryBlockchainInfo(channel, client, org) {
 function performance_main() {
     var channelCreated = 0;
     // send proposal to endorser
-    for (i=0; i<channelOrgName.length; i++ ) {
-        org = channelOrgName[i];
-        orgName=ORGS[org].name;
+    for (var i=0; i<channelOrgName.length; i++ ) {
+        let org = channelOrgName[i];
+        let orgName=ORGS[org].name;
         logger.info('[performance_main] org= %s, org Name= %s', org, orgName);
-        var client = new hfc();
+        let client = new hfc();
 
         if ( transType.toUpperCase() == 'INSTALL' ) {
             initDeploy();
-            var username = ORGS[org].username;
-            var secret = ORGS[org].secret;
+            let username = ORGS[org].username;
+            let secret = ORGS[org].secret;
             logger.info('[performance_main] Deploy: user= %s, secret= %s', username, secret);
 
             hfc.newDefaultKeyValueStore({
@@ -1194,6 +1014,8 @@ function performance_main() {
                     }
                 );
             });
+            // chaincodeInstantiate send requests to all orgs, so no need to iterate
+            break;
         } else if ( transType.toUpperCase() == 'CHANNEL' ) {
             if ( channelOpt.action.toUpperCase() == 'CREATE' ) {
                 // create channel once
@@ -1375,10 +1197,16 @@ function sleep(ms) {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function evtDisconnect() {
-    for ( i=0; i<g_len; i++) {
+function evtDisconnect(eventHubs, blockCallbacks) {
+    if (!eventHubs) {
+        eventHubs = allEventhubs;
+    }
+    for (var i=0; i<eventHubs.length; i++) {
         if (eventHubs[i] && eventHubs[i].isconnected()) {
-            logger.info('Disconnecting the event hub: %d', i);
+            logger.info('Disconnecting the event hub: %s', eventHubs[i].getPeerAddr());
+            if (blockCallbacks && blockCallbacks[i]) {
+                eventHubs[i].unregisterBlockEvent(blockCallbacks[i]);
+            }
             eventHubs[i].disconnect();
         }
     }
