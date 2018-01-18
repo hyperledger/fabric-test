@@ -6,6 +6,7 @@
 
 from behave import *
 import sys
+import os
 import json
 import time
 import random
@@ -435,7 +436,8 @@ def step_impl(context):
 @when(u'a user creates a channel named "{channelId}" using orderer "{orderer}')
 def create_channel_impl(context, channelId, orderer):
     # Be sure there is a transaction block for this channel
-    config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
+    if not os.path.exists("./configs/{0}/{1}.tx".format(context.projectName, channelId)):
+        config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
     context.interface.create_channel(context, orderer, channelId)
 
 @when(u'a user creates a channel named "{channelId}"')
@@ -464,12 +466,12 @@ def step_impl(context, peer):
     context.interface.join_channel(context, [peer], context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}" using "{orderer}" to location "{location}"')
-def fetch_impl(context, channelID, peer, orderer, location):
-    context.interface.fetch_channel(context, [peer], orderer, channelID, location)
+def fetch_impl(context, channelID, peer, orderer, location, ext="block"):
+    context.interface.fetch_channel(context, [peer], orderer, channelID, location, ext=ext)
 
 @when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}" to location "{location}"')
 def step_impl(context, channelID, peer, location):
-    fetch_impl(context, channelID, peer, "orderer0.example.com", location)
+    fetch_impl(context, channelID, peer, "orderer0.example.com", location, ext='tx')
 
 @when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}"')
 def step_impl(context, channelID, peer):
@@ -579,11 +581,19 @@ def not_containing_impl(context, response, peer):
 def step_impl(context, response):
     not_containing_impl(context, response, "peer0.org1.example.com")
 
-@then(u'the file "{channelID}.block" file is fetched from peer "{peer}" at location "{location}"')
-def block_found_impl(context, channelID, peer, location):
+@then(u'the "{fileName}" file is fetched from peer "{peer}" at location "{location}"')
+def block_found_impl(context, fileName, peer, location=None):
+    if location is None:
+        location = "/var/hyperledger/configs/{0}".format(context.projectName)
+
     output = context.composition.docker_exec(["ls", location], [peer])
-    assert "{0}.block".format(channelID) in output[peer], "The channel block file has not been fetched"
+    assert fileName in output[peer], "The channel block file has not been fetched"
 
 @then(u'the block file is fetched from peer "{peer}" at location "{location}"')
 def step_impl(context, peer, location):
     block_found_impl(context, context.interface.TEST_CHANNEL_ID, peer, location)
+
+@then(u'the "{fileName}" file is fetched from peer "{peer}"')
+def step_impl(context, fileName, peer):
+    info = fileName.split('.')
+    block_found_impl(context, info[0], peer, None)

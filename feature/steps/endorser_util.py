@@ -429,17 +429,20 @@ class CLIInterface(InterfaceBase):
 
         return output
 
-    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None, user="Admin"):
+    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None, user="Admin", ext=""):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         if not location:
             location = configDir
+
+        if not ext:
+            ext = "block"
 
         for peer in peers:
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
             setup = self.get_env_vars(context, peer, includeAll=False, user=user)
             command = ["peer", "channel", "fetch", "config",
-                       "{0}/{1}.block".format(location, channelId),
+                       "{0}/{1}.{2}".format(location, channelId, ext),
                        "--channelID", channelId,
                        "--orderer", '{0}:7050'.format(orderer)]
             if context.tls:

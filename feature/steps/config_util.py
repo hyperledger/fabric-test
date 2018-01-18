@@ -72,8 +72,8 @@ def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgName=N
     # Peer Stanza
     peerStanzas = ""
     for count in range(int(numOrgs)):
-        name = "Org{0}ExampleCom".format(count)
-        domain = "org{0}.example.com".format(count)
+        name = "Org{0}ExampleCom".format(count+1)
+        domain = "org{0}.example.com".format(count+1)
         if orgName is not None:
             name = orgName.title().replace('.', '')
             domain = orgName

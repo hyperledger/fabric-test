@@ -40,7 +40,7 @@ def step_impl(context, toolCommand):
 @given(u'I compose "{composeYamlFile}"')
 def compose_impl(context, composeYamlFile, projectName=None, startContainers=True):
     if not hasattr(context, "composition"):
-       context.composition = compose_util.Composition(context, composeYamlFile,
+        context.composition = compose_util.Composition(context, composeYamlFile,
                                            projectName=projectName,
                                            startContainers=startContainers)
     else:
@@ -70,7 +70,7 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=
     channelID = context.interface.SYS_CHANNEL_ID
     if hasattr(context, "composition"):
         context.projectName = context.composition.projectName
-    else:
+    elif not hasattr(context, "projectName"):
         context.projectName = str(uuid.uuid1()).replace('-','')
     config_util.generateCrypto(context)
     config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
@@ -232,16 +232,22 @@ def start_network_impl(context, ordererType, tlsEnabled=True):
     for composeFile in context.composeFile:
         assert os.path.exists(composeFile), "The docker compose file does not exist: {0}".format(composeFile)
 
+    if not hasattr(context, "projectName"):
+        context.projectName = None
+
     # Should TLS be enabled
     context.tls = tlsEnabled
-    if tlsEnabled:
-        compose_util.enableTls(context, tlsEnabled)
+    compose_util.enableTls(context, tlsEnabled, projectName=context.projectName)
 
     compose_impl(context, context.composeFile, projectName=context.projectName)
 
 @when(u'I start a fabric network using a {ordererType} orderer service')
 def step_impl(context, ordererType):
     start_network_impl(context, ordererType, False)
+
+@when(u'I start a fabric network with TLS')
+def step_impl(context):
+    start_network_impl(context, "solo", True)
 
 @when(u'I start a fabric network')
 def step_impl(context):

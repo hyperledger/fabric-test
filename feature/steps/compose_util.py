@@ -13,9 +13,9 @@ import time
 from common_util import Timeout, convertBoolean
 
 
-def enableTls(context, tlsEnabled):
+def enableTls(context, tlsEnabled, projectName=None):
     if not hasattr(context, "composition"):
-        context.composition = Composition(context, startContainers=False)
+        context.composition = Composition(context, projectName=projectName, startContainers=False)
     context.composition.environ["ORDERER_GENERAL_TLS_ENABLED"] = convertBoolean(tlsEnabled)
     context.composition.environ["CORE_PEER_TLS_ENABLED"] = convertBoolean(tlsEnabled)
 
