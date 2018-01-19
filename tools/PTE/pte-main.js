@@ -50,7 +50,7 @@ var procDone=0;
 // input: userinput json file
 var PTEid = parseInt(process.argv[5]);
 var loggerMsg='PTE ' + PTEid + ' main';
-var logger = utils.getLogger(loggerMsg);
+var logger = new testUtil.PTELogger({"prefix":loggerMsg, "level":"info"});
 
 var Nid = parseInt(process.argv[2]);
 var uiFile = process.argv[3];
