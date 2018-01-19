@@ -85,6 +85,45 @@ brew install gdate --with-default-names
 ```
 
 ## Setup
+PTE can be used with either the stable `fabric-sdk-node` libraries obtained from the `npm` package manager, or it can be used with the latest source from https://github.com/hyperledger/fabric-test
+
+### Use PTE with stable `fabric-sdk-node` libraries
+1. Download fabric-test sources:
+    - `go get -d github.com/hyperledger/fabric-test`
+
+2. Download or update fabric, and fabric-ca sources, see [Hyperledger fabric-test](https://github.com/hyperledger/fabric-test) for details:
+    - `cd $GOPATH/src/github.com/hyperledger/fabric-test`
+    - if first time:
+         - `git submodule update --init --recursive`
+         - `git submodule foreach git pull origin master`
+    - else:
+         - `git submodule foreach git pull origin master`
+
+3. Obtain appropriate docker images:
+
+Optionally, you may choose to skip this step of obtaining `fabric` and `fabric-ca` images if plan to run PTE against a remote Fabric network. See [Creating a local Fabric network](#creating-a-local-fabric-network) for additional information on this.
+
+    - fabric
+        - download from dockerhub:
+            * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric/scripts`
+            * If testing v1.0.0: `./bootstrap-1.0.0.sh`
+        - build images yourself (v1.0.0 shown here):
+            * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric/`
+            * `git checkout v1.0.0`
+            * `make docker`
+    - fabric-ca
+        * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-ca`
+        * `git checkout v1.0.0`
+        * `make docker`
+
+4. Install PTE
+    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+    - `npm install fabric-client@1.0.2`
+    - `npm install fabric-ca-client@1.0.2`
+
+
+
+### Use PTE with latest `fabric-sdk-node` source
 1. Download fabric-test sources:
     - `go get -d github.com/hyperledger/fabric-test`
 
@@ -123,12 +162,14 @@ brew install gdate --with-default-names
 4. Install PTE:
     - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools`
     - `cp -r PTE $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test`
+    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE  # run PTE from this directory`
 
 
-5. Create Service Credentials file(s) for your Fabric network:
+Once installed, the following steps are required.
+1. Create Service Credentials file(s) for your Fabric network:
     - See the examples in `SCFiles` and change the address to your own Fabric addresses and credentials. Add a block for each organization and peer, ensuring correctness.
 
-6. Specify run scenarios:
+2. Specify run scenarios:
     - Create your own version of PTEMgr.txt (if use pte_mgr.sh), runCases.txt and User Input json files, according to the test requirements. Use the desired chaincode name, channel name, organizations, etc. Using the information in your own network profiles, remember to "create" all channels, "join" channel, and "install"  and "instantiate" chaincode for each org, to ensure all peers are set up correctly. Additional information can be found below.
 
 ## Running PTE
