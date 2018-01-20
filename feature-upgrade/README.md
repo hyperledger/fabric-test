@@ -1,4 +1,4 @@
-# Welcome to Fabric Prototype
+# Welcome to hyperledger/fabric-test/feature-upgrade
 Developers will find these mechanisms useful for prototyping variant Hyperledger Fabric based systems.
 
 ## Getting started
@@ -7,7 +7,7 @@ Developers will find these mechanisms useful for prototyping variant Hyperledger
 
 #### Prerequisites Setup
 Make sure you have a properly configured Hyperledger Fabric development environment, and have already cloned the fabric-test repository.
-Go to the folder that contains our diverged copy of the files from "git clone https://github.com/jeffgarratt/fabric-prototype.git".
+Go to the folder that was originally copied from "https://github.com/jeffgarratt/fabric-prototype.git".
 ```
 cd $GOPATH/src/github.com/hyperledger/fabric-test/feature-upgrade
 ```
@@ -76,7 +76,7 @@ cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric
 # Optionally perform the following clean if you are unsure of your environment state.
 make clean
 
-# make the peer executable
+# Build the peer executable
 make peer
 ```
 
@@ -86,11 +86,10 @@ Execute the following command if necessary.
     export PATH=$PATH:$GOPATH/src/github.com/hyperledger/fabric-test/fabric/build/bin
 ```
 
-The behave system also uses several docker containers.  Execute the following commands to create the required docker containers.
+The behave system also uses several docker containers.  This includes pulling the latest available docker images for thirdparty docker containers (couchdb, kafka, zookeeper), as well as images for a prior release from which to upgrade.  Execute the following commands to create the required docker containers.
 
 ```
-    make peer-docker
-    make orderer-docker
+    make docker
 ```
 
 Change back to the upgrade test folder (where this readme is located) to execute subsequent behave commands.
@@ -99,13 +98,7 @@ Change back to the upgrade test folder (where this readme is located) to execute
     cd $GOPATH/src/github.com/hyperledger/fabric-test/feature-upgrade
 ```
 
-#### Example: Run all of the behave features and suppressing skipped steps (-k)
-
-```
-    behave -k
-```
-
-#### Examples: Run test scenarios in a specific feature file
+#### Examples: Run test scenarios in a specific feature file, while suppressing skipped steps (-k)
 
 ```
     behave -k features/bootstrap.feature
