@@ -112,11 +112,12 @@ Examples:
 @daily
 Scenario: FAB-4773: Fetching of a channel genesis block
     Given I have a crypto config file with 2 orgs, 2 peers, 3 orderers, and 2 users
-    And I have a fabric config file
     When the crypto material is generated for TLS network
-    And the network is bootstrapped for an orderer
-    And the network is bootstrapped for a channel named "mychannel"
-    And I start a fabric network
-    And a user creates a channel named "mychannel"
-    And a user fetches genesis information for a channel "mychannel" from peer "peer1.org1.example.com" to location "."
-    Then the file "mychannel.block" file is fetched from peer "peer1.org1.example.com" at location "."
+    Given I have a fabric config file
+    When the network is bootstrapped for an orderer
+    When I start a fabric network with TLS
+    When the network is bootstrapped for a channel named "mychannel"
+    When a user creates a channel named "mychannel"
+    And a user fetches genesis information for a channel "mychannel" from peer "peer1.org1.example.com"
+    Then the "mychannel.tx" file is generated
+    Then the "mychannel.tx" file is fetched from peer "peer1.org1.example.com"

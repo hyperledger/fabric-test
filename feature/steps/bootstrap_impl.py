@@ -12,7 +12,8 @@ TEST_CHANNEL_ID = "syschannel"
 
 @given(u'I have a fabric config file')
 def step_impl(context):
-    config_util.generateCrypto(context)
+    if not hasattr(context, "projectName"):
+        config_util.generateCrypto(context)
     config_util.setupConfigs(context, TEST_CHANNEL_ID)
 
 @given(u'I have a crypto config file with {numOrgs} orgs, {numPeers} peers, {numOrderers} orderers, and {numUsers} users')
@@ -21,8 +22,9 @@ def step_impl(context, numOrgs, numPeers, numOrderers, numUsers):
 
 @when(u'the network is bootstrapped for an orderer of type {ordererType}')
 def ordererBootstrap_impl(context, ordererType):
-    profile = config_util.PROFILE_TYPES[ordererType]
-    config_util.generateOrdererConfig(context, TEST_CHANNEL_ID, profile, "orderer.block")
+    context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
+    config_util.generateOrdererConfig(context, config_util.CHANNEL_PROFILE, context.ordererProfile, "orderer.block")
+    config_util.generateChannelConfig(context.interface.SYS_CHANNEL_ID, config_util.CHANNEL_PROFILE, context)
 
 @when(u'the network is bootstrapped for an orderer')
 def step_impl(context):
