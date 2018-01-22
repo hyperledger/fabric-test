@@ -1,0 +1,8 @@
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i1-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i2-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i3-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i4-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i5-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i6-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i7-TLS.txt
+driver=pte CITest/FAB-7627-16i/samplecc/runCases-FAB-7627-16i8-TLS.txt
