@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-7627-16i/samplecc/samplecc-chan3-FAB-7627-16i-TLS.json
