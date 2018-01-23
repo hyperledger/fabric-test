@@ -652,7 +652,8 @@ where:
              }
 
 * **eventOpt**: event hub options
-    * **type**: event type, default: Peer
+    * **type**: event service type, default: Peer
+        * **FilteredBlock**: filtered block event service at channel level
         * **Channel**: events at channel level
         * **Peer**: events at peer level
     * **listener**: event listener, default: Transaction

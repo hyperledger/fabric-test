@@ -345,12 +345,12 @@ function peerFailover(channel, client) {
     channel.addPeer(peerList[currPeerId]);
 
     //handle channel eventHubs if evtType == CHANNEL
-    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
         //delete channel eventHubs
         for ( var i = 0; i < eventHubs.length; i++ ) {
             var str = peerList[currId]._url.split('//');
             if ( str[1] == eventHubs[i].getPeerAddr() ) {
-                  eh.disconnect()
+                  eventHubs[i].disconnect()
                   delete eventHubs[i];
             }
         }
@@ -366,7 +366,11 @@ function peerFailover(channel, client) {
         if ( found == 0 ) {
             eh = channel.newChannelEventHub(peerList[currPeerId]);
             eventHubs.push(eh);
-            eh.connect();
+            if ( evtType == 'FILTEREDBLOCK' ) {
+                eh.connect();
+            } else {
+                eh.connect(true);
+            }
         }
     }
 
@@ -478,10 +482,14 @@ function assignThreadAllPeers(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 } else {
                     peerTmp = client.newPeer( ORGS[key1][key].requests);
@@ -490,14 +498,18 @@ function assignThreadAllPeers(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 }
 
-                if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') && ( key1 == org ) && !event_connected) {
+                if ( (evtType == 'PEER') && ( key1 == org ) && !event_connected) {
                     eh = client.newEventHub();
                     if (TLS == 'ENABLED') {
                         eh.setPeerAddr(
@@ -547,10 +559,14 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 } else {
                     peerTmp = client.newPeer( ORGS[key1][key].requests);
@@ -559,14 +575,18 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 }
 
-                if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') && ( key1 == org ) ) {
+                if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key1 == org ) ) {
                     eh = client.newEventHub();
                     if (TLS == 'ENABLED') {
                         eh.setPeerAddr(
@@ -612,10 +632,14 @@ function assignThreadOrgPeer(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
@@ -623,14 +647,18 @@ function assignThreadOrgPeer(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 }
 
-                if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') ) {
+                if ( (evtType == 'PEER') && (invokeType == 'MOVE') ) {
                     eh=client.newEventHub();
                     if (TLS == 'ENABLED') {
                         eh.setPeerAddr(
@@ -681,10 +709,14 @@ function assignThreadPeerList(channel, client, org) {
                         if ( peerFOList == 'TARGETPEERS' ) {
                             peerList.push(peerTmp);
                         }
-                        if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                             eh = channel.newChannelEventHub(peerTmp);
                             eventHubs.push(eh);
-                            eh.connect();
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     } else {
                         peerTmp = client.newPeer(ORGS[key][peername].requests);
@@ -692,14 +724,18 @@ function assignThreadPeerList(channel, client, org) {
                         if ( peerFOList == 'TARGETPEERS' ) {
                             peerList.push(peerTmp);
                         }
-                        if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                             eh = channel.newChannelEventHub(peerTmp);
                             eventHubs.push(eh);
-                            eh.connect();
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     }
 
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') && ( key == org ) && !event_connected ) {
+                    if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key == org ) && !event_connected ) {
                         eh = client.newEventHub();
                         if (TLS == 'ENABLED') {
                             eh.setPeerAddr(
@@ -741,19 +777,27 @@ function channelAddPeer(channel, client, org) {
                     );
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 }
             }
@@ -786,13 +830,17 @@ function channelAddPeerEvent(channel, client, org) {
                 }
                 targets.push(peerTmp);
                 channel.addPeer(peerTmp);
-                if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                     eh = channel.newChannelEventHub(peerTmp);
                     eventHubs.push(eh);
-                    eh.connect();
+                    if ( evtType == 'FILTEREDBLOCK' ) {
+                        eh.connect();
+                    } else {
+                        eh.connect(true);
+                    }
                 }
 
-                if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') ) {
+                if ( (evtType == 'PEER') && (invokeType == 'MOVE') ) {
                     eh=client.newEventHub();
                     if (TLS == 'ENABLED') {
                         eh.setPeerAddr(
@@ -916,10 +964,14 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 } else {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, peer1: %s', Nid, channelName, org, pid, key, ORGS[org].peer1.requests);
@@ -929,15 +981,19 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
-                    if ( (evtType == 'CHANNEL') && (invokeType == 'MOVE') ) {
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
-                        eh.connect();
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
                     }
                 }
             }
 
-            if ( (evtType != 'CHANNEL') && (invokeType == 'MOVE') && ( key == org ) ) {
+            if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key == org ) ) {
                 eh=client.newEventHub();
                 if (TLS == 'ENABLED') {
                     eh.setPeerAddr(
@@ -1131,6 +1187,71 @@ function getTxRequest(results) {
 }
 
 var evtRcvB=0;
+
+function eventRegisterFilteredBlock() {
+
+    eventHubs.forEach((eh) => {
+        let txPromise = new Promise((resolve, reject) => {
+            let block_reg = null;
+            let handle = setTimeout(() => {
+                if (block_reg) {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] Timeout - Failed to receive the block and transaction event', Nid, channelName, org, pid);
+                }
+                reject(new Error('Timed out waiting for block event'));
+            }, 20000);
+
+
+            block_reg = eh.registerBlockEvent((filtered_block) => {
+                clearTimeout(handle);
+
+                // this block listener handles the filtered block
+                if (filtered_block.number) {
+                    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] Successfully received the filtered block event for block_num: %d, txid number: %d', Nid, channelName, org, pid, filtered_block.number, filtered_block.filtered_tx.length);
+                    for (i=0; i<filtered_block.filtered_tx.length; i++) {
+                        var txid = filtered_block.filtered_tx[i].txid;
+                        if ( txidList[txid] ) {
+                            evtRcvB = evtRcvB + 1;
+                            var tend = new Date().getTime();
+                            latency_update(evtRcvB, tend-txidList[txid], latency_event);
+                            delete txidList[txid];
+                        }
+                    }
+
+                    if ( inv_m == evtRcvB  ) {
+                        if ( IDone == 1 ) {
+                            tCurr = new Date().getTime();
+                            var remain = Object.keys(txidList).length;
+                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcvB, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcvB/(tCurr-tLocal)*1000).toFixed(2));
+                            if (invokeCheck == 'TRUE') {
+                                arg0 = keyStart + inv_m - 1;
+                                inv_q = inv_m - 1;
+                                invoke_query_simple(0);
+                            }
+                            if ( remain > 0 ) {
+                                console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
+                            }
+
+                            eh.unregisterBlockEvent(block_reg);
+                            evtDisconnect();
+                            latency_output();
+                        }
+                    }
+                    resolve();
+                } else {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] Failed - received the full block event for block_num:',Nid, channelName, org, pid, filtered_block.number);
+                }
+            },
+            (err) => {
+                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] inv_m:evtRcvB=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
+            });
+        }).catch((err) => {
+            //evtTimeoutCnt++;
+            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, evtTimeoutCnt, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+        });
+
+    });
+
+}
 
 function eventRegisterBlock() {
 
@@ -1840,7 +1961,15 @@ function execModeConstant() {
                     freq = 20000;
                 }
             }
-            if (evtListener == 'BLOCK') {
+
+            if (evtType == 'FILTEREDBLOCK') {
+                if ( evtListener == 'BLOCK') {
+                    eventRegisterFilteredBlock();
+                    invoke_move_const_evtBlock(freq);
+                } else {
+                   invoke_move_const(freq);
+                }
+            } else if (evtListener == 'BLOCK') {
                 eventRegisterBlock();
                 invoke_move_const_evtBlock(freq);
             } else if (evtListener == 'NONE') {
