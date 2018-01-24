@@ -89,7 +89,7 @@ Feature: Upgrade
     And we compose "<ComposeFile>"
 
     Then all services should have state with status of "running" and running is "True" with the following exceptions:
-      | Service | Status | Running |
+       | Service | Status | Running |
 
 
     # Sleep as to allow system up time
@@ -1001,6 +1001,8 @@ Feature: Upgrade
 
     And the user "configAdminOrdererOrg0" using cert alias "config-admin-cert" broadcasts ConfigUpdate Tx "capabilitiesConfigUpdateTx1" to orderer "<orderer0>"
 
+    And I wait "<BroadcastWaitTime>" seconds
+
 
     ###########################################################################
     #
@@ -1025,6 +1027,7 @@ Feature: Upgrade
 
     And the user "configAdminOrdererOrg0" using cert alias "config-admin-cert" broadcasts ConfigUpdate Tx "capabilitiesConfigUpdateTx2" to orderer "<orderer0>"
 
+    And I wait "<BroadcastWaitTime>" seconds
     #  So if you create a new Channel post orderer fix, you will now have a correctly set mod_policy at channel level vs prior channel genesis block.
 
     ###########################################################################
@@ -1042,7 +1045,8 @@ Feature: Upgrade
     And the user "configAdminOrdererOrg0" collects signatures for ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeer" from developers:
       | Developer              | Cert Alias        |
       | configAdminOrdererOrg0 | config-admin-cert |
-#      | configAdminOrdererOrg1 | config-admin-cert |
+    #  | configAdminPeerOrg0    | config-admin-cert |
+    #  | configAdminOrdererOrg1 | config-admin-cert |
 
     And the user "configAdminOrdererOrg0" creates a ConfigUpdate Tx "capabilitiesConfigUpdateForPeerTx1" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeer"
 
@@ -1054,6 +1058,16 @@ Feature: Upgrade
       | Service | Status | Running |
       | peer0   | exited | False   |
       | peer2   | exited | False   |
+
+    # Check one of the orderers for the new block on the channel
+
+    When user "configAdminPeerOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer2>" using port "7050"
+    And user "configAdminPeerOrg0" sends deliver a seek request on node "<orderer2>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel1 | 8     | 8   |
+
+    Then user "configAdminPeerOrg0" should get a delivery "deliveredLatestPeerConfigForCapabilities" from "<orderer2>" of "1" blocks with "1" messages within "1" seconds
+
 
     ###########################################################################
     #
@@ -1083,6 +1097,7 @@ Feature: Upgrade
 
     Then all services should have state with status of "running" and running is "True" with the following exceptions:
       | Service | Status | Running |
+
 
     ###########################################################################
     #
@@ -1122,7 +1137,7 @@ Feature: Upgrade
       # Check one of the orderers for the new block on the channel
     And user "dev0Org0" sends deliver a seek request on node "<orderer0>" with properties:
       | ChainId                           | Start | End |
-      | com.acme.blockchain.jdoe.channel1 | 8     | 8   |
+      | com.acme.blockchain.jdoe.channel1 | 9     | 9   |
 
     Then user "dev0Org0" should get a delivery "deliveredInvokeTxBlockAfterAllPeersUpversioned" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
 
@@ -1201,7 +1216,7 @@ Feature: Upgrade
     ###########################################################################
     #
     # The orderer config Admin then adds the same V1_1 capability to the
-    # /Channel and /Channel/Application groups for existing channels
+    # /Channel groups for existing channels
     #
     ###########################################################################
     ###########################################################################
@@ -1210,7 +1225,6 @@ Feature: Upgrade
     And user "configAdminOrdererOrg0" creates a capabilities config update "capabilitiesV1.1ConfigUpdateForPeerChannelLevel" using config "latestPeerConfigForCapabilitiesChangeForChannel" using channel ID "com.acme.blockchain.jdoe.channel1" with mod policy "Admins" to add capabilities:
       | Group                | Capabilities |
       | /Channel             | V1_1         |
-      | /Channel/Application | V1_1         |
     And the user "configAdminOrdererOrg0" creates a configUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeerChannelLevel" using configUpdate "capabilitiesV1.1ConfigUpdateForPeerChannelLevel"
 
     And the user "configAdminOrdererOrg0" collects signatures for ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeerChannelLevel" from developers:
@@ -1218,11 +1232,61 @@ Feature: Upgrade
       | configAdminOrdererOrg0 | config-admin-cert |
       | configAdminPeerOrg0    | config-admin-cert |
       | configAdminPeerOrg1    | config-admin-cert |
-#      | configAdminOrdererOrg1 | config-admin-cert |
 
     And the user "configAdminOrdererOrg0" creates a ConfigUpdate Tx "capabilitiesConfigUpdateForPeerTx1ChannelLevel" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeerChannelLevel"
 
     And the user "configAdminOrdererOrg0" using cert alias "config-admin-cert" broadcasts ConfigUpdate Tx "capabilitiesConfigUpdateForPeerTx1ChannelLevel" to orderer "<orderer0>"
+    And I wait "<BroadcastWaitTime>" seconds
+
+    # Check one of the orderers for the new block on the channel
+
+    When user "configAdminPeerOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer2>" using port "7050"
+    And user "configAdminPeerOrg0" sends deliver a seek request on node "<orderer2>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel1 | 10    | 10  |
+
+    Then user "configAdminPeerOrg0" should get a delivery "deliveredLatestPeerConfigForCapabilitiesForChannel" from "<orderer2>" of "1" blocks with "1" messages within "1" seconds
+
+
+
+    ###########################################################################
+    ###########################################################################
+    #
+    # The orderer config Admin then adds the same V1_1 capability to the
+    # /Channel/Application groups for existing channels
+    #
+    ###########################################################################
+    ###########################################################################
+
+    Given user "configAdminOrdererOrg0" retrieves the latest config block "latestPeerCAConfigForCapabilitiesChangeForChannel" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "configAdminOrdererOrg0" creates a capabilities config update "capabilitiesV1.1CAConfigUpdateForPeerChannelLevel" using config "latestPeerCAConfigForCapabilitiesChangeForChannel" using channel ID "com.acme.blockchain.jdoe.channel1" with mod policy "Admins" to add capabilities:
+      | Group                | Capabilities |
+      | /Channel/Application | V1_1         |
+    And the user "configAdminOrdererOrg0" creates a configUpdateEnvelope "capabilitiesV1.1CAConfigUpdateEnvelopeForPeerChannelLevel" using configUpdate "capabilitiesV1.1CAConfigUpdateForPeerChannelLevel"
+
+    And the user "configAdminOrdererOrg0" collects signatures for ConfigUpdateEnvelope "capabilitiesV1.1CAConfigUpdateEnvelopeForPeerChannelLevel" from developers:
+      | Developer              | Cert Alias        |
+      #| peer0Admin             | peer-admin-cert   |
+      #| peer2Admin             | peer-admin-cert   |
+      | configAdminPeerOrg0    | config-admin-cert |
+      | configAdminPeerOrg1    | config-admin-cert |
+
+    And the user "configAdminOrdererOrg0" creates a ConfigUpdate Tx "capabilitiesCAConfigUpdateForPeerTx1ChannelLevel" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "capabilitiesV1.1CAConfigUpdateEnvelopeForPeerChannelLevel"
+
+    And the user "configAdminOrdererOrg0" using cert alias "peer-admin-cert" broadcasts ConfigUpdate Tx "capabilitiesCAConfigUpdateForPeerTx1ChannelLevel" to orderer "<orderer0>"
+
+    And I wait "<BroadcastWaitTime>" seconds
+
+
+    # Check one of the orderers for the new block on the channel
+
+    When user "configAdminPeerOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer2>" using port "7050"
+    And user "configAdminPeerOrg0" sends deliver a seek request on node "<orderer2>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel1 | 11    | 11  |
+
+    Then user "configAdminPeerOrg0" should get a delivery "deliveredLatestPeerCAConfigForCapabilities" from "<orderer2>" of "1" blocks with "1" messages within "1" seconds
+
 
     ###########################################################################
     #
@@ -1264,7 +1328,7 @@ Feature: Upgrade
       # Check one of the orderers for the new block on the channel
     And user "dev0Org0" sends deliver a seek request on node "<orderer0>" with properties:
       | ChainId                           | Start | End |
-      | com.acme.blockchain.jdoe.channel1 | 9     | 9   |
+      | com.acme.blockchain.jdoe.channel1 | 12    | 12  |
 
     Then user "dev0Org0" should get a delivery "deliveredInvokeTxBlockAfterAddCapsToExistChans" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
 
@@ -1340,6 +1404,369 @@ Feature: Upgrade
       | peer3    |
 
 
+    ###########################################################################
+    #
+    # Entry point for creating channel2
+    #
+    ###########################################################################
+    Given the user "dev0Org0" creates a new channel ConfigUpdate "createChannelConfigUpdate2" using consortium "consortium1"
+      | ChannelID                         | PeerOrgSet  | [PeerAnchorSet] |
+      | com.acme.blockchain.jdoe.channel2 | peerOrgSet1 |                 |
+
+    And the user "dev0Org0" creates a configUpdateEnvelope "createChannelConfigUpdate2Envelope" using configUpdate "createChannelConfigUpdate2"
+
+    And the user "dev0Org0" collects signatures for ConfigUpdateEnvelope "createChannelConfigUpdate2Envelope" from developers:
+      | Developer | Cert Alias       |
+      | dev0Org0  | consortium1-cert |
+      | dev0Org1  | consortium1-cert |
+
+    And the user "dev0Org0" creates a ConfigUpdate Tx "configUpdateTx2" using cert alias "consortium1-cert" using signed ConfigUpdateEnvelope "createChannelConfigUpdate2Envelope"
+
+    And the user "dev0Org0" using cert alias "consortium1-cert" broadcasts ConfigUpdate Tx "configUpdateTx2" to orderer "<orderer0>"
+
+    # Sleep as the local orderer needs to bring up the resources that correspond to the new channel
+    # For the Kafka orderer, this includes setting up a producer and consumer for the channel's partition
+    # Requesting a deliver earlier may result in a SERVICE_UNAVAILABLE response and a connection drop
+
+    And I wait "<ChannelJoinDelay>" seconds
+    When user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer0>" using port "7050"
+    And user "dev0Org0" sends deliver a seek request on node "<orderer0>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel2 | 0     | 0   |
+
+    Then user "dev0Org0" should get a delivery "genesisBlockForMyNewChannel2" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
+
+    Given user "dev0Org0" gives "genesisBlockForMyNewChannel2" to user "dev0Org1" who saves it as "genesisBlockForMyNewChannel2"
+
+    Given user "dev0Org0" gives "genesisBlockForMyNewChannel2" to user "peer0Admin" who saves it as "genesisBlockForMyNewChannel2"
+    Given user "dev0Org0" gives "genesisBlockForMyNewChannel2" to user "peer1Admin" who saves it as "genesisBlockForMyNewChannel2"
+
+
+    #############################################################################
+    #
+    # This is entry point for joining peers on channel2
+    #
+    ###########################################################################
+
+    When user "peer0Admin" using cert alias "peer-admin-cert" requests to join channel using genesis block "genesisBlockForMyNewChannel2" on peers with result "joinChannelResult2"
+      | Peer  |
+      | peer0 |
+
+    Then user "peer0Admin" expects result code for "joinChannelResult2" of "200" from peers:
+      | Peer  |
+      | peer0 |
+
+    When user "peer1Admin" using cert alias "peer-admin-cert" requests to join channel using genesis block "genesisBlockForMyNewChannel2" on peers with result "joinChannelResult2"
+      | Peer  |
+      | peer1 |
+
+    Then user "peer1Admin" expects result code for "joinChannelResult2" of "200" from peers:
+      | Peer  |
+      | peer1 |
+
+
+    # Simulate the administrator sharing the channel genesis block with other peer org admins, so they can join their peers to the channel too
+
+    Given user "dev0Org1" gives "genesisBlockForMyNewChannel2" to user "peer2Admin" who saves it as "genesisBlockForMyNewChannel2"
+    Given user "dev0Org1" gives "genesisBlockForMyNewChannel2" to user "peer3Admin" who saves it as "genesisBlockForMyNewChannel2"
+
+    When user "peer2Admin" using cert alias "peer-admin-cert" requests to join channel using genesis block "genesisBlockForMyNewChannel2" on peers with result "joinChannelResult2"
+      | Peer  |
+      | peer2 |
+
+    Then user "peer2Admin" expects result code for "joinChannelResult2" of "200" from peers:
+      | Peer  |
+      | peer2 |
+
+    When user "peer3Admin" using cert alias "peer-admin-cert" requests to join channel using genesis block "genesisBlockForMyNewChannel2" on peers with result "joinChannelResult2"
+      | Peer  |
+      | peer3 |
+
+    Then user "peer3Admin" expects result code for "joinChannelResult2" of "200" from peers:
+      | Peer  |
+      | peer3 |
+
+
+    #######################################################################################################################
+    #
+    # Orderer config Admin then adds v1.1 capability to /Channel/Application group for channel2.
+    # Channel/Orderer and /Channel capabilities are already defined
+    #
+    # This step could be avoided if we (admins) had chosen to enhance the existing yaml config files with config parameters 
+    # which are new in release v1.1 (such as the channel mod policy and the /Channel/Application v1_1 capability) before the 
+    # orderers and peers were restarted on new binaries versions.
+    #
+    #####################################################################################################################
+    Given user "configAdminOrdererOrg0" retrieves the latest config block "latestPeerConfigForCapabilitiesChangeForChannel2" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel2"
+    And user "configAdminOrdererOrg0" creates a capabilities config update "capabilitiesV1.1ConfigUpdateForPeerChannelLevel2" using config "latestPeerConfigForCapabilitiesChangeForChannel2" using channel ID "com.acme.blockchain.jdoe.channel2" with mod policy "Admins" to add capabilities:
+      | Group                | Capabilities |
+      | /Channel/Application | V1_1         |
+    And the user "configAdminOrdererOrg0" creates a configUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeerChannelLevel2" using configUpdate "capabilitiesV1.1ConfigUpdateForPeerChannelLevel2"
+
+    And the user "configAdminOrdererOrg0" collects signatures for ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeerChannelLevel2" from developers:
+      | Developer              | Cert Alias        |
+#      | peer0Admin             | peer-admin-cert   |
+#      | peer2Admin             | peer-admin-cert   |
+      | configAdminPeerOrg0    | config-admin-cert |
+      | configAdminPeerOrg1    | config-admin-cert |
+
+    And the user "configAdminOrdererOrg0" creates a ConfigUpdate Tx "capabilitiesConfigUpdateForPeerTx2ChannelLevel2" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "capabilitiesV1.1ConfigUpdateEnvelopeForPeerChannelLevel2"
+
+    And the user "configAdminOrdererOrg0" using cert alias "config-admin-cert" broadcasts ConfigUpdate Tx "capabilitiesConfigUpdateForPeerTx2ChannelLevel2" to orderer "<orderer0>"
+    And I wait "<BroadcastWaitTime>" seconds
+
+    # Check one of the orderers for the new block on the channel
+
+    When user "configAdminPeerOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer2>" using port "7050"
+    And user "configAdminPeerOrg0" sends deliver a seek request on node "<orderer2>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel2 | 1     | 1   |
+
+    Then user "configAdminPeerOrg0" should get a delivery "deliveredLatestPeerConfigForCapabilitiesForChannel2" from "<orderer2>" of "1" blocks with "1" messages within "1" seconds
+
+
+    ###########################################################################
+    #
+    # Entry point for creating a channel config update to add anchor peers
+    # (using anchors1, which was previously created)
+    #
+    ###########################################################################
+
+    Given user "configAdminPeerOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer0>" using port "7050"
+    #And user "peer0Admin" using cert alias "peer-admin-cert" connects to deliver function on node "<orderer0>" using port "7050"
+
+    And user "configAdminPeerOrg0" retrieves the latest config block "latestChannelConfigUpdate2" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel2"
+    #And user "peer0Admin" retrieves the latest config update "latestChannelConfigUpdate2" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel2"
+
+    And the user "configAdminPeerOrg0" creates an existing channel config update "newChannelConfigUpdate1" using config update "latestChannelConfigUpdate2"
+    #And the user "peer0Admin" creates an existing channel config update "newChannelConfigUpdate1" using config update "latestChannelConfigUpdate2"
+      | ChannelID                         | [PeerAnchorSet] |
+      | com.acme.blockchain.jdoe.channel2 | anchors1        |
+
+
+    Given the user "configAdminPeerOrg0" creates a configUpdateEnvelope "newChannelConfigUpdate1Envelope" using configUpdate "newChannelConfigUpdate1"
+    #Given the user "peer0Admin" creates a configUpdateEnvelope "newChannelConfigUpdate1Envelope" using configUpdate "newChannelConfigUpdate1"
+
+
+    And the user "configAdminPeerOrg0" collects signatures for ConfigUpdateEnvelope "newChannelConfigUpdate1Envelope" from developers:
+    #And the user "peer0Admin" collects signatures for ConfigUpdateEnvelope "newChannelConfigUpdate1Envelope" from developers:
+      | Developer           | Cert Alias        |
+      | configAdminPeerOrg0 | config-admin-cert |
+    #  | peer0Admin          | peer-admin-cert   |
+
+    And the user "configAdminPeerOrg0" creates a ConfigUpdate Tx "newChannelConfigUpdateTx1" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "newChannelConfigUpdate1Envelope"
+    #And the user "peer0Admin" creates a ConfigUpdate Tx "newChannelConfigUpdateTx1" using cert alias "config-admin-cert" using signed ConfigUpdateEnvelope "newChannelConfigUpdate1Envelope"
+
+    When the user "configAdminPeerOrg0" broadcasts transaction "newChannelConfigUpdateTx1" to orderer "<orderer0>"
+    #When the user "peer0Admin" broadcasts transaction "newChannelConfigUpdateTx1" to orderer "<orderer0>"
+
+    And I wait "<BroadcastWaitTime>" seconds
+
+    # Check one of the orderers for the new block on the channel
+    And user "configAdminPeerOrg0" sends deliver a seek request on node "<orderer2>" with properties:
+    #And user "peer0Admin" sends deliver a seek request on node "<orderer0>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel2 | 2     | 2   |
+
+    Then user "configAdminPeerOrg0" should get a delivery "deliveredNewChannelConfigUpdateTx1Block" from "<orderer2>" of "1" blocks with "1" messages within "1" seconds
+    #Then user "peer0Admin" should get a delivery "deliveredNewChannelConfigUpdateTx1Block" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
+    # Sleep to allow for chaincode instantiation on the peer
+
+
+    ###########################################################################
+    #
+    # Entry point for install and instantiate chaincode on peers on a channel2
+    #
+    ###########################################################################
+
+    When user "peer0Admin" creates a chaincode spec "ccSpec2" with name "example02B" and version "1.0" of type "GOLANG" for chaincode "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args
+      | funcName | arg1 | arg2 | arg3 | arg4 |
+      | init     | a    | 1000 | b    | 2000 |
+
+      ### TODO: Will soon need to collect signatures (owners) and create a SignedChaincodeDeploymentSpec which will supplant the payload for installProposal.
+
+      # Under the covers, create a deployment spec, etc.
+    And user "peer0Admin" using cert alias "peer-admin-cert" creates a install proposal "installProposal1ch2" using chaincode spec "ccSpec2"
+
+    And user "peer0Admin" using cert alias "peer-admin-cert" sends proposal "installProposal1ch2" to endorsers with timeout of "90" seconds with proposal responses "installProposalCh2Responses1":
+      | Endorser |
+      | peer0    |
+
+    Then user "peer0Admin" expects proposal responses "installProposalCh2Responses1" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+
+    Given user "peer0Admin" gives "ccSpec2" to user "peer2Admin" who saves it as "ccSpec2"
+
+      # Under the covers, create a deployment spec, etc.
+    When user "peer2Admin" using cert alias "peer-admin-cert" creates a install proposal "installProposal2ch2" using chaincode spec "ccSpec2"
+
+    And user "peer2Admin" using cert alias "peer-admin-cert" sends proposal "installProposal2ch2" to endorsers with timeout of "90" seconds with proposal responses "installProposalCh2Responses2":
+      | Endorser |
+      | peer2    |
+
+    Then user "peer2Admin" expects proposal responses "installProposalCh2Responses2" with status "200" from endorsers:
+      | Endorser |
+      | peer2    |
+
+
+    Given user "peer0Admin" gives "ccSpec2" to user "dev0Org0" who saves it as "ccSpec2"
+    And user "peer0Admin" gives "ccSpec2" to user "configAdminPeerOrg0" who saves it as "ccSpec2"
+
+    And user "configAdminPeerOrg0" creates a signature policy envelope "signedByMemberOfPeerOrg0AndPeerOrg1Ch2" using "envelope(n_out_of(2,[signed_by(0),signed_by(1)]),[member('peerOrg0'), member('peerOrg1')])"
+    When user "configAdminPeerOrg0" using cert alias "config-admin-cert" creates a instantiate proposal "instantiateProposalch2" for channel "com.acme.blockchain.jdoe.channel2" using chaincode spec "ccSpec2" and endorsement policy "signedByMemberOfPeerOrg0AndPeerOrg1Ch2"
+
+    And user "configAdminPeerOrg0" using cert alias "config-admin-cert" sends proposal "instantiateProposalch2" to endorsers with timeout of "90" seconds with proposal responses "instantiateProposalCh2Responses1":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    Then user "configAdminPeerOrg0" expects proposal responses "instantiateProposalCh2Responses1" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    And user "configAdminPeerOrg0" expects proposal responses "instantiateProposalCh2Responses1" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    When the user "configAdminPeerOrg0" creates transaction "instantiateTxch2-1" from proposal "instantiateProposalch2" and proposal responses "instantiateProposalCh2Responses1" for channel "com.acme.blockchain.jdoe.channel2"
+
+    And the user "configAdminPeerOrg0" broadcasts transaction "instantiateTxch2-1" to orderer "<orderer1>"
+
+      # Sleep as the local orderer ledger needs to create the block that corresponds to the start number of the seek request
+    And I wait "<BroadcastWaitTime>" seconds
+
+      # Check one of the orderers for the new block on the channel
+    And user "configAdminPeerOrg0" sends deliver a seek request on node "<orderer0>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel2 | 3     | 3   |
+
+    Then user "configAdminPeerOrg0" should get a delivery "deliveredInstantiateCh2Tx1Block" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
+
+    # Sleep to allow for chaincode instantiation on the peer
+    And I wait "15" seconds
+
+
+
+    ############################################################################
+    #
+    # Send invoke TX on newly created channel2, and then
+    # Verify on orderer and peers that each return the same height and value
+    #
+    ###########################################################################
+
+    When user "dev0Org0" creates a chaincode invocation spec "invocationSpecOnNewChannel" using spec "ccSpec2" with input:
+      | funcName | arg1 | arg2 | arg3 |
+      | invoke   | a    | b    | 1000 |
+
+    And user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "invocationProposalOnNewChannel" for channel "com.acme.blockchain.jdoe.channel2" using chaincode spec "invocationSpecOnNewChannel"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "invocationProposalOnNewChannel" to endorsers with timeout of "60" seconds with proposal responses "invocationProposalResponsesOnNewChannel":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    Then user "dev0Org0" expects proposal responses "invocationProposalResponsesOnNewChannel" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    And user "dev0Org0" expects proposal responses "invocationProposalResponsesOnNewChannel" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    When the user "dev0Org0" creates transaction "invokeTxAfterOnNewChannel" from proposal "invocationProposalOnNewChannel" and proposal responses "invocationProposalResponsesOnNewChannel" for channel "com.acme.blockchain.jdoe.channel1"
+
+    And the user "dev0Org0" broadcasts transaction "invokeTxAfterOnNewChannel" to orderer "<orderer2>"
+
+      # Sleep as the local orderer ledger needs to create the block that corresponds to the start number of the seek request
+    And I wait "<BroadcastWaitTime>" seconds
+
+      # Check one of the orderers for the new block on the channel
+    And user "dev0Org0" sends deliver a seek request on node "<orderer0>" with properties:
+      | ChainId                           | Start | End |
+      | com.acme.blockchain.jdoe.channel2 | 4     | 4   |
+
+    Then user "dev0Org0" should get a delivery "deliveredInvokeTxBlockOnNewChannel" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
+
+    #########################################################################
+    #
+    # Query peers; ensure block was delivered to each of them with same value
+    #
+    #########################################################################
+    When user "dev0Org0" creates a chaincode invocation spec "querySpecOnNewChannel" using spec "ccSpec2" with input:
+      | funcName | arg1 |
+      | query    | a    |
+
+      # Under the covers, create a deployment spec, etc.
+    When user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "queryProposalOnNewChannel" for channel "com.acme.blockchain.jdoe.channel2" using chaincode spec "querySpecOnNewChannel"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "queryProposalOnNewChannel" to endorsers with timeout of "30" seconds with proposal responses "queryProposalResponsesOnNewChannel":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+#     | peer1    |
+#     | peer3    |
+
+    Then user "dev0Org0" expects proposal responses "queryProposalResponsesOnNewChannel" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+#     | peer1    |
+#     | peer3    |
+
+    And user "dev0Org0" expects proposal responses "queryProposalResponsesOnNewChannel" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+#     | peer1    |
+#     | peer3    |
+
+    ###########################################################################
+    #
+    # New Channel: channel2:
+    # Verifying blockinfo for all peers in the channel
+    #
+    ###########################################################################
+
+    Given I wait "<VerifyAllBlockHeightsWaitTime>" seconds
+
+    When user "dev0Org0" creates a chaincode spec "qsccSpecGetChainInfoOnNewChannel" with name "qscc" and version "1.0" of type "GOLANG" for chaincode "/" with args
+      | funcName     | arg1                              |
+      | GetChainInfo | com.acme.blockchain.jdoe.channel2 |
+
+    And user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "queryGetChainInfoProposalOnNewChannel" for channel "com.acme.blockchain.jdoe.channel2" using chaincode spec "qsccSpecGetChainInfoOnNewChannel"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "queryGetChainInfoProposalOnNewChannel" to endorsers with timeout of "30" seconds with proposal responses "queryGetChainInfoProposalResponsesOnNewChannel":
+      | Endorser |
+      | peer0    |
+      | peer1    |
+      | peer2    |
+      | peer3    |
+
+    Then user "dev0Org0" expects proposal responses "queryGetChainInfoProposalResponsesOnNewChannel" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer1    |
+      | peer2    |
+      | peer3    |
+
+    And user "dev0Org0" expects proposal responses "queryGetChainInfoProposalResponsesOnNewChannel" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer1    |
+      | peer2    |
+      | peer3    |
+
+
+    ###########################################################################
+    #
+    # End Updates on channel2
+    #
+    ###########################################################################
 
     ### TODO: Once events are working, consider listen event listener as well.
 
