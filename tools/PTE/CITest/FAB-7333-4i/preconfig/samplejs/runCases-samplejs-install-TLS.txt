@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-7333-4i/preconfig/samplejs/samplejs-chan1-install-TLS.json
