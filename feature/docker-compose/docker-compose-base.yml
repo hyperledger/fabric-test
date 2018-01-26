@@ -48,8 +48,13 @@ services:
             - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/tls/server.key
             - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/tls/server.crt
             - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/tls/ca.crt]
+            - ORDERER_TLS_CLIENTAUTHREQUIRED=${ORDERER_TLS_CLIENTAUTHREQUIRED}
+            - ORDERER_TLS_CLIENTROOTCAS_FILES=/var/hyperledger/users/Admin@example.com/tls/ca.crt
+            - ORDERER_TLS_CLIENTCERT_FILE=/var/hyperledger/users/Admin@example.com/tls/client.crt
+            - ORDERER_TLS_CLIENTKEY_FILE=/var/hyperledger/users/Admin@example.com/tls/client.key
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}:/var/hyperledger/configs
+            - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/users:/var/hyperledger/users
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
         command: orderer
         ports:
@@ -75,7 +80,6 @@ services:
             # TLS settings
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CLIENTAUTHREQUIRED=${CORE_PEER_TLS_CLIENTAUTHREQUIRED}
-            - CORE_PEER_TLS_CLIENTROOTCAS_FILES=[/var/hyperledger/tls/ca.crt]
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
             - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
