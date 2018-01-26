@@ -64,7 +64,7 @@ error () {
 #     ARGS: 1: text to output; 2: outfile
 output () {
     # 1: text to output; 2: outfile
-    if [ $VERBOSE = "True" ]; then
+    if [ $VERBOSE == "True" ]; then
         echo -e "$1"                # show output in terminal during runtime
     fi
     echo -e "$1" >> $2              # output data to outfile
@@ -81,9 +81,9 @@ readLog () {
     outfile="$3"
 
     if [ $channel == "all" ]; then
-        lines=$(cat "$infile" | grep "Committed block")  # look at all blocks
+        lines=$(cat "$infile" | grep "$blockKeyWord")  # look at all blocks
     else
-        lines=$(cat "$infile" | grep "Committed block" | grep "$channel")  # only look channels related blocks
+        lines=$(cat "$infile" | grep "$blockKeyWord" | grep "$channel")  # only look channels related blocks
     fi
 
     preLines=$OUTPUTPATH"/prelines"
@@ -143,9 +143,15 @@ getPeerStats () {
         docker logs $peer >& $peerlog
         i=$[ i + 1 ]
         infile="$peerlog"
+
+        if [ "$(cat $infile | grep "$blockKeyWord")" == "" ]; then
+           blockKeyWord="Created block"
+        fi
+        echo "block search key word: [$blockKeyWord]"
+
         if [ -f "$infile" ]; then
             # confirm file contains key phrase
-            if [ "$(cat $infile | grep "Committed block")" = "" ]; then
+            if [ "$(cat $infile | grep "$blockKeyWord")" == "" ]; then
                 echo -e "\nERROR: Log does not appear to have any blocks recorded."
                 echo "Searched: $infile"
             # gather data
@@ -189,6 +195,8 @@ OUTPUTPATH="peerStatsOutput"     # path to output files
 LOGNAME="peer"                   # prefix name of logfiles
 RUNID="CITest"
 CHANNELS[0]="all"
+
+blockKeyWord="Committed block"
 
 # GET CUSTOM OPTIONS
 echo -e "\nAny optional arguments chosen:\n"
@@ -268,7 +276,7 @@ if [ ! -d $RUNPATH ]; then
 fi
 
 # GET LOGS TO EXAMINE
-if [ "${#PEERS[@]}" = "0" ]; then
+if [ "${#PEERS[@]}" == "0" ]; then
     echo "error: no peer is specified."
     usage
 fi
