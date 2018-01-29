@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-7929-8q/samplecc/samplecc-chan2-FAB-7929-8q-TLS.json

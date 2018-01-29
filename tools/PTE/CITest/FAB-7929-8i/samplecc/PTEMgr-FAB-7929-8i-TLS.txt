@@ -1,0 +1,4 @@
+driver=pte CITest/FAB-7929-8i/samplecc/runCases-FAB-7929-8i1-TLS.txt
+driver=pte CITest/FAB-7929-8i/samplecc/runCases-FAB-7929-8i2-TLS.txt
+driver=pte CITest/FAB-7929-8i/samplecc/runCases-FAB-7929-8i3-TLS.txt
+driver=pte CITest/FAB-7929-8i/samplecc/runCases-FAB-7929-8i4-TLS.txt

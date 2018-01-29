@@ -62,6 +62,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-7333-4i: samplecc Node JS chaincode, 4 processes X 10000 invokes, TLS, levelDB, 1 channel, filtered block event service, event listener: per transaction
         FAB-7334-4i: samplecc Node JS chaincode, 4 processes X 10000 invokes, TLS, levelDB, 2 channel, filtered block event service, event listener: per block
         FAB-7627-16i: samplecc GO chaincode, 16 processes X 10000 invokes, TLS, levelDB, 8 channel, peer event service, event listener: per block
+        FAB-7929-8i: smoke test, samplecc GO chaincode, 8 processes X 100 invokes, TLS, levelDB, 4 channel, channel event service, event listener: per block
 
 
 * ### Examples
@@ -118,6 +119,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-7333-4i.sh: execute FAB-7333-4i
         FAB-7334-4i.sh: execute FAB-7334-4i
         FAB-7627-16i.sh: execute FAB-7627-16i
+        FAB-7929-16i.sh: execute FAB-7929-8i
 
 
 * ### Network
