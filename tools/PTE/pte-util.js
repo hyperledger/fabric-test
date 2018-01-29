@@ -20,6 +20,7 @@ var jsrsa = require('jsrsasign');
 var os = require('os');
 var path = require('path');
 var util = require('util');
+var winston = require('winston');
 
 var KEYUTIL = jsrsa.KEYUTIL;
 
@@ -28,7 +29,11 @@ var copService = require('fabric-ca-client/lib/FabricCAClientImpl.js');
 var User = require('fabric-client/lib/User.js');
 //var Constants = require('./constants.js');
 
-var logger = require('fabric-client/lib/utils.js').getLogger('PTE util');
+// var logger = require('fabric-client/lib/utils.js').getLogger('PTE util');
+
+var PTEid = parseInt(process.argv[5]);
+var loggerMsg='PTE ' + PTEid + ' util';
+var logger = new PTELogger({"prefix":loggerMsg, "level":"info"});
 
 module.exports.CHAINCODE_PATH = 'github.com/example_cc';
 module.exports.CHAINCODE_UPGRADE_PATH = 'github.com/example_cc1';
@@ -287,3 +292,40 @@ module.exports.getSubmitter = function(username, secret, client, peerOrgAdmin, n
 		return getMember(username, secret, client, nid, userOrg, svcFile);
 	}
 };
+
+// set up PTE logger
+function PTELogger(opts) {
+    var winstonLogger = new winston.Logger({
+        transports: [
+            new (winston.transports.Console)({ colorize: true })
+        ]
+    }),
+        levels = ['debug', 'info', 'warn', 'error'],
+        logger = Object.assign({}, winstonLogger);
+
+    if (opts.level) {
+        if (levels.includes(opts.level)) {
+            // why, oh why, does logger.level = opts.level not work?
+            winstonLogger.level = opts.level;
+        }
+    }
+
+    levels.forEach(function (method) {
+        var func = winstonLogger[method];
+
+        logger[method] = (function (context, tag, f) {
+            return function () {
+                if (arguments.length > 0) {
+                    var prefix = '[' + tag + ']: ';
+                    arguments[0] = prefix + arguments[0];
+                }
+
+                f.apply(context, arguments);
+            };
+        }(winstonLogger, opts.prefix, func));
+    });
+
+    return logger;
+}
+module.exports.PTELogger = PTELogger;
+
