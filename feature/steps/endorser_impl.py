@@ -9,6 +9,7 @@ import sys
 import os
 import json
 import time
+import os
 import random
 import string
 import struct
@@ -50,9 +51,9 @@ def step_impl(context, channelId):
 def step_impl(context):
     setup_channel_impl(context, context.interface.TEST_CHANNEL_ID, "orderer0.example.com")
 
-@when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
-def deploy_impl(context, path, args, name, language, peer, channel, timeout=300, username="Admin", policy=None):
-    context.interface.deploy_chaincode(context, path, args, name, language, peer, username, timeout, channel, policy=policy)
+@when(u'a user deploys chaincode at path "{path}" with version "{version}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
+def deploy_impl(context, path, args, name, language, peer, channel, version=0, timeout=300, username="Admin", policy=None):
+    context.interface.deploy_chaincode(context, path, args, name, language, peer, username, timeout, channel, version, policy=policy)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with policy {policy}')
 def step_impl(context, path, args, policy):
@@ -330,6 +331,11 @@ def step_impl(context, number, channel):
                  "name": 'qscc'}
     context.result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
 
+@when(u'a user upgrades the chaincode on "{peer}"')
+def step_impl(context, peer, username="Admin", timeout=120):
+    context.interface.upgrade_chaincode(context, peer, username)
+    context.interface.post_deploy_chaincode(context, peer, timeout)
+
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" for the random key with args {args} on "{peer}"')
 def step_impl(context, channel, name, args, peer):
     query_impl(context, channel, name, args.format(random_key=context.random_key), peer)
@@ -456,6 +462,27 @@ def step_impl(context, numInvokes, args):
 @when(u'a user invokes {numInvokes:d} times using chaincode named "{name}" with args {args}')
 def step_impl(context, numInvokes, name, args):
     invokes_impl(context, numInvokes, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com")
+
+@when(u'a user invokes marble {startNum:d} to {endNum:d} with the last {numShare:d} of them with owner "{owner}", color "{color}" and size "{size}" in channel named "{channel}" in chaincode "{cc_name}"')
+def step_impl(context, startNum, endNum, numShare, owner, color, size, channel, cc_name):
+    for x in range(startNum, endNum+1-numShare):
+        args="[\"initMarble\",\"marble"+str(x)+"\",\"blue\",\"35\",\"jane\"]"
+        invokes_impl(context, 1, channel, cc_name, args, "peer0.org1.example.com")
+    for x in range(endNum+1-numShare, endNum+1):
+        args="[\"initMarble\",\"marble"+str(x)+"\",\""+color+"\",\""+size+"\",\""+owner+"\"]"
+        invokes_impl(context, 1, channel, cc_name, args, "peer0.org1.example.com")
+
+@when(u'a user invokes marble {startNum:d} to {endNum:d} with owner "{owner}", color "{color}" and size "{size}"')
+def step_impl(context, startNum, endNum, owner, color, size):
+    for x in range(startNum, endNum+1):
+        args="[\"initMarble\",\"marble"+str(x)+"\",\""+color+"\",\""+size+"\",\""+owner+"\"]"
+        invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com")
+
+@when(u'a user invokes marble {startNum:d} to {endNum:d}')
+def step_impl(context, startNum, endNum):
+    for x in range(startNum, endNum+1):
+        args="[\"initMarble\",\"marble"+str(x)+"\",\"blue\",\"35\",\"jane\"]"
+        invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com")
 
 @when(u'a user invokes on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, channel, name, args, peer):
@@ -705,6 +732,25 @@ def step_impl(context):
     peers = context.interface.get_peers(context)
     sign_impl(context, peers, context.interface.TEST_CHANNEL_ID)
 
+@when(u'a user requests to get the design doc "{ddoc_name}" for the chaincode named "{cc_name}" in the channel "{ch_name}" and from the CouchDB instance "{couchdb_instance}"')
+def step_impl(context, ddoc_name, cc_name, ch_name, couchdb_instance):
+    cmd=["curl",  "-k",  "-X", "GET", couchdb_instance+"/"+ch_name+"_"+cc_name+"/_design/"+ddoc_name]
+    print("cmd is: "+" ".join(str(p) for p in cmd)+"\n")
+    context.result=subprocess.check_output(cmd, env=os.environ)
+    print("result is: "+context.result+"\n")
+
+@then(u'a user receives {status} response of [{response}] from the CouchDB container')
+def step_impl(context, status, response):
+    print("response is: "+response)
+    if status == "success":
+        assert "error" not in context.result, "Error, recieved unexpected error message from CouchDB container: "+context.result
+    elif status == "error":
+        assert "error" in context.result, "Error, recieved unexpected message with no error from CouchDB container: "+context.result
+    else:
+        assert False, "Error: Unknown response type defined in feature file."
+
+    assert response in context.result, "Error, recieved unexpected response from CouchDB container: "+context.result
+
 @then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
 def step_impl(context, response, org, status):
     expected_impl(context, response, context.interface.get_initial_leader(context, org))
@@ -725,7 +771,6 @@ def expected_impl(context, response, peer, status="a success"):
         assert response in context.result[peer], "Expected response was {0}; received {1}".format(response, context.result[peer])
     else:
         assert False, "Unknown response type: {}. Please choose success or error".format(status)
-
 
 @then(u'a user receives {status} response of {response}')
 def step_impl(context, response, status="a success"):

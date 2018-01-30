@@ -14,9 +14,9 @@ def generateIndex(indexName, docName, fieldStr, path):
     for field in fields:
         if ":" in field:
             keyfield = field.split(":")
-            fieldData.append({"data.{}".format(keyfield[0]): keyfield[1]})
+            fieldData.append({keyfield[0]:keyfield[1]})
         else:
-            fieldData.append("data.{}".format(field))
+            fieldData.append("{}".format(field))
 
     generated = {"index": {"fields":fieldData},
                  "ddoc": docName,
