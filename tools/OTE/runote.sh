@@ -7,15 +7,21 @@ function printHelp {
 
    echo "Usage: "
    echo " ./runote.sh [opt] [value] "
-   echo "    -t: testcase number, default=FAB-6996"
+   echo "    -t <testcase (default=FAB-6996_1ch_solo)>"
    echo " "
-   echo " example: "
-   echo " ./runote.sh -t FAB-6996"
+   echo "Examples: "
+   echo "  ./runote.sh                                   # run the default testcase FAB-6996_1ch_solo"
+   echo "  ./runote.sh -t FAB-6996_1ch_solo              # basic test with 1 channel, 1 solo orderer"
+   echo "  ./runote.sh -t FAB-7936_100tx_3ch_3ord_3kb    # short test covering OTE functionalities"
+   echo " "
+   echo "The supported testcases are:"
+   grep "^FAB" ${0} | cut -f1 -d' '
+   echo " "
    exit
 }
 
 #defaults
-TESTCASE="FAB-6996"
+TESTCASE="FAB-6996_1ch_solo"
 
 while getopts "t:" opt;
 do
@@ -34,8 +40,7 @@ do
         esac
 done
 
-
-FAB-6996 () {
+FAB-6996_1ch_solo () {
         cd $CWD/../NL
         ./networkLauncher.sh -o 1 -x 1 -r 1 -p 1 -n 1 -f test -w localhost -S enabled
         cd $OTE_DIR
@@ -137,6 +142,15 @@ FAB-7038 () {
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7038_3ch_3ord_5kb docker-compose -f ote-compose.yml up -d
+}
+
+FAB-7936_100tx_3ch_3ord_3kb () {
+        # this is a short test for OTE functionality, with no CA, and with no extra KBs or ZKs
+        cd $CWD/../NL
+        ./networkLauncher.sh -o 3 -r 1 -p 1 -n 3 -k 3 -z 1 -t kafka -f test -w localhost -S enabled
+        cd $OTE_DIR
+        # run testcase
+        numChannels=3 testcase=Test_FAB7936_100tx_3ch_3ord_3kb docker-compose -f ote-compose.yml up -d
 }
 
 FAB-7076 () {

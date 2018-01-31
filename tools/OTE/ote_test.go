@@ -309,9 +309,16 @@ func Test_ORD105_1ch_3ord_kafka_4kbs(t *testing.T) {
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-6996 - send txns to solo orderer with default batchsize and default payload
+//FAB-6996_1ch_solo - DEFAULT testcase - send txns to 1 chan on solo orderer with default batchsize and payload size
 func Test_FAB6996_1ch_1ord_solo(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-6996", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+        passResult, finalResultSummaryString := ote("FAB-6996_1ch_solo", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+        if !passResult { t.Error(finalResultSummaryString) }
+}
+
+//FAB-7936 - short test of ote functionalities: send 100 TXs to 3 chans on 3 orderers, 3 kafka brokers, 1 zookeeper with default batchsize and payload size
+func Test_FAB7936_100tx_3ch_3ord_3kb(t *testing.T) {
+        // TODO: Later we should use spyDefer, after FAB-7996 is finished to repair that OTE functionality.
+        passResult, finalResultSummaryString := ote("FAB-7936_100tx_3ch_3ord_3kb", 100, 3, 3, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
