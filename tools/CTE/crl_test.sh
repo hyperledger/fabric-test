@@ -8,6 +8,8 @@ CONFIGFILE="$CA_CFG_PATH/runFabricCaFvt.yaml"
 ADMINUSER="admin"
 NOTADMINUSER="notadmin"
 ADMINCERT="$CA_CFG_PATH/$ADMINUSER/msp/signcerts/cert.pem"
+USERCERT1="$CA_CFG_PATH/testUser/msp/signcerts/cert.pem"
+USERCERT2="$CA_CFG_PATH/testUser2/msp/signcerts/cert.pem"
 . $SCRIPTDIR/fabric-ca_utils
 RC=0
 export CA_CFG_PATH
@@ -41,15 +43,15 @@ for db in sqlite3 mysql postgres; do
    #   explicitly support notbefore/notafter. cfssl unilaterally rounds to
    #   the nearest minute and backdates the certificate, so we must work
    #   within these parameters. As a consequnce, the certificate will expire
-   #   sometime between 9 and 69 seconds from creation.
+   #   35 seconds from creation.
    sed -i '/signing/,/^[^ ]/ s@^@#@; s@#csr:@csr:@' $CONFIGFILE
    cat >> $CONFIGFILE <<EOF
 signing:
   default:
     usage:
       - digital signature
-    expiry: 70s
-    backdate: 31s
+    expiry: 40s
+    backdate: 5s
 EOF
 
    $SCRIPTDIR/fabric-ca_setup.sh -S -X -D -d $db
@@ -77,42 +79,58 @@ EOF
    #                      a-----b includes neither
    #
 
+   # Since we can't set the start/end date,
+   # at least we can set the start time. This makes the
+   # expiry predictable.
+   while test $(date "+%S") -gt 3 ; do sleep .5; done
    starttime=$(date -d "$(date)" --rfc-3339=seconds | sed 's/ /T/')
    # window1
-   a1=$(formatDate "$starttime-2min"); b1=$(formatDate "$starttime-1min")
+   a1=$(formatDate "$starttime-1min"); b1=$(formatDate "$starttime-10sec")
    # window2
-   a2=$(formatDate "$starttime-1min"); b2=$(formatDate "$starttime+70sec")
+   a2=$(formatDate "$starttime-10sec"); b2=$(formatDate "$starttime+50sec")
    # window3
-   a3=$(formatDate "$starttime-1min"); b3=$(formatDate "$starttime+150sec")
+   a3=$(formatDate "$starttime-10sec"); b3=$(formatDate "$starttime+120sec")
    # window4
-   a4=$(formatDate "$starttime+70sec"); b4=$(formatDate "$starttime+3min")
+   a4=$(formatDate "$starttime+50sec"); b4=$(formatDate "$starttime+120sec")
    # window5
-   a5=$(formatDate "$starttime+3min"); b5=$(formatDate "$starttime+4min")
+   a5=$(formatDate "$starttime+120sec"); b5=$(formatDate "$starttime+180sec")
 
    ### START
    # before starttime enroll $ADMINUSER
    enroll
    # for debugging, compare current time and expiry
-   openssl x509 -in $ADMINCERT -noout -startdate -enddate
-   date
 
    # at starttime enroll testUser,revoke testUser
    enroll testUser user1
    fabric-ca-client revoke -e testUser -H $CA_CFG_PATH/$ADMINUSER
+   openssl x509 -in $USERCERT1 -noout -startdate -enddate; date
    s1=$(openssl x509 -noout -in $CA_CFG_PATH/testUser/msp/signcerts/cert.pem -serial | awk -F'=' '{print $2}')
 
+   printf "testUser Revoke date ==========> "
+   case  $db in
+      postgres) $SCRIPTDIR/fabric-ca_setup.sh -d postgres -D -L | awk '$1=="testUser" {print $17}' ;;
+      sqlite3)  $SCRIPTDIR/fabric-ca_setup.sh -L -x /tmp/gencrl -D  | awk -F'|' '$1~/testUser$/ {print $8}' ;;
+      mysql)    $SCRIPTDIR/fabric-ca_setup.sh -L -D -d mysql 2>&1|awk '/Certificates:/,/Affiliations:/ { if ($1~/testUser$/) print $9}' ;;
+   esac
+
    # allow certificate for testUser to expire
-   sleep 72
+   sleep 50
+   # at starttime+60 seconds, enroll testUser2, revoke testUser2
+   while test $(date "+%S") -gt 3; do sleep .5; done
 
    # refresh $ADMINUSER cert
    enroll
-   openssl x509 -in $ADMINCERT -noout -startdate -enddate
-   date
-
-   # at starttime+72 seconds, enroll testUser2, revoke testUser2
+   openssl x509 -in $ADMINCERT -noout -startdate -enddate; date
    enroll testUser2 user2
    fabric-ca-client revoke -e testUser2 -H $CA_CFG_PATH/$ADMINUSER
+   openssl x509 -in $USERCERT2 -noout -startdate -enddate; date
    s2=$(openssl x509 -noout -in $CA_CFG_PATH/testUser2/msp/signcerts/cert.pem -serial | awk -F'=' '{print $2}')
+   printf "testUser2 Revoke date ==========> "
+   case  $db in
+      postgres) $SCRIPTDIR/fabric-ca_setup.sh -d postgres -D -L | awk '$1=="testUser" {print $17}' ;;
+      sqlite3)  $SCRIPTDIR/fabric-ca_setup.sh -L -x /tmp/gencrl -D  | awk -F'|' '$1~/testUser$/ {print $8}' ;;
+      mysql)    $SCRIPTDIR/fabric-ca_setup.sh -L -D -d mysql 2>&1|awk '/Certificates:/,/Affiliations:/ { if ($1~/testUser$/) print $9}' ;;
+   esac
 
    # intersection of expiry window (A), and revoke window (B)
    #     B1  B2  B3  B4  B5
@@ -152,7 +170,7 @@ EOF
    checkCrl $a5 $b5 $a4 $b4 ""
    checkCrl $a5 $b5 $a5 $b5 ""
 
-   # Lastly, ensure that we don't allow an unauthorrized user to issue gencrl
+   # Lastly, ensure that we don't allow an unauthorized user to issue gencrl
    enroll $NOTADMINUSER pass
    fabric-ca-client gencrl -H $CA_CFG_PATH/$NOTADMINUSER && ErrorMsg "Access to gencrl by ($NOTADMINUSER) should have failed"
 done
