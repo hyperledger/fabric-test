@@ -15,6 +15,7 @@ import compose_util
 import orderer_util
 import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
+import database_util
 
 
 @given(u'I wait "{seconds}" seconds')
@@ -117,6 +118,10 @@ def step_impl(context, ordererType, database):
 @given(u'I have a bootstrapped fabric network using state-database {database} with tls')
 def step_impl(context, database):
     bootstrapped_impl(context, "solo", database, True)
+
+@when(u'a user defines a couchDB index named {indexName} with design document name "{docName}" containing the fields "{fields}" to the chaincode at path "{path}"')
+def step_impl(context, indexName, docName, fields, path):
+    database_util.generateIndex(indexName, docName, fields, path)
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} with tls')
 def step_impl(context, ordererType):
