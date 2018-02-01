@@ -136,11 +136,13 @@ class InterfaceBase:
     def join_channel(self, context, peers, channelId, user="Admin"):
         return self.cli.join_channel(context, peers, channelId, user=user)
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, user="User1"):
-        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId, user=user)
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, targs="", user="User1"):
+        # targs and user are optional parameters with defaults set if they are not included
+        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId, targs, user)
 
-    def query_chaincode(self, context, chaincode, peer, channelId, user="User1"):
-        return self.cli.query_chaincode(context, chaincode, peer, channelId, user=user)
+    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1"):
+        # targs and user are optional parameters with defaults set if they are not included
+        return self.cli.query_chaincode(context, chaincode, peer, channelId, targs, user)
 
 
 class ToolInterface(InterfaceBase):
@@ -198,7 +200,8 @@ class ToolInterface(InterfaceBase):
             results[peer] = subprocess.check_call(cmd.split(), env=os.environ)
         return results
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, user="User1"):
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, targs="", user="User1"):
+        # targs and user are optional parameters with defaults set if they are not included
         args = json.loads(chaincode["args"])
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
         cmd = "node v1.0_sdk_tests/app.js invoke -c {0} -i {1} -v 1 -p {2} -m {3}".format(channelId,
@@ -208,7 +211,8 @@ class ToolInterface(InterfaceBase):
         print(cmd)
         return {peer: subprocess.check_call(cmd.split(), env=os.environ)}
 
-    def query_chaincode(self, context, chaincode, peer, channelId, user="User1"):
+    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1"):
+        # targs and user are optional parameters with defaults set if they are not included
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
         cmd = "node v1.0_sdk_tests/app.js query -c {0} -i {1} -v 1 -p {2}".format(channelId,
                                                                    chaincode["name"],
@@ -283,6 +287,7 @@ class SDKInterface(InterfaceBase):
         return chaincode
 
     def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
+        # channelId, targs and user are optional parameters with defaults set if they are not included
         reformatted = self.reformat_chaincode(chaincode, channelId)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
@@ -291,7 +296,8 @@ class SDKInterface(InterfaceBase):
         print("Invoke: {}".format(result))
         return {peer: result}
 
-    def query_chaincode(self, context, chaincode, peer, channelId, targs, user="User1"):
+    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1"):
+        # targs and user are optional parameters with defaults set if they are not included
         reformatted = self.reformat_chaincode(chaincode, channelId)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
@@ -479,6 +485,7 @@ class CLIInterface(InterfaceBase):
         return output
 
     def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
+        # channelId, targs and user are optional parameters with defaults set if they are not included
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = chaincode.get('args', '[]').replace('"', r'\"')
         peerParts = peer.split('.')
@@ -505,9 +512,8 @@ class CLIInterface(InterfaceBase):
         output = self.retry(context, output, peer, setup, command)
         return output
 
-
     def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
-        configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
+        # channelId, targs and user are optional parameters with defaults set if they are not included
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         args = chaincode.get('args', '[]').replace('"', r'\"')
@@ -520,6 +526,9 @@ class CLIInterface(InterfaceBase):
             #to escape " so that targs are compatible with cli command
             targs = targs.replace('"', r'\"')
             command = command +["--transient", targs]
+
+        if chaincode.get("version", None) is not None:
+            command = command +["--version", chaincode["version"]]
 
         command.append('"')
         result = context.composition.docker_exec(setup+command, [peer])

@@ -20,7 +20,6 @@ Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query, 
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 990
-
     When "peer0.org2.example.com" is taken down
     And a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "5" seconds
@@ -167,7 +166,7 @@ Examples:
 
 
 @daily
-Scenario Outline: FAB-7150: Test Mutual TLS/ClientAuth <security> with <type> based-orderer
+Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Test Mutual TLS/ClientAuth <security> with <type> based-orderer
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And I have a bootstrapped fabric network of type <type> <security>
@@ -188,6 +187,12 @@ Scenario Outline: FAB-7150: Test Mutual TLS/ClientAuth <security> with <type> ba
   And I wait "10" seconds
   And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
   Then a user receives a success response of 980 from "peer0.org2.example.com"
+
+  When a user queries for the first block
+  Then a user receives a response containing org1.example.com
+  Then a user receives a response containing org2.example.com
+  Then a user receives a response containing example.com
+  Then a user receives a response containing CERTIFICATE
 Examples:
     | type  |   security  |  interface |
     | kafka |   with tls  | NodeJS SDK |

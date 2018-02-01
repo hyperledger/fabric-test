@@ -11,6 +11,7 @@ import json
 import time
 import random
 import string
+import struct
 import subprocess
 import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
@@ -230,6 +231,41 @@ def step_impl(context):
 def step_impl(context, peer, username="Admin", timeout=120):
     context.interface.instantiate_chaincode(context, peer, username)
     context.interface.post_deploy_chaincode(context, peer, timeout)
+
+@when(u'a user queries for channel information')
+def step_impl(context):
+    get_chain_info_impl(context, context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user queries for channel information on channel "{channel}"')
+def get_chain_info_impl(context, channel):
+    chaincode = {"args": '["GetChainInfo","{}"]'.format(channel),
+                 "chaincodeId": 'qscc',
+                 "name": 'qscc'}
+    context.result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
+
+@when(u'a user queries for the first block')
+def step_impl(context):
+    get_block_num_impl(context, "1", context.interface.TEST_CHANNEL_ID)
+
+@when(u'a user queries for the first block on the channel "{channel}"')
+def step_impl(context, channel):
+    get_block_num_impl(context, "1", channel)
+
+@when(u'a user queries for block number "{number}" on the channel "{channel}"')
+def get_block_num_impl(context, number, channel):
+    updated_env = config_util.updateEnviron(context)
+    time.sleep(2)
+    chaincode = {"args": '["GetBlockByNumber","{0}","{1}"]'.format(channel, number),
+                 "chaincodeId": 'qscc',
+                 "name": 'qscc'}
+    context.result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
+
+@when(u'a user queries for last transaction using the transaction ID')
+def step_impl(context, number, channel):
+    chaincode = {"args": '["GetTransactionByID","{0}","{1}"]'.format(channel, txId),
+                 "chaincodeId": 'qscc',
+                 "name": 'qscc'}
+    context.result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
 
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" for the random key with args {args} on "{peer}"')
 def step_impl(context, channel, name, args, peer):
@@ -566,7 +602,11 @@ def step_impl(context, length):
 @then(u'a user receives a response containing {response} from "{peer}"')
 def containing_impl(context, response, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
-    assert response in context.result[peer], "Expected response was {0}; received {1}".format(response, context.result[peer])
+    print("Type of result: {}".format(type(context.result[peer])))
+    if type(response) == type(context.result[peer]):
+        assert response in context.result[peer][13:], "Expected response was {0}; received {1}".format(response, context.result[peer])
+    else:
+        assert str(response) in context.result[peer][13:], "Expected response was {0}; received {1}".format(response, context.result[peer])
 
 @then(u'a user receives a response containing {response}')
 def step_impl(context, response):
