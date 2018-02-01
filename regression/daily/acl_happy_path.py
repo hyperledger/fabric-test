@@ -22,8 +22,7 @@ class ACL(unittest.TestCase):
          Passing criteria: The sample executes with a congratulatory message.
         '''
         self.assertTrue(os.path.exists(fca_sample_directory), msg="The fabric-ca chaincode test does not exist in this directory setup")
-        output = subprocess.check_output(["./scripts/env.sh && ./start.sh"],
-                                         shell=True, cwd=fca_sample_directory)
+        output = subprocess.check_output(["./start.sh"], shell=True, cwd=fca_sample_directory)
         self.assertNotIn("ERROR", output)
         self.assertTrue(os.path.exists(fca_sample_directory+"/data/logs/run.log"), msg="The ACL test did not execute.")
         with open(fca_sample_directory+"/data/logs/run.log", "r") as fd:
