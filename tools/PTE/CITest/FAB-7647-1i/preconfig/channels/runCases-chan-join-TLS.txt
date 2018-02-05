@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-7647-1i/preconfig/channels/chan1-join-TLS.json
