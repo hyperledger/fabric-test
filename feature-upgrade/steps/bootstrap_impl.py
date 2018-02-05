@@ -295,7 +295,7 @@ def step_impl(context, userName, composeService):
     streamHelper = user.getDelivererStreamHelper(context, composeService)
     streamHelper.seekToRange(chainID=chainID, start = start, end = end)
 
-@given(u'user "{userName}" retrieves the latest config update "{latest_config_name}" from orderer "{service_name}" for channel "{channel_id_or_ref}"')
+@given(u'user "{userName}" retrieves the latest config block "{latest_config_name}" from orderer "{service_name}" for channel "{channel_id_or_ref}"')
 def step_impl(context, userName, latest_config_name, service_name, channel_id_or_ref):
     directory = bootstrap_util.getDirectory(context)
     user = directory.getUser(userName=userName)

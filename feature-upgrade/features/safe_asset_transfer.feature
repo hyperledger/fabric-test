@@ -135,7 +135,7 @@ Feature: Safe Asset Transfer
 
     And user "configAdminOrdererOrg0" using cert alias "config-admin-cert" connects to deliver function on orderer "<orderer0>"
 
-    And user "configAdminOrdererOrg0" retrieves the latest config update "latestOrdererConfig" from orderer "<orderer0>" for channel "{ordererSystemChannelId}"
+    And user "configAdminOrdererOrg0" retrieves the latest config block "latestOrdererConfig" from orderer "<orderer0>" for channel "{ordererSystemChannelId}"
 
     And the orderer config admin "configAdminOrdererOrg0" creates a consortiums config update "consortiumsConfigUpdate1" using config "latestOrdererConfig" using orderer system channel ID "ordererSystemChannelId" to add consortiums:
       | Consortium  |
@@ -235,7 +235,7 @@ Feature: Safe Asset Transfer
 
     And user "configAdminBobOrg" using cert alias "config-admin-cert" connects to deliver function on orderer "<orderer0>"
 
-    And user "configAdminBobOrg" retrieves the latest config update "latestChannelConfigUpdate" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "configAdminBobOrg" retrieves the latest config block "latestChannelConfigUpdate" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
 
     And the user "configAdminBobOrg" creates an existing channel config update "existingChannelConfigUpdate1" using config update "latestChannelConfigUpdate"
       | ChannelID                         | [PeerAnchorSet] |

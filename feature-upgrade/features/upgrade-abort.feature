@@ -107,7 +107,7 @@ Feature: Upgrade
 
     And user "configAdminOrdererOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer0>" using port "7050"
 
-    And user "configAdminOrdererOrg0" retrieves the latest config update "latestOrdererConfig" from orderer "<orderer0>" for channel "{ordererSystemChannelId}"
+    And user "configAdminOrdererOrg0" retrieves the latest config block "latestOrdererConfig" from orderer "<orderer0>" for channel "{ordererSystemChannelId}"
 
     And the orderer config admin "configAdminOrdererOrg0" creates a consortiums config update "consortiumsConfigUpdate1" using config "latestOrdererConfig" using orderer system channel ID "ordererSystemChannelId" to add consortiums:
       | Consortium  |
@@ -225,7 +225,7 @@ Feature: Upgrade
 
     And user "configAdminPeerOrg0" using cert alias "config-admin-cert" connects to deliver function on node "<orderer0>" using port "7050"
 
-    And user "configAdminPeerOrg0" retrieves the latest config update "latestChannelConfigUpdate" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "configAdminPeerOrg0" retrieves the latest config block "latestChannelConfigUpdate" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
 
     And the user "configAdminPeerOrg0" creates an existing channel config update "existingChannelConfigUpdate1" using config update "latestChannelConfigUpdate"
       | ChannelID                         | [PeerAnchorSet] |
@@ -558,7 +558,7 @@ Feature: Upgrade
     And I wait "<RestartOrdererWaitTime>" seconds
 
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer0>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgrOrd0" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "dev0Org0" retrieves the latest config block "latestChannelConfigAfterUpgrOrd0" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
 
     # entry point for invoking after upgrading orderer
     When user "dev0Org0" creates a chaincode invocation spec "invocationSpec2" using spec "ccSpec" with input:
@@ -612,7 +612,7 @@ Feature: Upgrade
 
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer1>" using port "7050"
 
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgrOrd1" from orderer "<orderer1>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "dev0Org0" retrieves the latest config block "latestChannelConfigAfterUpgrOrd1" from orderer "<orderer1>" for channel "com.acme.blockchain.jdoe.channel1"
 
     # entry point for invoking after upgrading orderer
     When user "dev0Org0" creates a chaincode invocation spec "invocationSpecAfterUpgrOrd1" using spec "ccSpec" with input:
@@ -665,7 +665,7 @@ Feature: Upgrade
     And I wait "<RestartOrdererWaitTime>" seconds
 
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer2>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterUpgrOrd2" from orderer "<orderer2>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "dev0Org0" retrieves the latest config block "latestChannelConfigAfterUpgrOrd2" from orderer "<orderer2>" for channel "com.acme.blockchain.jdoe.channel1"
 
     # entry point for invoking after upgrading orderer
     When user "dev0Org0" creates a chaincode invocation spec "invocationSpecAfterUpgrOrd2" using spec "ccSpec" with input:
@@ -987,7 +987,7 @@ Feature: Upgrade
     And I wait "<RestartOrdererWaitTime>" seconds
 
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer0>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterDowngradeOrd0" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "dev0Org0" retrieves the latest config block "latestChannelConfigAfterDowngradeOrd0" from orderer "<orderer0>" for channel "com.acme.blockchain.jdoe.channel1"
 
     ###################################################
     # entry point for invoking after downgrading orderer0
@@ -1050,10 +1050,10 @@ Feature: Upgrade
     #    And all orderer nodes are verified ready
     ########################################################################
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer1>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterDowngradeOfOrderersFromOrderer1" from orderer "<orderer1>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "dev0Org0" retrieves the latest config block "latestChannelConfigAfterDowngradeOfOrderersFromOrderer1" from orderer "<orderer1>" for channel "com.acme.blockchain.jdoe.channel1"
 
     And user "dev0Org0" using cert alias "consortium1-cert" connects to deliver function on node "<orderer2>" using port "7050"
-    And user "dev0Org0" retrieves the latest config update "latestChannelConfigAfterDowngradeOfOrderersFromOrderer2" from orderer "<orderer2>" for channel "com.acme.blockchain.jdoe.channel1"
+    And user "dev0Org0" retrieves the latest config block "latestChannelConfigAfterDowngradeOfOrderersFromOrderer2" from orderer "<orderer2>" for channel "com.acme.blockchain.jdoe.channel1"
 
     #####################################################
     # Downgrade all peers

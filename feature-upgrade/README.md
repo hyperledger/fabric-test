@@ -76,8 +76,8 @@ cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric
 # Optionally perform the following clean if you are unsure of your environment state.
 make clean
 
-# Build the peer executable
-make peer
+# Build all native binaries
+make native
 ```
 
 The peer executable will be located in the build/bin folder. Make sure that your PATH enviroment variable contains the location.
