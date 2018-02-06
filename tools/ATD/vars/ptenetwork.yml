@@ -49,6 +49,12 @@ fabric: {
   },
 
   baseimage_tag: "",
-  helper_tag: "1.1.0-preview",
-  ca: { admin: "admin", adminpw: "adminpw" }
+  helper_tag: "x86_64-0.4.5",
+  ca: { admin: "admin", adminpw: "adminpw" },
+
+  repo: {
+    url: "hyperledger/",
+    bin: ""
+  }
+
 }
