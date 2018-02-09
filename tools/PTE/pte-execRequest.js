@@ -214,6 +214,17 @@ if (typeof( uiContent.ccOpt.keyPayLoad ) !== 'undefined') {
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyPayLoad: ', Nid, channel.getName(), org, pid, keyPayLoad);
 
+var moveMarbleOwner='tom';
+var moveMarbleName='marble';
+var queryMarbleOwner='tom';
+var queryMarbleName='marble';
+var nOwner=100;
+var queryMarbleDocType='marble';
+//set transaction ID: channelName+'_'+org+'_'+Nid+'_'+pid
+var txIDVar=channelName+'_'+org+'_'+Nid+'_'+pid;
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] tx IDVar: ', Nid, channel.getName(), org, pid, txIDVar);
+
+
 if ( ccType == 'ccchecker' ) {
     keyStart = parseInt(uiContent.ccOpt.keyStart);
     payLoadMin = parseInt(uiContent.ccOpt.payLoadMin)/2;
@@ -230,6 +241,42 @@ if ( ccType == 'ccchecker' ) {
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
                  Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+
+    // get number of owners
+    if ( typeof( uiContent.invoke.nOwner ) !== 'undefined'  ) {
+        nOwner=parseInt(uiContent.invoke.nOwner);
+    }
+
+    // get prefix owner name
+    // moveMarbleOwner
+    // "args": ["marble", "blue","35","tom"]
+    if ( uiContent.invoke.move.fcn == 'initMarble' ) {
+        moveMarbleOwner = uiContent.invoke.move.args[3];
+    }
+    moveMarbleName=uiContent.invoke.move.args[0];
+
+    // queryMarbleByOwner
+    // "args": ["tom"]
+    //
+    // queryMarble
+    // "args": {
+    //     "selector": {
+    //         "owner":"tom",
+    //         "docType":"marble"
+    //     }
+    // }
+    if ( uiContent.invoke.query.fcn == 'queryMarblesByOwner' ) {
+        queryMarbleOwner=uiContent.invoke.query.args[0];
+    } else if ( uiContent.invoke.query.fcn == 'queryMarbles' ) {
+        if ( typeof( uiContent.invoke.query.args.selector.owner ) !== 'undefined' ) {
+            queryMarbleOwner=uiContent.invoke.query.args.selector.owner;
+        }
+        if ( typeof( uiContent.invoke.query.args.selector.docType ) !== 'undefined' ) {
+            queryMarbleDocType=uiContent.invoke.query.args.selector.docType;
+        }
+    }
+    queryMarbleName=uiContent.invoke.query.args[0];
+
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] ccType: %s, keyStart: %d', Nid, channel.getName(), org, pid, ccType, keyStart);
 //construct invoke request
@@ -243,7 +290,7 @@ function getMoveRequest() {
     if ( ccType == 'ccchecker') {
         arg0 ++;
         for ( i=0; i<keyIdx.length; i++ ) {
-            testInvokeArgs[keyIdx[i]] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+            testInvokeArgs[keyIdx[i]] = 'key_'+txIDVar+'_'+arg0;
         }
 
         // randomise length of payload
@@ -258,7 +305,11 @@ function getMoveRequest() {
     } else if ( ccType == 'marblescc' ) {
         arg0 ++;
         for ( i=0; i<keyIdx.length; i++ ) {
-            testInvokeArgs[keyIdx[i]] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+            testInvokeArgs[keyIdx[i]] = moveMarbleName+'_'+txIDVar+'_'+arg0;
+        }
+        if ( uiContent.invoke.move.fcn == 'initMarble' ) {
+            var index=arg0%nOwner;
+            testInvokeArgs[3]=moveMarbleOwner+'_'+txIDVar+'_'+index;
         }
         // random marble size
         var r = Math.floor((Math.random() * (payLoadMax - payLoadMin)) + payLoadMin);
@@ -296,12 +347,19 @@ for (i=0; i<uiContent.invoke.query.args.length; i++) {
     testQueryArgs.push(uiContent.invoke.query.args[i]);
 }
 
+var rqSelector;
+if ( uiContent.invoke.query.fcn == 'queryMarbles' ) {
+    if ( typeof( uiContent.invoke.query.args.selector ) !== 'undefined' ) {
+        rqSelector = uiContent.invoke.query.args.selector;
+    }
+}
+
 var request_query;
 function getQueryRequest() {
     if ( ccType == 'ccchecker') {
         arg0 ++;
         for ( i=0; i<keyIdx.length; i++ ) {
-            testQueryArgs[keyIdx[i]] = 'key_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+            testQueryArgs[keyIdx[i]] = 'key_'+txIDVar+'_'+arg0;
         }
     } else if ( ccType == 'marblescc' ) {
         arg0 ++;
@@ -310,11 +368,44 @@ function getQueryRequest() {
             keyA = arg0 - 10;
         }
         if ( uiContent.invoke.query.fcn == 'getMarblesByRange' ) {
-            testQueryArgs[0] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+keyA;
-            testQueryArgs[1] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+            testQueryArgs[0] = queryMarbleName+'_'+txIDVar+'_'+keyA;
+            testQueryArgs[1] = queryMarbleName+'_'+txIDVar+'_'+arg0;
+        } else if ( uiContent.invoke.query.fcn == 'queryMarblesByOwner' ) {
+            // marbles02 rich query: queryMarblesByOwner
+            var index=arg0%nOwner;
+            testQueryArgs[0] = queryMarbleOwner+'_'+txIDVar+'_'+index;
+        } else if ( uiContent.invoke.query.fcn == 'queryMarbles' ) {
+            // marbles02 rich query: queryMarbles
+            var selector=0;
+            var index=arg0%nOwner;
+            if ( rqSelector ) {
+                testQueryArgs[0]='{\"selector\":{"';
+                if ( typeof( rqSelector.owner ) !== 'undefined' ) {
+                    rqSelector.owner = '\owner\":\"'+queryMarbleOwner+'_'+txIDVar+'_'+index;
+                    if ( selector == 0 ) {
+                        testQueryArgs[0]=testQueryArgs[0]+rqSelector.owner;
+                    } else {
+                        testQueryArgs[0]=testQueryArgs[0]+','+rqSelector.owner;
+                    }
+                    selector=1;
+                }
+                if ( typeof( rqSelector.docType ) !== 'undefined' ) {
+                    rqSelector.docType = '\"docType\":\"'+queryMarbleDocType;
+                    if ( selector == 0 ) {
+                        testQueryArgs[0]=testQueryArgs[0]+rqSelector.docType;
+                    } else {
+                        testQueryArgs[0]=testQueryArgs[0]+'\",'+rqSelector.docType;
+                    }
+                    selector=1;
+                }
+                testQueryArgs[0]=testQueryArgs[0]+'\"}';
+            }
+
+            testQueryArgs[0]=testQueryArgs[0]+'}';
+
         } else {
             for ( i=0; i<keyIdx.length; i++ ) {
-                testQueryArgs[keyIdx[i]] = 'marble_'+channelName+'_'+org+'_'+Nid+'_'+pid+'_'+arg0;
+                testQueryArgs[keyIdx[i]] = queryMarbleName+'_'+txIDVar+'_'+arg0;
             }
         }
     }
