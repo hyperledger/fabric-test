@@ -12,9 +12,19 @@ import time
 import random
 import string
 import struct
+import marshal
 import subprocess
 import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
+
+try:
+    #pbFilePath = "../fabric/bddtests"
+    pbFilePath = "../feature-upgrade"
+    sys.path.insert(0, pbFilePath)
+    from common import ledger_pb2
+except:
+    print("ERROR! Unable to import the protobuf libraries from the ../feature-upgrade directory: {0}".format(sys.exc_info()[0]))
+    sys.exit(1)
 
 
 @when(u'a user sets up a channel named "{channelId}" using orderer "{orderer}"')
@@ -257,7 +267,13 @@ def get_chain_info_impl(context, channel):
     chaincode = {"args": '["GetChainInfo","{}"]'.format(channel),
                  "chaincodeId": 'qscc',
                  "name": 'qscc'}
-    context.result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
+
+    #context.result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
+    result = context.interface.query_chaincode(context, chaincode, "peer0.org1.example.com", channel, user="Admin")
+    #msgFormat = ledger_pb2.BlockchainInfo()
+    #context.result = msgFormat.SerializeToString()
+    context.result["peer0.org1.example.com"] = marshal.dumps(result["peer0.org1.example.com"])
+    context.result["peer0.org1.example.com"] = result["peer0.org1.example.com"].encode("ascii", "ignore")
 
 @when(u'a user queries for the first block')
 def step_impl(context):
@@ -293,7 +309,6 @@ def step_impl(context, name, args, peer):
 
 @when(u'a user queries on the chaincode named "{name}" for the random key with args {args}')
 def step_impl(context, name, args):
-    print("in the step_imp for random query ")
     query_impl(context, context.interface.TEST_CHANNEL_ID, name, args.format(random_key=context.random_key), "peer0.org1.example.com")
 
 @when(u'a user queries on the chaincode for the random key with args {args}"')
@@ -307,6 +322,15 @@ def step_impl(context, name, args, org):
 @when(u'a user queries on the chaincode named "{name}" with args {args} on the initial non-leader peer of "{org}"')
 def step_impl(context, name, args, org):
     query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, context.interface.get_initial_non_leader(context, org))
+
+@when(u'a user queries on the chaincode named "{name}" with dynamic args {args} on "{peer}"')
+def step_impl(context, name, args, peer):
+    # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using events for being sure the invokes are complete
+    time.sleep(2)
+    chaincode = {"args": args.format(last_key=context.last_key),
+                 "chaincodeId": str(name),
+                 "name": str(name)}
+    context.result = context.interface.query_chaincode(context, chaincode, peer, context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def query_impl(context, channel, name, args, peer, targs=''):
@@ -452,6 +476,29 @@ def step_impl(context, name, args):
 @when(u'a user invokes {numInvokes:d} times on the chaincode')
 def step_impl(context, numInvokes):
     invokes_impl(context, numInvokes, context.interface.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
+
+@when(u'a user invokes random args {args} of length {length:d} {numInvokes:d} times on the chaincode named "{name}"')
+def step_impl(context, args, length, numInvokes, name):
+    for num in range(numInvokes):
+        random_invoke_impl(context, name, args, length, "peer0.org1.example.com", "orderer0.example.com")
+
+@when(u'a user invokes args with {count:d} random key/values of length {length:d} on the chaincode named "{name}"')
+def step_impl(context, count, length, name):
+    keyVals = []
+    for index in range(count):
+        key = 'a{index}'.format(index=index)
+        keyVals.append('"{}"'.format(key))
+        payload = ''.join(random.choice(string.ascii_letters) for _ in range(length))
+        keyVals.append('"{}"'.format(payload))
+        context.last_key = key
+        context.payload = {"payload": payload, "len": length}
+
+    keyValStr = ",".join(keyVals)
+    chaincode = {"args": '["put",{}]'.format(keyValStr),
+                 "chaincodeId": str(name),
+                 "name": str(name)}
+    print("chaincode: {}".format(chaincode))
+    context.result = context.interface.invoke_chaincode(context, chaincode, "orderer0.example.com", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}" using orderer "{orderer}"')
 def random_invoke_impl(context, name, args, length, peer, orderer):
@@ -619,8 +666,9 @@ def step_impl(context, length):
 def containing_impl(context, response, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
     print("Type of result: {}".format(type(context.result[peer])))
+    print("result: {}".format(context.result[peer]))
     if type(response) == type(context.result[peer]):
-        assert response in context.result[peer][13:], "Expected response was {0}; received {1}".format(response, context.result[peer])
+        assert response in context.result[peer][13:], u"Expected response was {0}; received {1}".format(response, context.result[peer])
     else:
         assert str(response) in context.result[peer][13:], "Expected response was {0}; received {1}".format(response, context.result[peer])
 

@@ -141,6 +141,31 @@ Examples:
     |      1 MB        |      1 MB         |     2 MB        |       1.5 MB         |           10 MB              |  1048576 |
     |     11 MB        |      2 MB         |    11 MB        |       11 MB          |           20 MB              | 10485760 |
 
+@daily
+Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>
+    Given I have a bootstrapped fabric network of type kafka using state-database couchdb
+    And I use the NodeJS SDK interface
+    When a user sets up a channel
+    When a user deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]
+
+    When a user invokes on the chaincode named "mycc" with args ["put","c","3F","d","76D"]
+    When I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","c"]
+    Then a user receives a success response of "3F"
+    When a user queries on the chaincode named "mycc" with args ["get","d"]
+    Then a user receives a success response of "76D"
+
+    When a user invokes args with <count> random key/values of length <size> on the chaincode named "mycc"
+    And I wait "5" seconds
+    And a user queries on the chaincode named "mycc" with dynamic args ["get","{last_key}"] on "peer0.org1.example.com"
+    Then a user receives a response containing a value of length <size>
+    And a user receives a response with the random value
+Examples:
+    |   size  |  count  |
+    |   2048  |   20    | # 2KB
+    | 1048576 |  1024   | # 1MB
+    | 2097152 |  1024   | # 2MB
+
 
 @daily
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
