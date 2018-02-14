@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-8201-4q/preconfig/channels/chan1-join-TLS.json
+sdk=node CITest/FAB-8201-4q/preconfig/channels/chan2-join-TLS.json
