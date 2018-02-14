@@ -8,8 +8,8 @@ which can be found in the fabric-test repository, to test several components on 
 Driving PTE using ATD reduces the effort of modifying the channel configuration files, samplecc-chan-create-TLS.json files,
 and running the create, join, install, instantiate, invokes and queries separately by doing the following:
 
- - Auto-generates channel configuration files that are necessary to run PTE by parsing vars/ptevars.yml
- - Auto-generates samplecc-chan-create-TLS.json files that are required to create the channels by parsing vars/ptevars.yml
+ - Auto-generates channel configuration files that are necessary to run PTE by parsing vars/<filename>.yml
+ - Auto-generates samplecc-chan-create-TLS.json files that are required to create the channels by parsing vars/<filename>.yml
  - Generates channel configuration transactions using configtxgen and mounts them to PTE docker container
  - Builds docker image for PTE and launches PTE in a separate container
  - Drives PTE tests from inside the container
@@ -46,9 +46,9 @@ and running the create, join, install, instantiate, invokes and queries separate
 ## Using ATD to drive PTE
 
 ### Setting up the channels
-Edit `.../path/to/fabric-test/tools/ATD/vars/ptevars.yml` with your list of channel names, organizations that are part of that channel, and the orderer to which the requests have to be routed based on hyperledger fabric network configuration.
+Edit `.../path/to/fabric-test/tools/ATD/vars/<filename>.yml` with your list of channel names, organizations that are part of that channel, and the orderer to which the requests have to be routed based on hyperledger fabric network configuration.
 
-For example, `vars/ptevars.yml` looks like this
+For example, `vars/2channels.yml` looks like this
 ```
 pte: {
 
@@ -66,11 +66,11 @@ Now, run the following command to launch the PTE in a container
 ```
   cd .../path/to/fabric-test/tools/ATD/
   ansible-playbook -i ../../cello/src/agent/ansible/run/runhosts \
-  --extra-vars "chaincode=samplecc testcase=FAB-3983-i-TLS" -e "mode=apply env=bc1st tool_type=pte" ptesetup.yml
+  --extra-vars "chaincode=samplecc testcase=FAB-3983-i-TLS" -e "mode=apply env=bc1st tool_type=pte pteenv=2channels" ptesetup.yml
 ```
 
 Behind the scenes, it will use templates under `roles/tool_pte/ptesetup/templates/` to generate the chan-config-TLS.json,
-samplecc-chan-create-TLS.json, pte-compose.json files depending vars/ptevars.yml
+samplecc-chan-create-TLS.json, pte-compose.json files depending vars/2channels.yml
 
 In the above command,
  - `-i <filename>` is used to provide an input file like host file which is needed by ansible to run against
@@ -87,3 +87,5 @@ In the above command,
     - `mode=destroy` remove the PTE container and PTE image and network artifacts of the test environment
  - `tool_type=<type of tool>` type of tool to drive
     - `tool_type=pte` to run the PTE
+ - `pteenv=<file name>` pte environment file to be used
+    - `pteenv=2channels` to use two channels with PTE

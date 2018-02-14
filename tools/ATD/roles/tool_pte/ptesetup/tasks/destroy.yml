@@ -12,6 +12,11 @@
     fabricpath: "/opt/gopath/{{ env}}/src/github.com/hyperledger/fabric"
     fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
 
+- name: Get docker logs of PTE
+  shell: docker logs PTE > {{ testcase }}-pte.log 2>&1
+  args:
+    chdir: "{{ fabrictestpath }}/Logs"
+
 - name: Archive the logs directory
   archive:
     path: "{{ fabrictestpath }}/Logs"

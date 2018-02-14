@@ -10,7 +10,7 @@
   user: "{{ fabric.ssh_user }}"
   vars_files:
     - "./../../../../cello/src/agent/ansible/vars/{{ env }}.yml"
-    - "./../../vars/ptevars.yml"
+    - "./../../vars/{{ pteenv }}.yml"
   tasks:
     - include: "fabrictestsetup/tasks/{{ mode }}.yml"
   tags: "fabrictestsetup"
@@ -21,7 +21,7 @@
   user: "{{ fabric.ssh_user }}"
   vars_files:
     - "./../../../../cello/src/agent/ansible/vars/{{ env }}.yml"
-    - "./../../vars/ptevars.yml"
+    - "./../../vars/{{ pteenv }}.yml"
   tasks:
     - include: "ptesetup/tasks/{{ mode }}.yml"
   tags: "ptesetup"

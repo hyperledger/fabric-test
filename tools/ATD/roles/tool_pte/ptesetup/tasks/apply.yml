@@ -33,13 +33,13 @@
 - name: Create samplecc-create file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-create-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/channels/samplecc-chan{{ item.channelnum }}-create-TLS.json"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/channels/chan{{ item.channelnum }}-create-TLS.json"
   with_items: "{{ channellists }}"
 
 - name: Create samplecc-join file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-join-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/channels/samplecc-chan{{ item[0].channelnum }}-join{{ item[1] }}-TLS.json"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/channels/chan{{ item[0].channelnum }}-join{{ item[1] }}-TLS.json"
   with_nested:
     - "{{ channellists }}"
     - "{{ numorgs }}"
@@ -48,7 +48,7 @@
 - name: Create samplecc-install file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-install-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item[0].channelnum }}-install{{ item[1] }}-TLS.json"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item[0].channelnum }}-install{{ item[1] }}-TLS.json"
   with_nested:
     - "{{ channellists }}"
     - "{{ numorgs }}"
@@ -57,11 +57,11 @@
 - name: Create samplecc-instantiate file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-instantiate-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-instantiate-TLS.json"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-instantiate-TLS.json"
   with_items: "{{ channellists }}"
 
 - replace:
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/samplecc/samplecc-chan{{ item.channelnum }}-{{ testcase }}.json"
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-{{ testcase }}-TLS.json"
     regexp: '^(.*)name(.*)$'
     replace: '    "name": "{{ item.name }}",'
   with_items: "{{ channellists }}"
@@ -94,6 +94,9 @@
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/pte-compose.j2"
     dest: "{{ fabricworkdir }}/run/pte-compose.yml"
+  with_together:
+    - "{{ channels }}"
+    - "{{ peers }}"
 
 - name: Create Log directory
   file:

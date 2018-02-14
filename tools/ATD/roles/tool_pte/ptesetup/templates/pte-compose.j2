@@ -16,6 +16,12 @@ services:
     environment:
       - TESTCASE={{ testcase }}
       - CHAINCODE={{ chaincode }}
+{% for channel in channels %}
+      - CHANNEL{{ loop.index }}={{ channel.name }}
+{% endfor %}
+{% for peer in peers %}
+      - PEER{{ loop.index }}={{ peer.name }}
+{% endfor %}
     volumes:
       - {{ fabricworkdir }}/keyfiles:/var/hyperledger/fabric/artifacts
       - {{ fabricworkdir }}/CISCFiles:/root/gopath/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/CISCFiles

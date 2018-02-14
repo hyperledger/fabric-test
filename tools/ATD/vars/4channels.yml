@@ -1,0 +1,14 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+# This variable defines fabric network attributes
+pte: {
+  ptechannels: [
+    {name: "testorgschannel1", orgs: ["orga", "orgb"], orderer: "orderer0"},
+    {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer0"},
+    {name: "testorgschannel3", orgs: ["orga", "orgb"], orderer: "orderer0"},
+    {name: "testorgschannel4", orgs: ["orga", "orgb"], orderer: "orderer0"},
+  ]
+}
