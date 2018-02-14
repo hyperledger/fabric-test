@@ -32,7 +32,7 @@
     },
     "constantOpt": {
         "recHist": "HIST",
-        "constFreq": "1000",
+        "constFreq": "100",
         "devFreq": "10"
     },
     "listOpt": {
@@ -40,8 +40,9 @@
         "org2": ["peer1"]
     },
     "eventOpt": {
-        "listener": "Transaction",
-        "timeout": "240000"
+        "type": "Channel",
+        "listener": "Block",
+        "timeout": "3600000"
     },
     "ccType": "ccchecker",
     "ccOpt": {

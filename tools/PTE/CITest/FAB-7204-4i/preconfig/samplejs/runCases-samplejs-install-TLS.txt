@@ -1,4 +1,2 @@
-sdk=node CITest/FAB-7204-4i/preconfig/samplejs/samplejs-chan1-install1-TLS.json
-sdk=node CITest/FAB-7204-4i/preconfig/samplejs/samplejs-chan1-install2-TLS.json
-sdk=node CITest/FAB-7204-4i/preconfig/samplejs/samplejs-chan2-install3-TLS.json
-sdk=node CITest/FAB-7204-4i/preconfig/samplejs/samplejs-chan2-install4-TLS.json
+sdk=node CITest/FAB-7204-4i/preconfig/samplejs/samplejs-chan1-install-TLS.json
+sdk=node CITest/FAB-7204-4i/preconfig/samplejs/samplejs-chan2-install-TLS.json
