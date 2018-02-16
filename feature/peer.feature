@@ -125,7 +125,7 @@ Examples:
     | solo  |
     | kafka |
 
-  Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up, is able to resume regular operation
+Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up, is able to resume regular operation
   Given I have a bootstrapped fabric network of type solo
   When a user sets up a channel
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"

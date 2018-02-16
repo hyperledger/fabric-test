@@ -25,6 +25,12 @@ def changeFormat(value):
            changedString = toChangeUnits[0]+"s"
        elif "hour" in toChangeUnits[1]:
            changedString = toChangeUnits[0]+"h"
+       elif "MB" in toChangeUnits[1]:
+           changedString = str(int( float(toChangeUnits[0]) * 1024 * 1024) )
+       elif "KB" in toChangeUnits[1]:
+           changedString = str(int( float(toChangeUnits[0]) * 1024) )
+       elif "B" in toChangeUnits[1]:
+           changedString = toChangeUnits[0]
     return changedString
 
 def convertBoolean(boolean):
