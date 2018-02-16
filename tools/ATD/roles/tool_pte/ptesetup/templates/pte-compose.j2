@@ -15,6 +15,7 @@ services:
     hostname: PTE
     environment:
       - TESTCASE={{ testcase }}
+      - TESTCASE_QUERY={{ testcase_query }}
       - CHAINCODE={{ chaincode }}
 {% for channel in channels %}
       - CHANNEL{{ loop.index }}={{ channel.name }}

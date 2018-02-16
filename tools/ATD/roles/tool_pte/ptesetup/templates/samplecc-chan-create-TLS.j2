@@ -1,6 +1,10 @@
 {
     "channelID": "_ch{{ item.channelnum|int }}",
+{% if chaincode == "samplecc" %}
     "chaincodeID": "sample_cc",
+{% elif chaincode == "samplejs" %}
+    "chaincodeID": "sample_js",
+{% endif %}
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "nProcPerOrg": "4",
@@ -13,11 +17,6 @@
         "orgName": [
             "org{{ (item.channelnum|int * item.orgs|length) - (item.orgs|length - 1) }}"
         ]
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
-        "fcn": "init",
-        "args": []
     },
     "SCFile": [
                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}

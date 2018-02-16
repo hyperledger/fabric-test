@@ -66,7 +66,7 @@ Now, run the following command to launch the PTE in a container
 ```
   cd .../path/to/fabric-test/tools/ATD/
   ansible-playbook -i ../../cello/src/agent/ansible/run/runhosts \
-  --extra-vars "chaincode=samplecc testcase=FAB-3983-i-TLS" -e "mode=apply env=bc1st tool_type=pte pteenv=2channels" ptesetup.yml
+  --extra-vars "chaincode=samplecc testcase=FAB-7246-4i testcase_query=FAB-7246-4q" -e "mode=apply env=bc1st tool_type=pte pteenv=2channels" ptesetup.yml
 ```
 
 Behind the scenes, it will use templates under `roles/tool_pte/ptesetup/templates/` to generate the chan-config-TLS.json,
@@ -77,6 +77,7 @@ In the above command,
     - `-i ../../cello/src/ansible/run/runhosts` refers the runhosts file generated while provisioning the machines using cello/src/agent/ansible
  - `--extra-vars "var=<value>"` is used to pass in a variable to the playbook
     - `testcase=<Testcase Number>` is used to run a specific testcase that is defined in the PTE/CITest directory. Refer the list of available testcases in PTE/CITest/scripts/test_driver.sh.
+    - `testcase_query=<Testcase Number to query as a scenario>` is used to run a specific testcase that is defined in the PTE/CITest directory. Refer the list of available testcases in PTE/CITest/scripts/test_driver.sh.
     - `chaincode=<chaincode name>` is used to specify which chaincode to use. It can be chaincode=samplecc | all | marbles.
  - `env=<value>`to pass the environment variable file
     - Make sure that the `env` value is same as `env` value that is used in launching the Hyperledger Fabric network section.
