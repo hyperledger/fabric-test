@@ -201,3 +201,14 @@ Examples:
     | solo  |   with tls  |     CLI    |
     | kafka | without tls |     CLI    |
     | solo  | without tls | NodeJS SDK |
+
+@daily
+Scenario: FAB-3855: Empty Payload Messages
+    Given I have a bootstrapped fabric network of type kafka
+    When a user sets up a channel named "emptiness"
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "empty" on channel "emptiness"
+    When a user invokes on the channel "emptiness" using chaincode named "empty" with args ["put", "a", ""]
+    And I wait "5" seconds
+    And a user queries on the channel "emptiness" using chaincode named "empty" with args ["get", "a"]
+    # the "map" chaincode adds quotes around the result
+    Then a user receives a success response of ""
