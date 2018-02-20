@@ -96,6 +96,7 @@ rm -f $cfgOutFile
               echo "    - Name: PeerOrg$i" >> $cfgOutFile
               tt=org$i"."$comName
               echo "      Domain: $tt" >> $cfgOutFile
+              echo "      EnableNodeOUs: true" >> $cfgOutFile
               echo "      Template:" >> $cfgOutFile
               echo "        Count: $peersPerOrg" >> $cfgOutFile
               echo "      Users:" >> $cfgOutFile
