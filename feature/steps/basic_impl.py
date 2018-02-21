@@ -50,7 +50,7 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
     context.compose_containers = context.composition.collectServiceNames()
 
 
-def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=300):
+def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=300, ouEnabled=False):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
@@ -73,7 +73,18 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=
         context.projectName = context.composition.projectName
     elif not hasattr(context, "projectName"):
         context.projectName = str(uuid.uuid1()).replace('-','')
-    config_util.generateCrypto(context)
+
+    # Determine number of orderers
+    numOrderers = 1
+    if ordererType == 'kafka':
+        numOrderers = 3
+
+    # Get Configs setup
+    if ouEnabled:
+        config_util.buildCryptoFile(context, 2, 2, numOrderers, 2, ouEnable=common_util.convertBoolean(ouEnabled))
+        config_util.generateCrypto(context, "./configs/{0}/crypto.yaml".format(context.projectName))
+    else:
+        config_util.generateCrypto(context)
     config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
     compose_impl(context, context.composeFile, projectName=context.projectName)
 
@@ -96,12 +107,16 @@ def wait_for_bootstrap_completion(context, timeout):
                     brokers.append(broker[0])
                 common_util.wait_until_in_log(brokers, " Startup complete. ")
     finally:
-        assert common_util.is_in_log(peers, "Starting profiling server with listenAddress = 0.0.0.0:6060"), "The containers are not ready in the allotted time ({} seconds)".format(timeout)
+        assert common_util.is_in_log(peers, "Starting profiling server with listenAddress = 0.0.0.0:6060"), "The peer containers are not ready in the allotted time ({} seconds)".format(timeout)
         assert common_util.is_in_log(brokers, " Startup complete. "), "The kafka containers are not ready in the allotted time ({} seconds)".format(timeout)
 
     # A 5-second additional delay ensures ready state
     time.sleep(5)
 
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} with tls with organizational units enabled on all nodes')
+def step_impl(context, ordererType):
+    bootstrapped_impl(context, ordererType, "leveldb", True, ouEnabled=True)
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database} with tls')
 def step_impl(context, ordererType, database):

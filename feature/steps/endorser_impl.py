@@ -41,8 +41,12 @@ def step_impl(context):
     setup_channel_impl(context, context.interface.TEST_CHANNEL_ID, "orderer0.example.com")
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
-def deploy_impl(context, path, args, name, language, peer, channel, timeout=300, username="Admin"):
-    context.interface.deploy_chaincode(context, path, args, name, language, peer, username, timeout, channel)
+def deploy_impl(context, path, args, name, language, peer, channel, timeout=300, username="Admin", policy=None):
+    context.interface.deploy_chaincode(context, path, args, name, language, peer, username, timeout, channel, policy=policy)
+
+@when(u'a user deploys chaincode at path "{path}" with args {args} with policy {policy}')
+def step_impl(context, path, args, policy):
+    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, 300, policy=policy)
 
 @when(u'a user deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}"')
 def step_impl(context, path, args, name, language, peer, channel):
@@ -171,6 +175,18 @@ def step_impl(context, name, channel):
                 "GOLANG",
                 "peer0.org1.example.com",
                 channel)
+
+@when(u'a user deploys chaincode with args {args} with policy {policy}')
+def step_impl(context, args, policy):
+    deploy_impl(context,
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
+                args,
+                "mycc",
+                "GOLANG",
+                "peer0.org1.example.com",
+                context.interface.TEST_CHANNEL_ID,
+                300,
+                policy=policy)
 
 @when(u'a user deploys chaincode with args {args} within {timeout:d} seconds')
 def step_impl(context, args, timeout):

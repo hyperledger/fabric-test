@@ -48,27 +48,28 @@ class InterfaceBase:
                 peers.append(container)
         return peers
 
-    def deploy_chaincode(self, context, path, args, name, language, peer, username, timeout, channel=TEST_CHANNEL_ID):
-        self.pre_deploy_chaincode(context, path, args, name, language, peer, channel)
+    def deploy_chaincode(self, context, path, args, name, language, peer, username, timeout, channel=TEST_CHANNEL_ID, policy=None):
+        self.pre_deploy_chaincode(context, path, args, name, language, peer, channel, policy=policy)
         all_peers = self.get_peers(context)
         self.install_chaincode(context, all_peers, username)
         self.instantiate_chaincode(context, peer, username)
         self.post_deploy_chaincode(context, peer, timeout)
 
-    def pre_deploy_chaincode(self, context, path, args, name, language, peer, channelId=TEST_CHANNEL_ID):
+    def pre_deploy_chaincode(self, context, path, args, name, language, peer, channelId=TEST_CHANNEL_ID, policy=None):
         config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
         orderers = self.get_orderers(context)
         peers = self.get_peers(context)
         assert orderers != [], "There are no active orderers in this network"
 
-        context.chaincode={
-                          "path": path,
-                          "language": language,
-                          "name": name,
-                          "args": args,
-                          "orderers": orderers,
-                          "channelID": channelId,
-                          }
+        context.chaincode={"path": path,
+                           "language": language,
+                           "name": name,
+                           "args": args,
+                           "orderers": orderers,
+                           "channelID": channelId,
+                           }
+        if policy:
+            context.chaincode['policy'] = policy
 
     def post_deploy_chaincode(self, context, peer, timeout):
         chaincode_container = "{0}-{1}-{2}-0".format(context.projectName, peer, context.chaincode['name'])
@@ -369,8 +370,6 @@ class CLIInterface(InterfaceBase):
                 command = command + ["--orderer", 'orderer0.example.com:7050']
             if "user" in context.chaincode:
                 command = command + ["--username", context.chaincode["user"]]
-            if "policy" in context.chaincode:
-                command = command + ["--policy", context.chaincode["policy"]]
             command.append('"')
             ret = context.composition.docker_exec(setup+command, ['cli'])
             output[peer] = ret['cli']
@@ -399,8 +398,8 @@ class CLIInterface(InterfaceBase):
             command = command + ["--orderer", 'orderer0.example.com:7050']
         if "user" in context.chaincode:
             command = command + ["--username", context.chaincode["user"]]
-        if "policy" in context.chaincode:
-            command = command + ["--policy", context.chaincode["policy"]]
+        if context.chaincode.get("policy", None) is not None:
+            command = command + ["--policy", context.chaincode["policy"].replace('"', r'\"')]
         command.append('"')
 
         output[peer] = context.composition.docker_exec(setup + command, [peer])

@@ -212,3 +212,19 @@ Scenario: FAB-3855: Empty Payload Messages
     And a user queries on the channel "emptiness" using chaincode named "empty" with args ["get", "a"]
     # the "map" chaincode adds quotes around the result
     Then a user receives a success response of ""
+
+
+@daily
+Scenario: FAB-8379: Test MSP Identity - Happy Path
+  Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
+  And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
+  Given I have a bootstrapped fabric network of type kafka with tls with organizational units enabled on all nodes
+  When a user sets up a channel
+  And a user deploys chaincode with args ["init","a","1000","b","2000"] with policy "OR ('Org1ExampleCom.peer','Org2ExampleCom.peer')"
+  When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 1000
+  # Endorsement policies not enforced during initialization
+  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
+  And I wait "5" seconds
+  When a user queries on the chaincode named "mycc" with args ["query","a"]
+  Then a user receives a success response of 990
