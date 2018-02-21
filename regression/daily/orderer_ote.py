@@ -24,7 +24,7 @@ class perf_orderer(unittest.TestCase):
          Refer to the logs to also see the TPS throughput rate.
         '''
         with open(os.path.join(logs_directory, "ote_FAB-6996.log"), "w") as logfile:
-            result = subprocess.check_output("./runote.sh -t FAB-6996 2>&1",
+            result = subprocess.check_output("./runote.sh -t FAB-6996_1ch_solo 2>&1",
                                             shell=True,
                                             #stderr=subprocess.STDOUT,  #Uncomment this two lines to see the stdout
                                             #stdout=subprocess.STDOUT,

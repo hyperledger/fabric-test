@@ -14,6 +14,6 @@ cd -
 echo "========== System Test using PTE and NL tools..."
 py.test -v --junitxml results_systest_pte.xml systest_pte.py
 
-echo "========== Orderer component test using OTE and NL tools..."
-py.test -v --junitxml results_orderer_ote.xml orderer_ote.py
+#echo "========== Orderer component test using OTE and NL tools..."
+#py.test -v --junitxml results_orderer_ote.xml orderer_ote.py
 
