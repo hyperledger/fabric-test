@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-8384-4i/preconfig/samplejs/samplejs-chan1-instantiate-TLS.json
+sdk=node CITest/FAB-8384-4i/preconfig/samplejs/samplejs-chan2-instantiate-TLS.json
