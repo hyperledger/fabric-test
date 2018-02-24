@@ -1,0 +1,8 @@
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i1-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i2-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i3-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i4-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i5-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i6-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i7-TLS.txt
+driver=pte CITest/FAB-8208-64i/samplecc/runCases-FAB-8208-64i8-TLS.txt

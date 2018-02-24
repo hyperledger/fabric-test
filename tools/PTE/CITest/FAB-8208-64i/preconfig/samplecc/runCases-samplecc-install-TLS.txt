@@ -1,0 +1,8 @@
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan1-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan2-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan3-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan4-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan5-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan6-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan7-install-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan8-install-TLS.json
