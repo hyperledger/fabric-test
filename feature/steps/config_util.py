@@ -43,7 +43,7 @@ PEER_ORG_STR = '''
 def updateEnviron(context):
     updated_env = os.environ.copy()
     if hasattr(context, "composition"):
-        updated_env.update(context.composition.environ)
+        updated_env.update(context.composition.getEnv())
     return updated_env
 
 def makeProjectConfigDir(context):

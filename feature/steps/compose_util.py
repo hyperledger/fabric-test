@@ -126,10 +126,20 @@ class Composition:
         myEnv["CORE_PEER_NETWORKID"] = self.projectName
         return myEnv
 
-    def getEnv(self):
+    def getEnv(self, container=''):
         myEnv = os.environ.copy()
         for key,value in self.getEnvAdditions().items():
-            myEnv[key] = value
+
+            if key == container and type(value) == dict:
+                # If these are container specific environment variables
+                # copy these env vars
+                for c_key, c_value in value.items():
+                    myEnv[c_key] = c_value
+            elif type(value) == dict:
+                # Skipping any env vars for containers we don't care about
+                pass
+            else:
+                myEnv[key] = value
         return myEnv
 
     def refreshContainerIDs(self):

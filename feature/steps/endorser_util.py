@@ -337,10 +337,16 @@ class CLIInterface(InterfaceBase):
                       'CORE_PEER_ID={0}'.format(peer),
                       'CORE_PEER_ADDRESS={0}:7051'.format(peer)]
 
-        if context.tls:
+        # Only pull the env vars specific to the peer
+        if peer in context.composition.environ.keys():
+            for key, value in context.composition.environ[peer].items():
+                setup.append("{0}={1}".format(key, value))
+
+        if context.tls and "CORE_PEER_TLS_CERT_FILE" not in setup:
             setup += ['CORE_PEER_TLS_ROOTCERT_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/ca.crt'.format(configDir, org, peer),
                       'CORE_PEER_TLS_CERT_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/server.crt'.format(configDir, org, peer),
                       'CORE_PEER_TLS_KEY_FILE={0}/peerOrganizations/{1}/peers/{2}/tls/server.key'.format(configDir, org, peer)]
+
         return setup
 
     def get_chaincode_deploy_spec(self, projectDir, ccType, path, name, args):

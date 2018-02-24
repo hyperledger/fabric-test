@@ -50,17 +50,22 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
     context.compose_containers = context.composition.collectServiceNames()
 
 
+def getCompositionFiles(context, curpath, ordererType, database="leveldb"):
+    # Get the correct composition file
+    composeFiles = ["%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)]
+    if database.lower() != "leveldb":
+        composeFiles.append("%s/docker-compose/docker-compose-%s.yml" % (curpath, database.lower()))
+    composeFiles.append("%s/docker-compose/docker-compose-cli.yml" % (curpath))
+    for composeFile in composeFiles:
+        assert os.path.exists(composeFile), "The docker compose file does not exist: {0}".format(composeFile)
+    return composeFiles
+
 def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=300, ouEnabled=False):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
     # Get the correct composition file
-    context.composeFile = ["%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)]
-    if database.lower() != "leveldb":
-        context.composeFile.append("%s/docker-compose/docker-compose-%s.yml" % (curpath, database.lower()))
-    context.composeFile.append("%s/docker-compose/docker-compose-cli.yml" % (curpath))
-    for composeFile in context.composeFile:
-        assert os.path.exists(composeFile), "The docker compose file does not exist: {0}".format(composeFile)
+    context.composeFile = getCompositionFiles(context, curpath, ordererType, database)
 
     # Should TLS be enabled
     context.tls = tlsEnabled
@@ -86,8 +91,8 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=
     else:
         config_util.generateCrypto(context)
     config_util.generateConfig(context, channelID, config_util.CHANNEL_PROFILE, context.ordererProfile)
-    compose_impl(context, context.composeFile, projectName=context.projectName)
 
+    compose_impl(context, context.composeFile, projectName=context.projectName)
     wait_for_bootstrap_completion(context, timeout)
 
 
@@ -247,10 +252,7 @@ def start_network_impl(context, ordererType, tlsEnabled=True):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
-    context.composeFile = ["%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)]
-    context.composeFile.append("%s/docker-compose/docker-compose-cli.yml" % (curpath))
-    for composeFile in context.composeFile:
-        assert os.path.exists(composeFile), "The docker compose file does not exist: {0}".format(composeFile)
+    context.composeFile = getCompositionFiles(context, curpath, ordererType)
 
     if not hasattr(context, "projectName"):
         context.projectName = None
@@ -351,6 +353,11 @@ def step_impl(context, org):
 def step_impl(context, org):
     assert hasattr(context, 'initial_non_leader'), "Error: initial non-leader was not set previously. This statement works only with pre-set initial non-leader."
     assert not common_util.get_leadership_status(context.initial_non_leader[org]), "Error: initial non-leader peer has already become leader."
+
+@then(u'the logs on {component} contains "{data}" within {timeout:d} seconds')
+def step_impl(context, component, data, timeout):
+    with common_util.Timeout(timeout):
+        common_util.wait_until_in_log([component], data)
 
 @then(u'the logs on {component} contains {data}')
 def step_impl(context, component, data):

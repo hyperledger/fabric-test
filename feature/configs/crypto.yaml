@@ -15,6 +15,7 @@ OrdererOrgs:
 PeerOrgs:
   - Name: Org1ExampleCom
     Domain: org1.example.com
+    EnableNodeOUs: false
     Template:
       Count: 2
     Users:
@@ -22,6 +23,7 @@ PeerOrgs:
 
   - Name: Org2ExampleCom
     Domain: org2.example.com
+    EnableNodeOUs: false
     Template:
       Count: 2
     Users:

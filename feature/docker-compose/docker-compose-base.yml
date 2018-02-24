@@ -45,8 +45,8 @@ services:
             - CONFIGTX_ORDERER_ADDRESSES=[127.0.0.1:7050]
             # TLS settings
             - ORDERER_GENERAL_TLS_ENABLED=${ORDERER_GENERAL_TLS_ENABLED}
-            - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/tls/server.key
-            - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/tls/server.crt
+            - ORDERER_GENERAL_TLS_PRIVATEKEY=${ORDERER_GENERAL_TLS_PRIVATEKEY}
+            - ORDERER_GENERAL_TLS_CERTIFICATE=${ORDERER_GENERAL_TLS_CERTIFICATE}
             - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/tls/ca.crt]
             - ORDERER_TLS_CLIENTAUTHREQUIRED=${ORDERER_TLS_CLIENTAUTHREQUIRED}
             - ORDERER_TLS_CLIENTROOTCAS_FILES=/var/hyperledger/users/Admin@example.com/tls/ca.crt
@@ -80,8 +80,8 @@ services:
             # TLS settings
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CLIENTAUTHREQUIRED=${CORE_PEER_TLS_CLIENTAUTHREQUIRED}
-            - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt
-            - CORE_PEER_TLS_KEY_FILE=/var/hyperledger/tls/server.key
+            - CORE_PEER_TLS_CERT_FILE=${CORE_PEER_TLS_CERT_FILE}
+            - CORE_PEER_TLS_KEY_FILE=${CORE_PEER_TLS_KEY_FILE}
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
         volumes:
             - /var/run/:/host/var/run/

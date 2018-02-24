@@ -46,6 +46,16 @@ def step_impl(context, key, value):
     changedString = common_util.changeFormat(value)
     context.composition.environ[key] = changedString
 
+@given(u'the peer "{peer}" is setup to use a client identity')
+def step_impl(context, peer):
+    if not hasattr(context, "composition"):
+        context.composition = compose_util.Composition(context, startContainers=False)
+    peerInfo = peer.split('.')
+    if peer not in context.composition.environ:
+        context.composition.environ[peer] = {}
+    context.composition.environ[peer]["CORE_PEER_TLS_CERT_FILE"] = "/var/hyperledger/users/Admin@{}.example.com/tls/client.crt".format(peerInfo[1])
+    context.composition.environ[peer]["CORE_PEER_TLS_KEY_FILE"] = "/var/hyperledger/users/Admin@{}.example.com/tls/client.key".format(peerInfo[1])
+
 @given(u'a certificate from {organization} is added to the kafka orderer network')
 def step_impl(context, organization):
     pass
