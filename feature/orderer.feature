@@ -118,6 +118,31 @@ Examples:
 
 
 @daily
+Scenario Outline: FAB-3859: Message Sizes with Configuration Tweaks
+  Given the ORDERER_ABSOLUTEMAXBYTES environment variable is <absoluteMaxBytes>
+  And the ORDERER_PREFERREDMAXBYTES environment variable is <preferredMaxBytes>
+  And the KAFKA_MESSAGE_MAX_BYTES environment variable is <messageMaxBytes>
+  And the KAFKA_REPLICA_FETCH_MAX_BYTES environment variable is <replicaFetchMaxBytes>
+  And the KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES environment variable is <replicaFetchResponseMaxBytes>
+  Given I have a bootstrapped fabric network of type kafka
+  And I use the NodeJS SDK interface
+  When a user sets up a channel named "configsz"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "mapIt" on channel "configsz"
+
+  When a user invokes on the chaincode named "mapIt" with random args ["put","g","{random_value}"] of length <size>
+  And I wait "10" seconds
+  And a user queries on the chaincode named "mapIt" with args ["get","g"]
+  Then a user receives a response containing a value of length <size>
+  And a user receives a response with the random value
+Examples:
+    | absoluteMaxBytes | preferredMaxBytes | messageMaxBytes | replicaFetchMaxBytes | replicaFetchResponseMaxBytes |   size   |
+    |     20 MB        |      2 MB         |     2 MB        |        2 MB          |           20 MB              |  1048576 |
+    |      1 MB        |      1 MB         |     2 MB        |        2 MB          |           10 MB              |  1048576 |
+    |      1 MB        |      1 MB         |     2 MB        |       1.5 MB         |           10 MB              |  1048576 |
+    |     11 MB        |      2 MB         |    11 MB        |       11 MB          |           20 MB              | 10485760 |
+
+
+@daily
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     When a user sets up a channel

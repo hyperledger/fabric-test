@@ -57,6 +57,9 @@ services:
         environment:
             - KAFKA_BROKER_ID=0
             - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+            - KAFKA_MESSAGE_MAX_BYTES=${KAFKA_MESSAGE_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_MAX_BYTES=${KAFKA_REPLICA_FETCH_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES=${KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES}
         depends_on:
             - zookeeper0
             - zookeeper1
@@ -74,6 +77,9 @@ services:
         environment:
             - KAFKA_BROKER_ID=1
             - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+            - KAFKA_MESSAGE_MAX_BYTES=${KAFKA_MESSAGE_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_MAX_BYTES=${KAFKA_REPLICA_FETCH_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES=${KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES}
         depends_on:
             - zookeeper0
             - zookeeper1
@@ -91,6 +97,9 @@ services:
         environment:
             - KAFKA_BROKER_ID=2
             - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+            - KAFKA_MESSAGE_MAX_BYTES=${KAFKA_MESSAGE_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_MAX_BYTES=${KAFKA_REPLICA_FETCH_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES=${KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES}
         depends_on:
             - zookeeper0
             - zookeeper1
@@ -108,6 +117,9 @@ services:
         environment:
             - KAFKA_BROKER_ID=3
             - KAFKA_ZOOKEEPER_CONNECT=zookeeper0:2181,zookeeper1:2181,zookeeper2:2181
+            - KAFKA_MESSAGE_MAX_BYTES=${KAFKA_MESSAGE_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_MAX_BYTES=${KAFKA_REPLICA_FETCH_MAX_BYTES}
+            - KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES=${KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES}
         depends_on:
             - zookeeper0
             - zookeeper1
@@ -130,6 +142,8 @@ services:
             - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
             - ORDERER_KAFKA_VERBOSE=true
             - ORDERER_GENERAL_GENESISPROFILE=SampleInsecureKafka
+            - ORDERER_ABSOLUTEMAXBYTES=${ORDERER_ABSOLUTEMAXBYTES}
+            - ORDERER_PREFERREDMAXBYTES=${ORDERER_PREFERREDMAXBYTES}
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer0.example.com/tls:/var/hyperledger/tls
@@ -158,6 +172,8 @@ services:
             - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
             - ORDERER_KAFKA_VERBOSE=true
             - ORDERER_GENERAL_GENESISPROFILE=SampleInsecureKafka
+            - ORDERER_ABSOLUTEMAXBYTES=${ORDERER_ABSOLUTEMAXBYTES}
+            - ORDERER_PREFERREDMAXBYTES=${ORDERER_PREFERREDMAXBYTES}
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer1.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer1.example.com/tls:/var/hyperledger/tls
@@ -186,6 +202,8 @@ services:
             - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
             - ORDERER_KAFKA_VERBOSE=true
             - ORDERER_GENERAL_GENESISPROFILE=SampleInsecureKafka
+            - ORDERER_ABSOLUTEMAXBYTES=${ORDERER_ABSOLUTEMAXBYTES}
+            - ORDERER_PREFERREDMAXBYTES=${ORDERER_PREFERREDMAXBYTES}
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer2.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/orderers/orderer2.example.com/tls:/var/hyperledger/tls
