@@ -1,0 +1,22 @@
+{
+    "channelID": "_ch4",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "transType": "Channel",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel4",
+        "action":  "join",
+        "orgName": [
+            "org13",
+            "org14",
+            "org15",
+            "org16"
+        ]
+    },
+    "SCFile": [
+		{"ServiceCredentials":"CITest/CISCFiles/mh-chan4-TLS.json"}
+	]
+}

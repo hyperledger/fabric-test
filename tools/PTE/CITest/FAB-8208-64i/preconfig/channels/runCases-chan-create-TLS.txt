@@ -1,0 +1,8 @@
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan1-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan2-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan3-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan4-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan5-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan6-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan7-create-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/channels/chan8-create-TLS.json

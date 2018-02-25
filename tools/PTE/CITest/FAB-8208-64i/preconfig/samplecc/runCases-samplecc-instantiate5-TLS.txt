@@ -1,0 +1,4 @@
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan5-instantiate-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan6-instantiate-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan7-instantiate-TLS.json
+sdk=node CITest/FAB-8208-64i/preconfig/samplecc/samplecc-chan8-instantiate-TLS.json

@@ -515,7 +515,7 @@ function chaincodeInstantiate(channel, client, org) {
 
             // sendInstantiateProposal
             //logger.info('request_instantiate: ', request_instantiate);
-            return channel.sendInstantiateProposal(request, 120000);
+            return channel.sendInstantiateProposal(request, 1200000);
         },
         function(err) {
             logger.error('[chaincodeInstantiate:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);

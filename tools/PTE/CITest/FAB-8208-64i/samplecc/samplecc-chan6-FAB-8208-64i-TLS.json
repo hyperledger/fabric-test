@@ -1,0 +1,70 @@
+{
+    "channelID": "_ch6",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Move",
+    "targetPeers": "OrgAnchor",
+    "nProcPerOrg": "1",
+    "nRequest": "0",
+    "runDur": "43200",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel6",
+        "action":  "create",
+        "orgName": [
+            "org21",
+            "org22",
+            "org23",
+            "org24"
+        ]
+    },
+    "burstOpt": {
+        "burstFreq0":  "500",
+        "burstDur0":  "3000",
+        "burstFreq1": "2000",
+        "burstDur1": "10000"
+    },
+    "mixOpt": {
+        "mixQuery": "FALSE",
+        "mixFreq": "1000"
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "500",
+        "devFreq": "50"
+    },
+    "listOpt": {
+        "org1": ["peer1"],
+        "org2": ["peer1"]
+    },
+    "eventOpt": {
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "240000"
+    },
+    "ccType": "ccchecker",
+    "ccOpt": {
+        "keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "0",
+        "payLoadMin": "1024",
+        "payLoadMax": "2048"
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
+    "SCFile": [
+		{"ServiceCredentials":"CITest/CISCFiles/mh-chan6-TLS.json"}
+	]
+}
