@@ -94,10 +94,10 @@ def wait_for_bootstrap_completion(context, timeout):
                 for kafka in kafkas:
                     broker = kafka.split(":")
                     brokers.append(broker[0])
-                common_util.wait_until_in_log(brokers, ", started (kafka.server.KafkaServer)")
+                common_util.wait_until_in_log(brokers, " Startup complete. ")
     finally:
         assert common_util.is_in_log(peers, "Starting profiling server with listenAddress = 0.0.0.0:6060"), "The containers are not ready in the allotted time ({} seconds)".format(timeout)
-        assert common_util.is_in_log(brokers, ", started (kafka.server.KafkaServer)"), "The containers are not ready in the allotted time ({} seconds)".format(timeout)
+        assert common_util.is_in_log(brokers, " Startup complete. "), "The kafka containers are not ready in the allotted time ({} seconds)".format(timeout)
 
     # A 5-second additional delay ensures ready state
     time.sleep(5)
