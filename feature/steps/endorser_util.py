@@ -447,8 +447,7 @@ class CLIInterface(InterfaceBase):
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
             setup = self.get_env_vars(context, peer, includeAll=False, user=user)
-            #command = ["peer", "channel", "fetch", "config",
-            command = ["peer", "channel", "fetch", "0",
+            command = ["peer", "channel", "fetch", "config",
                        "{0}/{1}.{2}".format(location, channelId, ext),
                        "--channelID", channelId,
                        "--orderer", '{0}:7050'.format(orderer)]
