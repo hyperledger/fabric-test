@@ -120,6 +120,7 @@ BDD tests are testing functionality and feature behavior. With this in mind, the
    * Bootstrapping
       * configtxgen
       * cryptogen
+      * configtxlator
    * Growing and shrinking networks
    * Stopping and Starting components
    * … and more (such as different tooling, messages sizes, special scenarios)
@@ -142,7 +143,7 @@ The docker images for ``peer``, ``orderer``, ``kafka``, and ``zookeeper`` are ne
 =========================
 Building tool executables
 =========================
-The **configtxgen** and **cryptogen** tools are used when bootstrapping the networks in these tests. As a result, you must perform a ``make configtxgen && make cryptogen`` in the ``/path/to/hyperledger/fabric-test/fabric`` directory. Be sure that the executable location is added to your PATH.
+The **configtxgen**, **configtxlator** and **cryptogen** tools are used when bootstrapping the networks in these tests. As a result, you must perform a ``make configtxgen cryptogen configtxlator`` in the ``/path/to/hyperledger/fabric-test/fabric`` directory. Be sure that the executable location is added to your PATH.
 
 
 How to Contribute

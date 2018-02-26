@@ -10,6 +10,7 @@ import os
 import sys
 from shutil import copyfile
 import uuid
+import common_util
 
 ORDERER_TYPES = ["solo",
                  "kafka",
@@ -78,7 +79,13 @@ def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgName=N
         if orgName is not None:
             name = orgName.title().replace('.', '')
             domain = orgName
-        peerStanzas += PEER_ORG_STR.format(name=name, domain=domain, numPeers=numPeers, numUsers=numUsers, ouEnable=ouEnable)
+        if type(ouEnable) == bool:
+            ouEnableStr = common_util.convertBoolean(ouEnable)
+        elif ouEnable == name:
+            ouEnableStr = "true"
+        else:
+            ouEnableStr = "false"
+        peerStanzas += PEER_ORG_STR.format(name=name, domain=domain, numPeers=numPeers, numUsers=numUsers, ouEnable=ouEnableStr)
     peerStr = "PeerOrgs:" + peerStanzas
 
     cryptoStr = ordererStr + "\n\n" + peerStr

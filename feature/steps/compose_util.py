@@ -135,10 +135,9 @@ class Composition:
                 # copy these env vars
                 for c_key, c_value in value.items():
                     myEnv[c_key] = c_value
-            elif type(value) == dict:
-                # Skipping any env vars for containers we don't care about
-                pass
-            else:
+            elif type(value) != dict:
+                # Skipping any env vars that contain dict values
+                # for containers that we don't care about
                 myEnv[key] = value
         return myEnv
 

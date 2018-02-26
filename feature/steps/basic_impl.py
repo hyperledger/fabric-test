@@ -86,7 +86,7 @@ def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=
 
     # Get Configs setup
     if ouEnabled:
-        config_util.buildCryptoFile(context, 2, 2, numOrderers, 2, ouEnable=common_util.convertBoolean(ouEnabled))
+        config_util.buildCryptoFile(context, 2, 2, numOrderers, 2, ouEnable=ouEnabled)
         config_util.generateCrypto(context, "./configs/{0}/crypto.yaml".format(context.projectName))
     else:
         config_util.generateCrypto(context)
@@ -122,6 +122,10 @@ def wait_for_bootstrap_completion(context, timeout):
 @given(u'I have a bootstrapped fabric network of type {ordererType} with tls with organizational units enabled on all nodes')
 def step_impl(context, ordererType):
     bootstrapped_impl(context, ordererType, "leveldb", True, ouEnabled=True)
+
+@given(u'I have a bootstrapped fabric network of type {ordererType} with tls with organizational units enabled on all {orgName} nodes')
+def step_impl(context, ordererType, orgName):
+    bootstrapped_impl(context, ordererType, "leveldb", True, ouEnabled=orgName)
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} using state-database {database} with tls')
 def step_impl(context, ordererType, database):
