@@ -85,7 +85,7 @@ brew install gdate --with-default-names
 ```
 
 ## Setup
-PTE can be used with either the stable `fabric-sdk-node` libraries obtained from the `npm` package manager, or it can be used with the latest source from https://github.com/hyperledger/fabric-test
+PTE can be used with either the stable `fabric-sdk-node` libraries obtained from the `npm` package manager, or the latest unstable libraries
 
 ### Use PTE with stable `fabric-sdk-node` libraries
 1. Download fabric-test sources:
@@ -117,52 +117,18 @@ Optionally, you may choose to skip this step of obtaining `fabric` and `fabric-c
         * `make docker`
 
 4. Install PTE
-    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
-    - `npm install fabric-client@1.0.2`
-    - `npm install fabric-ca-client@1.0.2`
-
-
-
-### Use PTE with latest `fabric-sdk-node` source
-1. Download fabric-test sources:
-    - `go get -d github.com/hyperledger/fabric-test`
-
-2. Download or update fabric, fabric-ca, and fabric-sdk-node sources, see [Hyperledger fabric-test](https://github.com/hyperledger/fabric-test) for details:
-    - `cd $GOPATH/src/github.com/hyperledger/fabric-test`
-    - if first time:
-         - `git submodule update --init --recursive`
-         - `git submodule foreach git pull origin master`
-    - else:
-         - `git submodule foreach git pull origin master`
-
-3. Obtain appropriate docker images:
-
-    Optionally, you may choose to skip this step of obtaining `fabric` and `fabric-ca` images if plan to run PTE against a remote Fabric network. See [Creating a local Fabric network](#creating-a-local-fabric-network) for additional information on this.
-
-    - fabric
-        - download from dockerhub:
-            * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric/scripts`
-            * If testing v1.0.0: `./bootstrap-1.0.0.sh`
-        - build images yourself (v1.0.0 shown here):
-            * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric/`
-            * `git checkout v1.0.0`
-            * `make docker`
-    - fabric-ca
-        * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-ca`
-        * `git checkout v1.0.0`
-        * `make docker`
-    - fabric-sdk-node
-        * `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node`
-        * If testing v1.0.0: `git checkout v1.0.0`
-        * `npm install`
-            *  you should be able to safely ignore any warnings
-        *  `gulp ca`
-
-
-4. Install PTE:
-    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools`
-    - `cp -r PTE $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test`
-    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE  # run PTE from this directory`
+    - Stable (with latest fabric sdk)
+        - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `npm install fabric-client`
+        - `npm install fabric-ca-client`
+    - Stable (with specific version of fabric sdk)
+        - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `npm install fabric-client@version`, for example to install version `1.0.2`, `npm install fabric-client@1.0.2`
+        - `npm install fabric-ca-client@version`, for example to install version `1.0.2`, `npm install fabric-ca-client@1.0.2`
+    - Unstable (with development version of fabric sdk)
+        - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `npm install fabric-client@unstable`
+        - `npm install fabric-ca-client@unstable`
 
 
 Once installed, the following steps are required.
@@ -176,7 +142,7 @@ Once installed, the following steps are required.
 
 Before attempting to run PTE please ensure
 1. your network is running!
-2. you are in the correct directory `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test`
+2. you are in the correct directory `$GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
 If you do not have access to a Fabric network, please see the section on [Creating a local Fabric network](#creating-a-local-fabric-network).
 
 ### Usage
