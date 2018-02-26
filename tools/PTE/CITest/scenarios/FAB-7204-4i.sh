@@ -10,7 +10,7 @@
 
 CWD=$PWD
 
-#### Lauch network and synch-up ledger
+#### Launch network and synch-up ledger
 cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
 ./test_driver.sh -n -m FAB-7204-4i -p -c samplejs -t FAB-7204-4q
 #### remove PTE log from synch-up ledger run
