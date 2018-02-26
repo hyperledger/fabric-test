@@ -992,7 +992,7 @@ function performance_main() {
             var secret = ORGS[org].secret;
             logger.info('[performance_main] instantiate: user= %s, secret= %s', username, secret);
 
-            hfc.setConfigSetting('request-timeout', 200000);
+            hfc.setConfigSetting('request-timeout', 1200000);
             hfc.newDefaultKeyValueStore({
                 path: testUtil.storePathForOrg(Nid, orgName)
             })
