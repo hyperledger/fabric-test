@@ -39,20 +39,14 @@
 - name: Create samplecc-join file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-join-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/channels/chan{{ item[0].channelnum }}-join{{ item[1] }}-TLS.json"
-  with_nested:
-    - "{{ channellists }}"
-    - "{{ numorgs }}"
-  when: (((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1)) + item[0].orgs|length) > item[1]|int >= ((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1))
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/channels/chan{{ item.channelnum }}-join-TLS.json"
+  with_items: "{{ channellists }}"
 
 - name: Create samplecc-install file
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/samplecc-chan-install-TLS.j2"
-    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item[0].channelnum }}-install{{ item[1] }}-TLS.json"
-  with_nested:
-    - "{{ channellists }}"
-    - "{{ numorgs }}"
-  when: (((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1)) + item[0].orgs|length) > item[1]|int >= ((item[0].channelnum|int * item[0].orgs|length) - (item[0].orgs|length - 1))
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-install-TLS.json"
+  with_items: "{{ channellists }}"
 
 - name: Create samplecc-instantiate file
   template:

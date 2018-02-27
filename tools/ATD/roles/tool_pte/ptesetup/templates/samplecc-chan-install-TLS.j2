@@ -1,5 +1,5 @@
 {
-    "channelID": "_ch{{ item[0].channelnum|int }}",
+    "channelID": "_ch{{ item.channelnum|int }}",
 {% if chaincode == "samplecc" %}
     "chaincodeID": "sample_cc",
 {% elif chaincode == "samplejs" %}
@@ -12,10 +12,17 @@
     "nProcPerOrg": "4",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "{{ item[0].name }}",
+        "name":  "{{ item.name }}",
         "action":  "create",
         "orgName": [
-            "org{{ item[1]|int }}"
+{% set index = ((item.channelnum|int * item.orgs|length) - (item.orgs|length - 1)) -%}
+{% for orgName in item.orgs %}
+{% if not loop.last %}
+            "org{{ index + loop.index0 }}",
+{% else %}
+            "org{{ index + loop.index0 }}"
+{% endif %}
+{% endfor %}
         ]
     },
     "deploy": {
@@ -29,6 +36,6 @@
         "args": []
     },
     "SCFile": [
-                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item[0].channelnum|int }}-TLS.json"}
+                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}
 	]
 }

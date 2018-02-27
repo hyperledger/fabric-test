@@ -15,7 +15,14 @@
         "name":  "{{ item.name }}",
         "action":  "create",
         "orgName": [
-            "org{{ (item.channelnum|int * item.orgs|length) - (item.orgs|length - 1) }}"
+{% set index = ((item.channelnum|int * item.orgs|length) - (item.orgs|length - 1)) -%}
+{% for orgName in item.orgs %}
+{% if not loop.last %}
+            "org{{ index + loop.index0 }}",
+{% else %}
+            "org{{ index + loop.index0 }}"
+{% endif %}
+{% endfor %}
         ]
     },
     "deploy": {
