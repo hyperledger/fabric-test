@@ -48,14 +48,14 @@ class InterfaceBase:
                 peers.append(container)
         return peers
 
-    def deploy_chaincode(self, context, path, args, name, language, peer, username, timeout, channel=TEST_CHANNEL_ID, policy=None):
-        self.pre_deploy_chaincode(context, path, args, name, language, peer, channel, policy=policy)
+    def deploy_chaincode(self, context, path, args, name, language, peer, username, timeout, channel=TEST_CHANNEL_ID, version=0, policy=None):
+        self.pre_deploy_chaincode(context, path, args, name, language, peer, channel, version, policy)
         all_peers = self.get_peers(context)
         self.install_chaincode(context, all_peers, username)
         self.instantiate_chaincode(context, peer, username)
         self.post_deploy_chaincode(context, peer, timeout)
 
-    def pre_deploy_chaincode(self, context, path, args, name, language, peer, channelId=TEST_CHANNEL_ID, policy=None):
+    def pre_deploy_chaincode(self, context, path, args, name, language, peer, channelId=TEST_CHANNEL_ID, version=0, policy=None):
         config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
         orderers = self.get_orderers(context)
         peers = self.get_peers(context)
@@ -64,6 +64,7 @@ class InterfaceBase:
         context.chaincode={"path": path,
                            "language": language,
                            "name": name,
+                           "version": str(version),
                            "args": args,
                            "orderers": orderers,
                            "channelID": channelId,
@@ -72,7 +73,7 @@ class InterfaceBase:
             context.chaincode['policy'] = policy
 
     def post_deploy_chaincode(self, context, peer, timeout):
-        chaincode_container = "{0}-{1}-{2}-0".format(context.projectName, peer, context.chaincode['name'])
+        chaincode_container = "{0}-{1}-{2}-{3}".format(context.projectName, peer, context.chaincode['name'], context.chaincode.get('version', 0))
         context.interface.wait_for_deploy_completion(context, chaincode_container, timeout)
 
     def channel_block_present(self, context, containers, channelId):
@@ -512,6 +513,31 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
+    def upgrade_chaincode(self, context, orderer, channelId=TEST_CHANNEL_ID, user="Admin", ext=""):
+        configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
+        setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
+        command = ["peer", "chaincode", "upgrade",
+                   "--name", context.chaincode['name'],
+                   "--version", str(context.chaincode.get('version', 1)),
+                   "--ctor", r"""'{\"Args\": %s}'""" % (str(context.chaincode['args'].replace('"', r'\"'))),
+                   "--channelID", str(context.chaincode.get('channelID', self.TEST_CHANNEL_ID))]
+        if context.tls:
+            command = command + ["--tls",
+                                 common_util.convertBoolean(context.tls),
+                                 "--cafile",
+                                 '{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir)]
+        if "orderers" in context.chaincode:
+            command = command + ["--orderer", '{}:7050'.format(orderer)]
+        if "user" in context.chaincode:
+            command = command + ["--username", context.chaincode["user"]]
+        if context.chaincode.get("policy", None) is not None:
+            command = command + ["--policy", context.chaincode["policy"].replace('"', r'\"')]
+
+        command.append('"')
+        output = context.composition.docker_exec(setup+command, ['peer0.org1.example.com'])
+        print("[{0}]: {1}".format(" ".join(setup + command), output))
+        return output
+
     def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
         # channelId, targs and user are optional parameters with defaults set if they are not included
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
@@ -556,7 +582,7 @@ class CLIInterface(InterfaceBase):
             command = command +["--transient", targs]
 
         if chaincode.get("version", None) is not None:
-            command = command +["--version", chaincode["version"]]
+            command = command +["--version", str(chaincode["version"])]
 
         command.append('"')
         result = context.composition.docker_exec(setup+command, [peer])

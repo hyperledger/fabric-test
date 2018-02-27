@@ -332,14 +332,19 @@ def step_impl(context, name, args, peer):
                  "name": str(name)}
     context.result = context.interface.query_chaincode(context, chaincode, peer, context.interface.TEST_CHANNEL_ID)
 
-@when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
-def query_impl(context, channel, name, args, peer, targs=''):
+@when(u'a user queries on version "{version:d}" of the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
+def query_impl(context, channel, name, args, peer, targs='', version=0):
     # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using events for being sure the invokes are complete
     time.sleep(2)
     chaincode = {"args": args,
                  "chaincodeId": str(name),
+                 "version": version,
                  "name": str(name)}
     context.result = context.interface.query_chaincode(context, chaincode, peer, channel, targs)
+
+@when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
+def step_impl(context, channel, name, args, peer):
+    query_impl(context, channel, name, args, peer)
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} and generated transient args {targs} on "{peer}"')
 def step_impl(context, name, args, peer, targs):
@@ -532,6 +537,37 @@ def step_impl(context, name):
 def step_impl(context):
     invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", '["invoke","a","b","5"]', "peer0.org1.example.com")
 
+@when(u'a user using a {identityType} identity invokes on the chaincode named "{name}" with args {args}')
+def step_impl(context, identityType, name, args):
+    peer = "peer0.org1.example.com"
+    org = "org1.example.com"
+
+    # Save env vars from peer if it is present otherwise save the defaults
+    backup = context.composition.getEnv(peer)
+    if peer not in context.composition.environ.keys():
+        context.composition.environ[peer] = {}
+
+    # Change env vars for peer to certs for the specified identity
+    if identityType == "peer":
+        context.composition.environ[peer]["CORE_PEER_TLS_CERT_FILE"] = "/var/hyperledger/tls/server.crt"
+        context.composition.environ[peer]["CORE_PEER_TLS_KEY_FILE"] = "/var/hyperledger/tls/server.key"
+    elif identityType == "client":
+        context.composition.environ[peer]["CORE_PEER_TLS_CERT_FILE"] = "/var/hyperledger/users/Admin@{}/tls/client.crt".format(org)
+        context.composition.environ[peer]["CORE_PEER_TLS_KEY_FILE"] = "/var/hyperledger/users/Admin@{}/tls/client.key".format(org)
+    elif identityType == "orderer":
+        context.composition.environ[peer]["CORE_PEER_TLS_CERT_FILE"] = "/var/hyperledger/configs/{}/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/server.crt".format(context.projectName)
+        context.composition.environ[peer]["CORE_PEER_TLS_KEY_FILE"] = "/var/hyperledger/configs/{}/ordererOrganizations/example.com/orderers/orderer0.example.com/tls/server.key".format(context.projectName)
+    else:
+        assert identityType in ('peer', 'client', 'orderer'), "Unknown identity type {} for invoking on the chaincode".format(identityType)
+
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer)
+
+    # Reinstate the certs saved for the composition for the specified peer
+    if backup.get(peer, None) is not None:
+        context.composition.environ[peer] = backup.get(peer)
+    else:
+        context.composition.environ.pop(peer)
+
 @when(u'a user creates a channel named "{channelId}" using orderer "{orderer}')
 def create_channel_impl(context, channelId, orderer):
     # Be sure there is a transaction block for this channel
@@ -602,6 +638,26 @@ def update_impl(context, peer, channel):
 def step_impl(context):
     peers = context.interface.get_peers(context)
     update_impl(context, peers, context.interface.TEST_CHANNEL_ID)
+
+@when(u'the admin changes the policy to {policy} on channel "{channel}" with args "{args}"')
+def policyChannelUpdate_impl(context, policy, channel, args=None):
+    context.chaincode["policy"] = policy
+    context.chaincode["version"] = 2
+    if args is not None:
+        context.chaincode["args"] = args
+
+    peers = context.interface.get_peers(context)
+    context.interface.install_chaincode(context, peers, user="Admin")
+    context.interface.upgrade_chaincode(context, "orderer0.example.com", channel)
+    context.interface.post_deploy_chaincode(context, "peer0.org1.example.com", 120)
+
+@when(u'the admin changes the policy to {policy} with args "{args}"')
+def step_impl(context, policy, args):
+    policyChannelUpdate_impl(context, policy, context.interface.TEST_CHANNEL_ID, args)
+
+@when(u'the admin changes the policy to {policy}')
+def step_impl(context, policy):
+    policyChannelUpdate_impl(context, policy, context.interface.TEST_CHANNEL_ID)
 
 @then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
 def step_impl(context, response, org, status):

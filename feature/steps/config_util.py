@@ -10,6 +10,7 @@ import os
 import sys
 from shutil import copyfile
 import uuid
+import json
 import common_util
 
 ORDERER_TYPES = ["solo",
