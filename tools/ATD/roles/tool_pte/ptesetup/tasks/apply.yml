@@ -60,6 +60,24 @@
     replace: '    "name": "{{ item.name }}",'
   with_items: "{{ channellists }}"
 
+- replace:
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase }}/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-{{ testcase }}-TLS.json"
+    regexp: '^(.*)ServiceCredentials(.*)$'
+    replace: '                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}'
+  with_items: "{{ channellists }}"
+
+- replace:
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase_query }}/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-{{ testcase_query }}-TLS.json"
+    regexp: '^(.*)name(.*)$'
+    replace: '    "name": "{{ item.name }}",'
+  with_items: "{{ channellists }}"
+
+- replace:
+    dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ testcase_query }}/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-{{ testcase_query }}-TLS.json"
+    regexp: '^(.*)ServiceCredentials(.*)$'
+    replace: '                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}'
+  with_items: "{{ channellists }}"
+
 - name: Generating the Dockerfile for PTE
   copy:
     src: "{{ playbook_dir }}/../../images/pte/Dockerfile"
