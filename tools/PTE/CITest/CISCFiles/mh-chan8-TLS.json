@@ -49,7 +49,7 @@
 			"mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
 			"adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org29.example.com/users/Admin@org29.example.com/msp",
 			"comName": "example.com",
-			"ordererID": "orderer1",
+			"ordererID": "orderer3",
 			"ca": {
                              "url":"https://localhost:7055",
 			     "name": "ca1"
@@ -75,7 +75,7 @@
 			"mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
 			"adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org30.example.com/users/Admin@org30.example.com/msp",
 			"comName": "example.com",
-			"ordererID": "orderer1",
+			"ordererID": "orderer3",
 			"ca": {
                              "url":"https://localhost:7055",
 			     "name": "ca1"
@@ -101,7 +101,7 @@
 			"mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
 			"adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org31.example.com/users/Admin@org31.example.com/msp",
 			"comName": "example.com",
-			"ordererID": "orderer1",
+			"ordererID": "orderer3",
 			"ca": {
                              "url":"https://localhost:7055",
 			     "name": "ca1"
@@ -127,7 +127,7 @@
 			"mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
 			"adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org32.example.com/users/Admin@org32.example.com/msp",
 			"comName": "example.com",
-			"ordererID": "orderer1",
+			"ordererID": "orderer3",
 			"ca": {
                              "url":"https://localhost:7055",
 			     "name": "ca1"
