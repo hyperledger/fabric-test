@@ -18,15 +18,25 @@ cd $SDKDir/test/PTE
 
 echo "[$0] create channel"
 echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-create-TLS.txt"
-./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-create-TLS.txt
-#./pte_driver.sh CITest/preconfig/channels/runCases-chan-create-TLS.txt
-sleep 60s
+
+    runCreate=`ls CITest/$PrecfgDir/preconfig/channels/runCases*create*`
+    echo "runCreate $runCreate"
+    for ri in $runCreate; do
+       echo "./pte_driver.sh $ri"
+       ./pte_driver.sh $ri
+       sleep 60s
+    done
 
 echo "[$0] join channel"
 echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-join-TLS.txt"
-./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-join-TLS.txt
-#./pte_driver.sh CITest/preconfig/channels/runCases-chan-join-TLS.txt
-sleep 20s
+
+    runJoin=`ls CITest/$PrecfgDir/preconfig/channels/runCases*join*`
+    echo "runJoin $runJoin"
+    for ri in $runJoin; do
+       echo "./pte_driver.sh $ri"
+       ./pte_driver.sh $ri
+       sleep 60s
+    done
 
 
 cd $CWD

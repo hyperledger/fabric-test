@@ -13,23 +13,8 @@ PREFIX="result"   # result log prefix
 
 #### Launch network and synch-up ledger
 cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
-./test_driver.sh -n -m FAB-8208-64i
+./test_driver.sh -n -m FAB-8208-64i -p -c samplecc -t FAB-8208-64q
 
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE
-./pte_driver.sh CITest/FAB-8208-64q/preconfig/channels/runCases-chan-create-TLS.txt
-sleep 60
-./pte_driver.sh CITest/FAB-8208-64q/preconfig/channels/runCases-chan-join-TLS.txt
-sleep 60
-./pte_driver.sh CITest/FAB-8208-64q/preconfig/samplecc/runCases-samplecc-install-TLS.txt
-sleep 60
-./pte_driver.sh CITest/FAB-8208-64q/preconfig/samplecc/runCases-samplecc-instantiate1-TLS.txt
-sleep 60
-./pte_driver.sh CITest/FAB-8208-64q/preconfig/samplecc/runCases-samplecc-instantiate5-TLS.txt
-sleep 60
-
-#### execute testcase FAB-8208-64q: 32 threads queries for ledger synch-up
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
-./test_driver.sh -t FAB-8208-64q
 rm -rf ../Logs/FAB-8208-64q_*
 sleep 60
 
