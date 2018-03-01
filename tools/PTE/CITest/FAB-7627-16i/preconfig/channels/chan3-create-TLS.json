@@ -2,15 +2,8 @@
     "channelID": "_ch3",
     "chaincodeID": "sample_cc",
     "chaincodeVer": "v0",
-    "logLevel": "ERROR",
-    "invokeCheck": "TRUE",
-    "transMode": "Simple",
     "transType": "Channel",
-    "invokeType": "Move",
-    "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
-    "nRequest": "1000",
-    "runDur": "600",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel3",
@@ -19,26 +12,6 @@
         "orgName": [
             "org1"
         ]
-    },
-    "burstOpt": {
-        "burstFreq0":  "500",
-        "burstDur0":  "3000",
-        "burstFreq1": "2000",
-        "burstDur1": "10000"
-    },
-    "mixOpt": {
-        "mixFreq": "3000"
-    },
-    "constantOpt": {
-        "recHist": "HIST",
-        "constFreq": "1",
-        "devFreq": "0"
-    },
-    "ccType": "ccchecker",
-    "ccOpt": {
-        "keyStart": "50000",
-        "payLoadMin": "1024",
-        "payLoadMax": "1024"
     },
     "SCFile": [
 		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
