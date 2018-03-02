@@ -45,6 +45,7 @@ This is the main script to execute all tasks.
          -t: ledger orderer service type [solo|kafka], default=solo
          -w: host ip 1, default=0.0.0.0
          -l: core logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR
+         -q: orderer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR
          -c: batch timeout, default=2s
          -B: batch size, default=10
          -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen
@@ -165,6 +166,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
        orderer environment variables
        -t: orderer type [solo|kafka]
+       -q: orderer logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]
 
 
 ## Example

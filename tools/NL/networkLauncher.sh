@@ -30,6 +30,7 @@ function printHelp {
    echo "    -t: ledger orderer service type [solo|kafka], default=solo"
    echo "    -w: host ip, default=0.0.0.0"
    echo "    -l: core logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
+   echo "    -q: orderer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
    echo "    -c: batch timeout, default=2s"
    echo "    -B: batch size, default=10"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
@@ -43,6 +44,7 @@ function printHelp {
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled "
    echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w localhost -S enabled "
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled "
+   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled -l INFO -q DEBUG"
    exit
 }
 
@@ -64,11 +66,12 @@ HostIP1="0.0.0.0"
 comName="example.com"
 networkAction="up"
 BuildDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/build/bin
-logLevel="ERROR"
+coreLogLevel="ERROR"
+ordererLogLevel="ERROR"
 batchTimeOut="2s"
 batchSize=10
 
-while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:c:B:F:G:S:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     a)
@@ -145,8 +148,13 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:c:B:F:G:S:C:" opt; do
       ;;
 
     l)
-      logLevel=$OPTARG
-      echo "logLevel:  $logLevel"
+      coreLogLevel=$OPTARG
+      echo "coreLogLevel:  $coreLogLevel"
+      ;;
+
+    q)
+      ordererLogLevel=$OPTARG
+      echo "ordererLogLevel:  $ordererLogLevel"
       ;;
 
     B)
@@ -303,6 +311,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled  -l $logLevel"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -C $comName -l $logLevel
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled  -l $coreLogLevel -q $ordererLogLevel"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel
 

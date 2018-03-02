@@ -33,6 +33,7 @@ function printHelp {
    echo " "
    echo "    orderer environment variables"
    echo "       -t: orderer type [solo|kafka] "
+   echo "       -q: orderer logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
    echo " "
    echo "Example:"
    echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
@@ -55,7 +56,7 @@ TLSEnabled="disabled"
 db="goleveldb"
 comName="example.com"
 
-while getopts ":x:z:l:d:t:a:o:k:p:r:F:G:S:C:" opt; do
+while getopts ":x:z:l:q:d:t:a:o:k:p:r:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     S)
@@ -96,6 +97,11 @@ while getopts ":x:z:l:d:t:a:o:k:p:r:F:G:S:C:" opt; do
       if [ $nBroker == 0 ] && [ $CONFIGTX_ORDERER_ORDERERTYPE == 'kafka' ]; then
           nBroker=1   # must have at least 1
       fi
+      ;;
+    q)
+      ORDERER_GENERAL_LOGLEVEL=$OPTARG
+      export ORDERER_GENERAL_LOGLEVEL=$ORDERER_GENERAL_LOGLEVEL
+      echo "ORDERER_GENERAL_LOGLEVEL: $ORDERER_GENERAL_LOGLEVEL"
       ;;
 
     # network options
