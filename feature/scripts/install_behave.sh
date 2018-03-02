@@ -49,13 +49,23 @@ pip install pykafka
 pip install requests
 pip install pyexecjs
 pip install cython
-pip install pyjnius
+# commenting out until we can get started using Java SDK in test runs
+#pip install pyjnius
 
 # Install Tcl prerequisites for busywork
 apt-get install --yes tcl tclx tcllib
 
 # Install NPM for the SDK
 apt-get install --yes npm
+
+# Verify that go is installed
+GO_VERSION=$(go version || /bin/true)
+if [ -z "$GO_VERSION" ]; then
+        echo "Go is not installed! Attempting to install now..."
+        apt-get install --yes golang-go
+else
+        echo "Go is installed. Version info: $GO_VERSION"
+fi
 
 # Install Govendor
 go get -u github.com/kardianos/govendor
