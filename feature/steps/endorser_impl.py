@@ -659,6 +659,21 @@ def step_impl(context, policy, args):
 def step_impl(context, policy):
     policyChannelUpdate_impl(context, policy, context.interface.TEST_CHANNEL_ID)
 
+@when('peer {peer} signs the updated channel config for channel "{channel}"')
+def sign_impl(context, peer, channel):
+    filename = "/var/hyperledger/configs/{0}/update{1}.pb".format(context.composition.projectName, channel)
+
+    # If this is a string and not a list, convert to list
+    peers = peer
+    if type(peer) == str:
+        peers = [peer]
+    context.interface.sign_channel(context, peers, filename)
+
+@when('all peers sign the updated channel config')
+def step_impl(context):
+    peers = context.interface.get_peers(context)
+    sign_impl(context, peers, context.interface.TEST_CHANNEL_ID)
+
 @then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
 def step_impl(context, response, org, status):
     expected_impl(context, response, context.interface.get_initial_leader(context, org))
