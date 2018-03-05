@@ -25,7 +25,7 @@ def step_impl(context, numOrgs, numPeers, numOrderers, numUsers):
 @when(u'the network is bootstrapped for an orderer of type {ordererType}')
 def ordererBootstrap_impl(context, ordererType):
     context.ordererProfile = config_util.PROFILE_TYPES.get(ordererType, "SampleInsecureSolo")
-    config_util.generateOrdererConfig(context, config_util.CHANNEL_PROFILE, context.ordererProfile, "orderer.block")
+    config_util.generateOrdererConfig(context, context.interface.SYS_CHANNEL_ID, context.ordererProfile, "orderer.block")
     config_util.generateChannelConfig(context.interface.SYS_CHANNEL_ID, config_util.CHANNEL_PROFILE, context)
 
 @when(u'the network is bootstrapped for an orderer')
