@@ -96,6 +96,17 @@ var nProcPerOrg = parseInt(uiContent.nProcPerOrg);
 logger.info('nProcPerOrg ', nProcPerOrg);
 var tCurr;
 
+// timeout option
+var timeoutOpt;
+var cfgTimeout=200000;   // default 200 sec
+if ((typeof( uiContent.timeoutOpt ) !== 'undefined')) {
+    timeoutOpt = parseInt(uiContent.timeoutOpt);
+    logger.info('main - timeoutOpt: %j', timeoutOpt);
+    if ((typeof( uiContent.timeoutOpt.preConfig ) !== 'undefined')) {
+        cfgTimeout = parseInt(uiContent.timeoutOpt.preConfig);
+    }
+}
+logger.info('main - cfgTimeout: ', cfgTimeout);
 
 // default chaincode language: golang
 var language='golang';
@@ -515,7 +526,7 @@ function chaincodeInstantiate(channel, client, org) {
 
             // sendInstantiateProposal
             //logger.info('request_instantiate: ', request_instantiate);
-            return channel.sendInstantiateProposal(request, 1200000);
+            return channel.sendInstantiateProposal(request, cfgTimeout);
         },
         function(err) {
             logger.error('[chaincodeInstantiate:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);
@@ -552,7 +563,7 @@ function chaincodeInstantiate(channel, client, org) {
                 var eventPromises = [];
                 eventHubs.forEach((eh) => {
                     let txPromise = new Promise((resolve, reject) => {
-                        let handle = setTimeout(reject, 120000);
+                        let handle = setTimeout(reject, cfgTimeout);
 
                         eh.registerTxEvent(deployId.toString(), (tx, code) => {
                             var tCurr1=new Date().getTime();
@@ -949,6 +960,8 @@ function queryBlockchainInfo(channel, client, org) {
 
 function performance_main() {
     var channelCreated = 0;
+    // set timeout for create/join channel and install/instantiate chaincode
+    hfc.setConfigSetting('request-timeout', cfgTimeout);
     // send proposal to endorser
     for (var i=0; i<channelOrgName.length; i++ ) {
         let org = channelOrgName[i];
@@ -992,7 +1005,6 @@ function performance_main() {
             var secret = ORGS[org].secret;
             logger.info('[performance_main] instantiate: user= %s, secret= %s', username, secret);
 
-            hfc.setConfigSetting('request-timeout', 1200000);
             hfc.newDefaultKeyValueStore({
                 path: testUtil.storePathForOrg(Nid, orgName)
             })

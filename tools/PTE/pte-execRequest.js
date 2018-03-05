@@ -188,6 +188,18 @@ if ( ( nRequest == 0 ) && ( runDur == 0 ) ) {
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] runForever: %d', Nid, channel.getName(), org, pid,  runForever);
 
+// timeout option
+var timeoutOpt;
+var reqTimeout=45000; // default 45 sec
+if ((typeof( uiContent.timeoutOpt ) !== 'undefined')) {
+    timeoutOpt = parseInt(uiContent.timeoutOpt);
+    logger.info('main - timeoutOpt: %j', timeoutOpt);
+    if ((typeof( uiContent.timeoutOpt.request ) !== 'undefined')) {
+        reqTimeout = parseInt(uiContent.timeoutOpt.request);
+    }
+}
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] reqTimeout: ', Nid, channel.getName(), org, pid, reqTimeout);
+
 // init latencies matrix: tx num/avg/min/max
 var latency_peer = [0, 0, 99999999, 0];
 var latency_orderer = [0, 0, 99999999, 0];
@@ -1136,6 +1148,7 @@ function execTransMode() {
 
     //enroll user
     var promise;
+    hfc.setConfigSetting('request-timeout', reqTimeout);
     if (useStore) {
         promise = hfc.newDefaultKeyValueStore({
                   path: testUtil.storePathForOrg(Nid, orgName)});

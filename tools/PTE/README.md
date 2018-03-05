@@ -605,6 +605,10 @@ The following chaincodes are tested and supported:
             "method": "RoundRobin",
             "list": "targetPeers"
         },
+        "timeoutOpt": {
+            "preConfig": "200000",
+            "request": "45000"
+        },
         "ccType": "general",
         "ccOpt": {
             "keyIdx": [1],
@@ -718,6 +722,9 @@ where:
     * **list**: peer failover candidate list, default is `targetPeers`
          * **targetPeers**: the peer candidate list is the same as the peers specified in the `targetPeers`
          * **all**: the peer candidate list is made of all peers listed in the associated service confidential file
+* **timeoutOpt**: timeout configuration
+    * **preConfig**: The timeout for channel creation and join and chaincode installation and instantiation. Unit: ms. Default:200,000.
+    * **request**: The timeout for proposal and transaction. Unit: ms. Default:45,000.
 * **ccType**: chaincode type
     * **ccchecker**: The first argument (key) in the query and invoke request is incremented by 1 for every transaction.  The prefix of the key is made of process ID, ex, all keys issued from process 4 will have prefix of **key3_**. And, the second argument (payload) in an invoke (Move) is a random string of size ranging between payLoadMin and payLoadMax defined in ccOpt.
     * **general**: The arguments of transaction request are taken from the user input json file without any changes.
