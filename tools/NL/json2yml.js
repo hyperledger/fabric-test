@@ -80,7 +80,11 @@ if ( process.env.CONFIGTX_ORDERER_BATCHTIMEOUT != null ) {
     ord_env_name.push('CONFIGTX_ORDERER_BATCHTIMEOUT');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_BATCHTIMEOUT);
 }
-
+if ( process.env.ORDERER_GENERAL_LOGLEVEL != null ) {
+    console.log(' ORDERER_GENERAL_LOGLEVEL= ', process.env.ORDERER_GENERAL_LOGLEVEL);
+    ord_env_name.push('ORDERER_GENERAL_LOGLEVEL');
+    ord_env_val.push(process.env.ORDERER_GENERAL_LOGLEVEL);
+}
 console.log('ord_env_name: ', ord_env_name.length, ord_env_name);
 console.log('ord_env_val: ', ord_env_val.length, ord_env_val);
 
@@ -89,6 +93,7 @@ if ( process.env.HOSTCONFIG_NETWORKMODE != null ) {
     HOSTCONFIG_NETWORKMODE=process.env.HOSTCONFIG_NETWORKMODE;
 }
 console.log('HOSTCONFIG_NETWORKMODE: ', HOSTCONFIG_NETWORKMODE);
+
 
 // Peer environment var
 var peer_env_name=[];
