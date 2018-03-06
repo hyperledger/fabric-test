@@ -588,6 +588,21 @@ def step_impl(context, peer, orderer):
 def step_impl(context, peer):
     fetch_impl(context, context.interface.TEST_CHANNEL_ID, peer, "orderer0.example.com", None)
 
+@when('peer "{peer}" updates the "{channel}" channel')
+def update_impl(context, peer, channel):
+    filename = "/var/hyperledger/configs/{0}/update{1}.pb".format(context.composition.projectName, channel)
+
+    # If this is a string and not a list, convert to list
+    peers = peer
+    if type(peer) == str:
+        peers = [peer]
+    context.interface.update_channel(context, peers, channel, "orderer0.example.com", filename)
+
+@when('all peers update the channel')
+def step_impl(context):
+    peers = context.interface.get_peers(context)
+    update_impl(context, peers, context.interface.TEST_CHANNEL_ID)
+
 @then(u'a user receives {status} response of {response} from the initial leader peer of "{org}"')
 def step_impl(context, response, org, status):
     expected_impl(context, response, context.interface.get_initial_leader(context, org))

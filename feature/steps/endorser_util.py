@@ -489,6 +489,29 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
+    def update_channel(self, context, peers, channelId=TEST_CHANNEL_ID, orderer="orderer0.example.com", block_filename="update.pb", user="Admin"):
+        configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
+
+        # peer channel update -f org3_update_in_envelope.pb -c $CHANNEL_NAME -o orderer.example.com:7050 --tls --cafile $ORDERER_CA
+        for peer in peers:
+            peerParts = peer.split('.')
+            org = '.'.join(peerParts[1:])
+            setup = self.get_env_vars(context, peer, includeAll=False, user=user)
+            command = ["peer", "channel", "update",
+                       "--file", block_filename,
+                       "--channelID", channelId,
+                       "--orderer", '{0}:7050'.format(orderer)]
+            if context.tls:
+                command = command + ["--tls",
+                                     "--cafile",
+                                     '{0}/ordererOrganizations/example.com/orderers/{1}/msp/tlscacerts/tlsca.example.com-cert.pem'.format(configDir, orderer)]
+
+            command.append('"')
+
+            output = context.composition.docker_exec(setup+command, [peer])
+        print("[{0}]: {1}".format(" ".join(setup+command), output))
+        return output
+
     def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
         # channelId, targs and user are optional parameters with defaults set if they are not included
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
