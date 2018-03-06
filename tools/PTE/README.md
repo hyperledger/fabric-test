@@ -341,6 +341,14 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
             "fcn": "init",
             "args": []
         },
+    If installing chaincode on CouchDB with indexing, then add `metadataPath` for the absolute path of the index definitions to `deploy`:
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
+            "metadataPath": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF",
+            "fcn": "init",
+            "args": []
+        },
     In above example, a default endorsement policy of "a signature by any member from any of the organizations corresponding to the array of member service providers" is used.
     If the test need a specific endorsement policy when chaincode instantiate, the 'endorsement' section need be configured like below format:
 
