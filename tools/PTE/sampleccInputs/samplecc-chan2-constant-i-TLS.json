@@ -38,23 +38,28 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org3": ["peer1"],
-        "org4": ["peer1"]
+        "org3": ["peer1", "peer2"],
+        "org4": ["peer1", "peer2"]
     },
     "eventOpt": {
         "type": "Channel",
-        "listener": "Transaction",
+        "listener": "Block",
         "timeout": "240000"
     },
     "failoverOpt": {
         "method": "RoundRobin",
         "list": "targetPeers"
     },
+    "timeoutOpt": {
+        "preConfig": "200000",
+        "request": "45000"
+    },
     "ccType": "ccchecker",
     "ccOpt": {
         "keyIdx": [1],
         "keyPayLoad": [2],
         "keyStart": "0",
+        "payLoadType": "Random",
         "payLoadMin": "1024",
         "payLoadMax": "1024"
     },
