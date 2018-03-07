@@ -101,6 +101,7 @@ var tCurr;
 var language='golang';
 var testDeployArgs = [];
 var chaincodePath;
+var metadataPath;
 function initDeploy() {
     if ((typeof( uiContent.deploy.language ) !== 'undefined')) {
         language=uiContent.deploy.language.toLowerCase();
@@ -114,7 +115,12 @@ function initDeploy() {
     if ( language === 'node' ) {
         chaincodePath = path.resolve(goPath, 'src', chaincodePath);
     }
-    logger.info('chaincode language: %s, path: %s', language, chaincodePath)
+    logger.info('chaincode language: %s, path: %s', language, chaincodePath);
+
+    if ((typeof( uiContent.deploy.metadataPath ) !== 'undefined')) {
+        metadataPath=uiContent.deploy.metadataPath;
+    }
+    logger.info('metadataPath: %s', metadataPath);
 }
 
 var tx_id = null;
@@ -399,12 +405,13 @@ function chaincodeInstall(channel, client, org) {
     var request_install = {
         targets: targets,
         chaincodePath: chaincodePath,
+        metadataPath: metadataPath,
         chaincodeId: chaincode_id,
         chaincodeType: language,
         chaincodeVersion: chaincode_ver
     };
 
-    logger.info('request_install: ', request_install);
+    logger.info('request_install: %j', request_install);
 
     client.installChaincode(request_install)
     .then(
