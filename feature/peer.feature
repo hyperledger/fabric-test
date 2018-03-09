@@ -287,3 +287,47 @@ Scenario: FAB-8382: Test MSP Identity with inconsistencies
   And I wait "2" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 1000
+
+@daily
+Scenario: FAB-8759: Test querying a peer with two different versions of chaincode - values change
+  Given I have a bootstrapped fabric network of type kafka with tls
+  When a user sets up a channel named "versioningtest"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init", "a", "1000" , "b", "2000"] with name "vt" on channel "versioningtest"
+  When a user queries on the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 1000
+  When a user invokes on the channel "versioningtest" using chaincode named "vt" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
+  And I wait "5" seconds
+  When a user queries on the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 990
+
+  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" as version "3" with args ["init","a","1000","b","2000"] with name "vt" on all peers
+  And I wait "5" seconds
+  When a user upgrades the chaincode on channel "versioningtest" to version "3" on peer "peer0.org1.example.com" with args ["init","a","1000","b","2000"]
+  #When a user upgrades the chaincode on channel "versioningtest" to version "3" on peer "peer0.org1.example.com"
+  When a user queries on version "3" of the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of 1000
+  When a user queries on version "0" of the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org2.example.com"
+  Then a user receives a success response of 1000 from "peer0.org2.example.com"
+
+
+@daily
+Scenario: FAB-8759: Test querying a peer that has two different versions of chaincode - no change in data
+  Given I have a bootstrapped fabric network of type kafka with tls
+  When a user sets up a channel named "versioningtest"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "vt" on channel "versioningtest"
+  When a user invokes on the channel "versioningtest" using chaincode named "vt" with args ["put","a","1000"] on "peer0.org2.example.com"
+  When a user invokes on the channel "versioningtest" using chaincode named "vt" with args ["put","b","2000"] on "peer0.org1.example.com"
+  When a user invokes on the channel "versioningtest" using chaincode named "vt" with args ["put","c","3000"] on "peer1.org1.example.com"
+  And I wait "5" seconds
+  When a user queries on the channel "versioningtest" using chaincode named "vt" with args ["get","a"] on "peer1.org2.example.com"
+  Then a user receives a success response of "1000" from "peer1.org2.example.com"
+  When a user queries on the channel "versioningtest" using chaincode named "vt" with args ["get","c"] on "peer1.org2.example.com"
+  Then a user receives a success response of "3000" from "peer1.org2.example.com"
+
+  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" as version "4" with args ["init"] with name "vt" on all peers
+  And I wait "5" seconds
+  When a user upgrades the chaincode on channel "versioningtest" to version "4" on peer "peer0.org1.example.com" with args ["init"]
+  When a user queries on version "4" of the channel "versioningtest" using chaincode named "vt" with args ["get","a"] on "peer0.org1.example.com"
+  Then a user receives a success response of "1000"
+  When a user queries on version "0" of the channel "versioningtest" using chaincode named "vt" with args ["get","c"] on "peer0.org2.example.com"
+  Then a user receives a success response of "3000" from "peer0.org2.example.com"
