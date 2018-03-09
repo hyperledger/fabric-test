@@ -78,6 +78,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-8414-4q: ledger synchronization for FAB-8414-4i, samplecc NodeJS chaincode, 4 processes X 100 queries to 2 peers, TLS, levelDB, 2 channel
         FAB-8208-64i: samplecc chaincode, 32 processes invokes longrun, TLS, levelDB, 32 org, 8 channel, filtered block event service
         FAB-8208-64q: ledger synchronization for FAB-8208-64i, samplecc chaincode, 32 processes X 100 queries, TLS, levelDB, 32 org, 8 channel
+        FAB-6813-4i: marbles02 GO chaincode, 4 processes X 1000 invokes, TLS, CouchDB with indexing, 2 channel, channel event service with block listener
 
     **Note that a query testcase requires execution of corresponding invoke testcase first to avoid errors due to the absence of transactions.**
 
@@ -141,6 +142,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-8384-4i.sh: execute FAB-8384-4i
         FAB-8414-4i.sh: execute FAB-8414-4i
         FAB-8208-64i.sh: execute FAB-8208-64i
+        FAB-6813-4i.sh: execute FAB-6813-4i, FAB-8199-4q, FAB-8200-4q, FAB-8201-4q
 
 
 * ### Network
