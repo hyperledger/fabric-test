@@ -1256,6 +1256,34 @@ function isExecDone(trType){
                }
            }
         }
+
+        // set a guard timer that extends past the time when all events for all invoke TXs should have been received or timed out.
+        // If this guard timer times out, then that means at least one invoke TX did not make it,
+        // and cleanup has not happened so we can finish and clean up now.
+        if ( IDone == 1 ) {
+            tCurr = new Date().getTime();
+            console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] setup Timeout: %d ms, curr time: %d', Nid, channelName, org, pid, evtTimeout, tCurr);
+            setTimeout(function(){
+                tCurr = new Date().getTime();
+                console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] Timeout: curr time: %d', Nid, channelName, org, pid, tCurr);
+                var remain = Object.keys(txidList).length;
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d', Nid, channelName, org, pid, evtRcvB, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain);
+                if (invokeCheck == 'TRUE') {
+                    arg0 = keyStart + inv_m - 1;
+                    inv_q = inv_m - 1;
+                    invoke_query_simple(0);
+                }
+                if ( remain > 0 ) {
+                    console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
+                }
+
+                evtDisconnect();
+                latency_output();
+                process.exit();
+
+            }, evtTimeout);
+        }
+
     } else if ( trType.toUpperCase() == 'QUERY' ) {
         if ( nRequest > 0 ) {
            if ( (inv_q % (nRequest/10)) == 0 ) {
@@ -1305,7 +1333,7 @@ function eventRegisterFilteredBlock() {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] Timeout - Failed to receive the block and transaction event', Nid, channelName, org, pid);
                 }
                 reject(new Error('Timed out waiting for block event'));
-            }, 20000);
+            }, evtTimeout);
 
 
             block_reg = eh.registerBlockEvent((filtered_block) => {
@@ -1483,7 +1511,7 @@ function eventRegister_latency(tx, cb) {
     var eventPromises = [];
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
-            let handle = setTimeout(reject, 600000);
+            let handle = setTimeout(reject, evtTimeout);
 
             eh.registerTxEvent(deployId.toString(), (tx, code) => {
                 clearTimeout(handle);
