@@ -283,16 +283,13 @@ A single test case is described by a user input file. User input files define al
 
 ### Sample Use Cases
 * ### Latency
-    Example: `sampleccInputs/samplecc-latency-i.json`
+    Example: `sampleccInputs/samplecc-chan1-latency-i.json`
     Performs 1000 invokes (Move) with 1 process on 1 network using the sample_cc chaincode. The average of the execution result (execution time (ms)/1000 transactions) represents the latency of 1 invoke (Move).
 * ### Long run
-    Example: `sampleccInputs/samplecc-longrun-i.json`
-    Performs invokes (Move) of various payload size ranging from 1kb-2kb with 1 processes on one network using sample_cc chaincode for 72 hours at 1 transaction per second.
-* ### Concurrency
-    Example: `sampleccInputs/samplecc-concurrency-i.json`
-    Performs invokes (Move) of 1kb payload with 50 processes on one 4-peer network using sample_cc chaincode for 10 minutes.
+    Example: `sampleccInputs/samplecc-chan1-longrun-i.json`
+    Performs invokes (Move) of various payload size of 1kb with 1 process on one network using sample_cc chaincode for 36 hours at 1 transaction per second.
 * ### Complex
-    Example: `sampleccInputs/samplecc-complex-i.json`
+    Example: `sampleccInputs/samplecc-chan1-complex-i.json`
     Performs invokes (Move) of various payload size ranging from 10kb-500kb with 10 processes on one 4-peer network using sample_cc chaincode for 10 minutes. Each invoke (Move) is followed by an invoke (Query).
 * ### More complicated scenarios
     * For multiple chaincodes deployments and transactions, configure each user input file to install and instantiate chaincodes and drive the transactions appropriately.

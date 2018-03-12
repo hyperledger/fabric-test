@@ -1,0 +1,3 @@
+driver=pte sampleccInputs/runCases-latency-i1-TLS.txt
+driver=pte sampleccInputs/runCases-latency-i2-TLS.txt
+driver=pte sampleccInputs/runCases-latency-i3-TLS.txt
