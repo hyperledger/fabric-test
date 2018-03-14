@@ -2,7 +2,6 @@
     "channelID": "_ch1",
     "chaincodeID": "sample_js",
     "chaincodeVer": "v0",
-    "logLevel": "ERROR",
     "transType": "install",
     "nProcPerOrg": "1",
     "TLS": "enabled",
