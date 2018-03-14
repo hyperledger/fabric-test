@@ -320,9 +320,9 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   When a user creates a channel
 
   #Join only three peers
-  When a user fetches genesis information from peer "peer0.org1.example.com"
-  And a user fetches genesis information from peer "peer0.org2.example.com"
-  And a user fetches genesis information from peer "peer1.org1.example.com"
+  When a user fetches genesis information using peer "peer0.org1.example.com"
+  And a user fetches genesis information using peer "peer0.org2.example.com"
+  And a user fetches genesis information using peer "peer1.org1.example.com"
   And a user makes peer "peer0.org1.example.com" join the channel
   And a user makes peer "peer0.org2.example.com" join the channel
   And a user makes peer "peer1.org1.example.com" join the channel
@@ -346,7 +346,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   Then a user receives a success response of 940
 
   #Join the rest of the peers
-  When a user fetches genesis information from peer "peer1.org2.example.com"
+  When a user fetches genesis information using peer "peer1.org2.example.com"
   And a user makes peer "peer1.org2.example.com" join the channel
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"
@@ -374,9 +374,9 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   When a user creates a channel
 
   #Join only three peers
-  When a user fetches genesis information from peer "peer0.org1.example.com"
-  And a user fetches genesis information from peer "peer0.org2.example.com"
-  And a user fetches genesis information from peer "peer1.org1.example.com"
+  When a user fetches genesis information using peer "peer0.org1.example.com"
+  And a user fetches genesis information using peer "peer0.org2.example.com"
+  And a user fetches genesis information using peer "peer1.org1.example.com"
   And a user makes peer "peer0.org1.example.com" join the channel
   And a user makes peer "peer0.org2.example.com" join the channel
   And a user makes peer "peer1.org1.example.com" join the channel
@@ -400,7 +400,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   Then a user receives a success response of 940
 
   #Join the rest of the peers
-  When a user fetches genesis information from peer "peer1.org2.example.com"
+  When a user fetches genesis information using peer "peer1.org2.example.com"
   And a user makes peer "peer1.org2.example.com" join the channel
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"

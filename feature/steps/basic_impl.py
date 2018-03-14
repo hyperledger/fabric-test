@@ -293,37 +293,49 @@ def step_impl(context, command, key):
         context.command_result[key] = subprocess.check_output(cmd, env=os.environ).strip()
     print("command result: {}".format(context.command_result))
 
-@when(u'an admin adds an organization to the {channelName} channel')
+@when(u'an admin adds an organization to the {channelName} channel config')
 def step_impl(context, channelName):
     add_org_impl(context, "org3.example.com", channelName)
 
-@when(u'an admin adds an organization named {orgName} to the {channelName} channel')
-def add_org_impl(context, orgName, channelName):
+@when(u'an admin adds an organization to the channel config')
+def step_impl(context):
+    add_org_impl(context, "org3.example.com", context.interface.TEST_CHANNEL_ID)
+
+@when(u'an admin adds an organization named {orgMSP} to the {channelName} channel config')
+def add_org_impl(context, orgMSP, channelName):
+    configDir =  "./configs/{0}".format(context.projectName)
+
     #Save original crypto.yaml file
-    copyfile("./configs/{0}/crypto.yaml".format(context.projectName),
-             "./configs/{0}/crypto_orig.yaml".format(context.projectName))
+    if os.path.exists("{0}/crypto.yaml".format(configDir)):
+        copyfile("{0}/crypto.yaml".format(configDir),
+                 "{0}/crypto_orig.yaml".format(configDir))
 
     # Add cryptogen info for 3rd org
-    config_util.buildCryptoFile(context, 1, 2, 0, 2, orgName=orgName)
-    config_util.generateCrypto(context, "./configs/{0}/crypto.yaml".format(context.projectName))
-    config_util.generateCryptoDir(context, 1, 2, 0, 2, tlsExist=context.tlsEnabled, orgName=orgName)
-
-    # Format the args for adding a new org with the orgName (TitleCase name and remove '.' for MSPID)
-    # Example: org3.example.com (MSPID:Org3ExampleCom)
+    config_util.buildCryptoFile(context, 1, 2, 0, 2, orgMSP=orgMSP)
+    config_util.generateCrypto(context, "{0}/crypto.yaml".format(configDir))
+    config_util.generateCryptoDir(context, 1, 2, 0, 2, tlsExist=context.tls, orgMSP=orgMSP)
+    args = config_util.addNewOrg(context, orgMSP, configDir)
 
     update_impl(context, 'peer', channelName, args, userName='Admin')
 
-@when(u'an admin removes an organization named {orgName} from the {channelName} channel')
-def step_impl(context, orgName, channelName):
-    # Format the args for removing orgName
+@when(u'an admin removes an organization named {orgMSP} from the {channelName} channel config')
+def step_impl(context, orgMSP, channelName):
+    configDir =  "./configs/{0}".format(context.projectName)
+
+    # Format the args for removing orgMSP
+    #args = config_util.delNewOrg(orgMSP, configDir)
 
     update_impl(context, 'peer', channelName, args, userName='Admin')
 
-@when(u'an {component} admin updates the {channelName} channel with {args}')
+@when(u'an {component} admin updates the {channelName} channel config with {args}')
 def step_impl(context, component, channelName, args):
     update_impl(context, component, channelName, args, userName='Admin')
 
-@when(u'an {component} admin with username {userName} updates the {channelName} channel with {args}')
+@when(u'an admin updates the channel config with {args}')
+def step_impl(context, args):
+    update_impl(context, 'peer', context.interface.TEST_CHANNEL_ID, args, userName='Admin')
+
+@when(u'an {component} admin with username {userName} updates the {channelName} channel config with {args}')
 def update_impl(context, component, channelName, args, userName='Admin'):
     assert component in ('peer', 'orderer'), "Error: the component type must be either 'peer' or 'orderer' instead of '{}'.".format(component)
     if channelName == "system":
@@ -335,11 +347,8 @@ def update_impl(context, component, channelName, args, userName='Admin'):
     assert len(peers) > 0, "Error: There are no peers on this fabric network."
     context.interface.fetch_channel(context, peers, 'orderer0.example.com', channelName, user=userName)
 
-    # Start configtxlator
-    # Convert block file to json
-    # Prep args for update
-    # have other peers sign updated channel block
-    # send signed, updated block to the channel
+    # Convert block file to json & Prep for update
+    context.block_filename = config_util.configUpdate(context, args, "Application", channelName)
 
 @when(u'the peers from the added organization are added to the network')
 def step_impl(context):

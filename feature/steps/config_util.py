@@ -23,6 +23,17 @@ PROFILE_TYPES = {"solo": "SampleInsecureSolo",
 
 CHANNEL_PROFILE = "SysTestChannel"
 
+CFGTX_ORG_STR = '''
+---
+Organizations:
+    - &{orgName}
+        Name: {orgName}
+        ID: {orgMSP}
+        MSPDir: ./peerOrganizations/{orgMSP}/peers/peer0.{orgMSP}/msp
+        AnchorPeers:
+            - Host: peer0.{orgMSP}
+              Port: 7051 '''
+
 ORDERER_STR = '''
 OrdererOrgs:
   - Name: ExampleCom
@@ -63,7 +74,7 @@ def makeProjectConfigDir(context):
         os.mkdir(testConfigs)
     return testConfigs
 
-def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgName=None, ouEnable=False):
+def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgMSP=None, ouEnable=False):
     testConfigs = makeProjectConfigDir(context)
 
     # Orderer Stanza
@@ -77,9 +88,9 @@ def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgName=N
     for count in range(int(numOrgs)):
         name = "Org{0}ExampleCom".format(count+1)
         domain = "org{0}.example.com".format(count+1)
-        if orgName is not None:
-            name = orgName.title().replace('.', '')
-            domain = orgName
+        if orgMSP is not None:
+            name = orgMSP.title().replace('.', '')
+            domain = orgMSP
         if type(ouEnable) == bool:
             ouEnableStr = common_util.convertBoolean(ouEnable)
         elif ouEnable == name:
@@ -203,14 +214,14 @@ def traverse_orderer(projectname, numOrderers, tlsExist):
     userpath = opath + 'users/Admin@example.com/'
     mspandtlsCheck(userpath, tlsExist)
 
-def traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgName=None):
+def traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgMSP=None):
     # Peer stanza
     pppath = 'configs/' +projectname+ '/peerOrganizations/'
     for orgNum in range(int(numOrgs)):
-        if orgName is None:
-            orgName = "org" + str(orgNum) + ".example.com"
+        if orgMSP is None:
+            orgMSP = "org" + str(orgNum) + ".example.com"
         for peerNum in range(int(numPeers)):
-            orgpath = orgName + "/"
+            orgpath = orgMSP + "/"
             ppath = pppath + orgpath
             peerpath = ppath +"peers/"+"peer"+str(peerNum)+ "."+ orgpath
 
@@ -230,9 +241,9 @@ def traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgName=No
                 userpath = ppath + "users/"+"User"+str(count)+"@"+orgpath
                 mspandtlsCheck(userpath, tlsExist)
 
-def generateCryptoDir(context, numOrgs, numPeers, numOrderers, numUsers, tlsExist=True, orgName=None):
+def generateCryptoDir(context, numOrgs, numPeers, numOrderers, numUsers, tlsExist=True, orgMSP=None):
     projectname = context.projectName
-    traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgName)
+    traverse_peer(projectname, numOrgs, numPeers, numUsers, tlsExist, orgMSP)
     traverse_orderer(projectname, numOrderers, tlsExist)
 
 def mspandtlsCheck(path, tlsExist):
@@ -277,3 +288,96 @@ def tlsCertificates(path):
 def keystoreCheck(path):
     keystorepath = path + "keystore/"
     fileExistWithExtension(keystorepath, "There are missing files in {0}.".format(keystorepath), '')
+
+def buildConfigtx(testConfigs, orgName, mspID):
+    configtx = CFGTX_ORG_STR.format(orgName=orgName, orgMSP=mspID)
+    with open("{}/configtx.yaml".format(testConfigs), "w") as fd:
+        fd.write(configtx)
+
+def addNewOrg(context, mspID, configDir):
+    testConfigs = makeProjectConfigDir(context)
+    updated_env = updateEnviron(context)
+
+    orgName = mspID.title().replace(".", "")
+    copyfile("{}/configtx.yaml".format(testConfigs), "{}/orig_configtx.yaml".format(testConfigs))
+    buildConfigtx(testConfigs, orgName, mspID)
+    try:
+        command = ["configtxgen", "-printOrg", orgName]
+        args = subprocess.check_output(command, cwd=testConfigs, env=updated_env)
+        print("Result of printOrg: ".format(args))
+    except:
+        print("Unable to inspect orderer config data: {0}".format(sys.exc_info()[1]))
+        args = ""
+
+    # Save the org config and reinstate the original configtx.yaml
+    copyfile("{}/configtx.yaml".format(testConfigs), "{}/configtx_org3.yaml".format(testConfigs))
+    copyfile("{}/orig_configtx.yaml".format(testConfigs), "{}/configtx.yaml".format(testConfigs))
+    return {orgName: json.loads(args)}
+
+def delNewOrg(mspID, configDir):
+    pass
+
+def configUpdate(context, config_update, group, channel):
+    updated_env = updateEnviron(context)
+    testConfigs = "./configs/{0}".format(context.projectName)
+    inputFile = "{0}.block".format(channel)
+
+    # configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
+    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", inputFile, "--type", "common.Block"], cwd=testConfigs , env=updated_env)
+    config = json.loads(configStr)
+
+    with open("{0}/config.json".format(testConfigs), "w") as fd:
+        fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
+
+    # configtxlator proto_encode --input config.json --type common.Config --output config.pb
+    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    # groups = "Application"
+    # config_update = {"Org3ExampleCom": <data>}
+    config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"].update(config_update)
+
+    with open("{0}/modified_config.json".format(testConfigs), "w") as fd:
+        fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
+
+    print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"]))
+
+    # configtxlator proto_encode --input config.json --type common.Config --output config.pb
+    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    # configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
+    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "modified_config.json", "--type", "common.Config", "--output", "modified_config.pb"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    # configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb --updated modified_config.pb --output update.pb
+    configStr = subprocess.check_output(["configtxlator", "compute_update", "--channel_id", channel, "--original", "config.pb", "--updated", "modified_config.pb", "--output", "update.pb"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    # configtxlator proto_decode --input update.pb --type common.ConfigUpdate | jq . > org3_update.json
+    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", "update.pb", "--type", "common.ConfigUpdate"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+    config = json.loads(configStr)
+
+    # echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":'$(cat org3_update.json)'}}}' | jq . > org3_update_in_envelope.json
+    updatedconfig = {"payload": {"header": {"channel_header": {"channel_id": channel,
+                                                               "type":2}
+                                           },
+                                 "data": {"config_update": config}
+                                }
+                    }
+
+    with open("{0}/update.json".format(testConfigs), "w") as fd:
+        fd.write(json.dumps(updatedconfig, indent=4))
+
+    # configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
+    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "update.json", "--type", "common.Envelope", "--output", "update{0}.pb".format(channel)],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    return "{0}/update{1}.pb".format(testConfigs, channel)

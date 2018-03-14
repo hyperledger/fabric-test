@@ -96,12 +96,12 @@ Scenario Outline: FAB-4776/FAB-4777: Bring up a kafka based network and check pe
     And the orderer node logs receiving the orderer block
     And a user queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 100
-    When a user fetches genesis information from peer "peer1.org1.example.com" using "orderer0.example.com" to location "."
-    Then the block file is fetched from peer "peer1.org1.example.com" at location "."
+    When a user fetches genesis information using peer "peer1.org1.example.com" from "orderer0.example.com" to location "."
+    Then the config block file is fetched from peer "peer1.org1.example.com" at location "."
     When a user queries on the chaincode with args ["query","a"] from "peer1.org1.example.com"
     Then a user receives a success response of 100 from "peer1.org1.example.com"
-    When a user fetches genesis information from peer "peer1.org2.example.com" using "orderer1.example.com" to location "."
-    Then the block file is fetched from peer "peer1.org2.example.com" at location "."
+    When a user fetches genesis information using peer "peer1.org2.example.com" from "orderer1.example.com" to location "."
+    Then the config block file is fetched from peer "peer1.org2.example.com" at location "."
     When a user queries on the chaincode with args ["query","a"] from "peer1.org2.example.com"
     Then a user receives a success response of 100 from "peer1.org2.example.com"
 Examples:
@@ -119,6 +119,6 @@ Scenario: FAB-4773: Fetching of a channel genesis block
     When I start a fabric network with TLS
     When the network is bootstrapped for a channel named "mychannel"
     When a user creates a channel named "mychannel"
-    And a user fetches genesis information for a channel "mychannel" from peer "peer1.org1.example.com"
+    And a user fetches genesis information for a channel "mychannel" using peer "peer1.org1.example.com"
     Then the "mychannel.block" file is generated
     Then the "mychannel.block" file is fetched from peer "peer1.org1.example.com"
