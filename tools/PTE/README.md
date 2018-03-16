@@ -466,7 +466,7 @@ The following chaincodes are tested and supported:
 * **sample_js**: This is the Node JS chaincode of sample_cc. See directory `samplejsInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
-            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+            "chaincodePath": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
             "fcn": "init",
             "language": "node",
             "args": []
@@ -746,6 +746,7 @@ where:
     * **payLoadMin**: minimum size in bytes of the payload
     * **payLoadMax**: maximum size in bytes of the payload
 * **deploy**: deploy transaction contents
+    * chaincodePath: this is the relative path to GOPATH/src if the language is golang, for example: `github.com/hyperledger/fabric-test/chaincodes/samplecc/go` and the absolute path if the language is node, for example: `/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node`
     * language: the chaincode language including:
         * **golang**: golang chaincode, this is the default language
         * **node**: Node JS chaincode
