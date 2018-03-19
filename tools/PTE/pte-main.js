@@ -123,15 +123,12 @@ function initDeploy() {
     }
 
     chaincodePath = uiContent.deploy.chaincodePath;
-    if ( language === 'node' ) {
-        chaincodePath = path.resolve(goPath, 'src', chaincodePath);
-    }
     logger.info('chaincode language: %s, path: %s', language, chaincodePath);
 
     if ((typeof( uiContent.deploy.metadataPath ) !== 'undefined')) {
         metadataPath=uiContent.deploy.metadataPath;
+        logger.info('metadataPath: %s', metadataPath);
     }
-    logger.info('metadataPath: %s', metadataPath);
 }
 
 var tx_id = null;
