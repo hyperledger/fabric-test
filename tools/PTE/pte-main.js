@@ -158,21 +158,24 @@ function printChainInfo(channel) {
     logger.info('[printChainInfo] events: ', allEventhubs);
 }
 
+
 function clientNewOrderer(client, org) {
     var ordererID = ORGS[org].ordererID;
+    var data;
     logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
     if (TLS.toUpperCase() == 'ENABLED') {
-        var caRootsPath = path.resolve(goPath, ORGS['orderer'][ordererID].tls_cacerts);
-        let data = fs.readFileSync(caRootsPath);
-        let caroots = Buffer.from(data).toString();
+        data = testUtil.getTLSCert('orderer', ordererID);
+        if ( data !== null ) {
+            let caroots = Buffer.from(data).toString();
 
-        orderer = client.newOrderer(
-            ORGS['orderer'][ordererID].url,
-            {
-                'pem': caroots,
-                'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
-            }
-        );
+            orderer = client.newOrderer(
+                ORGS['orderer'][ordererID].url,
+                {
+                    'pem': caroots,
+                    'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
+                }
+            );
+        }
     } else {
         orderer = client.newOrderer(ORGS['orderer'][ordererID].url);
     }
@@ -182,20 +185,22 @@ function clientNewOrderer(client, org) {
 function chainAddOrderer(channel, client, org) {
     logger.info('[chainAddOrderer] channel name: ', channel.getName());
     var ordererID = ORGS[org].ordererID;
+    var data;
     if (TLS.toUpperCase() == 'ENABLED') {
-        var caRootsPath = path.resolve(goPath, ORGS['orderer'][ordererID].tls_cacerts);
-        var data = fs.readFileSync(caRootsPath);
-        let caroots = Buffer.from(data).toString();
+        data = testUtil.getTLSCert('orderer', ordererID);
+        if ( data !== null ) {
+            let caroots = Buffer.from(data).toString();
 
-        channel.addOrderer(
-            client.newOrderer(
-                ORGS['orderer'][ordererID].url,
-                {
-                    'pem': caroots,
-                    'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
-                }
-            )
-        );
+            channel.addOrderer(
+                client.newOrderer(
+                    ORGS['orderer'][ordererID].url,
+                    {
+                        'pem': caroots,
+                        'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
+                    }
+                )
+            );
+        }
     } else {
         channel.addOrderer(
             client.newOrderer(ORGS['orderer'][ordererID].url)
@@ -206,6 +211,7 @@ function chainAddOrderer(channel, client, org) {
 
 function channelAddPeer(channel, client, org) {
     logger.info('[channelAddPeer] channel name: ', channel.getName());
+    var data;
     var peerTmp;
     var targets = [];
 
@@ -213,16 +219,18 @@ function channelAddPeer(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[org][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                        }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
+                    data = testUtil.getTLSCert(org, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[org][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
                     targets.push(peerTmp);
@@ -239,6 +247,7 @@ function channelAddPeer(channel, client, org) {
 function channelAddQIPeer(channel, client, qorg, qpeer) {
     logger.info('[channelAddQIPeer] channel name: ', channel.getName());
     logger.info('[channelAddQIPeer] qorg %s qpeer: ', qorg,qpeer);
+    var data;
     var peerTmp;
     var targets = [];
 
@@ -246,16 +255,18 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
         if (ORGS[qorg].hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    let data = fs.readFileSync(path.resolve(goPath, ORGS[qorg][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[qorg][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[qorg][key]['server-hostname']
-                        }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
+                    data = testUtil.getTLSCert(qorg, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[qorg][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[qorg][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[qorg][key].requests);
                     targets.push(peerTmp);
@@ -271,6 +282,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
 
 function channelAddPeer1(channel, client, org) {
     logger.info('[channelAddPeer1] channel name: %s, org: %s', channel.getName(), org);
+    var data;
     var peerTmp;
     var targets = [];
 
@@ -278,16 +290,18 @@ function channelAddPeer1(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS.toUpperCase() == 'ENABLED') {
-                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[org][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                        }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
+                    data = testUtil.getTLSCert(org, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[org][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
                     targets.push(peerTmp);
@@ -304,6 +318,7 @@ function channelAddPeer1(channel, client, org) {
 
 function channelAddPeerEventJoin(channel, client, org) {
     logger.info('[channelAddPeerEvent] channel name: ', channel.getName());
+            var data;
             var eh;
             var peerTmp;
 
@@ -314,16 +329,18 @@ function channelAddPeerEventJoin(channel, client, org) {
                 if (ORGS[org].hasOwnProperty(key)) {
                     if (key.indexOf('peer') === 0) {
                         if (TLS.toUpperCase() == 'ENABLED') {
-                            let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                            targets.push(
-                                client.newPeer(
-                                    ORGS[org][key].requests,
-                                    {
-                                        pem: Buffer.from(data).toString(),
-                                        'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                    }
-                                )
-                            );
+                            data = testUtil.getTLSCert(org, key);
+                            if ( data !== null ) {
+                                targets.push(
+                                    client.newPeer(
+                                        ORGS[org][key].requests,
+                                        {
+                                            pem: Buffer.from(data).toString(),
+                                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                                        }
+                                    )
+                                );
+                            }
                         } else {
                             targets.push(
                                 client.newPeer(
@@ -335,14 +352,16 @@ function channelAddPeerEventJoin(channel, client, org) {
 
                         eh=client.newEventHub();
                         if (TLS.toUpperCase() == 'ENABLED') {
-                            let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                            eh.setPeerAddr(
-                                ORGS[org][key].events,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                }
-                            );
+                            data = testUtil.getTLSCert(org, key);
+                            if ( data !== null ) {
+                                eh.setPeerAddr(
+                                    ORGS[org][key].events,
+                                    {
+                                        pem: Buffer.from(data).toString(),
+                                        'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                                    }
+                                );
+                            }
                         } else {
                             eh.setPeerAddr(ORGS[org][key].events);
                         }
@@ -359,6 +378,7 @@ function channelAddPeerEventJoin(channel, client, org) {
 
 function channelAddEvent(channel, client, org) {
     logger.info('[channelAddEvent] channel name: ', channel.getName());
+            var data;
             var eh;
             var peerTmp;
             var eventHubs = [];
@@ -369,14 +389,16 @@ function channelAddEvent(channel, client, org) {
 
                         eh=client.newEventHub();
                         if (TLS.toUpperCase() == 'ENABLED') {
-                            var data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                            eh.setPeerAddr(
-                                ORGS[org][key].events,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                }
-                            );
+                            data = testUtil.getTLSCert(org, key);
+                            if ( data !== null ) {
+                                eh.setPeerAddr(
+                                    ORGS[org][key].events,
+                                    {
+                                        pem: Buffer.from(data).toString(),
+                                        'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                                    }
+                                );
+                            }
                         } else {
                             eh.setPeerAddr(ORGS[org][key].events);
                         }

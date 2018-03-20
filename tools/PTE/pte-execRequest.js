@@ -510,15 +510,17 @@ function assignPeerListFromList(channel, client, org) {
                 peername = listOpt[key][i];
                 if (peername.indexOf('peer') === 0) {
                     if (TLS == 'ENABLED') {
-                        data = fs.readFileSync(path.resolve(goPath, ORGS[key][peername]['tls_cacerts']));
-                        peerTmp = client.newPeer(
-                            ORGS[key][peername].requests,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key][peername]['server-hostname']
-                            }
-                        );
-                        peerList.push(peerTmp);
+                        data = testUtil.getTLSCert(key, peername);
+                        if ( data !== null ) {
+                            peerTmp = client.newPeer(
+                                ORGS[key][peername].requests,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                                }
+                            );
+                            peerList.push(peerTmp);
+                        }
                     } else {
                         peerTmp = client.newPeer(ORGS[key][peername].requests);
                         peerList.push(peerTmp);
@@ -541,16 +543,17 @@ function assignPeerList(channel, client, org) {
             for (let key in ORGS[key1]) {
                 if (key.indexOf('peer') === 0) {
                     if (TLS == 'ENABLED') {
-
-                        data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key]['tls_cacerts']));
-                        peerTmp = client.newPeer(
-                            ORGS[key1][key].requests,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
-                            }
-                        );
-                        peerList.push(peerTmp);
+                        data = testUtil.getTLSCert(key1, key);
+                        if ( data !== null ) {
+                            peerTmp = client.newPeer(
+                                ORGS[key1][key].requests,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                                }
+                            );
+                            peerList.push(peerTmp);
+                        }
                     } else {
                         peerTmp = client.newPeer( ORGS[key1][key].requests);
                         peerList.push(peerTmp);
@@ -574,27 +577,29 @@ function assignThreadAllPeers(channel, client, org) {
             for (let key in ORGS[key1]) {
             if (key.indexOf('peer') === 0) {
                 if (TLS == 'ENABLED') {
-
-                    data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[key1][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                    data = testUtil.getTLSCert(key1, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[key1][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                        if ( peerFOList == 'TARGETPEERS' ) {
+                            peerList.push(peerTmp);
                         }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if ( peerFOList == 'TARGETPEERS' ) {
-                        peerList.push(peerTmp);
-                    }
-                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if ( evtType == 'FILTEREDBLOCK' ) {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
+
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                            eh = channel.newChannelEventHub(peerTmp);
+                            eventHubs.push(eh);
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     }
                 } else {
@@ -651,27 +656,29 @@ function assignThreadAllAnchorPeers(channel, client, org) {
             for (let key in ORGS[key1]) {
             if (key.indexOf('peer1') === 0) {
                 if (TLS == 'ENABLED') {
-
-                    data = fs.readFileSync(path.resolve(goPath, ORGS[key1][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[key1][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                    data = testUtil.getTLSCert(key1, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[key1][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                        if ( peerFOList == 'TARGETPEERS' ) {
+                            peerList.push(peerTmp);
                         }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if ( peerFOList == 'TARGETPEERS' ) {
-                        peerList.push(peerTmp);
-                    }
-                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if ( evtType == 'FILTEREDBLOCK' ) {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
+
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                            eh = channel.newChannelEventHub(peerTmp);
+                            eventHubs.push(eh);
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     }
                 } else {
@@ -725,26 +732,29 @@ function assignThreadOrgPeer(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS == 'ENABLED') {
-                    data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[org][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                    data = testUtil.getTLSCert(org, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[org][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                        if ( peerFOList == 'TARGETPEERS' ) {
+                            peerList.push(peerTmp);
                         }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if ( peerFOList == 'TARGETPEERS' ) {
-                        peerList.push(peerTmp);
-                    }
-                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if ( evtType == 'FILTEREDBLOCK' ) {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
+
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                            eh = channel.newChannelEventHub(peerTmp);
+                            eventHubs.push(eh);
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     }
                 } else {
@@ -802,26 +812,29 @@ function assignThreadPeerList(channel, client, org) {
                 peername = listOpt[key][i];
                 if (peername.indexOf('peer') === 0) {
                     if (TLS == 'ENABLED') {
-                        data = fs.readFileSync(path.resolve(goPath, ORGS[key][peername]['tls_cacerts']));
-                        peerTmp = client.newPeer(
-                            ORGS[key][peername].requests,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                        data = testUtil.getTLSCert(key, peername);
+                        if ( data !== null ) {
+                            peerTmp = client.newPeer(
+                                ORGS[key][peername].requests,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                                }
+                            );
+                            targets.push(peerTmp);
+                            channel.addPeer(peerTmp);
+                            if ( peerFOList == 'TARGETPEERS' ) {
+                                peerList.push(peerTmp);
                             }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                        if ( peerFOList == 'TARGETPEERS' ) {
-                            peerList.push(peerTmp);
-                        }
-                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                            eh = channel.newChannelEventHub(peerTmp);
-                            eventHubs.push(eh);
-                            if ( evtType == 'FILTEREDBLOCK' ) {
-                                eh.connect();
-                            } else {
-                                eh.connect(true);
+
+                            if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                                eh = channel.newChannelEventHub(peerTmp);
+                                eventHubs.push(eh);
+                                if ( evtType == 'FILTEREDBLOCK' ) {
+                                    eh.connect();
+                                } else {
+                                    eh.connect(true);
+                                }
                             }
                         }
                     } else {
@@ -867,29 +880,33 @@ function assignThreadPeerList(channel, client, org) {
 
 function channelAddPeer(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeer]', Nid, channelName, org, pid);
+    var data;
     var peerTmp;
     var eh;
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS == 'ENABLED') {
-                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[org][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                        }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if ( evtType == 'FILTEREDBLOCK' ) {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
+                    data = testUtil.getTLSCert(org, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[org][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                            eh = channel.newChannelEventHub(peerTmp);
+                            eventHubs.push(eh);
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     }
                 } else {
@@ -915,6 +932,7 @@ function channelAddPeer(channel, client, org) {
 
 function channelAddPeerEvent(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent]', Nid, channelName, org, pid);
+    var data;
     var eh;
     var peerTmp;
     for (let key in ORGS[org]) {
@@ -922,14 +940,16 @@ function channelAddPeerEvent(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.indexOf('peer') === 0) {
                 if (TLS == 'ENABLED') {
-                    let data = fs.readFileSync(path.resolve(goPath, ORGS[org][key]['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[org][key].requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key]['server-hostname']
-                        }
-                    );
+                    data = testUtil.getTLSCert(org, key);
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[org][key].requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key]['server-hostname']
+                            }
+                        );
+                    }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] peer: ', Nid, channelName, org, pid, ORGS[org][key].requests);
@@ -993,13 +1013,13 @@ function setCurrOrdererId(channel, client, org) {
 // assign Orderer List
 function assignOrdererList(channel, client) {
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s assignOrdererList] ', Nid, channelName, org, pid);
+    var data;
     var ordererTmp;
     for (let key in ORGS['orderer']) {
         if (key.indexOf('orderer') === 0) {
             if (TLS == 'ENABLED') {
-                var caRootsPath = path.resolve(goPath, ORGS['orderer'][key].tls_cacerts);
-                if (fs.existsSync(caRootsPath)) {
-                    let data = fs.readFileSync(caRootsPath);
+                data = testUtil.getTLSCert('orderer', key);
+                if ( data !== null ) {
                     let caroots = Buffer.from(data).toString();
 
                     ordererTmp = client.newOrderer(
@@ -1010,13 +1030,11 @@ function assignOrdererList(channel, client) {
                         }
                     )
                     ordererList.push(ordererTmp);
-                } else {
-                    logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d assignOrdererList] file does not exist: %s', Nid, channelName, org, pid, caRootsPath);
                 }
-            } else {
-                ordererTmp = client.newOrderer(ORGS['orderer'][key].url);
-                ordererList.push(ordererTmp);
             }
+        } else {
+            ordererTmp = client.newOrderer(ORGS['orderer'][key].url);
+            ordererList.push(ordererTmp);
         }
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] orderer list: %j', Nid, channelName, org, pid, ordererList);
@@ -1024,21 +1042,23 @@ function assignOrdererList(channel, client) {
 
 function channelAddOrderer(channel, client, org) {
     var ordererID = ORGS[org].ordererID;
+    var data;
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s channelAddOrderer] ', Nid, channelName, org, pid, ordererID );
     if (TLS == 'ENABLED') {
-        var caRootsPath = path.resolve(goPath, ORGS['orderer'][ordererID].tls_cacerts);
-        let data = fs.readFileSync(caRootsPath);
-        let caroots = Buffer.from(data).toString();
+        data = testUtil.getTLSCert('orderer', ordererID);
+        if ( data !== null ) {
+            let caroots = Buffer.from(data).toString();
 
-        channel.addOrderer(
-            client.newOrderer(
-                ORGS['orderer'][ordererID].url,
-                {
-                    'pem': caroots,
-                    'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
-                }
-            )
-        );
+            channel.addOrderer(
+                client.newOrderer(
+                    ORGS['orderer'][ordererID].url,
+                    {
+                        'pem': caroots,
+                        'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
+                    }
+                )
+            );
+        }
     } else {
         channel.addOrderer(client.newOrderer(ORGS['orderer'][ordererID].url));
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, ORGS['orderer'][ordererID].url);
@@ -1057,26 +1077,29 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
         if (ORGS.hasOwnProperty(key) && typeof ORGS[key].peer1 !== 'undefined') {
             if ( key == org ) {
                 if (TLS == 'ENABLED') {
-                    data = fs.readFileSync(path.resolve(goPath, ORGS[key].peer1['tls_cacerts']));
-                    peerTmp = client.newPeer(
-                        ORGS[key].peer1.requests,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key].peer1['server-hostname']
+                    data = testUtil.getTLSCert(key, 'peer1');
+                    if ( data !== null ) {
+                        peerTmp = client.newPeer(
+                            ORGS[key].peer1.requests,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key].peer1['server-hostname']
+                            }
+                        );
+                        targets.push(peerTmp);
+                        channel.addPeer(peerTmp);
+                        if ( peerFOList == 'TARGETPEERS' ) {
+                            peerList.push(peerTmp);
                         }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if ( peerFOList == 'TARGETPEERS' ) {
-                        peerList.push(peerTmp);
-                    }
-                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if ( evtType == 'FILTEREDBLOCK' ) {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
+
+                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                            eh = channel.newChannelEventHub(peerTmp);
+                            eventHubs.push(eh);
+                            if ( evtType == 'FILTEREDBLOCK' ) {
+                                eh.connect();
+                            } else {
+                                eh.connect(true);
+                            }
                         }
                     }
                 } else {
