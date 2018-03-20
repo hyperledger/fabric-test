@@ -212,13 +212,26 @@ function getOrdererAdmin(client, userOrg, svcFile) {
         var certPEM;
         var ordererID = ORGS[userOrg].ordererID;
 
-        if (typeof ORGS['orderer'][ordererID].admin_cert !== 'undefined') {
-            logger.info(' %s admin_cert defined', userOrg);
+        if (typeof ORGS['orderer'].admin_cert !== 'undefined') {
+            logger.info(' %s global orderer admin_cert defined', userOrg);
+            keyPEM = ORGS['orderer'].priv;
+            certPEM = ORGS['orderer'].admin_cert;
+        } else if (typeof ORGS['orderer'][ordererID].admin_cert !== 'undefined') {
+            logger.info(' %s local orderer admin_cert defined', userOrg);
             keyPEM = ORGS['orderer'][ordererID].priv;
             certPEM = ORGS['orderer'][ordererID].admin_cert;
+        } else if ( (typeof ORGS['orderer'].adminPath !== 'undefined') && (typeof ORGS['orderer'].adminPath !== 'undefined') ) {
+            getgoPath();
+            logger.info(' %s global orderer adminPath defined', userOrg);
+            keyPath = path.resolve(goPath, ORGS['orderer'].adminPath, 'keystore');
+            keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
+            certPath = path.resolve(goPath, ORGS['orderer'].adminPath, 'signcerts');
+            certPEM = readAllFiles(certPath)[0];
+            logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
+            logger.debug('[getOrdererAdmin] certPath: %s', certPath);
         } else {
             getgoPath();
-            logger.info(' %s admin_cert undefined', userOrg);
+            logger.info(' %s local orderer adminPath defined', userOrg);
             keyPath = path.resolve(goPath, ORGS['orderer'][ordererID].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
             certPath = path.resolve(goPath, ORGS['orderer'][ordererID].adminPath, 'signcerts');
