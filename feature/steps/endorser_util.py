@@ -49,13 +49,13 @@ class InterfaceBase:
         return peers
 
     def deploy_chaincode(self, context, path, args, name, language, peer, username, timeout, channel=TEST_CHANNEL_ID, version=0, policy=None):
-        self.pre_deploy_chaincode(context, path, args, name, language, peer, channel, version, policy)
+        self.pre_deploy_chaincode(context, path, args, name, language, channel, version, policy)
         all_peers = self.get_peers(context)
         self.install_chaincode(context, all_peers, username)
         self.instantiate_chaincode(context, peer, username)
         self.post_deploy_chaincode(context, peer, timeout)
 
-    def pre_deploy_chaincode(self, context, path, args, name, language, peer, channelId=TEST_CHANNEL_ID, version=0, policy=None):
+    def pre_deploy_chaincode(self, context, path, args, name, language, channelId=TEST_CHANNEL_ID, version=0, policy=None):
         config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
         orderers = self.get_orderers(context)
         peers = self.get_peers(context)
@@ -526,14 +526,16 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def upgrade_chaincode(self, context, orderer, channelId=TEST_CHANNEL_ID, user="Admin", ext=""):
+    def upgrade_chaincode(self, context, orderer, channelId=TEST_CHANNEL_ID, args=None, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
         command = ["peer", "chaincode", "upgrade",
                    "--name", context.chaincode['name'],
                    "--version", str(context.chaincode.get('version', 1)),
-                   "--ctor", r"""'{\"Args\": %s}'""" % (str(context.chaincode['args'].replace('"', r'\"'))),
-                   "--channelID", str(context.chaincode.get('channelID', self.TEST_CHANNEL_ID))]
+                   "--channelID", str(context.chaincode.get('channelID', channelId))]
+        if args:
+            #command = command + ["--ctor", r"""'{\"Args\": %s}'""" % (str(context.chaincode['args'].replace('"', r'\"')))]
+            command = command + ["--ctor", r"""'{\"Args\": %s}'""" % (str(args.replace('"', r'\"')))]
         if context.tls:
             command = command + ["--tls",
                                  common_util.convertBoolean(context.tls),
