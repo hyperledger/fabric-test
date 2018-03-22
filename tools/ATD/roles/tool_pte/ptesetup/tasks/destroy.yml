@@ -12,6 +12,14 @@
     fabricpath: "/opt/gopath/{{ env}}/src/github.com/hyperledger/fabric"
     fabrictestpath: "/opt/gopath/{{ env }}/src/github.com/hyperledger/fabric-test"
 
+- name: testcase
+  set_fact:
+    testcase: "{{ testcase | default('multihost') }}"
+
+- name: testcase_query
+  set_fact:
+    testcase_query: "{{ testcase_query | default('multihost_query') }}"
+
 - name: Get docker logs of PTE
   shell: docker logs PTE > {{ testcase }}-pte.log 2>&1
   args:
@@ -54,14 +62,8 @@
   when: deadcontainers.stdout_lines | length > 0
   no_log: true
 
-- name: Test if there are any chaincode container images
-  shell: docker images | grep "pte" | cat | awk '{print $1}'
-  register: images
-  no_log: true
-
-- name: Remove these chaincode container images
-  shell: docker images | grep "pte" | cat | awk '{print $1}' | xargs docker rmi -f
-  when: images.stdout != ""
+- name: Remove these PTE image
+  shell: docker rmi -f pte:latest
   no_log: true
 
 - name: Make sure that working directory is removed
