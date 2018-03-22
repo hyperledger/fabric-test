@@ -42,6 +42,59 @@
   set_fact:
     channelnum: "{{ channelnum | list }}"
 
+- name: Transaction rate parameters
+  set_fact:
+    transMode: "{{ pte.transaction.transMode }}"
+    targetPeers: "{{ pte.transaction.targetPeers }}"
+    nProcPerOrg: "{{ pte.transaction.nProcPerOrg }}"
+    nRequest: "{{ pte.transaction.nRequest }}"
+    runDur: "{{ pte.transaction.runDur }}"
+    peerFailover: "{{ pte.transaction.peerFailover }}"
+    ordererFailover: "{{ pte.transaction.ordererFailover }}"
+
+- name: Transaction mode for MIX
+  set_fact:
+    mixQuery: "{{ pte.transaction.mixOpt.mixQuery }}"
+    mixFreq: "{{ pte.transaction.mixOpt.mixFreq }}"
+  when: transMode == "Mix"
+
+- name: Transaction mode for BURST
+  set_fact:
+    burstFreq0: "{{ pte.transaction.burstOpt.burstFreq0 }}"
+    burstDur0: "{{ pte.transaction.burstOpt.burstDur0 }}"
+    burstFreq1: "{{ pte.transaction.burstOpt.burstFreq1 }}"
+    burstDur1: "{{ pte.transaction.burstOpt.burstDur1 }}"
+  when: transMode == "Burst"
+
+- name: Transaction mode for CONSTANT
+  set_fact:
+    rectHist: "{{ pte.transaction.constantOpt.rectHist }}"
+    constFreq: "{{ pte.transaction.constantOpt.constFreq }}"
+    devFreq: "{{ pte.transaction.constantOpt.devFreq }}"
+  when: transMode == "Constant"
+
+- name: Event options
+  set_fact:
+    eventType: "{{ pte.transaction.eventOpt.type }}"
+    eventListener: "{{ pte.transaction.eventOpt.listener }}"
+    eventTimeout: "{{ pte.transaction.eventOpt.timeout }}"
+
+- name: Timeout Options
+  set_fact:
+    preconfig: "{{ pte.transaction.timeoutOpt.preConfig }}"
+    request: "{{ pte.transaction.timeoutOpt.request }}"
+
+- name: failover Options
+  set_fact:
+    method: "{{ pte.transaction.failoverOpt.method }}"
+    list: "{{ pte.transaction.failoverOpt.list }}"
+
+- name: Payload options
+  set_fact:
+    payLoadType: "{{ pte.transaction.ccOpt.payLoadType }}"
+    payLoadMin: "{{ pte.transaction.ccOpt.payLoadMin }}"
+    payLoadMax: "{{ pte.transaction.ccOpt.payLoadMax }}"
+
 - name: Create list
   set_fact:
     channellists: |
@@ -172,6 +225,6 @@
     depth: 1
 
 - name: Initializing the git submodules in fabric-test
-  shell: "git submodule update --init --recursive"
+  shell: "git submodule update --init --recursive && git submodule foreach git pull origin master"
   args:
     chdir: "{{ fabrictestpath }}"

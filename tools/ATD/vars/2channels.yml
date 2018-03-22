@@ -8,5 +8,51 @@ pte: {
   ptechannels: [
     {name: "testorgschannel1", orgs: ["orga", "orgb"], orderer: "orderer0"},
     {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer0"},
-  ]
+  ],
+  transaction: {
+    transMode: "Burst",
+    nProcPerOrg: 2,
+    nRequest: 100,
+    runDur: 0,
+    targetPeers: "OrgAnchor",
+    peerFailover: TRUE,
+    ordererFailover: TRUE,
+    burstOpt: {
+      burstFreq0:  500,
+      burstDur0:  3000,
+      burstFreq1: 2000,
+      burstDur1: 10000
+    },
+    mixOpt: {
+      mixQuery: "false",
+      mixFreq: 3000
+    },
+    constantOpt: {
+      recHist: "HIST",
+      constFreq: 0,
+      devFreq: 0
+    },
+    listOpt: {
+      org1: ["peer1", "peer2"],
+      org2: ["peer1", "peer2"]
+    },
+    eventOpt: {
+      type: "Channel",
+      listener: "Block",
+      timeout: 240000
+    },
+    failoverOpt: {
+      method: "RoundRobin",
+      list: "targetPeers"
+    },
+    timeoutOpt: {
+      preConfig: 200000,
+      request: 45000
+    },
+    ccOpt: {
+      payLoadType: "Random",
+      payLoadMin: 1024,
+      payLoadMax: 1024
+    }
+  }
 }
