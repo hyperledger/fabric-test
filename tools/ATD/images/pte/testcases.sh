@@ -1,4 +1,3 @@
-#!/bin/bash
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
@@ -10,6 +9,12 @@ echo "##########################"
 echo "STARTING THE PTE CONTAINER"
 echo "##########################"
 PREFIX="result"
+
+cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node
+npm install
+npm install singly-linked-list
+cd node_modules/.bin && ./gulp ca
+
 cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
 CWD=$PWD/../Logs
 echo "##################"
