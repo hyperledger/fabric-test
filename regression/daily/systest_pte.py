@@ -13,9 +13,6 @@ import subprocess
 
 TEST_PASS_STRING="RESULT=PASS"
 
-
-
-
 ######################################################################
 ### COUCHDB
 ######################################################################
@@ -151,7 +148,6 @@ class Perf_Stress_CouchDB(unittest.TestCase):
 
 class Perf_Stress_LevelDB(unittest.TestCase):
 
-
     def test_FAB3808_2i_FAB3811_2q(self):
         '''
         Description:
@@ -210,7 +206,6 @@ class Perf_Stress_LevelDB(unittest.TestCase):
                 "grep -c \"QUERY transaction=10000,\" result_FAB-3808-2i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
-
 
     def test_FAB3807_4i_FAB3835_4q(self):
         '''

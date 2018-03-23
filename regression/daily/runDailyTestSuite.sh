@@ -7,16 +7,19 @@
 
 DAILYDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/daily"
 
-#echo "========== Sample Tests..."
-#py.test -v --junitxml results_sample.xml Example.py
+echo "========== System Test Performance Stress tests driven by PTE tool..."
 
-### comment out pte performance systests temporarily, until
-### Jenkins CI can run them successfully without timing out...
-#echo "========== System Test Performance Stress tests driven by PTE tool..."
-#py.test -v --junitxml results_systest_pte.xml systest_pte.py
+cp -r ../../tools/PTE $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/
+
+cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node
+
+./../pre_setup.sh && npm config set prefix ~/npm && npm install && npm install -g gulp
+
+gulp ca && cd $DAILYDIR && py.test -v --junitxml results_systest_pte.xml systest_pte.py
 
 echo "========== Behave feature and system tests..."
-cd ../../feature
+
+cd $GOPATH/src/github.com/hyperledger/fabric-test/feature
 behave --junit --junit-directory ../regression/daily/. --tags=-skip --tags=daily -k -D logs=y
 cd -
 
