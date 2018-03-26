@@ -12,7 +12,7 @@ CWD=$PWD
 PREFIX="result"   # result log prefix
 
 #### Launch network and synch-up ledger
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
+cd ../scripts
 ./test_driver.sh -n -m FAB-8208-64i -p -c samplecc -t FAB-8208-64q
 
 rm -rf ../Logs/FAB-8208-64q_*

@@ -8,7 +8,6 @@
 # Script for testcase FAB-4670
 # Restart each docker container for every fabric network node in the default configuration, one at a time
 
-FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
 
 CWD=$PWD
 

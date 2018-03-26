@@ -6,15 +6,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
-SDKDir=$FabricTestDir/fabric-sdk-node
-
 PrecfgDir=$1
 echo "[$0] PrecfgDir: $PrecfgDir"
 # PTE: create/join channels
 CWD=$PWD
 
-cd $SDKDir/test/PTE
+# cd PTE dir
+cd ../../
+echo "[$0] PTE dir= $PWD"
 
 echo "[$0] create channel"
 echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-create-TLS.txt"

@@ -6,12 +6,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
-NLDir=$FabricTestDir/tools/NL
-
 CWD=$PWD
 
-cd $NLDir
+cd ../../../NL
 echo "[$0] NL dir: $PWD"
 # bring down network
 echo "[$0] bring down network"

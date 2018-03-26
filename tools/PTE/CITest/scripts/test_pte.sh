@@ -12,11 +12,12 @@ if [ $# -gt 2 ]; then
     exit
 fi
 
-FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
-PTEDir=$FabricTestDir/fabric-sdk-node/test/PTE
-CIDir=$FabricTestDir/fabric-sdk-node/test/PTE/CITest
+cd ../..
+PTEDir=$PWD
+CIDir=$PTEDir/CITest
 ScriptsDir=$CIDir/scripts
 LogsDir=$CIDir/Logs
+echo "[$0] PTEDir= $PTEDir"
 
 TCase=$1
 TStart=$2

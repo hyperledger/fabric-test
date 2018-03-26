@@ -20,7 +20,7 @@ function testDriverHelp {
 
    echo "Usage: "
    echo " ./test_driver.sh [opt] [values]"
-   echo "    -e: environment setup, default=no"
+   echo "    -e: install sdk packages, default=no"
    echo "    -n: create network, default=no"
    echo "    -m: directory where test_nl.sh, preconfig, chaincode to be used to create network, default=scripts"
    echo "    -p: preconfigure creation/join channels, default=no"
@@ -63,7 +63,7 @@ while getopts ":t:c:b:m:enps" opt; do
     # parse environment options
     e)
       SETUP="setup"
-      echo "environemnt setup: $SETUP"
+      echo "install sdk packages: $SETUP"
       ;;
     n)
       NL="create"
@@ -117,9 +117,14 @@ done
 echo "SETUP $SETUP, NL $NL, NLDir $NLDir, CHANNEL $CHANNEL, CHAINCODE $CHAINCODE, TStart $TStart"
 echo "total: ${#TCases[@]} test cases: ${TCases[@]}"
 
-CIDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest
-
 CWD=$PWD
+
+# set CIDir
+cd ..
+CIDir=$PWD
+echo "[$0] CIDir= $CIDir"
+
+cd $CWD
 # setup test environment
 if [ $SETUP == "setup" ]; then
     ./test_setup.sh

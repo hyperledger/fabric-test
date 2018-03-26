@@ -11,7 +11,7 @@
 CWD=$PWD
 PREFIX="result"   # result log prefix
 
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
+cd ../scripts
 
 #### Launch network
 ./test_driver.sh -n -m FAB-8694-4i -p -c marbles02 >& ../Logs/FAB-8694-4i-precfg.log

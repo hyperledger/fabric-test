@@ -11,7 +11,7 @@
 CWD=$PWD
 PREFIX="result"   # result log prefix
 
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
+cd ../scripts
 
 #### Launch network and synch-up ledger
 ./test_driver.sh -n -m FAB-3807-4i -p -c samplecc -t FAB-3835-4q

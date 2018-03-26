@@ -6,22 +6,24 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
-SDKDir=$FabricTestDir/fabric-sdk-node
-
 # PTE: create/join channel, install/instantiate chaincode
 CWD=$PWD
+
+cd ../..
+PTEDir=$PWD
+echo "[$0] PTEDir= $PTEDir"
+
 cc=$1
 PrecfgDir=$2
 echo "[$0] chaincode: $cc, PrecfgDir: $PrecfgDir"
 
-cd $SDKDir/test/PTE
+cd $PTEDir
 
 cd CITest/$PrecfgDir/preconfig
 if [ $cc == "all" ]; then
     ccDir=`ls`
     echo "[$0] ccDir: $ccDir"
-    cd $SDKDir/test/PTE
+    cd $PTEDir
     for c1 in $ccDir; do
         if [ $c1 == 'channels' ]; then
             echo "[$0] The directory [$c1] is not for chaincode!"
@@ -57,7 +59,7 @@ else
         echo "[$0] The chaincode directory [$cc] does not exist!"
         exit
     else
-        cd $SDKDir/test/PTE
+        cd $PTEDir
         echo "[$0] ***************************************************"
         echo "[$0] *******   install chaincode: $cc      *******"
         echo "[$0] ***************************************************"

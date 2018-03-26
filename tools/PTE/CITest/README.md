@@ -22,7 +22,7 @@ The command is located in `PTE/CITest/scripts`
 * ### command
 
         ./test_driver.sh [opt] [values]
-                -e: environment setup, default=no
+                -e: install sdk packages, default=no
                 -n: create network, default=no
                 -m: directory containing test_nl.sh to be used to create network and PTE config input files to be used to configure channels and to install and instantiate chaincode, default=scripts
                 -p: preconfigure creation/join channels, default=no

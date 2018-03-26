@@ -11,7 +11,7 @@
 CWD=$PWD
 PREFIX="result"   # result log prefix
 
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/PTE/CITest/scripts
+cd ../scripts
 
 #### Launch network, install chaincode with index and synch-up ledger
 ./test_driver.sh -n -m FAB-6813-4i -p -c marbles02 -t marbles02-4q

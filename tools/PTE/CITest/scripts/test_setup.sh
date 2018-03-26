@@ -6,39 +6,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-FabricTestDir=$GOPATH/src/github.com/hyperledger/fabric-test
-NLDir=$FabricTestDir/tools/NL
-PTEDir=$FabricTestDir/tools/PTE
-SDKDir=$FabricTestDir/fabric-sdk-node
-
-# setup fabric-test
 CWD=$PWD
-echo "[$0] clone fabric-test"
-cd $GOPATH/src/github.com/hyperledger
-git clone https://github.com/hyperledger/fabric-test
 
+cd ../..
+PTEDir=$PWD
+echo "[$0] PTEDir= $PTEDir"
 
-# get v1.0.0 images
-cd $FabricTestDir
-### git submodule update --init --recursive
-cd $FabricTestDir/fabric/scripts
-### ./bootstrap-1.0.0.sh
+# install fablric-client and fabric-ca-client
+cd $PTEDir
+echo "***** npm install fabric-client *****"
+npm install fabric-client
 
-# install sdk-node
-cd $SDKDir
-echo "***** npm install -g gulp *****"
-### sudo npm install -g gulp
-echo "***** sudo apt install *****"
-### sudo apt install -y build-essential python libltdl-dev
-
-echo "***** npm install *****"
-npm install
-echo "***** gulp ca *****"
-gulp ca
-echo "***** npm install singly-linked-list *****"
-npm install singly-linked-list --save
-
-cp -rf $PTEDir $SDKDir/test
+echo "***** npm install fabric-ca-client *****"
+npm install fabric-ca-client
 
 cd $CWD
 echo "[$0] current dir: $PWD"
