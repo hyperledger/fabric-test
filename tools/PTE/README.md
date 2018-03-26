@@ -758,25 +758,29 @@ The service credentials contain the information of the network and are stored in
 
     {
         "test-network": {
+            "gopath": "GOPATH",
             "orderer": {
+                 "orderer0": {
                     "name": "OrdererMSP",
                     "mspid": "OrdererMSP",
-                    "mspPath": "./crypto-config",
-                    "adminPath": "./crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp",
+                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
+                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp",
                     "comName": "example.com",
                     "url": "grpcs://localhost:5005",
                     "server-hostname": "orderer0.example.com",
-                    "tls_cacerts": "./crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/cacerts/ca.example.com-cert.pem"
+                    "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+                }
             },
             "org1": {
                     "name": "Org1MSP",
                     "mspid": "Org1MSP",
-                    "mspPath": "./crypto-config",
-                    "adminPath": "./crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
+                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
+                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
                     "comName": "example.com",
+                    "ordererID": "orderer0",
                     "ca": {
                          "url":"https://localhost:7054",
-                         "name": "ca-org1"
+                         "name": "ca0"
                     },
                     "username": "admin",
                     "secret": "adminpw",
@@ -784,24 +788,25 @@ The service credentials contain the information of the network and are stored in
                             "requests": "grpc://localhost:7061",
                             "events": "grpc://localhost:7051",
                             "server-hostname": "peer0.org1.example.com",
-                            "tls_cacerts": "../fixtures/tls/peers/peer0/ca-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
                     },
                     "peer2": {
                             "requests": "grpc://localhost:7062",
                             "events": "grpc://localhost:7052",
                             "server-hostname": "peer1.org1.example.com",
-                            "tls_cacerts": "../fixtures/tls/peers/peer0/ca-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
                     }
             },
             "org2": {
                     "name": "Org2MSP",
                     "mspid": "Org2MSP",
-                    "mspPath": "./crypto-config",
-                    "adminPath": "./crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
+                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
+                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
                     "comName": "example.com",
+                    "ordererID": "orderer0",
                     "ca": {
                          "url":"https://localhost:8054",
-                         "name": "ca-org2"
+                         "name": "ca1"
                     },
                     "username": "admin",
                     "secret": "adminpw",
@@ -809,18 +814,27 @@ The service credentials contain the information of the network and are stored in
                             "requests": "grpcs://localhost:7063",
                             "events": "grpcs://localhost:7053",
                             "server-hostname": "peer0.org2.example.com",
-                            "tls_cacerts": "./crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/cacerts/ca.org2.example.com-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
                     },
                     "peer2": {
                             "requests": "grpcs://localhost:7064",
                             "events": "grpcs://localhost:7054",
                             "server-hostname": "peer1.org2.example.com",
-                            "tls_cacerts": "./crypto-config/peerOrganizations/org2.example.com/peers/peer1.org2.example.com/msp/cacerts/ca.org2.example.com-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
                     }
             }
         }
     }
 
+Note that
+
+1. Key **gopath** is the GOPATH used by PTE. Set to `GOPATH` to use the environment variable `GOPATH`.
+
+2. Key **ordererID** is the orderer that the org will communicate.
+
+3. User can opt to use the same `tls_cert` for all orderers and peers by setting `tls_cert` at the same level as the **orderer**.  If the `tls_cert` is set, then the file defined in `tls_cacerts` is ignored. This can simplify the setting of tls_cert for a network with large number of peers and orderers.
+
+4. User can opt to include `admin_cert` in the json by setting `admin_cert` within each **org** section.  If the `admin_cert` is set, then the files specified in `adminPath` are ignored.  This allows the certificate to be included in the config json file rather than copy it in multiple locations.
 
 
 ## Creating a local Fabric network
