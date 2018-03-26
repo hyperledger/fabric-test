@@ -1012,7 +1012,7 @@ function setCurrOrdererId(channel, client, org) {
 
 // assign Orderer List
 function assignOrdererList(channel, client) {
-    logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s assignOrdererList] ', Nid, channelName, org, pid);
+    logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d assignOrdererList] ', Nid, channelName, org, pid);
     var data;
     var ordererTmp;
     for (let key in ORGS['orderer']) {
@@ -1031,10 +1031,10 @@ function assignOrdererList(channel, client) {
                     )
                     ordererList.push(ordererTmp);
                 }
+            } else {
+                ordererTmp = client.newOrderer(ORGS['orderer'][key].url);
+                ordererList.push(ordererTmp);
             }
-        } else {
-            ordererTmp = client.newOrderer(ORGS['orderer'][key].url);
-            ordererList.push(ordererTmp);
         }
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] orderer list: %j', Nid, channelName, org, pid, ordererList);
