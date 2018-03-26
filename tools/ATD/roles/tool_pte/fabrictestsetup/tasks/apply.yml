@@ -68,7 +68,7 @@
 
 - name: Transaction mode for CONSTANT
   set_fact:
-    rectHist: "{{ pte.transaction.constantOpt.rectHist }}"
+    recHist: "{{ pte.transaction.constantOpt.recHist }}"
     constFreq: "{{ pte.transaction.constantOpt.constFreq }}"
     devFreq: "{{ pte.transaction.constantOpt.devFreq }}"
   when: transMode == "Constant"
