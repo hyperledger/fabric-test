@@ -14,7 +14,4 @@ done
 go build
 sleep 30
 go test -run $TESTCASE -timeout=90m
-if [ ! -d logs ];then
-       mkdir logs
-fi
-mv ote-*.log ./logs/${TESTCASE}.log
+mv ote-*.log ote.log
