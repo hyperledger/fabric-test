@@ -31,7 +31,7 @@ services:
         volumes:
             - /var/run/:/host/var/run/
             - ../../fabric/examples/chaincode:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode
-            - ../../fabric-samples:/opt/gopath/src/github.com/hyperledger/fabric-samples
+            - ../../fabric-samples/chaincode:/opt/gopath/src/github.com/hyperledger/fabric-samples/chaincode
             - ../../chaincodes:/opt/gopath/src/github.com/hyperledger/fabric-test/chaincodes
             - ../../fabric/common:/opt/gopath/src/github.com/hyperledger/fabric/common
             - ../../fabric/vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
