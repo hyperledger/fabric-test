@@ -129,9 +129,10 @@ Scenario Outline: FAB-3859: Message Sizes with Configuration Tweaks
   When a user sets up a channel named "configsz"
   And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "mapIt" on channel "configsz"
 
-  When a user invokes on the chaincode named "mapIt" with random args ["put","g","{random_value}"] of length <size>
+  When a user invokes on the channel "configsz" using chaincode named "mapIt" with random args ["put","g","{random_value}"] of length <size>
   And I wait "10" seconds
-  And a user queries on the chaincode named "mapIt" with args ["get","g"]
+  And a user queries on the channel "configsz" using chaincode named "mapIt" for the random key with args ["get","g"] on "peer0.org1.example.com"
+  # And a user queries on the chaincode named "mapIt" with args ["get","g"]
   Then a user receives a response containing a value of length <size>
   And a user receives a response with the random value
 Examples:
