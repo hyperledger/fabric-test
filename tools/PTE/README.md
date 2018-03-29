@@ -338,11 +338,11 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
             "fcn": "init",
             "args": []
         },
-    If installing chaincode on CouchDB with indexing, then add `metadataPath` for the absolute path of the index definitions to `deploy`:
+    If installing chaincode on CouchDB with indexing, then inside the `deploy` section we should also add `metadataPath` for the location of the index definition files. Note: if `gopath` is defined in the service credential json, then specify the relative path from `$GOPATH/src/` (as is done in this example); otherwise use a fully specified absolute path.
 
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
-            "metadataPath": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF",
+            "metadataPath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF",
             "fcn": "init",
             "args": []
         },
@@ -688,7 +688,7 @@ where:
     * **endBlock**: the ending block. If the the ending block is greater than the chain height in the peer, eBlock will be set to the chain height.
 * **channelOpt**: transType channel options
     * **name**: channel name
-    * **channelTX**: channel transaction file
+    * **channelTX**: channel transaction file. If the `gopath` is defined in the service credential json, then the path is relative to `gopath/src`. Otherwise, absolute path is required.
     * **action**: channel action: create or join
     * **orgName**: name of organization for the test
 * **burstOpt**: the frequencies and duration for Burst transaction mode traffic. Currently, two transaction rates are supported. The traffic will issue one transaction every burstFreq0 ms for burstDur0 ms, then one transaction every burstFreq1 ms for burstDur1 ms, then the pattern repeats. These parameters are valid only if the transMode is set to **Burst**.
@@ -743,8 +743,8 @@ where:
     * **payLoadMin**: minimum size in bytes of the payload
     * **payLoadMax**: maximum size in bytes of the payload
 * **deploy**: deploy transaction contents
-    * chaincodePath: this is the relative path to GOPATH/src if the language is golang, for example: `github.com/hyperledger/fabric-test/chaincodes/samplecc/go` and the absolute path if the language is node, for example: `/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node`
-    * language: the chaincode language including:
+    * **chaincodePath**: this path is relative to `gopath/src` if the `gopath` is defined in the service credential json. Otherwise, absolute path is required.
+    * **language**: the chaincode language including:
         * **golang**: golang chaincode, this is the default language
         * **node**: Node JS chaincode
 * **invoke** invoke transaction contents
