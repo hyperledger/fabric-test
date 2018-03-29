@@ -525,15 +525,15 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
 
-    def upgrade_chaincode(self, context, orderer, channelId=TEST_CHANNEL_ID, args=None, user="Admin"):
+    def upgrade_chaincode(self, context, orderer, peer, channelId=TEST_CHANNEL_ID, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
-        setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
+        setup = self.get_env_vars(context, peer, user=user)
         command = ["peer", "chaincode", "upgrade",
                    "--name", context.chaincode['name'],
                    "--version", str(context.chaincode.get('version', 1)),
                    "--channelID", str(context.chaincode.get('channelID', channelId))]
-        if args:
-            command = command + ["--ctor", r"""'{\"Args\": %s}'""" % (str(args.replace('"', r'\"')))]
+        if context.chaincode["args"]:
+            command = command + ["--ctor", r"""'{\"Args\": %s}'""" % (str(context.chaincode["args"].replace('"', r'\"')))]
         if context.tls:
             command = command + ["--tls",
                                  common_util.convertBoolean(context.tls),
