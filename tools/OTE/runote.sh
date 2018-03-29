@@ -245,6 +245,10 @@ echo "====================Starting $TESTCASE test with OTE===================="
 cp -R $CWD/../OTE $CWD/../../../fabric/
 $TESTCASE
 docker logs -f OTE
+if [ ! -d logs ];then
+       mkdir logs
+fi
+docker cp -a OTE:/opt/gopath/src/github.com/hyperledger/fabric/OTE/ote.log ./logs/${TESTCASE}.log
 # Now look for test results logs in ./logs/${testcase}.log
 docker-compose -f ote-compose.yml down
 cd ../../fabric-test/tools/NL
