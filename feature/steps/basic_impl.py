@@ -333,13 +333,19 @@ def update_impl(context, component, channelName, args, userName='Admin'):
     # fetch the block for the specified channel
     peers = context.interface.get_peers(context)
     assert len(peers) > 0, "Error: There are no peers on this fabric network."
-    context.interface.fetch_channel(context, peers, 'orderer0.example.com', channelName, user=username)
+    context.interface.fetch_channel(context, peers, 'orderer0.example.com', channelName, user=userName)
 
     # Start configtxlator
     # Convert block file to json
     # Prep args for update
     # have other peers sign updated channel block
     # send signed, updated block to the channel
+
+@when(u'the peers from the added organization are added to the network')
+def step_impl(context):
+    curpath = os.path.realpath('.')
+    context.composeFile.append("%s/docker-compose/docker-compose-peer-org3.yml" % (curpath))
+    context.composition.up(force_recreate=False, components=["peer0.org3.example.com", "peer1.org3.example.com"])
 
 @then(u'the initial non-leader peer of "{org}" has become the leader')
 def step_impl(context, org):
