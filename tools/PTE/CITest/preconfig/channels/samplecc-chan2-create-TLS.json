@@ -16,7 +16,7 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel2",
-        "channelTX": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
         "action":  "create",
         "orgName": [
             "org3"
