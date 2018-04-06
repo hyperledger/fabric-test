@@ -341,9 +341,9 @@ Some helpful docker commands when debugging:
    * View docker images installed locally
       * ``$ docker images``
    * View networks currently running
-      * ``$ docker networks ls``
+      * ``$ docker network ls``
    * Remove a specific residual network
-      * ``$ docker networks rm <network_name>``
+      * ``$ docker network rm <network_name>``
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
