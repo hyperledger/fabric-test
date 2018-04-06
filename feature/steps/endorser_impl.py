@@ -250,6 +250,12 @@ def step_impl(context, path, args, name, version, username="Admin"):
     context.interface.pre_deploy_chaincode(context, path, args, name, "GOLANG", version=version)
     context.interface.install_chaincode(context, peers, "Admin")
 
+@when(u'a user installs chaincode at path "{path}" with args {args} on all peers')
+def step_impl(context, path, args, username="Admin"):
+    peers = context.interface.get_peers(context)
+    context.interface.pre_deploy_chaincode(context, path, args, "mycc", "GOLANG", version="0")
+    context.interface.install_chaincode(context, peers, "Admin")
+
 @when(u'a user installs chaincode at path "{path}" with args {args} with name "{name}" to "{peer}"')
 def step_impl(context, path, args, name, peer, username="Admin"):
     context.interface.pre_deploy_chaincode(context, path, args, name, "GOLANG")

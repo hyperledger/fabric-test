@@ -63,8 +63,14 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
 Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer using the <interface> interface
     Given I have a bootstrapped fabric network of type <type>
     And I use the <interface> interface
-    When a user sets up a channel
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
+    # Following lines are equivaent to "When a user sets up a channel"
+    When a user creates a channel
+    When a user fetches genesis information from peer "peer0.org1.example.com"
+    When a user makes all peers join the channel
+    # Following lines are equivalent to "When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]"
+    When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""] on all peers
+    When a user instantiates the chaincode on "peer0.org1.example.com"
+
     # 1K
     And a user invokes on the chaincode named "mycc" with random args ["put","a","{random_value}"] of length 1024
     And I wait "3" seconds
