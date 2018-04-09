@@ -132,7 +132,7 @@ class InterfaceBase:
     def create_channel(self, context, orderer, channelId, user="Admin"):
         return self.cli.create_channel(context, orderer, channelId, user=user)
 
-    def fetch_channel(self, context, peers, orderer,channelId=TEST_CHANNEL_ID, location=None, user="Admin"):
+    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None, user="Admin", ext=""):
         return self.cli.fetch_channel(context, peers, orderer, channelId, location, user=user)
 
     def join_channel(self, context, peers, channelId, user="Admin"):

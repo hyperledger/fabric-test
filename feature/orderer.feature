@@ -115,9 +115,9 @@ Scenario Outline: FAB-3851: Message Payloads of size <size>, for <type> orderer
     And a user receives a response with the random value
 Examples:
     | type  |  size   |
-    | solo  | 1048576 | # 1MB
-    | solo  | 2097152 | # 2MB
-    | solo  | 4194304 | # 4MB
+    | solo  | 1048576 |
+    | solo  | 2097152 |
+    | solo  | 4194304 |
     | kafka | 1048576 |
     | kafka | 2097152 |
     | kafka | 4194304 |
@@ -169,9 +169,9 @@ Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>
     And a user receives a response with the random value
 Examples:
     |   size  |  count  |
-    |   2048  |   20    | # 2KB
-    | 1048576 |  1024   | # 1MB
-    | 2097152 |  1024   | # 2MB
+    |   2048  |   20    |
+    | 1048576 |  1024   |
+    | 2097152 |  1024   |
 
 
 @daily
