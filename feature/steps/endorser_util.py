@@ -596,9 +596,6 @@ class CLIInterface(InterfaceBase):
             targs = targs.replace('"', r'\"')
             command = command +["--transient", targs]
 
-        if chaincode.get("version", None) is not None:
-            command = command +["--version", str(chaincode["version"])]
-
         command.append('"')
         result = context.composition.docker_exec(setup+command, [peer])
         print("Query Exec command: {0}".format(" ".join(setup+command)))
