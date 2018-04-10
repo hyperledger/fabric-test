@@ -65,7 +65,6 @@ import (
         mspmgmt "github.com/hyperledger/fabric/msp/mgmt"
         cb "github.com/hyperledger/fabric/protos/common"
         ab "github.com/hyperledger/fabric/protos/orderer"
-        "github.com/hyperledger/fabric/core/comm"
         "github.com/hyperledger/fabric/protos/utils"
         "golang.org/x/net/context"
         "google.golang.org/grpc"
@@ -330,7 +329,7 @@ func (b *broadcastClient) getAck() error {
 func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txRecvCntrP *int64, blockRecvCntrP *int64, consumerConnP **grpc.ClientConn, seek int, quiet bool, tlsEnabled bool, orgMSPID string) {
         myName := clientName("Consumer", ordererIndex, channelIndex)
         signer := localmsp.NewSigner()
-        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%s", ordStartPort))
+        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort))
         matches, _ := filepath.Glob(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
         ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
         if ordererIndex == 0 { // Loading the msp's of orderer0 for every channel is enough to create the deliver client
@@ -345,11 +344,11 @@ func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIn
         }
         var conn *grpc.ClientConn
         var err error
-        comm.SetMaxRecvMsgSize(1000 * 1024 * 1024)
+        var maxGrpcMsgSize = 1000 * 1024 * 1024
         if tlsEnabled {
                 var dialOpts []grpc.DialOption
                 // set max send/recv msg sizes
-                dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(comm.MaxRecvMsgSize())))
+                dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxGrpcMsgSize)))
                 creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
                 dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
                 conn, err = grpc.Dial(serverAddr, dialOpts...)
@@ -550,7 +549,7 @@ func moreDeliveries(txSentP *[][]int64, totalNumTxSentP *int64, txSentFailuresP 
 func startProducer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txReq int64, txSentCntrP *int64, txSentFailureCntrP *int64, tlsEnabled bool, payload int) {
         myName := clientName("Producer", ordererIndex, channelIndex)
         signer := localmsp.NewSigner()
-        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%s", ordStartPort))
+        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort))
         matches, _ := filepath.Glob(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
         ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
         var conn *grpc.ClientConn
