@@ -84,7 +84,7 @@ Ensure you are in your $GOPATH/src/github.com/hyperledger/fabric-test directory.
 
 To install dependencies - NodeJS,NPM (one time only):
 ```
-  make pre_setup
+  make pre-setup
 ```
 
 To build all images and binaries in fabric, fabric-ca, as required by tests (execute each time you update the repositories commit levels, after each `make git-update`)
