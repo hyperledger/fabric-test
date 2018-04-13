@@ -250,6 +250,12 @@ def step_impl(context, path, args, name, version, username="Admin"):
     context.interface.pre_deploy_chaincode(context, path, args, name, "GOLANG", version=version)
     context.interface.install_chaincode(context, peers, "Admin")
 
+@when(u'a user installs chaincode at path "{path}" as version "{version}" with args {args} on all peers')
+def step_impl(context, path, version, args, username="Admin"):
+    peers = context.interface.get_peers(context)
+    context.interface.pre_deploy_chaincode(context, path, args, "mycc", "GOLANG", version=version)
+    context.interface.install_chaincode(context, peers, "Admin")
+
 @when(u'a user installs chaincode at path "{path}" with args {args} on all peers')
 def step_impl(context, path, args, username="Admin"):
     peers = context.interface.get_peers(context)
@@ -290,6 +296,18 @@ def step_impl(context, channel, peer, args):
 @when(u'a user upgrades the chaincode on channel "{channel}" on peer "{peer}"')
 def step_impl(context, channel, peer):
     upgrade_impl(context, channel, 1, peer)
+
+@when(u'a user upgrades the chaincode to version "{version}" on peer "{peer}" with args {args}')
+def step_impl(context, version, peer, args):
+    upgrade_impl(context, context.interface.TEST_CHANNEL_ID, version, peer, args)
+
+@when(u'a user upgrades the chaincode on peer "{peer}" with args {args}')
+def step_impl(context, peer, args):
+    upgrade_impl(context, context.interface.TEST_CHANNEL_ID, 1, peer, args)
+
+@when(u'a user upgrades the chaincode on peer "{peer}"')
+def step_impl(context, channel, peer):
+    upgrade_impl(context, context.interface.TEST_CHANNEL_ID, 1, peer)
 
 @when(u'a user instantiates the chaincode on "{peer}"')
 def step_impl(context, peer, username="Admin", timeout=120):
@@ -518,6 +536,10 @@ def step_impl(context, name, args, targs):
 def step_impl(context, name, args, peer):
     invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer)
 
+@when(u'a user invokes on the chaincode with args {args} on "{peer}"')
+def step_impl(context, args, peer):
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, peer)
+
 @when(u'a user invokes on the chaincode with args {args}')
 def step_impl(context, args):
     invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], args, "peer0.org1.example.com")
@@ -672,33 +694,40 @@ def step_impl(context, channelId, peer):
 def step_impl(context, peer):
     context.interface.join_channel(context, [peer], context.interface.TEST_CHANNEL_ID)
 
-@when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}" using "{orderer}" to location "{location}"')
+@when(u'a user fetches genesis information at block {block} using peer "{peer}"')
+def step_impl(context, block, peer):
+    context.interface.fetch_channel(context, [peer], "orderer0.example.com", context.interface.TEST_CHANNEL_ID, None, block=block)
+
+@when(u'a user fetches genesis information for a channel "{channelID}" using peer "{peer}" from "{orderer}" to location "{location}"')
 def fetch_impl(context, channelID, peer, orderer, location, ext="block"):
     context.interface.fetch_channel(context, [peer], orderer, channelID, location, ext=ext)
 
-@when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}" to location "{location}"')
+@when(u'a user fetches genesis information for a channel "{channelID}" using peer "{peer}" to location "{location}"')
 def step_impl(context, channelID, peer, location):
     fetch_impl(context, channelID, peer, "orderer0.example.com", location, ext='tx')
 
-@when(u'a user fetches genesis information for a channel "{channelID}" from peer "{peer}"')
+@when(u'a user fetches genesis information for a channel "{channelID}" using peer "{peer}"')
 def step_impl(context, channelID, peer):
     fetch_impl(context, channelID, peer, "orderer0.example.com", None)
 
-@when(u'a user fetches genesis information from peer "{peer}" using "{orderer}" to location "{location}"')
+@when(u'a user fetches genesis information using peer "{peer}" from "{orderer}" to location "{location}"')
 def step_impl(context, peer, orderer, location):
     fetch_impl(context, context.interface.TEST_CHANNEL_ID, peer, orderer, location)
 
-@when(u'a user fetches genesis information from peer "{peer}" using "{orderer}"')
+@when(u'a user fetches genesis information using peer "{peer}" from "{orderer}"')
 def step_impl(context, peer, orderer):
     fetch_impl(context, context.interface.TEST_CHANNEL_ID, peer, orderer, None)
 
-@when(u'a user fetches genesis information from peer "{peer}"')
+@when(u'a user fetches genesis information using peer "{peer}"')
 def step_impl(context, peer):
     fetch_impl(context, context.interface.TEST_CHANNEL_ID, peer, "orderer0.example.com", None)
 
-@when('peer "{peer}" updates the "{channel}" channel')
+@when('the admin updates the "{channel}" channel using the peer "{peer}"')
 def update_impl(context, peer, channel):
-    filename = "/var/hyperledger/configs/{0}/update{1}.pb".format(context.composition.projectName, channel)
+    if not hasattr(context, "block_filename"):
+        filename = "/var/hyperledger/configs/{0}/update{1}.pb".format(context.composition.projectName, channel)
+    else:
+        filename = "/var/hyperledger/{}".format(context.block_filename)
 
     # If this is a string and not a list, convert to list
     peers = peer
@@ -706,7 +735,11 @@ def update_impl(context, peer, channel):
         peers = [peer]
     context.interface.update_channel(context, peers, channel, "orderer0.example.com", filename)
 
-@when('all peers update the channel')
+@when('the admin updates the channel using peer "{peer}"')
+def step_impl(context, peer):
+    update_impl(context, [peer], context.interface.TEST_CHANNEL_ID)
+
+@when('the admin updates the channel for all peers')
 def step_impl(context):
     peers = context.interface.get_peers(context)
     update_impl(context, peers, context.interface.TEST_CHANNEL_ID)
@@ -731,9 +764,12 @@ def step_impl(context, policy, args):
 def step_impl(context, policy):
     policyChannelUpdate_impl(context, policy, context.interface.TEST_CHANNEL_ID)
 
-@when('peer {peer} signs the updated channel config for channel "{channel}"')
+@when('the peer admin from "{peer}" signs the updated channel config for channel "{channel}"')
 def sign_impl(context, peer, channel):
-    filename = "/var/hyperledger/configs/{0}/update{1}.pb".format(context.composition.projectName, channel)
+    if not hasattr(context, "block_filename"):
+        filename = "/var/hyperledger/configs/{0}/update{1}.pb".format(context.composition.projectName, channel)
+    else:
+        filename = "/var/hyperledger/{}".format(context.block_filename)
 
     # If this is a string and not a list, convert to list
     peers = peer
@@ -741,7 +777,11 @@ def sign_impl(context, peer, channel):
         peers = [peer]
     context.interface.sign_channel(context, peers, filename)
 
-@when('all peers sign the updated channel config')
+@when('the peer admin from "{peer}" signs the updated channel config')
+def step_impl(context, peer):
+    sign_impl(context, [peer], context.interface.TEST_CHANNEL_ID)
+
+@when('all organization admins sign the updated channel config')
 def step_impl(context):
     peers = context.interface.get_peers(context)
     sign_impl(context, peers, context.interface.TEST_CHANNEL_ID)
@@ -869,9 +909,13 @@ def block_found_impl(context, fileName, peer, location=None):
     output = context.composition.docker_exec(["ls", location], [peer])
     assert fileName in output[peer], "The channel block file has not been fetched"
 
-@then(u'the block file is fetched from peer "{peer}" at location "{location}"')
+@then(u'the config block file is fetched from peer "{peer}" at location "{location}"')
 def step_impl(context, peer, location):
     block_found_impl(context, context.interface.TEST_CHANNEL_ID, peer, location)
+
+@then(u'the config block file is fetched from peer "{peer}"')
+def step_impl(context, peer):
+    block_found_impl(context, context.interface.TEST_CHANNEL_ID, peer)
 
 @then(u'the "{fileName}" file is fetched from peer "{peer}"')
 def step_impl(context, fileName, peer):

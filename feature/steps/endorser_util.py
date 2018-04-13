@@ -56,7 +56,6 @@ class InterfaceBase:
         self.post_deploy_chaincode(context, peer, timeout)
 
     def pre_deploy_chaincode(self, context, path, args, name, language, channelId=TEST_CHANNEL_ID, version=0, policy=None):
-        config_util.generateChannelConfig(channelId, config_util.CHANNEL_PROFILE, context)
         orderers = self.get_orderers(context)
         peers = self.get_peers(context)
         assert orderers != [], "There are no active orderers in this network"
@@ -441,7 +440,7 @@ class CLIInterface(InterfaceBase):
 
         return output
 
-    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None, user="Admin", ext=""):
+    def fetch_channel(self, context, peers, orderer, channelId=TEST_CHANNEL_ID, location=None, user="Admin", ext="", block=""):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         if not location:
             location = configDir
@@ -453,10 +452,12 @@ class CLIInterface(InterfaceBase):
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
             setup = self.get_env_vars(context, peer, includeAll=False, user=user)
-            command = ["peer", "channel", "fetch", "config",
-                       "{0}/{1}.{2}".format(location, channelId, ext),
-                       "--channelID", channelId,
-                       "--orderer", '{0}:7050'.format(orderer)]
+            command = ["peer", "channel", "fetch", "config"]
+            if block:
+                command = ["peer", "channel", "fetch", block]
+            command += ["{0}/{1}.{2}".format(location, channelId, ext),
+                        "--channelID", channelId,
+                        "--orderer", '{0}:7050'.format(orderer)]
             if context.tls:
                 command = command + ["--tls",
                                      "--cafile",
@@ -513,15 +514,13 @@ class CLIInterface(InterfaceBase):
         return output
 
     def sign_channel(self, context, peers, block_filename="update.pb", user="Admin"):
-        configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
-
         # peer channel signconfigtx -f org3_update_in_envelope.pb
         for peer in peers:
             peerParts = peer.split('.')
             org = '.'.join(peerParts[1:])
             setup = self.get_env_vars(context, peer, user=user)
             command = ["peer", "channel", "signconfigtx",
-                       "--file", '/var/hyperledger/configs/{0}/{1}"'.format(context.composition.projectName, block_filename)]
+                       "--file", '{}"'.format(block_filename)]
             output = context.composition.docker_exec(setup+command, [peer])
         print("[{0}]: {1}".format(" ".join(setup+command), output))
         return output
@@ -534,7 +533,6 @@ class CLIInterface(InterfaceBase):
                    "--version", str(context.chaincode.get('version', 1)),
                    "--channelID", str(context.chaincode.get('channelID', channelId))]
         if args:
-            #command = command + ["--ctor", r"""'{\"Args\": %s}'""" % (str(context.chaincode['args'].replace('"', r'\"')))]
             command = command + ["--ctor", r"""'{\"Args\": %s}'""" % (str(args.replace('"', r'\"')))]
         if context.tls:
             command = command + ["--tls",

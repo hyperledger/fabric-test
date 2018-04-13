@@ -331,3 +331,50 @@ Scenario: FAB-8759: Test querying a peer that has two different versions of chai
   Then a user receives a success response of "1000"
   When a user queries on version "0" of the channel "versioningtest" using chaincode named "vt" with args ["get","c"] on "peer0.org2.example.com"
   Then a user receives a success response of "3000" from "peer0.org2.example.com"
+
+@daily
+Scenario: FAB-7407: Update the channel policies - add an organization
+  Given I have a bootstrapped fabric network of type solo with tls
+  When a user sets up a channel
+  And a user deploys chaincode with args ["init","a","1000","b","2000"]
+  When a user invokes on the chaincode with args ["invoke","a","b","10"]
+  And I wait "5" seconds
+  When a user queries on the chaincode with args ["query","a"]
+  Then a user receives a success response of 990
+
+  When an admin adds an organization to the channel config
+  # Assume channel config file is distributed out of band
+  And all organization admins sign the updated channel config
+  When the admin updates the channel using peer "peer0.org1.example.com"
+
+  When a user fetches genesis information using peer "peer0.org1.example.com"
+  Then the config block file is fetched from peer "peer0.org1.example.com"
+  Then the updated config block contains Org3ExampleCom
+
+  When a user invokes on the chaincode with args ["invoke","a","b","10"]
+  And I wait "5" seconds
+  When a user queries on the chaincode with args ["query","a"]
+  Then a user receives a success response of 980
+
+  When the peers from the added organization are added to the network
+
+  When a user fetches genesis information at block 0 using peer "peer0.org3.example.com"
+  When a user makes peer "peer0.org3.example.com" join the channel
+  And a user makes peer "peer1.org3.example.com" join the channel
+  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" as version "2" with args ["init","a","1000","b","2000"] on all peers
+  And I wait "5" seconds
+  When a user upgrades the chaincode to version "2" on peer "peer0.org1.example.com" with args ["init","a","1000","b","2000"]
+
+  When a user queries on the chaincode with args ["query","a"] from "peer0.org3.example.com"
+  Then a user receives a success response of 1000 from "peer0.org3.example.com"
+
+  When a user invokes on the chaincode with args ["invoke","a","b","10"] on "peer0.org2.example.com"
+  And I wait "5" seconds
+  When a user queries on the chaincode with args ["query","a"]
+  Then a user receives a success response of 990
+  When a user invokes on the chaincode with args ["invoke","a","b","10"] on "peer1.org3.example.com"
+  And I wait "5" seconds
+  #When a user queries on the chaincode with args ["query","a"] on "peer0.org3.example.com"
+  #Then a user receives a success response of 980 from "peer0.org3.example.com"
+  When a user queries on the chaincode with args ["query","a"]
+  Then a user receives a success response of 980
