@@ -1,12 +1,12 @@
 {
-    "channelID": "_ch1",
+    "channelID": "_ch2",
     "chaincodeID": "sample_js",
     "chaincodeVer": "v0",
-    "transType": "instantiate",
+    "transType": "install",
     "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "testorgschannel1",
+        "name":  "testorgschannel2",
         "action":  "create",
         "orgName": [
             "org1",

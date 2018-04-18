@@ -40,8 +40,7 @@
         "org2": ["peer1"]
     },
     "eventOpt": {
-        "type": "Peer",
-        "listener": "Block",
+        "listener": "Transaction",
         "timeout": "240000"
     },
     "ccType": "ccchecker",

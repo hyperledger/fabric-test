@@ -2,22 +2,16 @@
     "channelID": "_ch2",
     "chaincodeID": "sample_js",
     "chaincodeVer": "v0",
-    "transType": "instantiate",
+    "transType": "Channel",
     "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "testorgschannel2",
-        "action":  "create",
+        "name": "testorgschannel2",
+        "action":  "join",
         "orgName": [
             "org1",
             "org2"
         ]
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
-        "fcn": "init",
-        "language": "node",
-        "args": []
     },
     "SCFile": [
 		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
