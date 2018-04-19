@@ -44,7 +44,7 @@
         "payLoadMax": "1024"
     },
     "deploy": {
-        "chaincodePath": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
         "fcn": "init",
         "language": "node",
         "args": []

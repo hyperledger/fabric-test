@@ -122,15 +122,26 @@ function initDeploy() {
         testDeployArgs.push(uiContent.deploy.args[i]);
     }
 
-    if (typeof(goPath) !== 'undefined') {
+    // If language is golang, then user specifies path relative to gopath.  Note: since SDK prepends
+    // GOPATH/src to any golang chaincodePath, PTE will use it as defined in the json file.
+    // And for other chaincode languages, if user defines goPath, then they will also specify path
+    // relative to gopath.  In that case, the PTE will prepend GOPATH/src here.  Otherwise (not golang
+    // and no gopath defined) PTE uses the chaincodepath exactly as specified (user should specify an
+    // absolute path in the input json file).
+    if (language == 'golang') {
+        chaincodePath = uiContent.deploy.chaincodePath;
+    } else if (typeof(goPath) !== '') {
         chaincodePath = path.join(goPath, 'src', uiContent.deploy.chaincodePath);
     } else {
         chaincodePath = uiContent.deploy.chaincodePath;
     }
     logger.info('chaincode language: %s, path: %s', language, chaincodePath);
 
+    // If user defines goPath, then they must also specify path relative to gopath in the input json file.
+    // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the metadataPath exactly as
+    // specified (user should specify an absolute path) in the input json file.
     if ((typeof( uiContent.deploy.metadataPath ) !== 'undefined')) {
-        if (typeof(goPath) !== 'undefined') {
+        if (typeof(goPath) !== '') {
             metadataPath = path.join(goPath, 'src', uiContent.deploy.metadataPath);
         } else {
             metadataPath=uiContent.deploy.metadataPath;
@@ -688,8 +699,11 @@ function createOneChannel(client ,channelOrgName) {
 
     hfc.setConfigSetting('key-value-store', 'fabric-client/lib/impl/FileKeyValueStore.js');
 
+    // If user defines goPath, then they must also specify path relative to gopath in the input json file.
+    // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the channelTX exactly as
+    // specified (user should specify an absolute path) in the input json file.
     var channelTX=channelOpt.channelTX;
-    if ( typeof(goPath) !== 'undefined' ) {
+    if ( typeof(goPath) !== '' ) {
         channelTX = path.join(goPath, 'src', channelOpt.channelTX);
     }
     logger.info('[createOneChannel] channelTX: ', channelTX);
