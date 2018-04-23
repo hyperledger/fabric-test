@@ -13,7 +13,8 @@
 #   - fabric - clones fabric repository.
 #   - smoke-tests - runs Smoke Test Suite
 #   - daily-tests - runs Daily Test Suite
-#   - git-init  -   init git submodules
+#   - git-latest  -   init git submodules to latest available commit.
+#   - git-init  - init git submodules
 #   - pre-setup - installs node, govendor and behave pre-requisites
 #   - clean  - cleans the docker containers and images
 #
@@ -29,7 +30,11 @@ DOCKER_ORG = hyperledger
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/pre_setup.sh
 
 .PHONY: ci-smoke
-ci-smoke: git-init fabric ca clean pre-setup docker-images smoke-tests
+ci-smoke: git-init git-latest fabric ca clean pre-setup docker-images smoke-tests
+
+.PHONY: git-latest
+git-latest:
+	@git submodule foreach git pull origin master
 
 .PHONY: git-init
 git-init:
@@ -41,7 +46,7 @@ pre-setup:
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: ci-daily
-ci-daily: git-init fabric ca clean pre-setup docker-images daily-tests
+ci-daily: git-init git-latest fabric ca clean pre-setup docker-images daily-tests
 
 .PHONY: fabric
 fabric:
