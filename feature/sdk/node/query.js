@@ -56,7 +56,7 @@ var query = function(user, userOrg, chaincode, peer, network_config_path) {
             console.info(JSON.stringify(["ok", response_payloads.toString() + '\n']));
             return JSON.stringify(jsonResponse);
         }
-        console.info(JSON.stringify(["ok", "Query Result: " + response_payloads.toString() + '\n']));
+        console.info(JSON.stringify(["ok", response_payloads.toString() + '\n']));
         return JSON.stringify(jsonResponse);
         } else {
             console.error('response_payloads is null');
