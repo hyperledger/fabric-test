@@ -541,7 +541,7 @@ function assignPeerList(channel, client, org) {
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
-                if (key.indexOf('peer') === 0) {
+                if (key.includes('peer')) {
                     if (TLS == 'ENABLED') {
                         data = testUtil.getTLSCert(key1, key);
                         if ( data !== null ) {
@@ -575,7 +575,7 @@ function assignThreadAllPeers(channel, client, org) {
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
-            if (key.indexOf('peer') === 0) {
+            if (key.includes('peer')) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(key1, key);
                     if ( data !== null ) {
@@ -730,7 +730,7 @@ function assignThreadOrgPeer(channel, client, org) {
     var data;
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.indexOf('peer') === 0) {
+            if (key.includes('peer')) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -885,7 +885,7 @@ function channelAddPeer(channel, client, org) {
     var eh;
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.indexOf('peer') === 0) {
+            if (key.includes('peer')) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -938,7 +938,7 @@ function channelAddPeerEvent(channel, client, org) {
     for (let key in ORGS[org]) {
         logger.info('key: ', key);
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.indexOf('peer') === 0) {
+            if (key.includes('peer')) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
