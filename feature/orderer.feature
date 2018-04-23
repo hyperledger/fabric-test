@@ -65,7 +65,7 @@ Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer u
     And I use the <interface> interface
     # Following lines are equivaent to "When a user sets up a channel"
     When a user creates a channel
-    When a user fetches genesis information from peer "peer0.org1.example.com"
+    When a user fetches genesis information using peer "peer0.org1.example.com"
     When a user makes all peers join the channel
     # Following lines are equivalent to "When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]"
     When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""] on all peers
