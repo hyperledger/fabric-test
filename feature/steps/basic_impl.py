@@ -314,16 +314,21 @@ def add_org_impl(context, orgMSP, channelName):
     config_util.buildCryptoFile(context, 1, 2, 0, 2, orgMSP=orgMSP)
     config_util.generateCrypto(context, "{0}/crypto.yaml".format(configDir))
     config_util.generateCryptoDir(context, 1, 2, 0, 2, tlsExist=context.tls, orgMSP=orgMSP)
-    args = config_util.addNewOrg(context, orgMSP, configDir)
+    args = config_util.getNewOrg(context, orgMSP)
+    updated_config = config_util.addNewOrg(context, args, "Application", channelName)
 
-    update_impl(context, 'peer', channelName, args, userName='Admin')
+    update_impl(context, 'peer', channelName, updated_config, userName='Admin')
+
+@when(u'an admin removes an organization named {orgMSP} from the channel config')
+def step_impl(context, orgMSP):
+    del_org_impl(context, orgMSP, context.interface.TEST_CHANNEL_ID)
 
 @when(u'an admin removes an organization named {orgMSP} from the {channelName} channel config')
-def step_impl(context, orgMSP, channelName):
+def del_org_impl(context, orgMSP, channelName):
     configDir =  "./configs/{0}".format(context.projectName)
 
     # Format the args for removing orgMSP
-    #args = config_util.delNewOrg(orgMSP, configDir)
+    args = config_util.delNewOrg(context, "Application", orgMSP, channelName)
 
     update_impl(context, 'peer', channelName, args, userName='Admin')
 

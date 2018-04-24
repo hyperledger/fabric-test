@@ -284,4 +284,4 @@ Capabilities:
     # manipulated without concern for upgrading orderers.  Set the value of the
     # capability to true to require it.
     Application: &ApplicationCapabilities
-        V1_1: true
+        V1_2: true

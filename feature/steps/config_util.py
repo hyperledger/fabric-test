@@ -294,7 +294,7 @@ def buildConfigtx(testConfigs, orgName, mspID):
     with open("{}/configtx.yaml".format(testConfigs), "w") as fd:
         fd.write(configtx)
 
-def addNewOrg(context, mspID, configDir):
+def getNewOrg(context, mspID):
     testConfigs = makeProjectConfigDir(context)
     updated_env = updateEnviron(context)
 
@@ -314,10 +314,7 @@ def addNewOrg(context, mspID, configDir):
     copyfile("{}/orig_configtx.yaml".format(testConfigs), "{}/configtx.yaml".format(testConfigs))
     return {orgName: json.loads(args)}
 
-def delNewOrg(mspID, configDir):
-    pass
-
-def configUpdate(context, config_update, group, channel):
+def delNewOrg(context, group, mspID, channel):
     updated_env = updateEnviron(context)
     testConfigs = "./configs/{0}".format(context.projectName)
     inputFile = "{0}.block".format(channel)
@@ -330,13 +327,38 @@ def configUpdate(context, config_update, group, channel):
         fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
 
     # configtxlator proto_encode --input config.json --type common.Config --output config.pb
-    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
+    subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"].pop(mspID)
+    return config
+
+def addNewOrg(context, config_update, group, channel):
+    updated_env = updateEnviron(context)
+    testConfigs = "./configs/{0}".format(context.projectName)
+    inputFile = "{0}.block".format(channel)
+
+    # configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
+    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", inputFile, "--type", "common.Block"], cwd=testConfigs , env=updated_env)
+    config = json.loads(configStr)
+
+    with open("{0}/config.json".format(testConfigs), "w") as fd:
+        fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
+
+    # configtxlator proto_encode --input config.json --type common.Config --output config.pb
+    subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
                                         cwd=testConfigs,
                                         env=updated_env)
 
     # groups = "Application"
     # config_update = {"Org3ExampleCom": <data>}
     config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"].update(config_update)
+    return config
+
+def configUpdate(context, config, group, channel):
+    updated_env = updateEnviron(context)
+    testConfigs = "./configs/{0}".format(context.projectName)
 
     with open("{0}/modified_config.json".format(testConfigs), "w") as fd:
         fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
@@ -344,17 +366,17 @@ def configUpdate(context, config_update, group, channel):
     print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"]))
 
     # configtxlator proto_encode --input config.json --type common.Config --output config.pb
-    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
+    subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
                                         cwd=testConfigs,
                                         env=updated_env)
 
     # configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
-    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "modified_config.json", "--type", "common.Config", "--output", "modified_config.pb"],
+    subprocess.check_output(["configtxlator", "proto_encode", "--input", "modified_config.json", "--type", "common.Config", "--output", "modified_config.pb"],
                                         cwd=testConfigs,
                                         env=updated_env)
 
     # configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb --updated modified_config.pb --output update.pb
-    configStr = subprocess.check_output(["configtxlator", "compute_update", "--channel_id", channel, "--original", "config.pb", "--updated", "modified_config.pb", "--output", "update.pb"],
+    subprocess.check_output(["configtxlator", "compute_update", "--channel_id", channel, "--original", "config.pb", "--updated", "modified_config.pb", "--output", "update.pb"],
                                         cwd=testConfigs,
                                         env=updated_env)
 
@@ -376,7 +398,7 @@ def configUpdate(context, config_update, group, channel):
         fd.write(json.dumps(updatedconfig, indent=4))
 
     # configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
-    configStr = subprocess.check_output(["configtxlator", "proto_encode", "--input", "update.json", "--type", "common.Envelope", "--output", "update{0}.pb".format(channel)],
+    subprocess.check_output(["configtxlator", "proto_encode", "--input", "update.json", "--type", "common.Envelope", "--output", "update{0}.pb".format(channel)],
                                         cwd=testConfigs,
                                         env=updated_env)
 
