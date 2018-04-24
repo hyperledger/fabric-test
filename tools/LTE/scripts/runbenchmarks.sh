@@ -13,6 +13,7 @@ if [ ! -d "$GOPATH/src/github.com/hyperledger/fabric" ]; then
 echo "found fabric repo...."
 ## Copy this folder under fabric/test/tools
 rm -r $GOPATH/src/github.com/hyperledger/fabric/test/tools/LTE
+mkdir -p $GOPATH/src/github.com/hyperledger/fabric/test/tools
 cp -R ../../LTE $GOPATH/src/github.com/hyperledger/fabric/test/tools
 cd $GOPATH/src/github.com/hyperledger/fabric/test/tools/LTE/scripts
 
