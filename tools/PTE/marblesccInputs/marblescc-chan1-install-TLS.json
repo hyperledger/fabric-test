@@ -3,13 +3,13 @@
     "chaincodeID": "marbles_cc",
     "chaincodeVer": "v0",
     "transType": "install",
-    "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
         "name":  "testorgschannel1",
         "action":  "create",
         "orgName": [
-            "org1"
+            "org1",
+            "org2"
         ]
     },
     "deploy": {
@@ -19,6 +19,6 @@
         "args": []
     },
     "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
-	]
+        {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
+    ]
 }

@@ -59,10 +59,6 @@ logger.info('input parameters: Nid=%d, uiFile=%s, tStart=%d PTEid=%d', Nid, uiFi
 var uiContent = JSON.parse(fs.readFileSync(uiFile));
 
 var TLS=uiContent.TLS;
-var channelID = uiContent.channelID;
-var chaincode_id = uiContent.chaincodeID+channelID;
-var chaincode_ver = uiContent.chaincodeVer;
-logger.info('Nid: %d, chaincode_id: %s, chaincode_ver: %s', Nid, chaincode_id, chaincode_ver);
 
 var channelOpt=uiContent.channelOpt;
 var channelName=channelOpt.name;
@@ -92,8 +88,6 @@ var users =  hfc.getConfigSetting('users');
 
 
 var transType = uiContent.transType;
-var nProcPerOrg = parseInt(uiContent.nProcPerOrg);
-logger.info('nProcPerOrg ', nProcPerOrg);
 var tCurr;
 
 // timeout option
@@ -154,7 +148,6 @@ var tx_id = null;
 var nonce = null;
 
 var the_user = null;
-var g_len = nProcPerOrg;
 
 var cfgtxFile;
 var allEventhubs = [];
@@ -433,6 +426,15 @@ function channelAddEvent(channel, client, org) {
     return eventHubs;
 }
 
+var chaincode_id;
+var chaincode_ver;
+function getCCID() {
+    var channelID = uiContent.channelID;
+    chaincode_id = uiContent.chaincodeID+channelID;
+    chaincode_ver = uiContent.chaincodeVer;
+    logger.info('Nid: %d, chaincode_id: %s, chaincode_ver: %s', Nid, chaincode_id, chaincode_ver);
+}
+
 // test begins ....
 performance_main();
 
@@ -451,6 +453,7 @@ function chaincodeInstall(channel, client, org) {
     //printChainInfo(channel);
 
     //sendInstallProposal
+    getCCID();
     var request_install = {
         targets: targets,
         chaincodePath: chaincodePath,
@@ -500,6 +503,7 @@ function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
         let tx_id = client.newTransactionID();
 
         // send proposal to endorser
+        getCCID();
         var request = {
                 chaincodePath: chaincodePath,
                 chaincodeId: chaincode_id,
@@ -1097,6 +1101,8 @@ function performance_main() {
             queryBlockchainInfo(channel, client, org);
         } else if ( transType.toUpperCase() == 'INVOKE' ) {
             // spawn off processes for transactions
+            var nProcPerOrg = parseInt(uiContent.nProcPerOrg);
+            logger.info('nProcPerOrg ', nProcPerOrg);
             for (var j = 0; j < nProcPerOrg; j++) {
                 var workerProcess = child_process.spawn('node', ['./pte-execRequest.js', j, Nid, uiFile, tStart, org, PTEid]);
 

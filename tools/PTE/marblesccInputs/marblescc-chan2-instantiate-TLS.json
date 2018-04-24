@@ -3,7 +3,6 @@
     "chaincodeID": "marbles_cc",
     "chaincodeVer": "v0",
     "transType": "instantiate",
-    "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
         "name":  "testorgschannel2",
@@ -12,12 +11,16 @@
             "org3"
         ]
     },
+    "timeoutOpt": {
+        "preConfig": "120000",
+        "request": "180000"
+    },
     "deploy": {
         "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
         "fcn": "init",
         "args": []
     },
     "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
-	]
+        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
+    ]
 }

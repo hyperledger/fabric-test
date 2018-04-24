@@ -3,10 +3,10 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel3",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel3.tx",
-        "action":  "create",
+        "action":  "join",
         "orgName": [
-            "org5"
+            "org5",
+            "org6"
         ]
     },
     "SCFile": [

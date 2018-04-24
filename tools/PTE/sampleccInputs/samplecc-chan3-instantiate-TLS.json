@@ -13,8 +13,8 @@
         ]
     },
     "timeoutOpt": {
-        "preConfig": "123000",
-        "request": "181000"
+        "preConfig": "120000",
+        "request": "180000"
     },
     "deploy": {
         "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
@@ -22,6 +22,6 @@
         "args": []
     },
     "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
-	]
+        {"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
+    ]
 }
