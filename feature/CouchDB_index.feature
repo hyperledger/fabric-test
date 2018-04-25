@@ -11,9 +11,9 @@ Feature: Testing Fabric CouchDB indexing
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb with tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "size" to the chaincode at path "<index_path>"
 
-    # set up 1 channel, 1  cc
-    When a user sets up a channel named "mychannel1"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
+    # set up 1 channels, 1 cc
+    When an admin sets up a channel named "mychannel1"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
 
     # Invoke in the channel
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble100","red","5","cassey"] on "peer0.org1.example.com"
@@ -34,12 +34,12 @@ Examples:
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
     # set up 3 channels, each with one unique chaincode
-    When a user sets up a channel named "mychannel1"
-    And a user sets up a channel named "mychannel2"
-    And a user sets up a channel named "mychannel3"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
+    When an admin sets up a channel named "mychannel1"
+    And an admin sets up a channel named "mychannel2"
+    And an admin sets up a channel named "mychannel3"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
 
     # Invoke in each channel
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"
@@ -68,12 +68,12 @@ Examples:
     And a user defines a couchDB index named index_behave_test_3 with design document name "indexdoc_behave_test_3" containing the fields "color" to the chaincode at path "<index_path>"
 
     # set up 3 channel, 1  cc
-    When a user sets up a channel named "mychannel1"
-    And a user sets up a channel named "mychannel2"
-    And a user sets up a channel named "mychannel3"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
-    And a user deploys chaincode at path "<cc_path>" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
+    When an admin sets up a channel named "mychannel1"
+    And an admin sets up a channel named "mychannel2"
+    And an admin sets up a channel named "mychannel3"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
+    And an admin deploys chaincode at path "<cc_path>" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
 
     # Invoke in the channel
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"

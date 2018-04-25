@@ -11,8 +11,8 @@ Feature: Chaincodes Testing
 @daily
 Scenario Outline: FAB-5797: Test chaincode fabric/examples/example02/cmd deploy, invoke, and query with chaincode install name in all lowercase/uppercase/mixedcase chars, for <type> orderer
     Given I have a bootstrapped fabric network of type <type>
-    When a user sets up a channel
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "<ccName>"
+    When an admin sets up a channel
+    And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "<ccName>"
     When a user queries on the chaincode named "<ccName>" with args ["query","a"]
     Then a user receives a success response of 1000
     When a user invokes on the chaincode named "<ccName>" with args ["invoke","a","b","10"]
@@ -31,10 +31,10 @@ Examples:
 @daily
 Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric/examples/example04/cmd
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example04/cmd" with args ["init","Event","1"] with name "myex04"
-  When a user sets up a channel named "channel2"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_a" on channel "channel2"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example04/cmd" with args ["init","Event","1"] with name "myex04"
+  When an admin sets up a channel named "channel2"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_a" on channel "channel2"
   When a user queries on the channel "channel2" using chaincode named "myex02_a" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex04" with args ["query","Event", "myex02_a", "a", "channel2"]
@@ -45,10 +45,10 @@ Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric/examples
 @daily
 Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05 when cc_05 and cc_02 are on different channels
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
-  When a user sets up a channel named "channel2"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
+  When an admin sets up a channel named "channel2"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
   When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "channel2"]
@@ -58,9 +58,9 @@ Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel 
 @daily
 Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
+  When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b"
   When a user queries on the chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", ""]
@@ -70,9 +70,9 @@ Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty st
 @daily
 Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name when cc_ex02 and cc_ex05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
+  When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b"
   When a user queries on the chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "non-existing-channel"]
@@ -83,10 +83,10 @@ Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case pas
 @daily
 Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase passing an incorrect ot non-existing string for channelname when cc_ex02 and cc_ex05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
-  When a user sets up a channel named "channel2"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
+  When an admin sets up a channel named "channel2"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
   When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", "non-existing-channel"]
@@ -97,10 +97,10 @@ Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase pass
 @daily
 Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase passing an empty string for channelname when cc_ex02 and cc_ex05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
-  When a user sets up a channel named "channel2"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
+  When an admin sets up a channel named "channel2"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b" on channel "channel2"
   When a user queries on the channel "channel2" using chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", ""]
@@ -110,9 +110,9 @@ Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase pass
 @daily
 Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_ex02 and cc_ex05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
-  When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example05/cmd" with args ["init","sum","0"] with name "myex05"
+  When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "myex02_b"
   When a user queries on the chaincode named "myex02_b" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum"]
@@ -123,8 +123,8 @@ Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_
 Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, using marbles02, for <type> orderer
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type <type>
-  When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
+  When an admin sets up a channel
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
 
   When a user invokes on the chaincode named "mycc" with args ["initMarble","marble1","red","35","tom"]
   And I wait "3" seconds
@@ -162,8 +162,8 @@ Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, usi
 @smoke
 Scenario Outline: FAB-6211: Test example02 chaincode written using <language> <security>
     Given I have a bootstrapped fabric network of type solo <security>
-    When a user sets up a channel
-    And a user deploys chaincode at path "<path>" with args ["init","a","1000","b","2000"] with name "mycc" with language "<language>"
+    When an admin sets up a channel
+    And an admin deploys chaincode at path "<path>" with args ["init","a","1000","b","2000"] with name "mycc" with language "<language>"
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 1000
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -184,8 +184,8 @@ Examples:
 @daily
 Scenario Outline: FAB-6256: Test support of rich queries in SHIM API: queryMarbles and queryMarblesByOwner using marbles chaincode on couchdb 
     Given I have a bootstrapped fabric network of type solo using state-database couchdb with tls
-    When a user sets up a channel
-    And a user deploys chaincode at path "<path>" with args [""] with language "<language>"
+    When an admin sets up a channel
+    And an admin deploys chaincode at path "<path>" with args [""] with language "<language>"
 
     When a user invokes on the chaincode with args ["initMarble","marble1","blue","35","tom"]
     When a user invokes on the chaincode with args ["initMarble","marble2","red","50","tom"]
@@ -255,11 +255,11 @@ Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim l
     # IV=`openssl rand 16 -base64`
     # SIGKEY=`openssl ecparam -name prime256v1 -genkey | tail -n5 | base64 -w0`
     Given I have a bootstrapped fabric network of type <type>
-    When a user sets up a channel
+    When an admin sets up a channel
     #Warning: if you see errors during deploy instantiation, you may need to first remove outdated vendored materials inside the chaincode folder, 
     #e.g. `rm -rf ../../fabric-test/fabric/examples/chaincode/go/encc/vendor`
     And I vendor "GOLANG" packages for fabric-based chaincode at "../fabric/examples/chaincode/go/enccc_example"
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
+    And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
     And I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
     And a user invokes on the chaincode named "mycc" with args ["ENCRYPT","Social-Security-Number","123-45-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
     And I wait "5" seconds
@@ -308,9 +308,9 @@ Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, p
   # For the things we called BAD keys in this test,  we deleted last character from the generated good keys to corrupt them.
 
   Given I have a bootstrapped fabric network of type kafka
-  When a user sets up a channel
+  When an admin sets up a channel
   And I vendor "GOLANG" packages for fabric-based chaincode at "../fabric/examples/chaincode/go/enccc_example"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/enccc_example" with args ["init", ""] with name "mycc"
 
   #first we test for invoke failures by passing in bad keys
   When a user invokes on the chaincode named "mycc" with args ["ENCRYPT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
@@ -374,10 +374,10 @@ Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimA
 # |        InvokeChaincode                      |           FAB-4717  ch_ex05 calling ch_ex02           |
 
   Given I have a bootstrapped fabric network of type <type>
-  When a user sets up a channel
+  When an admin sets up a channel
   And I vendor "<language>" packages for fabric-based chaincode at "<VendorPath>"
-  When a user deploys chaincode at path "<marbles02Path>" with args [""] with name "mycc" with language "<language>"
-  When a user deploys chaincode at path "<shimAPIDriverPath>" with args [""] with name "myShimAPI" with language "<language>"
+  When an admin deploys chaincode at path "<marbles02Path>" with args [""] with name "mycc" with language "<language>"
+  When an admin deploys chaincode at path "<shimAPIDriverPath>" with args [""] with name "myShimAPI" with language "<language>"
 
 
   #first two marbles are used for getMarblesByRange
