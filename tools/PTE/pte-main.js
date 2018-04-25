@@ -124,7 +124,7 @@ function initDeploy() {
     // absolute path in the input json file).
     if (language == 'golang') {
         chaincodePath = uiContent.deploy.chaincodePath;
-    } else if (typeof(goPath) !== '') {
+    } else if (goPath !== '') {
         chaincodePath = path.join(goPath, 'src', uiContent.deploy.chaincodePath);
     } else {
         chaincodePath = uiContent.deploy.chaincodePath;
@@ -135,7 +135,7 @@ function initDeploy() {
     // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the metadataPath exactly as
     // specified (user should specify an absolute path) in the input json file.
     if ((typeof( uiContent.deploy.metadataPath ) !== 'undefined')) {
-        if (typeof(goPath) !== '') {
+        if (goPath !== '') {
             metadataPath = path.join(goPath, 'src', uiContent.deploy.metadataPath);
         } else {
             metadataPath=uiContent.deploy.metadataPath;
@@ -707,7 +707,7 @@ function createOneChannel(client ,channelOrgName) {
     // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the channelTX exactly as
     // specified (user should specify an absolute path) in the input json file.
     var channelTX=channelOpt.channelTX;
-    if ( typeof(goPath) !== '' ) {
+    if ( goPath !== '' ) {
         channelTX = path.join(goPath, 'src', channelOpt.channelTX);
     }
     logger.info('[createOneChannel] channelTX: ', channelTX);
