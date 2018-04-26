@@ -88,14 +88,31 @@ var uiFile = process.argv[4];
 var tStart = parseInt(process.argv[5]);
 var org=process.argv[6];
 var uiContent = JSON.parse(fs.readFileSync(uiFile));
-var TLS=uiContent.TLS.toUpperCase();
-var targetPeers=uiContent.targetPeers.toUpperCase();
 var channelOpt=uiContent.channelOpt;
 var channelOrgName = [];
 var channelName = channelOpt.name;
 for (i=0; i<channelOpt.orgName.length; i++) {
     channelOrgName.push(channelOpt.orgName[i]);
 }
+
+var txCfgPtr;
+if ( typeof(uiContent.txCfgPtr) === 'undefined' ) {
+    txCfgPtr=uiContent;
+} else {
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] txCfgPtr: %s', Nid, channelName, org, pid, uiContent.txCfgPtr);
+    txCfgPtr = JSON.parse(fs.readFileSync(uiContent.txCfgPtr));
+}
+
+var ccDfnPtr;
+if ( typeof(uiContent.ccDfnPtr) === 'undefined' ) {
+    ccDfnPtr=uiContent;
+} else {
+    ccDfnPtr = JSON.parse(fs.readFileSync(uiContent.ccDfnPtr));
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] ccDfnPtr: %s', Nid, channelName, org, pid, uiContent.ccDfnPtr);
+}
+
+var TLS=txCfgPtr.TLS.toUpperCase();
+var targetPeers=txCfgPtr.targetPeers.toUpperCase();
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: uiFile=%s, tStart=%d', Nid, channelName, org, pid, uiFile, tStart);
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] TLS: %s', Nid, channelName, org, pid, TLS);
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] targetPeers: %s', Nid, channelName, org, pid, targetPeers.toUpperCase());
@@ -104,17 +121,17 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] channelOrgName.length
 var client = new hfc();
 var channel = client.newChannel(channelName);
 
-if ( (typeof( uiContent.eventOpt ) !== 'undefined') && (typeof( uiContent.eventOpt.type ) !== 'undefined') ) {
-    evtType = uiContent.eventOpt.type.toUpperCase();
+if ( (typeof( txCfgPtr.eventOpt ) !== 'undefined') && (typeof( txCfgPtr.eventOpt.type ) !== 'undefined') ) {
+    evtType = txCfgPtr.eventOpt.type.toUpperCase();
 }
-if ( (typeof( uiContent.eventOpt ) !== 'undefined') && (typeof( uiContent.eventOpt.listener ) !== 'undefined') ) {
-    evtListener = uiContent.eventOpt.listener.toUpperCase();
+if ( (typeof( txCfgPtr.eventOpt ) !== 'undefined') && (typeof( txCfgPtr.eventOpt.listener ) !== 'undefined') ) {
+    evtListener = txCfgPtr.eventOpt.listener.toUpperCase();
 }
-if ( (typeof( uiContent.eventOpt ) !== 'undefined') && (typeof( uiContent.eventOpt.timeout ) !== 'undefined') ) {
-    evtTimeout = uiContent.eventOpt.timeout;
+if ( (typeof( txCfgPtr.eventOpt ) !== 'undefined') && (typeof( txCfgPtr.eventOpt.timeout ) !== 'undefined') ) {
+    evtTimeout = txCfgPtr.eventOpt.timeout;
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] event type: %s, listener: %s, timeout: %d', Nid, channel.getName(), org, pid, evtType, evtListener, evtTimeout);
-invokeCheck = uiContent.invokeCheck.toUpperCase();
+invokeCheck = txCfgPtr.invokeCheck.toUpperCase();
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] invokeCheck: ', Nid, channel.getName(), org, pid, invokeCheck);
 
 var channelID = uiContent.channelID;
@@ -140,10 +157,10 @@ var orgName = ORGS[org].name;
 var users =  hfc.getConfigSetting('users');
 
 //user parameters
-var transMode = uiContent.transMode.toUpperCase();
-var transType = uiContent.transType.toUpperCase();
-var invokeType = uiContent.invokeType.toUpperCase();
-var nRequest = parseInt(uiContent.nRequest);
+var transMode = txCfgPtr.transMode.toUpperCase();
+var transType = txCfgPtr.transType.toUpperCase();
+var invokeType = txCfgPtr.invokeType.toUpperCase();
+var nRequest = parseInt(txCfgPtr.nRequest);
 
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] transMode: %s, transType: %s, invokeType: %s, nRequest: %d', Nid, channel.getName(), org, pid,  transMode, transType, invokeType, nRequest);
 
@@ -156,19 +173,19 @@ var peerFO = 'FALSE';
 var ordererFO = 'FALSE';
 var peerFOList = 'TARGETPEERS';
 var peerFOMethod = 'ROUNDROBIN';
-if (typeof( uiContent.peerFailover ) !== 'undefined') {
-    peerFO = uiContent.peerFailover.toUpperCase();
+if (typeof( txCfgPtr.peerFailover ) !== 'undefined') {
+    peerFO = txCfgPtr.peerFailover.toUpperCase();
 }
-if (typeof( uiContent.ordererFailover ) !== 'undefined') {
-    ordererFO = uiContent.ordererFailover.toUpperCase();
+if (typeof( txCfgPtr.ordererFailover ) !== 'undefined') {
+    ordererFO = txCfgPtr.ordererFailover.toUpperCase();
 }
 if ( peerFO == 'TRUE' ) {
-    if (typeof( uiContent.failoverOpt ) !== 'undefined') {
-        if (typeof( uiContent.failoverOpt.list ) !== 'undefined') {
-            peerFOList = uiContent.failoverOpt.list.toUpperCase();
+    if (typeof( txCfgPtr.failoverOpt ) !== 'undefined') {
+        if (typeof( txCfgPtr.failoverOpt.list ) !== 'undefined') {
+            peerFOList = txCfgPtr.failoverOpt.list.toUpperCase();
         }
-        if (typeof( uiContent.failoverOpt.method ) !== 'undefined') {
-            peerFOMethod = uiContent.failoverOpt.method.toUpperCase();
+        if (typeof( txCfgPtr.failoverOpt.method ) !== 'undefined') {
+            peerFOMethod = txCfgPtr.failoverOpt.method.toUpperCase();
         }
     }
 }
@@ -176,7 +193,7 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: pee
 
 var runDur=0;
 if ( nRequest == 0 ) {
-   runDur = parseInt(uiContent.runDur);
+   runDur = parseInt(txCfgPtr.runDur);
    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] transMode: %s, transType: %s, invokeType: %s, runDur: %d', Nid, channel.getName(), org, pid, transMode, transType, invokeType, runDur);
    // convert runDur from second to ms
    runDur = 1000*runDur;
@@ -191,11 +208,11 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] runForever: %d', Nid,
 // timeout option
 var timeoutOpt;
 var reqTimeout=45000; // default 45 sec
-if ((typeof( uiContent.timeoutOpt ) !== 'undefined')) {
-    timeoutOpt = parseInt(uiContent.timeoutOpt);
+if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
+    timeoutOpt = parseInt(txCfgPtr.timeoutOpt);
     logger.info('main - timeoutOpt: %j', timeoutOpt);
-    if ((typeof( uiContent.timeoutOpt.request ) !== 'undefined')) {
-        reqTimeout = parseInt(uiContent.timeoutOpt.request);
+    if ((typeof( timeoutOpt.request ) !== 'undefined')) {
+        reqTimeout = parseInt(timeoutOpt.request);
     }
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] reqTimeout: ', Nid, channel.getName(), org, pid, reqTimeout);
@@ -205,23 +222,22 @@ var latency_peer = [0, 0, 99999999, 0];
 var latency_orderer = [0, 0, 99999999, 0];
 var latency_event = [0, 0, 99999999, 0];
 
-var ccType = uiContent.ccType;
 var keyStart=0;
 var payLoadMin=0;
 var payLoadMax=0;
 var payLoadType='RANDOM'
 var arg0=0;
 var keyIdx = [];
-if (typeof( uiContent.ccOpt.keyIdx ) !== 'undefined') {
-    for (i=0; i<uiContent.ccOpt.keyIdx.length; i++) {
-        keyIdx.push(uiContent.ccOpt.keyIdx[i]);
+if (typeof( ccDfnPtr.ccOpt.keyIdx ) !== 'undefined') {
+    for (i=0; i<ccDfnPtr.ccOpt.keyIdx.length; i++) {
+        keyIdx.push(ccDfnPtr.ccOpt.keyIdx[i]);
     }
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyIdx: ', Nid, channel.getName(), org, pid, keyIdx);
 var keyPayLoad = [];
-if (typeof( uiContent.ccOpt.keyPayLoad ) !== 'undefined') {
-    for (i=0; i<uiContent.ccOpt.keyPayLoad.length; i++) {
-        keyPayLoad.push(uiContent.ccOpt.keyPayLoad[i]);
+if (typeof( ccDfnPtr.ccOpt.keyPayLoad ) !== 'undefined') {
+    for (i=0; i<ccDfnPtr.ccOpt.keyPayLoad.length; i++) {
+        keyPayLoad.push(ccDfnPtr.ccOpt.keyPayLoad[i]);
     }
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] keyPayLoad: ', Nid, channel.getName(), org, pid, keyPayLoad);
@@ -237,35 +253,36 @@ var txIDVar=channelName+'_'+org+'_'+Nid+'_'+pid;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] tx IDVar: ', Nid, channel.getName(), org, pid, txIDVar);
 
 
+var ccType = ccDfnPtr.ccType;
 if ( ccType == 'ccchecker' ) {
-    keyStart = parseInt(uiContent.ccOpt.keyStart);
-    payLoadMin = parseInt(uiContent.ccOpt.payLoadMin)/2;
-    payLoadMax = parseInt(uiContent.ccOpt.payLoadMax)/2;
-    if ( uiContent.ccOpt.payLoadType )
-        payLoadType = uiContent.ccOpt.payLoadType.toUpperCase();
+    keyStart = parseInt(ccDfnPtr.ccOpt.keyStart);
+    payLoadMin = parseInt(ccDfnPtr.ccOpt.payLoadMin)/2;
+    payLoadMax = parseInt(ccDfnPtr.ccOpt.payLoadMax)/2;
+    if ( ccDfnPtr.ccOpt.payLoadType )
+        payLoadType = ccDfnPtr.ccOpt.payLoadType.toUpperCase();
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+                 Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(ccDfnPtr.ccOpt.payLoadMin), parseInt(ccDfnPtr.ccOpt.payLoadMax));
 } else if ( ccType == 'marblescc' ) {
-    keyStart = parseInt(uiContent.ccOpt.keyStart);
-    payLoadMin = parseInt(uiContent.ccOpt.payLoadMin);
-    payLoadMax = parseInt(uiContent.ccOpt.payLoadMax);
+    keyStart = parseInt(ccDfnPtr.ccOpt.keyStart);
+    payLoadMin = parseInt(ccDfnPtr.ccOpt.payLoadMin);
+    payLoadMax = parseInt(ccDfnPtr.ccOpt.payLoadMax);
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(uiContent.ccOpt.payLoadMin), parseInt(uiContent.ccOpt.payLoadMax));
+                 Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(ccDfnPtr.ccOpt.payLoadMin), parseInt(ccDfnPtr.ccOpt.payLoadMax));
 
     // get number of owners
-    if ( typeof( uiContent.invoke.nOwner ) !== 'undefined'  ) {
-        nOwner=parseInt(uiContent.invoke.nOwner);
+    if ( typeof( ccDfnPtr.invoke.nOwner ) !== 'undefined'  ) {
+        nOwner=parseInt(ccDfnPtr.invoke.nOwner);
     }
 
     // get prefix owner name
     // moveMarbleOwner
     // "args": ["marble", "blue","35","tom"]
-    if ( uiContent.invoke.move.fcn == 'initMarble' ) {
-        moveMarbleOwner = uiContent.invoke.move.args[3];
+    if ( ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
+        moveMarbleOwner = ccDfnPtr.invoke.move.args[3];
     }
-    moveMarbleName=uiContent.invoke.move.args[0];
+    moveMarbleName=ccDfnPtr.invoke.move.args[0];
 
     // queryMarbleByOwner
     // "args": ["tom"]
@@ -277,24 +294,24 @@ if ( ccType == 'ccchecker' ) {
     //         "docType":"marble"
     //     }
     // }
-    if ( uiContent.invoke.query.fcn == 'queryMarblesByOwner' ) {
-        queryMarbleOwner=uiContent.invoke.query.args[0];
-    } else if ( uiContent.invoke.query.fcn == 'queryMarbles' ) {
-        if ( typeof( uiContent.invoke.query.args.selector.owner ) !== 'undefined' ) {
-            queryMarbleOwner=uiContent.invoke.query.args.selector.owner;
+    if ( ccDfnPtr.invoke.query.fcn == 'queryMarblesByOwner' ) {
+        queryMarbleOwner=ccDfnPtr.invoke.query.args[0];
+    } else if ( ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
+        if ( typeof( ccDfnPtr.invoke.query.args.selector.owner ) !== 'undefined' ) {
+            queryMarbleOwner=ccDfnPtr.invoke.query.args.selector.owner;
         }
-        if ( typeof( uiContent.invoke.query.args.selector.docType ) !== 'undefined' ) {
-            queryMarbleDocType=uiContent.invoke.query.args.selector.docType;
+        if ( typeof( ccDfnPtr.invoke.query.args.selector.docType ) !== 'undefined' ) {
+            queryMarbleDocType=ccDfnPtr.invoke.query.args.selector.docType;
         }
     }
-    queryMarbleName=uiContent.invoke.query.args[0];
+    queryMarbleName=ccDfnPtr.invoke.query.args[0];
 
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] ccType: %s, keyStart: %d', Nid, channel.getName(), org, pid, ccType, keyStart);
 //construct invoke request
 var testInvokeArgs = [];
-for (i=0; i<uiContent.invoke.move.args.length; i++) {
-    testInvokeArgs.push(uiContent.invoke.move.args[i]);
+for (i=0; i<ccDfnPtr.invoke.move.args.length; i++) {
+    testInvokeArgs.push(ccDfnPtr.invoke.move.args[i]);
 }
 
 var request_invoke;
@@ -319,7 +336,7 @@ function getMoveRequest() {
         for ( i=0; i<keyIdx.length; i++ ) {
             testInvokeArgs[keyIdx[i]] = moveMarbleName+'_'+txIDVar+'_'+arg0;
         }
-        if ( uiContent.invoke.move.fcn == 'initMarble' ) {
+        if ( ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
             var index=arg0%nOwner;
             testInvokeArgs[3]=moveMarbleOwner+'_'+txIDVar+'_'+index;
         }
@@ -336,7 +353,7 @@ function getMoveRequest() {
 
     request_invoke = {
         chaincodeId : chaincode_id,
-        fcn: uiContent.invoke.move.fcn,
+        fcn: ccDfnPtr.invoke.move.fcn,
         args: testInvokeArgs,
         txId: tx_id
     };
@@ -355,14 +372,14 @@ function getMoveRequest() {
 
 //construct query request
 var testQueryArgs = [];
-for (i=0; i<uiContent.invoke.query.args.length; i++) {
-    testQueryArgs.push(uiContent.invoke.query.args[i]);
+for (i=0; i<ccDfnPtr.invoke.query.args.length; i++) {
+    testQueryArgs.push(ccDfnPtr.invoke.query.args[i]);
 }
 
 var rqSelector;
-if ( uiContent.invoke.query.fcn == 'queryMarbles' ) {
-    if ( typeof( uiContent.invoke.query.args.selector ) !== 'undefined' ) {
-        rqSelector = uiContent.invoke.query.args.selector;
+if ( ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
+    if ( typeof( ccDfnPtr.invoke.query.args.selector ) !== 'undefined' ) {
+        rqSelector = ccDfnPtr.invoke.query.args.selector;
     }
 }
 
@@ -379,14 +396,14 @@ function getQueryRequest() {
         if ( arg0 - keyStart > 10 ) {
             keyA = arg0 - 10;
         }
-        if ( uiContent.invoke.query.fcn == 'getMarblesByRange' ) {
+        if ( ccDfnPtr.invoke.query.fcn == 'getMarblesByRange' ) {
             testQueryArgs[0] = queryMarbleName+'_'+txIDVar+'_'+keyA;
             testQueryArgs[1] = queryMarbleName+'_'+txIDVar+'_'+arg0;
-        } else if ( uiContent.invoke.query.fcn == 'queryMarblesByOwner' ) {
+        } else if ( ccDfnPtr.invoke.query.fcn == 'queryMarblesByOwner' ) {
             // marbles02 rich query: queryMarblesByOwner
             var index=arg0%nOwner;
             testQueryArgs[0] = queryMarbleOwner+'_'+txIDVar+'_'+index;
-        } else if ( uiContent.invoke.query.fcn == 'queryMarbles' ) {
+        } else if ( ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
             // marbles02 rich query: queryMarbles
             var selector=0;
             var index=arg0%nOwner;
@@ -426,7 +443,7 @@ function getQueryRequest() {
     request_query = {
         chaincodeId : chaincode_id,
         txId: tx_id,
-        fcn: uiContent.invoke.query.fcn,
+        fcn: ccDfnPtr.invoke.query.fcn,
         args: testQueryArgs
     };
 
@@ -501,7 +518,7 @@ function assignPeerListFromList(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
-    var listOpt=uiContent.listOpt;
+    var listOpt=txCfgPtr.listOpt;
     var peername;
     var event_connected = false;
     for(var key in listOpt) {
@@ -803,7 +820,7 @@ function assignThreadPeerList(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
-    var listOpt=uiContent.listOpt;
+    var listOpt=txCfgPtr.listOpt;
     var peername;
     var event_connected = false;
     for(var key in listOpt) {
@@ -2086,8 +2103,8 @@ function execModeConstant() {
 
     // send proposal to endorser
     if ( transType == 'INVOKE' ) {
-        if (uiContent.constantOpt.recHist) {
-            recHist = uiContent.constantOpt.recHist.toUpperCase();
+        if (txCfgPtr.constantOpt.recHist) {
+            recHist = txCfgPtr.constantOpt.recHist.toUpperCase();
         }
         logger.info('recHist: ', recHist);
 
@@ -2104,14 +2121,14 @@ function execModeConstant() {
             tEnd = tLocal + runDur;
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeConstant] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
-        var freq = parseInt(uiContent.constantOpt.constFreq);
+        var freq = parseInt(txCfgPtr.constantOpt.constFreq);
         ofile = 'ConstantResults'+PTEid+'.txt';
 
-        if (typeof( uiContent.constantOpt.devFreq ) == 'undefined') {
+        if (typeof( txCfgPtr.constantOpt.devFreq ) == 'undefined') {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeConstant] devFreq undefined, set to 0', Nid, channelName, org, pid);
             devFreq=0;
         } else {
-            devFreq = parseInt(uiContent.constantOpt.devFreq);
+            devFreq = parseInt(txCfgPtr.constantOpt.devFreq);
         }
 
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeConstant] Constant Freq: %d ms, variance Freq: %d ms', Nid, channelName, org, pid, freq, devFreq);
@@ -2261,7 +2278,7 @@ var mixQuery;
 function execModeMix() {
 
     // send proposal to endorser
-    mixQuery = uiContent.mixOpt.mixQuery.toUpperCase();
+    mixQuery = txCfgPtr.mixOpt.mixQuery.toUpperCase();
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeMix] mixQuery: %s', Nid, channelName, org, pid, mixQuery);
     if ( transType == 'INVOKE' ) {
         // no need to check since a query is issued after every invoke
@@ -2271,7 +2288,7 @@ function execModeMix() {
             tEnd = tLocal + runDur;
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeMix] tStart %d, tEnd %d, tLocal %d', Nid, channelName, org, pid, tStart, tEnd, tLocal);
-        var freq = parseInt(uiContent.mixOpt.mixFreq);
+        var freq = parseInt(txCfgPtr.mixOpt.mixFreq);
         if ( ccType == 'general' ) {
             if ( freq < 20000 ) {
                 freq = 20000;
@@ -2482,10 +2499,10 @@ function invoke_query_burst() {
 function execModeBurst() {
 
     // init TcertBatchSize
-    burstFreq0 = parseInt(uiContent.burstOpt.burstFreq0);
-    burstDur0 = parseInt(uiContent.burstOpt.burstDur0);
-    burstFreq1 = parseInt(uiContent.burstOpt.burstFreq1);
-    burstDur1 = parseInt(uiContent.burstOpt.burstDur1);
+    burstFreq0 = parseInt(txCfgPtr.burstOpt.burstFreq0);
+    burstDur0 = parseInt(txCfgPtr.burstOpt.burstDur0);
+    burstFreq1 = parseInt(txCfgPtr.burstOpt.burstFreq1);
+    burstDur1 = parseInt(txCfgPtr.burstOpt.burstDur1);
     tFreq = [burstFreq0, burstFreq1];
     tDur  = [burstDur0, burstDur1];
 

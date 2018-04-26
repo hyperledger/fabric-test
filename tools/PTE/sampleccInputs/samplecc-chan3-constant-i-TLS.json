@@ -1,84 +1,17 @@
 {
+    "txCfgPtr": "sampleccInputs/txCfgOpt.json",
+    "ccDfnPtr": "sampleccInputs/ccDfnOpt.json",
     "channelID": "_ch3",
     "chaincodeID": "sample_cc",
     "chaincodeVer": "v0",
-    "logLevel": "ERROR",
-    "invokeCheck": "TRUE",
-    "transMode": "Constant",
-    "transType": "Invoke",
-    "invokeType": "Move",
-    "targetPeers": "OrgAnchor",
-    "peerFailover": "TRUE",
-    "ordererFailover": "TRUE",
-    "nProcPerOrg": "1",
-    "nRequest": "1000",
-    "runDur": "600",
-    "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel3",
-        "action":  "create",
         "orgName": [
             "org5",
             "org6"
         ]
     },
-    "burstOpt": {
-        "burstFreq0":  "500",
-        "burstDur0":  "3000",
-        "burstFreq1": "2000",
-        "burstDur1": "10000"
-    },
-    "mixOpt": {
-        "mixQuery": "false",
-        "mixFreq": "3000"
-    },
-    "constantOpt": {
-        "recHist": "HIST",
-        "constFreq": "0",
-        "devFreq": "0"
-    },
-    "listOpt": {
-        "org5": ["peer1", "peer2"],
-        "org6": ["peer1", "peer2"]
-    },
-    "eventOpt": {
-        "type": "Channel",
-        "listener": "Block",
-        "timeout": "240000"
-    },
-    "failoverOpt": {
-        "method": "RoundRobin",
-        "list": "targetPeers"
-    },
-    "timeoutOpt": {
-        "preConfig": "200000",
-        "request": "45000"
-    },
-    "ccType": "ccchecker",
-    "ccOpt": {
-        "keyIdx": [1],
-        "keyPayLoad": [2],
-        "keyStart": "0",
-        "payLoadType": "Random",
-        "payLoadMin": "1024",
-        "payLoadMax": "1024"
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
-        "fcn": "init",
-        "args": []
-    },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
-    },
     "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
-	]
+        {"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
+    ]
 }

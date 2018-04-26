@@ -463,7 +463,7 @@ The following chaincodes are tested and supported:
 * **sample_js**: This is the Node JS chaincode of sample_cc. See directory `samplejsInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
-            "chaincodePath": "/home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
             "fcn": "init",
             "language": "node",
             "args": []
@@ -552,6 +552,12 @@ The following chaincodes are tested and supported:
 
 ### User Input file
 
+The user input file contains configuration parameters including chaincode definition, transaction configuration, and channel information.  Two structure options are provided:
+
+* contain all configuration parameters in one file as identified in the testcase runCases.txt files
+* split into three files: main input file, transaction configuration file, and chaincode definition file.
+
+##### All in One User Input File
 
     {
         "channelID": "_ch1",
@@ -577,7 +583,7 @@ The following chaincodes are tested and supported:
         },
         "channelOpt": {
             "name": "testchannel1",
-            "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+            "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
             "action":  "create",
             "orgName": [
                 "org1"
@@ -590,6 +596,7 @@ The following chaincodes are tested and supported:
             "burstDur1": "10000"
         },
         "mixOpt": {
+            "mixquery": "false",
             "mixFreq": "2000"
         },
         "constantOpt": {
@@ -602,8 +609,8 @@ The following chaincodes are tested and supported:
             "org2": ["peer1"]
         },
         "eventOpt": {
-            "type": "Channel",
-            "listener": "Transaction",
+            "type": "FilteredBlock",
+            "listener": "Block",
             "timeout": "240000"
         },
         "failoverOpt": {
@@ -643,6 +650,123 @@ The following chaincodes are tested and supported:
             {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
         ]
     }
+
+
+##### Three User Input Files
+
+####### Main Input File
+
+    {
+        "txCfgPtr": "sampleccInputs/txCfgOpt.json",
+        "ccDfnPtr": "sampleccInputs/ccDfnOpt.json",
+        "channelID": "_ch1",
+        "chaincodeID": "sample_cc",
+        "chaincodeVer": "v0",
+        "channelOpt": {
+            "name": "testchannel1",
+            "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+            "action":  "create",
+            "orgName": [
+                "org1"
+            ]
+        },
+        "SCFile": [
+            {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
+        ]
+    }
+
+
+where
+
+* **txCfgPtr**: the transaction configuration input file
+* **ccDfnPtr**: the chaincode definition input file
+
+
+####### Transaction configuration File
+
+    {
+        "logLevel": "ERROR",
+        "invokeCheck": "TRUE",
+        "transMode": "Constant",
+        "transType": "Invoke",
+        "invokeType": "Move",
+        "targetPeers": "OrgAnchor",
+        "peerFailover": "TRUE",
+        "ordererFailover": "TRUE",
+        "nProcPerOrg": "4",
+        "nRequest": "0",
+        "runDur": "600",
+        "TLS": "enabled",
+        "queryBlockOpt": {
+            "org":  "org1",
+            "peer":  "peer1",
+            "startBlock":  "6590",
+            "endBlock":  "6800"
+        },
+        "burstOpt": {
+            "burstFreq0":  "500",
+            "burstDur0":  "3000",
+            "burstFreq1": "2000",
+            "burstDur1": "10000"
+        },
+        "mixOpt": {
+            "mixquery": "false",
+            "mixFreq": "2000"
+        },
+        "constantOpt": {
+            "recHIST": "HIST",
+            "constFreq": "1000",
+            "devFreq": "300"
+        },
+        "listOpt": {
+            "org1": ["peer1"],
+            "org2": ["peer1"]
+        },
+        "eventOpt": {
+            "type": "FilteredBlock",
+            "listener": "Block",
+            "timeout": "240000"
+        },
+        "failoverOpt": {
+            "method": "RoundRobin",
+            "list": "targetPeers"
+        },
+        "timeoutOpt": {
+            "preConfig": "200000",
+            "request": "45000"
+        }
+    }
+
+####### Chaincode Definition File
+
+    {
+        "ccType": "general",
+        "ccOpt": {
+            "keyIdx": [1],
+            "keyPayLoad": [2],
+            "keyStart": "5000",
+            "payLoadType": "Random",
+            "payLoadMin": "1024",
+            "payLoadMax": "2048"
+        },
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-sdk-node/test/fixtures/src/github.com/sample_cc",
+            "fcn": "init",
+            "language": "golang"
+            "args": []
+        },
+        "invoke": {
+            "query": {
+                "fcn": "invoke",
+                "args": ["get", "a"]
+            },
+            "move": {
+                "fcn": "invoke",
+                "args": ["put", "a", "string-msg"]
+            }
+        }
+    }
+
 
 where:
 

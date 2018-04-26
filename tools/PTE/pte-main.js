@@ -58,7 +58,24 @@ var tStart = parseInt(process.argv[4]);
 logger.info('input parameters: Nid=%d, uiFile=%s, tStart=%d PTEid=%d', Nid, uiFile, tStart, PTEid);
 var uiContent = JSON.parse(fs.readFileSync(uiFile));
 
-var TLS=uiContent.TLS;
+var txCfgPtr;
+if ( typeof(uiContent.txCfgPtr) === 'undefined' ) {
+    txCfgPtr=uiContent;
+} else {
+    logger.info('[Nid=%d pte-main] txCfgPtr: %s', Nid, uiContent.txCfgPtr);
+    txCfgPtr = JSON.parse(fs.readFileSync(uiContent.txCfgPtr));
+}
+
+var ccDfnPtr;
+if ( typeof(uiContent.ccDfnPtr) === 'undefined' ) {
+    ccDfnPtr=uiContent;
+} else {
+    ccDfnPtr = JSON.parse(fs.readFileSync(uiContent.ccDfnPtr));
+    logger.info('[Nid=%d pte-main] ccDfnPtr: %s', Nid, uiContent.ccDfnPtr);
+}
+
+
+var TLS=txCfgPtr.TLS.toUpperCase();
 
 var channelOpt=uiContent.channelOpt;
 var channelName=channelOpt.name;
@@ -66,7 +83,7 @@ var channelOrgName = [];
 for (i=0; i<channelOpt.orgName.length; i++) {
     channelOrgName.push(channelOpt.orgName[i]);
 }
-logger.info('TLS: %s', TLS.toUpperCase());
+logger.info('TLS: %s', TLS);
 logger.info('channelName: %s', channelName);
 logger.info('channelOrgName.length: %d, channelOrgName: %s', channelOrgName.length, channelOrgName);
 
@@ -87,17 +104,17 @@ logger.info('GOPATH: ', goPath);
 var users =  hfc.getConfigSetting('users');
 
 
-var transType = uiContent.transType;
+var transType = txCfgPtr.transType.toUpperCase();
 var tCurr;
 
 // timeout option
 var timeoutOpt;
 var cfgTimeout=200000;   // default 200 sec
-if ((typeof( uiContent.timeoutOpt ) !== 'undefined')) {
+if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
     timeoutOpt = parseInt(uiContent.timeoutOpt);
     logger.info('main - timeoutOpt: %j', timeoutOpt);
-    if ((typeof( uiContent.timeoutOpt.preConfig ) !== 'undefined')) {
-        cfgTimeout = parseInt(uiContent.timeoutOpt.preConfig);
+    if ((typeof( timeoutOpt.preConfig ) !== 'undefined')) {
+        cfgTimeout = parseInt(timeoutOpt.preConfig);
     }
 }
 logger.info('main - cfgTimeout: ', cfgTimeout);
@@ -108,12 +125,12 @@ var testDeployArgs = [];
 var chaincodePath;
 var metadataPath;
 function initDeploy() {
-    if ((typeof( uiContent.deploy.language ) !== 'undefined')) {
-        language=uiContent.deploy.language.toLowerCase();
+    if ((typeof( ccDfnPtr.deploy.language ) !== 'undefined')) {
+        language=ccDfnPtr.deploy.language.toLowerCase();
     }
 
-    for (i=0; i<uiContent.deploy.args.length; i++) {
-        testDeployArgs.push(uiContent.deploy.args[i]);
+    for (i=0; i<ccDfnPtr.deploy.args.length; i++) {
+        testDeployArgs.push(ccDfnPtr.deploy.args[i]);
     }
 
     // If language is golang, then user specifies path relative to gopath.  Note: since SDK prepends
@@ -123,22 +140,22 @@ function initDeploy() {
     // and no gopath defined) PTE uses the chaincodepath exactly as specified (user should specify an
     // absolute path in the input json file).
     if (language == 'golang') {
-        chaincodePath = uiContent.deploy.chaincodePath;
+        chaincodePath = ccDfnPtr.deploy.chaincodePath;
     } else if (goPath !== '') {
-        chaincodePath = path.join(goPath, 'src', uiContent.deploy.chaincodePath);
+        chaincodePath = path.join(goPath, 'src', ccDfnPtr.deploy.chaincodePath);
     } else {
-        chaincodePath = uiContent.deploy.chaincodePath;
+        chaincodePath = ccDfnPtr.deploy.chaincodePath;
     }
     logger.info('chaincode language: %s, path: %s', language, chaincodePath);
 
     // If user defines goPath, then they must also specify path relative to gopath in the input json file.
     // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the metadataPath exactly as
     // specified (user should specify an absolute path) in the input json file.
-    if ((typeof( uiContent.deploy.metadataPath ) !== 'undefined')) {
+    if ((typeof( ccDfnPtr.deploy.metadataPath ) !== 'undefined')) {
         if (goPath !== '') {
-            metadataPath = path.join(goPath, 'src', uiContent.deploy.metadataPath);
+            metadataPath = path.join(goPath, 'src', ccDfnPtr.deploy.metadataPath);
         } else {
-            metadataPath=uiContent.deploy.metadataPath;
+            metadataPath=ccDfnPtr.deploy.metadataPath;
         }
         logger.info('metadataPath: %s', metadataPath);
     }
@@ -175,7 +192,7 @@ function clientNewOrderer(client, org) {
     var ordererID = ORGS[org].ordererID;
     var data;
     logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
-    if (TLS.toUpperCase() == 'ENABLED') {
+    if (TLS == 'ENABLED') {
         data = testUtil.getTLSCert('orderer', ordererID);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
@@ -198,7 +215,7 @@ function chainAddOrderer(channel, client, org) {
     logger.info('[chainAddOrderer] channel name: ', channel.getName());
     var ordererID = ORGS[org].ordererID;
     var data;
-    if (TLS.toUpperCase() == 'ENABLED') {
+    if (TLS == 'ENABLED') {
         data = testUtil.getTLSCert('orderer', ordererID);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
@@ -230,7 +247,7 @@ function channelAddPeer(channel, client, org) {
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.includes('peer')) {
-                if (TLS.toUpperCase() == 'ENABLED') {
+                if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
@@ -266,7 +283,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
     for (let key in ORGS[qorg]) {
         if (ORGS[qorg].hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
-                if (TLS.toUpperCase() == 'ENABLED') {
+                if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(qorg, key);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
@@ -301,7 +318,7 @@ function channelAddPeer1(channel, client, org) {
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.includes('peer')) {
-                if (TLS.toUpperCase() == 'ENABLED') {
+                if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
@@ -340,7 +357,7 @@ function channelAddPeerEventJoin(channel, client, org) {
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
                     if (key.includes('peer')) {
-                        if (TLS.toUpperCase() == 'ENABLED') {
+                        if (TLS == 'ENABLED') {
                             data = testUtil.getTLSCert(org, key);
                             if ( data !== null ) {
                                 targets.push(
@@ -363,7 +380,7 @@ function channelAddPeerEventJoin(channel, client, org) {
                         }
 
                         eh=client.newEventHub();
-                        if (TLS.toUpperCase() == 'ENABLED') {
+                        if (TLS == 'ENABLED') {
                             data = testUtil.getTLSCert(org, key);
                             if ( data !== null ) {
                                 eh.setPeerAddr(
@@ -400,7 +417,7 @@ function channelAddEvent(channel, client, org) {
                     if (key.includes('peer')) {
 
                         eh=client.newEventHub();
-                        if (TLS.toUpperCase() == 'ENABLED') {
+                        if (TLS == 'ENABLED') {
                             data = testUtil.getTLSCert(org, key);
                             if ( data !== null ) {
                                 eh.setPeerAddr(
@@ -432,7 +449,7 @@ function getCCID() {
     var channelID = uiContent.channelID;
     chaincode_id = uiContent.chaincodeID+channelID;
     chaincode_ver = uiContent.chaincodeVer;
-    logger.info('Nid: %d, chaincode_id: %s, chaincode_ver: %s', Nid, chaincode_id, chaincode_ver);
+    logger.info('[getCCID] Nid: %d, chaincode_id: %s, chaincode_ver: %s', Nid, chaincode_id, chaincode_ver);
 }
 
 // test begins ....
@@ -508,11 +525,11 @@ function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
                 chaincodePath: chaincodePath,
                 chaincodeId: chaincode_id,
                 chaincodeVersion: chaincode_ver,
-                fcn: uiContent.deploy.fcn,
+                fcn: ccDfnPtr.deploy.fcn,
                 args: testDeployArgs,
                 chainId: channelName,
                 chaincodeType: type,
-                'endorsement-policy': uiContent.deploy.endorsement,
+                'endorsement-policy': ccDfnPtr.deploy.endorsement,
                 txId: tx_id
 
                 // use this to demonstrate the following policy:
@@ -943,10 +960,10 @@ function queryBlockchainInfo(channel, client, org) {
     var username = ORGS[org].username;
     var secret = ORGS[org].secret;
     //logger.info('[queryBlockchainInfo] user=%s, secret=%s', username, secret);
-    sBlock = uiContent.queryBlockOpt.startBlock;
-    eBlock = uiContent.queryBlockOpt.endBlock;
-    qOrg = uiContent.queryBlockOpt.org;
-    qPeer = uiContent.queryBlockOpt.peer;
+    sBlock = txCfgPtr.queryBlockOpt.startBlock;
+    eBlock = txCfgPtr.queryBlockOpt.endBlock;
+    qOrg = txCfgPtr.queryBlockOpt.org;
+    qPeer = txCfgPtr.queryBlockOpt.peer;
     logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%s:%d:%d', qOrg, qPeer, sBlock, eBlock);
 
     hfc.setConfigSetting('key-value-store','fabric-client/lib/impl/FileKeyValueStore.js');
@@ -1024,7 +1041,7 @@ function performance_main() {
         logger.info('[performance_main] org= %s, org Name= %s', org, orgName);
         let client = new hfc();
 
-        if ( transType.toUpperCase() == 'INSTALL' ) {
+        if ( transType == 'INSTALL' ) {
             initDeploy();
             let username = ORGS[org].username;
             let secret = ORGS[org].secret;
@@ -1054,7 +1071,7 @@ function performance_main() {
                 logger.error('[Nid=%d] Failed to install chaincode on org(%s) to error: ', Nid, org, err.stack ? err.stack : err);
                 evtDisconnect();
             });
-        } else if ( transType.toUpperCase() == 'INSTANTIATE' ) {
+        } else if ( transType == 'INSTANTIATE' ) {
             initDeploy();
             var username = ORGS[org].username;
             var secret = ORGS[org].secret;
@@ -1083,7 +1100,7 @@ function performance_main() {
             });
             // chaincodeInstantiate send requests to all orgs, so no need to iterate
             break;
-        } else if ( transType.toUpperCase() == 'CHANNEL' ) {
+        } else if ( transType == 'CHANNEL' ) {
             if ( channelOpt.action.toUpperCase() == 'CREATE' ) {
                 // create channel once
                 if(channelCreated == 0) {
@@ -1095,13 +1112,13 @@ function performance_main() {
                 logger.info('[performance_main] channel name: ', channelName);
                 joinChannel(channel, client, org);
             }
-        } else if ( transType.toUpperCase() == 'QUERYBLOCK' ) {
+        } else if ( transType == 'QUERYBLOCK' ) {
             var channel = client.newChannel(channelName);
             logger.info('[performance_main] channel name: ', channelName);
             queryBlockchainInfo(channel, client, org);
-        } else if ( transType.toUpperCase() == 'INVOKE' ) {
+        } else if ( transType == 'INVOKE' ) {
             // spawn off processes for transactions
-            var nProcPerOrg = parseInt(uiContent.nProcPerOrg);
+            var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
             logger.info('nProcPerOrg ', nProcPerOrg);
             for (var j = 0; j < nProcPerOrg; j++) {
                 var workerProcess = child_process.spawn('node', ['./pte-execRequest.js', j, Nid, uiFile, tStart, org, PTEid]);
