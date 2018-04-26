@@ -81,7 +81,7 @@ var ordererTypeParamStr = genesisConfigLocation+"ORDERERTYPE"
 
 var debugflagLaunch = false
 var debugflagAPI = true
-var debugflag1 = false
+var debugflag1 = true
 var debugflag2 = false
 var debugflag3 = false // most detailed and voluminous
 
@@ -272,7 +272,7 @@ func (r *ordererdriveClient) readUntilClose(ordererIndex int, channelIndex int, 
         for {
                 msg, err := r.client.Recv()
                 if err != nil {
-                        if !strings.Contains(err.Error(),"transport is closing") {
+                        if !strings.Contains(err.Error(),"is closing") {
                                 // print if we do not see the msg indicating graceful closing of the connection
                                 logger(fmt.Sprintf("Consumer for orderer %d channel %d readUntilClose() Recv error: %v", ordererIndex, channelIndex, err))
                         }
@@ -293,16 +293,17 @@ func (r *ordererdriveClient) readUntilClose(ordererIndex int, channelIndex int, 
                         }
                         *txRecvCntrP += int64(len(t.Block.Data.Data))
                         (*blockRecvCntrP)++
+                        // debugflag1 for unusual success case: it is one of the first blocks OR it is not filled to capacity with transactions
                         if ((*blockRecvCntrP) <= 2) || (int64(len(t.Block.Data.Data)) < batchSize) {
                                 if debugflag1 {
-                                         logger(fmt.Sprintf("===%s recvd blockNum %d with numtrans=%d/%d; numBlocks=%d, %v", myName, t.Block.Header.Number, len(t.Block.Data.Data), batchSize, (*blockRecvCntrP), time.Now()))
-                                         //if debugflag3 { logger(fmt.Sprintf("===Block.Data: %v", t.Block.Data)) }
-                                         if (*blockRecvCntrP) <= 2 { logger(fmt.Sprintf("===Block.Data: %v", t.Block.Data)) }
+                                         logger(fmt.Sprintf("%s recvd blockNum %d with numtrans=%d/%d; numBlocks=%d, %v", myName, t.Block.Header.Number, len(t.Block.Data.Data), batchSize, (*blockRecvCntrP), time.Now()))
+                                         //if (*blockRecvCntrP) <= 2 { logger(fmt.Sprintf("===Block.Data: %v", t.Block.Data)) }
                                 }
                         } else if debugflag2 {
-                                logger(fmt.Sprintf("===%s recvd blockNum %d with numtrans=%d; numBlocks=%d %v", myName, t.Block.Header.Number, len(t.Block.Data.Data), (*blockRecvCntrP), time.Now()))
-                                if debugflag3 { logger(fmt.Sprintf("Block.Data: %v", t.Block.Data )) }
+                                // debugflag2 for typical usual success case: it is NOT one of the first blocks, AND it is "full" of transactions
+                                logger(fmt.Sprintf("%s recvd blockNum %d with numtrans=%d; numBlocks=%d %v", myName, t.Block.Header.Number, len(t.Block.Data.Data), (*blockRecvCntrP), time.Now()))
                         }
+                        if debugflag3 { logger(fmt.Sprintf("Block.Data: %v", t.Block.Data)) }
                 }
         }
 }
@@ -342,26 +343,28 @@ func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIn
         if seek < -2 {
                 fmt.Println("Wrong seek value.")
         }
-        var conn *grpc.ClientConn
         var err error
-        var maxGrpcMsgSize = 1000 * 1024 * 1024
+        var maxGrpcMsgSize int = 1000 * 1024 * 1024
+        var dialOpts []grpc.DialOption
+        var conntimeout time.Duration = 30 * time.Second
+        dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxGrpcMsgSize),
+                                                                grpc.MaxCallRecvMsgSize(maxGrpcMsgSize)))
         if tlsEnabled {
-                var dialOpts []grpc.DialOption
-                // set max send/recv msg sizes
-                dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxGrpcMsgSize)))
                 creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
+                if err != nil {
+                        panic(fmt.Sprintf("Error on client %s creating grpc tls client creds, serverAddr %s, err: %v", myName, serverAddr, err))
+                }
                 dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
-                conn, err = grpc.Dial(serverAddr, dialOpts...)
-                if err != nil {
-                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
-                }
         } else {
-                conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
-                if err != nil {
-                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
-                }
+                dialOpts = append(dialOpts, grpc.WithInsecure())
         }
-        (*consumerConnP) = conn
+      //(*consumerConnP), err = grpc.Dial(serverAddr, dialOpts...)
+        ctx, cancel := context.WithTimeout(context.Background(), conntimeout)
+        defer cancel()
+        (*consumerConnP), err = grpc.DialContext(ctx, serverAddr, dialOpts...)
+        if err != nil {
+                panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+        }
         client, err := ab.NewAtomicBroadcastClient(*consumerConnP).Deliver(context.TODO())
         if err != nil {
                 panic(fmt.Sprintf("Error on client %s invoking Deliver() on grpc connection to %s, err: %v", myName, serverAddr, err))
