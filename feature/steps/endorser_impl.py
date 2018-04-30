@@ -604,7 +604,7 @@ def random_invoke_impl(context, name, args, length, peer, orderer, channel):
     context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, channel)
 
 @when(u'a user invokes on the channel "{channel}" using chaincode named "{name}" with random args {args} of length {length:d}')
-def step_impl(context, name, args, length):
+def step_impl(context, channel, name, args, length):
     random_invoke_impl(context, name, args, length, "peer0.org1.example.com", "orderer0.example.com", channel)
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}" using orderer "{orderer}"')
