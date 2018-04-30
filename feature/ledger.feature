@@ -72,7 +72,7 @@ Scenario Outline: FAB-6036-1: Test marbles02_private initMarble, readMarble, del
   When a user invokes on the chaincode named "mycc" with args ["delete","marble2"]
   And I wait "10" seconds
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble2"]
-  Then a user receives an error response of status: 500
+  Then a user receives an error response of status:500
   And a user receives an error response of {"Error":"Marble does not exist: marble2"}
   And I wait "3" seconds
 
@@ -214,7 +214,7 @@ Scenario Outline: FAB-6036-2: Test marbles02_private : getHistoryForMarble
   When a user invokes on the chaincode named "mycc" with args ["delete","marble201"]
   And I wait "20" seconds
   When a user queries on the chaincode named "mycc" with args ["readMarble","marble201"]
-  Then a user receives a success response of status: 500 with error status
+  Then a user receives a success response of status:500 with error status
   And a user receives a success response of {"Error":"Marble does not exist: marble201"} with error status
   And I wait "10" seconds
 
