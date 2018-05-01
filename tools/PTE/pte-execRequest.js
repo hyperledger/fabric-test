@@ -525,7 +525,7 @@ function assignPeerListFromList(channel, client, org) {
         for (i = 0; i < listOpt[key].length; i++) {
             if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
-                if (peername.indexOf('peer') === 0) {
+                if (peername.includes('peer')) {
                     if (TLS == 'ENABLED') {
                         data = testUtil.getTLSCert(key, peername);
                         if ( data !== null ) {
@@ -671,7 +671,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
-            if (key.indexOf('peer1') === 0) {
+            if (key.includes('peer')) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(key1, key);
                     if ( data !== null ) {
@@ -827,7 +827,7 @@ function assignThreadPeerList(channel, client, org) {
         for (i = 0; i < listOpt[key].length; i++) {
             if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
-                if (peername.indexOf('peer') === 0) {
+                if (peername.includes('peer')) {
                     if (TLS == 'ENABLED') {
                         data = testUtil.getTLSCert(key, peername);
                         if ( data !== null ) {
@@ -1033,7 +1033,7 @@ function assignOrdererList(channel, client) {
     var data;
     var ordererTmp;
     for (let key in ORGS['orderer']) {
-        if (key.indexOf('orderer') === 0) {
+        if (key.includes('orderer')) {
             if (TLS == 'ENABLED') {
                 data = testUtil.getTLSCert('orderer', key);
                 if ( data !== null ) {
@@ -1091,16 +1091,17 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
     var eh;
     var data;
     for (let key in ORGS) {
-        if (ORGS.hasOwnProperty(key) && typeof ORGS[key].peer1 !== 'undefined') {
-            if ( key == org ) {
+        if ( key == org ) {
+        for ( let subkey in ORGS[key] ) {
+            if (subkey.includes('peer')) {
                 if (TLS == 'ENABLED') {
-                    data = testUtil.getTLSCert(key, 'peer1');
+                    data = testUtil.getTLSCert(key, subkey);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[key].peer1.requests,
+                            ORGS[key][subkey].requests,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key].peer1['server-hostname']
+                                'ssl-target-name-override': ORGS[key][subkey]['server-hostname']
                             }
                         );
                         targets.push(peerTmp);
@@ -1120,8 +1121,8 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                         }
                     }
                 } else {
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, peer1: %s', Nid, channelName, org, pid, key, ORGS[org].peer1.requests);
-                    peerTmp = client.newPeer( ORGS[key].peer1.requests);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, subkey: %s', Nid, channelName, org, pid, key, ORGS[org][subkey].requests);
+                    peerTmp = client.newPeer( ORGS[key][subkey].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                     if ( peerFOList == 'TARGETPEERS' ) {
@@ -1137,25 +1138,26 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                         }
                     }
                 }
-            }
 
-            if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key == org ) ) {
-                eh=client.newEventHub();
-                if (TLS == 'ENABLED') {
-                    eh.setPeerAddr(
-                        ORGS[key].peer1.events,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[key].peer1['server-hostname']
-                        }
-                    );
-                } else {
-                    eh.setPeerAddr(ORGS[key].peer1.events);
+                if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key == org ) ) {
+                    eh=client.newEventHub();
+                    if (TLS == 'ENABLED') {
+                        eh.setPeerAddr(
+                            ORGS[key][subkey].events,
+                            {
+                                pem: Buffer.from(data).toString(),
+                                'ssl-target-name-override': ORGS[key][subkey]['server-hostname']
+                            }
+                        );
+                    } else {
+                        eh.setPeerAddr(ORGS[key][subkey].events);
+                    }
+                    eh.connect();
+                    eventHubs.push(eh);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] requests: %s, events: %s', Nid, channelName, org, pid, ORGS[key][subkey].requests, ORGS[key][subkey].events);
                 }
-                eh.connect();
-                eventHubs.push(eh);
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] requests: %s, events: %s', Nid, channelName, org, pid, ORGS[key].peer1.requests, ORGS[key].peer1.events);
             }
+        }
         }
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] Peers:  ', Nid, channelName, org, pid, channel.getPeers());
