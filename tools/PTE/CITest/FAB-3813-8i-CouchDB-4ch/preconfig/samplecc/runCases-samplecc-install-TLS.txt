@@ -1,0 +1,4 @@
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/samplecc/samplecc-chan1-install-TLS.json
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/samplecc/samplecc-chan2-install-TLS.json
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/samplecc/samplecc-chan3-install-TLS.json
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/samplecc/samplecc-chan4-install-TLS.json

@@ -1,0 +1,4 @@
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/channels/chan1-create-TLS.json
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/channels/chan2-create-TLS.json
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/channels/chan3-create-TLS.json
+sdk=node CITest/FAB-3813-8i-CouchDB-4ch/preconfig/channels/chan4-create-TLS.json

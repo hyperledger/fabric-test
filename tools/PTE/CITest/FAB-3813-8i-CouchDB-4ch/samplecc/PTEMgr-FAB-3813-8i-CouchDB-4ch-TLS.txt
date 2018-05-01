@@ -1,0 +1,4 @@
+driver=pte CITest/FAB-3813-8i-CouchDB-4ch/samplecc/runCases-FAB-3813-8i-CouchDB-4ch1-TLS.txt
+driver=pte CITest/FAB-3813-8i-CouchDB-4ch/samplecc/runCases-FAB-3813-8i-CouchDB-4ch2-TLS.txt
+driver=pte CITest/FAB-3813-8i-CouchDB-4ch/samplecc/runCases-FAB-3813-8i-CouchDB-4ch3-TLS.txt
+driver=pte CITest/FAB-3813-8i-CouchDB-4ch/samplecc/runCases-FAB-3813-8i-CouchDB-4ch4-TLS.txt
