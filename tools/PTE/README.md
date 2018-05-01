@@ -544,8 +544,56 @@ The following chaincodes are tested and supported:
         info: [PTE 0 exec]: [Nid:chan:org:id=0:testorgschannel1:org2:0 latency_output] event latency stats: tx num= 1000, total time: 828433 ms, avg= 828.43 ms, min= 284 ms, max= 2195 ms
 
 
+* **Test Summary Report**
+
+    A test summary report file, namely pteReport.txt, is generated at the PTE directory after PTE execution.  The report contains overall tranasction TPS and latency statistics (min, max, avg) for endorsement, transaction acknowledgment, and end-to-end transaction events for each PTE execution, i.e., each runCases.txt. Below is an example of the report of executing PTE with 3 runCases.txt, involving chaincode sample_cc_ch1 on channel testorgschannel1, sample_cc_ch2, on channel testorgschannel2 and sample_cc_ch3 on channel testorgschannel2 respectively.  The report will be appended to the report file if it exists.
 
 
+
+        ======= PTE 0 main Test Summary: executed at Wed May 02 2018 13:10:19 GMT-0400 (EDT) =======
+        (testorgschannel1:sample_cc_ch1): INVOKE transaction stats
+        (testorgschannel1:sample_cc_ch1):       Total transactions 200  timeout transactions 0
+        (testorgschannel1:sample_cc_ch1):       start 1525281040506  end 1525281049585  duration 9079 ms
+        (testorgschannel1:sample_cc_ch1):       TPS 22.03
+        (testorgschannel1:sample_cc_ch1): peer latency stats (endorsement)
+        (testorgschannel1:sample_cc_ch1):       total transactions: 200  total time: 4998 ms
+        (testorgschannel1:sample_cc_ch1):       min: 8 ms  max: 98 ms  avg: 24.99 ms
+        (testorgschannel1:sample_cc_ch1): orderer latency stats (transaction ack)
+        (testorgschannel1:sample_cc_ch1):       total transactions: 200  total time: 12527 ms
+        (testorgschannel1:sample_cc_ch1):       min: 14 ms  max: 174 ms  avg: 62.635 ms
+        (testorgschannel1:sample_cc_ch1): event latency stats (end-to-end)
+        (testorgschannel1:sample_cc_ch1):       total transactions: 200  total time: 66070 ms
+        (testorgschannel1:sample_cc_ch1):       min: 76 ms  max: 674 ms  avg: 330.35 ms
+
+        ======= PTE 1 main Test Summary: executed at Wed May 02 2018 13:10:19 GMT-0400 (EDT) =======
+        (testorgschannel2:sample_cc_ch2): INVOKE transaction stats
+        (testorgschannel2:sample_cc_ch2):       Total transactions 200  timeout transactions 0
+        (testorgschannel2:sample_cc_ch2):       start 1525281040579  end 1525281049680  duration 9101 ms
+        (testorgschannel2:sample_cc_ch2):       TPS 21.98
+        (testorgschannel2:sample_cc_ch2): peer latency stats (endorsement)
+        (testorgschannel2:sample_cc_ch2):       total transactions: 200  total time: 4905 ms
+        (testorgschannel2:sample_cc_ch2):       min: 9 ms  max: 92 ms  avg: 24.525 ms
+        (testorgschannel2:sample_cc_ch2): orderer latency stats (transaction ack)
+        (testorgschannel2:sample_cc_ch2):       total transactions: 200  total time: 12534 ms
+        (testorgschannel2:sample_cc_ch2):       min: 20 ms  max: 173 ms  avg: 62.67 ms
+        (testorgschannel2:sample_cc_ch2): event latency stats (end-to-end)
+        (testorgschannel2:sample_cc_ch2):       total transactions: 200  total time: 68286 ms
+        (testorgschannel2:sample_cc_ch2):       min: 113 ms  max: 716 ms  avg: 341.43 ms
+
+        ======= PTE 2 main Test Summary: executed at Wed May 02 2018 13:10:19 GMT-0400 (EDT) =======
+        (testorgschannel3:sample_cc_ch3): INVOKE transaction stats
+        (testorgschannel3:sample_cc_ch3):       Total transactions 200  timeout transactions 0
+        (testorgschannel3:sample_cc_ch3):       start 1525281040539  end 1525281049696  duration 9157 ms
+        (testorgschannel3:sample_cc_ch3):       TPS 21.84
+        (testorgschannel3:sample_cc_ch3): peer latency stats (endorsement)
+        (testorgschannel3:sample_cc_ch3):       total transactions: 200  total time: 5222 ms
+        (testorgschannel3:sample_cc_ch3):       min: 8 ms  max: 102 ms  avg: 26.11 ms
+        (testorgschannel3:sample_cc_ch3): orderer latency stats (transaction ack)
+        (testorgschannel3:sample_cc_ch3):       total transactions: 200  total time: 12424 ms
+        (testorgschannel3:sample_cc_ch3):       min: 13 ms  max: 175 ms  avg: 62.12 ms
+        (testorgschannel3:sample_cc_ch3): event latency stats (end-to-end)
+        (testorgschannel3:sample_cc_ch3):       total transactions: 200  total time: 72844 ms
+        (testorgschannel3:sample_cc_ch3):       min: 92 ms  max: 736 ms  avg: 364.22 ms
 
 
 ## Reference
