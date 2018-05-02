@@ -1,0 +1,15 @@
+{
+    "transType": "Channel",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "_CHANNELNAME_",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/_CHANNELNAME_.tx",
+        "action":  "create",
+        "orgName": [
+            "org1"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
+    ]
+}

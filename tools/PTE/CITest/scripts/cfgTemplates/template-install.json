@@ -1,0 +1,25 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "_CHAINCODEID_",
+    "chaincodeVer": "v0",
+    "transType": "install",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "_CHANNELNAME_",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "deploy": {
+        "chaincodePath": "_CHAINCODEPATH_",
+        "metadataPath": "_METADATAPATH_",
+        "language": "_LANGUAGE_",
+        "fcn": "init",
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "_TRANSMODE_",
+    "transType": "Invoke",
+    "invokeType": "_INVOKETYPE_",
+    "targetPeers": "OrgAnchor",
+    "peerFailover": "TRUE",
+    "ordererFailover": "TRUE",
+    "nProcPerOrg": "_NPROC_",
+    "nRequest": "_NREQ_",
+    "runDur": "_RUNDUR_",
+    "TLS": "enabled",
+    "burstOpt": {
+        "burstFreq0":  "500",
+        "burstDur0":  "3000",
+        "burstFreq1": "2000",
+        "burstDur1": "10000"
+    },
+    "mixOpt": {
+        "mixQuery": "false",
+        "mixFreq": "_FREQ_"
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "_FREQ_",
+        "devFreq": "0"
+    },
+    "listOpt": {
+        "org1": ["peer1", "peer2"],
+        "org2": ["peer1", "peer2"]
+    },
+    "eventOpt": {
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "240000"
+    },
+    "failoverOpt": {
+        "method": "RoundRobin",
+        "list": "targetPeers"
+    },
+    "timeoutOpt": {
+        "preConfig": "200000",
+        "request": "45000"
+    }
+}

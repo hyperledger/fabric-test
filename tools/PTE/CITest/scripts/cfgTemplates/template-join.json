@@ -1,0 +1,15 @@
+{
+    "transType": "Channel",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "_CHANNELNAME_",
+        "action":  "join",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
+    ]
+}

@@ -1,0 +1,17 @@
+{
+    "txCfgPtr": "runPTE/TXopt.json",
+    "ccDfnPtr": "runPTE/_CHAINCODEID_DfnOpt.json",
+    "channelID": "_ch1",
+    "chaincodeID": "_CHAINCODEID_",
+    "chaincodeVer": "v0",
+    "channelOpt": {
+        "name": "_CHANNELNAME_",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
+    ]
+}

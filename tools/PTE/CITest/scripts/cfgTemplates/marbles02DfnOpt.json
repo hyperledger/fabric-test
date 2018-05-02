@@ -1,0 +1,20 @@
+{
+    "ccType": "marblescc",
+    "ccOpt": {
+        "keyIdx": [0],
+        "keyPayLoad": [2],
+        "keyStart": "_KEYSTART_",
+        "payLoadMin": "1024",
+        "payLoadMax": "1024"
+    },
+    "invoke": {
+        "query": {
+            "fcn": "readMarble",
+            "args": ["marble"]
+        },
+        "move": {
+            "fcn": "initMarble",
+            "args": ["marble", "blue","35","tom"]
+        }
+    }
+}

@@ -1,0 +1,27 @@
+{
+    "ccType": "ccchecker",
+    "ccOpt": {
+	"keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "_KEYSTART_",
+        "payLoadType": "Random",
+        "payLoadMin": "1024",
+        "payLoadMax": "1024"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+        "language": "golang",
+        "fcn": "init",
+        "args": []
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get","a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put","a1","1"]
+        }
+    }
+}
