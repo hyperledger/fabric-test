@@ -19,7 +19,6 @@ import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
 
 try:
-    #pbFilePath = "../fabric/bddtests"
     pbFilePath = "../feature-upgrade"
     sys.path.insert(0, pbFilePath)
     from common import ledger_pb2
