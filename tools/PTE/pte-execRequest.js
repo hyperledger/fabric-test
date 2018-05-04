@@ -291,7 +291,9 @@ if ( ccType == 'ccchecker' ) {
     // "args": {
     //     "selector": {
     //         "owner":"tom",
-    //         "docType":"marble"
+    //         "docType":"marble",
+    //         "color":"blue",
+    //         "size":"35",
     //     }
     // }
     if ( ccDfnPtr.invoke.query.fcn == 'queryMarblesByOwner' ) {
@@ -336,14 +338,13 @@ function getMoveRequest() {
         for ( i=0; i<keyIdx.length; i++ ) {
             testInvokeArgs[keyIdx[i]] = moveMarbleName+'_'+txIDVar+'_'+arg0;
         }
+        var index=arg0%nOwner;
         if ( ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
-            var index=arg0%nOwner;
             testInvokeArgs[3]=moveMarbleOwner+'_'+txIDVar+'_'+index;
         }
-        // random marble size
-        var r = Math.floor((Math.random() * (payLoadMax - payLoadMin)) + payLoadMin);
+        // marble size
         for ( i=0; i<keyPayLoad.length; i++ ) {
-            testInvokeArgs[keyPayLoad[i]] = String(r);
+            testInvokeArgs[keyPayLoad[i]] = String(index);
         }
     }
 
@@ -408,26 +409,26 @@ function getQueryRequest() {
             var selector=0;
             var index=arg0%nOwner;
             if ( rqSelector ) {
-                testQueryArgs[0]='{\"selector\":{"';
-                if ( typeof( rqSelector.owner ) !== 'undefined' ) {
-                    rqSelector.owner = '\owner\":\"'+queryMarbleOwner+'_'+txIDVar+'_'+index;
-                    if ( selector == 0 ) {
-                        testQueryArgs[0]=testQueryArgs[0]+rqSelector.owner;
-                    } else {
-                        testQueryArgs[0]=testQueryArgs[0]+','+rqSelector.owner;
+                testQueryArgs[0]='{\"selector\":{';
+                for ( let key in rqSelector ) {
+                    if ( selector == 1 ) {
+                        testQueryArgs[0]=testQueryArgs[0]+',';
                     }
-                    selector=1;
-                }
-                if ( typeof( rqSelector.docType ) !== 'undefined' ) {
-                    rqSelector.docType = '\"docType\":\"'+queryMarbleDocType;
-                    if ( selector == 0 ) {
-                        testQueryArgs[0]=testQueryArgs[0]+rqSelector.docType;
+
+                    if ( key == 'owner' ) {
+                        testQueryArgs[0]=testQueryArgs[0]+'\"'+key+'\":\"'+queryMarbleOwner+'_'+txIDVar+'_'+index+'\"';
+                    } else if ( key == 'size' ) {
+                        var mSize=arg0%nOwner;
+                        testQueryArgs[0]=testQueryArgs[0]+'\"'+key+'\":'+mSize;
                     } else {
-                        testQueryArgs[0]=testQueryArgs[0]+'\",'+rqSelector.docType;
+                        testQueryArgs[0]=testQueryArgs[0]+'\"'+key+'\":\"'+rqSelector[key]+'\"';
                     }
-                    selector=1;
+
+                    if ( selector == 0 ) {
+                        selector = 1;
+                    }
                 }
-                testQueryArgs[0]=testQueryArgs[0]+'\"}';
+                testQueryArgs[0]=testQueryArgs[0]+'}';
             }
 
             testQueryArgs[0]=testQueryArgs[0]+'}';

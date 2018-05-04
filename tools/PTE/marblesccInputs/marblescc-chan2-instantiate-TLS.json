@@ -8,7 +8,8 @@
         "name":  "testorgschannel2",
         "action":  "create",
         "orgName": [
-            "org3"
+            "org3",
+            "org4"
         ]
     },
     "timeoutOpt": {

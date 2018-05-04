@@ -9,7 +9,7 @@
     "invokeType": "Query",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
-    "nRequest": "100",
+    "nRequest": "1000",
     "runDur": "1200",
     "TLS": "enabled",
     "channelOpt": {
@@ -62,7 +62,9 @@
             "args": {
                 "selector": {
                      "owner":"tom",
-                     "docType":"marble"
+                     "docType":"marble",
+                     "color":"blue",
+                     "size":"35"
                 }
             }
         },
