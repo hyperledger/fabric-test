@@ -2,54 +2,28 @@
     "channelID": "_ch1",
     "chaincodeID": "sample_cc",
     "chaincodeVer": "v0",
-    "chainID": "testchainid",
-    "logLevel": "ERROR",
-    "invokeCheck": "TRUE",
-    "transMode": "Simple",
     "transType": "instantiate",
-    "invokeType": "Move",
-    "targetPeers": "OrgAnchor",
-    "nOrderer": "1",
-    "nPeer": "4",
-    "nProcPerOrg": "4",
-    "nRequest": "1000",
-    "runDur": "600",
+    "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "mychannel",
+        "name":  "testorgschannel1",
         "action":  "create",
         "orgName": [
             "org1",
             "org2"
         ]
     },
-    "burstOpt": {
-        "burstFreq0":  "500",
-        "burstDur0":  "3000",
-        "burstFreq1": "2000",
-        "burstDur1": "10000"
-    },
-    "mixOpt": {
-        "mixFreq": "3000"
-    },
-    "constantOpt": {
-        "recHist": "HIST",
-        "constFreq": "1",
-        "devFreq": "0"
-    },
-    "ccType": "ccchecker",
-    "ccOpt": {
-        "keyStart": "50000",
-        "payLoadMin": "1024",
-        "payLoadMax": "1024"
+    "timeoutOpt": {
+        "preConfig": "120000",
+        "request": "180000"
     },
     "deploy": {
         "chaincodePath": "github.com/hyperledger/fabric-sdk-node/test/fixtures/src/github.com/sample_cc",
         "fcn": "init",
          "endorsement": {
                        "identities": [
-                        { "role": { "name": "member", "mspId": "Org1MSP" }},
-                        { "role": { "name": "member", "mspId": "Org2MSP" }}
+                        { "role": { "name": "peer", "mspId": "PeerOrg1" }},
+                        { "role": { "name": "peer", "mspId": "PeerOrg2" }}
                            ],
                        "policy": {
                           "2-of": [{ "signed-by": 0 }, { "signed-by": 1 }]
@@ -57,17 +31,7 @@
                       },
         "args": []
     },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
-    },
     "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
-	]
+        {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
+    ]
 }

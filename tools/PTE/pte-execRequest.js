@@ -50,10 +50,10 @@ var tLocal;
 var i = 0;
 var inv_m = 0;    // counter of invoke move
 var inv_q = 0;    // counter of invoke query
-var evtTimeoutCnt = 0;    // counter of event timeout
-var evtType = 'PEER';                 // event type: PEER|CHANNEL, default: PEER
+var evtTimeoutCnt = 0;                // counter of event timeout
+var evtType = 'FILTEREDBLOCK';        // event type: FILTEREDBLOCK|CHANNEL, default: FILTEREDBLOCK
 var evtTimeout = 120000;              // event timeout, default: 120000 ms
-var evtListener = 'TRANSACTION';      // event listener: TRANSACTION|BLOCK, default: TRANSACTION
+var evtListener = 'BLOCK';            // event listener: BLOCK|TRANSACTION, default: BLOCK
 var IDone=0;
 var QDone=0;
 var recHist;
@@ -123,6 +123,11 @@ var channel = client.newChannel(channelName);
 
 if ( (typeof( txCfgPtr.eventOpt ) !== 'undefined') && (typeof( txCfgPtr.eventOpt.type ) !== 'undefined') ) {
     evtType = txCfgPtr.eventOpt.type.toUpperCase();
+    if ( (evtType != 'FILTEREDBLOCK') && (evtType != 'CHANNEL') ) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] unsupported event type: %s', Nid, channelName, org, pid, evtType);
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] supported event types: FilteredBlock and Channel', Nid, channelName, org, pid);
+        process.exit();
+    }
 }
 if ( (typeof( txCfgPtr.eventOpt ) !== 'undefined') && (typeof( txCfgPtr.eventOpt.listener ) !== 'undefined') ) {
     evtListener = txCfgPtr.eventOpt.listener.toUpperCase();
@@ -638,23 +643,6 @@ function assignThreadAllPeers(channel, client, org) {
                     }
                 }
 
-                if ( (evtType == 'PEER') && ( key1 == org ) && !event_connected) {
-                    eh = client.newEventHub();
-                    if (TLS == 'ENABLED') {
-                        eh.setPeerAddr(
-                            ORGS[key1][key].events,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
-                            }
-                        );
-                    } else {
-                        eh.setPeerAddr(ORGS[key1][key].events);
-                    }
-                    eh.connect();
-                    eventHubs.push(eh);
-                    event_connected= true;
-                }
                 }
             }
         }
@@ -716,23 +704,6 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                         }
                     }
                 }
-
-                if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key1 == org ) ) {
-                    eh = client.newEventHub();
-                    if (TLS == 'ENABLED') {
-                        eh.setPeerAddr(
-                            ORGS[key1][key].events,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
-                            }
-                        );
-                    } else {
-                        eh.setPeerAddr(ORGS[key1][key].events);
-                    }
-                    eh.connect();
-                    eventHubs.push(eh);
-                }
             }
             }
         }
@@ -792,22 +763,6 @@ function assignThreadOrgPeer(channel, client, org) {
                     }
                 }
 
-                if ( (evtType == 'PEER') && (invokeType == 'MOVE') ) {
-                    eh=client.newEventHub();
-                    if (TLS == 'ENABLED') {
-                        eh.setPeerAddr(
-                            ORGS[org][key].events,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                            }
-                        );
-                    } else {
-                        eh.setPeerAddr(ORGS[org][key].events);
-                    }
-                    eh.connect();
-                    eventHubs.push(eh);
-                }
             }
         }
     }
@@ -870,24 +825,6 @@ function assignThreadPeerList(channel, client, org) {
                                 eh.connect(true);
                             }
                         }
-                    }
-
-                    if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key == org ) && !event_connected ) {
-                        eh = client.newEventHub();
-                        if (TLS == 'ENABLED') {
-                            eh.setPeerAddr(
-                                ORGS[key][peername].events,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[key][peername]['server-hostname']
-                                }
-                            );
-                        } else {
-                            eh.setPeerAddr(ORGS[key][peername].events);
-                        }
-                        eh.connect();
-                        eventHubs.push(eh);
-                        event_connected = true;
                     }
                 }
             }
@@ -982,23 +919,6 @@ function channelAddPeerEvent(channel, client, org) {
                     } else {
                         eh.connect(true);
                     }
-                }
-
-                if ( (evtType == 'PEER') && (invokeType == 'MOVE') ) {
-                    eh=client.newEventHub();
-                    if (TLS == 'ENABLED') {
-                        eh.setPeerAddr(
-                            ORGS[org][key].events,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                            }
-                        );
-                    } else {
-                        eh.setPeerAddr(ORGS[org][key].events);
-                    }
-                    eh.connect();
-                    eventHubs.push(eh);
                 }
                 logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] requests: %s, events: %s ', Nid, channelName, org, pid, ORGS[org][key].requests, ORGS[org][key].events);
             }
@@ -1138,24 +1058,6 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                             eh.connect(true);
                         }
                     }
-                }
-
-                if ( (evtType == 'PEER') && (invokeType == 'MOVE') && ( key == org ) ) {
-                    eh=client.newEventHub();
-                    if (TLS == 'ENABLED') {
-                        eh.setPeerAddr(
-                            ORGS[key][subkey].events,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key][subkey]['server-hostname']
-                            }
-                        );
-                    } else {
-                        eh.setPeerAddr(ORGS[key][subkey].events);
-                    }
-                    eh.connect();
-                    eventHubs.push(eh);
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] requests: %s, events: %s', Nid, channelName, org, pid, ORGS[key][subkey].requests, ORGS[key][subkey].events);
                 }
             }
         }
@@ -2152,9 +2054,6 @@ function execModeConstant() {
                 }
             } else if (evtListener == 'BLOCK') {
                 eventRegisterBlock();
-                invoke_move_const_evtBlock(freq);
-            } else if (evtListener == 'NONE') {
-                evtDisconnect();
                 invoke_move_const_evtBlock(freq);
             } else {
                 requestPusher(getMoveRequest, (freq / 10));

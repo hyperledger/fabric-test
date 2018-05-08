@@ -848,16 +848,14 @@ where:
                  "org6": ["peer3"]
              }
 
-* **eventOpt**: event hub options
-    * **type**: event service type, default: Peer
-        * **FilteredBlock**: filtered block event service at channel level
-        * **Channel**: events at channel level
-        * **Peer**: events at peer level
-    * **listener**: event listener, default: Transaction
-        * **Transaction**: PTE registers a transaction listener to receive a registered transaction event. This is the default event listener.
-        * **Block**: PTE registers a block listener to receive every block event on all channels. PTE will parse the received block event for the transactions sent. The block listener option applies to tranMode CONSTANT only.
-        * **None**: PTE will not register any event listener.
-    * **timeout**: event timeout, applied to the transaction listener only, unit ms, default: 120000 ms
+* **eventOpt**: event options
+    * **type**: event service type, default: FilteredBlock
+        * **FilteredBlock**: efficient option, delivers filtered events per channel for each block or transaction
+        * **Channel**: basic option, delivers full events per channel for each block or transaction
+    * **listener**: event listener, default: Block
+        * **Transaction**: one event per transaction
+        * **Block**: one event per block. The block listener option applies to tranMode CONSTANT only.
+    * **timeout**: event timeout, unit ms, default: 120000 ms
 * **failoverOpt**: peer failover options
     * **method**: peer failover selection method, default is `RoundRobin`
          * **random**: a peer is selected randomly from the list for failover

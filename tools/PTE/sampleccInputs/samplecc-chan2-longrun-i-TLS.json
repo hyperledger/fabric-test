@@ -35,11 +35,12 @@
         "devFreq": "10"
     },
     "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
+        "org3": ["peer1"],
+        "org4": ["peer1"]
     },
     "eventOpt": {
-        "listener": "Transaction",
+        "type": "FilteredBlock",
+        "listener": "Block",
         "timeout": "240000"
     },
     "ccType": "ccchecker",
