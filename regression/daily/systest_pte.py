@@ -56,27 +56,48 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # Run the test scenario, including both the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
-        # invokes have to be done first anyways before we can query them.
+        # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3833-2i.sh",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
 
-        # Check the result log file for an output line with "tx Num: <number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread
-        # (one for each org). And, since each thread sends 10000 TX, then
-        # the tx Num (sum TXs delivered for all threads) is 20000.
+        # Check the result log file for one line of output from every peer
+        # that is used for traffic, since those are the peers (typically
+        # one per org) from which we will collect stats of the number of
+        # TX written to the ledger. The summary line should contain
+        #     "Channel: all, tx Num: <number>,"
+        # This testcase uses one channel, one thread per channel, on one peer
+        # of each org (total 2 threads). Since all peers are joined to all
+        # channels, then all the TX in all threads will be received and written
+        # to the ledgers on all peers. Since each thread sends 10000,
+        # then the total tx Num for all channels on each peer is 20000.
+        # For most typical tests, compute the per-peer invoke tx number as
+        # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     2*1*1*1*10000=20000
+        # and the expected count of occurances will be the number of orgs:
+        #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"tx Num: 20000,\" result_FAB-3833-2i.log",
+                "grep -c \"Channel: all, tx Num: 20000,\" result_FAB-3833-2i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
-        # Check the result log file for an output line with "QUERY transaction=<number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread;
-        # the total query count on each peer is 10000.
+        # Check the result log file for an output line containing
+        # "Total QUERY transaction <number>,"
+        # This is seen on the same line as "Aggregate Test Summary".
+        # If the query testcase ran to completion and the results were
+        # tabulated ok, then we should see one line printed for each
+        # chaincode and channel (multiplied by number of threads of each),
+        # appended onto the same result_*.log file as the invokes test used.
+        # We use an equal number of threads for queries as were used for
+        # the accompanying invokes test, above. In this testcase, the total
+        # number of threads is 2, each sending 10000 queries.
+        # Compute the per-chaincode per-channel query tx number on one peer as
+        # (#chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     1*1*1*10000=10000
+        # and compute the count of occurances as (#orgs * #threads per org * #channels):
+        #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"QUERY transaction=10000,\" result_FAB-3833-2i.log",
+                "grep -c \"Total QUERY transaction 10000,\" result_FAB-3833-2i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -115,27 +136,26 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # Run the test scenario, including both the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
-        # invokes have to be done first anyways before we can query them.
+        # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3832-4i.sh",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
 
-        # Check the result log file for an output line with "tx Num: <number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread
-        # (one for each org). And, since each thread sends 10000 TX, then
-        # the tx Num (sum TXs delivered for all threads) is 40000.
+        # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     2*1*1*2*10000=40000
+        # and the expected count of occurances will be the number of orgs:
+        #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"tx Num: 40000,\" result_FAB-3832-4i.log",
+                "grep -c \"Channel: all, tx Num: 40000,\" result_FAB-3832-4i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
-        # Check the result log file for an output line with "QUERY transaction=<number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread;
-        # the total query count on each peer is 20000.
+        # (#chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     1*1*2*10000=20000
+        # and compute the count of occurances as (#orgs * #threads per org * #channels):
+        #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"QUERY transaction=20000,\" result_FAB-3832-4i.log",
+                "grep -c \"Total QUERY transaction 20000,\" result_FAB-3832-4i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -183,27 +203,26 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # Run the test scenario, including both the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
-        # invokes have to be done first anyways before we can query them.
+        # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3808-2i.sh",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
 
-        # Check the result log file for an output line with "tx Num: <number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread
-        # (one for each org). And, since each thread sends 10000 TX, then
-        # the tx Num (sum TXs delivered for all threads) is 20000.
+        # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     2*1*1*1*10000=20000
+        # and the expected count of occurances will be the number of orgs:
+        #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"tx Num: 20000,\" result_FAB-3808-2i.log",
+                "grep -c \"Channel: all, tx Num: 20000,\" result_FAB-3808-2i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
-        # Check the result log file for an output line with "QUERY transaction=<number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread;
-        # the total query count on each peer is 10000.
+        # (#chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     1*1*1*10000=10000
+        # and compute the count of occurances as (#orgs * #threads per org * #channels):
+        #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"QUERY transaction=10000,\" result_FAB-3808-2i.log",
+                "grep -c \"Total QUERY transaction 10000,\" result_FAB-3808-2i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -242,26 +261,25 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # Run the test scenario, including both the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
-        # invokes have to be done first anyways before we can query them.
+        # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3807-4i.sh",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
 
-        # Check the result log file for an output line with "tx Num: <number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread
-        # (one for each org). And, since each thread sends 10000 TX, then
-        # the tx Num (sum TXs delivered for all threads) is 40000.
+        # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     2*1*1*2*10000=40000
+        # and the expected count of occurances will be the number of orgs:
+        #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"tx Num: 40000,\" result_FAB-3807-4i.log",
+                "grep -c \"Channel: all, tx Num: 40000,\" result_FAB-3807-4i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
-        # Check the result log file for an output line with "QUERY transaction=<number>".
-        # If the invokes testcase ran to completion and the results were
-        # tabulated ok, then we should see one line printed for each thread;
-        # the total query count on each peer is 20000.
+        # (#chaincodes * #channels * #threads per org * 10,000 TX per thread):
+        #     1*1*2*10000=20000
+        # and compute the count of occurances as (#orgs * #threads per org * #channels):
+        #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"QUERY transaction=20000,\" result_FAB-3807-4i.log",
+                "grep -c \"Total QUERY transaction 20000,\" result_FAB-3807-4i.log",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)

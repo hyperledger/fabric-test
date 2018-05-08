@@ -120,9 +120,9 @@ readLog () {
     TPS=$(echo "$txNum" "$totalMSec" | awk '{printf "%.2f", $1/$2*1000}')
     BPS=$(echo "$blkNum" "$totalMSec" | awk '{printf "%.2f", $1/$2*1000}')
     #output "peer: $peer" "$2"
-    output "\tstart time: $sTime, end time: $eTime, total time: $totalMSec ms" "$outfile"
-    output "\tblk Num: $blkNum, BPS: $BPS" "$outfile"
-    output "\ttx Num: $txNum, TPS: $TPS\n" "$outfile"
+    output "\tChannel: $channel, start time: $sTime, end time: $eTime, total time: $totalMSec ms" "$outfile"
+    output "\tChannel: $channel, blk Num: $blkNum, BPS: $BPS" "$outfile"
+    output "\tChannel: $channel, tx Num: $txNum, TPS: $TPS\n" "$outfile"
 
     #echo "[readLog] remove $preLines"
     rm -f $preLines
@@ -157,7 +157,6 @@ getPeerStats () {
             # gather data
             else
                 output "\nPeer: $peer" "$1"
-                output "\tChannel: $chan" "$1"
                 readLog "$infile" "$chan" "$1"
             fi
         else

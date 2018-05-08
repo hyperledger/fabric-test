@@ -3,25 +3,21 @@
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 DAILYDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/daily"
-
-echo "========== System Test Performance Stress tests driven by PTE tool..."
-
-cp -r ../../tools/PTE $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/
-
-cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node
-
-./../pre_setup.sh && npm config set prefix ~/npm && npm install && npm install -g gulp
-
-gulp ca && cd $DAILYDIR && py.test -v --junitxml results_systest_pte.xml systest_pte.py
+cd $DAILYDIR
 
 echo "========== Behave feature and system tests..."
-
-cd $GOPATH/src/github.com/hyperledger/fabric-test/feature
+cd ../../feature
 behave --junit --junit-directory ../regression/daily/. --tags=-skip --tags=daily -k -D logs=y
 cd -
+
+echo "========== System Test Performance tests using PTE and NL tools..."
+cp -r ../../tools/PTE $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node/test/
+cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-sdk-node
+./../pre_setup.sh && npm config set prefix ~/npm && npm install && npm install -g gulp
+gulp ca && cd $DAILYDIR && py.test -v --junitxml results_systest_pte.xml systest_pte.py
+cd $DAILYDIR
 
 echo "========== Ledger component performance tests..."
 py.test -v --junitxml results_ledger_lte.xml ledger_lte.py
