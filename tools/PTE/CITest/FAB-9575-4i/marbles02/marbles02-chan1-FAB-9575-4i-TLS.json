@@ -1,5 +1,5 @@
 {
-    "channelID": "_ch2",
+    "channelID": "_ch1",
     "chaincodeID": "marbles02_go",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
@@ -13,7 +13,7 @@
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel2",
+        "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
             "org1",
@@ -48,7 +48,7 @@
     "ccOpt": {
         "keyIdx": [0],
         "keyPayLoad": [2],
-        "keyStart": "0",
+        "keyStart": "250000",
         "payLoadMin": "1024",
         "payLoadMax": "2048"
     },
@@ -60,7 +60,7 @@
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "white","35","jerry"]
+            "args": ["marble", "blue","35","tom"]
         }
     },
     "SCFile": [

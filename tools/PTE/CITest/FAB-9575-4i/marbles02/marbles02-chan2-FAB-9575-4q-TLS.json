@@ -6,10 +6,10 @@
     "invokeCheck": "TRUE",
     "transMode": "Constant",
     "transType": "Invoke",
-    "invokeType": "Move",
+    "invokeType": "Query",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
-    "nRequest": "250000",
+    "nRequest": "500000",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
@@ -32,7 +32,7 @@
     },
     "constantOpt": {
         "recHist": "HIST",
-        "constFreq": "100",
+        "constFreq": "0",
         "devFreq": "0"
     },
     "listOpt": {
@@ -50,13 +50,20 @@
         "keyPayLoad": [2],
         "keyStart": "0",
         "payLoadMin": "1024",
-        "payLoadMax": "2048"
+        "payLoadMax": "20148"
     },
     "invoke": {
         "nOwner":"10000",
         "query": {
-            "fcn": "readMarble",
-            "args": ["marble"]
+            "fcn": "queryMarbles",
+            "args": {
+                "selector": {
+                     "owner":"jerry",
+                     "docType":"marble",
+                     "color":"white",
+                     "size":"35"
+                }
+            }
         },
         "move": {
             "fcn": "initMarble",

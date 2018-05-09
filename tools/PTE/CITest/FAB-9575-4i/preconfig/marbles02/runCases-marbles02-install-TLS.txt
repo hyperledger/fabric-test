@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-9575-4i/preconfig/marbles02/marbles02-chan1-install-TLS.json
+sdk=node CITest/FAB-9575-4i/preconfig/marbles02/marbles02-chan2-install-TLS.json

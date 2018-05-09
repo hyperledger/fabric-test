@@ -53,7 +53,7 @@
         "payLoadMax": "2048"
     },
     "invoke": {
-        "nOwner":"100",
+        "nOwner":"10000",
         "query": {
             "fcn": "readMarble",
             "args": ["marble"]
