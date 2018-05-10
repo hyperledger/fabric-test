@@ -540,7 +540,7 @@ function chaincodeInstall(channel, client, org) {
             }
 
         }, (err) => {
-            logger.error('Failed to enroll user \'admin\'. ' + err);
+            logger.error('[chaincodeInstall] Failed to install chaincode in (%s:%s) due to error: ', channelName, orgName, err);
             evtDisconnect();
             process.exit();
 
