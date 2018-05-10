@@ -1,19 +1,19 @@
 {
-    "channelID": "_ch2",
+    "channelID": "_ch1",
     "chaincodeID": "marbles02_go",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Constant",
     "transType": "Invoke",
-    "invokeType": "Move",
+    "invokeType": "Query",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
-    "nRequest": "250000",
+    "nRequest": "500000",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel2",
+        "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
             "org1",
@@ -32,7 +32,7 @@
     },
     "constantOpt": {
         "recHist": "HIST",
-        "constFreq": "100",
+        "constFreq": "0",
         "devFreq": "0"
     },
     "listOpt": {
@@ -55,12 +55,19 @@
     "invoke": {
         "nOwner":"10000",
         "query": {
-            "fcn": "readMarble",
-            "args": ["marble"]
+            "fcn": "queryMarbles",
+            "args": {
+                "selector": {
+                     "owner":"tom",
+                     "docType":"marble",
+                     "color":"blue",
+                     "size":"35"
+                }
+            }
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "white","35","jerry"]
+            "args": ["marble", "blue","35","tom"]
         }
     },
     "SCFile": [
