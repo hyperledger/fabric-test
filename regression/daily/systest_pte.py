@@ -18,6 +18,7 @@ TEST_PASS_STRING="RESULT=PASS"
 ######################################################################
 
 scenarios_directory = '../../fabric-sdk-node/test/PTE/CITest/scenarios'
+nl_directory = '../../tools/NL'
 
 class Perf_Stress_CouchDB(unittest.TestCase):
 
@@ -53,13 +54,14 @@ class Perf_Stress_CouchDB(unittest.TestCase):
             fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3810-2q-<MMDDHHMMSS>.log
         '''
 
-        # Run the test scenario, including both the invokes and query tests.
+        # Run the test scenario: launch network and run the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
-        returncode = subprocess.call("./FAB-3833-2i.sh",
-                cwd=scenarios_directory, shell=True)
+        returncode = subprocess.call("./FAB-3833-2i.sh", cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        # tear down the network, including all the nodes docker containers
+        returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
         # Check the result log file for one line of output from every peer
         # that is used for traffic, since those are the peers (typically
@@ -133,13 +135,14 @@ class Perf_Stress_CouchDB(unittest.TestCase):
             fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3834-4q-<MMDDHHMMSS>.log
         '''
 
-        # Run the test scenario, including both the invokes and query tests.
+        # Run the test scenario: launch network and run the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
-        returncode = subprocess.call("./FAB-3832-4i.sh",
-                cwd=scenarios_directory, shell=True)
+        returncode = subprocess.call("./FAB-3832-4i.sh", cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        # tear down the network, including all the nodes docker containers
+        returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
         # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
         #     2*1*1*2*10000=40000
@@ -200,13 +203,14 @@ class Perf_Stress_LevelDB(unittest.TestCase):
             fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3811-2q-<MMDDHHMMSS>.log
         '''
 
-        # Run the test scenario, including both the invokes and query tests.
+        # Run the test scenario: launch network and run the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
-        returncode = subprocess.call("./FAB-3808-2i.sh",
-                cwd=scenarios_directory, shell=True)
+        returncode = subprocess.call("./FAB-3808-2i.sh", cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        # tear down the network, including all the nodes docker containers
+        returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
         # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
         #     2*1*1*1*10000=20000
@@ -258,13 +262,14 @@ class Perf_Stress_LevelDB(unittest.TestCase):
             fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3835-4q-<MMDDHHMMSS>.log
         '''
 
-        # Run the test scenario, including both the invokes and query tests.
+        # Run the test scenario: launch network and run the invokes and query tests.
         # We do these two testcases together in this one test scenario, with
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
-        returncode = subprocess.call("./FAB-3807-4i.sh",
-                cwd=scenarios_directory, shell=True)
+        returncode = subprocess.call("./FAB-3807-4i.sh", cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        # tear down the network, including all the nodes docker containers
+        returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
         # (#orgs * #chaincodes * #channels * #threads per org * 10,000 TX per thread):
         #     2*1*1*2*10000=40000
