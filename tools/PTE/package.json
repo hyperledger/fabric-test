@@ -1,0 +1,19 @@
+{
+  "name": "PTE",
+  "version": "1.0.0",
+  "description": "A Performance Traffic Engine (PTE) tool to interact with Hyperledger Fabric networks by sending requests to and receiving responses from one or more networks",
+  "main": "pte-main.js",
+  "keywords": [
+    "PTE",
+    "Performance Traffic Engine tool"
+  ],
+  "engines": {
+    "node": ">=8.9.4 <9.0",
+    "npm": ">=5.6.0 <6.0"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fabric-ca-client": "unstable",
+    "fabric-client": "unstable"
+  }
+}
