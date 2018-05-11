@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-3814-2i-CouchDB-LargePayload/preconfig/channels/chan1-create-TLS.json
