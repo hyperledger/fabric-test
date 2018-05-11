@@ -333,10 +333,15 @@ def step_impl(context, peer, args):
 def step_impl(context, channel, peer):
     upgrade_impl(context, context.interface.TEST_CHANNEL_ID, 1, peer)
 
-@when(u'a user instantiates the chaincode on "{peer}"')
-def step_impl(context, peer, username="Admin", timeout=120):
+@when(u'a user instantiates the chaincode on channel "{channel}" on peer "{peer}"')
+def instantiate_impl(context, peer, channel, username="Admin", timeout=120):
+    context.chaincode["channelID"] = channel
     context.interface.instantiate_chaincode(context, peer, username)
     context.interface.post_deploy_chaincode(context, peer, timeout)
+
+@when(u'a user instantiates the chaincode on "{peer}"')
+def step_impl(context, peer):
+    instantiate_impl(context, peer, context.chaincode["channelID"])
 
 @when(u'a user queries for channel information')
 def step_impl(context):

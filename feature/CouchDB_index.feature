@@ -225,3 +225,121 @@ Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num                      |
     | github.com/hyperledger/fabric-samples/chaincode/marbles02/go   | github.com/hyperledger/fabric-samples/chaincode/marbles02/go | GOLANG    |  FAB-7265, FAB-7266, FAB-7267  |
     | ../../fabric-samples/chaincode/marbles02/node                  | ../fabric-samples/chaincode/marbles02/node                   | NODE      |  FAB-7270, FAB-7271, FAB-7272  |
+
+
+@daily
+  Scenario Outline: <jira_num>: Test CouchDB indexing using install-after-instantiate with marbles chaincode using <language> with 3 channels and 1 index
+
+    Given I have a bootstrapped fabric network of type kafka using state-database couchdb with tls
+    When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
+
+    # set up 3 channels, 1  cc each
+    When a user sets up a channel named "mychannel1"
+    And a user sets up a channel named "mychannel2"
+    And a user sets up a channel named "mychannel3"
+
+    # install the 3 ccs only in 3 (out of 4) peers and instantiate them
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org2.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org2.example.com"
+    And a user instantiates the chaincode on channel "mychannel1" on peer "peer0.org1.example.com"
+
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org2.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org2.example.com"
+    And a user instantiates the chaincode on channel "mychannel2" on peer "peer0.org1.example.com"
+
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org2.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org2.example.com"
+    And a user instantiates the chaincode on channel "mychannel3" on peer "peer0.org1.example.com"
+    And I wait "10" seconds
+
+    # Invoke in the channels
+    When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"
+    And a user invokes on the channel "mychannel2" using chaincode named "mycc2" with args ["initMarble","marble2","yellow","20","alex"] on "peer0.org1.example.com"
+    And a user invokes on the channel "mychannel3" using chaincode named "mycc3" with args ["initMarble","marble3","red","5","jose"] on "peer0.org1.example.com"
+
+    # Now the late-install in 4th peer
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
+
+    # Do explicit queryi 4th peer: rich query with the index explicitly specified
+    When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"alex\\", \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"jose\\", \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+
+Examples:
+    |                             cc_path                            |                      index_path                              | language  |  jira_num           |
+    | github.com/hyperledger/fabric-samples/chaincode/marbles02/go   | github.com/hyperledger/fabric-samples/chaincode/marbles02/go | GOLANG    |  FAB-7257, FAB-7258 |
+    | ../../fabric-samples/chaincode/marbles02/node                  | ../fabric-samples/chaincode/marbles02/node                   | NODE      |  FAB-7260, FAB-7261 |
+
+
+@daily
+  Scenario Outline: <jira_num>: Test CouchDB indexing using install-after-instantiate with marbles chaincode using <language> with 3 channels and 3 indexes
+
+    Given I have a bootstrapped fabric network of type kafka using state-database couchdb with tls
+    When a user defines a couchDB index named index_behave_test_owner with design document name "indexdoc_behave_test" containing the fields "owner" to the chaincode at path "<index_path>"
+    When a user defines a couchDB index named index_behave_test_docType with design document name "indexdoc_behave_test" containing the fields "docType" to the chaincode at path "<index_path>"
+    When a user defines a couchDB index named index_behave_test_color with design document name "indexdoc_behave_test" containing the fields "color" to the chaincode at path "<index_path>"
+
+    # set up 3 channels, 1  cc each
+    When a user sets up a channel named "mychannel1"
+    And a user sets up a channel named "mychannel2"
+    And a user sets up a channel named "mychannel3"
+
+    # install the 3 ccs only in 3 (out of 4) peers and instantiate them
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org2.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org2.example.com"
+    And a user instantiates the chaincode on channel "mychannel1" on peer "peer0.org1.example.com"
+
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org2.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org2.example.com"
+    And a user instantiates the chaincode on channel "mychannel2" on peer "peer0.org1.example.com"
+
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org2.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org2.example.com"
+    And a user instantiates the chaincode on channel "mychannel3" on peer "peer0.org1.example.com"
+    And I wait "10" seconds
+
+    # Invoke in the channels
+    When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"
+    And a user invokes on the channel "mychannel2" using chaincode named "mycc2" with args ["initMarble","marble2","yellow","20","alex"] on "peer0.org1.example.com"
+    And a user invokes on the channel "mychannel3" using chaincode named "mycc3" with args ["initMarble","marble3","red","5","jose"] on "peer0.org1.example.com"
+
+    # Now the late-install in 4th peer
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
+    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
+
+    # Do explicit query in 4th peer: rich query with the index explicitly specified
+    When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"alex\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"jose\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_docType\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_docType\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_docType\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
+    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+
+Examples:
+    |                             cc_path                            |                      index_path                              | language  |  jira_num    |
+    | github.com/hyperledger/fabric-samples/chaincode/marbles02/go   | github.com/hyperledger/fabric-samples/chaincode/marbles02/go | GOLANG    |  FAB-7259    |
+    | ../../fabric-samples/chaincode/marbles02/node                  | ../fabric-samples/chaincode/marbles02/node                   | NODE      |  FAB-7262    |
