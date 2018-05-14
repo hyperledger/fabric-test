@@ -786,14 +786,10 @@ function createOneChannel(client ,channelOrgName) {
     })
     .then((results) => {
         results.forEach(function(result){
-        var signature = client.signChannelConfig(config);
-        logger.info('[createOneChannel] Successfully signed config update for one organization ');
-        // collect signature from org1 admin
-        // TODO: signature counting against policies on the orderer
-        // at the moment is being investigated, but it requires this
-        // weird double-signature from each org admin
-        signatures.push(signature);
-        signatures.push(signature);
+            var signature = client.signChannelConfig(config);
+            logger.info('[createOneChannel] Successfully signed config update for one organization ');
+            // collect signature from org admin
+            signatures.push(signature);
         });
         return signatures;
     }).then((sigs) =>{
@@ -804,11 +800,7 @@ function createOneChannel(client ,channelOrgName) {
         logger.info('[createOneChannel] Successfully enrolled user \'admin\' for', "orderer");
         var signature = client.signChannelConfig(config);
         logger.info('[createOneChannel] Successfully signed config update: ', "orderer");
-        // collect signature from org1 admin
-        // TODO: signature counting against policies on the orderer
-        // at the moment is being investigated, but it requires this
-        // weird double-signature from each org admin
-        signatures.push(signature);
+        // collect signature from org admin
         signatures.push(signature);
 
         //logger.info('[createOneChannel] signatures: ', signatures);
