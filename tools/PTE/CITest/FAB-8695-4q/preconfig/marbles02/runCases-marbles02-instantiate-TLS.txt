@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-8695-4q/preconfig/marbles02/marbles02-chan1-instantiate-TLS.json
+sdk=node CITest/FAB-8695-4q/preconfig/marbles02/marbles02-chan2-instantiate-TLS.json
