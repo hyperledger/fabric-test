@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-4045-2i-CouchDB-8kafkas/samplecc/samplecc-chan1-FAB-4045-2i-CouchDB-8kafkas-TLS.json
