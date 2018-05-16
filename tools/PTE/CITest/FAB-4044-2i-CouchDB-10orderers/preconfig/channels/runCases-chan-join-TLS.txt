@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-4044-2i-CouchDB-10orderers/preconfig/channels/chan1-join-TLS.json

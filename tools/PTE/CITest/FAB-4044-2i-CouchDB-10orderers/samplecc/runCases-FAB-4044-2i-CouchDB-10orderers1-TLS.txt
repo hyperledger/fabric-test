@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-4044-2i-CouchDB-10orderers/samplecc/samplecc-chan1-FAB-4044-2i-CouchDB-10orderers1-TLS.json
