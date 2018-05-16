@@ -1,0 +1,1 @@
+sdk=node CITest/runCases-FAB-4043-8i-CouchDB-4cc/samplecc/samplecc2-chan1-runCases-FAB-4043-8i-CouchDB-4cc-TLS.json

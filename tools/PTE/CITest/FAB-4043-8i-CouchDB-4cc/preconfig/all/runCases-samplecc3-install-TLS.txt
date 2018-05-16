@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-4043-8i-CouchDB-4cc/preconfig/all/samplecc3-chan1-install-TLS.json
