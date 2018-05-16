@@ -1,7 +1,7 @@
 {
     "txCfgPtr": "runPTE/TXopt.json",
     "ccDfnPtr": "runPTE/_CHAINCODEID_DfnOpt.json",
-    "channelID": "_ch1",
+    "channelID": "_CHANNELID_",
     "chaincodeID": "_CHAINCODEID_",
     "chaincodeVer": "v0",
     "channelOpt": {

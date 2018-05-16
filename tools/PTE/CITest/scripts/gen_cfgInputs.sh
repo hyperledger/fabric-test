@@ -19,13 +19,13 @@ usage () {
     echo
     echo -e "-h, --help\tView this help message"
 
-    echo -e "-n, --name\tchannel name"
+    echo -e "-n, --name\tlist of channel"
     echo -e "\t\t(Default: defaultchannel)"
 
     echo -e "-c, --channel\tcreate/join channel"
     echo -e "\t\t(Default: No)"
 
-    echo -e "-i, --install\tInstall/instantiate chaincode"
+    echo -e "-i, --install\tinstall/instantiate chaincode"
     echo -e "\t\t(Default: No)"
 
     echo -e "-a, --app\tlist of chaincode"
@@ -59,8 +59,8 @@ usage () {
     echo -e "\t\t(Default: 0)"
 
     echo -e "examples:"
-    echo -e "./gen_cfgInputs.sh -d SCDir -c -i -n testorgschannel1 -a samplecc"
-    echo -e "./gen_cfgInputs.sh -d SCDir -i -n testorgschannel1 -a marbles02"
+    echo -e "./gen_cfgInputs.sh -d SCDir -c -i -n testorgschannel1 testorgschannel2 -a samplecc"
+    echo -e "./gen_cfgInputs.sh -d SCDir -i -n testorgschannel1 testorgschannel2 -a marbles02 samplecc"
     echo -e "./gen_cfgInputs.sh -d SCDir -c -i -n testorgschannel1 -a samplecc samplejs marbles02 -p -t Move"
     echo -e "./gen_cfgInputs.sh -d SCDir -i -n testorgschannel1 -p -t Move"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 -a samplecc samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 -t move"
@@ -113,6 +113,8 @@ LANGUAGE="golang"
 CCPath=""
 MDPath=""
 
+# get chaincode path
+# $1: chaincode
 getCCPath() {
     cc=$1
     if [ $cc == "samplecc" ]; then
@@ -132,19 +134,23 @@ getCCPath() {
 # create PTE input json: create/join channel and install/instantiate chaincode
 # $1: config file name
 # $2: SC file
-# $3: chaincode
+# $3: channel
+# $4: chaincode (optional)
 PreCFGProc() {
 
     cfgName=$1
     sc=$2
-    echo -e " $0: sfile=$sc"
-    if [ $# -eq 3 ]; then
-        cc=$3
+    chnl=$3
+    echo -e " $0: sfile=$sc $chnl=$chnl"
+    if [ $# -eq 4 ]; then
+        cc=$4
         echo -e " $0: chaincode=$cc"
     else
         cc=""
     fi
-        sed -i "s/_CHANNELNAME_/$CHANNEL/g" $cfgName
+        ###sed -i "s/_CHANNELNAME_/$CHANNEL/g" $cfgName
+        sed -i "s/_CHANNELNAME_/$chnl/g" $cfgName
+        sed -i "s/_CHANNELID_/$chnl/g" $cfgName
         sed -i "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
         sed -i "s/_SCFILENAME_/$sc/g" $cfgName
         sed -i "s/_CHAINCODEPATH_/$CCPath/g" $cfgName
@@ -159,6 +165,13 @@ PreCFGProc() {
 }
 
 # create PTE input json: transaction
+# $1: cfg json
+# $2: invoke type
+# $3: number of proc
+# $4: transaction frequency
+# $5: number of transaction request
+# $6: run duration
+# $7: transaction mode
 PreTXProc() {
 
     cfgTX=$1
@@ -170,8 +183,8 @@ PreTXProc() {
     transmode=$7
 
         sed -i "s/_INVOKETYPE_/$invokeType/g" $cfgTX
-        sed -i "s/_FREQ_/$freq/g" $cfgTX
         sed -i "s/_NPROC_/$nproc/g" $cfgTX
+        sed -i "s/_FREQ_/$freq/g" $cfgTX
         sed -i "s/_NREQ_/$nreq/g" $cfgTX
         sed -i "s/_RUNDUR_/$rundur/g" $cfgTX
         sed -i "s/_TRANSMODE_/$transmode/g" $cfgTX
@@ -180,89 +193,100 @@ PreTXProc() {
 
 # channel process: create and join
 ChannelProc() {
-    for scfile in "${NWName[@]}"; do
-        fname=$scfile
-        cd $runDir
-        echo "process cc $scfile"
+    # loop on channel list
+    for chan in "${CHANNEL[@]}"; do
+        # loop on network list
+        for scfile in "${NWName[@]}"; do
+            fname=$scfile"_"$chan
+            cd $runDir
+            echo "process cc $scfile channel $chan"
 
-        cfgCREATE=create-$fname".json"
-        cp $TEMPLATEDIR/template-create.json $cfgCREATE
+            cfgCREATE=create-$fname".json"
+            cp $TEMPLATEDIR/template-create.json $cfgCREATE
 
-        PreCFGProc $cfgCREATE $scfile.json
+            PreCFGProc $cfgCREATE $scfile.json $chan
 
-        # create channel
-        runCaseCreate=runCases-create-$fname".txt"
-        tmp=$runDir/$cfgCREATE
-        echo "sdk=node $tmp" >> $runCaseCreate
+            # create channel
+            runCaseCreate=runCases-create-$fname".txt"
+            tmp=$runDir/$cfgCREATE
+            echo "sdk=node $tmp" >> $runCaseCreate
 
-        cd $PTEDIR
-        echo "create channel on $scfile"
-        ./pte_driver.sh $runDir/$runCaseCreate
+            cd $PTEDIR
+            echo "create channel on $scfile"
+            ./pte_driver.sh $runDir/$runCaseCreate
 
-        sleep 15
-        # join channel
-        cd $runDir
+            sleep 15
+            # join channel
+            cd $runDir
 
-        cfgJOIN=join-$fname".json"
-        cp $TEMPLATEDIR/template-join.json $cfgJOIN
+            cfgJOIN=join-$fname".json"
+            cp $TEMPLATEDIR/template-join.json $cfgJOIN
 
-        PreCFGProc $cfgJOIN $scfile.json
+            PreCFGProc $cfgJOIN $scfile.json $chan
 
-        runCaseJoin=runCases-join-$fname".txt"
-        tmp=$runDir/$cfgJOIN
-        echo "sdk=node $tmp" >> $runCaseJoin
+            runCaseJoin=runCases-join-$fname".txt"
+            tmp=$runDir/$cfgJOIN
+            echo "sdk=node $tmp" >> $runCaseJoin
 
-        cd $PTEDIR
-        echo "join channel on $scfile"
-        ./pte_driver.sh $runDir/$runCaseJoin
-        cd $runDir
+            cd $PTEDIR
+            echo "join channel on $scfile"
+            ./pte_driver.sh $runDir/$runCaseJoin
+            cd $runDir
+        done
     done
 }
 
 # install/instantiate chaincode
 ChaincodeProc() {
+    # loop on chaincode list
     for chaincode in "${Chaincode[@]}"; do
         getCCPath $chaincode
 
-    for scfile in "${NWName[@]}"; do
-        cd $runDir
-        echo "[$0] process cc $scfile"
-        echo "[$0] CCPath $CCPath"
-        sc=$scfile".json"
-        echo "[$0] sc $sc"
+        # loop on network list
+        for scfile in "${NWName[@]}"; do
+            # loop on channel list
+            for chan in "${CHANNEL[@]}"; do
+                cd $runDir
+                echo "[$0] process cc $scfile"
+                echo "[$0] CCPath $CCPath"
+                sc=$scfile".json"
+                echo "[$0] sc $sc"
 
-        fname=$scfile"-"$chaincode
-        cfgINSTALL=install-$fname".json"
-        cp $TEMPLATEDIR/template-install.json $cfgINSTALL
+                fname=$scfile"_"$chan"-"$chaincode
+                cfgINSTALL=install-$fname".json"
+                cp $TEMPLATEDIR/template-install.json $cfgINSTALL
 
-        PreCFGProc $cfgINSTALL $scfile.json $chaincode
+                PreCFGProc $cfgINSTALL $scfile.json $chan $chaincode
 
-        # install chaincode
-        runCaseinstall=runCases-install-$fname".txt"
-        tmp=$runDir/$cfgINSTALL
-        echo "sdk=node $tmp" >> $runCaseinstall
+                # install chaincode
+                runCaseinstall=runCases-install-$fname".txt"
+                tmp=$runDir/$cfgINSTALL
+                echo "sdk=node $tmp" >> $runCaseinstall
 
-        # instantiate chaincode
+                # instantiate chaincode
 
-        cfgINSTAN=instantiate-$fname".json"
-        cp $TEMPLATEDIR/template-instantiate.json $cfgINSTAN
+                cfgINSTAN=instantiate-$fname".json"
+                cp $TEMPLATEDIR/template-instantiate.json $cfgINSTAN
 
-        PreCFGProc $cfgINSTAN $scfile.json $chaincode
+                PreCFGProc $cfgINSTAN $scfile.json $chan $chaincode
 
-        runCaseinstantiate=runCases-instantiate-$fname".txt"
-        tmp=$runDir/$cfgINSTAN
-        echo "sdk=node $tmp" >> $runCaseinstantiate
+                runCaseinstantiate=runCases-instantiate-$fname".txt"
+                tmp=$runDir/$cfgINSTAN
+                echo "sdk=node $tmp" >> $runCaseinstantiate
 
-    done
-        cd $PTEDIR
-        echo "install chaincode on $scfile"
-        ./pte_driver.sh $runDir/$runCaseinstall
+                cd $PTEDIR
+                echo "install chaincode on $scfile"
+                echo "./pte_driver.sh $runDir/$runCaseinstall"
+                ./pte_driver.sh $runDir/$runCaseinstall
 
-        echo "instantiate chaincode on $scfile"
-        ./pte_driver.sh $runDir/$runCaseinstantiate
-        cd $runDir
+                echo "instantiate chaincode on $scfile"
+                echo "./pte_driver.sh $runDir/$runCaseinstantiate"
+                ./pte_driver.sh $runDir/$runCaseinstantiate
+                cd $runDir
 
-    done
+            done     # end loop on channel list
+        done         # end loop on network list
+    done             # end loop on chaincode list
 }
 
 
@@ -273,35 +297,40 @@ TransactionProc() {
 
     # execute transactions
     PTEMgr=$runDir/PTEMgr-runTX.txt
+    # loop on chaincode list
     for chaincode in "${Chaincode[@]}"; do
         getCCPath $chaincode
+        # loop on network list
         for scfile in "${NWName[@]}"; do
+            # loop on channel list
+            for chan in "${CHANNEL[@]}"; do
 
-            echo "process $chaincode tx on $scfile"
-            fname=$scfile"-"$chaincode
-            cd $runDir
+                echo "process $chaincode tx on $scfile"
+                fname=$scfile"_"$chan"-"$chaincode
+                cd $runDir
 
-            pteCfgTX="TX-"$fname".json"
-            pteTXopt="TXopt.json"
+                pteCfgTX="TX-"$fname".json"
+                pteTXopt="TXopt.json"
 
-            cp $TEMPLATEDIR/template-tx.json $pteCfgTX
-            cp $TEMPLATEDIR/txCfgOpt.json $pteTXopt
-            if [ ! -e $ccDfnOpt.json ]; then
-                echo -e "copy $chaincode DfnOpt.json"
-                cp $TEMPLATEDIR/$chaincode"DfnOpt.json" $runDir
-                sed -i "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
-            fi
+                cp $TEMPLATEDIR/template-tx.json $pteCfgTX
+                cp $TEMPLATEDIR/txCfgOpt.json $pteTXopt
+                if [ ! -e $ccDfnOpt.json ]; then
+                    echo -e "copy $chaincode DfnOpt.json"
+                    cp $TEMPLATEDIR/$chaincode"DfnOpt.json" $runDir
+                    sed -i "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
+                fi
 
-            # create PTE input json
-            PreCFGProc $pteCfgTX $scfile.json $chaincode
-            PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE
+                # create PTE input json
+                PreCFGProc $pteCfgTX $scfile.json $chan $chaincode
+                PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE
 
-            runCaseTX=runCasesTX-$fname".txt"
-            tmp=$runDir/$pteCfgTX
-            echo "sdk=node $tmp"
-            echo "sdk=node $tmp" >> $runCaseTX
-            echo "driver=pte $runDir/$runCaseTX" >> $PTEMgr
+                runCaseTX=runCasesTX-$fname".txt"
+                tmp=$runDir/$pteCfgTX
+                echo "sdk=node $tmp"
+                echo "sdk=node $tmp" >> $runCaseTX
+                echo "driver=pte $runDir/$runCaseTX" >> $PTEMgr
 
+            done
         done
     done
 
@@ -346,9 +375,14 @@ while [[ $# -gt 0 ]]; do
       -n | --name)
           shift
           i=0
-          CHANNEL=$1  # Channels
+          CHANNEL[$i]=$1  # Channels
           shift
-          echo -e "\t- Specify Channels: $CHANNEL"
+          until [[ $(eval "echo \$1") =~ ^-.* ]] || [ -z $(eval "echo \$1") ]; do
+              i=$[ i + 1]
+              CHANNEL[$i]=$1
+              shift
+          done
+          echo -e "\t- Specify Channels: ${CHANNEL[@]}"
           echo -e ""
           ;;
 

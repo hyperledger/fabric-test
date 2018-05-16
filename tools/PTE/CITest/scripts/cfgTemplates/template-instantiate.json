@@ -1,5 +1,5 @@
 {
-    "channelID": "_ch1",
+    "channelID": "_CHANNELID_",
     "chaincodeID": "_CHAINCODEID_",
     "chaincodeVer": "v0",
     "transType": "instantiate",
