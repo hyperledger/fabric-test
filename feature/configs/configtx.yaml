@@ -5,126 +5,40 @@
 ---
 ################################################################################
 #
-#   Profiles
+#   SECTION: Capabilities
 #
-#   - Different configuration profiles may be encoded here to be specified
-#   as parameters to the configtxgen tool. The profiles which specify consortiums
-#   are to be used for generating the orderer genesis block.  With the correct
-#   consortium members defined in the orderer genesis block, channel creation
-#   requests may be generated with only the org member names and a consortium name
+#   - This section defines the capabilities of fabric network. This is a new
+#   concept as of v1.1.0 and should not be utilized in mixed networks with
+#   v1.0.x peers and orderers.  Capabilities define features which must be
+#   present in a fabric binary for that binary to safely participate in the
+#   fabric network.  For instance, if a new MSP type is added, newer binaries
+#   might recognize and validate the signatures from this type, while older
+#   binaries without this support would be unable to validate those
+#   transactions.  This could lead to different versions of the fabric binaries
+#   having different world states.  Instead, defining a capability for a channel
+#   informs those binaries without this capability that they must cease
+#   processing transactions until they have been upgraded.  For v1.0.x if any
+#   capabilities are defined (including a map with all capabilities turned off)
+#   then the v1.0.x peer will deliberately crash.
 #
 ################################################################################
-Profiles:
+Capabilities:
+    # Channel capabilities apply to both the orderers and the peers and must be
+    # supported by both.  Set the value of the capability to true to require it.
+    Global: &ChannelCapabilities
+        V1_1: true
 
-    # SampleInsecureSolo defines a configuration which uses the Solo orderer,
-    # contains no MSP definitions, and allows all transactions and channel
-    # creation requests for the consortium SampleConsortium.
-    SampleInsecureSolo:
-        Capabilities:
-            <<: *ChannelCapabilities
-        Orderer:
-            <<: *OrdererDefaults
-            Organizations:
-                - *ExampleCom
-            Capabilities:
-                <<: *OrdererCapabilities
-        Consortiums:
-            SampleConsortium:
-                Organizations:
-                    - *Org1ExampleCom
-                    - *Org2ExampleCom
+    # Orderer capabilities apply only to the orderers, and may be safely
+    # manipulated without concern for upgrading peers.  Set the value of the
+    # capability to true to require it.
+    Orderer: &OrdererCapabilities
+        V1_1: true
 
-    # SampleInsecureKafka defines a configuration that differs from the
-    # SampleInsecureSolo one only in that is uses the Kafka-based orderer.
-    SampleInsecureKafka:
-        Capabilities:
-            <<: *ChannelCapabilities
-        Orderer:
-            <<: *OrdererDefaults
-            OrdererType: kafka
-            Addresses:
-                - orderer0.example.com:7050
-                - orderer1.example.com:7050
-                - orderer2.example.com:7050
-            Organizations:
-                - *ExampleCom
-            Capabilities:
-                <<: *OrdererCapabilities
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *ExampleCom
-            Capabilities:
-                <<: *ApplicationCapabilities
-        Consortiums:
-            SampleConsortium:
-                Organizations:
-                    - *ExampleCom
-                    - *Org1ExampleCom
-                    - *Org2ExampleCom
-
-    # SampleSingleMSPSolo defines a configuration which uses the Solo orderer,
-    # and contains a single MSP definition (the MSP sampleconfig).
-    # The Consortium SampleConsortium has only a single member, SampleOrg
-    SampleSingleMSPSolo:
-        Orderer:
-            <<: *OrdererDefaults
-            Organizations:
-                - *ExampleCom
-            Capabilities:
-                <<: *OrdererCapabilities
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *ExampleCom
-            Capabilities:
-                <<: *ApplicationCapabilities
-        Consortiums:
-            SampleConsortium:
-                Organizations:
-                    - *ExampleCom
-                    - *Org1ExampleCom
-                    - *Org2ExampleCom
-
-    # SampleEmptyInsecureChannel defines a channel with no members
-    # and therefore no access control
-    SampleEmptyInsecureChannel:
-        Capabilities:
-            <<: *ChannelCapabilities
-        Consortium: SampleConsortium
-        Application:
-            Organizations:
-                - *ExampleCom
-            Capabilities:
-                <<: *ApplicationCapabilities
-
-    # SysTestChannel defines a channel for use with the System Test Orgs
-    SysTestChannel:
-        Capabilities:
-            <<: *ChannelCapabilities
-        Consortium: SampleConsortium
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *Org1ExampleCom
-                - *Org2ExampleCom
-            Capabilities:
-                <<: *ApplicationCapabilities
-
-    # SampleSingleMSPChannel defines a channel with only the sample org as a
-    # member.  It is designed to be used in conjunction with SampleSingleMSPSolo
-    # and SampleSingleMSPKafka orderer profiles
-    SampleSingleMSPChannel:
-        Capabilities:
-            <<: *ChannelCapabilities
-        Consortium: SampleConsortium
-        Application:
-            <<: *ApplicationDefaults
-            Organizations:
-                - *Org1ExampleCom
-                - *Org2ExampleCom
-            Capabilities:
-                <<: *ApplicationCapabilities
+    # Application capabilities apply only to the peer network, and may be safely
+    # manipulated without concern for upgrading orderers.  Set the value of the
+    # capability to true to require it.
+    Application: &ApplicationCapabilities
+        V1_2: true
 
 ################################################################################
 #
@@ -251,37 +165,124 @@ Application: &ApplicationDefaults
 
 ################################################################################
 #
-#   SECTION: Capabilities
+#   Profiles
 #
-#   - This section defines the capabilities of fabric network. This is a new
-#   concept as of v1.1.0 and should not be utilized in mixed networks with
-#   v1.0.x peers and orderers.  Capabilities define features which must be
-#   present in a fabric binary for that binary to safely participate in the
-#   fabric network.  For instance, if a new MSP type is added, newer binaries
-#   might recognize and validate the signatures from this type, while older
-#   binaries without this support would be unable to validate those
-#   transactions.  This could lead to different versions of the fabric binaries
-#   having different world states.  Instead, defining a capability for a channel
-#   informs those binaries without this capability that they must cease
-#   processing transactions until they have been upgraded.  For v1.0.x if any
-#   capabilities are defined (including a map with all capabilities turned off)
-#   then the v1.0.x peer will deliberately crash.
+#   - Different configuration profiles may be encoded here to be specified
+#   as parameters to the configtxgen tool. The profiles which specify consortiums
+#   are to be used for generating the orderer genesis block.  With the correct
+#   consortium members defined in the orderer genesis block, channel creation
+#   requests may be generated with only the org member names and a consortium name
 #
 ################################################################################
-Capabilities:
-    # Channel capabilities apply to both the orderers and the peers and must be
-    # supported by both.  Set the value of the capability to true to require it.
-    Global: &ChannelCapabilities
-        V1_1: true
+Profiles:
 
-    # Orderer capabilities apply only to the orderers, and may be safely
-    # manipulated without concern for upgrading peers.  Set the value of the
-    # capability to true to require it.
-    Orderer: &OrdererCapabilities
-        V1_1: true
+    # SampleInsecureSolo defines a configuration which uses the Solo orderer,
+    # contains no MSP definitions, and allows all transactions and channel
+    # creation requests for the consortium SampleConsortium.
+    SampleInsecureSolo:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *ExampleCom
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *Org1ExampleCom
+                    - *Org2ExampleCom
 
-    # Application capabilities apply only to the peer network, and may be safely
-    # manipulated without concern for upgrading orderers.  Set the value of the
-    # capability to true to require it.
-    Application: &ApplicationCapabilities
-        V1_2: true
+    # SampleInsecureKafka defines a configuration that differs from the
+    # SampleInsecureSolo one only in that is uses the Kafka-based orderer.
+    SampleInsecureKafka:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            OrdererType: kafka
+            Addresses:
+                - orderer0.example.com:7050
+                - orderer1.example.com:7050
+                - orderer2.example.com:7050
+            Organizations:
+                - *ExampleCom
+            Capabilities:
+                <<: *OrdererCapabilities
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *ExampleCom
+            Capabilities:
+                <<: *ApplicationCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *ExampleCom
+                    - *Org1ExampleCom
+                    - *Org2ExampleCom
+
+    # SampleSingleMSPSolo defines a configuration which uses the Solo orderer,
+    # and contains a single MSP definition (the MSP sampleconfig).
+    # The Consortium SampleConsortium has only a single member, SampleOrg
+    SampleSingleMSPSolo:
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *ExampleCom
+            Capabilities:
+                <<: *OrdererCapabilities
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *ExampleCom
+            Capabilities:
+                <<: *ApplicationCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *ExampleCom
+                    - *Org1ExampleCom
+                    - *Org2ExampleCom
+
+    # SampleEmptyInsecureChannel defines a channel with no members
+    # and therefore no access control
+    SampleEmptyInsecureChannel:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Consortium: SampleConsortium
+        Application:
+            Organizations:
+                - *ExampleCom
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+    # SysTestChannel defines a channel for use with the System Test Orgs
+    SysTestChannel:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Consortium: SampleConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1ExampleCom
+                - *Org2ExampleCom
+            Capabilities:
+                <<: *ApplicationCapabilities
+
+    # SampleSingleMSPChannel defines a channel with only the sample org as a
+    # member.  It is designed to be used in conjunction with SampleSingleMSPSolo
+    # and SampleSingleMSPKafka orderer profiles
+    SampleSingleMSPChannel:
+        Capabilities:
+            <<: *ChannelCapabilities
+        Consortium: SampleConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1ExampleCom
+                - *Org2ExampleCom
+            Capabilities:
+                <<: *ApplicationCapabilities
+
