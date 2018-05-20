@@ -98,7 +98,7 @@ To build all images and binaries in fabric, fabric-ca, as required by tests (exe
 
   cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric-ca
 
-  make docker     # Builds all fabric-ca images.
+  make docker-fabric-ca     # Builds all fabric-ca images.
 
 ```
 
