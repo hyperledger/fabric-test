@@ -1586,7 +1586,7 @@ Feature: Upgrade
       ### TODO: Will soon need to collect signatures (owners) and create a SignedChaincodeDeploymentSpec which will supplant the payload for installProposal.
 
       # Under the covers, create a deployment spec, etc.
-    And user "peer0Admin" using cert alias "peer-admin-cert" creates a install proposal "installProposal1ch2" using chaincode spec "ccSpec2"
+    When user "peer0Admin" using cert alias "peer-admin-cert" creates a install proposal "installProposal1ch2" using chaincode spec "ccSpec2"
 
     And user "peer0Admin" using cert alias "peer-admin-cert" sends proposal "installProposal1ch2" to endorsers with timeout of "90" seconds with proposal responses "installProposalCh2Responses1":
       | Endorser |
@@ -1648,6 +1648,114 @@ Feature: Upgrade
     # Sleep to allow for chaincode instantiation on the peer
     And I wait "15" seconds
 
+    ###########################################################################
+    #
+    # Entry point to upgrade chaincode on peers on channel1
+    #
+    ###########################################################################
+
+     When user "peer0Admin" creates a chaincode spec "ccSpecV1.1" with name "example02" and version "1.1" of type "GOLANG" for chaincode "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args
+      | funcName | arg1 | arg2 | arg3 | arg4 |
+      | init     | a    | 10000| b    | 20000|
+
+      # Under the covers, create a deployment spec, etc.
+    When user "peer0Admin" using cert alias "peer-admin-cert" creates a install proposal "installProposalV1.1" using chaincode spec "ccSpecV1.1"
+
+    And user "peer0Admin" using cert alias "peer-admin-cert" sends proposal "installProposalV1.1" to endorsers with timeout of "90" seconds with proposal responses "installProposalV1.1Responses1":
+      | Endorser |
+      | peer0    |
+
+    Then user "peer0Admin" expects proposal responses "installProposalV1.1Responses1" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+
+
+    Given user "peer0Admin" gives "ccSpecV1.1" to user "peer2Admin" who saves it as "ccSpecV1.1"
+
+      # Under the covers, create a deployment spec, etc.
+    When user "peer2Admin" using cert alias "peer-admin-cert" creates a install proposal "installProposalV1.1" using chaincode spec "ccSpecV1.1"
+
+    And user "peer2Admin" using cert alias "peer-admin-cert" sends proposal "installProposalV1.1" to endorsers with timeout of "90" seconds with proposal responses "installProposalV1.1Responses2":
+      | Endorser |
+      | peer2    |
+
+    Then user "peer2Admin" expects proposal responses "installProposalV1.1Responses2" with status "200" from endorsers:
+      | Endorser |
+      | peer2    |
+
+    Given user "peer0Admin" gives "ccSpecV1.1" to user "dev0Org0" who saves it as "ccSpecV1.1"
+    And user "peer0Admin" gives "ccSpecV1.1" to user "configAdminPeerOrg0" who saves it as "ccSpecV1.1"
+
+    And user "configAdminPeerOrg0" creates a signature policy envelope "upgrcc_signedByMemberOfPeerOrg0AndPeerOrg1Ch2" using "envelope(n_out_of(2,[signed_by(0),signed_by(1)]),[member('peerOrg0'), member('peerOrg1')])"
+
+    When user "configAdminPeerOrg0" using cert alias "config-admin-cert" creates an upgrade proposal "upgradeProposalChannel1V1.1" for channel "com.acme.blockchain.jdoe.channel1" using chaincode spec "ccSpecV1.1" and endorsement policy "upgrcc_signedByMemberOfPeerOrg0AndPeerOrg1Ch2"
+
+    And user "configAdminPeerOrg0" using cert alias "config-admin-cert" sends proposal "upgradeProposalChannel1V1.1" to endorsers with timeout of "90" seconds with proposal responses "upgradeProposalResonsesChannel1V1.1":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    Then user "configAdminPeerOrg0" expects proposal responses "upgradeProposalResonsesChannel1V1.1" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+    And user "configAdminPeerOrg0" expects proposal responses "upgradeProposalResonsesChannel1V1.1" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+
+
+    When the user "configAdminPeerOrg0" creates transaction "upgradeTxChannel1V1.1" from proposal "upgradeProposalChannel1V1.1" and proposal responses "upgradeProposalResonsesChannel1V1.1" for channel "com.acme.blockchain.jdoe.channel1"
+
+    And the user "configAdminPeerOrg0" broadcasts transaction "upgradeTxChannel1V1.1" to orderer "<orderer0>"
+
+    # Sleep as the local orderer ledger needs to create the block that corresponds to the start number of the seek request
+    And I wait "<BroadcastWaitTime>" seconds
+
+ #   And user "configAdminPeerOrg0" sends deliver a seek request on orderer "<orderer0>" with properties:
+ #     | ChainId                           | Start | End |
+ #     | com.acme.blockchain.jdoe.channel1 | 13    | 13  |
+
+ #   Then user "configAdminPeerOrg0" should get a delivery "deliveredUpgradeTxChannel1V1.1" from "<orderer0>" of "1" blocks with "1" messages within "1" seconds
+
+    # Sleep to allow for chaincode instantiation on the peer
+ #  And I wait "5" seconds
+
+
+
+    #####################################################################################################
+    #
+    # Query peers on this upgraded chaincode; ensure block was delivered to each of them with same value
+    #
+    #####################################################################################################
+    When user "dev0Org0" creates a chaincode invocation spec "querySpecOnUpgradedChaincodeCh1" using spec "ccSpecV1.1" with input:
+      | funcName | arg1 |
+      | query    | a    |
+
+      # Under the covers, create a deployment spec, etc.
+    When user "dev0Org0" using cert alias "consortium1-cert" creates a proposal "queryProposalUpgradedChaincode" for channel "com.acme.blockchain.jdoe.channel1" using chaincode spec "querySpecOnUpgradedChaincodeCh1"
+
+    And user "dev0Org0" using cert alias "consortium1-cert" sends proposal "queryProposalUpgradedChaincode" to endorsers with timeout of "30" seconds with proposal responses "queryProposalUpgradedChaincodeResponses1":
+      | Endorser |
+      | peer0    |
+      | peer2    |
+#     | peer1    |
+#     | peer3    |
+
+    Then user "dev0Org0" expects proposal responses "queryProposalUpgradedChaincodeResponses1" with status "200" from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+#     | peer1    |
+#     | peer3    |
+
+    And user "dev0Org0" expects proposal responses "queryProposalUpgradedChaincodeResponses1" each have the same value from endorsers:
+      | Endorser |
+      | peer0    |
+      | peer2    |
+#     | peer1    |
+#     | peer3    |
 
 
     ############################################################################
