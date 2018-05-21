@@ -48,11 +48,17 @@ In brief, PTE has the following features:
     - [Remote PTE](#remote-pte)
 
 ---
+### Code Base for v1.1.0
+- Fabric commit level: dce23777837545f2c63b75e5a26786131bf05132
+- fabric-sdk-node commit level: 34731570af3645a235e50e4023212d35b1da1429
+- fabric-ca commit level: 71974f53ab08fd8765b0016d76ad2cff71e5b668
+- fabric-test commit level: 2f355b12251e4b87ca6ccd8c17e570a7bdec8a12
+
 ### Code Base for v1.0.0
 - Fabric commit level: e4b47043270f2293daabf7d24984dd46901e04e7
 - fabric-sdk-node commit level: 974bafcb1059c4cb8dda54a9e9d0afc6d87854c5
 - fabric-ca commit level: 74f8f4d4c29e45a79a8849efb057dbd8de3ae8d0
-- PTE commit level: 359dbfb39f507a737ad52129ac0e4fac9cc03c0b
+- fabric-test commit level: 359dbfb39f507a737ad52129ac0e4fac9cc03c0b
 
 
 ### Future items
@@ -126,6 +132,9 @@ Optionally, you may choose to skip this step of obtaining `fabric` and `fabric-c
         - `npm install fabric-client@version`, for example to install version `1.0.2`, `npm install fabric-client@1.0.2`
         - `npm install fabric-ca-client@version`, for example to install version `1.0.2`, `npm install fabric-ca-client@1.0.2`
     - Unstable (with development version of fabric sdk)
+        - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `npm install`
+    or
         - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
         - `npm install fabric-client@unstable`
         - `npm install fabric-ca-client@unstable`
