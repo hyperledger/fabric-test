@@ -13,7 +13,7 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
   When a user sets up a channel
   # the following wait is for Gossip leadership states to be stabilized
   And I wait "30" seconds
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc" on the initial leader peer of "org1"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc" on the initial leader peer of "org1"
   And I wait "5" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial leader peer of "org1"
   Then a user receives a success response of 1000 from the initial leader peer of "org1"
@@ -61,7 +61,7 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
   When a user sets up a channel
   # the following wait is for Gossip leadership states to be stabilized
   And I wait "30" seconds
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc" on the initial non-leader peer of "org1"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc" on the initial non-leader peer of "org1"
   And I wait "5" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial non-leader peer of "org1"
   Then a user receives a success response of 1000 from the initial non-leader peer of "org1"
@@ -111,7 +111,7 @@ Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <t
   When a user sets up a channel
   # the following wait is for Gossip leadership states to be stabilized
   And I wait "30" seconds
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc" on the initial non-leader peer of "org1"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc" on the initial non-leader peer of "org1"
   And I wait "5" seconds
   And a user queries on the chaincode named "mycc" with args ["query","a"] on the initial non-leader peer of "org1"
   Then a user receives a success response of 1000 from the initial non-leader peer of "org1"
@@ -205,7 +205,7 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a 
   # Bootstrap the network create channel, deploy chaincode
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
 
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
@@ -266,7 +266,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   # Bootstrap the network create channel, deploy chaincode
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -329,7 +329,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
 
   # the following wait is for Gossip leadership states to be stabilized
   And I wait "30" seconds
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   ## Now do 3 invoke-queries in leader peer
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -383,7 +383,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
 
   # the following wait is for Gossip leadership states to be stabilized
   And I wait "30" seconds
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   ## Now do 3 invoke-queries in leader peer
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]

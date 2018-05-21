@@ -178,7 +178,7 @@ Examples:
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     When a user sets up a channel
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "10" seconds
     And a user queries on the chaincode named "mycc" with args ["query","a"]
@@ -220,7 +220,7 @@ Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the
     # and the min ISR is 2(KAFKA_MIN_INSYNC_REPLICAS)
     Given I have a bootstrapped fabric network of type kafka
     When a user sets up a channel
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["query","a"]
@@ -289,7 +289,7 @@ Scenario Outline: FAB-4808,FAB-3937,FAB-3938: Orderer_BatchTimeOut is honored, f
     Given the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is <envValue>
     And I have a bootstrapped fabric network of type <type>
     When a user sets up a channel
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 1000
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]

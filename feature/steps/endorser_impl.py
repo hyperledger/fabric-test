@@ -137,7 +137,7 @@ def step_impl(context, path, args):
 @when(u'a user deploys chaincode on channel "{channel}" with args {args} within {timeout:d} seconds')
 def step_impl(context, channel, args, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -147,7 +147,7 @@ def step_impl(context, channel, args, timeout):
 @when(u'a user deploys chaincode on channel "{channel}" with args {args}')
 def step_impl(context, channel, args):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -157,7 +157,7 @@ def step_impl(context, channel, args):
 @when(u'a user deploys chaincode on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, channel, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -167,7 +167,7 @@ def step_impl(context, channel, timeout):
 @when(u'a user deploys chaincode on channel "{channel}"')
 def step_impl(context, channel):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -177,7 +177,7 @@ def step_impl(context, channel):
 @when(u'a user deploys chaincode with name "{name}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, name, channel, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 name,
                 "GOLANG",
@@ -187,7 +187,7 @@ def step_impl(context, name, channel, timeout):
 @when(u'a user deploys chaincode with name "{name}" on channel "{channel}"')
 def step_impl(context, name, channel):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 name,
                 "GOLANG",
@@ -197,7 +197,7 @@ def step_impl(context, name, channel):
 @when(u'a user deploys chaincode with args {args} with policy {policy}')
 def step_impl(context, args, policy):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -209,7 +209,7 @@ def step_impl(context, args, policy):
 @when(u'a user deploys chaincode with args {args} within {timeout:d} seconds')
 def step_impl(context, args, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -219,7 +219,7 @@ def step_impl(context, args, timeout):
 @when(u'a user deploys chaincode with args {args}')
 def step_impl(context, args):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -229,7 +229,7 @@ def step_impl(context, args):
 @when(u'a user deploys chaincode within {timeout:d} seconds')
 def step_impl(context, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -239,7 +239,7 @@ def step_impl(context, timeout):
 @when(u'a user deploys chaincode')
 def step_impl(context):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -288,7 +288,7 @@ def step_impl(context, path, args, name, peer):
 def step_impl(context):
     peers = context.interface.get_peers(context)
     install_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
