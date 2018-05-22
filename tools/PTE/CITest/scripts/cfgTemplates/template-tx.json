@@ -7,8 +7,6 @@
     "channelOpt": {
         "name": "_CHANNELNAME_",
         "orgName": [
-            "org1",
-            "org2"
         ]
     },
     "SCFile": [

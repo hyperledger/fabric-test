@@ -8,8 +8,6 @@
         "name":  "_CHANNELNAME_",
         "action":  "create",
         "orgName": [
-            "org1",
-            "org2"
         ]
     },
     "timeoutOpt": {

@@ -25,6 +25,12 @@ usage () {
     echo -e "-c, --channel\tcreate/join channel"
     echo -e "\t\t(Default: No)"
 
+    echo -e "-o, --org\tlist of organizations"
+    echo -e "\t\t(Default: None)"
+
+    echo -e "--norg\tnumber of organization"
+    echo -e "\t\t(Default: 0)"
+
     echo -e "-i, --install\tinstall/instantiate chaincode"
     echo -e "\t\t(Default: No)"
 
@@ -59,11 +65,11 @@ usage () {
     echo -e "\t\t(Default: 0)"
 
     echo -e "examples:"
-    echo -e "./gen_cfgInputs.sh -d SCDir -c -i -n testorgschannel1 testorgschannel2 -a samplecc"
-    echo -e "./gen_cfgInputs.sh -d SCDir -i -n testorgschannel1 testorgschannel2 -a marbles02 samplecc"
-    echo -e "./gen_cfgInputs.sh -d SCDir -c -i -n testorgschannel1 -a samplecc samplejs marbles02 -p -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -i -n testorgschannel1 -p -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 -a samplecc samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 -t move"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a marbles02 samplecc -i"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -i -t Move"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 -t move"
     echo
     exit
 }
@@ -92,7 +98,9 @@ PrimeProc="NO"
 TXType=""
 Chaincode=""
 SCDIR=""
+ORGS=""
 
+NORG=0
 TXMODE="Constant"
 NPROC=1
 FREQ=0
@@ -131,6 +139,38 @@ getCCPath() {
 }
 
 
+# insert org into template
+InsertOrgs() {
+    InJson=$1
+    echo -e "PWD $PWD, process $InJson\n"
+        preOrg="orgName"
+        i=1
+    if [ $NORG -gt 0 ]; then
+        while [ $i -le $NORG ]
+        do
+            #echo -e "i=$i, ORGS length=$NORG"
+            if [ $i -eq $NORG ]; then
+                sed -i "/\"$preOrg\"/a \            \"org$i\"" $InJson
+            else
+                sed -i "/\"$preOrg\"/a \            \"org$i\"," $InJson
+            fi
+            preOrg="org"$i
+            ((i++))
+        done
+    else
+        for org in "${ORGS[@]}"; do
+            #echo -e "i=$i, ORGS length=${#ORGS[@]}"
+            if [ $i -eq ${#ORGS[@]} ]; then
+                sed -i "/\"$preOrg\"/a \            \"$org\"" $InJson
+            else
+                sed -i "/\"$preOrg\"/a \            \"$org\"," $InJson
+            fi
+            ((i++))
+            preOrg=$org
+        done
+    fi
+}
+
 # create PTE input json: create/join channel and install/instantiate chaincode
 # $1: config file name
 # $2: SC file
@@ -148,7 +188,6 @@ PreCFGProc() {
     else
         cc=""
     fi
-        ###sed -i "s/_CHANNELNAME_/$CHANNEL/g" $cfgName
         sed -i "s/_CHANNELNAME_/$chnl/g" $cfgName
         sed -i "s/_CHANNELID_/$chnl/g" $cfgName
         sed -i "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
@@ -161,6 +200,8 @@ PreCFGProc() {
         else
             sed -i "s/_METADATAPATH_/$MDPath/g" $cfgName
         fi
+
+        InsertOrgs $cfgName
 
 }
 
@@ -232,8 +273,8 @@ ChannelProc() {
             echo "join channel on $scfile"
             ./pte_driver.sh $runDir/$runCaseJoin
             cd $runDir
-        done
-    done
+        done     # end loop on network list
+    done         # end loop on channel list
 }
 
 # install/instantiate chaincode
@@ -320,7 +361,7 @@ TransactionProc() {
                     sed -i "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
                 fi
 
-                # create PTE input json
+                # create PTE transaction configuration input json
                 PreCFGProc $pteCfgTX $scfile.json $chan $chaincode
                 PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE
 
@@ -384,6 +425,27 @@ while [[ $# -gt 0 ]]; do
           done
           echo -e "\t- Specify Channels: ${CHANNEL[@]}"
           echo -e ""
+          ;;
+
+      -o | --org)
+          shift
+          i=0
+          ORGS[$i]=$1  # organization
+          shift
+          until [[ $(eval "echo \$1") =~ ^-.* ]] || [ -z $(eval "echo \$1") ]; do
+              i=$[ i + 1]
+              ORGS[$i]=$1
+              shift
+          done
+          echo -e "\t- Specify Channels: ${ORGS[@]}"
+          echo -e ""
+          ;;
+
+      --norg)
+          shift
+          NORG=$1           # number of organization
+          echo -e "\t- Specify number of org: $NORG\n"
+          shift
           ;;
 
       -a | --app)
@@ -478,6 +540,10 @@ echo " TXProc=$TXType"
 echo " PrimeProc=$PrimeProc"
 echo " CCProc=$CCProc"
 echo " ChanProc=$ChanProc"
+
+echo " ORGS length: ${#ORGS[@]}"
+echo " ORGS=${ORGS[@]}"
+echo " NORG=$NORG"
 
     # sanity check: SCDIR
 if [ "$SCDIR" == "" ]; then

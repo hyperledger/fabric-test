@@ -5,8 +5,6 @@
         "name": "_CHANNELNAME_",
         "action":  "join",
         "orgName": [
-            "org1",
-            "org2"
         ]
     },
     "SCFile": [
