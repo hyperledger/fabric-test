@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-3816-2i-CouchDB-10peersPerOrg/samplecc/chan1-FAB-3816-2i-CouchDB-10peersPerOrg1-TLS.json

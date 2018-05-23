@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-3816-2i-CouchDB-10peersPerOrg/preconfig/samplecc/chan1-instantiate-TLS.json

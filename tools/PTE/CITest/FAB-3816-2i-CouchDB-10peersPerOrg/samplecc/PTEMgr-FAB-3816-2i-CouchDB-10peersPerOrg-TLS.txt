@@ -1,0 +1,2 @@
+driver=pte CITest/FAB-3816-2i-CouchDB-10peersPerOrg/samplecc/runCases-FAB-3816-2i-CouchDB-10peersPerOrg1-TLS.txt
+driver=pte CITest/FAB-3816-2i-CouchDB-10peersPerOrg/samplecc/runCases-FAB-3816-2i-CouchDB-10peersPerOrg2-TLS.txt

@@ -47,6 +47,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-3810-2q: 2 processes X 10000 queries, TLS, couchDB
         FAB-3813-8i-CouchDB-4ch: 8 processes X 10000 invokes, TLS, couchDB, 4 channels
         FAB-3814-2i-CouchDB-LargePayload: 2 processes X 10000 invokes, TLS, couchDB, 1m payload
+        FAB-3816-2i-CouchDB-10peersPerOrg: 2 processes X 10000 invokes, TLS, couchDB, 10 peers/org
         FAB-3832-4i: 4 processes X 10000 invokes, TLS, couchDB
         FAB-3834-4q: 4 processes X 10000 queries, TLS, couchDB
         FAB-3808-2i: 2 processes X 10000 invokes, TLS
@@ -133,6 +134,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-3808-2i.sh: execute both FAB-3808-2i and FAB-3811-2q
         FAB-3813-8i-CouchDB-4ch.sh: execute FAB-3813-8i-CouchDB-4ch
         FAB-3814-2i-CouchDB-LargePayload.sh: execute FAB-3814-2i-CouchDB-LargePayload
+        FAB-3816-2i-CouchDB-10peersPerOrg.sh: execute FAB-3816-2i-CouchDB-10peersPerOrg
         FAB-3832-4i.sh: execute both FAB-3832-4i and FAB-3834-4q
         FAB-3833-2i.sh: execute both FAB-3833-2i and FAB-3810-2q
         FAB-4038-2i.sh: execute both FAB-4038-2i and FAB-4036-2q
