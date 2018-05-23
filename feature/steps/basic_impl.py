@@ -181,7 +181,7 @@ def step_impl(context):
 
 @when(u'I vendor "{language}" packages for fabric-based chaincode at "{path}"')
 def step_impl(context, language, path):
-    if language=="GOLANG":
+    if language.upper() == "GOLANG":
         print(subprocess.check_output(["govendor init && govendor add +external"], cwd=path, shell=True))
     elif language=="NODE":
         print(subprocess.check_output(["npm install"], cwd=path, shell=True))
