@@ -28,6 +28,7 @@ FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
 CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
 DOCKER_ORG = hyperledger
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/pre_setup.sh
+PTE_TAG = $(DOCKER_ORG)/fabric-pte:$(shell git rev-parse --short HEAD)
 
 .PHONY: ci-smoke
 ci-smoke: git-init git-latest fabric ca clean pre-setup docker-images smoke-tests
@@ -80,6 +81,10 @@ smoke-tests:
 .PHONY: daily-tests
 daily-tests:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runDailyTestSuite.sh
+
+.PHONY: pte-image
+pte-image:
+	docker build -t $(PTE_TAG) images/PTE
 
 .PHONY: clean
 clean:
