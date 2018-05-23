@@ -1295,6 +1295,12 @@ function eventRegisterFilteredBlock() {
                             var tend = new Date().getTime();
                             latency_update(evtRcvB, tend-txidList[txid], latency_event);
                             delete txidList[txid];
+                            if (transMode == 'LATENCY') {
+                                isExecDone('Move');
+                                if ( IDone != 1 ) {
+                                    invoke_move_latency();
+                                }
+                            }
                         }
                       }
                     }
@@ -1455,55 +1461,9 @@ function eventRegister(tx, cb) {
     cb(eventPromises);
 }
 
-function eventRegister_latency(tx, cb) {
-
-    var deployId = tx.getTransactionID();
-    var eventPromises = [];
-    eventHubs.forEach((eh) => {
-        let txPromise = new Promise((resolve, reject) => {
-            let handle = setTimeout(reject, evtTimeout);
-
-            eh.registerTxEvent(deployId.toString(), (tx, code) => {
-                clearTimeout(handle);
-                eh.unregisterTxEvent(deployId);
-                evtRcv++;
-
-                if (code !== 'VALID') {
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister_latency] The invoke transaction was invalid, code = ', Nid, channelName, org, pid, code);
-                    reject();
-                } else {
-                    if ( ( IDone == 1 ) && ( inv_m == evtRcv ) ) {
-                        tCurr = new Date().getTime();
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister_latency] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-                        if (invokeCheck == 'TRUE') {
-                            arg0 = keyStart + inv_m - 1;
-                            inv_q = inv_m - 1;
-                            invoke_query_simple(0);
-                        }
-                        evtDisconnect();
-                        resolve();
-                    } else if ( IDone != 1 ) {
-                        invoke_move_latency();
-                    }
-                }
-            });
-        }).catch((err) => {
-            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister_latency] eventHub error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-        });
-
-        eventPromises.push(txPromise);
-    });
-
-    cb(eventPromises);
-
-}
-
 
 // invoke_move_latency
 function invoke_move_latency() {
-    if ( IDone == 1 ) {
-       return;
-    }
 
     inv_m++;
 
@@ -1515,34 +1475,22 @@ function invoke_move_latency() {
             var proposalResponses = results[0];
 
             getTxRequest(results);
-            eventRegister_latency(tx_id, function(sendPromise) {
-
-                var sendPromise = channel.sendTransaction(txRequest);
-                return Promise.all([sendPromise].concat(eventPromises))
-                .then((results) => {
-
-                    isExecDone('Move');
-                    return results[0];
-
-                }).catch((err) => {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                    evtDisconnect();
-                    return;
-                })
-            },
-            function(err) {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                evtDisconnect();
+            txidList[tx_id.getTransactionID().toString()] = new Date().getTime();
+            return channel.sendTransaction(txRequest)
+            .then((results) => {
+                // do nothing here
+            }).catch((err) => {
+                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
             })
-
-        });
-
+        },
+        function(err) {
+            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+        })
 }
 
 
 function execModeLatency() {
 
-    // send proposal to endorser
     if ( transType == 'INVOKE' ) {
         tLocal = new Date().getTime();
         if ( runDur > 0 ) {
@@ -1554,6 +1502,8 @@ function execModeLatency() {
             if ( ccType == 'ccchecker' ) {
                 freq = 0;
             }
+
+            eventRegisterFilteredBlock();
             invoke_move_latency();
         } else if ( invokeType == 'QUERY' ) {
             invoke_query_simple(0);
@@ -1652,7 +1602,6 @@ function invoke_query_simple(freq) {
 
 function execModeSimple() {
 
-    // send proposal to endorser
     if ( transType == 'INVOKE' ) {
         tLocal = new Date().getTime();
         if ( runDur > 0 ) {
@@ -2011,7 +1960,6 @@ function invoke_query_const(freq) {
 }
 function execModeConstant() {
 
-    // send proposal to endorser
     if ( transType == 'INVOKE' ) {
         if (txCfgPtr.constantOpt.recHist) {
             recHist = txCfgPtr.constantOpt.recHist.toUpperCase();
@@ -2055,6 +2003,7 @@ function execModeConstant() {
                     eventRegisterFilteredBlock();
                     invoke_move_const_evtBlock(freq);
                 } else {
+                   requestPusher(getMoveRequest, (freq / 10));
                    invoke_move_const(freq);
                 }
             } else if (evtListener == 'BLOCK') {
@@ -2184,7 +2133,6 @@ function invoke_query_mix(freq) {
 var mixQuery;
 function execModeMix() {
 
-    // send proposal to endorser
     mixQuery = txCfgPtr.mixOpt.mixQuery.toUpperCase();
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeMix] mixQuery: %s', Nid, channelName, org, pid, mixQuery);
     if ( transType == 'INVOKE' ) {
@@ -2258,7 +2206,6 @@ function execModeProposal() {
             if ( ccType == 'ccchecker' ) {
                 freq = 0;
             }
-            invoke_move_latency();
             invoke_move_proposal();
         } else if ( invokeType == 'QUERY' ) {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeProposal] invalid invokeType= %s', Nid, channelName, org, pid, invokeType);
