@@ -51,6 +51,7 @@ This is the main script to execute all tasks.
          -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
          -S: TLS enablement [enabled|disabled], default=disabled
+         -m: Mutual TLS enablement [enabled|disabled], default=disabled
          -C: company name, default=example.com
 
 Note that when `-a down` is invoked to clean network, the company name is used as a key word in searching for docker images to be deleted.  The company name can be set using `-C`. The default company name is `example.com`.
@@ -155,6 +156,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -z: number of zookeeper
        -r: number of organiztions
        -S: TLS enablement [enabled|disabled], default=disabled
+       -m: Mutual TLS enablement [enabled|disabled], default=disabled
        -x: number of ca
        -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
        -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config

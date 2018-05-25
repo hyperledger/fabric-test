@@ -22,6 +22,7 @@ function printHelp {
    echo "       -z: number of zookeeper, default=0"
    echo "       -r: number of organiztions, default=1"
    echo "       -S: TLS enablement [enabled|disabled], default=disabled "
+   echo "       -m: Mutual TLS enablement [enabled|disabled], default=disabled "
    echo "       -x: number of ca, default=0"
    echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
@@ -53,16 +54,22 @@ nCA=0
 MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 TLSEnabled="disabled"
+MutualTLSEnabled="disabled"
 db="goleveldb"
 comName="example.com"
 
-while getopts ":x:z:l:q:d:t:a:o:k:p:r:F:G:S:C:" opt; do
+while getopts ":x:z:l:q:d:t:a:o:k:p:r:F:G:S:m:C:" opt; do
   case $opt in
     # peer environment options
     S)
       TLSEnabled=$OPTARG
       export TLSEnabled=$TLSEnabled
       echo "TLSEnabled: $TLSEnabled"
+      ;;
+    m)
+      MutualTLSEnabled=$OPTARG
+      export MutualTLSEnabled=$MutualTLSEnabled
+      echo "MutualTLSEnabled: $MutualTLSEnabled"
       ;;
     x)
       nCA=$OPTARG

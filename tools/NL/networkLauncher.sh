@@ -35,6 +35,7 @@ function printHelp {
    echo "    -B: batch size, default=10"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
+   echo "    -m: mutual TLS, [enabled|disabled], default=disabled"
    echo "    -S: TLS enablement [enabled|disabled], default=disabled"
    echo "    -C: company name, default=example.com "
    echo " "
@@ -61,6 +62,7 @@ ledgerDB="goleveldb"
 hashType="SHA2"
 secType="256"
 TLSEnabled="disabled"
+MutualTLSEnabled="disabled"
 nChannel=1
 HostIP1="0.0.0.0"
 comName="example.com"
@@ -71,7 +73,7 @@ ordererLogLevel="ERROR"
 batchTimeOut="2s"
 batchSize=10
 
-while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:q:c:B:F:G:S:m:C:" opt; do
   case $opt in
     # peer environment options
     a)
@@ -177,6 +179,11 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:" opt; do
     S)
       TLSEnabled=`echo $OPTARG | tr [A-Z] [a-z]`
       echo "TLSEnabled: $TLSEnabled"
+      ;;
+
+    m)
+      MutualTLSEnabled=`echo $OPTARG | tr [A-Z] [a-z]`
+      echo "MutualTLSEnabled: $MutualTLSEnabled"
       ;;
 
     C)
@@ -311,6 +318,6 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled  -l $coreLogLevel -q $ordererLogLevel"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel
 

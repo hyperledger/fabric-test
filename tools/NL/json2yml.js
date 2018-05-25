@@ -44,6 +44,17 @@ if ( process.env.TLSEnabled != null ) {
     }
 }
 console.log('TLS: %s, TLSEnabled: %s', TLS, TLSEnabled);
+// Mutual TLS
+var MutualTLS = 'disabled';
+var MutualTLSEnabled;
+if ( process.env.MutualTLSEnabled != null ) {
+    MutualTLSEnabled=process.env.MutualTLSEnabled;
+    if ( MutualTLSEnabled.toUpperCase() == 'ENABLED' ) {
+        MutualTLS = 'enabled';
+        console.log(' MutualTLSEnabled= ', process.env.MutualTLSEnabled);
+    }
+}
+console.log('MutualTLS: %s, MutualTLSEnabled: %s', MutualTLS, MutualTLSEnabled);
 
 // Orderer environment var
 var ord_env_name=[];
@@ -417,6 +428,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     }
 
                                 }
+                                if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                }
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var v1 = v+1;
                                     var OrdTLSDir = srcMSPDir + '/ordererOrganizations/'+comName+'/orderers/'+ordererName+'/tls';
@@ -746,6 +761,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':7051' + '\n';
                                 fs.appendFileSync(dFile, buff);
 
+                                if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
+                                    buff = '  ' + '    - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                }
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var t = Math.floor(v / nPeerPerOrg) + 1;
                                     var s = (v % nPeerPerOrg);
