@@ -21,6 +21,7 @@ function printHelp {
    echo "    -f: profile string, default=test"
    echo "    -h: hash type, default=SHA2"
    echo "    -k: number of kafka, default=0"
+   echo "    -e: number of kafka replications, default=0"
    echo "    -z: number of zookeepers, default=0"
    echo "    -n: number of channels, default=1"
    echo "    -o: number of orderers, default=1"
@@ -53,6 +54,7 @@ function printHelp {
 PROFILE_STRING="test"
 ordServType="solo"
 nKafka=0
+nReplica=0
 nZoo=0
 nCA=0
 nOrderer=1
@@ -73,7 +75,7 @@ ordererLogLevel="ERROR"
 batchTimeOut="2s"
 batchSize=10
 
-while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:q:c:B:F:G:S:m:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:m:C:" opt; do
   case $opt in
     # peer environment options
     a)
@@ -103,6 +105,11 @@ while getopts ":a:z:x:d:f:h:k:n:o:p:r:t:s:w:l:q:c:B:F:G:S:m:C:" opt; do
     k)
       nKafka=$OPTARG
       echo "number of kafka: $nKafka"
+      ;;
+
+    e)
+      nReplica=$OPTARG
+      echo "number of kafka replication: $nReplica"
       ;;
 
     z)
@@ -219,6 +226,10 @@ fi
 #   nCA=$nOrg
 #fi
 
+if [ $nReplica -eq 0 ]; then
+    nReplica=$nKafka
+fi
+
 # sanity check
 echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer, nZoo=$nZoo"
 echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType, comName=$comName"
@@ -318,6 +329,5 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel
-
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel

@@ -36,6 +36,7 @@ This is the main script to execute all tasks.
          -f: profile string, default=test
          -h: hash type, default=SHA2
          -k: number of kafka, default=0
+         -e: number of kafka replication, default=0
          -z: number of zookeepers, default=0
          -n: number of channels, default=1
          -o: number of orderers, default=1
@@ -153,6 +154,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -p: number of peers per organization
        -o: number of orderers
        -k: number of brokers
+       -e: number of kafka replications, defualt=brokers
        -z: number of zookeeper
        -r: number of organiztions
        -S: TLS enablement [enabled|disabled], default=disabled

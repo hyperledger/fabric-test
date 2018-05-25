@@ -142,6 +142,9 @@ console.log('number of Orderer: ', addOrderer);
 var addBroker = parseInt(process.argv[5]);
 console.log('number of Kafka Broker: ', addBroker);
 
+var addReplica = parseInt(process.argv[10]);
+console.log('number of Kafka Replication: ', addReplica);
+
 var nZoo = parseInt(process.argv[6]);;
 console.log('number of zookeepers: ', nZoo);
 
@@ -535,7 +538,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + v + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'KAFKA_DEFAULT_REPLICATION_FACTOR' ) {
-                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + addBroker + '\n';
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + addReplica + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'KAFKA_ZOOKEEPER_CONNECT' ) {
                                         var zp=2181;

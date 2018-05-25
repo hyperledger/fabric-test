@@ -19,6 +19,7 @@ function printHelp {
    echo "       -p: number of peers per organization, default=1"
    echo "       -o: number of orderers, default=1"
    echo "       -k: number of brokers, default=0"
+   echo "       -e: number of replicas, default=brokers"
    echo "       -z: number of zookeeper, default=0"
    echo "       -r: number of organiztions, default=1"
    echo "       -S: TLS enablement [enabled|disabled], default=disabled "
@@ -46,6 +47,7 @@ function printHelp {
 #init var
 Req="create"
 nBroker=0
+nReplica=0
 nZoo=0
 nPeerPerOrg=1
 nOrg=1
@@ -58,7 +60,7 @@ MutualTLSEnabled="disabled"
 db="goleveldb"
 comName="example.com"
 
-while getopts ":x:z:l:q:d:t:a:o:k:p:r:F:G:S:m:C:" opt; do
+while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:" opt; do
   case $opt in
     # peer environment options
     S)
@@ -120,6 +122,10 @@ while getopts ":x:z:l:q:d:t:a:o:k:p:r:F:G:S:m:C:" opt; do
       nBroker=$OPTARG
       echo "# of Broker: $nBroker"
       ;;
+    e)
+      nReplica=$OPTARG
+      echo "# of Replica: $nReplica"
+      ;;
     z)
       nZoo=$OPTARG
       echo "number of zookeeper: $Zoo"
@@ -157,10 +163,13 @@ while getopts ":x:z:l:q:d:t:a:o:k:p:r:F:G:S:m:C:" opt; do
   esac
 done
 
-
 if [ $nBroker -gt 0 ] && [ $CONFIGTX_ORDERER_ORDERERTYPE == 'solo' ]; then
     echo "reset Broker number to 0 due to the CONFIGTX_ORDERER_ORDERERTYPE=$CONFIGTX_ORDERER_ORDERERTYPE"
     nBroker=0
+fi
+
+if [ $nReplica -le 0 ]; then
+    nReplica=$nBroker
 fi
 
 #OS
@@ -174,7 +183,7 @@ export HOSTCONFIG_NETWORKMODE=$HOSTCONFIG_NETWORKMODE
 echo "HOSTCONFIG_NETWORKMODE: $HOSTCONFIG_NETWORKMODE"
 
 dbType=`echo "$db" | awk '{print tolower($0)}'`
-echo "action=$Req nPeerPerOrg=$nPeerPerOrg nBroker=$nBroker nOrderer=$nOrderer dbType=$dbType"
+echo "action=$Req nPeerPerOrg=$nPeerPerOrg nBroker=$nBroker nReplica=$nReplica nOrderer=$nOrderer dbType=$dbType"
 VP=`docker ps -a | grep 'peer node start' | wc -l`
 echo "existing peers: $VP"
 
@@ -208,9 +217,9 @@ fi
 
 ## echo "N1=$N1 VP=$VP nPeerPerOrg=$nPeerPerOrg VPN=$VPN"
 
-echo "node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $nCA"
+echo "node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $nCA $nReplica"
 
-node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $nCA
+node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $nCA $nReplica
 
 #fix CA _sk in docker-compose.yml
 CWD=$PWD
