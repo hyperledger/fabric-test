@@ -1,0 +1,18 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+- name: Launching PTE container
+  hosts: localhost
+  connection: local
+  become: true
+  become_user: root
+  gather_facts: true
+  vars_files:
+    - "./../../../../cello/src/agent/ansible/vars/{{ env }}.yml"
+    - "./../../vars/{{ pteenv }}.yml"
+  tasks:
+    - include: "ptesetup/tasks/{{ mode }}.yml"
+  tags: "ptesetup"

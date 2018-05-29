@@ -187,7 +187,7 @@
     dest: "{{ fabrictestpath }}/tools/PTE/CITest/{{ item[1] }}/{{ chaincode }}/runCases-chan{{ item[0].channelnum }}-{{ item[1] }}-TLS.txt"
   with_nested:
     - "{{ channellists }}"
-    - "{{ testcase }}"
+    - "{{ testcase_query }}"
   when: testcase_query == "multihost_query"
 
 - name: Create PTEMgr.txt file for query

@@ -1,0 +1,24 @@
+{
+    "channelID": "_ch{{ item.channelnum|int }}",
+{% if chaincode == "samplecc" %}
+    "chaincodeID": "sample_cc",
+{% elif chaincode == "samplejs" %}
+    "chaincodeID": "sample_js",
+{% endif %}
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "nProcPerOrg": "4",
+    "transType": "Channel",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "{{ item.name }}",
+        "channelTX": "/var/hyperledger/fabric/artifacts/keyfiles/{{ item.name }}.tx",
+        "action":  "create",
+        "orgName": [
+            "org{{ (item.channelnum|int * item.orgs|length) - (item.orgs|length - 1) }}"
+        ]
+    },
+    "SCFile": [
+               {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}
+       ]
+}

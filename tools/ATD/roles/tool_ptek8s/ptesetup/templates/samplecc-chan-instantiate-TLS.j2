@@ -1,0 +1,51 @@
+{
+    "channelID": "_ch{{ item.channelnum|int }}",
+{% if chaincode == "samplecc" %}
+    "chaincodeID": "sample_cc",
+{% elif chaincode == "samplejs" %}
+    "chaincodeID": "sample_js",
+{% endif %}
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transType": "instantiate",
+    "nProcPerOrg": "4",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "{{ item.name }}",
+        "action":  "create",
+        "orgName": [
+{% set index = ((item.channelnum|int * item.orgs|length) - (item.orgs|length - 1)) -%}
+{% for orgName in item.orgs %}
+{% if not loop.last %}
+            "org{{ index + loop.index0 }}",
+{% else %}
+            "org{{ index + loop.index0 }}"
+{% endif %}
+{% endfor %}
+        ]
+    },
+    "deploy": {
+{% if chaincode == "samplecc" %}
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+{% elif chaincode == "samplejs" %}
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+        "language": "node",
+{% endif %}
+        "fcn": "init",
+        "args": []
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
+    "SCFile": [
+                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}
+        ]
+}

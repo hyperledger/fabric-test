@@ -1,0 +1,33 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+set -e
+
+echo "##########################"
+echo "STARTING THE PTE CONTAINER"
+echo "##########################"
+PREFIX="result"
+cp -r CITest/*.tx /var/hyperledger/fabric/artifacts/keyfiles/
+cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE/CITest/scripts
+CWD=$PWD/../Logs
+{% if testcase != 'multihost' %}
+{% for ch in channelnum %}
+sed -i 's/\(\"channelTX\"\:\ \"\)\(.*\)/\1\/var\/hyperledger\/fabric\/artifacts\/keyfiles\/testorgschannel{{ ch }}.tx\"\,/g' ../{{ testcase }}/preconfig/channels/chan{{ ch }}-create-TLS.json
+{% if chaincode == 'samplejs' %}
+sed -i 's/\(\"chaincodePath\"\:\ \"\)\(.*\)/\1\/root\/go\/src\/github.com\/hyperledger\/fabric-test\/chaincodes\/samplecc\/node"\,/g' ../{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ ch }}-install-TLS.json
+{% endif %}
+{% endfor %}
+{% endif %}
+echo "##################"
+echo "STARTING THE TESTS"
+echo "##################"
+./test_driver.sh -m {{ testcase }} -p -c {{ chaincode }} -t {{ testcase_query }}
+rm -f ../Logs/{{ testcase_query }}*.log
+
+./test_driver.sh -m {{ testcase }} -t {{ testcase }}
+while ps axg | grep -vw grep | grep -w "node ./pte-execRequest.js" > /dev/null; do sleep 120; done
+
+./test_driver.sh -m {{ testcase_query }} -t {{ testcase_query }}
+while ps axg | grep -vw grep | grep -w "node ./pte-execRequest.js" > /dev/null; do sleep 120; done

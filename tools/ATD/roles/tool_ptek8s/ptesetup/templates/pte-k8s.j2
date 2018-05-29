@@ -1,0 +1,35 @@
+# Hyperledger fabric deployment file.
+#
+# Example usage: kubectl create -f <this_file>
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pte
+  labels:
+    k8s-app: pte
+spec:
+  imagePullSecrets:
+    - name: regcred
+  volumes:
+    - name: task-pv-storage
+      persistentVolumeClaim:
+        claimName: fabriccerts
+  containers:
+    - name: pte
+      image: {{ pte.repo.url }}fabric-pte:stable
+      imagePullPolicy: Always
+      env:
+        - { name: "TESTCASE", value: "{{ testcase }}" }
+        - { name: "TESTCASE_QUERY", value: "{{ testcase_query }}" }
+        - { name: "CHAINCODE", value: "{{ chaincode }}" }
+{% for channel in channels %}
+        - { name: "CHANNEL{{ loop.index }}", value: "{{ channel.name }}" }
+{% endfor %}
+{% for peer in peers %}
+        - { name: "PEER{{ loop.index }}", value: "{{ peer.name }}" }
+{% endfor %}
+      volumeMounts:
+        - { mountPath: "/var/hyperledger/fabric/artifacts", name: "task-pv-storage" }
+      command: ["sleep"]
+      args: ["1000000"]
