@@ -416,11 +416,11 @@ class CLIInterface(InterfaceBase):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
         # Ideally this would NOT be a 5 minute timeout, but more like a 2 minute timeout.
-        timeout = str(300 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s')))
+        timeout = 300 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s'))
         command = ["peer", "channel", "create",
                    "--file", "/var/hyperledger/configs/{0}/{1}.tx".format(context.composition.projectName, channelId),
                    "--channelID", channelId,
-                   "--timeout", timeout,
+                   "--timeout", "{}s".format(timeout),
                    "--orderer", '{0}:7050'.format(orderer)]
         if context.tls:
             command = command + ["--tls",
