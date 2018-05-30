@@ -1396,16 +1396,14 @@ function eventRegisterBlock() {
 var evtRcv=0;
 var evtCount=0;
 
-function eventRegister(tx, cb) {
+function eventRegister(tx) {
 
     var deployId = tx.getTransactionID();
-    var eventPromises = [];
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
             let handle = setTimeout(function(){eh.unregisterTxEvent(deployId);
             evtTimeoutCnt++;
             evtCount = evtRcv + evtTimeoutCnt;
-            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) timeout (%d).', Nid, channelName, org, pid, deployId.toString(), evtTimeoutCnt);
             if ( ( IDone == 1 ) && ( inv_m == evtCount )  ) {
                 tCurr = new Date().getTime();
                 var remain = Object.keys(txidList).length;
@@ -1414,51 +1412,54 @@ function eventRegister(tx, cb) {
                     console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
                 }
                 latency_output();
-
+                evtDisconnect();
             }
-            evtDisconnect();resolve()}, evtTimeout);
+            resolve()}, evtTimeout);
 
             eh.registerTxEvent(deployId.toString(), (tx, code) => {
                 clearTimeout(handle);
 
-                eh.unregisterTxEvent(deployId);
-                evtRcv++;
-                var tend = new Date().getTime();
-                latency_update(evtRcv, tend-txidList[deployId.toString()], latency_event);
-                delete txidList[deployId.toString()];
+                if ( txidList[deployId.toString()] ) {
+                    eh.unregisterTxEvent(deployId);
+                    evtRcv++;
+                    var tend = new Date().getTime();
+                    latency_update(evtRcv, tend-txidList[deployId.toString()], latency_event);
+                    delete txidList[deployId.toString()];
 
-                if (code !== 'VALID') {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, deployId.toString(), code);
-                    reject();
-                } else {
-                    if ( ( IDone == 1 ) && ( inv_m == evtRcv ) ) {
-                        tCurr = new Date().getTime();
-                        var remain = Object.keys(txidList).length;
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcv, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcv/(tCurr-tLocal)*1000).toFixed(2));
-                        if (invokeCheck == 'TRUE') {
-                            arg0 = keyStart + inv_m - 1;
-                            inv_q = inv_m - 1;
-                            invoke_query_simple(0);
-                        }
-                        if ( remain > 0 ) {
-                            console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList);
-                        }
+                    if (code !== 'VALID') {
+                        logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, deployId.toString(), code);
+                        reject();
+                    } else {
+                        if ( ( IDone == 1 ) && ( inv_m == evtRcv ) ) {
+                            tCurr = new Date().getTime();
+                            var remain = Object.keys(txidList).length;
+                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcv, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcv/(tCurr-tLocal)*1000).toFixed(2));
+                            if (invokeCheck == 'TRUE') {
+                                arg0 = keyStart + inv_m - 1;
+                                inv_q = inv_m - 1;
+                                invoke_query_simple(0);
+                            }
+                            if ( remain > 0 ) {
+                                console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList);
+                            }
 
-                        evtDisconnect();
-                        resolve();
-                        latency_output();
+                            evtDisconnect();
+                            resolve();
+                            latency_output();
+                        }
                     }
-                }
+                    }
+                }).catch((err) => {
+                    clearTimeout(handle);
+                });
+            }).catch((err) => {
+                //evtTimeoutCnt++;
+                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, evtTimeoutCnt, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
             });
-        }).catch((err) => {
-            //evtTimeoutCnt++;
-            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, evtTimeoutCnt, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+
+            eventPromises.push(txPromise);
         });
 
-        eventPromises.push(txPromise);
-    });
-
-    cb(eventPromises);
 }
 
 
@@ -1526,32 +1527,27 @@ function invoke_move_simple(freq) {
             var proposalResponses = results[0];
 
             getTxRequest(results);
-            eventRegister(request_invoke.txId, function(sendPromise) {
+            eventRegister(request_invoke.txId);
 
-                var sendPromise = channel.sendTransaction(txRequest);
-                return Promise.all([sendPromise].concat(eventPromises))
-                .then((results) => {
+            var sendPromise = channel.sendTransaction(txRequest);
+            return Promise.all([sendPromise].concat(eventPromises))
+            .then((results) => {
 
-                    isExecDone('Move');
-                    if ( IDone != 1 ) {
-                        setTimeout(function(){
-                            invoke_move_simple(freq);
-                        },freq);
-                    } else {
-                        tCurr = new Date().getTime();
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_simple] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-                    }
-                    return results[0];
+                isExecDone('Move');
+                if ( IDone != 1 ) {
+                    setTimeout(function(){
+                        invoke_move_simple(freq);
+                    },freq);
+                } else {
+                    tCurr = new Date().getTime();
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_simple] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                }
+                return results[0];
 
-                }).catch((err) => {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_simple] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                    evtDisconnect();
-                    return;
-                })
-            },
-            function(err) {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_simple] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+            }).catch((err) => {
+                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_simple] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
                 evtDisconnect();
+                return;
             })
 
         });
@@ -1823,7 +1819,6 @@ function invoke_move_const(freq) {
     txProposal.targets = targets;
 
     var ts = new Date().getTime();
-    // channel.sendTransactionProposal(request_invoke)
     channel.sendTransactionProposal(txProposal)
     .then((results) => {
 
@@ -1832,82 +1827,74 @@ function invoke_move_const(freq) {
 
             var proposalResponses = results[0];
 
-            // getTxRequest(results);
-            // txidList[tx_id.getTransactionID().toString()] = new Date().getTime();
             txidList[txProposal.txId.getTransactionID().toString()] = new Date().getTime();
 
-            //  eventRegister(tx_id, function(sendPromise) {
-            eventRegister(txProposal.txId, function(sendPromise) {
+            eventRegister(txProposal.txId);
 
-                var tos = new Date().getTime();
-                // var sendPromise = channel.sendTransaction(txRequest);
-                var sendPromise = channel.sendTransaction({proposalResponses: results[0], proposal: results[1], header: results[2]});
-                return Promise.all([sendPromise].concat(eventPromises))
-                .then((results) => {
+            getTxRequest(results);
 
-                    var toe = new Date().getTime();
-                    latency_update(inv_m, toe-tos, latency_orderer);
+            var tos = new Date().getTime();
+            var sendPromise = channel.sendTransaction(txRequest);
+            return Promise.all([sendPromise].concat(eventPromises))
+            .then((results) => {
 
-                    if ( results[0].status != 'SUCCESS' ) {
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results[0]);
-                        if (ordererFO == 'TRUE') {
-                            ordererFailover(channel, client);
-                        }
-                        invoke_move_const_go(t1, freq);
-                        return;
-                    }
+                var toe = new Date().getTime();
+                latency_update(inv_m, toe-tos, latency_orderer);
 
-                    // hist output
-                    if ( recHist == 'HIST' ) {
-                        tCurr = new Date().getTime();
-                        buff = PTEid +':'+ Nid +':'+ pid + ':' + channelName +':' + org + ' ' + transType[0]+':'+invokeType[0] + ':' + inv_m + ' time:'+ tCurr + '\n';
-                        fs.appendFile(ofile, buff, function(err) {
-                            if (err) {
-                               return logger.error(err);
-                            }
-                        })
-                    }
-
-                    isExecDone('Move');
-                    if ( IDone != 1 ) {
-                        invoke_move_const_go(t1, freq);
-                    } else {
-                        tCurr = new Date().getTime();
-                        var remain = Object.keys(txidList).length;
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] completed %d, evtTimoutCnt %d, unceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-                        if ( remain > 0 ) {
-                            console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
-                        }
-                        return;
-                    }
-                    //return results[0];
-
-                }).catch((err) => {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if ( results[0].status != 'SUCCESS' ) {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results[0]);
                     if (ordererFO == 'TRUE') {
                         ordererFailover(channel, client);
                     }
                     invoke_move_const_go(t1, freq);
-                    //evtDisconnect();
-                    //return;
-                })
-            },
-            function(err) {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send event register due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                invoke_move_const_go(t1, freq);
-                //evtDisconnect();
-            })
+                    return;
+                }
 
-        }).catch((err) => {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                if (peerFO == 'TRUE') {
-                    peerFailover(channel, client);
+                // hist output
+                if ( recHist == 'HIST' ) {
+                    tCurr = new Date().getTime();
+                    buff = PTEid +':'+ Nid +':'+ pid + ':' + channelName +':' + org + ' ' + transType[0]+':'+invokeType[0] + ':' + inv_m + ' time:'+ tCurr + '\n';
+                    fs.appendFile(ofile, buff, function(err) {
+                        if (err) {
+                           return logger.error(err);
+                        }
+                    })
                 }
 
                 isExecDone('Move');
                 if ( IDone != 1 ) {
                     invoke_move_const_go(t1, freq);
+                } else {
+                    tCurr = new Date().getTime();
+                    var remain = Object.keys(txidList).length;
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] completed %d, evtTimoutCnt %d, unceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                    if ( remain > 0 ) {
+                        console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
+                    }
+                    return;
                 }
+                //return results[0];
+
+            }).catch((err) => {
+                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if (ordererFO == 'TRUE') {
+                    ordererFailover(channel, client);
+                }
+                invoke_move_const_go(t1, freq);
+                //evtDisconnect();
+                //return;
+            })
+
+        }).catch((err) => {
+            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+            if (peerFO == 'TRUE') {
+                peerFailover(channel, client);
+            }
+
+            isExecDone('Move');
+            if ( IDone != 1 ) {
+                invoke_move_const_go(t1, freq);
+            }
         });
 }
 
@@ -2045,38 +2032,29 @@ function invoke_move_mix(freq) {
             var proposalResponses = results[0];
 
             getTxRequest(results);
-            eventRegister(request_invoke.txId, function(sendPromise) {
+            eventRegister(request_invoke.txId);
 
-                var sendPromise = channel.sendTransaction(txRequest);
-                return Promise.all([sendPromise].concat(eventPromises))
-                .then((results) => {
+            var sendPromise = channel.sendTransaction(txRequest);
+            return Promise.all([sendPromise].concat(eventPromises))
+            .then((results) => {
 
-                    if ( results[0].status != 'SUCCESS' ) {
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] sendTransaction status: %d', Nid, channelName, org, pid, results[0]);
-                        invoke_move_mix_go(freq);
-                        return;
-                    }
-
-                    if ( IDone != 1 ) {
-                        invoke_move_mix_go(freq);
-                    } else {
-                        tCurr = new Date().getTime();
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-                    //    return;
-                    }
-                    return results[0];
-
-                }).catch((err) => {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if ( results[0].status != 'SUCCESS' ) {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] sendTransaction status: %d', Nid, channelName, org, pid, results[0]);
                     invoke_move_mix_go(freq);
-                    //evtDisconnect();
-                    //return;
-                })
-            },
-            function(err) {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] Failed to send event register due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                    return;
+                }
+
+                if ( IDone != 1 ) {
+                    invoke_move_mix_go(freq);
+                } else {
+                    tCurr = new Date().getTime();
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                }
+                return results[0];
+
+            }).catch((err) => {
+                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
                 invoke_move_mix_go(freq);
-                //evtDisconnect();
             })
 
         }).catch((err) => {
@@ -2265,39 +2243,33 @@ function invoke_move_burst() {
             var proposalResponses = results[0];
 
             getTxRequest(results);
-            eventRegister(request_invoke.txId, function(sendPromise) {
+            eventRegister(request_invoke.txId);
 
-                var sendPromise = channel.sendTransaction(txRequest);
-                return Promise.all([sendPromise].concat(eventPromises))
-                .then((results) => {
+            var sendPromise = channel.sendTransaction(txRequest);
+            return Promise.all([sendPromise].concat(eventPromises))
+            .then((results) => {
 
-                    if ( results[0].status != 'SUCCESS' ) {
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0]);
-                        invoke_move_burst_go();
-                        return;
-                    }
-
-                    isExecDone('Move');
-                    if ( IDone != 1 ) {
-                        invoke_move_burst_go();
-                    } else {
-                        tCurr = new Date().getTime();
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-                        return;
-                    }
-                    //return results[0];
-
-                }).catch((err) => {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if ( results[0].status != 'SUCCESS' ) {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0]);
                     invoke_move_burst_go();
-                    //evtDisconnect();
                     return;
-                })
-            },
-            function(err) {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] Failed to send eventRegister due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                }
+
+                isExecDone('Move');
+                if ( IDone != 1 ) {
+                    invoke_move_burst_go();
+                } else {
+                    tCurr = new Date().getTime();
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                    return;
+                }
+                //return results[0];
+
+            }).catch((err) => {
+                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
                 invoke_move_burst_go();
                 //evtDisconnect();
+                return;
             })
 
         }).catch((err) => {
