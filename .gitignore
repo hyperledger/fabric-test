@@ -33,3 +33,5 @@ bin/
 *.block
 # vscode settings
 .vscode
+tools/PTE/package-lock.json
+tools/PTE/node_modules
