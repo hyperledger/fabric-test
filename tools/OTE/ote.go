@@ -541,7 +541,7 @@ func moreDeliveries(txSentP *[][]int64, totalNumTxSentP *int64, txSentFailuresP 
                 //if prevTotalTxRecv[ordNum] != (*totalTxRecvP)[ordNum] { moreReceived = true }
                 if prevTotalTxRecv[ordNum] != (*totalTxRecvP)[ordNum] {
                         moreReceived = true
-                        if debugflag1 {
+                        if debugflag2 {
                                 logger(fmt.Sprintf("moreDeliveries (%d) received on ordererIndex %d, %v", (*totalTxRecvP)[ordNum]-prevTotalTxRecv[ordNum], ordNum, time.Now()))
                         }
                 }
@@ -1298,6 +1298,7 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
 
         computeTotals(&txSent, &totalNumTxSent, &txSentFailures, &totalNumTxSentFailures, &txRecv, &totalTxRecv, &totalTxRecvMismatch, &blockRecv, &totalBlockRecv, &totalBlockRecvMismatch)
 
+        slowRecoveryTime := 300
         idleCount := 0
         waitSecs := 0
         for !sendEqualRecv(numTxToSend, &totalTxRecv, totalTxRecvMismatch, totalBlockRecvMismatch) {
@@ -1306,18 +1307,27 @@ func ote( testname string, txs int64, chans int, orderers int, ordType string, k
                 // recheck every second for more messages
                 if !(moreDeliveries(&txSent, &totalNumTxSent, &txSentFailures, &totalNumTxSentFailures, &txRecv, &totalTxRecv, &totalTxRecvMismatch, &blockRecv, &totalBlockRecv, &totalBlockRecvMismatch)) {
                         // idleCount keeps track of how long it has been since we last received a message.
-                        // This is a stopgap, in case of code error miscount, or lost messages.
+                        // This is a stopgap, in case of code error miscount, or lost messages, or possibly
+                        // severely delayed deliveries due to CPU contention by all the producers, consumers,
+                        // orderers, kafkas running on 1 or same few hosts.
                         idleCount++
-                        if idleCount >= (batchTimeout+30) {
-                                waitSecs-=(batchTimeout+30)
+                        if idleCount >= (batchTimeout+slowRecoveryTime) {
+                                waitSecs-=(batchTimeout+slowRecoveryTime)
                                 break
                         }
-                } else { idleCount=0 }
+                } else {
+                        if (debugflag1 && (idleCount > 0)) {
+                                logger(fmt.Sprintf("Blocks received after a delay exceeding %d secs, %v", idleCount, time.Now()))
+                        }
+                        idleCount=0
+                }
         }
 
         // Recovery Duration = time spent waiting for orderer service to finish delivering transactions,
         // after all producers finished sending them. AND if transactions were still missing, then
-        // this includes the extra time (batchTimeout+30) we wasted, hoping they would arrive.
+        // this includes the extra time (batchTimeout+slowRecoveryTime) we wasted waiting at the end,
+        // hoping they would arrive. If there were delays in message deliveries due to CPU contention
+        // or other reasons, then the TPS measurments will include and reflect that.
         recoveryDuration := (time.Now().Unix() - recoverStart)
         logger(fmt.Sprintf("Recovery Duration (secs):%4d", recoveryDuration))
         logger(fmt.Sprintf("waitSecs for last batch: %4d", waitSecs))
