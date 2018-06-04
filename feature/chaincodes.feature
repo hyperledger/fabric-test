@@ -314,11 +314,11 @@ Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, p
 
   #first we test for invoke failures by passing in bad keys
   When a user invokes on the chaincode named "mycc" with args ["ENCRYPT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
-  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 40 - <nil>
+  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 40 - proposal response: <nil>
   When a user invokes on the chaincode named "mycc" with args ["ENCRYPT","Tax-Id","1234-012"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\",\\"IV\\":\\"<BAD_IV_KEY>\\"}"
-  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 23 - <nil>
+  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 23 - proposal response: <nil>
   When a user invokes on the chaincode named "mycc" with args ["ENCRYPTSIGN","Passport-Number","M9037"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\",\\"SIGKEY\\":\\"<BAD_SIG_KEY>\\"}"
-  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 300 - <nil>
+  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 300 - proposal response: <nil>
 
   #here we make sure invokes pass but test for query failures by passing in bad keys
   When I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
@@ -332,7 +332,7 @@ Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, p
   When a user invokes on the chaincode named "mycc" with args ["ENCRYPT","Social-Security-Number","123-45-6789"] and transient args "{\\"ENCKEY\\":\\"<GOOD_ENC_KEY>\\"}"
   And I wait "5" seconds
   When a user queries on the chaincode named "mycc" with args ["ENCRYPT","Social-Security-Number"] and generated transient args "{\\"ENCKEY\\":\\"<BAD_ENC_KEY>\\"}"
-  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 40 - <nil>
+  Then a user receives an error response of Error: error parsing transient string: illegal base64 data at input byte 40 - proposal response: <nil>
 
 Examples:
     |                   GOOD_ENC_KEY                         |                BAD_ENC_KEY                            |     BAD_IV_KEY              | BAD_SIG_KEY    |
