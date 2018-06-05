@@ -237,6 +237,8 @@ do
       elif [ "$t1" == "&ProfileOrderString" ]; then
           tmp=$PROFILE_STRING"OrgsOrdererGenesis"
           echo "    $tmp:" >> $cfgOutFile
+          tmp="<<: *ChannelDefaults"
+          echo "        $tmp" >> $cfgOutFile
 
       elif [ "$t1" == "&ProfileOrgString" ]; then
           tmp=$PROFILE_STRING"orgschannel"
@@ -295,7 +297,17 @@ do
              #echo "        ID: $tt" >> $cfgOutFile
              ordDir=$MSPBaseDir"/ordererOrganizations/"$comName"/msp"
              echo "        MSPDir: $ordDir" >> $cfgOutFile
-             echo "        #AdminPrincipal: Role.MEMBER" >> $cfgOutFile
+             ordMSP="OrdererOrg"
+             echo "        Policies:" >> $cfgOutFile
+             echo "            Readers:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
+             echo "            Writers:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
+             echo "            Admins:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.admin')\"" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
 #             echo "        BCCSP:" >> $cfgOutFile
@@ -320,7 +332,18 @@ do
              #echo "        ID: $tmp" >> $cfgOutFile
              peerDir=$MSPBaseDir"/peerOrganizations/org"$i"."$comName"/msp"
              echo "        MSPDir: $peerDir" >> $cfgOutFile
-             echo "        #AdminPrincipal: Role.MEMBER" >> $cfgOutFile
+             #orgMSP="PeerOrg"$i"MSP"
+             orgMSP="PeerOrg"$i
+             echo "        Policies:" >> $cfgOutFile
+             echo "            Readers:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.peer')\"" >> $cfgOutFile
+             echo "            Writers:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.client')\"" >> $cfgOutFile
+             echo "            Admins:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$orgMSP.admin')\"" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
 #             echo "        BCCSP:" >> $cfgOutFile

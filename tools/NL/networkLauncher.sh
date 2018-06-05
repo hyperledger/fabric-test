@@ -303,8 +303,9 @@ fi
 cd $CWD
 echo "current working directory: $PWD"
 ordBlock=$ordererDir/orderer.block
-echo "$CFGEXE -profile $ORDERER_PROFILE -outputBlock $ordBlock"
-$CFGEXE -profile $ORDERER_PROFILE -outputBlock $ordBlock
+testChannel="testchannel"
+echo "$CFGEXE -profile $ORDERER_PROFILE -channelID $testChannel -outputBlock $ordBlock"
+$CFGEXE -profile $ORDERER_PROFILE -channelID $testChannel -outputBlock $ordBlock
 
 #create channels configuration transaction
 echo " "
@@ -315,10 +316,22 @@ echo " "
 for (( i=1; i<=$nChannel; i++ ))
 do
     channelTx=$ordererDir"/"$ORG_PROFILE$i".tx"
-    #channelTx=$ordererDir"/mychannel.tx"
     echo "$CFGEXE -profile $ORG_PROFILE -channelID $ORG_PROFILE"$i" -outputCreateChannelTx $channelTx"
     $CFGEXE -profile $ORG_PROFILE -channelID $ORG_PROFILE"$i" -outputCreateChannelTx $channelTx
 done
+
+#create anchor peer update for org
+#echo " "
+#echo "        ####################################################### "
+#echo "        #         create anchor peer update for orgs          # "
+##echo "        ####################################################### "
+#echo " "
+#for (( i=1; i<=$nOrg; i++ ))
+#do
+#    OrgMSP=$ordererDir"/PeerOrg"$i"anchors.tx"
+#    echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i"
+#    $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i
+#done
 
 echo " "
 echo "        ####################################################### "

@@ -1012,8 +1012,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 // header 4
                                 for ( m=0; m< lvl3_key.length; m++ ) {
                                     if ( lvl3_key[m] == 'FABRIC_CA_SERVER_CA_NAME' ) {
-                                        var t = v+1;
-                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + lvl2_obj[lvl3_key[m]]+t + '\n';
+                                        buff = '  ' + '    - ' + lvl3_key[m] + '=' + lvl2_obj[lvl3_key[m]]+v + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' +lvl2_obj[lvl3_key[m]] + '\n';
@@ -1024,6 +1023,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var v1 = v+1;
+                                    buff = '  ' + '    - FABRIC_CA_SERVER_CA_CERTFILE='+CADir+'/ca.org'+v1+'.'+comName+'-cert.pem'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+                                    buff = '  ' + '    - FABRIC_CA_SERVER_CA_KEYFILE='+CADir+'/CA_SK'+v+'\n';
+                                    fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - FABRIC_CA_SERVER_TLS_ENABLED=true' + '\n';
                                     fs.appendFileSync(dFile, buff);
                                     buff = '  ' + '    - FABRIC_CA_SERVER_TLS_CERTFILE='+CADir+'/ca.org'+v1+'.'+comName+'-cert.pem'+'\n';
@@ -1039,9 +1042,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                             } else if ( lvl2_key[k] == 'command' ) {
                                 var v1=v+1;
-                                var tmp = lvl1_obj[lvl2_key[k]] + ' '+CADir+"/ca.org"+v1+"."+comName+"-cert.pem --ca.keyfile " + CADir+"/CA_SK"+v+" -b admin:adminpw -d'"
-                                //buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
-                                buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp + '\n';
+                                //var tmp = lvl1_obj[lvl2_key[k]] + ' '+CADir+"/ca.org"+v1+"."+comName+"-cert.pem --ca.keyfile " + CADir+"/CA_SK"+v+" -b admin:adminpw -d'"
+                                buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
+                                //buff = '  ' + '  ' + lvl2_key[k] + ': ' + tmp + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                             } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'working_dir' )

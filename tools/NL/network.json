@@ -17,12 +17,12 @@
             "image": "hyperledger/fabric-ca",
             "environment": {
                 "FABRIC_CA_HOME":"/etc/hyperledger/fabric-ca-server",
-                "FABRIC_CA_SERVER_CA_NAME":"ca-org"
+                "FABRIC_CA_SERVER_CA_NAME":"ca"
             },
             "ports": [
                 "caPort:7054"
             ],
-            "command": "sh -c 'fabric-ca-server start --ca.certfile",
+            "command": "sh -c 'fabric-ca-server start --cfg.identities.allowremove --cfg.affiliations.allowremove -b admin:adminpw -d'",
             "volumes": [
                  "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config",
                  "./fabricca/tlsOrg1:/etc/hyperledger/fabric-ca-server"
