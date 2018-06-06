@@ -55,7 +55,7 @@ You can install Behave and additional packages, such as the `Govendor`_, using t
 
 ::
 
-    $ cd /path/to/fabric-test/feature; ./scripts/install_behave.sh
+    $ cd /path/to/fabric-test/feature; ../scripts/install_behave.sh
 
 
 The following repositories are dependencies and are included as submodules at the designated locations

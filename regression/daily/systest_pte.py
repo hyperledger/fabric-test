@@ -17,7 +17,7 @@ TEST_PASS_STRING="RESULT=PASS"
 ### COUCHDB
 ######################################################################
 
-scenarios_directory = '../../fabric-sdk-node/test/PTE/CITest/scenarios'
+scenarios_directory = '../../tools/PTE/CITest/scenarios'
 nl_directory = '../../tools/NL'
 
 class Perf_Stress_CouchDB(unittest.TestCase):
@@ -48,10 +48,10 @@ class Perf_Stress_CouchDB(unittest.TestCase):
 
         Logs Artifacts Locations:
         - Scenario ResultLogs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/scenarios/result_FAB-3833-2i.log
+            fabric-test/tools/PTE/CITest/scenarios/result_FAB-3833-2i.log
         - PTE Testcase Logs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3833-2i-<MMDDHHMMSS>.log
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3810-2q-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3833-2i-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3810-2q-<MMDDHHMMSS>.log
         '''
 
         # Run the test scenario: launch network and run the invokes and query tests.
@@ -59,7 +59,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3833-2i.sh", cwd=scenarios_directory, shell=True)
-        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/tools/PTE/CITest/Logs/")
         # tear down the network, including all the nodes docker containers
         returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
@@ -129,10 +129,10 @@ class Perf_Stress_CouchDB(unittest.TestCase):
 
         Logs Artifacts Locations:
         - Scenario ResultLogs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/scenarios/result_FAB-3832-4i.log
+            fabric-test/tools/PTE/CITest/scenarios/result_FAB-3832-4i.log
         - PTE Testcase Logs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3832-4i-<MMDDHHMMSS>.log
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3834-4q-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3832-4i-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3834-4q-<MMDDHHMMSS>.log
         '''
 
         # Run the test scenario: launch network and run the invokes and query tests.
@@ -140,7 +140,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3832-4i.sh", cwd=scenarios_directory, shell=True)
-        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/tools/PTE/CITest/Logs/")
         # tear down the network, including all the nodes docker containers
         returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
@@ -197,10 +197,10 @@ class Perf_Stress_LevelDB(unittest.TestCase):
 
         Logs Artifacts Locations:
         - Scenario ResultLogs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/scenarios/result_FAB-3808-2i.log
+            fabric-test/tools/PTE/CITest/scenarios/result_FAB-3808-2i.log
         - PTE Testcase Logs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3808-2i-<MMDDHHMMSS>.log
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3811-2q-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3808-2i-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3811-2q-<MMDDHHMMSS>.log
         '''
 
         # Run the test scenario: launch network and run the invokes and query tests.
@@ -208,7 +208,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3808-2i.sh", cwd=scenarios_directory, shell=True)
-        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/PTE/CITest/Logs/")
         # tear down the network, including all the nodes docker containers
         returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
@@ -256,10 +256,10 @@ class Perf_Stress_LevelDB(unittest.TestCase):
 
         Logs Artifacts Locations:
         - Scenario ResultLogs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/scenarios/result_FAB-3807-4i.log
+            fabric-test/tools/PTE/CITest/scenarios/result_FAB-3807-4i.log
         - PTE Testcase Logs:
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3807-4i-<MMDDHHMMSS>.log
-            fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/FAB-3835-4q-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3807-4i-<MMDDHHMMSS>.log
+            fabric-test/tools/PTE/CITest/Logs/FAB-3835-4q-<MMDDHHMMSS>.log
         '''
 
         # Run the test scenario: launch network and run the invokes and query tests.
@@ -267,7 +267,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # one network, because the query test needs to query all those same
         # transactions that were done with the invokes.
         returncode = subprocess.call("./FAB-3807-4i.sh", cwd=scenarios_directory, shell=True)
-        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/fabric-sdk-node/test/PTE/CITest/Logs/")
+        self.assertEqual(returncode, 0, msg="Test Failed; check for errors in fabric-test/tools/PTE/CITest/Logs/")
         # tear down the network, including all the nodes docker containers
         returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 

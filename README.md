@@ -106,7 +106,7 @@ Then, choose a tool and a test to run by following the instructions. For example
 
 ```
 cd ../feature
-./scripts/install_behave.sh
+../scripts/install_behave.sh
 behave -t smoke -k
 ```
 
@@ -178,7 +178,7 @@ Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabri
 * Clone the latest commits for repositories being tested, including fabric, fabric-ca, and more
 * Build docker images and binary files
 * Build fabric-ca and fabric peer, orderer, cryptogen and configtxgen
-* Update git submodules and install all the python required modules, including python, python-pytest, and everything else identified in fabric-test/feature/scripts/install_behave.sh.
+* Update git submodules and install all the python required modules, including python, python-pytest, and everything else identified in fabric-test/scripts/install_behave.sh.
 * Run `behave daily` tests, and other tests identified in fabric-test/regression/daily/runDailyTestSuite.sh
 * After the tests are completed, the CI job reports test results and populates the Job console. Click here to view the Test Results report display:
 https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/
