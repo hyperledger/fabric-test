@@ -1,0 +1,3 @@
+sdk=node marblescc_privInputs/marblescc-priv-chan1-create-TLS.json
+sdk=node marblescc_privInputs/marblescc-priv-chan2-create-TLS.json
+sdk=node marblescc_privInputs/marblescc-priv-chan3-create-TLS.json

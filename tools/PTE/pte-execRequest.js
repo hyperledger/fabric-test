@@ -268,7 +268,7 @@ if ( ccType == 'ccchecker' ) {
     arg0 = parseInt(keyStart);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
                  Nid, channel.getName(), org, pid, ccType, keyStart, parseInt(ccDfnPtr.ccOpt.payLoadMin), parseInt(ccDfnPtr.ccOpt.payLoadMax));
-} else if ( ccType == 'marblescc' ) {
+} else if ( (ccType == 'marblescc') || (ccType == 'marblescc_priv') ) {
     keyStart = parseInt(ccDfnPtr.ccOpt.keyStart);
     payLoadMin = parseInt(ccDfnPtr.ccOpt.payLoadMin);
     payLoadMax = parseInt(ccDfnPtr.ccOpt.payLoadMax);
@@ -338,7 +338,7 @@ function getMoveRequest() {
                 testInvokeArgs[keyPayLoad[i]] = buf.toString('hex');
             }
         }
-    } else if ( ccType == 'marblescc' ) {
+    } else if ( (ccType == 'marblescc') || (ccType == 'marblescc_priv') ) {
         arg0 ++;
         for ( i=0; i<keyIdx.length; i++ ) {
             testInvokeArgs[keyIdx[i]] = moveMarbleName+'_'+txIDVar+'_'+arg0;
@@ -443,6 +443,21 @@ function getQueryRequest() {
                 testQueryArgs[keyIdx[i]] = queryMarbleName+'_'+txIDVar+'_'+arg0;
             }
         }
+    } else if ( ccType == 'marblescc_priv' ) {
+        arg0 ++;
+        var keyA = keyStart;
+        if ( arg0 - keyStart > 10 ) {
+            keyA = arg0 - 10;
+        }
+        if ( ccDfnPtr.invoke.query.fcn == 'readMarblePrivateDetails' ) {
+            for ( i=0; i<keyIdx.length; i++ ) {
+                testQueryArgs[keyIdx[i]] = queryMarbleName+'_'+txIDVar+'_'+arg0;
+            }
+        } else {
+            for ( i=0; i<keyIdx.length; i++ ) {
+                testQueryArgs[keyIdx[i]] = queryMarbleName+'_'+txIDVar+'_'+arg0;
+            }
+        }
     }
 
     tx_id = client.newTransactionID();
@@ -453,7 +468,7 @@ function getQueryRequest() {
         args: testQueryArgs
     };
 
-    //logger.info('request_query: ', request_query);
+    //logger.info('request_query: %j', request_query);
 }
 
 function peerFailover(channel, client) {
@@ -963,7 +978,7 @@ function assignOrdererList(channel, client) {
                     ordererTmp = client.newOrderer(
                         ORGS['orderer'][key].url,
                         {
-                            'pem': caroots,
+                            pem: caroots,
                             'ssl-target-name-override': ORGS['orderer'][key]['server-hostname']
                         }
                     )
@@ -1001,7 +1016,7 @@ function channelAddOrderer(channel, client, org) {
         channel.addOrderer(client.newOrderer(ORGS['orderer'][ordererID].url));
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, ORGS['orderer'][ordererID].url);
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %j ', Nid, channelName, org, pid, channel.getOrderers());
+    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %j ', Nid, channelName, org, pid, channel.getOrderers());
 }
 
 
@@ -1063,7 +1078,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
         }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] Peers:  ', Nid, channelName, org, pid, channel.getPeers());
+    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] Peers:  ', Nid, channelName, org, pid, channel.getPeers());
 }
 
 /*
@@ -1100,6 +1115,7 @@ function execTransMode() {
     } else {
         promise = Promise.resolve(useStore);
     }
+
     return promise.then((store) => {
         if (store) {
              client.setStateStore(store);

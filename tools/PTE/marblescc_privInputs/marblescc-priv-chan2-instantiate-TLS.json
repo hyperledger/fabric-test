@@ -1,0 +1,28 @@
+{
+    "channelID": "_ch2",
+    "chaincodeID": "marbles_cc_priv",
+    "chaincodeVer": "v0",
+    "transType": "instantiate",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel2",
+        "action":  "create",
+        "orgName": [
+            "org3",
+            "org4"
+        ]
+    },
+    "timeoutOpt": {
+        "preConfig": "120000",
+        "request": "180000"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+        "collectionsConfigPath": "github.com/hyperledger/fabric-test/tools/PTE/marblescc_privInputs/collections_config-chan2.json",
+        "fcn": "init",
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
+    ]
+}

@@ -427,10 +427,19 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
-* **marbles_cc**: [Marbles chaincode](https://github.com/hyperledger/fabric/tree/master/examples/chaincode/go/marbles02). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify ccType as marblescc when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02`.  Set the deploy.chaincodePath to this directory in the user input file.
+* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify ccType as marblescc when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
+            "fcn": "init",
+            "args": []
+        },
+
+* **marblescc_priv**: [Marbles02 private chaincode](https://github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify ccType as marblescc_priv when using this chaincode.  See directory `marblescc_privInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go`.  Set the deploy.chaincodePath to this directory in the user input file.  This chaincode can be used for side DB if user specifies collection configuration json in the `collectionsConfigPath` when instantiate the chaincode.
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+            "collectionsConfigPath": "github.com/hyperledger/fabric-test/tools/PTE/marblescc_privInputs/collections_config-chan1.json",
             "fcn": "init",
             "args": []
         },

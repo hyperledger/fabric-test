@@ -124,6 +124,7 @@ var language='golang';
 var testDeployArgs = [];
 var chaincodePath;
 var metadataPath;
+var collectionsConfigPath;
 function initDeploy() {
     if ((typeof( ccDfnPtr.deploy.language ) !== 'undefined')) {
         language=ccDfnPtr.deploy.language.toLowerCase();
@@ -149,8 +150,8 @@ function initDeploy() {
     logger.info('chaincode language: %s, path: %s', language, chaincodePath);
 
     // If user defines goPath, then they must also specify path relative to gopath in the input json file.
-    // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the metadataPath exactly as
-    // specified (user should specify an absolute path) in the input json file.
+    // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the metadataPath and
+    // collectionsConfigPath exactly as specified (user should specify an absolute path) in the input json file.
     if ((typeof( ccDfnPtr.deploy.metadataPath ) !== 'undefined')) {
         if (goPath !== '') {
             metadataPath = path.join(goPath, 'src', ccDfnPtr.deploy.metadataPath);
@@ -158,6 +159,14 @@ function initDeploy() {
             metadataPath=ccDfnPtr.deploy.metadataPath;
         }
         logger.info('metadataPath: %s', metadataPath);
+    }
+    if ((typeof( ccDfnPtr.deploy.collectionsConfigPath ) !== 'undefined')) {
+        if (goPath !== '') {
+            collectionsConfigPath = path.join(goPath, 'src', ccDfnPtr.deploy.collectionsConfigPath);
+        } else {
+            collectionsConfigPath=ccDfnPtr.deploy.collectionsConfigPath;
+        }
+        logger.info('collectionsConfigPath: %s', collectionsConfigPath);
     }
 }
 
@@ -561,6 +570,7 @@ function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
                 chainId: channelName,
                 chaincodeType: type,
                 'endorsement-policy': ccDfnPtr.deploy.endorsement,
+                'collections-config': collectionsConfigPath,
                 txId: tx_id
 
                 // use this to demonstrate the following policy:
@@ -640,9 +650,9 @@ function chaincodeInstantiate(channel, client, org) {
                 let one_good = false;
                 if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
                     one_good = true;
-                    logger.info('[chaincodeInstantiate] channelName(%s) chaincode instantiation was good', channelName);
+                    logger.info('[chaincodeInstantiate:Nid=%d] channel(%s) org(%s) chaincode instantiation was good', Nid, channelName, org);
                 } else {
-                    logger.error('[chaincodeInstantiate] channelName(%s) chaincode instantiation was bad', channelName);
+                    logger.error('[chaincodeInstantiate:Nid=%d] channel(%s) org(%s) chaincode instantiation was bad: results= %j', Nid, channelName, org, results);
                 }
                 all_good = all_good & one_good;
             }
@@ -873,7 +883,7 @@ function joinChannel(channel, client, org) {
 
                 tx_id = client.newTransactionID();
                 var request = {
-                        txId :  tx_id
+                    txId :  tx_id
                 };
                 return channel.getGenesisBlock(request);
         }).then((block) =>{
@@ -1114,14 +1124,13 @@ function performance_main() {
                         chaincodeInstantiate(channel, client, org);
                     },
                     function(err) {
-                        logger.error('[Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);
+                        logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);
                         evtDisconnect();
 
                         return;
                     }
                 );
             });
-            // chaincodeInstantiate send requests to all orgs, so no need to iterate
             break;
         } else if ( transType == 'CHANNEL' ) {
             if ( channelOpt.action.toUpperCase() == 'CREATE' ) {

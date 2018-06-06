@@ -1,0 +1,15 @@
+{
+    "transType": "Channel",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel3",
+        "action":  "join",
+        "orgName": [
+            "org5",
+            "org6"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
+    ]
+}

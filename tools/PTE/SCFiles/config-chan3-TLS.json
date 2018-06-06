@@ -77,7 +77,7 @@
 			"comName": "example.com",
 			"ordererID": "orderer2",
 			"ca": {
-                             "url":"https://localhost:7058",
+                             "url":"https://localhost:7059",
 			     "name": "ca5"
                         },
 			"username": "admin",
