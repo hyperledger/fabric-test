@@ -404,6 +404,12 @@
     - "{{ channels }}"
     - "{{ peers }}"
 
+- name: Create configmaps for testcases.sh
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create configmap ptetestcase --from-file={{ fabricworkdir }}/keyfiles/testcases.sh
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+
 - name: Start PTE pod
   command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-k8s.yml"
   args:
@@ -411,18 +417,18 @@
   tags: "pteup"
 
 - name: Wait for containers to be ready
-  pause:
-    seconds: 90
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pte
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: ptestatus
+  until: ptestatus.stdout.find("true") >= 0
+  retries: 5
+  delay: 30
 
 - name: Copy config zip file onto the PTE pod
   command: >-
     ./kubectl --kubeconfig kubeconfig cp {{ fabricworkdir }}/pteconfig.tgz pte:/var/hyperledger/fabric/
-  args:
-    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-
-- name: Copy testcases.sh file onto the PTE pod
-  command: >-
-    ./kubectl --kubeconfig kubeconfig cp {{ fabricworkdir }}/keyfiles/testcases.sh pte:/var/hyperledger/fabric/testcases.sh
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
 
@@ -433,23 +439,19 @@
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
 
-- name: Start the test in PTE pod
+- name: Check the health of the PTE
   command: >-
-    ./kubectl --kubeconfig kubeconfig exec pte -c pte -- bash -c "cp /var/hyperledger/fabric/testcases.sh . && ./testcases.sh > pte_test.log 2>&1"
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pte
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-  tags: "runtest"
+  register: ptestatus
+  until: ptestatus.stdout.find("false") >= 0
+  retries: 2500
+  delay: 120
 
-- name: Copy the pte log to logs and tar the logs in PTE
-  command: >-
-    ./kubectl --kubeconfig kubeconfig exec pte -c pte -- bash -c "cp pte_test.log CITest/Logs && tar -czvf /var/hyperledger/fabric/ptetest.tgz CITest/Logs"
-  args:
-    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-  tags: "tarlogs"
-
-- name: Copy the zipped logs in PTE to local
-  command: >-
-    ./kubectl --kubeconfig kubeconfig cp pte:/var/hyperledger/fabric/ptetest.tgz {{ playbook_dir }}/../../vars
+- name: Logs in PTE to local
+  shell: >-
+    ./kubectl --kubeconfig kubeconfig logs pte -c pte > {{ playbook_dir }}/../../vars/{{ testcase }}.log 2>&1
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "getlogs"

@@ -11,10 +11,14 @@ metadata:
 spec:
   imagePullSecrets:
     - name: regcred
+  restartPolicy: OnFailure
   volumes:
     - name: task-pv-storage
       persistentVolumeClaim:
         claimName: fabriccerts
+    - name: testcase
+      configMap:
+        name: ptetestcase
   containers:
     - name: pte
       image: {{ pte.repo.url }}fabric-pte:stable
@@ -23,13 +27,8 @@ spec:
         - { name: "TESTCASE", value: "{{ testcase }}" }
         - { name: "TESTCASE_QUERY", value: "{{ testcase_query }}" }
         - { name: "CHAINCODE", value: "{{ chaincode }}" }
-{% for channel in channels %}
-        - { name: "CHANNEL{{ loop.index }}", value: "{{ channel.name }}" }
-{% endfor %}
-{% for peer in peers %}
-        - { name: "PEER{{ loop.index }}", value: "{{ peer.name }}" }
-{% endfor %}
       volumeMounts:
         - { mountPath: "/var/hyperledger/fabric/artifacts", name: "task-pv-storage" }
-      command: ["sleep"]
-      args: ["1000000"]
+        - { mountPath: "/var/hyperledger/fabric/testcase", name: "testcase" }
+      command: ["bash"]
+      args: ["-c","cp /var/hyperledger/fabric/testcase/testcases.sh . && chmod +x testcases.sh && ./testcases.sh"]

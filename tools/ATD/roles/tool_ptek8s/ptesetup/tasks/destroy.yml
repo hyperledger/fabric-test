@@ -49,6 +49,13 @@
     pte.repo.password | default("") | length > 0 and
     secretstatus.rc == 0
 
+- name: Delete configMap
+  command: >-
+    ./kubectl --kubeconfig kubeconfig delete configmap ptetestcase
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "configmapdelete"
+
 - name: Make sure that pte config directory is removed
   file:
     path: "{{ fabricworkdir }}/keyfiles/CITest"
@@ -58,4 +65,3 @@
   file:
     path: "{{ fabricworkdir }}/pteconfig.tgz"
     state: absent
-
