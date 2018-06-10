@@ -9,8 +9,7 @@
     "invokeType": "Query",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
-    "nRequest": "250",
-    "1nRequest": "250000",
+    "nRequest": "250000",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
