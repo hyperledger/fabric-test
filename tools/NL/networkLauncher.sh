@@ -321,17 +321,17 @@ do
 done
 
 #create anchor peer update for org
-#echo " "
-#echo "        ####################################################### "
-#echo "        #         create anchor peer update for orgs          # "
-##echo "        ####################################################### "
-#echo " "
-#for (( i=1; i<=$nOrg; i++ ))
-#do
-#    OrgMSP=$ordererDir"/PeerOrg"$i"anchors.tx"
-#    echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i"
-#    $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i
-#done
+echo " "
+echo "        ####################################################### "
+echo "        #         create anchor peer update for orgs          # "
+echo "        ####################################################### "
+echo " "
+for (( i=1; i<=$nOrg; i++ ))
+do
+    OrgMSP=$ordererDir"/PeerOrg"$i"anchors.tx"
+    echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i"
+    $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i
+done
 
 echo " "
 echo "        ####################################################### "
