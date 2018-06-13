@@ -657,6 +657,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
+    var found = 0; // Indicates if we found first peer in the org, as identified in the SCFile.
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
@@ -673,6 +674,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                         );
                         targets.push(peerTmp);
                         channel.addPeer(peerTmp);
+                        found = 1;
                         if ( peerFOList == 'TARGETPEERS' ) {
                             peerList.push(peerTmp);
                         }
@@ -691,6 +693,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                     peerTmp = client.newPeer( ORGS[key1][key].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    found = 1;
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
@@ -703,6 +706,12 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                             eh.connect(true);
                         }
                     }
+                }
+                if ( found == 1 ) {
+                    // Found the first peer in this org. Break out of searching for more peers in this org.
+                    // And Now reset it, so we can find the first peer in another org.
+                    found = 0;
+                    break;
                 }
             }
             }
@@ -1005,12 +1014,15 @@ function channelAddOrderer(channel, client, org) {
 }
 
 
+// User set "OrgAnchor" to send traffic to only the first peer in the org.
+// PTE assumes the first peer is "anchor peer", hence the function name.
 // assign thread the anchor peer (peer1) from the org
 function assignThreadOrgAnchorPeer(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] ', Nid, channelName, org, pid );
     var peerTmp;
     var eh;
     var data;
+    var found = 0; // found first peer, as identified in the SCFile.
     for (let key in ORGS) {
         if ( key == org ) {
         for ( let subkey in ORGS[key] ) {
@@ -1027,6 +1039,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                         );
                         targets.push(peerTmp);
                         channel.addPeer(peerTmp);
+                        found = 1;
                         if ( peerFOList == 'TARGETPEERS' ) {
                             peerList.push(peerTmp);
                         }
@@ -1046,6 +1059,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                     peerTmp = client.newPeer( ORGS[key][subkey].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
+                    found = 1;
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
@@ -1058,6 +1072,9 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                             eh.connect(true);
                         }
                     }
+                }
+                if ( found == 1 ) {
+                    break;
                 }
             }
         }
