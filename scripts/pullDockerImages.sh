@@ -37,11 +37,11 @@ STABLE_TAG=$ARCH-$PROJECT_VERSION
 cd $GOPATH/src/github.com/hyperledger/fabric
 
 dockerTag() {
-  for IMAGES in peer orderer ccenv tools ca; do
+  for IMAGES in peer orderer ccenv tools ca ca-tools ca-peer ca-orderer ca-fvt; do
     echo "Images: $IMAGES"
     echo
     docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
-          if [ $? !=0 ]; then
+          if [ $? != 0 ]; then
              echo  "FAILED: Docker Pull Failed on $IMAGES"
              exit 1
           fi
