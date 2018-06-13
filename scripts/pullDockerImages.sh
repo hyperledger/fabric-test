@@ -42,9 +42,9 @@ dockerTag() {
     echo
     docker pull $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG
           if [ $? !=0 ]; then
-             echo " FAILED" Docker Pull Failed on $IMAGES"
+             echo  "FAILED: Docker Pull Failed on $IMAGES"
              exit 1
-          fi 
+          fi
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG $ORG_NAME-$IMAGES
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGES:$STABLE_TAG $ORG_NAME-$IMAGES:$STABLE_TAG
     echo "$ORG_NAME-$IMAGES:$STABLE_TAG"
