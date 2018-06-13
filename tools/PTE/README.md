@@ -87,7 +87,7 @@ If planning to run your Fabric network locally, you'll need docker and a bit mor
 You need to install a gnu-compatible version of the `awk`, `date` utility. Install Brew (http://brew.sh) and run the following commands:
 ```
 brew install gawk --with-default-names
-brew install gdate --with-default-names
+brew install coreutils
 ```
 
 ## Setup
