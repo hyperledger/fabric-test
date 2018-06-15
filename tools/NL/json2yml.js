@@ -431,25 +431,43 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     }
 
                                 }
-                                if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
-                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true'+'\n';
-                                    fs.appendFileSync(dFile, buff);
-                                }
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
                                     var v1 = v+1;
                                     var OrdTLSDir = srcMSPDir + '/ordererOrganizations/'+comName+'/orderers/'+ordererName+'/tls';
-                                    var org1TLSDir = srcMSPDir + '/peerOrganizations/org1.'+comName+'/tls';
-                                    var org2TLSDir = srcMSPDir + '/peerOrganizations/org2.'+comName+'/tls';
 
                                     buff = '  ' + '    - ORDERER_GENERAL_TLS_ENABLED=true'+'\n';
                                     fs.appendFileSync(dFile, buff);
+
                                     buff = '  ' + '    - ORDERER_GENERAL_TLS_PRIVATEKEY='+OrdTLSDir+'/server.key'+'\n';
                                     fs.appendFileSync(dFile, buff);
+
                                     buff = '  ' + '    - ORDERER_GENERAL_TLS_CERTIFICATE='+OrdTLSDir+'/server.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
+
+                                    var OrdUserDir = srcMSPDir + '/ordererOrganizations/'+comName+'/users/Admin@'+comName+'/tls';
                                     var ordererCerts=OrdTLSDir+'/ca.crt';
-                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_ROOTCAS=['+ordererCerts+']'+'\n';
+                                    buff = '  ' + '    - ORDERER_GENERAL_TLS_ROOTCAS=['+ordererCerts;
+                                    for (var orgid=1; orgid<=nOrg; orgid++) {
+                                         var tmporg='org'+orgid+'.'+comName;
+                                         var orgTLSDir = srcMSPDir + '/peerOrganizations/'+tmporg+'/peers';
+                                    }
+                                    buff = buff + ']'+'\n';
                                     fs.appendFileSync(dFile, buff);
+
+                                    // mutual TLS
+                                    if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
+                                        buff = '  ' + '    - ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED=true'+'\n';
+                                        fs.appendFileSync(dFile, buff);
+                                        var ordererCerts=OrdTLSDir+'/ca.crt';
+                                        buff = '  ' + '    - ORDERER_GENERAL_TLS_CLIENTROOTCAS=['+ordererCerts;
+                                        for (var orgid=1; orgid<=nOrg; orgid++) {
+                                             var tmporg='org'+orgid+'.'+comName;
+                                             var peerCA = srcMSPDir + '/peerOrganizations/'+tmporg+'/ca/ca.'+tmporg+'-cert.pem';
+                                             buff = buff + ', ' + peerCA;
+                                        }
+                                        buff = buff + ']'+'\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    }
                                 }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' )
                                     || ( lvl2_key[k] == 'restart') ) {
@@ -721,7 +739,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                         buff = '  ' + '    - ' + lvl3_key[m] + '=' + HOSTCONFIG_NETWORKMODE +'_default' + '\n';
                                         fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_BOOTSTRAP' ) {
-                                        if ( v != 0 ) {
+                                        if ( s != 0 ) {
+                                            var k1 = vp0Port + (t-1)*nPeerPerOrg;
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer0Name +':'+ '7051' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
@@ -743,6 +762,16 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'false' + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
+                                    } else if ( lvl3_key[m] == 'CORE_PEER_LISTENADDRESS' ) {
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+'7051' + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_ENDPOINT' ) {
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+'7051' + '\n';
+                                            fs.appendFileSync(dFile, buff);
+                                    } else if ( lvl3_key[m] == 'CORE_PEER_EVENTS_ADDRESS' ) {
+                                            var t1 = evtPort + v;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ t1 + '\n';
+                                            fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LOCALMSPID' ) {
                                             var t1 = Math.floor(v / nPeerPerOrg) + 1;
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + 'PeerOrg'+t1 + '\n';
@@ -761,24 +790,49 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 buff = '  ' + '    - CORE_PEER_ADDRESS=' + peerName +':7051\n';
                                 fs.appendFileSync(dFile, buff);
-                                buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':7051' + '\n';
+                                buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':'+'7051'+'\n';
                                 fs.appendFileSync(dFile, buff);
 
-                                if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
-                                    buff = '  ' + '    - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true'+'\n';
-                                    fs.appendFileSync(dFile, buff);
-                                }
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
-                                    var t = Math.floor(v / nPeerPerOrg) + 1;
-                                    var s = (v % nPeerPerOrg);
+                                    var oid = Math.floor(v / nPeerPerOrg) + 1;
+                                    var pid = (v % nPeerPerOrg);
+                                    var peerTLSDir = peerMSPDir+'/org'+oid +'.'+comName+'/peers/peer'+pid+'.org'+oid+'.'+comName+'/tls';
+                                    var peerUserDir = peerMSPDir+'/org'+oid +'.'+comName+'/users/Admin@org'+oid+'.'+comName+'/tls';
+
                                     buff = '  ' + '    - CORE_PEER_TLS_ENABLED=true' + '\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/server.key'+'\n';
+
+                                    buff = '  ' + '    - CORE_PEER_TLS_CERT_FILE='+peerTLSDir+'/server.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_TLS_CERT_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/server.crt'+'\n';
+
+                                    buff = '  ' + '    - CORE_PEER_TLS_KEY_FILE='+peerTLSDir+'/server.key'+'\n';
                                     fs.appendFileSync(dFile, buff);
-                                    buff = '  ' + '    - CORE_PEER_TLS_ROOTCERT_FILE='+peerMSPDir+'/org'+t +'.'+comName+'/peers/peer'+s+'.org'+t+'.'+comName+'/tls/ca.crt'+'\n';
+
+                                    buff = '  ' + '    - CORE_PEER_TLS_ROOTCERT_FILE='+peerTLSDir+'/ca.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
+
+                                    // mutual TLS
+                                    if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
+                                        buff = '  ' + '    - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true'+'\n';
+                                        fs.appendFileSync(dFile, buff);
+
+                                        buff = '  ' + '    - CORE_PEER_TLS_CLIENTROOTCAS_FILES=';
+                                        for ( ordid=0; ordid<addOrderer; ordid++) {
+                                            var ordererName = 'orderer'+ordid+'.'+comName;
+                                            var ordererCerts = srcMSPDir + '/ordererOrganizations/'+comName+'/orderers/'+ordererName+'/tls/ca.crt';
+                                            buff = buff + ordererCerts + ' ';
+                                         }
+                                         var tmporg='org'+oid+'.'+comName;
+                                         var peerCA = srcMSPDir + '/peerOrganizations/'+tmporg+'/ca/ca.'+tmporg+'-cert.pem';
+                                         for (var orgid=1; orgid<=nOrg; orgid++) {
+                                             var tmporg='org'+orgid+'.'+comName;
+                                             var orgTLSDir = srcMSPDir + '/peerOrganizations/'+tmporg+'/peers';
+                                             var peerCA = srcMSPDir + '/peerOrganizations/'+tmporg+'/ca/ca.'+tmporg+'-cert.pem';
+                                             buff = buff + ' ' + peerCA;
+                                         }
+                                         buff = buff + '\n';
+                                         fs.appendFileSync(dFile, buff);
+                                    }
                                 }
                         } else if ( ( lvl2_key[k] == 'image' ) || ( lvl2_key[k] == 'command' ) || ( lvl2_key[k] == 'working_dir' )
                                     || ( lvl2_key[k] == 'restart') ) {
@@ -797,11 +851,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             buff = '  ' + '    - ' + tmp_port + ':' + 7051 + '\n';
                             fs.appendFileSync(dFile, buff);
 
-                            //if ( v == 0 ) {
-                                var t1 = evtPort + v;
-                                buff = '  ' + '    - ' + t1 + ':' + 7053 + '\n';
-                                fs.appendFileSync(dFile, buff);
-                            //}
+                            var t1 = evtPort + v;
+                            buff = '  ' + '    - ' + t1 + ':' + 7053 + '\n';
+                            fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'links' ) {
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];

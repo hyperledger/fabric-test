@@ -51,8 +51,7 @@ This is the main script to execute all tasks.
          -B: batch size, default=10
          -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
-         -S: TLS enablement [enabled|disabled], default=disabled
-         -m: Mutual TLS enablement [enabled|disabled], default=disabled
+         -S: TLS enablement [disabled|serverauth|clientauth], default=disabled
          -C: company name, default=example.com
 
 Note that when `-a down` is invoked to clean network, the company name is used as a key word in searching for docker images to be deleted.  The company name can be set using `-C`. The default company name is `example.com`.

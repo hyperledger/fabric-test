@@ -36,17 +36,16 @@ function printHelp {
    echo "    -B: batch size, default=10"
    echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
-   echo "    -m: mutual TLS, [enabled|disabled], default=disabled"
-   echo "    -S: TLS enablement [enabled|disabled], default=disabled"
+   echo "    -S: TLS enablement [disabled|serverauth|clientauth], default=disabled"
    echo "    -C: company name, default=example.com "
    echo " "
    echo " example: "
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 "
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w 10.120.223.35 "
-   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 -S enabled "
-   echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w localhost -S enabled "
-   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled "
-   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled -l INFO -q DEBUG"
+   echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 -S serverauth "
+   echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w localhost -S serverauth "
+   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S serverauth "
+   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S clientauth -l INFO -q DEBUG"
    exit
 }
 
@@ -75,7 +74,7 @@ ordererLogLevel="ERROR"
 batchTimeOut="2s"
 batchSize=10
 
-while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:m:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:" opt; do
   case $opt in
     # peer environment options
     a)
@@ -188,11 +187,6 @@ while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:m:C:" opt; do
       echo "TLSEnabled: $TLSEnabled"
       ;;
 
-    m)
-      MutualTLSEnabled=`echo $OPTARG | tr [A-Z] [a-z]`
-      echo "MutualTLSEnabled: $MutualTLSEnabled"
-      ;;
-
     C)
       comName=$OPTARG
       echo "comName: $comName"
@@ -222,6 +216,15 @@ elif [ $networkAction != "up" ]; then
     exit;
 fi
 
+if [ $TLSEnabled == "clientauth" ]; then
+    TLSEnabled="enabled"
+    MutualTLSEnabled="enabled"
+fi
+if [ $TLSEnabled == "serverauth" ]; then
+    TLSEnabled="enabled"
+fi
+
+echo "TLSEnabled $TLSEnabled, MutualTLSEnabled $MutualTLSEnabled"
 #if [ $nCA -eq 0 ]; then
 #   nCA=$nOrg
 #fi
