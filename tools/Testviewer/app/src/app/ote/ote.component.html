@@ -1,0 +1,130 @@
+<div class="metric-container">
+	<h1 class="engine-title">{{title}}</h1>
+	<div class="testselect">
+		<mat-form-field class="testselect-dropdown">
+		  <mat-select [(ngModel)]="selectedOptions" placeholder="Tests" multiple disableRipple #chosentests>
+		    <mat-option *ngFor="let test of test_toadd" [value]="test">{{test}}</mat-option>
+		  </mat-select>
+		</mat-form-field>
+		<button (click)="loadAll(startdateinput.value, enddateinput.value)">Load</button>
+	</div>
+	<div>
+		<div class="dateselect">
+			<h4>Range Data</h4>
+			<mat-form-field>
+				<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput>
+				<mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+				<mat-datepicker #picker1></mat-datepicker>
+			</mat-form-field>
+			<mat-form-field>
+				<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput>
+				<mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+				<mat-datepicker #picker2></mat-datepicker>
+		  	</mat-form-field>
+		  	<button (click)="loadCharts(startdateinput.value, enddateinput.value)">Load</button>
+		  	<form>
+				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="0" [checked]="options"> TPS Chart
+				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="1" [checked]="!options"> % Differential Chart
+				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="2" [checked]="!options"> Stats Table
+			</form>
+		</div>
+		<div *ngIf="options == 0">
+			<fusioncharts
+			    [id]="id_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="dataSource_line"
+			></fusioncharts>
+		</div>
+		<div *ngIf="options == 1">
+			<fusioncharts
+			    [id]="id_differentialline"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="dataSource_differentialline"
+			></fusioncharts>
+		</div>
+		<div class="stat-container" *ngIf="options == 2">
+			<table class="stattable">
+				<tr>
+					<th class="statcol">Test</th>
+					<th class="statcol">Minimum</th>
+					<th class="statcol">Mean</th>
+					<th class="statcol">Maximum</th>
+					<th class="statcol">% Range</th>
+				</tr>
+			</table>
+			<table *ngFor="let test of selectedOptions" class="stattable">
+				<tr>
+					<td class="statcol">{{test}}</td>
+					<td class="statcol">{{tests[test].min}}</td>
+					<td class="statcol">{{tests[test].mean}}</td>
+					<td class="statcol">{{tests[test].max}}</td>
+					<td class="statcol">{{tests[test].prange}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="dateselect">
+		<h4>Single Day Data</h4>
+	  	<mat-form-field>
+			<input matInput [matDatepicker]="picker" placeholder="Choose a date" #dateinput>
+			<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+			<mat-datepicker #picker></mat-datepicker>
+	  	</mat-form-field>
+	  	<button (click)="updateDate()">Load</button>
+	  	<h3 id="buildnum">Build {{buildnum}} ({{chosendate}})</h3>
+	  	<h3><a href="https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-svt-x86_64/{{buildnum}}/" target='_blank'>Passing: {{numpassing}} Failing: {{numfailing}}</a></h3>
+	</div>
+	<div class="test-container">
+		<div class="enginetest" *ngFor="let test of objectkeys(tests)">
+			<h3><a href='https://jira.hyperledger.org/browse/{{tests[test].fab}}' target='_blank'>{{tests[test].fab}}</a></h3>
+			<table class="metric-table">
+				<tr>
+					<th class="metriccol1">Metric</th>
+					<th>Value</th>
+				</tr>
+				<tr>
+					<td class="metriccol1">Status</td>
+					<td [style.color] = "tests[test].status == 'PASSED' ? 'green' : 'red'">{{tests[test].status}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TX Requested</td>
+					<td>{{tests[test].txreq}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TX ACK</td>
+					<td>{{tests[test].txack}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TX NACK</td>
+					<td>{{tests[test].txnack}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">Blocks Delivered</td>
+					<td>{{tests[test].delivblk}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TX Delivered</td>
+					<td>{{tests[test].delivtx}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">No. Channels</td>
+					<td>{{tests[test].numch}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">Batch Size</td>
+					<td>{{tests[test].batchsize}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TPS</td>
+					<td>{{tests[test].tps}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

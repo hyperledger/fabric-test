@@ -1,0 +1,148 @@
+<div class="metric-container">
+	<h1 class="engine-title">{{title}}</h1>
+	<div class="testselect">
+		<mat-form-field class="testselect-dropdown">
+		  <mat-select [(ngModel)]="selectedOptions" placeholder="Tests" multiple disableRipple #chosentests>
+		    <mat-option *ngFor="let test of test_toadd" [value]="test">{{test}}</mat-option>
+		  </mat-select>
+		</mat-form-field>
+		<button (click)="loadAll(startdateinput.value, enddateinput.value)">Load</button>
+	</div>
+	<div>
+		<div class="dateselect">
+			<h4>Range Data</h4>
+			<mat-form-field>
+				<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput>
+				<mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+				<mat-datepicker #picker1></mat-datepicker>
+			</mat-form-field>
+			<mat-form-field>
+				<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput>
+				<mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+				<mat-datepicker #picker2></mat-datepicker>
+		  	</mat-form-field>
+		  	<button (click)="loadCharts(startdateinput.value, enddateinput.value)">Load</button>
+		  	<form>
+				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="0" [checked]="options"> TPS Chart
+				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="1" [checked]="!options"> % Differential Chart
+				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="2" [checked]="!options"> Stats Table
+			</form>
+		</div>
+		<div *ngIf="options == 0">
+			<fusioncharts
+			    [id]="id_invoke_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="dataSource_invoke_line"
+			></fusioncharts>
+			<fusioncharts
+			    [id]="id_query_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="dataSource_query_line"
+			></fusioncharts>
+		</div>
+		<div *ngIf="options == 1">
+			<fusioncharts
+			    [id]="id_differentialinvoke_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="dataSource_differentialinvoke_line"
+			></fusioncharts>
+			<fusioncharts
+			    [id]="id_differentialquery_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="dataSource_differentialquery_line"
+			></fusioncharts>
+		</div>
+		<div class="stat-container" *ngIf="options == 2">
+			<table class="stattable">
+				<tr>
+					<th class="statcol">Test</th>
+					<th class="statcol">Minimum</th>
+					<th class="statcol">Mean</th>
+					<th class="statcol">Maximum</th>
+					<th class="statcol">% Range</th>
+				</tr>
+			</table>
+			<table *ngFor="let test of selectedOptions" class="stattable">
+				<tr>
+					<td class="statcol">{{test}} Invoke</td>
+					<td class="statcol">{{tests[test].i.min}}</td>
+					<td class="statcol">{{tests[test].i.mean}}</td>
+					<td class="statcol">{{tests[test].i.max}}</td>
+					<td class="statcol">{{tests[test].i.prange}}</td>
+				</tr>
+				<tr>
+					<td class="statcol">{{test}} Query</td>
+					<td class="statcol">{{tests[test].q.min}}</td>
+					<td class="statcol">{{tests[test].q.mean}}</td>
+					<td class="statcol">{{tests[test].q.max}}</td>
+					<td class="statcol">{{tests[test].q.prange}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="dateselect">
+		<h4>Single Day Data</h4>
+	  	<mat-form-field>
+			<input matInput [matDatepicker]="picker" placeholder="Choose a date" #dateinput>
+			<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+			<mat-datepicker #picker></mat-datepicker>
+	  	</mat-form-field>
+	  	<button (click)="updateDate()">Load</button>
+	  	<h3 id="buildnum">Build {{buildnum}} ({{chosendate}})</h3>
+	</div>
+	<div class="test-container">
+		<div class="enginetest" *ngFor="let test of objectkeys(tests)">
+			<h3><a href="https://jira.hyperledger.org/browse/{{tests[test].i.faburl}}" target='_blank'>{{tests[test].i.fab}}</a></h3>
+			<h4>Invoke</h4>
+			<table class="metric-table">
+				<tr>
+					<th class="metriccol1">Metric</th>
+					<th>Value</th>
+				</tr>
+				<tr>
+					<td class="metriccol1">Total Time</td>
+					<td>{{tests[test].i.totaltime}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">Number of Transactions</td>
+					<td>{{tests[test].i.txnum}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TPS</td>
+					<td>{{tests[test].i.tps}}</td>
+				</tr>
+			</table>
+			<h4>Query</h4>
+			<table class="metric-table">
+				<tr>
+					<th class="metriccol1">Metric</th>
+					<th>Value</th>
+				</tr>
+				<tr>
+					<td class="metriccol1">Total Time</td>
+					<td>{{tests[test].q.totaltime}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">Number of Transactions</td>
+					<td>{{tests[test].q.txnum}}</td>
+				</tr>
+				<tr>
+					<td class="metriccol1">TPS</td>
+					<td>{{tests[test].q.tps}}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+</div>

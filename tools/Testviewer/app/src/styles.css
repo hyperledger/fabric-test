@@ -1,0 +1,95 @@
+@import url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css');
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+.pagetitle {
+	text-align:center;
+	font-size:5em;
+	padding:20px;
+}
+@media screen and (max-width:2000px) {
+	.covercharts {
+		display:flex;
+		flex-wrap:wrap;
+	}
+}
+@media screen and (max-width:1000px) {
+	.covercharts {
+	}
+}
+#pte_container, #ote_container, #lte_container {
+	padding:50px 0px;
+}
+.navlink {
+	padding:20px;
+}
+.engine-title {
+	text-align:center;
+}
+.dateselect {
+	padding:5px 20px;
+}
+.options {
+	margin:0px 5px;
+}
+#buildnum {
+	padding-top:5px;
+}
+#container {
+	margin-left:20px;
+}
+.metric-container {
+	padding:10px 0px;
+	text-align:left;
+}
+.metric-table {
+	max-width:100%;
+	height:auto;
+}
+.metriccol1 {
+	width:250px;
+}
+.enginetest {
+	max-width:100%;
+	height:auto;
+	margin:20px;
+}
+.test-container {
+	display:flex;
+	flex-wrap:wrap;
+	margin:auto;
+	max-width:100%;
+	height:auto;
+}
+.testselect {
+	text-align:center;
+}
+.testselect-dropdown {
+	width:80%;
+}
+.stat-container {
+	margin-left:20px;
+	padding:10px 0px;
+}
+.stattable {
+	width:90%;
+	height:auto;
+}
+.statcol {
+	width:15%;
+	padding:5px 0px;
+}
+
+
+.coverage-container {
+	margin-left:25px;
+}
+.coverage {
+	margin-top:25px;
+}
+.coveragetable {
+	text-align:left;
+	max-width: 100%;
+}
+.cov-col {
+	width:15%;
+}

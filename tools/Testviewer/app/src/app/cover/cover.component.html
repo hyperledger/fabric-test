@@ -1,0 +1,59 @@
+<div class="chart-container">
+	<a class="navlink" [routerLink]="['/data']">Data</a>
+	<div class="dateselect">
+		<h4>Date Range</h4>
+		<mat-form-field>
+			<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput>
+			<mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+			<mat-datepicker #picker1></mat-datepicker>
+		</mat-form-field>
+		<mat-form-field>
+			<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput>
+			<mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+			<mat-datepicker #picker2></mat-datepicker>
+	  	</mat-form-field>
+	  	<button (click)="loadCharts(startdateinput.value, enddateinput.value)">Load</button>
+	</div>
+	<div class="covercharts">
+		<div>
+			<fusioncharts
+			    [id]="id_invoke_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="PTEdataSource['invoke']['line']"
+			></fusioncharts>
+		</div>
+		<div>
+			<fusioncharts
+			    [id]="id_query_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="PTEdataSource['query']['line']"
+			></fusioncharts>
+		</div>
+		<div>
+			<fusioncharts
+			    [id]="id_ote_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="OTEdataSource"
+			></fusioncharts>
+		</div>
+		<div>
+			<fusioncharts
+			    [id]="id_lte_line"
+			    [width]="width"
+			    [height]="height"
+			    [type]="type_line"
+			    [dataFormat]="dataFormat"
+			    [dataSource]="LTEdataSource"
+			></fusioncharts>
+		</div>
+	</div>
+</div>
