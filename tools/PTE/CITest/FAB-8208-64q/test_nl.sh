@@ -18,7 +18,7 @@ echo "[$0] bring down network"
 ./networkLauncher.sh -a down
 # bring up network
 echo "[$0] bring up network"
-./networkLauncher.sh -o 4 -x 2 -r 32 -p 2 -k 5 -z 3 -n 8 -t kafka -f test -w localhost -S enabled -c 2s -l INFO -B 500
+./networkLauncher.sh -o 4 -x 2 -r 32 -p 2 -k 5 -z 3 -n 8 -e 3 -t kafka -f test -w localhost -S enabled -c 2s -l INFO -B 500
 
 cd $CWD
 echo [$0] "current dir: $PWD"

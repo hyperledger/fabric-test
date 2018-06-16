@@ -126,7 +126,7 @@ FAB-7036 () {
         ZKS=3
       # KBS=3 we could make do with just 3 for this and other tests that use just 1 channel, or even all the other tests if necessary
       # ZKS=1 we could make do with just 1 for all tests
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7036_1ch_3ord_5kb docker-compose -f ote-compose.yml up -d
@@ -137,7 +137,7 @@ FAB-7074 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7074_1ch_3ord_5kb_10kpayload docker-compose -f ote-compose.yml up -d
@@ -148,7 +148,7 @@ FAB-7037 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7037_1ch_3ord_5kb_500batchsize docker-compose -f ote-compose.yml up -d
@@ -159,7 +159,7 @@ FAB-7075 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7075_1ch_3ord_5kb_500batchsize_10kpayload docker-compose -f ote-compose.yml up -d
@@ -170,7 +170,7 @@ FAB-7038 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7038_3ch_3ord_5kb docker-compose -f ote-compose.yml up -d
@@ -182,7 +182,7 @@ FAB-7936_100tx_3ch_3ord_3kb () {
         ORDS=3
         KBS=3
         ZKS=1
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7936_100tx_3ch_3ord_3kb docker-compose -f ote-compose.yml up -d
@@ -193,7 +193,7 @@ FAB-7076 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7076_3ch_3ord_5kb_10kpayload docker-compose -f ote-compose.yml up -d
@@ -204,7 +204,7 @@ FAB-7039 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7039_3ch_3ord_5kb_500batchsize docker-compose -f ote-compose.yml up -d
@@ -215,7 +215,7 @@ FAB-7077 () {
         ORDS=3
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7077_3ch_3ord_5kb_500batchsize_10kpayload docker-compose -f ote-compose.yml up -d
@@ -226,7 +226,7 @@ FAB-7058 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7058_1ch_6ord_5kb docker-compose -f ote-compose.yml up -d
@@ -237,7 +237,7 @@ FAB-7078 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 0 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7078_1ch_6ord_5kb_10kpayload docker-compose -f ote-compose.yml up -d
@@ -248,7 +248,7 @@ FAB-7059 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7059_1ch_6ord_5kb_500batchsize docker-compose -f ote-compose.yml up -d
@@ -259,7 +259,7 @@ FAB-7079 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 1 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=1 testcase=Test_FAB7079_1ch_6ord_5kb_500batchsize_10kpayload docker-compose -f ote-compose.yml up -d
@@ -270,7 +270,7 @@ FAB-7060 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7060_3ch_6ord_5kb docker-compose -f ote-compose.yml up -d
@@ -281,7 +281,7 @@ FAB-7080 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7080_3ch_6ord_5kb_10kpayload docker-compose -f ote-compose.yml up -d
@@ -292,7 +292,7 @@ FAB-7061 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7061_3ch_6ord_5kb_500batchsize docker-compose -f ote-compose.yml up -d
@@ -303,7 +303,7 @@ FAB-7081 () {
         ORDS=6
         KBS=5
         ZKS=3
-        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -t kafka -f test -w localhost -B 500 -S enabled
+        ./networkLauncher.sh -o $ORDS -q $OLOGLVL -x 1 -r 1 -p 1 -n 3 -k $KBS -z $ZKS -e 3 -t kafka -f test -w localhost -B 500 -S enabled
         cd $OTE_DIR
         # run testcase
         numChannels=3 testcase=Test_FAB7081_3ch_6ord_5kb_500batchsize_10kpayload docker-compose -f ote-compose.yml up -d
