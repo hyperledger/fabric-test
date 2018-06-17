@@ -219,7 +219,7 @@ A single test case is described by a user input file. User input files define al
         "nProcPerOrg": "4",
         "nRequest": "1000",
         "runDur": "600",
-        "TLS": "Enabled",
+        "TLS": "serverauth",
 
     And set the channel name in channelOpt:
 
@@ -244,7 +244,7 @@ A single test case is described by a user input file. User input files define al
         "nProcPerOrg": "4",
         "nRequest": "1000",
         "runDur": "600",
-        "TLS": "Enabled",
+        "TLS": "clientauth",
 
     And set the channel name in channelOpt:
 
@@ -608,7 +608,7 @@ The user input file contains configuration parameters including chaincode defini
         "nProcPerOrg": "4",
         "nRequest": "0",
         "runDur": "600",
-        "TLS": "enabled",
+        "TLS": "clientauth",
         "queryBlockOpt": {
             "org":  "org1",
             "peer":  "peer1",
@@ -730,7 +730,7 @@ where
         "nProcPerOrg": "4",
         "nRequest": "0",
         "runDur": "600",
-        "TLS": "enabled",
+        "TLS": "serverauth",
         "queryBlockOpt": {
             "org":  "org1",
             "peer":  "peer1",
@@ -838,7 +838,10 @@ where:
     * if nRequest is non-zero the nRequest is executed.
     * if nRequest is zero and runDur is non-zero, then runDur is executed.
     * if both nRequest and runDur are zero, then PTE runs forever.
-* **TLS**: TLS setting for the test: Disabled or Enabled.
+* **TLS**: TLS setting for the test
+    * disabled: TLS is disabled
+    * serverauth: server authentication, TLS
+    * clientauth: client authentication, mutual TLS
 * **queryBlock**: query blockchain information options
     * **org**: the org to be queried
     * **peer**: the peer to be queried

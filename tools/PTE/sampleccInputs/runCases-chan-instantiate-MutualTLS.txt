@@ -1,0 +1,3 @@
+sdk=node sampleccInputs/samplecc-chan1-instantiate-MutualTLS.json
+sdk=node sampleccInputs/samplecc-chan2-instantiate-MutualTLS.json
+sdk=node sampleccInputs/samplecc-chan3-instantiate-MutualTLS.json

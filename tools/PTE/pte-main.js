@@ -41,7 +41,6 @@ var utils = require('fabric-client/lib/utils.js');
 
 hfc.setConfigSetting('crypto-keysize', 256);
 
-
 var webUser = null;
 var tmp;
 var i=0;
@@ -75,7 +74,8 @@ if ( typeof(uiContent.ccDfnPtr) === 'undefined' ) {
 }
 
 
-var TLS=txCfgPtr.TLS.toUpperCase();
+var TLS=testUtil.setTLS(txCfgPtr);
+logger.info('[Nid=%d pte-main] TLS= %d', Nid, TLS);
 
 var channelOpt=uiContent.channelOpt;
 var channelName=channelOpt.name;
@@ -83,7 +83,6 @@ var channelOrgName = [];
 for (i=0; i<channelOpt.orgName.length; i++) {
     channelOrgName.push(channelOpt.orgName[i]);
 }
-logger.info('TLS: %s', TLS);
 logger.info('channelName: %s', channelName);
 logger.info('channelOrgName.length: %d, channelOrgName: %s', channelOrgName.length, channelOrgName);
 
@@ -111,13 +110,13 @@ var tCurr;
 var timeoutOpt;
 var cfgTimeout=200000;   // default 200 sec
 if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
-    timeoutOpt = parseInt(uiContent.timeoutOpt);
+    timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
     if ((typeof( timeoutOpt.preConfig ) !== 'undefined')) {
         cfgTimeout = parseInt(timeoutOpt.preConfig);
     }
 }
-logger.info('main - cfgTimeout: ', cfgTimeout);
+logger.info('main - cfgTimeout: %d', cfgTimeout);
 
 // default chaincode language: golang
 var language='golang';
@@ -201,7 +200,7 @@ function clientNewOrderer(client, org) {
     var ordererID = ORGS[org].ordererID;
     var data;
     logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
-    if (TLS == 'ENABLED') {
+    if (TLS > testUtil.TLSDISABLED) {
         data = testUtil.getTLSCert('orderer', ordererID);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
@@ -224,7 +223,7 @@ function chainAddOrderer(channel, client, org) {
     logger.info('[chainAddOrderer] channel name: ', channel.getName());
     var ordererID = ORGS[org].ordererID;
     var data;
-    if (TLS == 'ENABLED') {
+    if (TLS > testUtil.TLSDISABLED) {
         data = testUtil.getTLSCert('orderer', ordererID);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
@@ -244,7 +243,7 @@ function chainAddOrderer(channel, client, org) {
             client.newOrderer(ORGS['orderer'][ordererID].url)
         );
     }
-    logger.info('[chainAddOrderer] channel orderers: ', channel.getOrderers());
+    //logger.info('[chainAddOrderer] channel orderers: ', channel.getOrderers());
 }
 
 function channelAddPeer(channel, client, org) {
@@ -256,7 +255,7 @@ function channelAddPeer(channel, client, org) {
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.includes('peer')) {
-                if (TLS == 'ENABLED') {
+                if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
@@ -277,7 +276,7 @@ function channelAddPeer(channel, client, org) {
             }
         }
     }
-    logger.info('[channelAddPeer] channel peers: ', channel.getPeers());
+    //logger.info('[channelAddPeer] channel peers: ', channel.getPeers());
 
     return targets;
 }
@@ -292,7 +291,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
     for (let key in ORGS[qorg]) {
         if (ORGS[qorg].hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
-                if (TLS == 'ENABLED') {
+                if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(qorg, key);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
@@ -318,7 +317,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
     return targets;
 }
 
-function channelAddPeer1(channel, client, org) {
+function channelAddPeer1(channel, client, org, eventHubs) {
     logger.info('[channelAddPeer1] channel name: %s, org: %s', channel.getName(), org);
     var data;
     var peerTmp;
@@ -327,7 +326,7 @@ function channelAddPeer1(channel, client, org) {
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (key.includes('peer')) {
-                if (TLS == 'ENABLED') {
+                if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
@@ -339,17 +338,19 @@ function channelAddPeer1(channel, client, org) {
                         );
                         targets.push(peerTmp);
                         channel.addPeer(peerTmp);
+                        let eh = channel.newChannelEventHub(peerTmp);
+                        eventHubs.push(eh);
                     }
                 } else {
                     peerTmp = client.newPeer( ORGS[org][key].requests);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                 }
-                break;
+                break; // found first peer, as identified in the SCFile
             }
         }
     }
-    logger.debug('[channelAddPeer1] org: %s, channel peers: ', org, channel.getPeers());
+    //logger.debug('[channelAddPeer1] org: %s, channel peers: ', org, channel.getPeers());
 
     return targets;
 }
@@ -366,7 +367,7 @@ function channelAddPeerEventJoin(channel, client, org) {
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
                     if (key.includes('peer')) {
-                        if (TLS == 'ENABLED') {
+                        if (TLS > testUtil.TLSDISABLED) {
                             data = testUtil.getTLSCert(org, key);
                             if ( data !== null ) {
                                 targets.push(
@@ -387,25 +388,6 @@ function channelAddPeerEventJoin(channel, client, org) {
                             );
                             logger.info('[channelAddPeerEvent] peer: ', ORGS[org][key].requests);
                         }
-
-                        eh=client.newEventHub();
-                        if (TLS == 'ENABLED') {
-                            data = testUtil.getTLSCert(org, key);
-                            if ( data !== null ) {
-                                eh.setPeerAddr(
-                                    ORGS[org][key].events,
-                                    {
-                                        pem: Buffer.from(data).toString(),
-                                        'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                    }
-                                );
-                            }
-                        } else {
-                            eh.setPeerAddr(ORGS[org][key].events);
-                        }
-                        eh.connect();
-                        eventHubs.push(eh);
-                        logger.info('[channelAddPeerEvent] requests: %s, events: %s ', ORGS[org][key].requests, ORGS[org][key].events);
                     }
                 }
             }
@@ -414,43 +396,6 @@ function channelAddPeerEventJoin(channel, client, org) {
     return { targets: targets, eventHubs: eventHubs };
 }
 
-function channelAddEvent(channel, client, org) {
-    logger.info('[channelAddEvent] channel name: ', channel.getName());
-            var data;
-            var eh;
-            var peerTmp;
-            var eventHubs = [];
-
-            for (let key in ORGS[org]) {
-                if (ORGS[org].hasOwnProperty(key)) {
-                    if (key.includes('peer')) {
-
-                        eh=client.newEventHub();
-                        if (TLS == 'ENABLED') {
-                            data = testUtil.getTLSCert(org, key);
-                            if ( data !== null ) {
-                                eh.setPeerAddr(
-                                    ORGS[org][key].events,
-                                    {
-                                        pem: Buffer.from(data).toString(),
-                                        'ssl-target-name-override': ORGS[org][key]['server-hostname']
-                                    }
-                                );
-                            }
-                        } else {
-                            eh.setPeerAddr(ORGS[org][key].events);
-                        }
-                        eh.connect();
-                        eventHubs.push(eh);
-                        logger.info('[channelAddEvent] requests: %s, events: %s ', ORGS[org][key].requests, ORGS[org][key].events);
-                        break;
-                    }
-                }
-            }
-
-    allEventhubs = allEventhubs.concat(eventHubs);
-    return eventHubs;
-}
 
 var chaincode_id;
 var chaincode_ver;
@@ -496,7 +441,7 @@ function update_latency_array(lat_new, rawText) {
 performance_main();
 
 // install chaincode
-function chaincodeInstall(channel, client, org) {
+async function chaincodeInstall(channel, client, org) {
     var orgName = ORGS[org].name;
     logger.info('[chaincodeInstall] org: %s, org Name: %s, channel name: %s', org, orgName, channel.getName());
 
@@ -504,10 +449,14 @@ function chaincodeInstall(channel, client, org) {
     cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
     client.setCryptoSuite(cryptoSuite);
 
+    // get client key
+    if ( TLS == testUtil.TLSCLIENTAUTH ) {
+        await testUtil.tlsEnroll(client, org, svcFile);
+        logger.info('[chaincodeInstall] got user private key: org= %s', org);
+    }
     chainAddOrderer(channel, client, org);
 
     var targets = channelAddPeer(channel, client, org);
-    //printChainInfo(channel);
 
     //sendInstallProposal
     getCCID();
@@ -520,7 +469,7 @@ function chaincodeInstall(channel, client, org) {
         chaincodeVersion: chaincode_ver
     };
 
-    logger.info('request_install: %j', request_install);
+    //logger.info('request_install: %j', request_install);
 
     client.installChaincode(request_install)
     .then(
@@ -572,26 +521,6 @@ function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
                 'endorsement-policy': ccDfnPtr.deploy.endorsement,
                 'collections-config': collectionsConfigPath,
                 txId: tx_id
-
-                // use this to demonstrate the following policy:
-                // 'if signed by org1 admin, then that's the only signature required,
-                // but if that signature is missing, then the policy can also be fulfilled
-                // when members (non-admin) from both orgs signed'
-/*
-                'endorsement-policy': {
-                        identities: [
-                                { role: { name: 'member', mspId: ORGS['org1'].mspid }},
-                                { role: { name: 'member', mspId: ORGS['org2'].mspid }},
-                                { role: { name: 'admin', mspId: ORGS['org1'].mspid }}
-                        ],
-                        policy: {
-                                '1-of': [
-                                        { 'signed-by': 2},
-                                        { '2-of': [{ 'signed-by': 0}, { 'signed-by': 1 }]}
-                                ]
-                        }
-                }
-*/
         };
 
         if(upgrade) {
@@ -603,23 +532,28 @@ function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
 }
 
 //instantiate chaincode
-function chaincodeInstantiate(channel, client, org) {
+async function chaincodeInstantiate(channel, client, org) {
+        var eventHubs = [];
         var cryptoSuite = hfc.newCryptoSuite();
         cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
         client.setCryptoSuite(cryptoSuite);
 
         logger.info('[chaincodeInstantiate] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
 
+        // get client key
+        if ( TLS == testUtil.TLSCLIENTAUTH ) {
+            await testUtil.tlsEnroll(client, org, svcFile);
+            logger.info('[chaincodeInstantiate] get user private key: org= %s', org);
+        }
         chainAddOrderer(channel, client, org);
-        //channelAddPeerEvent(chain, client, org);
-        //channelAddAnchorPeer(channel, client, org);
+
         var ivar=0
         for (ivar=0; ivar<channelOrgName.length; ivar++ ) {
             var orgInstantiate = channelOrgName[ivar];
-            channelAddPeer1(channel, client, orgInstantiate);
+            channelAddPeer1(channel, client, orgInstantiate, eventHubs);
         }
-        let eventHubs = channelAddEvent(channel, client, org);
-        //printChainInfo(channel);
+
+        logger.info('[chaincodeInstantiate:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
 
         channel.initialize()
         .then((success) => {
@@ -650,9 +584,9 @@ function chaincodeInstantiate(channel, client, org) {
                 let one_good = false;
                 if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
                     one_good = true;
-                    logger.info('[chaincodeInstantiate:Nid=%d] channel(%s) org(%s) chaincode instantiation was good', Nid, channelName, org);
+                    logger.info('[chaincodeInstantiate:Nid=%d] channel(%s) chaincode instantiation was good', Nid, channelName);
                 } else {
-                    logger.error('[chaincodeInstantiate:Nid=%d] channel(%s) org(%s) chaincode instantiation was bad: results= %j', Nid, channelName, org, results);
+                    logger.error('[chaincodeInstantiate:Nid=%d] channel(%s) chaincode instantiation was bad: results= %j', Nid, channelName, results);
                 }
                 all_good = all_good & one_good;
             }
@@ -668,6 +602,7 @@ function chaincodeInstantiate(channel, client, org) {
 
                 var deployId = tx_id.getTransactionID();
                 var eventPromises = [];
+                eventPromises.push(channel.sendTransaction(request));
                 eventHubs.forEach((eh) => {
                     let txPromise = new Promise((resolve, reject) => {
                         let handle = setTimeout(reject, cfgTimeout);
@@ -684,16 +619,21 @@ function chaincodeInstantiate(channel, client, org) {
                                 logger.info('[chaincodeInstantiate] The chaincode instantiate transaction was valid.');
                                 resolve();
                             }
+                        }, (err) => {
+                            clearTimeout(handle);
+                            reject();
+                        }, {
+                            disconnect: true
                         });
+                        eh.connect();
                     });
-
+                    logger.info('[chaincodeInstantiate] register eventhub %s with tx=%s', eh.getPeerAddr(),deployId);
                     eventPromises.push(txPromise);
                 });
 
-                var sendPromise = channel.sendTransaction(request);
                 var tCurr=new Date().getTime();
                 logger.info('[chaincodeInstantiate] Promise.all tCurr=%d', tCurr);
-                return Promise.all([sendPromise].concat(eventPromises))
+                return Promise.all(eventPromises)
 
                 .then((results) => {
 
@@ -723,14 +663,17 @@ function chaincodeInstantiate(channel, client, org) {
             if (response.status === 'SUCCESS') {
                 logger.info('[chaincodeInstantiate(Nid=%d)] Successfully instantiate transaction on %s. ', Nid, channelName);
                 evtDisconnect();
+                return;
             } else {
                 logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error code: ', Nid, channelName, response.status);
                 evtDisconnect();
+                return;
             }
 
         }, (err) => {
             logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s due to error: ', Nid, channelName, err.stack ? err.stack : err);
             evtDisconnect();
+            return;
         }
     );
 }
@@ -748,7 +691,7 @@ function readAllFiles(dir) {
 }
 
 //create channel
-function createOneChannel(client ,channelOrgName) {
+async function createOneChannel(client ,channelOrgName) {
 
     var config;
     var envelope_bytes;
@@ -773,12 +716,23 @@ function createOneChannel(client ,channelOrgName) {
     config = client.extractChannelConfig(envelope_bytes);
     logger.info('[createOneChannel] Successfull extracted the config update from the configtx envelope: ', channelTX);
 
+    // get client key
+    if ( TLS == testUtil.TLSCLIENTAUTH ) {
+        await testUtil.tlsEnroll(client, channelOrgName[0], svcFile);
+        logger.info('[createOneChannel] get user private key: org= %s', channelOrgName[0]);
+    }
     clientNewOrderer(client, channelOrgName[0]);
 
     hfc.newDefaultKeyValueStore({
         path: testUtil.storePathForOrg(Nid, orgName)
     }).then((store) => {
+
+
         client.setStateStore(store);
+        var cryptoSuite = hfc.newCryptoSuite();
+        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(org)}));
+        client.setCryptoSuite(cryptoSuite);
+
         var submitePromises= [];
         channelOrgName.forEach((org) => {
             submitter = new Promise(function (resolve,reject) {
@@ -813,7 +767,6 @@ function createOneChannel(client ,channelOrgName) {
         // collect signature from org admin
         signatures.push(signature);
 
-        //logger.info('[createOneChannel] signatures: ', signatures);
         logger.info('[createOneChannel] done signing: %s', channelName);
 
         // build up the create request
@@ -855,7 +808,7 @@ function createOneChannel(client ,channelOrgName) {
 }
 
 // join channel
-function joinChannel(channel, client, org) {
+async function joinChannel(channel, client, org) {
         var orgName = ORGS[org].name;
         logger.info('[joinChannel] Calling peers in organization (%s) to join the channel (%s)', orgName, channelName);
         var username = ORGS[org].username;
@@ -865,6 +818,11 @@ function joinChannel(channel, client, org) {
         var eventHubs = [];
         var blockCallbacks = [];
 
+        // get client key
+        if ( TLS == testUtil.TLSCLIENTAUTH ) {
+            await testUtil.tlsEnroll(client, org, svcFile);
+            logger.info('[joinChannel] get user private key: org= %s', org);
+        }
         // add orderers
         chainAddOrderer(channel, client, org);
 
@@ -880,6 +838,8 @@ function joinChannel(channel, client, org) {
                 logger.info('[joinChannel:%s] Successfully enrolled orderer \'admin\'', org);
                 the_user = admin;
                 logger.debug('[joinChannel] orderer admin: ', admin);
+
+//        chainAddOrderer(channel, client, org);
 
                 tx_id = client.newTransactionID();
                 var request = {
@@ -904,40 +864,6 @@ function joinChannel(channel, client, org) {
 
                 var eventPromises = [];
 
-                eventHubs.forEach((eh) => {
-                        let txPromise = new Promise((resolve, reject) => {
-                                let handle = setTimeout(reject, 30000);
-
-                                var cb = eh.registerBlockEvent((block) => {
-                                        clearTimeout(handle);
-
-                                        // in real-world situations, a peer may have more than one channels so
-                                        // we must check that this block came from the channel we asked the peer to join
-                                        if(block.data.data.length === 1) {
-                                                // Config block must only contain one transaction
-                                                var channel_header = block.data.data[0].payload.header.channel_header;
-
-                                                if (channel_header.channel_id === channelName) {
-                                                        logger.info('[joinChannel] The new channel has been successfully joined on peer '+ eh.getPeerAddr());
-                                                        resolve();
-                                                } else {
-                                                        //logger.error('[joinChannel] The new channel has not been succesfully joined');
-                                                        //reject();
-                                                }
-                                        }
-                                }, (err) => {
-                                    logger.error('[joinChannel] Failed to registerBlockEvent due to error: ' + err.stack ? err.stack : err);
-                                    throw new Error('[joinChannel] Failed to registerBlockEvent due to error: ' + err.stack ? err.stack : err);
-                                });
-                                blockCallbacks.push(cb);
-                        }, (err) => {
-                            logger.error('[joinChannel] Failed to Promise due to error: ' + err.stack ? err.stack : err);
-                            throw new Error('Failed to Promise due to error: ' + err.stack ? err.stack : err);
-                        });
-
-                        eventPromises.push(txPromise);
-                });
-
                 tx_id = client.newTransactionID();
                 let request = {
                         targets : targets,
@@ -945,17 +871,12 @@ function joinChannel(channel, client, org) {
                         txId :  tx_id
                 };
 
-                var sendPromise = channel.joinChannel(request);
-                return Promise.all([sendPromise].concat(eventPromises));
-        }, (err) => {
-                logger.error('[joinChannel] Failed to enroll user \'admin\' due to error: ' + err.stack ? err.stack : err);
-                evtDisconnect();
-                throw new Error('[joinChannel] Failed to enroll user \'admin\' due to error: ' + err.stack ? err.stack : err);
+                return channel.joinChannel(request);
         })
         .then((results) => {
                 logger.info(util.format('[joinChannel] join Channel R E S P O N S E : %j', results));
 
-                if(results[0] && results[0][0] && results[0][0].response && results[0][0].response.status == 200) {
+                if(results[0] && results[0].response && results[0].response.status == 200) {
                         logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
                         evtDisconnect(eventHubs, blockCallbacks);
                 } else {
@@ -964,7 +885,7 @@ function joinChannel(channel, client, org) {
                         throw new Error('[joinChannel] Failed to join channel');
                 }
         }, (err) => {
-                logger.error('[joinChannel] Failed to join channel due to error: ' + err.stack ? err.stack : err);
+                logger.error('[joinChannel] --- Failed to join channel due to error: ' + err.stack ? err.stack : err);
                 evtDisconnect(eventHubs, blockCallbacks);
         });
 }
@@ -1063,7 +984,7 @@ function queryBlockchainInfo(channel, client, org) {
 
 }
 
-function performance_main() {
+async function performance_main() {
     var channelCreated = 0;
     // set timeout for create/join channel and install/instantiate chaincode
     hfc.setConfigSetting('request-timeout', cfgTimeout);
@@ -1457,7 +1378,7 @@ function evtDisconnect(eventHubs, blockCallbacks) {
     }
     for (var i=0; i<eventHubs.length; i++) {
         if (eventHubs[i] && eventHubs[i].isconnected()) {
-            logger.info('Disconnecting the event hub: %s', eventHubs[i].getPeerAddr());
+            logger.info('[pte-main:evtDisconnect] Disconnecting the event hub: %s', eventHubs[i].getPeerAddr());
             if (blockCallbacks && blockCallbacks[i]) {
                 eventHubs[i].unregisterBlockEvent(blockCallbacks[i]);
             }
