@@ -112,7 +112,7 @@ Examples:
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
     # set up 1 channel, 1 cc
-    When a user sets up a channel named "mychannel1"
+    When an admin sets up a channel named "mychannel1"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
 
     # Invoke in the channel
@@ -141,9 +141,9 @@ Examples:
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
     # set up 3 channels, 1  cc each
-    When a user sets up a channel named "mychannel1"
-    And a user sets up a channel named "mychannel2"
-    And a user sets up a channel named "mychannel3"
+    When an admin sets up a channel named "mychannel1"
+    And an admin sets up a channel named "mychannel2"
+    And an admin sets up a channel named "mychannel3"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
@@ -185,9 +185,9 @@ Examples:
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
     # set up 3 channels, 1  cc each
-    When a user sets up a channel named "mychannel1"
-    And a user sets up a channel named "mychannel2"
-    And a user sets up a channel named "mychannel3"
+    When an admin sets up a channel named "mychannel1"
+    And an admin sets up a channel named "mychannel2"
+    And an admin sets up a channel named "mychannel3"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
     And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
@@ -234,9 +234,9 @@ Examples:
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
     # set up 3 channels, 1  cc each
-    When a user sets up a channel named "mychannel1"
-    And a user sets up a channel named "mychannel2"
-    And a user sets up a channel named "mychannel3"
+    When an admin sets up a channel named "mychannel1"
+    And an admin sets up a channel named "mychannel2"
+    And an admin sets up a channel named "mychannel3"
 
     # install the 3 ccs only in 3 (out of 4) peers and instantiate them
     And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
@@ -288,9 +288,9 @@ Examples:
     When a user defines a couchDB index named index_behave_test_color with design document name "indexdoc_behave_test" containing the fields "color" to the chaincode at path "<index_path>"
 
     # set up 3 channels, 1  cc each
-    When a user sets up a channel named "mychannel1"
-    And a user sets up a channel named "mychannel2"
-    And a user sets up a channel named "mychannel3"
+    When an admin sets up a channel named "mychannel1"
+    And an admin sets up a channel named "mychannel2"
+    And an admin sets up a channel named "mychannel3"
 
     # install the 3 ccs only in 3 (out of 4) peers and instantiate them
     And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
