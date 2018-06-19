@@ -1286,10 +1286,10 @@ function eventRegisterFilteredBlock() {
 
                 // this block listener handles the filtered block
                 if ( (typeof(filtered_block.number) != 'undefined') && (filtered_block.number > 0) ) {
-                    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] Successfully received the filtered block event for block_num: %d, txid number: %d', Nid, channelName, org, pid, filtered_block.number, filtered_block.filtered_transactions.length);
-                    if (typeof(filtered_block.filtered_transactions) != 'undefined') {
-                      for (i=0; i<filtered_block.filtered_transactions.length; i++) {
-                        var txid = filtered_block.filtered_transactions[i].txid;
+                    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] Successfully received the filtered block event for block_num: %d, txid number: %d', Nid, channelName, org, pid, filtered_block.number, filtered_block.filtered_tx.length);
+                    if (typeof(filtered_block.filtered_tx) != 'undefined') {
+                      for (i=0; i<filtered_block.filtered_tx.length; i++) {
+                        var txid = filtered_block.filtered_tx[i].txid;
                         if ( txidList[txid] ) {
                             evtRcvB = evtRcvB + 1;
                             var tend = new Date().getTime();
@@ -1305,7 +1305,7 @@ function eventRegisterFilteredBlock() {
                       }
                     }
                     else {
-                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] pte-exec: Failure - received filtered_block.number:%d but filtered_transactions is undefined', Nid, channelName, org, pid, filtered_block.number);
+                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] pte-exec: Failure - received filtered_block.number:%d but filtered_tx is undefined', Nid, channelName, org, pid, filtered_block.number);
                     }
 
                     if ( inv_m == evtRcvB  ) {
