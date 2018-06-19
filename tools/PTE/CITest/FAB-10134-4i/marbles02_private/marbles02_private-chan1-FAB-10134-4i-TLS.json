@@ -1,23 +1,22 @@
 {
     "channelID": "_ch1",
-    "chaincodeID": "marbles02_go",
+    "chaincodeID": "marbles02_private_go",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Constant",
     "transType": "Invoke",
-    "invokeType": "Query",
-    "targetPeers": "AllPeers",
-    "nProcPerOrg": "1",
-    "nRequest": "10",
+    "invokeType": "Move",
+    "targetPeers": "List",
+    "nProcPerOrg": "4",
+    "nRequest": "10000",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
-            "org1",
-            "org2"
+            "org1"
         ]
     },
     "burstOpt": {
@@ -32,19 +31,18 @@
     },
     "constantOpt": {
         "recHist": "HIST",
-        "constFreq": "0",
+        "constFreq": "200",
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
+        "org1": ["peer1"]
     },
     "eventOpt": {
-        "type": "Channel",
+        "type": "FilteredBlock",
         "listener": "Block",
         "timeout": "240000"
     },
-    "ccType": "marblescc",
+    "ccType": "marblescc_priv",
     "ccOpt": {
         "keyIdx": [0],
         "keyPayLoad": [2],
@@ -53,17 +51,17 @@
         "payLoadMax": "2048"
     },
     "invoke": {
-        "nOwner":"100",
+        "nOwner":"10000",
         "query": {
             "fcn": "readMarble",
             "args": ["marble"]
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom"]
+            "args": ["marble", "blue","35","tom","99"]
         }
     },
     "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
-	]
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-org1-TLS.json"}
+    ]
 }

@@ -90,6 +90,8 @@ The command is located in `PTE/CITest/scripts`
         FAB-8696-4q: marbles02 GO chaincode, 4 processes X 250000 rich queries with 4-field selector, TLS, CouchDB, 2 channels
         FAB-9575-4i: marbles02 GO chaincode, 4 processes X 250000 invokes and 4 processes X 50000 queries simultaneously, TLS, CouchDB, 2 channel, filtered block event service with block listener, require execution of FAB-8694-4i to have 1M invokes on the ledger
         FAB-10581-4i: 4 processes X 100,000 service discvoeries
+        FAB-10134-4i: marbles02_private GO chaincode, 4 process X 10000 invokes, TLS, CouchDB, 1 channel
+        FAB-10134-4q: marbles02_private GO chaincode, 4 process X 10000 query private, TLS, CouchDB, 1 Channel
 
     **Note that a query testcase requires execution of corresponding invoke testcase first to avoid errors due to the absence of transactions.**
 
@@ -165,6 +167,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-8696-4q.sh: execute FAB-8696-4q
         FAB-9575-4i.sh: execute FAB-8694-4i, then FAB-9575-4i
         FAB-10581-4i.sh: execute FAB-10581-4i
+        FAB-10134-4i.sh: execute FAB-10134-4i, then FAB-10134-4q
 
 * ### Network
 

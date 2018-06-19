@@ -7,7 +7,7 @@
     "transMode": "Constant",
     "transType": "Invoke",
     "invokeType": "Query",
-    "targetPeers": "OrgAnchor",
+    "targetPeers": "AllPeers",
     "nProcPerOrg": "1",
     "nRequest": "10",
     "runDur": "0",

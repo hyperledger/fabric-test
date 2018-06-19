@@ -1,0 +1,18 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "marbles02_private_go",
+    "chaincodeVer": "v0",
+    "transType": "Channel",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel1",
+        "action":  "join",
+        "orgName": [
+            "org1"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-org1-TLS.json"}
+    ]
+}

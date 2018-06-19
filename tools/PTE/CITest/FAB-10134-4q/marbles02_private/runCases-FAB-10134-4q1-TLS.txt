@@ -1,0 +1,2 @@
+#sdk=node CITest/FAB-10134-4q/marbles02_private/marbles02_private-chan1-FAB-10134-4q-TLS.json
+sdk=node CITest/FAB-10134-4q/marbles02_private/marbles02_private-chan1-FAB-10134-4qpv-TLS.json
