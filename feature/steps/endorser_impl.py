@@ -343,7 +343,7 @@ def step_impl(context, peer, args):
 def step_impl(context, channel, peer):
     upgrade_impl(context, context.interface.TEST_CHANNEL_ID, 1, peer)
 
-@when(u'am admin instantiates the chaincode on channel "{channel}" on peer "{peer}"')
+@when(u'an admin instantiates the chaincode on channel "{channel}" on peer "{peer}"')
 def instantiate_impl(context, peer, channel, username="Admin", timeout=120):
     context.chaincode["channelID"] = channel
     context.interface.instantiate_chaincode(context, peer, username)

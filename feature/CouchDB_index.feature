@@ -113,15 +113,15 @@ Examples:
 
     # set up 1 channel, 1 cc
     When an admin sets up a channel named "mychannel1"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
 
     # Invoke in the channel
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"
 
     #add another index and deploy version 1
     When a user defines a couchDB index named index_behave_test_v1 with design document name "indexdoc_behave_test_v1" containing the fields "owner" to the chaincode at path "<index_path>"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
-    And a user upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
+    And an admin upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
 
     # Do explicit query: rich query with the index explicitly specified
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
@@ -144,9 +144,9 @@ Examples:
     When an admin sets up a channel named "mychannel1"
     And an admin sets up a channel named "mychannel2"
     And an admin sets up a channel named "mychannel3"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
 
     # Invoke in the channels
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"
@@ -155,8 +155,8 @@ Examples:
 
     #add another index and deploy version 1 in 1 channel/cc only
     When a user defines a couchDB index named index_behave_test_v1 with design document name "indexdoc_behave_test_v1" containing the fields "owner" to the chaincode at path "<index_path>"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
-    And a user upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
+    And an admin upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
 
     # Do explicit query: rich query with the index explicitly specified
     # non-upgraded cc expected to fail for new indexes
@@ -188,9 +188,9 @@ Examples:
     When an admin sets up a channel named "mychannel1"
     And an admin sets up a channel named "mychannel2"
     And an admin sets up a channel named "mychannel3"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
-    And a user deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc1" with language "<language>" on channel "mychannel1"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc2" with language "<language>" on channel "mychannel2"
+    And an admin deploys chaincode at path "<cc_path>" with version "0" with args [""] with name "mycc3" with language "<language>" on channel "mychannel3"
 
     # Invoke in the channels
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble1","green","10","matt"] on "peer0.org1.example.com"
@@ -199,12 +199,12 @@ Examples:
 
     #add another index and deploy version 1 in all 3 channel-cc
     When a user defines a couchDB index named index_behave_test_v1 with design document name "indexdoc_behave_test_v1" containing the fields "owner" to the chaincode at path "<index_path>"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
-    And a user upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc2"
-    And a user upgrades the chaincode with name "mycc2" on channel "mychannel2" to version "1" with args [""]
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc3"
-    And a user upgrades the chaincode with name "mycc3" on channel "mychannel3" to version "1" with args [""]
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
+    And an admin upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc2"
+    And an admin upgrades the chaincode with name "mycc2" on channel "mychannel2" to version "1" with args [""]
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc3"
+    And an admin upgrades the chaincode with name "mycc3" on channel "mychannel3" to version "1" with args [""]
 
     # Do explicit query: rich query with the index explicitly specified
     # all ccs expected to pass with both indexes
@@ -239,20 +239,20 @@ Examples:
     And an admin sets up a channel named "mychannel3"
 
     # install the 3 ccs only in 3 (out of 4) peers and instantiate them
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org2.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org2.example.com"
-    And a user instantiates the chaincode on channel "mychannel1" on peer "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org2.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org2.example.com"
+    And an admin instantiates the chaincode on channel "mychannel1" on peer "peer0.org1.example.com"
 
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org2.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org2.example.com"
-    And a user instantiates the chaincode on channel "mychannel2" on peer "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org2.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org2.example.com"
+    And an admin instantiates the chaincode on channel "mychannel2" on peer "peer0.org1.example.com"
 
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org2.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org2.example.com"
-    And a user instantiates the chaincode on channel "mychannel3" on peer "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org2.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org2.example.com"
+    And an admin instantiates the chaincode on channel "mychannel3" on peer "peer0.org1.example.com"
     And I wait "10" seconds
 
     # Invoke in the channels
@@ -261,9 +261,9 @@ Examples:
     And a user invokes on the channel "mychannel3" using chaincode named "mycc3" with args ["initMarble","marble3","red","5","jose"] on "peer0.org1.example.com"
 
     # Now the late-install in 4th peer
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
 
     # Do explicit queryi 4th peer: rich query with the index explicitly specified
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
@@ -293,20 +293,20 @@ Examples:
     And an admin sets up a channel named "mychannel3"
 
     # install the 3 ccs only in 3 (out of 4) peers and instantiate them
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org2.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org2.example.com"
-    And a user instantiates the chaincode on channel "mychannel1" on peer "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org2.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer0.org2.example.com"
+    And an admin instantiates the chaincode on channel "mychannel1" on peer "peer0.org1.example.com"
 
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org2.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org2.example.com"
-    And a user instantiates the chaincode on channel "mychannel2" on peer "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org2.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer0.org2.example.com"
+    And an admin instantiates the chaincode on channel "mychannel2" on peer "peer0.org1.example.com"
 
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org2.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org2.example.com"
-    And a user instantiates the chaincode on channel "mychannel3" on peer "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org2.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer0.org2.example.com"
+    And an admin instantiates the chaincode on channel "mychannel3" on peer "peer0.org1.example.com"
     And I wait "10" seconds
 
     # Invoke in the channels
@@ -315,9 +315,9 @@ Examples:
     And a user invokes on the channel "mychannel3" using chaincode named "mycc3" with args ["initMarble","marble3","red","5","jose"] on "peer0.org1.example.com"
 
     # Now the late-install in 4th peer
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
-    And a user installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
+    And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
 
     # Do explicit query in 4th peer: rich query with the index explicitly specified
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
