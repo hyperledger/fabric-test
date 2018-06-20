@@ -253,7 +253,9 @@ do
           do
               j=$[ i - 1 ]
               tmpAddr="orderer"$j"."$comName
-              tmp=$tmpAddr":7050"
+              tmpPort=$[ ordererPort + j ]
+              tmp=$tmpAddr":"$tmpPort
+              ##tmp=$tmpAddr":7050"
               echo "         - $tmp" >> $cfgOutFile
           done
 
@@ -356,8 +358,8 @@ do
              echo "" >> $cfgOutFile
 
              #tmpPort=$[ HostPort + peersPerOrg * ( i - 1 ) ]
-             #tmpPort=$[ peerPort + peersPerOrg * ( i - 1 ) ]
-             tmpPort=7051
+             tmpPort=$[ peerPort + peersPerOrg * ( i - 1 ) ]
+             ###tmpPort=7051
              tmpHost="peer0.org"$i"."$comName
              echo "        AnchorPeers:" >> $cfgOutFile
              echo "            - Host: $tmpHost" >> $cfgOutFile

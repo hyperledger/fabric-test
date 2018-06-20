@@ -499,8 +499,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                 fs.appendFileSync(dFile, buff);
                                 tmp_port = ordererPort + v;
 
-                                buff = '  ' + '    - ' + tmp_port +':' + '7050' + '\n' ;
-                                //buff = '  ' + '    - ' + tmp_port +':' + tmp_port + '\n' ;
+                                buff = '  ' + '    - ' + tmp_port +':' + tmp_port + '\n' ;
                                 fs.appendFileSync(dFile, buff);
 
                         } else if ( (lvl2_key[k] == 'depends_on') ) {
@@ -741,7 +740,7 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_BOOTSTRAP' ) {
                                         if ( s != 0 ) {
                                             var k1 = vp0Port + (t-1)*nPeerPerOrg;
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer0Name +':'+ '7051' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer0Name +':'+ k1 + '\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_LEDGER_STATE_STATEDATABASE' ) {
@@ -763,10 +762,10 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             fs.appendFileSync(dFile, buff);
                                         }
                                     } else if ( lvl3_key[m] == 'CORE_PEER_LISTENADDRESS' ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+'7051' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ tmp_port + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_ENDPOINT' ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+'7051' + '\n';
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ tmp_port + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_EVENTS_ADDRESS' ) {
                                             var t1 = evtPort + v;
@@ -788,9 +787,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
 
                                 }
 
-                                buff = '  ' + '    - CORE_PEER_ADDRESS=' + peerName +':7051\n';
+                                buff = '  ' + '    - CORE_PEER_ADDRESS=' + peerName +':'+ tmp_port + '\n';
                                 fs.appendFileSync(dFile, buff);
-                                buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':'+'7051'+'\n';
+                                buff = '  ' + '    - CORE_PEER_GOSSIP_EXTERNALENDPOINT='+peerName+':'+ tmp_port + '\n';
                                 fs.appendFileSync(dFile, buff);
 
                                 if ( TLS.toUpperCase() == 'ENABLED' ) {
@@ -848,16 +847,15 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             fs.appendFileSync(dFile, buff);
 
                             // header 4
-                            buff = '  ' + '    - ' + tmp_port + ':' + 7051 + '\n';
+                            buff = '  ' + '    - ' + tmp_port + ':' + tmp_port + '\n';
                             fs.appendFileSync(dFile, buff);
 
                             var t1 = evtPort + v;
-                            buff = '  ' + '    - ' + t1 + ':' + 7053 + '\n';
+                            buff = '  ' + '    - ' + t1 + ':' + t1 + '\n';
                             fs.appendFileSync(dFile, buff);
 
                         } else if ( lvl2_key[k] == 'links' ) {
                             var lvl2_obj = lvl1_obj[lvl2_key[k]];
-                            //console.log('lvl2_obj: %d ', lvl2_obj.length, lvl2_obj);
 
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + '\n';
                             fs.appendFileSync(dFile, buff);
