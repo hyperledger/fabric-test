@@ -31,7 +31,7 @@ PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/pre_setup.sh
 PTE_TAG = $(DOCKER_ORG)/fabric-pte:$(shell git rev-parse --short HEAD)
 
 .PHONY: ci-smoke
-ci-smoke: git-init git-latest fabric ca clean pre-setup docker-images smoke-tests
+ci-smoke: git-init fabric ca clean pre-setup docker-images smoke-tests
 
 .PHONY: git-latest
 git-latest:
@@ -47,7 +47,7 @@ pre-setup:
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: ci-daily
-ci-daily: git-init git-latest fabric ca clean pre-setup docker-images daily-tests
+ci-daily: git-init fabric ca clean pre-setup docker-images daily-tests
 
 .PHONY: fabric
 fabric:
@@ -56,7 +56,7 @@ fabric:
 		cd $(HYPERLEDGER_DIR); \
 		git clone $(FABRIC) $(FABRIC_DIR); \
 	fi
-	cd $(FABRIC_DIR) && git pull $(FABRIC)
+	cd $(FABRIC_DIR) && git checkout $(shell cat ../fabric-test/.git/modules/fabric/HEAD)
 
 .PHONY: docker-images
 docker-images:
@@ -72,7 +72,7 @@ ca:
 		cd $(HYPERLEDGER_DIR); \
 		git clone $(FABRIC_CA) $(CA_DIR); \
 	fi
-	cd $(CA_DIR) && git pull $(FABRIC_CA)
+	cd $(CA_DIR) && git checkout $(shell cat ../fabric-test/.git/modules/fabric-ca/HEAD)
 
 .PHONY: smoke-tests
 smoke-tests:

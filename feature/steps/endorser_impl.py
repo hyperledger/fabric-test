@@ -137,7 +137,7 @@ def step_impl(context, path, args):
 @when(u'a user deploys chaincode on channel "{channel}" with args {args} within {timeout:d} seconds')
 def step_impl(context, channel, args, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
                 "GOLANG",
@@ -147,7 +147,7 @@ def step_impl(context, channel, args, timeout):
 @when(u'a user deploys chaincode on channel "{channel}" with args {args}')
 def step_impl(context, channel, args):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
                 "GOLANG",
@@ -157,7 +157,7 @@ def step_impl(context, channel, args):
 @when(u'a user deploys chaincode on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, channel, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -167,7 +167,7 @@ def step_impl(context, channel, timeout):
 @when(u'a user deploys chaincode on channel "{channel}"')
 def step_impl(context, channel):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -177,7 +177,7 @@ def step_impl(context, channel):
 @when(u'a user deploys chaincode with name "{name}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, name, channel, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 name,
                 "GOLANG",
@@ -187,7 +187,7 @@ def step_impl(context, name, channel, timeout):
 @when(u'a user deploys chaincode with name "{name}" on channel "{channel}"')
 def step_impl(context, name, channel):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 name,
                 "GOLANG",
@@ -197,7 +197,7 @@ def step_impl(context, name, channel):
 @when(u'a user deploys chaincode with args {args} with policy {policy}')
 def step_impl(context, args, policy):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
                 "GOLANG",
@@ -209,7 +209,7 @@ def step_impl(context, args, policy):
 @when(u'a user deploys chaincode with args {args} within {timeout:d} seconds')
 def step_impl(context, args, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
                 "GOLANG",
@@ -219,7 +219,7 @@ def step_impl(context, args, timeout):
 @when(u'a user deploys chaincode with args {args}')
 def step_impl(context, args):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 args,
                 "mycc",
                 "GOLANG",
@@ -229,7 +229,7 @@ def step_impl(context, args):
 @when(u'a user deploys chaincode within {timeout:d} seconds')
 def step_impl(context, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -239,7 +239,7 @@ def step_impl(context, timeout):
 @when(u'a user deploys chaincode')
 def step_impl(context):
     deploy_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -288,7 +288,7 @@ def step_impl(context, path, args, name, peer):
 def step_impl(context):
     peers = context.interface.get_peers(context)
     install_impl(context,
-                "github.com/hyperledger/fabric/examples/chaincode/go/example02",
+                "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -841,7 +841,7 @@ def step_impl(context, response, org, status):
 def expected_impl(context, response, peer, status="a success"):
     assert peer in context.result, "There is no response from {0}".format(peer)
     if status == "a success":
-        assert context.result[peer] == "{0}\n".format(response), \
+        assert context.result[peer] == "Query Result: {0}\n".format(response), \
                "Expected response was {0}; received {1}".format(response,
                                                                 context.result[peer])
     elif status == "an error":
@@ -859,7 +859,8 @@ def set_response_impl(context, valueType, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
     assert "Error endorsing query" not in context.result[peer], "There was an error response: {0}".format(context.result[peer])
     if valueType == "length":
-        assert len(context.result[peer].replace('\n', '').replace('"', '')) == context.payload["len"], \
+        # Account for extra "Query Result" characters
+        assert len(context.result[peer].replace('\n', '').replace('"', '')) == context.payload["len"] + 14, \
              "Expected response to be of length {0}; received length {1}; Result: {2}".format(context.payload["len"],
                                                                                               len(context.result[peer]),
                                                                                               context.result[peer])
@@ -877,7 +878,8 @@ def step_impl(context, valueType):
 def length_impl(context, length, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
     assert "Error endorsing query" not in context.result[peer], "There was an error response: {0}".format(context.result[peer])
-    assert len(context.result[peer].replace('\n', '').replace('"', '')) == length, \
+    # Account for extra "Query Result" characters
+    assert len(context.result[peer].replace('\n', '').replace('"', '')) == length + 14, \
         "Expected response to be of length {0}; received length {1}; Result: {2}".format(length,
                                                                                          len(context.result[peer]),
                                                                                          context.result[peer])

@@ -13,7 +13,7 @@ Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query, 
     Given I have a bootstrapped fabric network of type <type> <security>
     And I use the <interface> interface
     When a user sets up a channel
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 1000
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -62,7 +62,7 @@ Examples:
 Scenario Outline: FAB-3865: Multiple Channels Per Peer, with <type> orderer
     Given I have a bootstrapped fabric network of type <type>
     When a user sets up a channel named "chn1"
-    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init", "a", "1000" , "b", "2000"] with name "cc1" on channel "chn1"
+    And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init", "a", "1000" , "b", "2000"] with name "cc1" on channel "chn1"
     When a user sets up a channel named "chn2"
     And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "cc2" on channel "chn2"
     When a user invokes on the channel "chn2" using chaincode named "cc2" with args ["put", "a", "1000"]
@@ -97,7 +97,7 @@ Scenario Outline: FAB-3866: Multiple Chaincodes Per Peer, with <type> orderer
     And I wait "5" seconds
     And a user queries on the chaincode named "eventsender" with args ["query"]
     Then a user receives a success response of {"NoEvents":"1"}
-    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init", "a", "1000" , "b", "2000"] with name "example02"
+    When a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init", "a", "1000" , "b", "2000"] with name "example02"
     When a user invokes on the chaincode named "example02" with args ["invoke", "a", "b", "10"]
     And I wait "5" seconds
     And a user queries on the chaincode named "example02" with args ["query", "a"]
@@ -128,7 +128,7 @@ Examples:
 Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up, is able to resume regular operation
   Given I have a bootstrapped fabric network of type solo
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "10" seconds
 
   # do 1 set of invoke-query on peer1.org1
@@ -172,7 +172,7 @@ Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Test Mutual TLS/ClientAuth <securi
   And I have a bootstrapped fabric network of type <type> <security>
   And I use the <interface> interface
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init","a","1000","b","2000"] with name "mycc"
   When a user queries on the chaincode named "mycc" with args ["query","a"]
   Then a user receives a success response of 1000
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -292,7 +292,7 @@ Scenario: FAB-8382: Test MSP Identity with inconsistencies
 Scenario: FAB-8759: Test querying a peer with two different versions of chaincode - values change
   Given I have a bootstrapped fabric network of type kafka with tls
   When a user sets up a channel named "versioningtest"
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init", "a", "1000" , "b", "2000"] with name "vt" on channel "versioningtest"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" with args ["init", "a", "1000" , "b", "2000"] with name "vt" on channel "versioningtest"
   When a user queries on the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 1000
   When a user invokes on the channel "versioningtest" using chaincode named "vt" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
@@ -300,7 +300,7 @@ Scenario: FAB-8759: Test querying a peer with two different versions of chaincod
   When a user queries on the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 990
 
-  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" as version "3" with args ["init","a","1000","b","2000"] with name "vt" on all peers
+  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" as version "3" with args ["init","a","1000","b","2000"] with name "vt" on all peers
   And I wait "5" seconds
   When a user upgrades the chaincode on channel "versioningtest" to version "3" on peer "peer0.org1.example.com" with args ["init","a","1000","b","2000"]
   #When a user upgrades the chaincode on channel "versioningtest" to version "3" on peer "peer0.org1.example.com"
@@ -361,7 +361,7 @@ Scenario: FAB-7407: Update the channel policies - add an organization
   When a user fetches genesis information at block 0 using peer "peer0.org3.example.com"
   When a user makes peer "peer0.org3.example.com" join the channel
   And a user makes peer "peer1.org3.example.com" join the channel
-  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" as version "2" with args ["init","a","1000","b","2000"] on all peers
+  When a user installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" as version "2" with args ["init","a","1000","b","2000"] on all peers
   And I wait "5" seconds
   When a user upgrades the chaincode to version "2" on peer "peer0.org1.example.com" with args ["init","a","1000","b","2000"]
 

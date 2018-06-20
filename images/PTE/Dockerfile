@@ -14,7 +14,7 @@ RUN apt update && apt install -y git jq
 #Clone latest fabric-test repo and install node modules
 RUN mkdir -p $GOPATH/src/github.com/hyperledger/ \
     && cd $GOPATH/src/github.com/hyperledger \
-    && git clone https://github.com/hyperledger/fabric-test/ \
+    && git clone -b release-1.1 https://github.com/hyperledger/fabric-test/ \
     && cd $GOPATH/src/github.com/hyperledger/fabric-test \
     && git submodule update --init --recursive \
     && cd tools/PTE \
