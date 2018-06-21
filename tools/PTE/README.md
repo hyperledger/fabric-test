@@ -821,6 +821,7 @@ where:
     * **Instantiate**: instantiate chaincode
     * **QueryBlock**: query blockchain information
     * **Invoke**: invokes transaction
+    * **Discovery**: service discovery initialization
 * **peerFailover**: if this parameter is set to `TRUE` and if the transaction cannot be delivered to the targeted peer, then PTE will send the transaction to the next peer in the peer list, and so on.  The peer list consists of all peers in the configuration json.
 * **ordererFailover**: if this parameter is set to `TRUE` and if the transaction cannot be delivered to the targeted orderer, then PTE will send the transaction to the next orderer in the orderer list, and so on.  The orderer list consists of all orderers in the configuration json.
 * **invokeType**: invoke transaction type. This parameter is valid only if the transType is set to invoke
@@ -832,6 +833,7 @@ where:
     * **OrgPeers**: send to all peers in the organization being executed in the current process
     * **AllPeers**: send to all peers in all organizations
     * **List**: only send to the peers given in listOpt, see listOpt below for details
+    * **Disovery**: use service discovery to determine the target peers, see discoveryOpt below for details
 * **nProcPerOrg**: number of processes for the test
 * **nRequest**: number of transactions to be executed for each process
 * **runDur**: run duration in seconds to be executed  for each process.
@@ -870,7 +872,8 @@ where:
                  "org3": ["peer1"],
                  "org6": ["peer3"]
              }
-
+* **discoveryOpt**: service discovery option. The option is valid only when targetPeer is set to `Discovery`.
+    * **localHost**: set to `true` when fabric is running in containers and executing PTE from not in a container, else set to `false`. For CI automation tests or other tests on single host using docker, when sending invokes or queries, set `localHost=true` and set `targetPeers=discovery`. Default value is false.
 * **eventOpt**: event options
     * **type**: event service type, default: FilteredBlock
         * **FilteredBlock**: efficient option, delivers filtered events per channel for each block or transaction

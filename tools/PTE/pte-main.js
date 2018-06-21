@@ -1069,7 +1069,7 @@ async function performance_main() {
             var channel = client.newChannel(channelName);
             logger.info('[performance_main] channel name: ', channelName);
             queryBlockchainInfo(channel, client, org);
-        } else if ( transType == 'INVOKE' ) {
+        } else if ( (transType == 'INVOKE') || (transType == 'DISCOVERY') ) {
             // spawn off processes for transactions
             getCCID();
             var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
@@ -1126,6 +1126,8 @@ async function performance_main() {
                         var totalMixedTime=0;
                         var totalMixedInvoke=0;
                         var totalMixedQuery=0;
+                        var totalDiscoveryTrans=0;
+                        var totalDiscoveryTime=0;
 
                         var stmp=0;
                         var etmp=0;
@@ -1250,6 +1252,28 @@ async function performance_main() {
 
                                 continue;
                             };
+                            if (rawText.indexOf("invoke_discovery")>-1) {
+                                var transNum= parseInt(rawText.substring(rawText.indexOf("sent")+4,rawText.indexOf("transactions")).trim());
+                                totalDiscoveryTrans=totalDiscoveryTrans+transNum;
+                                var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
+                                totalDiscoveryTime=totalDiscoveryTime+tempDur;
+
+                                var tmp=parseInt(rawText.substring(rawText.indexOf("start")+5, rawText.indexOf("end")).trim());
+                                var tmp1=parseInt(rawText.substring(rawText.indexOf("end")+3, rawText.indexOf(",Throughput")).trim());
+                                if ( stmp == 0 ) {
+                                    stmp = tmp;
+                                } else if ( stmp > tmp ) {
+                                    stmp = tmp;
+                                }
+                                if ( etmp == 0 ) {
+                                    etmp = tmp1;
+                                } else if ( etmp < tmp1 ) {
+                                    etmp = tmp1;
+                                }
+                                logger.info('invoke_discovery found it', totalDiscoveryTrans, totalDiscoveryTime, stmp, etmp);
+
+                                continue;
+                            };
                         }
                         logger.info("Test Summary: Total %d Threads run completed",procDone);
                         if (totalInvokeTrans>0) {
@@ -1340,6 +1364,25 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+mTPS.toFixed(2)+ "\n\n";
+                            fs.appendFileSync(rptFile, buff);
+                        }
+                        if (totalDiscoveryTrans>0) {
+                            var dur=etmp-stmp;
+                            logger.info("Test Summary (%s):Total  DISCOVERY transaction=%d, duration=%d ms, total throughput=%d TPS", chaincode_id, totalDiscoveryTrans, dur, totalDiscoveryTrans/dur.toFixed(2));
+                            var sdTPS=1000*totalDiscoveryTrans/dur;
+                            logger.info("Aggregate Test Summary (%s):Total DISCOVERY transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalDiscoveryTrans, stmp, etmp, dur, sdTPS.toFixed(2));
+
+                            // service discovery transaction output
+                            var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"): DISCOVERY transaction stats\n";
+                            fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions "+totalDiscoveryTrans + "\n";
+                            fs.appendFileSync(rptFile, buff);
+
+                            buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tTPS "+sdTPS.toFixed(2)+ "\n\n";
                             fs.appendFileSync(rptFile, buff);
                         }
                         logger.info('[performance_main] pte-main:completed:');

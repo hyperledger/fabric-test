@@ -411,7 +411,6 @@ module.exports.TLSSERVERAUTH = TLSSERVERAUTH;
 module.exports.TLSCLIENTAUTH = TLSCLIENTAUTH;
 
 module.exports.setTLS=function(txCfgPtr) {
-    logger.info('[util] ');
     var TLSin=txCfgPtr.TLS.toUpperCase();
     var TLS = TLSDISABLED;        // default
     if ( (TLSin == 'SERVERAUTH') || (TLSin == 'ENABLED') ) {
@@ -419,7 +418,7 @@ module.exports.setTLS=function(txCfgPtr) {
     } else if ( TLSin == 'CLIENTAUTH' ) {
        TLS = TLSCLIENTAUTH;
     }
-    logger.info('[util] TLSin: %s, TLS: %d', TLSin, TLS);
+    logger.info('[setTLS] TLSin: %s, TLS: %d', TLSin, TLS);
 
     return TLS;
 }
