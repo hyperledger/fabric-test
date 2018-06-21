@@ -143,7 +143,7 @@ Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization
   Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
   And I have a bootstrapped fabric network of type kafka
   When a user sets up a channel
-  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+  And a user deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02" with args ["init","a","1000","b","2000"] with name "mycc"
   # the following wait is for Gossip leadership states to be stabilized
   And I wait "30" seconds
 
