@@ -64,8 +64,9 @@ echo "======== PULL FABRIC BINARIES ========"
 MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-stable/maven-metadata.xml")
 curl -L "$MVN_METADATA" > maven-metadata.xml
 RELEASE_TAG=$(cat maven-metadata.xml | grep release)
-COMMIT=$(echo $RELEASE_TAG | awk -F - '{ print $4 }' | cut -d "<" -f1)
-VERSION=$(cat Makefile | grep "BASE_VERSION =" | cut -d "=" -f2 | cut -d " " -f2)
+#COMMIT=$(echo $RELEASE_TAG | awk -F - '{ print $4 }' | cut -d "<" -f1)
+COMMIT=f6e72eb
+VERSION=1.2.0
 OS_VER=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo "BASE_VERSION = $VERSION"
 echo
