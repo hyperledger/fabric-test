@@ -1354,7 +1354,7 @@ function execModeLatency() {
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeLatency] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
         if ( invokeType == 'MOVE' ) {
-			var freq = ccFuncInst.getExecModeLatencyFreq();
+            var freq = ccFuncInst.getExecModeLatencyFreq();
 
             if (evtType == 'FILTEREDBLOCK') {
                 eventRegisterFilteredBlock();
@@ -1461,7 +1461,7 @@ function execModeSimple() {
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeSimple] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
         if ( invokeType == 'MOVE' ) {
-			var freq = ccFuncInst.getExecModeSimpleFreq();
+            var freq = ccFuncInst.getExecModeSimpleFreq();
             invoke_move_simple(freq);
         } else if ( invokeType == 'QUERY' ) {
             invoke_query_simple(0);
@@ -2033,7 +2033,7 @@ function execModeProposal() {
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeProposal] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
         if ( invokeType == 'MOVE' ) {
-			var freq = ccFuncInst.getExecModeProposalFreq();
+            var freq = ccFuncInst.getExecModeProposalFreq();
             invoke_move_proposal();
         } else if ( invokeType == 'QUERY' ) {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeProposal] invalid invokeType= %s', Nid, channelName, org, pid, invokeType);
