@@ -1,0 +1,57 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "CONSTANT",
+    "transType": "DISCOVERY",
+    "invokeType": "Move",
+    "targetPeers": "DISCOVERY",
+    "nProcPerOrg": "2",
+    "nRequest": "100000",
+    "runDur": "0",
+    "TLS": "clientauth",
+    "channelOpt": {
+        "name": "testorgschannel1",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "discoveryOpt": {
+        "localHost": "true"
+    },
+    "eventOpt": {
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "480000"
+    },
+    "ccType": "ccchecker",
+    "ccOpt": {
+        "keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "0",
+        "payLoadMin": "1024",
+        "payLoadMax": "1024"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+        "fcn": "init",
+        "args": []
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
+    "SCFile": [
+		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+	]
+}
