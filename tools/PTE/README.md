@@ -39,6 +39,7 @@ In brief, PTE has the following features:
      - [Transaction Type](#transaction-type)
      - [Sample Use Cases](#sample-use-cases)
      - [Chaincodes](#chaincodes)
+     - [Transaction Payload Generation](#tx-payload-gen)
      - [Output](#output)
  - [Reference](#reference)
     - [User Input File](#user-input-file)
@@ -451,7 +452,7 @@ The following chaincodes are tested and supported:
 
 * **example02**: This is a simple chaincode with limited capability.  This chaincode is **NOT** suitable for performance benchmark.
 
-* **sample_cc**: This chaincode supports variable (randomized) payload sizes and performs encryption and decryption on the payload. Specify ccType as ccchecker when using this chaincode. See directory `sampleccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/go`.  Set the deploy.chaincodePath to this directory in the user input file.
+* **sample_cc**: This chaincode supports variable (randomized) payload sizes and performs encryption and decryption on the payload. Specify `ccType` as `ccchecker` when using this chaincode. See directory `sampleccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/go`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
@@ -459,7 +460,7 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
-* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify ccType as marblescc when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02`.  Set the deploy.chaincodePath to this directory in the user input file.
+* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc` when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
@@ -467,7 +468,7 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
-* **marblescc_priv**: [Marbles02 private chaincode](https://github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify ccType as marblescc_priv when using this chaincode.  See directory `marblescc_privInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go`.  Set the deploy.chaincodePath to this directory in the user input file.  This chaincode can be used for side DB if user specifies collection configuration json in the `collectionsConfigPath` when instantiate the chaincode.
+* **marblescc_priv**: [Marbles02 private chaincode](https://github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc_priv` when using this chaincode.  See directory `marblescc_privInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go`.  Set the deploy.chaincodePath to this directory in the user input file.  This chaincode can be used for side DB if user specifies collection configuration json in the `collectionsConfigPath` when instantiate the chaincode.
 
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
@@ -484,6 +485,64 @@ The following chaincodes are tested and supported:
             "language": "node",
             "args": []
         },
+
+
+
+## Transaction Payload Generation
+You can write logic to generate transaction (invoke or query) arguments that is specific to a chaincode type (or `ccType` in your chaincode definition JSON file.)
+
+The logic for `<ccType>` should be specified in `ccArgumentsGenerators/<ccType>/ccFunctions.js`, in a class named `ccFunctions` that inherits the `ccFunctionsBase` class defined in `ccArgumentsGenerators/ccFunctionsBase.js`.
+
+(The following `ccType` values are supported by default: {`ccchecker`, `marblescc`, `marblescc_priv`}. If you want to run PTE on a custom `ccType`, create an appropriate folder and JS file.)
+
+The `ccFunctions` interface that should be implemented is described below. (_Note_: The functions in these interface will be called by `pte-execRequest.js`, so please ensure that they are defined and return a value of an appropriate type.)
+```
+class ccFunctions extends ccFunctionsBase {
+	constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
+		super(ccDfnPtr, logger, Nid, channelName, org, pid);
+		// ADD INITIALIZATION LOGIC HERE
+	}
+
+	getInvokeArgs(txIDVar) {
+		// ADD LOGIC TO COMPUTE CHAINCODE INVOCATION ARGUMENTS (EXCLUDING THE FUNCTION NAME)
+
+		// POPULATE THE 'this.testInvokeArgs[]' ARRAY WITH THE COMPUTED ARGUMENTS' LIST
+
+		// THIS ARRAY WILL BE READ IN 'pte-execRequest.js:getMoveRequest()'
+	}
+
+	getQueryArgs(txIDVar) {
+		// ADD LOGIC TO COMPUTE CHAINCODE QUERY ARGUMENTS (EXCLUDING THE FUNCTION NAME)
+
+		// POPULATE THE 'this.testQueryArgs[]' ARRAY WITH THE COMPUTED ARGUMENTS' LIST
+
+		// THIS ARRAY WILL BE READ IN 'pte-execRequest.js:getQueryRequest()'
+	}
+
+	getExecModeLatencyFreq() {
+		return 0;	// RETURN APPROPRIATE INTEGER VALUE
+
+		// THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeLatency()'
+	}
+
+	getExecModeSimpleFreq() {
+		return 0;	// RETURN APPROPRIATE INTEGER VALUE
+
+		// THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeSimple()'
+	}
+
+	getExecModeProposalFreq() {
+		return 0;	// RETURN APPROPRIATE INTEGER VALUE
+
+		// THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeProposal()'
+	}
+}
+```
+For examples, see:
+* [ccArgumentsGenerators/ccchecker/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/ccchecker/ccFunctions.js)
+* [ccArgumentsGenerators/marblescc/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/marblescc/ccFunctions.js)
+* [ccArgumentsGenerators/marblescc_priv/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/marblescc_priv/ccFunctions.js)
+
 
 ## Output
 * **Statistical Output Message**
