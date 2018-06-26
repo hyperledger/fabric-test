@@ -71,8 +71,9 @@ In brief, PTE has the following features:
 ## Prerequisites
 To build and test the following prerequisites must be installed first:
 
-- node and npm lts/boron release (v6.10.x and v3.10.x)
-    -  node v7 is not currently supported
+- node and npm
+    - `node`: >=`v8.9.4` AND <`v9.0`
+    - `npm`: >=`v5.6.0` AND <`v6.0`
 - gulp command
     - `npm install -g gulp`
 - go (v1.7 or later)
