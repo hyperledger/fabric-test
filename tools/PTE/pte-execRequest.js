@@ -230,15 +230,20 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] runForever: %d', Nid,
 
 // timeout option
 var timeoutOpt;
-var reqTimeout=45000; // default 45 sec
+var reqTimeout=45000;     // default 45 sec
+var grpcTimeout=3000;     // default 3 sec
 if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
     timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
     if ((typeof( timeoutOpt.request ) !== 'undefined')) {
         reqTimeout = parseInt(timeoutOpt.request);
     }
+    if ((typeof( timeoutOpt.grpcTimeout ) !== 'undefined')) {
+        grpcTimeout = parseInt(timeoutOpt.grpcTimeout);
+        hfc.setConfigSetting('grpc-wait-for-ready-timeout', grpcTimeout);
+    }
 }
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] reqTimeout: %d', Nid, channel.getName(), org, pid, reqTimeout);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] reqTimeout: %d, grpcTimeout: %d', Nid, channel.getName(), org, pid, reqTimeout, grpcTimeout);
 
 // init latencies matrix: tx num/avg/min/max
 var latency_peer = [0, 0, 99999999, 0];
@@ -1283,7 +1288,7 @@ async function execTransMode() {
                         asLocalhost: localHost
                     })
                     .then((success) => {
-                        //logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] discovery results %j', Nid, channelName, org, pid, success);
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] discovery results %j', Nid, channelName, org, pid, success);
                         if (targetPeers === 'DISCOVERY'){
                             channelDiscoveryEvent(channel, client, org);
                             logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] discovery: completed events ports' , Nid, channelName, org, pid);

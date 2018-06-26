@@ -109,11 +109,16 @@ var tCurr;
 // timeout option
 var timeoutOpt;
 var cfgTimeout=200000;   // default 200 sec
+var grpcTimeout=3000;    // default 3 sec
 if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
     timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
     if ((typeof( timeoutOpt.preConfig ) !== 'undefined')) {
         cfgTimeout = parseInt(timeoutOpt.preConfig);
+    }
+    if ((typeof( timeoutOpt.grpcTimeout ) !== 'undefined')) {
+        grpcTimeout = parseInt(timeoutOpt.grpcTimeout);
+        hfc.setConfigSetting('grpc-wait-for-ready-timeout', grpcTimeout);
     }
 }
 logger.info('main - cfgTimeout: %d', cfgTimeout);
