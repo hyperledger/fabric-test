@@ -1,0 +1,57 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "sample_js",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Move",
+    "targetPeers": "Discovery",
+    "nProcPerOrg": "1",
+    "nRequest": "10000",
+    "runDur": "0",
+    "TLS": "clientauth",
+    "channelOpt": {
+        "name": "testorgschannel1",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "0",
+        "devFreq": "0"
+    },
+    "discoveryOpt": {
+        "localHost": "true"
+    },
+    "eventOpt": {
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "3600000"
+    },
+    "ccType": "ccchecker",
+    "ccOpt": {
+        "keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "0",
+        "payLoadMin": "1024",
+        "payLoadMax": "2048"
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+    ]
+}
