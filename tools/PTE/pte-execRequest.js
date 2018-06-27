@@ -1907,7 +1907,7 @@ function invoke_move_const_evtBlock(freq) {
                         if (ordererFO == 'TRUE') {
                             ordererFailover(channel, client);
                         }
-                        invoke_move_const_go(t1, freq);
+                        invoke_move_const_go_evtBlock(t1, freq);
                         return;
                     }
 
