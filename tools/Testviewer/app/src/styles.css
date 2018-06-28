@@ -6,24 +6,31 @@
 	font-size:5em;
 	padding:20px;
 }
-@media screen and (max-width:2000px) {
-	.covercharts {
-		display:flex;
-		flex-wrap:wrap;
-	}
+
+.covercharts {
+	display:flex;
+	flex-wrap:wrap;
 }
-@media screen and (max-width:1000px) {
-	.covercharts {
-	}
+
+.spinner {
+	float:right;
+	margin-right:10em;
 }
 #pte_container, #ote_container, #lte_container {
 	padding:50px 0px;
 }
-.navlink {
-	padding:20px;
+.nav {
+	display:flex;
+	align-self:center;
+	justify-content:center;
 }
 .engine-title {
-	text-align:center;
+	display:flex;
+	align-self:center;
+	justify-content:center;
+}
+.datefield {
+	margin-right: 1em;
 }
 .dateselect {
 	padding:5px 20px;
@@ -35,15 +42,16 @@
 	padding-top:5px;
 }
 #container {
-	margin-left:20px;
+	margin:0em 2em;
 }
 .metric-container {
-	padding:10px 0px;
+	padding-bottom:10px;
 	text-align:left;
 }
 .metric-table {
 	max-width:100%;
 	height:auto;
+	margin-bottom:2em;
 }
 .metriccol1 {
 	width:250px;
@@ -51,7 +59,7 @@
 .enginetest {
 	max-width:100%;
 	height:auto;
-	margin:20px;
+	margin:1.5em;
 }
 .test-container {
 	display:flex;
@@ -78,18 +86,7 @@
 	width:15%;
 	padding:5px 0px;
 }
-
-
-.coverage-container {
-	margin-left:25px;
-}
-.coverage {
-	margin-top:25px;
-}
-.coveragetable {
-	text-align:left;
-	max-width: 100%;
-}
-.cov-col {
-	width:15%;
+.alertmessage {
+	font-style: italic;
+	color: red;
 }

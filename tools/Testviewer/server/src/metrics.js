@@ -15,6 +15,7 @@ const pte_base = {'2018-06-13':3}
 const svt_base = {'2018-06-13':46}
 
 const fetchBuild = (req, res) => {
+
 	let tool = req.params.test
 	urls = {
 		'pte': 'https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-pte-x86_64',
@@ -53,10 +54,7 @@ const fetchBuild = (req, res) => {
 }
 
 const getBuild = (req, res) => {
-	// Calculate given date's associated build number for given test
-	console.log(fetchBuild('pte'))
-	console.log(fetchBuild('ote'))
-	console.log(fetchBuild('lte'))
+	// Calculate given date's associated build number for given test. Replace fetchBuild with this method for hardcoded data.
 	let test = req.params.test
 	let buildnum = test == 'pte' ? calc_buildnum(req.params.date, pte_base) : calc_buildnum(req.params.date, svt_base)
 	res.send({"build":buildnum})
@@ -67,6 +65,11 @@ const getPTE = (req,res) => {
 
 	const fab = req.params.fab
 	const buildnum = req.params.build
+
+	if (buildnum == "undefined") {
+		res.send({"success":false})
+		return
+	}
 
 	// //// USING HARDCODE
 	// if (pte_hardcode[buildnum] == null) {
@@ -167,9 +170,14 @@ const getPTE = (req,res) => {
 
 const getOTE = (req,res) => {
 	// Fetches OTE metrics based on date and fab number.
-	
+
 	const fab = req.params.fab
 	const buildnum = req.params.build
+
+	if (buildnum == "undefined") {
+		res.send({"success":false})
+		return
+	}
 
 	// //// USING HARDCODE
 	// if (ote_hardcode[buildnum] == null) {
@@ -212,6 +220,12 @@ const getLTE = (req,res) => {
 	// Fetches LTE metrics based on date.
 
 	const buildnum = req.params.build
+
+	if (buildnum == "undefined") {
+		res.send({"success":false})
+		return
+	}
+
 	const url_lte = `https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-svt-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments/BenchmarkReadWriteTxs/results.csv`
 	// fabs taken from script at https://github.com/hyperledger/fabric-test/blob/master/regression/daily/ledger_lte.py
 	const fabs = ['FAB-3790','FAB-3795','FAB-3798','FAB-3799','FAB-3801','FAB-3802','FAB-3800','FAB-3803','FAB-3870','FAB-3871','FAB-3872','FAB-3873','FAB-3874','FAB-3875','FAB-3876','FAB-3877']
@@ -233,7 +247,7 @@ const getLTE = (req,res) => {
 	// check if build log exists
 	request(`https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-svt-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments`, { json: false }, (err, response, body) => {
 		// Check if log file exists
-		if (body.includes("404 Not Found")) {
+		if (body == null || body.includes("404 Not Found")) {
 			res.send({"success":false})
 		}
 		else {

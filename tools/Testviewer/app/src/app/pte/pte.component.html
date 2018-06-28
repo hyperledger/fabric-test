@@ -2,26 +2,26 @@
 	<h1 class="engine-title">{{title}}</h1>
 	<div class="testselect">
 		<mat-form-field class="testselect-dropdown">
-		  <mat-select [(ngModel)]="selectedOptions" placeholder="Tests" multiple disableRipple #chosentests>
+		  <mat-select [(ngModel)]="selectedOptions" placeholder="Tests to display" multiple disableRipple #chosentests (selectionChange)="loadAll(startdateinput.value, enddateinput.value)">
 		    <mat-option *ngFor="let test of test_toadd" [value]="test">{{test}}</mat-option>
 		  </mat-select>
 		</mat-form-field>
-		<button (click)="loadAll(startdateinput.value, enddateinput.value)">Load</button>
 	</div>
+	<mat-spinner class="spinner" strokeWidth="10" [diameter]="diameter"></mat-spinner>
 	<div>
 		<div class="dateselect">
 			<h4>Range Data</h4>
-			<mat-form-field>
-				<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput>
+			<mat-form-field class="datefield">
+				<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput (dateChange)="loadCharts(startdateinput.value, enddateinput.value)">
 				<mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
 				<mat-datepicker #picker1></mat-datepicker>
 			</mat-form-field>
-			<mat-form-field>
-				<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput>
+			<mat-form-field class="datefield">
+				<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput (dateChange)="loadCharts(startdateinput.value, enddateinput.value)">
 				<mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
 				<mat-datepicker #picker2></mat-datepicker>
 		  	</mat-form-field>
-		  	<button (click)="loadCharts(startdateinput.value, enddateinput.value)">Load</button>
+		  	<span class="alertmessage" #alertmessage></span>
 		  	<form>
 				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="0" [checked]="options"> TPS Chart
 				<input class="options" name="options" [(ngModel)]="options" type="radio" [value]="1" [checked]="!options"> % Differential Chart
@@ -95,12 +95,12 @@
 	<div class="dateselect">
 		<h4>Single Day Data</h4>
 	  	<mat-form-field>
-			<input matInput [matDatepicker]="picker" placeholder="Choose a date" #dateinput>
+			<input matInput [matDatepicker]="picker" placeholder="Choose a date" #dateinput (dateChange)="updateDate()">
 			<mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
 			<mat-datepicker #picker></mat-datepicker>
 	  	</mat-form-field>
-	  	<button (click)="updateDate()">Load</button>
-	  	<h3 id="buildnum">Build {{buildnum}} ({{chosendate}})</h3>
+	  	<mat-spinner class="spinner" strokeWidth="10" [diameter]="diameter_day"></mat-spinner>
+	  	<h3 id="buildnum"><a href="https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-pte-x86_64/{{buildnum}}/" target='_blank'>Build {{buildnum}} ({{chosendate}})</a></h3>
 	</div>
 	<div class="test-container">
 		<div class="enginetest" *ngFor="let test of objectkeys(tests)">

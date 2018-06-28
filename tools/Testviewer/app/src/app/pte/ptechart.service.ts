@@ -37,19 +37,25 @@ export class PtechartService {
         	fetch(`${serverurl}/pte/${fabnum}/${res[category['label']]}` ,{method:'GET'})
 	        .then(res => res.json())
 	        .then(res => {
-	          data_pte_invoke.push({
-	            "value":res['invoke']['tps'],
-	            "date":new Date(category["label"])
-	          })
-	          data_pte_query.push({
-	            "value":res['query']['tps'],
-	            "date":new Date(category["label"])
-	          })
+	        	let invoke_val,
+	        		query_val;
+	        	if (res.success) {
+	        		invoke_val = res['invoke']['tps']
+	        		query_val = res['query']['tps']
+	        	}
+				data_pte_invoke.push({
+					"value":invoke_val,
+					"date":new Date(category["label"])
+				})
+				data_pte_query.push({
+					"value":query_val,
+					"date":new Date(category["label"])
+				})
 	        })
         )
       }
       // When all promises are resolved, push this fab's data to dataset (i.e. 1 line in chart is being added to the rest)
-      dataSourceArray = 
+      dataSourceArray =
       	Promise.all(promisearray)
 	      .then((_) => {
 

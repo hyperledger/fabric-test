@@ -1,18 +1,21 @@
+<mat-toolbar class="nav">
+	<a class="navlink" [routerLink]="['/data']">Go to Data</a>
+</mat-toolbar>
 <div class="chart-container">
-	<a class="navlink" [routerLink]="['/data']">Data</a>
+	<mat-spinner class="spinner" strokeWidth="10" [diameter]="diameter"></mat-spinner>
 	<div class="dateselect">
 		<h4>Date Range</h4>
-		<mat-form-field>
-			<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput>
+		<mat-form-field class="datefield">
+			<input matInput [matDatepicker]="picker1" placeholder="Start date" #startdateinput (dateChange)="loadCharts(startdateinput.value, enddateinput.value)">
 			<mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
 			<mat-datepicker #picker1></mat-datepicker>
 		</mat-form-field>
-		<mat-form-field>
-			<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput>
+		<mat-form-field class="datefield">
+			<input matInput [matDatepicker]="picker2" placeholder="End date" #enddateinput (dateChange)="loadCharts(startdateinput.value, enddateinput.value)">
 			<mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
 			<mat-datepicker #picker2></mat-datepicker>
 	  	</mat-form-field>
-	  	<button (click)="loadCharts(startdateinput.value, enddateinput.value)">Load</button>
+	  	<span class="alertmessage" #alertmessage></span>
 	</div>
 	<div class="covercharts">
 		<div>

@@ -27,6 +27,7 @@ export class PTEComponent implements OnInit {
   @ViewChild("startdateinput") startdateinput;
   @ViewChild("enddateinput") enddateinput;
   @ViewChild("dateinput") dateinput;
+  @ViewChild("alertmessage") alertmessage;
   
   //// CHART INFORMATION
 
@@ -44,8 +45,10 @@ export class PTEComponent implements OnInit {
   dataSource_query_line;
   dataSource_differentialinvoke_line;
   dataSource_differentialquery_line;
+  diameter;
+  diameter_day;
 
-  //// 
+  ////
 
   constructor(private ptechartService: PtechartService, private dateselectService: DateselectService) { }
 
@@ -91,17 +94,21 @@ export class PTEComponent implements OnInit {
   }
 
   updateDate() {
+    this.diameter_day = 50
     this.dateselectService.updateChosenDate(this.dateinput.nativeElement.value, 'pte')
     .then(obj => {
       this.chosendate = obj.chosendate;
       this.buildnum = obj.build;
       this.getData(obj.build);
     })
+    .catch(err => {
+      this.diameter_day = 0
+      throw err
+    })
   }
 
   getData(build) {
     // Fetches data of all tests from server
-
   	for (let fabnum of this.selectedOptions) {
   		fetch(`${serverurl}/pte/${fabnum}/${build}` ,{
 	       method:'GET',
@@ -128,8 +135,10 @@ export class PTEComponent implements OnInit {
           this.tests[fabnum].q.txnum = null
           this.tests[fabnum].q.tps = null
         }
+        this.diameter_day = 0
        })
        .catch(err => {
+          this.diameter_day = 0
          	console.log("Logs may not be available yet!");
          	throw err
        })
@@ -137,8 +146,16 @@ export class PTEComponent implements OnInit {
   }
 
   loadCharts(startdate, enddate) {
-    // Loads charts with given date range
+    if (! this.dateselectService.validateDates(startdate, enddate)) {
+      this.alertmessage.nativeElement.innerHTML = "Start date must be earlier than the end date!"
+      return
+    }
+    else {
+      this.alertmessage.nativeElement.innerHTML = ""
+    }
 
+    // Loads charts with given date range
+    this.diameter = 50
     this.ptechartService.loadLineChart(startdate, enddate, this.selectedOptions)
     .then(([invokeline, queryline, diffinvokeline, diffqueryline]) => {
       for (let i = 0; i < invokeline.dataset.length; i++) {
@@ -156,12 +173,17 @@ export class PTEComponent implements OnInit {
         for (let datapoint of diffqueryline.dataset[i].data) {
           datapoint.value = parseFloat(datapoint.value).toFixed(2)
         }
+        this.diameter = 0
       }
       this.dataSource_invoke_line = invokeline
       this.dataSource_query_line = queryline
       this.dataSource_differentialinvoke_line = diffinvokeline
       this.dataSource_differentialquery_line = diffqueryline
       this.loadStats();
+    })
+    .catch(err => {
+      this.diameter = 0
+      throw err
     })
   }
 
@@ -189,9 +211,11 @@ export class PTEComponent implements OnInit {
   }
 
   loadAll(startdate, enddate) {
+    this.diameter = 50
     this.loadTests()
     this.updateDate()
     // Checks if end date is valid i.e. today's test is done and logs are available
+
     fetch(`${serverurl}/build/pte`, {method:'GET'})
     .then(res => res.json())
     .then(res => {
@@ -199,16 +223,20 @@ export class PTEComponent implements OnInit {
       this.dateselectService.checkEndDate(`${serverurl}/pte/${this.test_toadd[0]}/${endbuild}`)
       .then(bool => {
         if (bool == true) {
-          this.loadCharts(startdate, enddate)  
+          this.loadCharts(startdate, enddate)
         }
         else {
           // If logs unavailable, set end date to previous day
           let lastday = new Date(enddate)
           let prevday = new Date(lastday.setDate(lastday.getDate() - 1))
           this.enddateinput.nativeElement.value = [prevday.getMonth()+1, prevday.getDate(), prevday.getFullYear()].join('/')
-          this.loadCharts(startdate, this.enddateinput.nativeElement.value)  
+          this.loadCharts(startdate, this.enddateinput.nativeElement.value)
         }
       })
+    })
+    .catch(err => {
+      this.diameter = 0
+      throw err
     })
   }
 

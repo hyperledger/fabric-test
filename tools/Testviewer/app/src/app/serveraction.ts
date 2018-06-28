@@ -1,7 +1,5 @@
-import { environment } from '../environments/environment';
+import { server_ip } from '../../../config'
 
-const prod = environment.production;
-const port = '3000';
-const serverurl = prod ? '' : `http://${window.location.host.split(":")[0]}:${port}`;
+const serverurl = server_ip;
 
 export { serverurl }

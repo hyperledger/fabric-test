@@ -39,10 +39,14 @@ export class OtechartService {
          })
         .then(res => res.json())
         .then(res => {
-          data_ote.push({
-            "value":res['tps'],
-            "date":new Date(category["label"])
-          })
+        	let value;
+        	if (res.success) {
+        		value = res['tps']
+        	}
+			data_ote.push({
+				"value":value,
+				"date":new Date(category["label"])
+			})
         })
       )}
       // When all promises are resolved, push this fab's data to dataset (i.e. 1 line in chart is being added to the rest)

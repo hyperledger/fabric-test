@@ -88,4 +88,12 @@ export class DateselectService {
   	let res = await (await fetch(`${serverurl}/build/${test}`, {method:'GET'})).json()
     return {'chosendate':chosendate, "build":res[chosendate]}
   }
+
+  validateDates(startdate, enddate) {
+    // Checks to see that start date is earlier than the enddate
+
+    let start = new Date(startdate),
+        end = new Date(enddate)
+    return start.getTime() <= end.getTime()
+  }
 }

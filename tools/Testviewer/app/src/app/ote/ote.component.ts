@@ -23,12 +23,15 @@ export class OTEComponent implements OnInit {
   selectedOptions
   numpassing
   numfailing
+  diameter
+  diameter_day
 
   //// INPUTS
 
   @ViewChild("startdateinput") startdateinput
   @ViewChild("enddateinput") enddateinput
   @ViewChild("dateinput") dateinput
+  @ViewChild("alertmessage") alertmessage
 
   //// CHART INFORMATION
 
@@ -75,11 +78,16 @@ export class OTEComponent implements OnInit {
   }
 
   updateDate() {
+    this.diameter_day = 50
     this.dateselectService.updateChosenDate(this.dateinput.nativeElement.value, 'ote')
     .then(obj => {
       this.chosendate = obj.chosendate
       this.buildnum = obj.build
       this.getData(obj.build)
+    })
+    .catch(err => {
+      this.diameter_day = 0
+      throw err
     })
   }
 
@@ -116,6 +124,7 @@ export class OTEComponent implements OnInit {
             this.tests[fabnum].tps = null
           }
           this.loadStatuses()
+          this.diameter_day = 0
        })
        .catch(err => {
        		console.log("Logs may not be available yet!")
@@ -125,8 +134,16 @@ export class OTEComponent implements OnInit {
   }
 
   loadCharts(startdate, enddate) {
-    // Loads charts with given date range
+    if (! this.dateselectService.validateDates(startdate, enddate)) {
+      this.alertmessage.nativeElement.innerHTML = "Start date must be earlier than the end date!"
+      return
+    }
+    else {
+      this.alertmessage.nativeElement.innerHTML = ""
+    }
 
+    // Loads charts with given date range
+    this.diameter = 50
     this.otechartService.loadLineChart(startdate, enddate, this.selectedOptions)
     .then(([line, diffline]) => {
       for (let i = 0; i < line.dataset.length; i++) {
@@ -141,6 +158,11 @@ export class OTEComponent implements OnInit {
       this.dataSource_line = line
       this.dataSource_differentialline = diffline
       this.loadStats()
+      this.diameter = 0
+    })
+    .catch(err => {
+      this.diameter = 0
+      throw err
     })
   }
 
@@ -185,6 +207,7 @@ export class OTEComponent implements OnInit {
   }
 
   loadAll(startdate, enddate) {
+    this.diameter = 50
     this.loadTests()
     this.updateDate()
     // Checks if end date is valid i.e. today's test is done and logs are available
@@ -203,9 +226,12 @@ export class OTEComponent implements OnInit {
           let lastday = new Date(enddate)
           let prevday = new Date(lastday.setDate(lastday.getDate() - 1))
           this.enddateinput.nativeElement.value = [prevday.getMonth()+1, prevday.getDate(), prevday.getFullYear()].join('/')
-          this.loadCharts(startdate, this.enddateinput.nativeElement.value)  
+          this.loadCharts(startdate, this.enddateinput.nativeElement.value)
         }
       })
+    })
+    .catch(err => {
+      this.diameter = 0
     })
   }
 

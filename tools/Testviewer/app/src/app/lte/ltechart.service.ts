@@ -39,17 +39,21 @@ export class LtechartService {
          })
         .then(res => res.json())
         .then(res => {
+        	let value;
           	if (res['data'] != null) {
-			data_lte.push({
-				"value":res['data'][fabnum]['tps'],
-				"date":new Date(category["label"])
-			})
-	      }
+          		if (res.success) {
+          			value = res['data'][fabnum]['tps']
+          		}
+				data_lte.push({
+					"value":value,
+					"date":new Date(category["label"])
+				})
+		    }
         })
       )}
         // When all promises are resolved, push this fab's data to dataset (i.e. 1 line in chart is being added to the rest)
-      dataSourceArray = 
-      Promise.all(promisearray)
+      dataSourceArray =
+	    Promise.all(promisearray)
 	      .then((_) => {
 	      	let avg = this.dateselectService.getStat(data_lte)
 			let data_lte_sorted = data_lte.sort(function(a,b) { return a.date.getTime()-b.date.getTime() })
