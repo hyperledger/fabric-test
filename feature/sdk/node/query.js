@@ -31,11 +31,12 @@ var query = function(user, userOrg, chaincode, peer, network_config_path) {
         return {"error": err};
     }
 
-    let channel = client.newChannel(chaincode.channelId);
-
     var target = buildTarget(peer, userOrg, network_config);
     return common.getRegisteredUsers(client, user, user.split('@')[1], network_config_path['networkID'], network_config[userOrg]['mspid']).then((user) => {
         tx_id = client.newTransactionID();
+
+        let channel = client.newChannel(chaincode.channelId);
+
         // send query
         var request = {
             targets: [target],

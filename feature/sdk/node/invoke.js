@@ -32,15 +32,16 @@ var invoke = function(username, org, chaincode, peerNames, orderer, network_conf
         return err;
     }
 
-    let channel = client.newChannel(chaincode.channelId);
-    channel.addOrderer(common.newOrderer(client, network_config['network-config'], orderer, network_config['tls']));
-
-    common.setupPeers(peerNames, channel, org, client, network_config['network-config'], network_config['tls']);
     let targets = (peerNames) ? common.newPeers(peerNames, org, network_config['network-config'], client) : undefined;
 
     let tx_id = null;
     return common.getRegisteredUsers(client, username, username.split('@')[1], network_config['networkID'], network_config['network-config'][org]['mspid']).then((user) => {
         tx_id = client.newTransactionID();
+
+        let channel = client.newChannel(chaincode.channelId);
+        channel.addOrderer(common.newOrderer(client, network_config['network-config'], orderer, network_config['tls']));
+        common.setupPeers(peerNames, channel, org, client, network_config['network-config'], network_config['tls']);
+
         // send proposal to endorser
         let request = {
             chaincodeId: chaincode.chaincodeId,

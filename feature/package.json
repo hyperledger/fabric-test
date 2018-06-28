@@ -1,14 +1,14 @@
 {
   "name": "Integration",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Behave Node.js SDK Integration",
   "keywords": [
     "Behave node-sdk integration",
     "Call node-sdk apis from behave"
   ],
   "engines": {
-    "node": ">=6.9.5 <7.0",
-    "npm": ">=3.10.10 <4.0"
+    "node": ">=8.9.4 <9.0",
+    "npm": ">=5.6.0 <6.0"
   },
   "license": "Apache-2.0",
   "dependencies": {
