@@ -726,7 +726,6 @@ async function createOneChannel(client ,channelOrgName) {
         await testUtil.tlsEnroll(client, channelOrgName[0], svcFile);
         logger.info('[createOneChannel] get user private key: org= %s', channelOrgName[0]);
     }
-    clientNewOrderer(client, channelOrgName[0]);
 
     hfc.newDefaultKeyValueStore({
         path: testUtil.storePathForOrg(Nid, orgName)
@@ -774,6 +773,8 @@ async function createOneChannel(client ,channelOrgName) {
 
         logger.info('[createOneChannel] done signing: %s', channelName);
 
+        // add new orderer
+        clientNewOrderer(client, channelOrgName[0]);
         // build up the create request
         let tx_id = client.newTransactionID();
 	let nonce = tx_id.getNonce();
@@ -828,8 +829,6 @@ async function joinChannel(channel, client, org) {
             await testUtil.tlsEnroll(client, org, svcFile);
             logger.info('[joinChannel] get user private key: org= %s', org);
         }
-        // add orderers
-        chainAddOrderer(channel, client, org);
 
         //printChainInfo(channel);
 
@@ -844,7 +843,8 @@ async function joinChannel(channel, client, org) {
                 the_user = admin;
                 logger.debug('[joinChannel] orderer admin: ', admin);
 
-//        chainAddOrderer(channel, client, org);
+                // add orderers
+                chainAddOrderer(channel, client, org);
 
                 tx_id = client.newTransactionID();
                 var request = {
