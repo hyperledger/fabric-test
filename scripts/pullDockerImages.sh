@@ -28,11 +28,12 @@ echo "======== PULL DOCKER IMAGES ========"
 # Pull and Tag the fabric and fabric-ca images from Nexus
 ##########################################################
 echo "Fetching images from Nexus"
-PROJECT_VERSION=1.2.0-stable
 NEXUS_URL=nexus3.hyperledger.org:10001
 ORG_NAME="hyperledger/fabric"
 ARCH=$(go env GOARCH)
-STABLE_TAG=$ARCH-$PROJECT_VERSION
+: ${STABLE_VERSION:=1.2.0-stable}
+STABLE_TAG=$ARCH-$STABLE_VERSION
+echo "---------> STABLE_VERSION:" $STABLE_VERSION
 
 cd $GOPATH/src/github.com/hyperledger/fabric
 
@@ -65,13 +66,13 @@ MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases
 curl -L "$MVN_METADATA" > maven-metadata.xml
 RELEASE_TAG=$(cat maven-metadata.xml | grep release)
 #COMMIT=$(echo $RELEASE_TAG | awk -F - '{ print $4 }' | cut -d "<" -f1)
-COMMIT=f6e72eb
-VERSION=1.2.0
+# TODO# Will remove this later after fix the network glitch on the nexus maven-metadata.xml
+: ${RELEASE_COMMIT:=29a7d95}
+echo "------------> RELEASE_COMMIT:" $RELEASE_COMMIT
 OS_VER=$(uname -s|tr '[:upper:]' '[:lower:]')
-echo "BASE_VERSION = $VERSION"
 echo
 rm -rf .build && mkdir -p .build && cd .build
-curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-stable/$OS_VER-$ARCH.$VERSION-stable-$COMMIT/hyperledger-fabric-stable-$OS_VER-$ARCH.$VERSION-stable-$COMMIT.tar.gz | tar xz
+curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-stable/$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT/hyperledger-fabric-stable-$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT.tar.gz | tar xz
 export PATH=$WORKSPACE/gopath/src/github.com/hyperledger/fabric/.build/bin:$PATH
 echo "Binaries fetched from Nexus"
 echo
