@@ -122,7 +122,7 @@ var optimizeClientsMode = false
 // ordStartPort (default port is 7050, but driver.sh uses 5005).
 // peerStartPort (default port is 7051, but driver.sh uses 7061).
 
-var ordStartPort uint16 = 7050
+var ordStartPort uint16 = 5005
 
 const (
         // Indicate whether a test requires counters for a Spy monitor, and when.
@@ -330,31 +330,41 @@ func (b *broadcastClient) getAck() error {
 func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txRecvCntrP *int64, blockRecvCntrP *int64, consumerConnP **grpc.ClientConn, seek int, quiet bool, tlsEnabled bool, orgMSPID string) {
         myName := clientName("Consumer", ordererIndex, channelIndex)
         signer := localmsp.NewSigner()
-        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort))
-        matches, _ := filepath.Glob(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
-        ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
-        if ordererIndex == 0 { // Loading the msp's of orderer0 for every channel is enough to create the deliver client
-                err := mspmgmt.LoadLocalMsp(fmt.Sprintf("%s/msp", matches[0]), ordConf.General.BCCSP, orgMSPID)
-                if err != nil { // Handle errors reading the config file
-                        fmt.Printf("\nFailed to initialize local MSP for %s on chan %s: %s\n", myName, chanID, err)
-                        os.Exit(0)
-                }
+        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort + uint16(ordererIndex)))
+        fpath := fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName)
+        matches, err := filepath.Glob(fpath)
+        if debugflagLaunch {
+                fmt.Printf("[startConsumer myName=%s] ordererName=%s, fpath=%s, len(matches)=%d\n", myName, ordererName, fpath, len(matches))
+        }
+        if err != nil {
+                 panic(fmt.Sprintf("startConsumer: cannot find filepath %s ; err: %v", fpath, err))
         }
         if seek < -2 {
                 fmt.Println("Wrong seek value.")
         }
-        var err error
         var maxGrpcMsgSize int = 1000 * 1024 * 1024
         var dialOpts []grpc.DialOption
         var conntimeout time.Duration = 30 * time.Second
         dialOpts = append(dialOpts, grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(maxGrpcMsgSize),
                                                                 grpc.MaxCallRecvMsgSize(maxGrpcMsgSize)))
         if tlsEnabled {
-                creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
-                if err != nil {
-                        panic(fmt.Sprintf("Error on client %s creating grpc tls client creds, serverAddr %s, err: %v", myName, serverAddr, err))
+                if len(matches) > 0 {
+                        ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
+                        if ordererIndex == 0 { // Loading the msp's of orderer0 for every channel is enough to create the deliver client
+                                err = mspmgmt.LoadLocalMsp(fmt.Sprintf("%s/msp", matches[0]), ordConf.General.BCCSP, orgMSPID)
+                                if err != nil { // Handle errors reading the config file
+                                        fmt.Printf("\nFailed to initialize local MSP for %s on chan %s: %s\n", myName, chanID, err)
+                                        os.Exit(0)
+                                }
+                        }
+                        creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
+                        if err != nil {
+                                panic(fmt.Sprintf("Error on client %s creating grpc tls client creds, serverAddr %s, err: %v", myName, serverAddr, err))
+                        }
+                        dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
+                } else {
+                        panic(fmt.Sprintf("[startConsumer myName=%s] ERROR: no msp directory filepath name matches: %s\n", myName, fpath))
                 }
-                dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
         } else {
                 dialOpts = append(dialOpts, grpc.WithInsecure())
         }
@@ -552,16 +562,27 @@ func moreDeliveries(txSentP *[][]int64, totalNumTxSentP *int64, txSentFailuresP 
 func startProducer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txReq int64, txSentCntrP *int64, txSentFailureCntrP *int64, tlsEnabled bool, payload int) {
         myName := clientName("Producer", ordererIndex, channelIndex)
         signer := localmsp.NewSigner()
-        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort))
-        matches, _ := filepath.Glob(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName))
-        ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
+        ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort + uint16(ordererIndex)))
+        fpath := fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s" + "*", ordererName)
+        matches, err := filepath.Glob(fpath)
+        if debugflagLaunch {
+                fmt.Printf("[startProducer myName=%s] ordererName=%s, fpath=%s, len(matches)=%d\n", myName, ordererName, fpath, len(matches))
+        }
+        if err != nil {
+                 panic(fmt.Sprintf("startProducer: cannot find filepath %s ; err: %v", fpath, err))
+        }
+
         var conn *grpc.ClientConn
-        var err error
         if tlsEnabled {
-                creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
-                conn, err = grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
-                if err != nil {
-                        panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+                if len(matches) > 0 {
+                        ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath=fmt.Sprintf("%s/msp/keystore", matches[0])
+                        creds, err1 := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
+                        conn, err1 = grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
+                        if err1 != nil {
+                                panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+                        }
+                } else {
+                        panic(fmt.Sprintf("[startProducer myName=%s] ERROR: no msp directory filepath name matches: %s\n", myName, fpath))
                 }
         } else {
                 conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
@@ -1385,3 +1406,4 @@ func main() {
 
         _, _ = ote( "<commandline>"+testcmd+" ote", txs, chans, orderers, ordType, kbs, -1, pPerCh, payload)
 }
+

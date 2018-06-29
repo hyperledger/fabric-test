@@ -352,7 +352,7 @@ top -b -n 1 | head -n 20
 
 # Check the output OTE test logs for the string "RESULT=PASSED' which ote.go prints for each
 # successfully passed testcase. If an error occurred, collect container logs and host data.
-if [ `grep -c RESULT=PASSED ./logs/${TESTCASE}.log` -eq 0 ]
+if [ -f ./logs/${TESTCASE}.log -a `grep -c RESULT=PASSED ./logs/${TESTCASE}.log` -eq 0 ]
 then
     echo "====== Saving all docker container logs in logs/ for the ${TESTCASE} test failure."
     saveOrdLogs
