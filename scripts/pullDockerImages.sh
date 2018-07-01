@@ -62,7 +62,7 @@ echo
 
 echo "======== PULL FABRIC BINARIES ========"
 
-MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-stable/maven-metadata.xml")
+MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$STABLE_VERSION/maven-metadata.xml")
 curl -L "$MVN_METADATA" > maven-metadata.xml
 RELEASE_TAG=$(cat maven-metadata.xml | grep release)
 #COMMIT=$(echo $RELEASE_TAG | awk -F - '{ print $4 }' | cut -d "<" -f1)
@@ -72,7 +72,7 @@ echo "------------> RELEASE_COMMIT:" $RELEASE_COMMIT
 OS_VER=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo
 rm -rf .build && mkdir -p .build && cd .build
-curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-stable/$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT/hyperledger-fabric-stable-$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT.tar.gz | tar xz
+curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$STABLE_VERSION/$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT/hyperledger-fabric-$STABLE_VERSION-$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT.tar.gz | tar xz
 export PATH=$WORKSPACE/gopath/src/github.com/hyperledger/fabric/.build/bin:$PATH
 echo "Binaries fetched from Nexus"
 echo
