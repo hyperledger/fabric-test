@@ -166,7 +166,7 @@ Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up, 
 
 
 @daily
-Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Test Mutual TLS/ClientAuth <security> with <type> based-orderer
+Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Test Mutual TLS/ClientAuth <security> with <type> based-orderer using <interface> interface
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And I have a bootstrapped fabric network of type <type> <security>
@@ -188,11 +188,11 @@ Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Test Mutual TLS/ClientAuth <securi
   And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org2.example.com"
   Then a user receives a success response of 980 from "peer0.org2.example.com"
 
-  When a user queries for the first block
-  Then a user receives a response containing org1.example.com
-  Then a user receives a response containing org2.example.com
-  Then a user receives a response containing example.com
-  Then a user receives a response containing CERTIFICATE
+  When an admin queries for the first block
+  Then an admin receives a response containing org1.example.com
+  Then an admin receives a response containing org2.example.com
+  Then an admin receives a response containing example.com
+  Then an admin receives a response containing CERTIFICATE
 Examples:
     | type  |   security  |  interface |
     | kafka |   with tls  | NodeJS SDK |

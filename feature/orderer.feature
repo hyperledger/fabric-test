@@ -296,12 +296,12 @@ Scenario Outline: FAB-4808,FAB-3937,FAB-3938: Orderer_BatchTimeOut is honored, f
     And I wait "5" seconds
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of <firstQuery>
-    And I wait "8" seconds
+    And I wait "16" seconds
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of <lastQuery>
 Examples:
     | type  |  envValue  | firstQuery | lastQuery |
     | solo  | 2 seconds  |    990     |   990     |
     | kafka | 2 seconds  |    990     |   990     |
-    | solo  | 10 seconds |    1000    |   990     |
-    | kafka | 10 seconds |    1000    |   990     |
+    | solo  | 20 seconds |    1000    |   990     |
+    | kafka | 20 seconds |    1000    |   990     |

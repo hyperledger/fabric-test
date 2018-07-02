@@ -353,7 +353,7 @@ def instantiate_impl(context, peer, channel, username="Admin", timeout=120):
 def step_impl(context, peer):
     instantiate_impl(context, peer, context.chaincode["channelID"])
 
-@when(u'a admin queries for channel information')
+@when(u'an admin queries for channel information')
 def step_impl(context):
     get_chain_info_impl(context, context.interface.TEST_CHANNEL_ID)
 
@@ -904,6 +904,7 @@ def containing_impl(context, response, peer):
         assert str(response) in context.result[peer], "Expected response was {0}; received {1}".format(response, context.result[peer])
 
 @then(u'a user receives a response containing {response}')
+@then(u'an admin receives a response containing {response}')
 def step_impl(context, response):
     containing_impl(context, response, "peer0.org1.example.com")
 
