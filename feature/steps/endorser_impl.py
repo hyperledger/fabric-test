@@ -333,7 +333,7 @@ def step_impl(context, channel, peer):
 
 @when(u'an admin upgrades the chaincode to version "{version}" on peer "{peer}" with args {args}')
 def step_impl(context, version, peer, args):
-    upgrade_impl(context, context.interface.TEST_CHANNEL_ID, version, peer, args)
+    upgrade_impl(context, context.interface.TEST_CHANNEL_ID, version, peer, "mycc", args)
 
 @when(u'an admin upgrades the chaincode on peer "{peer}" with args {args}')
 def step_impl(context, peer, args):
@@ -784,6 +784,7 @@ def policyChannelUpdate_impl(context, policy, channel, args=None):
 
     peers = context.interface.get_peers(context)
     context.interface.install_chaincode(context, peers, user="Admin")
+    context.chaincode["version"] = 3
     context.interface.upgrade_chaincode(context, "orderer0.example.com", channel)
     context.interface.post_deploy_chaincode(context, "peer0.org1.example.com", 120)
 

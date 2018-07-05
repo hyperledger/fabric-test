@@ -302,7 +302,7 @@ Scenario: FAB-8759: Test querying a peer with two different versions of chaincod
 
   When an admin installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" as version "3" with args ["init","a","1000","b","2000"] with name "vt" on all peers
   And I wait "5" seconds
-  When an admin upgrades the chaincode on channel "versioningtest" to version "3" on peer "peer0.org1.example.com" with args ["init","a","1000","b","2000"]
+  When an admin upgrades the chaincode with name "vt" on channel "versioningtest" to version "3" on peer "peer0.org1.example.com" with args ["init","a","1000","b","2000"]
   #When an admin upgrades the chaincode on channel "versioningtest" to version "3" on peer "peer0.org1.example.com"
   When a user queries on version "3" of the channel "versioningtest" using chaincode named "vt" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 1000
@@ -326,7 +326,7 @@ Scenario: FAB-8759: Test querying a peer that has two different versions of chai
 
   When an admin installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" as version "4" with args ["init"] with name "vt" on all peers
   And I wait "5" seconds
-  When an admin upgrades the chaincode on channel "versioningtest" to version "4" on peer "peer0.org1.example.com" with args ["init"]
+  When an admin upgrades the chaincode with name "vt" on channel "versioningtest" to version "4" on peer "peer0.org1.example.com" with args ["init"]
   When a user queries on version "4" of the channel "versioningtest" using chaincode named "vt" with args ["get","a"] on "peer0.org1.example.com"
   Then a user receives a success response of "1000"
   When a user queries on version "0" of the channel "versioningtest" using chaincode named "vt" with args ["get","c"] on "peer0.org2.example.com"
@@ -377,13 +377,15 @@ Scenario: FAB-7407: Update the channel policies - add an organization
   When a user queries on the chaincode with args ["query","a"]
   Then a user receives a success response of 980
 
+  When an admin fetches genesis information using peer "peer0.org1.example.com"
+  Then the config block file is fetched from peer "peer0.org1.example.com"
   When an admin removes an organization named Org2ExampleCom from the channel config
   And all organization admins sign the updated channel config
   When the admin updates the channel using peer "peer0.org1.example.com"
 
-  #When a user fetches genesis information using peer "peer0.org1.example.com"
-  #Then the config block file is fetched from peer "peer0.org1.example.com"
-  #Then the updated config block does not contain Org2ExampleCom
+  When an admin fetches genesis information using peer "peer0.org1.example.com"
+  Then the config block file is fetched from peer "peer0.org1.example.com"
+  Then the updated config block does not contain Org2ExampleCom
 
   When a user invokes on the chaincode with args ["invoke","a","b","10"]
   And I wait "5" seconds
