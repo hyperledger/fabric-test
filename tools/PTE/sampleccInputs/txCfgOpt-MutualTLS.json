@@ -31,7 +31,8 @@
         "org2": ["peer1", "peer2"]
     },
     "discoveryOpt": {
-        "localHost": "true"
+        "localHost": "true",
+        "initFreq": "300000"
     },
     "eventOpt": {
         "type": "FilteredBlock",

@@ -70,6 +70,8 @@ var eventHubs=[];
 var targets = [];
 var eventPromises = [];
 var txidList = [];
+var initFreq=0;     // init discovery freq default = 0
+var initDiscTimer;
 var serviceDiscovery=false;
 var localHost=false;
 
@@ -1033,6 +1035,44 @@ function channelAdd1Peer(channel, client, org) {
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAdd1Peer peers: %j] ', Nid, channelName, org, pid, channel.getPeers());
 }
+
+
+
+function clearInitDiscTimeout() {
+    if ( initFreq > 0 ) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d clearInitDiscTimeout] clear discovery timer.', Nid, channelName, org, pid);
+        clearTimeout(initDiscTimer);
+    }
+}
+
+
+function initDiscovery() {
+    var tmpTime = new Date().getTime();
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d initDiscovery] discovery timestamp %d', Nid, channelName, org, pid, tmpTime);
+    channel.initialize({
+        discover: serviceDiscovery,
+        asLocalhost: localHost
+    })
+    .then((success) => {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d initDiscovery] discovery results %j', Nid, channelName, org, pid, success);
+        if (targetPeers === 'DISCOVERY'){
+            channelDiscoveryEvent(channel, client, org);
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d initDiscovery] discovery: completed events ports' , Nid, channelName, org, pid);
+        }
+    },
+    function(err) {
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d initDiscovery] Failed to wait due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+        return;
+    });
+
+    if ( initFreq > 0 ) {
+        initDiscTimer=setTimeout(function() {
+            initDiscovery();
+        }, initFreq);
+    }
+
+}
+
 // update orderer
 function ordererFailover(channel, client) {
     var currId = currOrdererId;
@@ -1261,9 +1301,16 @@ async function execTransMode() {
                                     localHost = true;
                                 }
                             }
+                            if ((typeof( discoveryOpt.initFreq ) !== 'undefined')) {
+                                initFreq = parseInt(discoveryOpt.initFreq);
+                            }
                         }
 
                         channelAdd1Peer(channel, client, org);       // add one peer to channel to perform service discovery
+                        if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
+                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
+                            initDiscovery();
+                        }
                     } else {
 	                logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, targetPeers);
                         process.exit(1);
@@ -1275,24 +1322,14 @@ async function execTransMode() {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] peerList: ' , Nid, channelName, org, pid, peerList);
                     }
 
+                    // execute transactions
                     tCurr = new Date().getTime();
                     var tSynchUp=tStart-tCurr;
                     if ( tSynchUp < 10000 ) {
                         tSynchUp=10000;
                     }
 	            logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: tCurr= %d, tStart= %d, time to wait=%d', Nid, channelName, org, pid, tCurr, tStart, tSynchUp);
-                    // execute transactions
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
-                    channel.initialize({
-                        discover: serviceDiscovery,
-                        asLocalhost: localHost
-                    })
-                    .then((success) => {
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] discovery results %j', Nid, channelName, org, pid, success);
-                        if (targetPeers === 'DISCOVERY'){
-                            channelDiscoveryEvent(channel, client, org);
-                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] discovery: completed events ports' , Nid, channelName, org, pid);
-                        }
+
                     setTimeout(function() {
                         //logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] get peers %j', Nid, channelName, org, pid, channel.getPeers());
                         if (transType == 'DISCOVERY') {
@@ -1315,13 +1352,8 @@ async function execTransMode() {
                             process.exit(1);
                         }
                     }, tSynchUp);
-                },
-                function(err) {
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] Failed to wait due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                    return;
                 }
-            );
-        });
+    );
 }
 
 function isExecDone(trType){
@@ -1353,6 +1385,7 @@ function isExecDone(trType){
         // If this guard timer times out, then that means at least one invoke TX did not make it,
         // and cleanup has not happened so we can finish and clean up now.
         if ( IDone == 1 ) {
+            clearInitDiscTimeout();
             tCurr = new Date().getTime();
             console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] setup Timeout: %d ms, curr time: %d', Nid, channelName, org, pid, evtTimeout, tCurr);
             setTimeout(function(){
@@ -1385,6 +1418,7 @@ function isExecDone(trType){
 
            if ( inv_q >= nRequest ) {
                 QDone = 1;
+                clearInitDiscTimeout();
            }
         } else {
            if ( (inv_q % 1000) == 0 ) {
@@ -1395,6 +1429,7 @@ function isExecDone(trType){
            if ( runForever == 0 ) {
                if ( tCurr > tEnd ) {
                     QDone = 1;
+                    clearInitDiscTimeout();
                }
            }
         }
@@ -1407,6 +1442,7 @@ function isExecDone(trType){
 
            if ( n_sd >= nRequest ) {
                 IDone = 1;
+                clearInitDiscTimeout();
            }
         } else {
            if ( (n_sd % 1000) == 0 ) {
@@ -1417,6 +1453,7 @@ function isExecDone(trType){
            if ( runForever == 0 ) {
                if ( tCurr > tEnd ) {
                     IDone = 1;
+                    clearInitDiscTimeout();
                }
            }
         }
@@ -1927,8 +1964,8 @@ function invoke_move_const_evtBlock(freq) {
                         invoke_move_const_go_evtBlock(t1, freq);
                     } else {
                         tCurr = new Date().getTime();
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] completed %d, evtTimoutCnt %d, unceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
                         var remain = Object.keys(txidList).length;
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] completed %d, evtTimoutCnt %d, unceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
                         if ( remain > 0 ) {
                             console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
                         }

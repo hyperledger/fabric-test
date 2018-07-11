@@ -643,6 +643,10 @@ The user input file contains configuration parameters including chaincode defini
             "org1": ["peer1"],
             "org2": ["peer1"]
         },
+        "discoveryOpt": {
+            "localHost": "true",
+            "initFreq": "300000"
+        },
         "eventOpt": {
             "type": "FilteredBlock",
             "listener": "Block",
@@ -877,6 +881,7 @@ where:
              }
 * **discoveryOpt**: service discovery option. The option is valid only when targetPeer is set to `Discovery`.
     * **localHost**: set to `true` when fabric is running in containers and executing PTE from not in a container, else set to `false`. For CI automation tests or other tests on single host using docker, when sending invokes or queries, set `localHost=true` and set `targetPeers=discovery`. Default value is false.
+    * **initFreq**: service discovery re-initialization frequency in ms. PTE will not re-initialize service discovery if this parameter is set to 0. Default: 0.
 * **eventOpt**: event options
     * **type**: event service type, default: FilteredBlock
         * **FilteredBlock**: efficient option, delivers filtered events per channel for each block or transaction
