@@ -16,7 +16,7 @@ In order to meet the two-fold requirements above, flexibility and modularity are
 In brief, PTE has the following features:
 
 - channel: to create and join channel
-- chaincode: to install and instantiate user specified chaincode
+- chaincode: to install, instantiate and upgrade user specified chaincode
 - transactions: to deliver transactions to the targeted peers with specified transaction mode, type, and frequency
 - network: to interact with local and/or remote networks simultaneously
 - scaling: easy to work with any number of networks, orderers, peers, organizations, channels, chaincodes etc.
@@ -148,7 +148,7 @@ Once installed, the following steps are required.
     - See the examples in `SCFiles` and change the address to your own Fabric addresses and credentials. Add a block for each organization and peer, ensuring correctness.
 
 2. Specify run scenarios:
-    - Create your own version of PTEMgr.txt (if use pte_mgr.sh), runCases.txt and User Input json files, according to the test requirements. Use the desired chaincode name, channel name, organizations, etc. Using the information in your own network profiles, remember to "create" all channels, "join" channel, and "install"  and "instantiate" chaincode for each org, to ensure all peers are set up correctly. Additional information can be found below.
+    - Create your own version of PTEMgr.txt (if use pte_mgr.sh), runCases.txt and User Input json files, according to the test requirements. Use the desired chaincode name, channel name, organizations, etc. Using the information in your own network profiles, remember to "create" all channels, "join" channel, and "install"  and "instantiate"/"upgrade" chaincode for each org, to ensure all peers are set up correctly. Additional information can be found below.
 
 ## Running PTE
 
@@ -275,7 +275,7 @@ A single test case is described by a user input file. User input files define al
     * For a density test, configure config json in SCFiles, create run cases files, and user input files for each network. Then execute pte_mgr.sh against these  run cases files.
 
 ## Additional Use Cases
-Although PTE's primary use case is to drive transactions into a Fabric network, it can be used for creating and joining channels, and chaincode installation and instantiation. This gives the ability for more complete end-to-end scenarios.
+Although PTE's primary use case is to drive transactions into a Fabric network, it can be used for creating and joining channels, and chaincode installation, instantiation and upgrade. This gives the ability for more complete end-to-end scenarios.
 
 * ### Channel Operations
     For any channel activities (create or join), set transType to `Channel`:
@@ -405,6 +405,16 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
         Note that action is ignored. PTE instantiates chaincode on all peers of each organization listed in channelOpt.orgName.
 
         **Recommendation: instantiate a chaincode on the organization before sending a transaction to any peer of that organization.**
+
+    * ### Upgrade a chaincode
+        To Upgrade a chaincode, set the transType to `upgrade`:
+
+            "transMode": "Constant",
+            "transType": "upgrade",
+            "invokeType": "Move",
+
+        and rest of the steps are same as for instantiating a chaincode (see above).
+
 
 * ### Query Blockchain Height Operations
     For any query blockchain height activities (query block), set transType to `QueryBlock`:
@@ -841,6 +851,7 @@ where:
     * **Channel**: channel activities specified in channelOpt.action
     * **Install**: install chaincode
     * **Instantiate**: instantiate chaincode
+    * **Upgrade**: upgrade chaincode
     * **QueryBlock**: query blockchain information
     * **Invoke**: invokes transaction
     * **Discovery**: service discovery initialization

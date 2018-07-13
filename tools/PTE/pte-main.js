@@ -735,6 +735,149 @@ async function chaincodeInstantiate(channel, client, org) {
     );
 }
 
+//Upgrade chaincode
+async function chaincodeUpgrade(channel, client, org) {
+        var eventHubs = [];
+        var cryptoSuite = hfc.newCryptoSuite();
+        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
+        client.setCryptoSuite(cryptoSuite);
+        logger.info('[chaincodeUpgrade] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
+
+        // get client key
+        if ( TLS == testUtil.TLSCLIENTAUTH ) {
+            await testUtil.tlsEnroll(client, org, svcFile);
+            logger.info('[chaincodeUpgrade] get user private key: org= %s', org);
+        }
+        chainAddOrderer(channel, client, org);
+
+        var ivar=0
+        for (ivar=0; ivar<channelOrgName.length; ivar++ ) {
+            var orgInstantiate = channelOrgName[ivar];
+            channelAddPeer1(channel, client, orgInstantiate, eventHubs);
+        }
+
+        logger.info('[chaincodeUpgrade:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
+
+        channel.initialize()
+        .then((success) => {
+            logger.info('[chaincodeUpgrade:Nid=%d] Successfully initialize channel[%s]', Nid, channel.getName());
+            var upgrade = true;
+
+            var badTransientMap = { 'test1': 'transientValue' }; // have a different key than what the chaincode example_cc1.go expects in Init()
+            var transientMap = { 'test': 'transientValue' };
+            var request = buildChaincodeProposal(client, the_user, language, upgrade, badTransientMap);
+            tx_id = request.txId;
+
+            return channel.sendUpgradeProposal(request, cfgTimeout);
+        },
+        function(err) {
+            logger.error('[chaincodeUpgrade:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);
+            evtDisconnect();
+            process.exit();
+        })
+    .then(
+        function(results) {
+            var proposalResponses = results[0];
+            var proposal = results[1];
+            var header   = results[2];
+            var all_good = true;
+            for(var i in proposalResponses) {
+                let one_good = false;
+                if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
+                    one_good = true;
+                    logger.info('[chaincodeUpgrade:Nid=%d] channel(%s) chaincode upgrade was good', Nid, channelName);
+                } else {
+                    logger.error('[chaincodeUpgrade:Nid=%d] channel(%s) chaincode upgrade was bad: results= %j', Nid, channelName, results);
+                }
+                all_good = all_good & one_good;
+            }
+            if (all_good) {
+                logger.info(util.format('[chaincodeUpgrade] Successfully sent chaincode upgrade Proposal and received ProposalResponse: Status - %s', proposalResponses[0].response.status));
+
+
+                var request = {
+                    proposalResponses: proposalResponses,
+                    proposal: proposal,
+                    header: header
+                };
+
+                var deployId = tx_id.getTransactionID();
+                var eventPromises = [];
+                eventPromises.push(channel.sendTransaction(request));
+                eventHubs.forEach((eh) => {
+                    let txPromise = new Promise((resolve, reject) => {
+                        let handle = setTimeout(reject, cfgTimeout);
+
+                        eh.registerTxEvent(deployId.toString(), (tx, code) => {
+                            var tCurr1=new Date().getTime();
+                            clearTimeout(handle);
+                            eh.unregisterTxEvent(deployId);
+
+                            if (code !== 'VALID') {
+                                logger.error('[chaincodeUpgrade] The chaincode upgrade transaction was invalid, code = ' + code);
+                                reject();
+                            } else {
+                                logger.info('[chaincodeUpgrade] The chaincode upgrade transaction was valid.');
+                                resolve();
+                            }
+                        }, (err) => {
+                            clearTimeout(handle);
+                            reject();
+                        }, {
+                            disconnect: true
+                        });
+                        eh.connect();
+                    });
+                    logger.info('[chaincodeUpgrade] register eventhub %s with tx=%s', eh.getPeerAddr(),deployId);
+                    eventPromises.push(txPromise);
+                });
+
+                var tCurr=new Date().getTime();
+                logger.info('[chaincodeUpgrade] Promise.all tCurr=%d', tCurr);
+                return Promise.all(eventPromises)
+
+                .then((results) => {
+
+                    logger.info('[chaincodeUpgrade] Event promise all complete and testing complete');
+                    return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
+                }).catch((err) => {
+                    var tCurr1=new Date().getTime();
+                    logger.error('[chaincodeUpgrade] failed to send upgrade transaction: tCurr=%d, elapse time=%d', tCurr, tCurr1-tCurr);
+                    evtDisconnect();
+                    throw new Error('Failed to send upgrade transaction and get notifications within the timeout period.');
+
+                });
+            } else {
+                logger.error('[chaincodeUpgrade] Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
+                evtDisconnect();
+                throw new Error('Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
+            }
+        },
+        function(err) {
+
+                logger.error('Failed to send Upgrade proposal due to error: ' + err.stack ? err.stack : err);
+                evtDisconnect();
+                throw new Error('Failed to send Upgrade proposal due to error: ' + err.stack ? err.stack : err);
+        })
+    .then((response) => {
+            if (response.status === 'SUCCESS') {
+                logger.info('[chaincodeUpgrade(Nid=%d)] Successfully Upgrade transaction on %s. ', Nid, channelName);
+                evtDisconnect();
+                return;
+            } else {
+                logger.error('[chaincodeUpgrade(Nid=%d)] Failed to Upgrade transaction on %s. Error code: ', Nid, channelName, response.status);
+                evtDisconnect();
+                return;
+            }
+
+        }, (err) => {
+            logger.error('[chaincodeUpgrade(Nid=%d)] Failed to upgrade transaction on %s due to error: ', Nid, channelName, err.stack ? err.stack : err);
+            evtDisconnect();
+            return;
+        }
+    );
+}
+
 function readAllFiles(dir) {
         var files = fs.readdirSync(dir);
         var certs = [];
@@ -1105,6 +1248,35 @@ async function performance_main() {
                         the_user = admin;
                         var channel = client.newChannel(channelName);
                         chaincodeInstantiate(channel, client, org);
+                    },
+                    function(err) {
+                        logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);
+                        evtDisconnect();
+
+                        return;
+                    }
+                );
+            });
+            break;
+
+        } else if ( transType == 'UPGRADE' ) {
+            initDeploy();
+            var username = ORGS[org].username;
+            var secret = ORGS[org].secret;
+            logger.info('[performance_main] upgrade: user= %s, secret= %s', username, secret);
+
+            hfc.newDefaultKeyValueStore({
+                path: testUtil.storePathForOrg(Nid, orgName)
+            })
+            .then((store) => {
+                client.setStateStore(store);
+                testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
+                .then(
+                    function(admin) {
+                        logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
+                        the_user = admin;
+                        var channel = client.newChannel(channelName);
+                        chaincodeUpgrade(channel, client, org);
                     },
                     function(err) {
                         logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);

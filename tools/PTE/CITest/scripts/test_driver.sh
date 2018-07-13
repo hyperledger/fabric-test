@@ -25,7 +25,8 @@ function testDriverHelp {
    echo "    -m: directory where test_nl.sh, preconfig, chaincode to be used to create network, default=scripts"
    echo "    -p: preconfigure creation/join channels, default=no"
    echo "    -s: synchup peer ledgers, recommended when network brought up, default=no"
-   echo "    -c: chaincode to be installed and instantiated [all|chaincode], default=no"
+   echo "    -c: chaincode to be installed and instantiated [all|<chaincode>], default=no"
+   echo "    -u: chaincode to be installed and upgraded [all|<chaincode>], default=no"
    echo "    -t [value1 value2 value3 ...]: test cases to be executed"
    echo "    -b [value]: test cases starting time"
    echo " "
@@ -55,10 +56,11 @@ function testDriverHelp {
    echo " ./test_driver.sh -n -p -c all -t FAB-3989-4i-TLS FAB-3989-4q-TLS: create a network, create/join channel and install/instantiate all chaincodes using default setting and execute two test cases"
    echo " ./test_driver.sh -n -p -c samplecc: create a network, create/join channels, install/instantiate chaincode samplecc using default setting"
    echo " ./test_driver.sh -t FAB-3811-2q FAB-3808-2i: execute test cases (FAB-3811-2q and FAB-3808-2i)"
+   echo " ./test_driver.sh -m FAB-8252/upgrade -u marbles02: upgrade chaincode marbles02 using setting in FAB-8252/upgrade directory"
    exit
 }
 
-while getopts ":t:c:b:m:enps" opt; do
+while getopts ":t:c:u:b:m:enps" opt; do
   case $opt in
     # parse environment options
     e)
@@ -81,6 +83,10 @@ while getopts ":t:c:b:m:enps" opt; do
     c)
       CHAINCODE=$OPTARG
       echo "chaincode: $CHAINCODE"
+      ;;
+    u)
+      CHAINCODE_TOUPGRADE=$OPTARG
+      echo "chaincode to upgrade: $CHAINCODE_TOUPGRADE"
       ;;
     t)
       TCases+=("$OPTARG")
@@ -147,7 +153,7 @@ if [ $NL == "create" ]; then
     sleep 60
 fi
 
-# channel and chaincode
+# channel
 if [ $CHANNEL == "create" ]; then
     ./test_channel.sh $PrecfgDir
     cd $CWD
@@ -155,9 +161,17 @@ if [ $CHANNEL == "create" ]; then
     sleep 60
 fi
 
-# channel and chaincode
+# chaincode
 if [ $CHAINCODE != "noCC" ]; then
     ./test_chaincode.sh $CHAINCODE $PrecfgDir
+    cd $CWD
+    echo "[$0] current dir: $PWD"
+    sleep 60
+fi
+
+# upgrade chaincode
+if [ ! -z "$CHAINCODE_TOUPGRADE" ]; then
+    ./test_chaincode.sh $CHAINCODE_TOUPGRADE $PrecfgDir doupgrade
     cd $CWD
     echo "[$0] current dir: $PWD"
     sleep 60

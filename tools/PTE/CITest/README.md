@@ -27,7 +27,8 @@ The command is located in `PTE/CITest/scripts`
                 -m: directory containing test_nl.sh to be used to create network and PTE config input files to be used to configure channels and to install and instantiate chaincode, default=scripts
                 -p: preconfigure creation/join channels, default=no
                 -s: synchup peer ledgers, recommended when network brought up, default=no
-                -c: chaincode to be installed and instantiated [all|chaincode], default=no
+                -c: chaincode to be installed and instantiated [all|<chaincode>], default=no
+                -u: chaincode to be installed and upgraded [all|<chaincode>], default=no
                 -t [value1 value2 value3 ...]: test cases to be executed
 
 * ### available test cases
@@ -137,6 +138,12 @@ The command is located in `PTE/CITest/scripts`
             ./test_driver.sh -t FAB-3811-2q FAB-3808-2i
 
         - executes test cases [FAB-3811-2q](https://jira.hyperledger.org/browse/FAB-3808) and [FAB-3808-2i](https://jira.hyperledger.org/browse/FAB-3811).
+
+    - The following command
+
+            ./test_driver.sh -m FAB-8252/upgrade -u marbles02
+
+        - installs and upgrades the existing chaincode marbles02 using settings available in directory <FAB-8252/upgrade>
 
 
 * ### Scenarios
