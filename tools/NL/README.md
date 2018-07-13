@@ -10,6 +10,7 @@ The network Launcher can execute the following task:
 3. create orderer genesis block
 4. create channel configuration transaction
 5. create a docker-compose.yml and launch a network
+6. generate PTE service credential configuration json
 
 The usages of each script is given below so that they can be executed separately as needed.  However, the script, networkLauncher.sh, is designed to execute all tasks listed above sequentially.
 
@@ -176,6 +177,30 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
     ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
+
+# gen_PTEcfg.sh
+
+The script generates the service credential json files of a network to be used as an input to [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE).
+
+## Usage
+
+    gen_PTEcfg.sh [opt] [value]
+
+    options:
+       -o: number of orderers, default=1
+       -p: number of peers per organization, default=1
+       -r: number of organizations, default=1
+       -n: number of channels, default=1
+       -x: number of ca, default=1
+       -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
+       -w: host ip, default=localhost
+       -C: company name, default=example.com
+
+
+
+## Example
+
+    ./gen_PTEcfg.sh -n 3 -o 3 -p 2 -r 6 -x 6
 
 ## IP address and port
 

@@ -347,3 +347,12 @@ nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
 echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel"
 ./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel
+
+echo " "
+echo "        ####################################################### "
+echo "        #             generate PTE sc cfg json                # "
+echo "        ####################################################### "
+echo " "
+
+echo "./gen_PTEcfg.sh -n $nChannel -o $nOrderer -p $nPeersPerOrg -r $nOrg -x $nCA -C $comName -w $HostIP1 -b $MSPDir"
+./gen_PTEcfg.sh -n $nChannel -o $nOrderer -p $nPeersPerOrg -r $nOrg -x $nCA -C $comName -w $HostIP1 -b $MSPDir
