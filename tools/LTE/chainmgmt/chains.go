@@ -21,6 +21,8 @@ import (
 	"sync"
 
 	"github.com/hyperledger/fabric/common/configtx/test"
+	"github.com/hyperledger/fabric/core/chaincode/platforms"
+	"github.com/hyperledger/fabric/core/chaincode/platforms/golang"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/hyperledger/fabric/core/ledger/ledgermgmt"
 	"github.com/hyperledger/fabric/protos/common"
@@ -47,7 +49,7 @@ type chainsMgr struct {
 }
 
 func newChainsMgr(mgrConf *ChainMgrConf, batchConf *BatchConf, initOp chainInitOp) *chainsMgr {
-	ledgermgmt.Initialize(nil)
+	ledgermgmt.Initialize(nil, platforms.NewRegistry(&golang.Platform{}))
 	return &chainsMgr{mgrConf, batchConf, initOp, make(map[ChainID]*Chain), &sync.WaitGroup{}}
 }
 

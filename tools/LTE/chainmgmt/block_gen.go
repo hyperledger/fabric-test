@@ -20,7 +20,9 @@ import (
 	"sync"
 
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger/fabric/core/ledger/util"
 	"github.com/hyperledger/fabric/protos/common"
+	"github.com/hyperledger/fabric/protos/peer"
 	benchcommon "github.com/hyperledger/fabric/test/tools/LTE/common"
 )
 
@@ -93,6 +95,8 @@ func (bg *blkGenerator) nextBlock() *common.Block {
 	block.Header.DataHash = block.Data.Hash()
 	block.Header.Number = bg.blockNum
 	block.Header.PreviousHash = bg.previousBlockHash
+	txsfltr := util.NewTxValidationFlagsSetValue(len(block.Data.Data), peer.TxValidationCode_VALID)
+	block.Metadata.Metadata[common.BlockMetadataIndex_TRANSACTIONS_FILTER] = txsfltr
 
 	bg.blockNum++
 	bg.previousBlockHash = block.Header.Hash()
