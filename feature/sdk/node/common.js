@@ -10,7 +10,7 @@ var logger = log4js.getLogger('SDK_INT');
 var path = require('path');
 var util = require('util');
 var fs = require('fs-extra');
-const hfc = require('fabric-client');
+var Client = require('fabric-client');
 
 function setupPeers(peers, channel, org, client, network_config, tls) {
     let nodes = network_config[org]['peers'];
@@ -55,8 +55,8 @@ function readAllFiles(dir) {
 
 
 function getKeyStoreForOrg(org) {
-    // console.info("???" + hfc.getConfigSetting('keyValueStore') + '_' + org);
-    return hfc.getConfigSetting('keyValueStore') + '_' + org;
+    // console.info("???" + Client.getConfigSetting('keyValueStore') + '_' + org);
+    return Client.getConfigSetting('keyValueStore') + '_' + org;
 }
 
 function newRemotes(names, forPeers, userOrg, network_config, client) {
@@ -108,12 +108,12 @@ var getRegisteredUsers = function(client, username, org, networkID, mspID) {
     var keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
     var certPath = util.format('./configs/%s/peerOrganizations/%s/users/%s/msp/signcerts/', networkID, org, username);
     var certPEM = readAllFiles(certPath)[0].toString();
-    var cryptoSuite = hfc.newCryptoSuite();
 
-    cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: '/tmp/fabric-client-kvs_'+org.split('.')[0]}));
+    var cryptoSuite = Client.newCryptoSuite();
+    cryptoSuite.setCryptoKeyStore(Client.newCryptoKeyStore({path: '/tmp/fabric-client-kvs_'+org.split('.')[0]}));
     client.setCryptoSuite(cryptoSuite);
 
-    return hfc.newDefaultKeyValueStore({
+    return Client.newDefaultKeyValueStore({
         path: getKeyStoreForOrg(org)
     }).then((store) => {
         client.setStateStore(store);
@@ -135,3 +135,4 @@ exports.setupPeers = setupPeers;
 exports.newRemotes = newRemotes;
 exports.newOrderer = newOrderer;
 exports.getRegisteredUsers = getRegisteredUsers;
+exports.getKeyStoreForOrg = getKeyStoreForOrg;

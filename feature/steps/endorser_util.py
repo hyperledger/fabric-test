@@ -256,21 +256,21 @@ class SDKInterface(InterfaceBase):
                          "tls": common_util.convertBoolean(context.tls),
                          "grpcType": grpcType,
                          "networkId": context.projectName}
-            updated = networkConfig % (structure)
-            fd.write(updated)
+            updated = json.loads(networkConfig % (structure))
+            fd.write(json.dumps(updated, indent=2))
         return networkConfigFile
 
     def initializeNode(self):
         shutil.rmtree("./node_modules", ignore_errors=True)
-        shutil.copyfile("package.json", "../../package.json")
+        shutil.copyfile("package.json", "../../../package.json")
         node = execjs.get(execjs.runtime_names.Node)
         print("node info: {}".format(node.name))
-        npminstall =  subprocess.check_output(["npm install --silent"],
+        npminstall = subprocess.check_output(["npm install --silent"],
                                             env=os.environ,
-                                            cwd="../..",
+                                            cwd="../../..",
                                             shell=True)
         print("npm install: {}".format(npminstall))
-        shutil.copytree("../../node_modules", "./node_modules")
+        shutil.copytree("../../../node_modules", "./node_modules")
 
         with open("./sdk/node/invoke.js", "r") as fd:
             invoke_text = fd.read()

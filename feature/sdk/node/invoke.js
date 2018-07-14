@@ -14,6 +14,7 @@ const common = require('./sdk/node/common.js');
 // const common = require('./common.js');
 const EventHub = require('fabric-client/lib/EventHub.js');
 let client = new hfc();
+var channel;
 
 var invoke = function(username, org, chaincode, peerNames, orderer, network_config_path) {
     var temptext = '\n\n Username : '+username +
@@ -26,7 +27,8 @@ var invoke = function(username, org, chaincode, peerNames, orderer, network_conf
     // Read Network JSON PATH from behave
     let network_config;
     try {
-        network_config = JSON.parse(fs.readFileSync(network_config_path));
+        var all_network_config = JSON.parse(fs.readFileSync(network_config_path));
+        network_config = all_network_config;
     } catch(err) {
         console.error(err);
         return err;
@@ -38,7 +40,7 @@ var invoke = function(username, org, chaincode, peerNames, orderer, network_conf
     return common.getRegisteredUsers(client, username, username.split('@')[1], network_config['networkID'], network_config['network-config'][org]['mspid']).then((user) => {
         tx_id = client.newTransactionID();
 
-        let channel = client.newChannel(chaincode.channelId);
+        channel = client.newChannel(chaincode.channelId);
         channel.addOrderer(common.newOrderer(client, network_config['network-config'], orderer, network_config['tls']));
         common.setupPeers(peerNames, channel, org, client, network_config['network-config'], network_config['tls']);
 
@@ -159,3 +161,5 @@ exports.invoke = invoke;
 
 // invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['m', '26687534657789098765432345654edddfdfdafde4567898767890987654567898765678765678765456765434'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'put'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/704c56a4b5c711e79e510214683e8447/network-config.json");
 //invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['a', 'b', '10'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'invoke'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/3ea89a44b03211e79e510214683e8447/network-config.json");
+//invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['a', 'b', '10'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'invoke'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/aaa49940839b11e8ab9a0214683e8447/network-config.json");
+//invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['g', '26687534657789098765432345654edddfdfdafde4567898767890987654567898765678765678765456765434'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'put'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/9be3329a862011e8ab9a0214683e8447/network-config.json");
