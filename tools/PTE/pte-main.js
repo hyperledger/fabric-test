@@ -286,6 +286,49 @@ function channelAddPeer(channel, client, org) {
     return targets;
 }
 
+function channelAddListedPeer(channel, client, org) {
+    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] listOpt: %j', Nid, channel.getName(), org, txCfgPtr.listOpt);
+    var peerTmp;
+    var eh;
+    var data;
+    var listOpt=txCfgPtr.listOpt;
+    var peername;
+    var targets = [];
+    for(var key in listOpt) {
+        for (i = 0; i < listOpt[key].length; i++) {
+            if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
+                peername = listOpt[key][i];
+                if (peername.includes('peer')) {
+                    if (TLS > testUtil.TLSDISABLED) {
+                        data = testUtil.getTLSCert(key, peername);
+                        if ( data !== null ) {
+                            peerTmp = client.newPeer(
+                                ORGS[key][peername].requests,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                                }
+                            );
+                            targets.push(peerTmp);
+                            channel.addPeer(peerTmp);
+                        }
+                    } else {
+                        peerTmp = client.newPeer(ORGS[key][peername].requests);
+                        channel.addPeer(peerTmp);
+                    }
+                } else {
+                    logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) incorrect peer name', Nid, channel.getName(), org, key, listOpt[key][i]);
+                }
+            } else {
+                logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) does not exist', Nid, channel.getName(), org, key, listOpt[key][i]);
+            }
+        }
+    }
+    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: ', Nid, channelName, org, channel.getPeers());
+
+    return targets;
+}
+
 function channelAddQIPeer(channel, client, qorg, qpeer) {
     logger.info('[channelAddQIPeer] channel name: ', channel.getName());
     logger.info('[channelAddQIPeer] qorg %s qpeer: ', qorg,qpeer);
@@ -461,7 +504,16 @@ async function chaincodeInstall(channel, client, org) {
     }
     chainAddOrderer(channel, client, org);
 
-    var targets = channelAddPeer(channel, client, org);
+    var targets;
+    if ( (typeof(txCfgPtr.targetPeers) !== 'undefined') && (txCfgPtr.targetPeers.toUpperCase() == 'LIST') ) {
+        if ( typeof(txCfgPtr.listOpt) == 'undefined' ) {
+            logger.error('[Nid:chan:org=%d:%s:%s chaincodeInstall] listOpt undefined', Nid, channel.getName(), org);
+            process.exit();
+        }
+        targets = channelAddListedPeer(channel, client, org);
+    } else {
+        targets = channelAddPeer(channel, client, org);
+    }
 
     //sendInstallProposal
     getCCID();

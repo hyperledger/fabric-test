@@ -352,18 +352,37 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
             "transType": "install",
             "invokeType": "Move",
 
-        And set channelOpt name to the channel name and orgName to a list of org names:
+        PTE can install a chaincode on all peers within an orgnization or on specified peers.
+
+        ##### Install a chaincode on all peers
+
+        In `channelOpt`, set channel name in `name` and list all orgs in `orgName`, such as:
 
             "channelOpt":
                 "name":  "testchannel1",
                 "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
                 "action":  "create",
                 "orgName": [
-                    "testOrg1"
+                    "testOrg1",
+                    "testOrg2"
                 ]
             },
 
         Note that action is ignored.
+
+        ##### Install a chaincode on specific peers of an orgnization
+
+        * Set the `targetPeers` to `LIST`
+
+             "targetPeers": "LIST",
+
+        * List all individual orgs and peers in `listOpt`, such as
+
+             "listOpt": {
+                 "org1": ["peer1", "peer2"],
+                 "org2": ["peer1"]
+             },
+
     * ### Instantiate a chaincode
         To instantiate a chaincode, set the transType to `instantiate`:
 
