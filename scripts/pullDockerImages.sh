@@ -31,7 +31,7 @@ echo "Fetching images from Nexus"
 NEXUS_URL=nexus3.hyperledger.org:10001
 ORG_NAME="hyperledger/fabric"
 ARCH=$(go env GOARCH)
-: ${STABLE_VERSION:=1.3.0-stable}
+: ${STABLE_VERSION:=1.2.1-stable}
 STABLE_TAG=$ARCH-$STABLE_VERSION
 echo "---------> STABLE_VERSION:" $STABLE_VERSION
 
@@ -62,11 +62,17 @@ echo
 
 echo "======== PULL FABRIC BINARIES ========"
 echo "------------> RELEASE_COMMIT:" $RELEASE_COMMIT
+if [ -z "$RELEASE_COMMIT" ]; then
+	RELEASE_COMMIT="1c94e9e"
+fi
+echo "------------> RELEASE_COMMIT:" $RELEASE_COMMIT
 RELEASE_COMMIT=${RELEASE_COMMIT:0:7}
 OS_VER=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo
 rm -rf .build && mkdir -p .build && cd .build
+echo "------------> cURL info:" $STABLE_VERSION/$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT
 curl https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$STABLE_VERSION/$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT/hyperledger-fabric-$STABLE_VERSION-$OS_VER-$ARCH.$STABLE_VERSION-$RELEASE_COMMIT.tar.gz | tar xz
+echo "------------> cURL Completed"
 export PATH=$WORKSPACE/gopath/src/github.com/hyperledger/fabric/.build/bin:$PATH
 echo "Binaries fetched from Nexus"
 echo

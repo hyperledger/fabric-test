@@ -47,8 +47,11 @@ ci-smoke: git-init git-latest fabric ca clean pre-setup docker-images smoke-test
 
 .PHONY: git-latest
 git-latest:
-	@git submodule foreach git checkout master
-	@git submodule foreach git pull origin master
+	cd $(HYPERLEDGER_DIR)/fabric-test/cello && git pull origin master && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric && git checkout release-1.2 && git pull origin release-1.2 && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-ca && git checkout release-1.2 && git pull origin release-1.2 && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-samples && git checkout release-1.2 && git pull origin release-1.2 && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-sdk-node && git checkout release-1.2 && git pull origin release-1.2 && git show-ref HEAD
 
 .PHONY: git-init
 git-init:
