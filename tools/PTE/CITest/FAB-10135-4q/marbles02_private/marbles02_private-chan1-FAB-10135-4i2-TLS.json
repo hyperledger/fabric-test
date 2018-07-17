@@ -6,10 +6,10 @@
     "invokeCheck": "TRUE",
     "transMode": "Constant",
     "transType": "Invoke",
-    "invokeType": "Query",
-    "targetPeers": "List",
+    "invokeType": "Move",
+    "targetPeers": "AllPeers",
     "nProcPerOrg": "2",
-    "nRequest": "10",
+    "nRequest": "1000",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
@@ -32,14 +32,14 @@
     },
     "constantOpt": {
         "recHist": "HIST",
-        "constFreq": "0",
+        "constFreq": "200",
         "devFreq": "0"
     },
     "listOpt": {
-       "org1": ["peer1"]
+        "org1": ["peer1"]
     },
     "eventOpt": {
-        "type": "Channel",
+        "type": "FilteredBlock",
         "listener": "Block",
         "timeout": "240000"
     },
@@ -47,12 +47,12 @@
     "ccOpt": {
         "keyIdx": [0],
         "keyPayLoad": [2],
-        "keyStart": "0",
+        "keyStart": "4000",
         "payLoadMin": "1024",
         "payLoadMax": "2048"
     },
     "invoke": {
-        "nOwner":"100",
+        "nOwner":"10000",
         "query": {
             "fcn": "readMarble",
             "args": ["marble"]
@@ -63,6 +63,6 @@
         }
     },
     "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
-	]
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+    ]
 }

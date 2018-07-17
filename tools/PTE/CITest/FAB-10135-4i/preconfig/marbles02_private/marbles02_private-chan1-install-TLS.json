@@ -1,0 +1,25 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "marbles02_private_go",
+    "chaincodeVer": "v0",
+    "transType": "install",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel1",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+        "metadataPath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go/META-INF",
+        "fcn": "init",
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+    ]
+}

@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-10135-4i/preconfig/channels/chan1-org1-update-TLS.json
+sdk=node CITest/FAB-10135-4i/preconfig/channels/chan1-org2-update-TLS.json

@@ -37,6 +37,17 @@ echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-join-T
        sleep 60s
     done
 
+echo "[$0] update channel"
+echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-update-TLS.txt"
+
+    runUpdate=`ls CITest/$PrecfgDir/preconfig/channels/runCases*update*`
+    echo "runUpdate $runUpdate"
+    for ri in $runUpdate; do
+       echo "./pte_driver.sh $ri"
+       ./pte_driver.sh $ri
+       sleep 60s
+    done
+
 
 cd $CWD
 echo "[$0] current dir: $PWD"

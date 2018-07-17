@@ -92,6 +92,8 @@ The command is located in `PTE/CITest/scripts`
         FAB-10581-4i: 4 processes X 100,000 service discvoeries
         FAB-10134-4i: marbles02_private GO chaincode, 4 process X 10000 invokes, TLS, CouchDB, 1 channel
         FAB-10134-4q: marbles02_private GO chaincode, 4 process X 10000 query private, TLS, CouchDB, 1 Channel
+        FAB-10135-4i: marbles02_private GO chaincode, 4 process X 1000 invokes, 2 org, TLS, CouchDB, 1 channel
+        FAB-10135-4q: marbles02_private GO chaincode, 4 process X 1000 invokes and 4 process X 1000 query private simultaneously, 2 org, TLS, CouchDB, 1 Channel
         FAB-10190-4i: 4 processes X 10,000 invokes with service discovery
         FAB-10190-4q: 4 processes X 100 queries with all peers, useful to prime ALL peers in the standard network of 2 orgs/4 peers, which is required when using service discovery
         FAB-10191-4i: 4 processes X 1 hour invokes with service discovery and simultaneously execute test_chaos.sh to restart all orderers, peers, kafkas, and zookeepers one at a time for robustness test
@@ -172,6 +174,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-9575-4i.sh: execute FAB-8694-4i, then FAB-9575-4i
         FAB-10581-4i.sh: execute FAB-10581-4i
         FAB-10134-4i.sh: execute FAB-10134-4i, then FAB-10134-4q
+        FAB-10135-4i.sh: execute FAB-10135-4i, then FAB-10135-4q
         FAB-10190-4i.sh: execute FAB-10190-4i
         FAB-10191-4i.sh: execute FAB-10191-4i
         FAB-10677.sh: execute FAB-10677

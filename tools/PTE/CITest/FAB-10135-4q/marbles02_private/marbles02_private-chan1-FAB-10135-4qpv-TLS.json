@@ -7,10 +7,10 @@
     "transMode": "Constant",
     "transType": "Invoke",
     "invokeType": "Query",
-    "targetPeers": "List",
+    "targetPeers": "AllPeers",
     "nProcPerOrg": "2",
-    "nRequest": "10",
-    "runDur": "0",
+    "nRequest": "1000",
+    "runDur": "1200",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel1",
@@ -27,8 +27,8 @@
         "burstDur1": "10000"
     },
     "mixOpt": {
-        "mixQuery": "FALSE",
-        "mixFreq": "1000"
+        "mixQuery": "false",
+        "mixFreq": "3000"
     },
     "constantOpt": {
         "recHist": "HIST",
@@ -36,11 +36,9 @@
         "devFreq": "0"
     },
     "listOpt": {
-       "org1": ["peer1"]
+        "org1": ["peer1"]
     },
     "eventOpt": {
-        "type": "Channel",
-        "listener": "Block",
         "timeout": "240000"
     },
     "ccType": "marblescc_priv",
@@ -49,17 +47,21 @@
         "keyPayLoad": [2],
         "keyStart": "0",
         "payLoadMin": "1024",
-        "payLoadMax": "2048"
+        "payLoadMax": "1024"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+        "fcn": "init",
+        "args": []
     },
     "invoke": {
-        "nOwner":"100",
         "query": {
-            "fcn": "readMarble",
+            "fcn": "readMarblePrivateDetails",
             "args": ["marble"]
         },
         "move": {
-            "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom","99"]
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
         }
     },
     "SCFile": [
