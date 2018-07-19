@@ -14,6 +14,7 @@ pte: {
     nProcPerOrg: 2,
     nRequest: 100,
     runDur: 0,
+    TLS: "enabled",
     targetPeers: "OrgAnchor",
     peerFailover: TRUE,
     ordererFailover: TRUE,
@@ -60,6 +61,7 @@ pte: {
     # official hub - url: "hyperledger/",
     # fabric build hub - url: "nexus3.hyperledger.org:10001/hyperledger/",
     url: "nexus3.hyperledger.org:10001/hyperledger/",
+    tag: "1.2.0",
     username: "",
     password: ""
   }

@@ -9,7 +9,7 @@
     "logLevel": "ERROR",
     "transType": "Channel",
     "nProcPerOrg": "4",
-    "TLS": "enabled",
+    "TLS": "{{ TLS }}",
     "channelOpt": {
         "name": "{{ item.name }}",
         "action":  "join",
@@ -23,6 +23,10 @@
 {% endif %}
 {% endfor %}
         ]
+    },
+    "timeoutOpt": {
+        "preConfig": "{{ preconfig }}",
+        "request": "{{ request }}"
     },
     "SCFile": [
                 {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}

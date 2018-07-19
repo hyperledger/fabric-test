@@ -6,10 +6,7 @@
 # This variable defines fabric network attributes
 pte: {
   ptechannels: [
-    {name: "testorgschannel1", orgs: ["orga", "orgb"], orderer: "orderer0"},
-    {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer0"},
-    {name: "testorgschannel3", orgs: ["orga", "orgb"], orderer: "orderer0"},
-    {name: "testorgschannel4", orgs: ["orga", "orgb"], orderer: "orderer0"},
+    {name: "testorgschannel1", orgs: ["orga1"], orderer: "orderer0"},
   ],
   transaction: {
     transMode: "Constant",
@@ -59,11 +56,13 @@ pte: {
     }
   },
   repo: {
+
+  repo: {
     # the url defines docker hub project access point
     # official hub - url: "hyperledger/",
     # fabric build hub - url: "nexus3.hyperledger.org:10001/hyperledger/",
     url: "nexus3.hyperledger.org:10001/hyperledger/",
-    tag: "1.2.0",
+    repo: "1.2.0",
     username: "",
     password: ""
   }

@@ -10,20 +10,18 @@
     "invokeCheck": "TRUE",
     "transType": "instantiate",
     "nProcPerOrg": "4",
-    "TLS": "enabled",
+    "TLS": "{{ TLS }}",
     "channelOpt": {
         "name":  "{{ item.name }}",
         "action":  "create",
         "orgName": [
-{% set index = ((item.channelnum|int * item.orgs|length) - (item.orgs|length - 1)) -%}
-{% for orgName in item.orgs %}
-{% if not loop.last %}
-            "org{{ index + loop.index0 }}",
-{% else %}
-            "org{{ index + loop.index0 }}"
-{% endif %}
-{% endfor %}
+{% set index = ((item.channelnum|int * item.orgs|length) - (item.orgs|length - 1)) %}
+            "org{{ index }}"
         ]
+    },
+    "timeoutOpt": {
+        "preConfig": "{{ preconfig }}",
+        "request": "{{ request }}"
     },
     "deploy": {
 {% if chaincode == "samplecc" %}

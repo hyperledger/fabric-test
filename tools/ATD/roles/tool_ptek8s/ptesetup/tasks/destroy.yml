@@ -20,11 +20,17 @@
   set_fact:
     testcase_query: "{{ testcase_query | default('multihost_query') }}"
 
-- name: Stop PTE pod
-  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/pte-k8s.yml"
+- name: Stop PTE admin pod
+  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/pte-admin-k8s.yml"
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-  tags: "ptedown"
+  tags: "pteadmindown"
+
+- name: Stop PTE client pod
+  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/pte-client-k8s.yml"
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteclientdown"
 
 - name: Check the status of secret for pulling images
   command: >-
@@ -54,14 +60,16 @@
     ./kubectl --kubeconfig kubeconfig delete configmap ptetestcase
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-  tags: "configmapdelete"
+  tags: "config"
 
 - name: Make sure that pte config directory is removed
   file:
     path: "{{ fabricworkdir }}/keyfiles/CITest"
     state: absent
+  tags: "config"
 
 - name: Make sure that pte config tar file is removed
   file:
     path: "{{ fabricworkdir }}/pteconfig.tgz"
     state: absent
+  tags: "config"

@@ -17,7 +17,7 @@
     "runDur": "{{ runDur }}",
     "peerFailover": "{{ peerFailover }}",
     "ordererFailover": "{{ ordererFailover }}",
-    "TLS": "enabled",
+    "TLS": "{{ TLS }}",
     "channelOpt": {
         "name": "{{ item.name }}",
         "action":  "create",
@@ -32,6 +32,11 @@
 {% endfor %}
         ]
     },
+{% if targetPeers == "Discovery" %}
+    "discoveryOpt": {
+        "localHost": "false"
+    },
+{% endif %}
 {% if transMode == "Burst" %}
     "burstOpt": {
         "burstFreq0":  "{{ burstFreq0 }}",

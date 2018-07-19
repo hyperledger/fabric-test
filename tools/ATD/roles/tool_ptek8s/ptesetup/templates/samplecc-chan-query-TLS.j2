@@ -13,11 +13,11 @@
     "invokeType": "Query",
     "targetPeers": "{{ targetPeers }}",
     "nProcPerOrg": "{{ nProcPerOrg }}",
-    "nRequest": "100",
+    "nRequest": "1000",
     "runDur": "0",
     "peerFailover": "{{ peerFailover }}",
     "ordererFailover": "{{ ordererFailover }}",
-    "TLS": "enabled",
+    "TLS": "{{ TLS }}",
     "channelOpt": {
         "name": "{{ item.name }}",
         "action":  "create",
@@ -31,6 +31,9 @@
 {% endif %}
 {% endfor %}
         ]
+    },
+    "discoveryOpt": {
+        "localHost": "false"
     },
 {% if transMode == "Burst" %}
     "burstOpt": {
@@ -47,7 +50,7 @@
 {% elif transMode == "Constant" %}
     "constantOpt": {
         "recHist": "{{ recHist }}",
-        "constFreq": "{{ constFreq }}",
+        "constFreq": "0",
         "devFreq": "{{ devFreq }}"
     },
 {% endif %}

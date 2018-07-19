@@ -10,7 +10,7 @@
     "transMode": "Simple",
     "transType": "install",
     "nProcPerOrg": "4",
-    "TLS": "enabled",
+    "TLS": "{{ TLS }}",
     "channelOpt": {
         "name":  "{{ item.name }}",
         "action":  "create",
@@ -24,6 +24,10 @@
 {% endif %}
 {% endfor %}
         ]
+    },
+    "timeoutOpt": {
+        "preConfig": "{{ preconfig }}",
+        "request": "{{ request }}"
     },
     "deploy": {
 {% if chaincode == "samplecc" %}

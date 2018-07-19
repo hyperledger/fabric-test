@@ -5,9 +5,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pte
+  name: pte{{ item }}
   labels:
-    k8s-app: pte
+    k8s-app: pte{{ item }}
 spec:
   imagePullSecrets:
     - name: regcred
@@ -20,8 +20,8 @@ spec:
       configMap:
         name: ptetestcase
   containers:
-    - name: pte
-      image: {{ pte.repo.url }}fabric-pte:stable
+    - name: pte{{ item }}
+      image: {{ pte.repo.url }}fabric-pte:{{ pte.repo.tag }}
       imagePullPolicy: Always
       env:
         - { name: "TESTCASE", value: "{{ testcase }}" }
@@ -31,4 +31,4 @@ spec:
         - { mountPath: "/var/hyperledger/fabric/artifacts", name: "task-pv-storage" }
         - { mountPath: "/var/hyperledger/fabric/testcase", name: "testcase" }
       command: ["bash"]
-      args: ["-c","cp /var/hyperledger/fabric/testcase/testcases.sh . && chmod +x testcases.sh && ./testcases.sh"]
+      args: ["-c","cp /var/hyperledger/fabric/testcase/{{ item }}.sh . && chmod +x {{ item }}.sh && ./{{ item }}.sh"]

@@ -46,6 +46,7 @@
   set_fact:
     transMode: "{{ pte.transaction.transMode }}"
     targetPeers: "{{ pte.transaction.targetPeers }}"
+    TLS: "{{ pte.transaction.TLS }}"
     nProcPerOrg: "{{ pte.transaction.nProcPerOrg }}"
     nRequest: "{{ pte.transaction.nRequest }}"
     runDur: "{{ pte.transaction.runDur }}"
@@ -169,7 +170,14 @@
 
 - name: Make list for channels
   set_fact:
-    endlist: "{{ (channelnum|length / 4) | int }}"
+    endlist: "{{ (channelnum|length)/2 | int }}"
+  when: "{{ (channelnum|length) | int }} is even"
+  register: countvar
+
+- name: Make list for channels
+  set_fact:
+    endlist: "{{ (channelnum|length + 1)/2 | int }}"
+  when: "{{ (channelnum|length) | int }} is odd"
   register: countvar
 
 - name: testcase
@@ -252,7 +260,7 @@
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/runCases-chan-create.j2"
     dest: "{{ fabricworkdir }}/keyfiles/CITest/{{ testcase }}/preconfig/channels/runCases-chan-create{{ item }}-TLS.txt"
-  with_sequence: start=1 end={{ (endlist|int + 1) }}
+  with_sequence: start=1 end={{ (endlist|int) }}
   when: testcase == "multihost"
 
 - name: Create samplecc-join file
@@ -266,7 +274,7 @@
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/runCases-chan-join.j2"
     dest: "{{ fabricworkdir }}/keyfiles/CITest/{{ testcase }}/preconfig/channels/runCases-chan-join{{ item }}-TLS.txt"
-  with_sequence: start=1 end={{ (endlist|int + 1) }}
+  with_sequence: start=1 end={{ (endlist|int) }}
   when: testcase == "multihost"
 
 - name: Create samplecc-install file
@@ -280,7 +288,7 @@
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/runCases-chan-install.j2"
     dest: "{{ fabricworkdir }}/keyfiles/CITest/{{ testcase }}/preconfig/{{ chaincode }}/runCases-chan-install{{ item }}-TLS.txt"
-  with_sequence: start=1 end={{ (endlist|int + 1) }}
+  with_sequence: start=1 end={{ (endlist|int) }}
   when: testcase == "multihost"
 
 - name: Create samplecc-instantiate file
@@ -294,7 +302,7 @@
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/runCases-chan-instantiate.j2"
     dest: "{{ fabricworkdir }}/keyfiles/CITest/{{ testcase }}/preconfig/{{ chaincode }}/runCases-chan-instantiate{{ item }}-TLS.txt"
-  with_sequence: start=1 end={{ (endlist|int + 1) }}
+  with_sequence: start=1 end={{ (endlist|int) }}
   when: testcase == "multihost"
 
 - name: Create samplecc-invoke file
@@ -357,10 +365,19 @@
     - "{{ channels }}"
     - "{{ channelnum }}"
 
-- name: Create testcases file
+- name: Create admin execution file
   template:
-    src: "{{ playbook_dir }}/ptesetup/templates/testcases.j2"
-    dest: "{{ fabricworkdir }}/keyfiles/testcases.sh"
+    src: "{{ playbook_dir }}/ptesetup/templates/admin.j2"
+    dest: "{{ fabricworkdir }}/keyfiles/admin.sh"
+    mode: "u=rx,g=rx"
+  with_together:
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
+- name: Create client execution file
+  template:
+    src: "{{ playbook_dir }}/ptesetup/templates/client.j2"
+    dest: "{{ fabricworkdir }}/keyfiles/client.sh"
     mode: "u=rx,g=rx"
   with_together:
     - "{{ channels }}"
@@ -399,49 +416,85 @@
 - name: Create deployment file for PTE
   template:
     src: "{{ playbook_dir }}/ptesetup/templates/pte-k8s.j2"
-    dest: "{{ playbook_dir }}/../../vars/pte-k8s.yml"
-  with_together:
-    - "{{ channels }}"
-    - "{{ peers }}"
+    dest: "{{ playbook_dir }}/../../vars/pte-{{ item }}-k8s.yml"
+  with_items:
+    - "admin"
+    - "client"
 
-- name: Create configmaps for testcases.sh
+- name: Create configmaps for pte config files, admin and client files
   command: >-
-    ./kubectl --kubeconfig kubeconfig create configmap ptetestcase --from-file={{ fabricworkdir }}/keyfiles/testcases.sh
+    ./kubectl --kubeconfig kubeconfig create configmap ptetestcase --from-file={{ fabricworkdir }}/keyfiles/admin.sh --from-file={{ fabricworkdir }}/keyfiles/client.sh
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
 
-- name: Start PTE pod
-  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-k8s.yml"
+- name: Start PTE admin pod
+  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-admin-k8s.yml"
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-  tags: "pteup"
+  tags: "pteadmin"
 
-- name: Wait for containers to be ready
+- name: Wait for PTE admin pod to come up
   command: >-
-    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pte
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteadmin
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-  register: ptestatus
-  until: ptestatus.stdout.find("true") >= 0
-  retries: 5
+  register: pteadminstatus
+  until: pteadminstatus.stdout.find("true") >= 0
+  retries: 10
+  delay: 30
+  tags: "pteadmin"
+
+- name: Copy config zip file onto the PTE admin pod
+  command: >-
+    ./kubectl --kubeconfig kubeconfig cp {{ fabricworkdir }}/pteconfig.tgz pteadmin:/var/hyperledger/fabric/
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteadmin"
+
+- name: Wait for PTE admin pod to be completed
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteadmin
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: pteadminstatus
+  until: pteadminstatus.stdout.find("false") >= 0
+  retries: 30
+  delay: 120
+  tags: "pteadmin"
+
+- name: Logs in PTE admin to local
+  shell: >-
+    ./kubectl --kubeconfig kubeconfig logs pteadmin -c pteadmin > {{ playbook_dir }}/../../vars/admin-{{ testcase }}-{{ testcase_query }}.log 2>&1
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  #tags: "getlogs"
+  tags: "pteadmin"
+
+- name: Start PTE client pod
+  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-client-k8s.yml"
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteclientup"
+
+- name: Wait for PTE client pod to come up
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: pteclientstatus
+  until: pteclientstatus.stdout.find("true") >= 0
+  retries: 10
   delay: 30
 
-- name: Copy config zip file onto the PTE pod
+- name: Copy config zip file onto the PTE client pod
   command: >-
-    ./kubectl --kubeconfig kubeconfig cp {{ fabricworkdir }}/pteconfig.tgz pte:/var/hyperledger/fabric/
+    ./kubectl --kubeconfig kubeconfig cp {{ fabricworkdir }}/pteconfig.tgz pteclient:/var/hyperledger/fabric/
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
 
-- name: Untar pteconfig.tgz in the PTE pod
+- name: Check the health of the PTE client
   command: >-
-    ./kubectl --kubeconfig kubeconfig exec pte -c pte
-    -- tar -xzvf /var/hyperledger/fabric/pteconfig.tgz
-  args:
-    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
-
-- name: Check the health of the PTE
-  command: >-
-    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pte
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   register: ptestatus
@@ -449,9 +502,9 @@
   retries: 2500
   delay: 120
 
-- name: Logs in PTE to local
+- name: Logs in PTE client to local
   shell: >-
-    ./kubectl --kubeconfig kubeconfig logs pte -c pte > {{ playbook_dir }}/../../vars/{{ testcase }}.log 2>&1
+    ./kubectl --kubeconfig kubeconfig logs pteclient -c pteclient > {{ playbook_dir }}/../../vars/client-{{ testcase }}-{{ testcase_query }}.log 2>&1
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "getlogs"
