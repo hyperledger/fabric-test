@@ -644,10 +644,8 @@ The user input file contains configuration parameters including chaincode defini
             ]
         },
         "burstOpt": {
-            "burstFreq0":  "500",
-            "burstDur0":  "3000",
-            "burstFreq1": "2000",
-            "burstDur1": "10000"
+            "burstFreq": ["500", "200", "300", "100"],
+            "burstDur":  ["3000", "2000", "3000", "1000"]
         },
         "mixOpt": {
             "mixquery": "false",
@@ -763,10 +761,8 @@ where
             "endBlock":  "6800"
         },
         "burstOpt": {
-            "burstFreq0":  "500",
-            "burstDur0":  "3000",
-            "burstFreq1": "2000",
-            "burstDur1": "10000"
+            "burstFreq": ["500", "200", "300", "100"],
+            "burstDur":  ["3000", "2000", "3000", "1000"]
         },
         "mixOpt": {
             "mixquery": "false",
@@ -835,8 +831,8 @@ where:
 * **chaincodeVer**: chaincode version.
 * **logLevel**: logging level for the run. Options are ERROR, DEBUG, or INFO.  Set to ERROR for performance test. The default value is ERROR.
 * **invokeCheck**: if this is TRUE, then a query will be executed for the last invoke upon the receiving of the event of the last invoke. This value is ignored for query test.
-* **transMode**: transaction mode
-    * **Simple**: one transaction type and rate only, the subsequent transaction is sent when the response of sending transaction (not the event handler), success or failure, of the previous transaction is received
+* **transMode**: transaction mode (applicable for each thread). Note: the per-thread transaction send rates for all modes have an upper bound. For example, if it typically takes 5 ms to get ack responses for sending transactions to peers in your network, then that limits your max effective rate to be 200 tps - such as when you use transMode = Constant with constantOpt.constFreq = any value between 1 - 5 ms. The host hardware cpu and memory resources may also impose limitations, especially when your test uses higher numbers of simultaneous connections and threads competing for those resources.
+    * **Simple**: one transaction type and rate only, the subsequent transaction is sent when the response of sending transaction (not the event handler), success or failure, of the previous transaction received
     * **Burst**: various traffic rates, see burstOpt for detailed
     * **Mix**: mix invoke and query transactions, see mixOpt for detailed
     * **Constant**: the transactions are sent by the specified rate, see constantOpt for detailed
@@ -880,11 +876,9 @@ where:
     * **channelTX**: channel transaction file. If the `gopath` is defined in the service credential json, then the path is relative to `gopath/src`. Otherwise, absolute path is required.
     * **action**: channel action: create or join
     * **orgName**: name of organization for the test
-* **burstOpt**: the frequencies and duration for Burst transaction mode traffic. Currently, two transaction rates are supported. The traffic will issue one transaction every burstFreq0 ms for burstDur0 ms, then one transaction every burstFreq1 ms for burstDur1 ms, then the pattern repeats. These parameters are valid only if the transMode is set to **Burst**.
-    * **burstFreq0**: frequency in ms for the first transaction rate
-    * **burstDur0**:  duration in ms for the first transaction rate
-    * **burstFreq1**: frequency in ms for the second transaction rate
-    * **burstDur1**: duration in ms for the second transaction rate
+* **burstOpt**: the frequencies and durations for Burst transaction mode traffic. Each PTE thread will issue transactions at the specified frequency for the corresponding duration for each interval. It will cycle through all intervals, repeating the cycles as necessary until the test completes (as specified by nRequest or runDur). The first burstFreq corresponds to the first burstDur, and the second burstFreq corresponds to the second burstDur, and so on.  If the length, number of modes, of burstFreq and burstDur are not the same, then the extra parameters wll be ignored from the longer list.  These parameters are valid only if the transMode is set to **Burst**.
+    * **burstFreq**: list of frequencies, in ms; the time between sending two successive msgs; tester must provide one transmit frequency per corresponding burstDur interval
+    * **burstDur**:  list of interval durations for sending transactions, in ms
 * **mixOpt**: each invoke is followed by a query on every process. This parameter is valid only the transMode is set to **Mix**.
 * **mixFreq**: frequency in ms for the transaction rate. This value should be set based on the characteristics of the chaincode to avoid the failure of the immediate query.
 * **constantOpt**: the transactions are sent at the specified rate. This parameter is valid only the transMode is set to **Constant**.

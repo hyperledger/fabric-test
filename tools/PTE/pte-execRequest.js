@@ -2411,44 +2411,48 @@ function execModeProposal() {
 }
 
 // Burst mode vars
-var burstFreq0;
-var burstDur0;
-var burstFreq1;
-var burstDur1;
-var tDur=[];
-var tFreq=[];
-var tUpd0;
-var tUpd1;
-var bFreq;
+var bDur=[];
+var bFreq=[];
+var bNext;
+var bCurrFreq;
+var bTotalModes;
+var bCurrMode=0;
 
 function getBurstFreq() {
 
     tCurr = new Date().getTime();
 
     // set up burst traffic duration and frequency
-    if ( tCurr < tUpd0 ) {
-        bFreq = tFreq[0];
-    } else if ( tCurr < tUpd1 ) {
-        bFreq = tFreq[1];
-    } else {
-        tUpd0 = tCurr + tDur[0];
-        tUpd1 = tUpd0 + tDur[1];
-        bFreq = tFreq[0];
+    if ( tCurr >= bNext ) {
+        bCurrMode=(bCurrMode+1)%bTotalModes;
+        bNext = tCurr + bDur[bCurrMode];
+        bCurrFreq = bFreq[bCurrMode];
+        //logger.info('[invoke_move_burst] bCurrFreq: %d, bNext: %d, tCurr: %d', bCurrFreq, bNext, tCurr);
     }
 
 }
 
 // invoke_move_burst
-
-function invoke_move_burst_go(){
+function invoke_move_burst_go(t1, freq){
+    var freq_n=freq;
+    tCurr = new Date().getTime();
+    t1 = tCurr - t1;
+    if ( t1 < freq_n ) {
+       freq_n = freq_n - t1;
+    } else {
+       freq_n = 0;
+    }
     setTimeout(function(){
         invoke_move_burst();
-    },bFreq);
+    },freq_n);
 }
 
 function invoke_move_burst() {
     inv_m++;
-    // set up burst traffic duration and frequency
+    var t1 = new Date().getTime();
+    //logger.info('[invoke_move_burst] inv_m=%d, bCurrFreq: %d, tCurr: %d', inv_m, bCurrFreq, t1);
+
+    // get burst traffic duration and frequency
     getBurstFreq();
 
     getMoveRequest();
@@ -2466,13 +2470,13 @@ function invoke_move_burst() {
 
                 if ( results[0].status != 'SUCCESS' ) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] sendTransactionProposal status: %d', Nid, channelName, org, pid, results[0]);
-                    invoke_move_burst_go();
+                    invoke_move_burst_go(t1, bCurrFreq);
                     return;
                 }
 
                 isExecDone('Move');
                 if ( IDone != 1 ) {
-                    invoke_move_burst_go();
+                    invoke_move_burst_go(t1, bCurrFreq);
                 } else {
                     tCurr = new Date().getTime();
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
@@ -2482,7 +2486,7 @@ function invoke_move_burst() {
 
             }).catch((err) => {
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-                invoke_move_burst_go();
+                invoke_move_burst_go(t1, bCurrFreq);
                 //evtDisconnect();
                 return;
             })
@@ -2492,7 +2496,7 @@ function invoke_move_burst() {
 
                 isExecDone('Move');
                 if ( IDone != 1 ) {
-                    invoke_move_burst_go();
+                    invoke_move_burst_go(t1, bCurrFreq);
                 }
         });
 }
@@ -2513,7 +2517,7 @@ function invoke_query_burst() {
             if ( QDone != 1 ) {
                 setTimeout(function(){
                     invoke_query_burst();
-                },bFreq);
+                },bCurrFreq);
             } else {
                 tCurr = new Date().getTime();
                 for(let j = 0; j < response_payloads.length; j++) {
@@ -2537,29 +2541,40 @@ function invoke_query_burst() {
     );
 
 }
+
 function execModeBurst() {
 
-    // init TcertBatchSize
-    burstFreq0 = parseInt(txCfgPtr.burstOpt.burstFreq0);
-    burstDur0 = parseInt(txCfgPtr.burstOpt.burstDur0);
-    burstFreq1 = parseInt(txCfgPtr.burstOpt.burstFreq1);
-    burstDur1 = parseInt(txCfgPtr.burstOpt.burstDur1);
-    tFreq = [burstFreq0, burstFreq1];
-    tDur  = [burstDur0, burstDur1];
+    // input burstOpt
+    if ( (typeof(txCfgPtr.burstOpt) === 'undefined') || (typeof(txCfgPtr.burstOpt.burstFreq) === 'undefined') || (typeof(txCfgPtr.burstOpt.burstDur) === 'undefined') ) {
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] invalid burstOpt',Nid, channelName, org, pid);
+        process.exit();
+    }
+    bTotalModes=txCfgPtr.burstOpt.burstFreq.length;
+    if ( txCfgPtr.burstOpt.burstFreq.length != txCfgPtr.burstOpt.burstDur.length ) {
+        bTotalModes=Math.min(txCfgPtr.burstOpt.burstFreq.length, txCfgPtr.burstOpt.burstDur.length);
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] burst freq (%d) and burst Dur (%d) have different number of modes. PTE will use %d modes',Nid, channelName, org, pid, txCfgPtr.burstOpt.burstFreq.length, txCfgPtr.burstOpt.burstDur.length, bTotalModes);
+    }
+    if ( bTotalModes == 0 ) {
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] invalid burstFreq and/or burstDur',Nid, channelName, org, pid);
+        process.exit();
+    }
+    for (i=0; i< bTotalModes; i++) {
+        bFreq.push(parseInt(txCfgPtr.burstOpt.burstFreq[i]));
+        bDur.push(parseInt(txCfgPtr.burstOpt.burstDur[i]));
+    }
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] Burst setting: total modes= %d, burstFreq= %j, burstDur= %j',Nid, channelName, org, pid, bTotalModes, bFreq, bDur);
 
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] Burst setting: tDur =',Nid, channelName, org, pid, tDur);
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] Burst setting: tFreq=',Nid, channelName, org, pid, tFreq);
+    bCurrMode=0;
+    bCurrFreq=bFreq[0];
 
     // get time
     tLocal = new Date().getTime();
 
-    tUpd0 = tLocal+tDur[0];
-    tUpd1 = tLocal+tDur[1];
-    bFreq = tFreq[0];
+    bNext = tLocal+bDur[0];
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] Burst init setting: bNext: %d, tLocal: %d ',Nid, channelName, org, pid, bNext, tLocal);
 
     // send proposal to endorser
     if ( transType == 'INVOKE' ) {
-        tLocal = new Date().getTime();
         if ( runDur > 0 ) {
             tEnd = tLocal + runDur;
         }
