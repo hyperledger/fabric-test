@@ -131,6 +131,12 @@ following line, which is required to run the tests with CouchDB:
 ```
 export useCouchDB="yes"
 ```
+CouchDB can store values in JSON or binary formats. The following option in
+`parameters_couchdb_daily_CI.sh` is used to switch between JSON and binary
+values:
+```
+UseJSONFormat="true"
+```
 
 ## How to View the Test Results
 
