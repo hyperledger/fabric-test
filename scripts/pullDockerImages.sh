@@ -31,7 +31,7 @@ echo "Fetching images from Nexus"
 NEXUS_URL=nexus3.hyperledger.org:10001
 ORG_NAME="hyperledger/fabric"
 ARCH=$(go env GOARCH)
-: ${STABLE_VERSION:=1.2.0-stable}
+: ${STABLE_VERSION:=1.3.0-stable}
 STABLE_TAG=$ARCH-$STABLE_VERSION
 echo "---------> STABLE_VERSION:" $STABLE_VERSION
 
@@ -61,13 +61,6 @@ docker images | grep "hyperledger*"
 echo
 
 echo "======== PULL FABRIC BINARIES ========"
-
-MVN_METADATA=$(echo "https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric-$STABLE_VERSION/maven-metadata.xml")
-curl -L "$MVN_METADATA" > maven-metadata.xml
-RELEASE_TAG=$(cat maven-metadata.xml | grep release)
-#COMMIT=$(echo $RELEASE_TAG | awk -F - '{ print $4 }' | cut -d "<" -f1)
-# TODO# Will remove this later after fix the network glitch on the nexus maven-metadata.xml
-: ${RELEASE_COMMIT:=29a7d95}
 echo "------------> RELEASE_COMMIT:" $RELEASE_COMMIT
 OS_VER=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo
