@@ -105,7 +105,7 @@ Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase pass
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex05" with args ["query","myex02_b", "sum", ""]
   Then a user receives an error response of status:500
-  And a user receives an error response of could not find chaincode with name 'myex02_b'
+  And a user receives an error response of chaincode myex02_b not found
 
 @daily
 Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_ex02 and cc_ex05 installed on same channels
