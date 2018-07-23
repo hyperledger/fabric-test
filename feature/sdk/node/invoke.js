@@ -12,7 +12,6 @@ const hfc = require('fabric-client');
 const Peer = require('fabric-client/lib/Peer.js');
 const common = require('./sdk/node/common.js');
 // const common = require('./common.js');
-const EventHub = require('fabric-client/lib/EventHub.js');
 let client = new hfc();
 var channel;
 
@@ -94,31 +93,6 @@ var invoke = function(username, org, chaincode, peerNames, orderer, network_conf
                 });
             }
 
-            let eventhubs = common.newEventHubs(peerNames, org, network_config['network-config'], client);
-            for (let key in eventhubs) {
-                let eh = eventhubs[key];
-                eh.connect();
-
-                let txPromise = new Promise((resolve, reject) => {
-                    let handle = setTimeout(() => {
-                        eh.disconnect();
-                        reject();
-                    }, 30000);
-
-                    eh.registerTxEvent(transactionID, (tx, code) => {
-                        clearTimeout(handle);
-                        eh.unregisterTxEvent(transactionID);
-                        eh.disconnect();
-
-                        if (code !== 'VALID') {
-                            reject();
-                        } else {
-                            resolve();
-                        }
-                    });
-                });
-                eventPromises.push(txPromise);
-            };
             let sendPromise = channel.sendTransaction(request);
             return Promise.all([sendPromise].concat(eventPromises)).then((results) => {
                 return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call

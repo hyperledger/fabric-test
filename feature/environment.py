@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import os
 import subprocess
 import shutil
 import gc
@@ -53,10 +54,11 @@ def after_scenario(context, scenario):
         shutil.rmtree("configs/%s" % context.composition.projectName)
         shutil.rmtree("/tmp/fabric-client-kvs_org1", ignore_errors=True)
         shutil.rmtree("/tmp/fabric-client-kvs_org2", ignore_errors=True)
-        shutil.rmtree("./node_modules", ignore_errors=True)
-        shutil.rmtree("../../../node_modules", ignore_errors=True)
-        subprocess.call(["npm cache clear --force"], shell=True)
-        subprocess.call(["npm i -g npm"], shell=True)
+        if os.path.exists("./node_modules"):
+            shutil.rmtree("./node_modules", ignore_errors=True)
+            shutil.rmtree("../../../node_modules", ignore_errors=True)
+            subprocess.call(["npm cache clear --force"], shell=True)
+            subprocess.call(["npm i -g npm"], shell=True)
         context.composition.decompose()
     elif hasattr(context, 'projectName'):
         shutil.rmtree("configs/%s" % context.projectName)

@@ -897,8 +897,6 @@ def step_impl(context, length):
 @then(u'a user receives a response containing {response} from "{peer}"')
 def containing_impl(context, response, peer):
     assert peer in context.result, "There is no response from {0}".format(peer)
-    print("Type of result: {}".format(type(context.result[peer])))
-    print("result: {}".format(context.result[peer]))
     if type(response) == type(context.result[peer]):
         assert response in context.result[peer], u"Expected response was {0}; received {1}".format(response, context.result[peer])
     else:

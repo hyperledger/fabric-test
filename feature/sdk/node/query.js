@@ -7,7 +7,6 @@ var path = require('path');
 var fs = require('fs');
 var util = require('util');
 var Peer = require('fabric-client/lib/Peer.js');
-var EventHub = require('fabric-client/lib/EventHub.js');
 // const common = require('./common.js');
 const common = require('./sdk/node/common.js');
 var channel;
