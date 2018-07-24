@@ -43,6 +43,11 @@
         "method": "RoundRobin",
         "list": "targetPeers"
     },
+    "invokeCheckOpt": {
+        "peers": "OrgAnchor",
+        "transactions": "LAST",
+        "txNum": "10"
+    },
     "timeoutOpt": {
         "preConfig": "200000",
         "request": "45000",

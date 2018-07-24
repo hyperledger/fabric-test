@@ -742,6 +742,11 @@ The user input file contains configuration parameters including chaincode defini
             "method": "RoundRobin",
             "list": "targetPeers"
         },
+        "invokeCheckOpt": {
+            "peers": "OrgAnchor",
+            "transactions": "LAST",
+            "txNum": "10"
+        },
         "timeoutOpt": {
             "preConfig": "200000",
             "request": "45000",
@@ -855,6 +860,11 @@ where
             "method": "RoundRobin",
             "list": "targetPeers"
         },
+        "invokeCheckOpt": {
+            "peers": "OrgAnchor",
+            "transactions": "LAST",
+            "txNum": "10"
+        },
         "timeoutOpt": {
             "preConfig": "200000",
             "request": "45000",
@@ -899,7 +909,7 @@ where:
 * **chaincodeID**: chaincode ID for the run.
 * **chaincodeVer**: chaincode version.
 * **logLevel**: logging level for the run. Options are ERROR, DEBUG, or INFO.  Set to ERROR for performance test. The default value is ERROR.
-* **invokeCheck**: if this is TRUE, then a query will be executed for the last invoke upon the receiving of the event of the last invoke. This value is ignored for query test.
+* **invokeCheck**: if this is `TRUE`, then queries will be executed for validation based on the setting of `invokeCheckOpt` once the event of all invokes are received. This value is ignored for query test.  Default: `FALSE`
 * **transMode**: transaction mode (applicable for each thread). Note: the per-thread transaction send rates for all modes have an upper bound. For example, if it typically takes 5 ms to get ack responses for sending transactions to peers in your network, then that limits your max effective rate to be 200 tps - such as when you use transMode = Constant with constantOpt.constFreq = any value between 1 - 5 ms. The host hardware cpu and memory resources may also impose limitations, especially when your test uses higher numbers of simultaneous connections and threads competing for those resources.
     * **Simple**: one transaction type and rate only, the subsequent transaction is sent when the response of sending transaction (not the event handler), success or failure, of the previous transaction received
     * **Burst**: various traffic rates, see burstOpt for detailed
@@ -980,6 +990,12 @@ where:
     * **list**: peer failover candidate list, default is `targetPeers`
          * **targetPeers**: the peer candidate list is the same as the peers specified in the `targetPeers`
          * **all**: the peer candidate list is made of all peers listed in the associated service confidential file
+* **invokeCheckOpt**: invokeCheck configuration, valid only if **invokeCheck** is `TRUE`. Note that the validation queries results are written in the PTE log which may take a large amount of space with large requested validation queries.
+    * **peers**: The peers that the validation queries to be sent.  Available options are the same as those of `targetPeers` listed above. Default: same as `targetPeers`.
+    * **transactions**: The transactions for invokes validation. Default: LAST.
+         * **ALL**: all transactions.
+         * **LAST**: last `txNum` transactions.
+    * **txNum**: last txNum transactions to be validated. Valid only if **transactions** is `LAST`. Defailt: 1.
 * **timeoutOpt**: timeout configuration
     * **preConfig**: The timeout for channel creation and join and chaincode installation and instantiation. Unit: ms. Default:200,000.
     * **request**: The timeout for proposal and transaction. Unit: ms. Default:45,000.

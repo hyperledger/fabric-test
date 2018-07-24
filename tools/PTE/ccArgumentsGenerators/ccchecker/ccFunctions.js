@@ -29,9 +29,19 @@ class ccFunctions extends ccFunctionsBase {
 		this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax)/2;
 		if ( this.ccDfnPtr.ccOpt.payLoadType )
 			this.payLoadType = this.ccDfnPtr.ccOpt.payLoadType.toUpperCase();
+
+		// Fixed payload
+		if ( this.payLoadType == 'FIXED' ) {
+			var rlen = this.payLoadMin;
+			var buf = crypto.randomBytes(rlen);
+			for ( var i = 0; i < this.keyPayLoad.length; i++ ) {
+				this.testInvokeArgs[this.keyPayLoad[i]] = buf.toString('hex');
+			}
+		}
+
 		this.arg0 = parseInt(this.keyStart);
 		this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-				this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart, 
+				this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart,
 				parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
 	}
 

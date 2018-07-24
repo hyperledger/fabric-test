@@ -58,7 +58,10 @@ var QDone=0;
 var recHist;
 var buff;
 var ofile;
-var invokeCheck;
+var invokeCheck='FALSE';
+var invokeCheckPeers='NONE';
+var invokeCheckTx='NONE';
+var invokeCheckTxNum=0;
 var chaincode_id;
 var chaincode_ver;
 var tx_id = null;
@@ -151,8 +154,35 @@ if ( (typeof( txCfgPtr.eventOpt ) !== 'undefined') && (typeof( txCfgPtr.eventOpt
     evtTimeout = txCfgPtr.eventOpt.timeout;
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] event type: %s, listener: %s, timeout: %d', Nid, channel.getName(), org, pid, evtType, evtListener, evtTimeout);
-invokeCheck = txCfgPtr.invokeCheck.toUpperCase();
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] invokeCheck: ', Nid, channel.getName(), org, pid, invokeCheck);
+
+if ( txCfgPtr.invokeCheck ) {
+    invokeCheck = txCfgPtr.invokeCheck.toUpperCase();
+    if ( invokeCheck == 'TRUE' ) {
+        if ( txCfgPtr.invokeCheckOpt ) {
+            if ( txCfgPtr.invokeCheckOpt.peers ) {
+                invokeCheckPeers=txCfgPtr.invokeCheckOpt.peers;
+            } else {
+                invokeCheckPeers=txCfgPtr.targetPeers;
+            }
+            if ( txCfgPtr.invokeCheckOpt.transactions ) {
+                invokeCheckTx=txCfgPtr.invokeCheckOpt.transactions;
+            } else {
+                invokeCheckTx='LAST';
+            }
+            if ( txCfgPtr.invokeCheckOpt.txNum ) {
+                invokeCheckTxNum=parseInt(txCfgPtr.invokeCheckOpt.txNum);
+            } else {
+                invokeCheckTxNum=1;
+            }
+        } else {
+            invokeCheckPeers=txCfgPtr.targetPeers;
+            invokeCheckTx='LAST';
+            invokeCheckTxNum=1;
+        }
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] invokeCheck: peers=%s, tx=%s, num=%d', Nid, channel.getName(), org, pid, invokeCheckPeers, invokeCheckTx, invokeCheckTxNum);
+    }
+}
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] invokeCheck: %j', Nid, channel.getName(), org, pid, invokeCheck);
 
 var channelID = uiContent.channelID;
 chaincode_id = uiContent.chaincodeID+channelID;
@@ -1032,6 +1062,44 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] Peers:  ', Nid, channelName, org, pid, channel.getPeers());
 }
 
+// add target peers to channel
+function setTargetPeers() {
+    if (targetPeers == 'ORGANCHOR') {
+        assignThreadOrgAnchorPeer(channel, client, org);
+    } else if (targetPeers == 'ALLANCHORS'){
+        assignThreadAllAnchorPeers(channel,client, org);
+    } else if (targetPeers == 'ORGPEERS'){
+        assignThreadOrgPeer(channel, client, org);
+    } else if (targetPeers == 'ALLPEERS'){
+        assignThreadAllPeers(channel,client, org);
+    } else if (targetPeers == 'LIST'){
+        assignThreadPeerList(channel,client,org);
+    } else if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
+        serviceDiscovery=true;
+        if ((typeof(txCfgPtr.discoveryOpt) !== 'undefined')) {
+            var discoveryOpt = txCfgPtr.discoveryOpt;
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d setTargetPeers] discoveryOpt: %j', Nid, channelName, org, pid, discoveryOpt);
+            if ((typeof( discoveryOpt.localHost ) !== 'undefined')) {
+                if (  discoveryOpt.localHost.toUpperCase() == 'TRUE' ) {
+                    localHost = true;
+                }
+            }
+            if ((typeof( discoveryOpt.initFreq ) !== 'undefined')) {
+                initFreq = parseInt(discoveryOpt.initFreq);
+            }
+        }
+
+        channelAdd1Peer(channel, client, org);       // add one peer to channel to perform service discovery
+        if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
+            initDiscovery();
+        }
+    } else {
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, targetPeers);
+        process.exit(1);
+    }
+
+}
 /*
  *   transactions begin ....
  */
@@ -1094,41 +1162,8 @@ async function execTransMode() {
                         }
                     }
 
-                    if (targetPeers == 'ORGANCHOR') {
-                        assignThreadOrgAnchorPeer(channel, client, org);
-                    } else if (targetPeers == 'ALLANCHORS'){
-                        assignThreadAllAnchorPeers(channel,client, org);
-                    } else if (targetPeers == 'ORGPEERS'){
-                        assignThreadOrgPeer(channel, client, org);
-                    } else if (targetPeers == 'ALLPEERS'){
-                        assignThreadAllPeers(channel,client, org);
-                    } else if (targetPeers == 'LIST'){
-                        assignThreadPeerList(channel,client,org);
-                    } else if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
-                        serviceDiscovery=true;
-                        if ((typeof(txCfgPtr.discoveryOpt) !== 'undefined')) {
-                            var discoveryOpt = txCfgPtr.discoveryOpt;
-                            logger.info('main - discoveryOpt: %j', discoveryOpt);
-                            if ((typeof( discoveryOpt.localHost ) !== 'undefined')) {
-                                if (  discoveryOpt.localHost.toUpperCase() == 'TRUE' ) {
-                                    localHost = true;
-                                }
-                            }
-                            if ((typeof( discoveryOpt.initFreq ) !== 'undefined')) {
-                                initFreq = parseInt(discoveryOpt.initFreq);
-                            }
-                        }
-
-                        channelAdd1Peer(channel, client, org);       // add one peer to channel to perform service discovery
-                        if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
-                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
-                            initDiscovery();
-                        }
-                    } else {
-	                logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, targetPeers);
-                        process.exit(1);
-                    }
-
+                    // add target peers to channel
+                    setTargetPeers();
 
                     if (targetPeers != 'DISCOVERY'){
                         setCurrPeerId(channel, client, org);
@@ -1202,22 +1237,10 @@ function isExecDone(trType){
             tCurr = new Date().getTime();
             console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] setup Timeout: %d ms, curr time: %d', Nid, channelName, org, pid, evtTimeout, tCurr);
             setTimeout(function(){
-                tCurr = new Date().getTime();
-                console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] Timeout: curr time: %d', Nid, channelName, org, pid, tCurr);
-                var remain = Object.keys(txidList).length;
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d', Nid, channelName, org, pid, evtRcvB, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain);
-                if (invokeCheck == 'TRUE') {
-                    ccFuncInst.arg0 = ccFuncInst.keyStart + inv_m - 1;
-                    inv_q = inv_m - 1;
-                    invoke_query_simple(0);
+                postEventProc('isExecDone', inv_m);
+                if ( invokeCheck !== 'TRUE' ) {
+                    process.exit();
                 }
-                if ( remain > 0 ) {
-                    console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
-                }
-
-                evtDisconnect();
-                latency_output();
-                process.exit();
 
             }, evtTimeout);
         }
@@ -1274,6 +1297,43 @@ function isExecDone(trType){
 
 }
 
+// invoke validation
+function invokeValidation(caller) {
+
+    if ( invokeCheck !== 'TRUE' ) {
+        logger.info("[Nid:chan:org:id=%d:%s:%s:%d invokeValidation] caller(%s), invokeCheck: %j", Nid, channelName, org, pid, caller, invokeCheck);
+        return;
+    }
+    logger.info("[Nid:chan:org:id=%d:%s:%s:%d invokeValidation] caller(%s) %s, %s, %d", Nid, channelName, org, pid, caller, invokeCheckPeers, invokeCheckTx, invokeCheckTxNum);
+
+    // reset transaction index
+    if (invokeCheckTx == 'LAST') {
+        if ( invokeCheckTxNum > inv_m ) {
+            ccFuncInst.arg0 = ccFuncInst.keyStart;
+            inv_q = 1;
+        } else {
+            ccFuncInst.arg0 = ccFuncInst.keyStart + inv_m - invokeCheckTxNum;
+            inv_q = inv_m - invokeCheckTxNum;
+        }
+    } else if (invokeCheckTx == 'ALL') {
+        ccFuncInst.arg0 = ccFuncInst.keyStart;
+        inv_q = 0;
+    } else {
+        return;
+    }
+
+    logger.info("[Nid:chan:org:id=%d:%s:%s:%d invokeValidation] invokeCheck: %d, %d", Nid, channelName, org, pid, ccFuncInst.arg0, inv_q);
+    // remove target peers from channel
+    for ( var i = 0; i < peerList.length; i++ ) {
+        channel.removePeer(peerList[i]);
+    }
+    // add target peers to channel
+    setTargetPeers();
+
+    invoke_query_simple(0);
+
+}
+
 
 var txRequest;
 function getTxRequest(results) {
@@ -1283,7 +1343,26 @@ function getTxRequest(results) {
     };
 }
 
-var evtRcvB=0;
+// event var
+var evtRcv=0;
+var evtCount=0;
+
+
+function postEventProc(caller, txnum) {
+
+    tCurr = new Date().getTime();
+    var remain = Object.keys(txidList).length;
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, txnum, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (txnum/(tCurr-tLocal)*1000).toFixed(2));
+    if ( remain > 0 ) {
+        console.log('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, caller, remain, txidList);
+    }
+
+    evtDisconnect();
+    latency_output();
+    invokeValidation('postEventProc');
+
+}
+
 
 function eventRegisterFilteredBlock() {
 
@@ -1307,9 +1386,9 @@ function eventRegisterFilteredBlock() {
                       for (i=0; i<filtered_block.filtered_transactions.length; i++) {
                         var txid = filtered_block.filtered_transactions[i].txid;
                         if ( txidList[txid] ) {
-                            evtRcvB = evtRcvB + 1;
+                            evtRcv = evtRcv + 1;
                             var tend = new Date().getTime();
-                            latency_update(evtRcvB, tend-txidList[txid], latency_event);
+                            latency_update(evtRcv, tend-txidList[txid], latency_event);
                             delete txidList[txid];
                             if (transMode == 'LATENCY') {
                                 isExecDone('Move');
@@ -1323,23 +1402,13 @@ function eventRegisterFilteredBlock() {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] pte-exec: Failure - received filtered_block.number:%d but filtered_transactions is undefined: %j', Nid, channelName, org, pid, filtered_block);
                     }
 
-                    if ( inv_m == evtRcvB  ) {
+                    if ( inv_m == evtRcv  ) {
                         if ( IDone == 1 ) {
-                            tCurr = new Date().getTime();
-                            var remain = Object.keys(txidList).length;
-                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcvB, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcvB/(tCurr-tLocal)*1000).toFixed(2));
-                            if (invokeCheck == 'TRUE') {
-                                ccFuncInst.arg0 = ccFuncInst.keyStart + inv_m - 1;
-                                inv_q = inv_m - 1;
-                                invoke_query_simple(0);
-                            }
-                            if ( remain > 0 ) {
-                                console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
-                            }
-
+                            postEventProc('eventRegisterFilteredBlock', evtRcv);
                             eh.unregisterBlockEvent(block_reg);
-                            evtDisconnect();
-                            latency_output();
+                            if ( invokeCheck !== 'TRUE' ) {
+                                process.exit();
+                            }
                         }
                     }
                     resolve();
@@ -1348,7 +1417,7 @@ function eventRegisterFilteredBlock() {
                 }
             },
             (err) => {
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] inv_m:evtRcvB=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
+                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] inv_m:evtRcv=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
             });
         }).catch((err) => {
             //evtTimeoutCnt++;
@@ -1369,9 +1438,9 @@ function eventRegisterBlock() {
                     var txid = block.data.data[i].payload.header.channel_header.tx_id;
                     //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] tx id= %s', Nid, channelName, org, pid, txid);
                     if ( txidList[txid] ) {
-                        evtRcvB = evtRcvB + 1;
+                        evtRcv = evtRcv + 1;
                         var tend = new Date().getTime();
-                        latency_update(evtRcvB, tend-txidList[txid], latency_event);
+                        latency_update(evtRcv, tend-txidList[txid], latency_event);
                         delete txidList[txid];
                         if (transMode == 'LATENCY') {
                             isExecDone('Move');
@@ -1382,28 +1451,18 @@ function eventRegisterBlock() {
                     }
                 }
 
-                if ( inv_m == evtRcvB  ) {
+                if ( inv_m == evtRcv  ) {
                     if ( IDone == 1 ) {
-                        tCurr = new Date().getTime();
-                        var remain = Object.keys(txidList).length;
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcvB, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcvB/(tCurr-tLocal)*1000).toFixed(2));
-                        if (invokeCheck == 'TRUE') {
-                            ccFuncInst.arg0 = ccFuncInst.keyStart + inv_m - 1;
-                            inv_q = inv_m - 1;
-                            invoke_query_simple(0);
+                        postEventProc('eventRegisterBlock', evtRcv);
+                        if ( invokeCheck !== 'TRUE' ) {
+                            process.exit();
                         }
-                        if ( remain > 0 ) {
-                            console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
-                        }
-
-                        evtDisconnect();
-                        latency_output();
                     }
                 }
                     resolve();
             },
             (err) => {
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcvB=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
+                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcv=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
             });
         }).catch((err) => {
             //evtTimeoutCnt++;
@@ -1413,9 +1472,6 @@ function eventRegisterBlock() {
     });
 
 }
-
-var evtRcv=0;
-var evtCount=0;
 
 function eventRegister(tx) {
 
@@ -1452,21 +1508,10 @@ function eventRegister(tx) {
                         reject();
                     } else {
                         if ( ( IDone == 1 ) && ( inv_m == evtRcv ) ) {
-                            tCurr = new Date().getTime();
-                            var remain = Object.keys(txidList).length;
-                            logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcv, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcv/(tCurr-tLocal)*1000).toFixed(2));
-                            if (invokeCheck == 'TRUE') {
-                                ccFuncInst.arg0 = ccFuncInst.keyStart + inv_m - 1;
-                                inv_q = inv_m - 1;
-                                invoke_query_simple(0);
+                            postEventProc('eventRegister', evtRcv);
+                            if ( invokeCheck !== 'TRUE' ) {
+                                process.exit();
                             }
-                            if ( remain > 0 ) {
-                                console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, txidList);
-                            }
-
-                            evtDisconnect();
-                            resolve();
-                            latency_output();
                         }
                     }
                     }
@@ -1586,6 +1631,11 @@ function invoke_query_simple(freq) {
     channel.queryByChaincode(request_query)
     .then(
         function(response_payloads) {
+            if (response_payloads) {
+                for(let j = 0; j < response_payloads.length; j++) {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] query[%d] result[%d]:', Nid, channelName, org, pid, inv_q, j,response_payloads[j].toString('utf8'));
+                }
+            }
             isExecDone('Query');
             if ( QDone != 1 ) {
                 setTimeout(function(){
@@ -1974,14 +2024,6 @@ function execModeConstant() {
             recHist = txCfgPtr.constantOpt.recHist.toUpperCase();
         }
         logger.info('recHist: ', recHist);
-
-        if ( ccFuncInst.payLoadType == 'FIXED' ) {
-            var rlen = ccFuncInst.payLoadMin;
-            var buf = String(PTEid).repeat(rlen).substring(0, rlen);
-            for ( i = 0; i < ccFuncInst.keyPayLoad.length; i++ ) {
-                ccFuncInst.testInvokeArgs[ccFuncInst.keyPayLoad[i]] = buf;
-            }
-        }
 
         tLocal = new Date().getTime();
         if ( runDur > 0 ) {
