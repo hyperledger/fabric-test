@@ -67,9 +67,10 @@ fabric:
 	if [ ! -d "$(FABRIC_DIR)" ]; then \
 		echo "Clone FABRIC REPO"; \
 		cd $(HYPERLEDGER_DIR); \
-		git clone $(FABRIC) $(FABRIC_DIR); \
+		git clone --single-branch -b master $(FABRIC) $(FABRIC_DIR); \
+	else \
+		cd $(FABRIC_DIR) && git pull $(FABRIC); \
 	fi
-	cd $(FABRIC_DIR) && git pull $(FABRIC)
 
 .PHONY: docker-images
 docker-images:
@@ -83,9 +84,10 @@ ca:
 	if [ ! -d "$(CA_DIR)" ]; then \
 		echo "Clone CA REPO"; \
 		cd $(HYPERLEDGER_DIR); \
-		git clone $(FABRIC_CA) $(CA_DIR); \
+		git clone --single-branch -b master $(FABRIC_CA) $(CA_DIR); \
+	else \
+		cd $(CA_DIR) && git pull $(FABRIC_CA); \
 	fi
-	cd $(CA_DIR) && git pull $(FABRIC_CA)
 
 .PHONY: smoke-tests
 smoke-tests:
