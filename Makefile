@@ -17,6 +17,8 @@
 #   - daily-tests   - runs Daily Test Suite.
 #   - pull-images   - pull the images and binaries from Nexus.
 #   - svt-daily-pte-tests - pulls the images, binaries from Nexus and runs the PTE Performance tests.
+#   - svt-daily-ote-tests - pulls the images, runs the OTE test suite.
+#   - svt-daily-lte-tests - pulls the images, runs the LTE test suite.
 #   - git-latest    - init git submodules to latest available commit.
 #   - git-init      - init git submodules.
 #   - pre-setup     - installs node, govendor and behave pre-requisites.
@@ -102,6 +104,14 @@ pull-images:
 .PHONY: svt-daily-pte-tests
 svt-daily-pte-tests: pull-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
+
+.PHONY: svt-daily-ote-tests
+svt-daily-ote-tests: pull-images
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runOteTestSuite.sh
+
+.PHONY: svt-daily-lte-tests
+svt-daily-lte-tests: pull-images
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
 
 .PHONY: svt-daily
 svt-daily: pull-images daily-tests
