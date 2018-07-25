@@ -47,6 +47,7 @@ ci-smoke: git-init git-latest fabric ca clean pre-setup docker-images smoke-test
 
 .PHONY: git-latest
 git-latest:
+	@git submodule foreach git checkout master
 	@git submodule foreach git pull origin master
 
 .PHONY: git-init
