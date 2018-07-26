@@ -62,6 +62,7 @@ echo
 
 echo "======== PULL FABRIC BINARIES ========"
 echo "------------> RELEASE_COMMIT:" $RELEASE_COMMIT
+RELEASE_COMMIT=${RELEASE_COMMIT:0:7}
 OS_VER=$(uname -s|tr '[:upper:]' '[:lower:]')
 echo
 rm -rf .build && mkdir -p .build && cd .build
