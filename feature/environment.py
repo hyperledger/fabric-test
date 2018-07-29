@@ -8,6 +8,7 @@ import os
 import subprocess
 import shutil
 import gc
+import psutil
 from steps.endorser_util import CLIInterface, ToolInterface
 
 
@@ -34,6 +35,10 @@ def getLogFiles(containers, fileSuffix):
 
 
 def after_scenario(context, scenario):
+    # Display memory usage before tearing down the network
+    mem = psutil.virtual_memory()
+    print("Memory Info Before Network Teardown:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
+
     getLogs = context.config.userdata.get("logs", "N")
     if getLogs.lower() == "force" or (scenario.status == "failed" and getLogs.lower() == "y" and "compose_containers" in context):
         print("Collecting container logs for Scenario '{}'".format(scenario.name))
@@ -63,12 +68,19 @@ def after_scenario(context, scenario):
     elif hasattr(context, 'projectName'):
         shutil.rmtree("configs/%s" % context.projectName)
 
+    # Print memory information after every scenario
+    memory = subprocess.check_output(["df", "-h"], shell=True)
+    print("\nMemory Usage Info:\n{}\n".format(memory))
+    mem = psutil.virtual_memory()
+    print("*** Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
+
     # Clean up memory in between scenarios, just in case
     if hasattr(context, "random_key"):
         del context.random_key
+    if hasattr(context, "composition"):
+        del context.composition
     gc.collect()
 
-# stop any running peer that could get in the way before starting the tests
 def before_all(context):
     context.interface = CLIInterface()
     context.remote = False
@@ -77,6 +89,9 @@ def before_all(context):
         context.remote = True
         context.interface = ToolInterface(context)
 
-# stop any running peer that could get in the way before starting the tests
+    mem = psutil.virtual_memory()
+    print("Starting Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
+
 def after_all(context):
-    print("context.failed = {0}".format(context.failed))
+    mem = psutil.virtual_memory()
+    print("\nEnding Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}".format(mem.free, mem.used, mem.percent))

@@ -49,6 +49,7 @@ pip install pykafka
 pip install requests
 pip install pyexecjs
 pip install cython
+pip install psutil
 # commenting out until we can get started using Java SDK in test runs
 #pip install pyjnius
 
