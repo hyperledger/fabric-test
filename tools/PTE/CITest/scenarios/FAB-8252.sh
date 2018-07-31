@@ -23,7 +23,7 @@ indexFile2Field="index-2field.json"
 indexFile4Field="index-4field.json"
 
 #### Launch network
-./test_driver.sh -n -m FAB-9575-4i -p -c marbles02 >& ../Logs/FAB-8251-4i-precfg.log
+./test_driver.sh -n -m FAB-9575-4i -p -c marbles02 >& ../Logs/FAB-8252-4i-precfg.log
 
 #### synch-up ledger
 ./test_driver.sh -t marbles02-4q
@@ -34,18 +34,19 @@ rm -f ../Logs/marbles02-4q*.log
 ./test_driver.sh -t FAB-8694-4i
 
 #### Put the index files in the chaincode installation folder prior to upgrade
+#### note that this test reuses the index files in FAB-8251
 cp ../FAB-8251/indexes/$indexFile2Field $indexDir/
 cp ../FAB-8251/indexes/$indexFile4Field $indexDir/
 
 #### install and upgrade cc, which will force index builds for both indexes
-#### note that only the first one will get used for the 2-field queries below
-./test_driver.sh -m FAB-8251/upgrade  -u marbles02 >& ../Logs/FAB-8251-4i-precfg.log &
+#### note that only the second one will get used for the 4-field queries below
+./test_driver.sh -m FAB-8251/upgrade  -u marbles02 >& ../Logs/FAB-8252-4i-precfg.log &
 
-#### execute testcase FAB-8251: 1M (4x250000) invokes and 2M (4x500000) 2-field queries simultaneously
-./test_driver.sh -t FAB-8251
-./get_peerStats.sh -r FAB-8251 -p peer0.org1.example.com peer0.org2.example.com -c testorgschannel1 testorgschannel2 -n $PREFIX -o $CWD
+#### execute testcase FAB-9575-4i: 1M (4x250000) invokes and 2M (4x500000) 4-field queries simultaneously
+./test_driver.sh -t FAB-9575-4i
+./get_peerStats.sh -r FAB-9575-4i -p peer0.org1.example.com peer0.org2.example.com -c testorgschannel1 testorgschannel2 -n $PREFIX -o $CWD -v
 
 #### return the original index files
-rm -f $indexDir/$indexFile1st $indexDir/$indexFile2nd
+rm -f $indexDir/$indexFile2Field $indexDir/$indexFile4Field
 mv $backupDir/*.* $indexDir/
 rmdir $backupDir
