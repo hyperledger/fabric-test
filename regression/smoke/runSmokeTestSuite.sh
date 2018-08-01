@@ -12,6 +12,9 @@ cd ../../feature
 behave --junit --junit-directory ../regression/smoke/. --tags=-skip --tags=smoke -k -D logs=y
 cd -
 
+echo "======== Ledger component performance tests...========"
+py.test -v --junitxml results_ledger_lte_smoke.xml ledger_lte_smoke.py
+
 echo "======== Performance Test using PTE and NL tools...========"
 cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE
 npm config set prefix ~/npm
