@@ -11,6 +11,7 @@ import { testlists } from '../testlists'
 })
 export class LTEComponent implements OnInit {
   title = 'LTE Metrics'
+  description = "The Ledger Traffic Engine (LTE) tool is a test harness that engages the Ledger APIs and benchmarks the performance of the Ledger component. It contains the framework for creating and managing chains, submitting transactions, creating blocks, and commiting blocks. It conducts benchmark tests for insert and read-write transactions (transactions per second) and contains scripts for launching the benchmarks. An insert benchmark followed by a readwrite benchmark on the same dataset is considered to constitute a single test-run."
 
   //// VARIABLES
   objectkeys = Object.keys
@@ -85,36 +86,34 @@ export class LTEComponent implements OnInit {
 
   getData(build) {
     // Fetches data of all tests from server
-    fetch(`${serverurl}/lte/${build}` ,{
-       method:'GET',
-     })
-     .then(res => res.json())
-     .then(res => {
-        if (res.success == true) {
-          for (let test of this.selectedOptions) {
-            this.tests[test].fab = test
-            this.tests[test].status = res['data'][test]['status']
-            this.tests[test].tps = res['data'][test]['tps'] != null ? parseFloat(res['data'][test]['tps']).toFixed(2) : res['data'][test]['tps']
-            this.tests[test].txnum = res['data'][test]['txnum']
-            this.tests[test].time = res['data'][test]['time'] == null ? null : res['data'][test]['time'] * 1000 + " ms"
+    for (let fabnum of this.selectedOptions) {
+      fetch(`${serverurl}/lte/${fabnum}/${build}` ,{
+         method:'GET',
+       })
+      .then(res => res.json())
+      .then(res => {
+          if (res.success == true) {
+              this.tests[fabnum].fab = fabnum
+              this.tests[fabnum].status = res['status']
+              this.tests[fabnum].tps = res['tps'] != null ? parseFloat(res['tps']).toFixed(2) : res['tps']
+              this.tests[fabnum].txnum = res['txnum']
+              this.tests[fabnum].time = res['time'] == null ? null : res['time'] * 1000 + " ms"
           }
-        }
-        else {
-          for (let test of this.selectedOptions) {
-            this.tests[test].fab = test
-            this.tests[test].status = null
-            this.tests[test].tps = null
-            this.tests[test].txnum = null
-            this.tests[test].time = null
+          else {
+              this.tests[fabnum].fab = fabnum
+              this.tests[fabnum].status = null
+              this.tests[fabnum].tps = null
+              this.tests[fabnum].txnum = null
+              this.tests[fabnum].time = null
           }
-        }
-        this.loadStatuses()
-        this.diameter_day = 0
+          this.loadStatuses()
+          this.diameter_day = 0
+        })
+      .catch(err => {
+          console.log("Logs may not be available yet!")
+          throw err
       })
-     .catch(err => {
-         console.log("Logs may not be available yet!")
-         throw err
-     })
+    }
   }
 
   loadCharts(startdate, enddate) {
@@ -131,6 +130,7 @@ export class LTEComponent implements OnInit {
     this.ltechartService.loadLineChart(startdate, enddate, this.selectedOptions)
     .then(([line, diffline]) => {
       for (let i = 0; i < line.dataset.length; i++) {
+        this.tests[line.dataset[i].seriesname.split(" ")[0]].values = []
         for (let datapoint of line.dataset[i].data) {
           this.tests[line.dataset[i].seriesname.split(" ")[0]].values.push(datapoint.value)
           datapoint.value = parseFloat(datapoint.value).toFixed(2)
@@ -153,17 +153,17 @@ export class LTEComponent implements OnInit {
   loadStats() {
     // Calculates and stores statistics
     for (let fabnum of this.selectedOptions) {
-      let i_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)})),
-          i_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)})),
-          i_mean = (parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return parseFloat(a)+parseFloat(b)})) / this.tests[fabnum].values.length)
+      let i_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)}, 0)),
+          i_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)}, 0)),
+          i_mean = (parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return parseFloat(a)+parseFloat(b)}, 0)) / this.tests[fabnum].values.length)
       this.tests[fabnum].max = i_max.toFixed(2)
       this.tests[fabnum].min = i_min.toFixed(2)
       this.tests[fabnum].mean = i_mean.toFixed(2)
       this.tests[fabnum].prange = (((i_min - i_mean)/i_mean) * 100).toFixed(2) + "% ~ +" + (((i_max - i_mean)/i_mean) * 100).toFixed(2) + "%"
 
-      let q_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)})),
-          q_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)})),
-          q_mean = (parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return parseFloat(a)+parseFloat(b)})) / this.tests[fabnum].values.length)
+      let q_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)}, 0)),
+          q_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)}, 0)),
+          q_mean = (parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return parseFloat(a)+parseFloat(b)}, 0)) / this.tests[fabnum].values.length)
 
       this.tests[fabnum].max = q_max.toFixed(2)
       this.tests[fabnum].min = q_min.toFixed(2)
@@ -193,29 +193,8 @@ export class LTEComponent implements OnInit {
     this.diameter = 50
     this.loadTests()
     this.updateDate()
-    // Checks if end date is valid i.e. today's test is done and logs are available
-    fetch(`${serverurl}/build/lte`, {method:'GET'})
-    .then(res => res.json())
-    .then(res => {
-      let endbuild = res[this.dateselectService.convertDateFormat(enddate)]
-      this.dateselectService.checkEndDate(`${serverurl}/lte/${endbuild}`)
-      .then(bool => {
-        if (bool == true) {
-          this.loadCharts(startdate, enddate)
-        }
-        else {
-          // If logs unavailable, set end date to previous day
-          let lastday = new Date(enddate)
-          let prevday = new Date(lastday.setDate(lastday.getDate() - 1))
-          this.enddateinput.nativeElement.value = [prevday.getMonth()+1, prevday.getDate(), prevday.getFullYear()].join('/')
-          this.loadCharts(startdate, this.enddateinput.nativeElement.value)
-        }
-      })
-    })
-    .catch(err => {
-      this.diameter = 0
-      throw err
-    })
+    this.loadCharts(startdate, enddate)
+    this.diameter = 0
   }
 
   ngOnInit() {

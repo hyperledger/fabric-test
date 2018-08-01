@@ -1,5 +1,5 @@
 <div class="metric-container">
-	<h1 class="engine-title">{{title}}</h1>
+	<h1 class="engine-title" matTooltip="{{ description }}" matTooltipPosition="above">{{title}}</h1>
 	<div class="testselect">
 		<mat-form-field class="testselect-dropdown">
 		  <mat-select [(ngModel)]="selectedOptions" placeholder="Tests to display" multiple disableRipple #chosentests (selectionChange)="loadAll(startdateinput.value, enddateinput.value)">

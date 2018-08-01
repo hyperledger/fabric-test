@@ -11,6 +11,7 @@ import { testlists } from '../testlists'
 })
 export class OTEComponent implements OnInit {
   title = 'OTE Metrics'
+  description = "The Orderer Traffic Engine (OTE) tool tests the operation of a Hyperledger Fabric ordering service. The focus is strictly on the orderers themselves. No peers, endorsement, validations, or committing to ledgers are involved. Transactions are sent to every channel through every orderer, and verifies that the correct number of transactions and blocks are delivered."
 
   //// VARIABLES
 
@@ -147,6 +148,7 @@ export class OTEComponent implements OnInit {
     this.otechartService.loadLineChart(startdate, enddate, this.selectedOptions)
     .then(([line, diffline]) => {
       for (let i = 0; i < line.dataset.length; i++) {
+        this.tests[line.dataset[i].seriesname.split(" ")[0]].values = []
         for (let datapoint of line.dataset[i].data) {
           this.tests[line.dataset[i].seriesname.split(" ")[0]].values.push(datapoint.value)
           datapoint.value = parseFloat(datapoint.value).toFixed(2)
@@ -170,16 +172,16 @@ export class OTEComponent implements OnInit {
     // Calculates and stores statistics
 
     for (let fabnum of this.selectedOptions) {
-      let i_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)})),
-          i_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)})),
+      let i_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)},0)),
+          i_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)},0)),
           i_mean = (parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return parseFloat(a)+parseFloat(b)})) / this.tests[fabnum].values.length)
       this.tests[fabnum].max = i_max.toFixed(2)
       this.tests[fabnum].min = i_min.toFixed(2)
       this.tests[fabnum].mean = i_mean.toFixed(2)
       this.tests[fabnum].prange = (((i_min - i_mean)/i_mean) * 100).toFixed(2) + "% ~ +" + (((i_max - i_mean)/i_mean) * 100).toFixed(2) + "%"
 
-      let q_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)})),
-          q_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)})),
+      let q_max = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.max(a,b)},0)),
+          q_min = parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return Math.min(a,b)},0)),
           q_mean = (parseFloat(this.tests[fabnum].values.reduce(function(a,b) {return parseFloat(a)+parseFloat(b)})) / this.tests[fabnum].values.length)
 
       this.tests[fabnum].max = q_max.toFixed(2)
@@ -210,29 +212,9 @@ export class OTEComponent implements OnInit {
     this.diameter = 50
     this.loadTests()
     this.updateDate()
+    this.loadCharts(startdate, enddate)
     // Checks if end date is valid i.e. today's test is done and logs are available
-
-    fetch(`${serverurl}/build/ote`, {method:'GET'})
-    .then(res => res.json())
-    .then(res => {
-      let endbuild = res[this.dateselectService.convertDateFormat(enddate)]
-      this.dateselectService.checkEndDate(`${serverurl}/ote/${this.test_toadd[0]}/${endbuild}`)
-      .then(bool => {
-        if (bool == true) {
-          this.loadCharts(startdate, enddate)  
-        }
-        else {
-          // If logs unavailable, set end date to previous day
-          let lastday = new Date(enddate)
-          let prevday = new Date(lastday.setDate(lastday.getDate() - 1))
-          this.enddateinput.nativeElement.value = [prevday.getMonth()+1, prevday.getDate(), prevday.getFullYear()].join('/')
-          this.loadCharts(startdate, this.enddateinput.nativeElement.value)
-        }
-      })
-    })
-    .catch(err => {
-      this.diameter = 0
-    })
+    this.diameter = 0
   }
 
   ngOnInit() {

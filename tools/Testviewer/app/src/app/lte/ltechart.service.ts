@@ -34,15 +34,15 @@ export class LtechartService {
       let promisearray = []
       for (let category of categories) {
       	// Fills promisearray with fetch of each date in category for current fabnum
-        promisearray.push(fetch(`${serverurl}/lte/${res[category["label"]]}` ,{
+        promisearray.push(fetch(`${serverurl}/lte/${fabnum}/${res[category["label"]]}` ,{
            method:'GET',
          })
         .then(res => res.json())
         .then(res => {
         	let value;
-          	if (res['data'] != null) {
+          	if (res != null) {
           		if (res.success) {
-          			value = res['data'][fabnum]['tps']
+          			value = res['tps']
           		}
 				data_lte.push({
 					"value":value,
@@ -83,7 +83,7 @@ export class LtechartService {
 	        let dataSource_line = {
 		        "chart": {
 		            "caption": "LTE Metrics",
-		            "subCaption": "TPS",
+		            "subCaption": "Transactions Per Second",
 		            "numberprefix": "",
 		            "theme": "fint",
 		            "baseFontSize": "12",

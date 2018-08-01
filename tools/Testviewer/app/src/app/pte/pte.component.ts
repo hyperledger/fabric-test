@@ -11,6 +11,7 @@ import { testlists } from '../testlists'
 })
 export class PTEComponent implements OnInit {
   title = 'PTE Metrics';
+  description = 'The Performance Traffic Engine (PTE) uses SDKs to interact with Hyperledger Fabric networks by sending requests to and receiving responses from one or more networks. PTE is designed to handle the complexity of the Hyperledger Fabric network (locations and number of network, number of channels, organizations, peers, orderers etc.) and support various test cases (various chaincodes, transaction number, duration, mode, type, and payload size etc.)'
 
   //// VARIABLES
 
@@ -94,6 +95,7 @@ export class PTEComponent implements OnInit {
   }
 
   updateDate() {
+    // Updates single-day data section
     this.diameter_day = 50
     this.dateselectService.updateChosenDate(this.dateinput.nativeElement.value, 'pte')
     .then(obj => {
@@ -159,6 +161,9 @@ export class PTEComponent implements OnInit {
     this.ptechartService.loadLineChart(startdate, enddate, this.selectedOptions)
     .then(([invokeline, queryline, diffinvokeline, diffqueryline]) => {
       for (let i = 0; i < invokeline.dataset.length; i++) {
+        this.tests[invokeline.dataset[i].seriesname.split(" ")[0]].i.values = []
+        this.tests[queryline.dataset[i].seriesname.split(" ")[0]].q.values = []
+
         for (let datapoint of invokeline.dataset[i].data) {
           this.tests[invokeline.dataset[i].seriesname.split(" ")[0]].i.values.push(datapoint.value)
           datapoint.value = parseFloat(datapoint.value).toFixed(2)
@@ -173,13 +178,13 @@ export class PTEComponent implements OnInit {
         for (let datapoint of diffqueryline.dataset[i].data) {
           datapoint.value = parseFloat(datapoint.value).toFixed(2)
         }
-        this.diameter = 0
       }
       this.dataSource_invoke_line = invokeline
       this.dataSource_query_line = queryline
       this.dataSource_differentialinvoke_line = diffinvokeline
       this.dataSource_differentialquery_line = diffqueryline
       this.loadStats();
+      this.diameter = 0
     })
     .catch(err => {
       this.diameter = 0
@@ -214,30 +219,8 @@ export class PTEComponent implements OnInit {
     this.diameter = 50
     this.loadTests()
     this.updateDate()
-    // Checks if end date is valid i.e. today's test is done and logs are available
-
-    fetch(`${serverurl}/build/pte`, {method:'GET'})
-    .then(res => res.json())
-    .then(res => {
-      let endbuild = res[this.dateselectService.convertDateFormat(enddate)]
-      this.dateselectService.checkEndDate(`${serverurl}/pte/${this.test_toadd[0]}/${endbuild}`)
-      .then(bool => {
-        if (bool == true) {
-          this.loadCharts(startdate, enddate)
-        }
-        else {
-          // If logs unavailable, set end date to previous day
-          let lastday = new Date(enddate)
-          let prevday = new Date(lastday.setDate(lastday.getDate() - 1))
-          this.enddateinput.nativeElement.value = [prevday.getMonth()+1, prevday.getDate(), prevday.getFullYear()].join('/')
-          this.loadCharts(startdate, this.enddateinput.nativeElement.value)
-        }
-      })
-    })
-    .catch(err => {
-      this.diameter = 0
-      throw err
-    })
+    this.loadCharts(startdate, enddate)
+    this.diameter = 0
   }
 
   ngOnInit() {

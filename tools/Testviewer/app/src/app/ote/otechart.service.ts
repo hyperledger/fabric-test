@@ -80,7 +80,7 @@ export class OtechartService {
 			let dataSource_line = {
 			    "chart": {
 			        "caption": "OTE Metrics",
-			        "subCaption": "TPS",
+			        "subCaption": "Transactions Per Second",
 			        "numberprefix": "",
 			        "theme": "fint",
 			        "baseFontSize": "12",

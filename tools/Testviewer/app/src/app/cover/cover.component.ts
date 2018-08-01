@@ -94,7 +94,6 @@ export class CoverComponent implements OnInit {
     else {
       this.alertmessage.nativeElement.innerHTML = ""
     }
-
     this.diameter = 50
   	this.loadPTE(startdate, enddate)
   	this.loadOTE(startdate, enddate)

@@ -107,7 +107,7 @@ export class PtechartService {
 	        let dataSource_invoke_line = {
 	            "chart": {
 	                "caption": "PTE Invoke Metrics",
-	                "subCaption": "TPS",
+	                "subCaption": "Transactions Per Second",
 	                "numberprefix": "",
 	                "theme": "fint",
 	                "baseFontSize": "12",
@@ -121,7 +121,7 @@ export class PtechartService {
 	        let dataSource_query_line = {
 	            "chart": {
 	                "caption": "PTE Query Metrics",
-	                "subCaption": "TPS",
+	                "subCaption": "Transactions Per Second",
 	                "numberprefix": "",
 	                "theme": "fint",
 	                "baseFontSize": "12",

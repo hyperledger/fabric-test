@@ -218,7 +218,7 @@ const getOTE = (req,res) => {
 
 const getLTE = (req,res) => {
 	// Fetches LTE metrics based on date.
-
+	const fab = req.params.fab
 	const buildnum = req.params.build
 
 	if (buildnum == "undefined") {
@@ -243,7 +243,6 @@ const getLTE = (req,res) => {
 	// return
 	////
 
-
 	// check if build log exists
 	request(`https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-svt-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments`, { json: false }, (err, response, body) => {
 		// Check if log file exists
@@ -258,25 +257,23 @@ const getLTE = (req,res) => {
 				columns= body[0].split("\n")[1].split(",")
 				time_idx = columns.indexOf(" Time_Spent(s)")
 				txnum_idx = columns.indexOf(" NumTotalTx")
-				data = {}
-				for (let fab of fabs) {
-					data[fab] = {};
+				result_data = {}
+
+				fabidx = fabs.indexOf(fab)
+				if (body[fabidx] == null || response.body.includes("404 Not Found")) {
+					result_data['status'] = 'FAILED'
 				}
-				for (i = 0; i < fabs.length; i++) {
-					if (body[i] == null || response.body.includes("404 Not Found")) {
-						data[fabs[i]]['status'] = 'FAILED'
-						continue
-					}
-					else {
-						data[fabs[i]]['status'] = 'PASSED'
-					}
-					line1 = body[i].split("\n")[2].split(",")
-					tps = line1[txnum_idx] / line1[time_idx]
-					data[fabs[i]]['tps'] = tps
-					data[fabs[i]]['txnum'] = line1[txnum_idx]
-					data[fabs[i]]['time'] = line1[time_idx]
+				else {
+					result_data['status'] = 'PASSED'
 				}
-				res.send({'success':true,'data':data})
+				line1 = body[fabidx].split("\n")[2].split(",")
+				tps = line1[txnum_idx] / line1[time_idx]
+				result_data['tps'] = tps
+				result_data['txnum'] = line1[txnum_idx]
+				result_data['time'] = line1[time_idx]
+				result_data['success'] = true
+
+				res.send(result_data)
 			})
 		}
 	})
@@ -285,6 +282,6 @@ const getLTE = (req,res) => {
 module.exports = (app) => {
 	app.get("/pte/:fab/:build", getPTE)
 	app.get("/ote/:fab/:build", getOTE)
-	app.get("/lte/:build", getLTE)
+	app.get("/lte/:fab/:build", getLTE)
 	app.get("/build/:test", fetchBuild)
 }

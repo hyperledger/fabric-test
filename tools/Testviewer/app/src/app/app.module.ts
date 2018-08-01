@@ -27,6 +27,7 @@ import {MatSelectModule} from '@angular/material/select';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatToolbarModule} from '@angular/material/toolbar';
 import {MatDividerModule} from '@angular/material/divider';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 export const routes: Routes = [
 	{
@@ -65,7 +66,8 @@ export const routes: Routes = [
     MatSelectModule,
     MatProgressSpinnerModule,
     MatToolbarModule,
-    MatDividerModule
+    MatDividerModule,
+    MatTooltipModule
   ],
   providers: [],
   bootstrap: [AppComponent]

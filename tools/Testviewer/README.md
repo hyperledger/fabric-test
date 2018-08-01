@@ -17,7 +17,7 @@ To build your own Testviewer image rather than using the one provided, run the f
 ```
 make test-viewer
 ```
-This creates an image with the tag `hyperledger/fabric-testviewer`. Change directory to `Testviewer` and replace the `image` fields in `docker-compose.yaml` and `k8fabricreport.yaml` with this tag.
+This creates an image with the tag `hyperledger/fabric-testviewer`. Change directory to `fabric-test/tools/Testviewer` and replace the `image` fields in `docker-compose.yaml` and `k8fabricreport.yaml` with this tag.
 
 
 
@@ -25,7 +25,7 @@ This creates an image with the tag `hyperledger/fabric-testviewer`. Change direc
 
 ### Alternative 1: Running Locally without Docker
 
-LTS versions of Node.js and npm are needed. This project uses node@v8.11.2 and npm@6.1.0.
+1. LTS versions of Node.js and npm are needed. This project uses node@v8.11.2 and npm@6.1.0.
 
 Run the following commands to install Node.js and npm. There are no directory restrictions on where these need to be run.
 
@@ -35,7 +35,7 @@ nvm install node@latest
 npm install npm@6.1.0
 ```
 
-Then, make sure node modules are installed correctly. Run the following commands from the Testviewer directory.
+2. Then, make sure node modules are installed correctly. Run the following commands from the Testviewer directory.
 
 ```
 cd server
@@ -44,9 +44,9 @@ cd ../app
 npm install
 ```
 
-From the Testviewer directory, open `config.ts`. Make sure `LOCAL` is set to `true`.
+3. From the Testviewer directory, open `config.ts`. Make sure `LOCAL` is set to `true`.
 
-Once the above steps are done, the application and server are ready to run. From the Testviewer directory, run the following commands.
+4. Once the above steps are done, the application and server are ready to run. From the Testviewer directory, run the following commands.
 
 ```
 node server/index.js
@@ -54,26 +54,28 @@ cd app
 npm start
 ```
 
-(OPTIONAL) The app runs on port 4200 and the server runs on port 3000 by default, but you can use custom port numbers.
+5. (OPTIONAL) The app runs on port 4200 and the server runs on port 3000 by default, but you can use custom port numbers.
 - To run the app on a custom port, run `npm start --port <INSERT PORT NUMBER HERE>`.
 - To run the server on a custom port, change the `LOCAL_PORT` constant in `config.ts` and the `port` constant in `server/index.js` to the desired port number before running `node server/index.js`.
 
 
 ### Alternative 2: Running Locally with Docker
 
-[Docker](https://docs.docker.com/) needs to first be installed.
+1. [Docker](https://docs.docker.com/) needs to first be installed.
 
-The necessary `Dockerfile` and `docker-compose.yaml` files are available in the Testviewer directory.
+2. The necessary `Dockerfile` and `docker-compose.yaml` files are available in the Testviewer directory.
 
-Run the following command from the Testviewer directory with the desired image name to build an image.
+By default, the Docker image is pulled from Nexus.
+
+3. To create a custom image Run the following command from the Testviewer directory with the desired image name to build an image.
 
 ```
 docker build -t <insert image name here> .
 ```
 
-Edit `docker-compose.yaml` so that the `image` field under `server` and `app` containers is the image name you chose when it was built.
+4. Edit `docker-compose.yaml` so that the `image` field under `server` and `app` containers is the image name you chose when it was built.
 
-Then, run the following command to start the `server` and `app` containers.
+5. Then, run the following command to start the `server` and `app` containers.
 
 ```
 docker-compose up
@@ -94,19 +96,19 @@ app
 
 ### Alternative 3: Running Remotely on Kubernetes cluster
 
-IBM Cloud CLI and Kubernetes CLI need to first be set up along with your Kubernetes cluster. Make sure the KUBECONFIG environment variable on your machine is correctly set up as well.
+1. IBM Cloud CLI and Kubernetes CLI need to first be set up along with your Kubernetes cluster. Make sure the KUBECONFIG environment variable on your machine is correctly set up as well.
 
-The necessary `k8fabricreport.yaml` and `k8reportservice.yaml` files are available in the Testviewer directory.
+2. The necessary `k8fabricreport.yaml` and `k8reportservice.yaml` files are available in the Testviewer directory.
 
-Find the public IP of the node you wish to use from your cluster. The public IP is availble under the "Worker Nodes" tab on the cluster's page on Bluemix.
+3. Find the public IP of the node you wish to use from your cluster. The public IP is availble under the "Worker Nodes" tab on the cluster's page on Bluemix.
 
-Edit `config.ts` in the Testviewer directory. LOCAL should be set to false, and REMOTE_IP should be the public IP of the node you wish to use. REMOTE_PORT should be the NodePort you wish to use to access the server (NOT the application). The application uses REMOTE_IP and REMOTE_PORT to use the server's API.
+4. Edit `config.ts` in the Testviewer directory. LOCAL should be set to false, and REMOTE_IP should be the public IP of the node you wish to use. REMOTE_PORT should be the NodePort you wish to use to access the server (NOT the application). The application uses REMOTE_IP and REMOTE_PORT to use the server's API.
 
-Next, rebuild the image and push it to a Dockerhub repository. Make sure that this Dockerhub repository is used under the `image` fields in the `k8fabricreport.yaml` file.
+5. Next, rebuild the image and push it to a Dockerhub repository. Make sure that this Dockerhub repository is used under the `image` fields in the `k8fabricreport.yaml` file.
 
-Next, edit the `k8reportservice.yaml` file so its `NodePort` field under port-1 (server) has the same port number as REMOTE_PORT in `config.ts`. You may also change the `NodePort` field under port-2 (app). This port is used for the public to access the application from their browsers.
+6. Next, edit the `k8reportservice.yaml` file so its `NodePort` field under port-1 (server) has the same port number as REMOTE_PORT in `config.ts`. You may also change the `NodePort` field under port-2 (app). This port is used for the public to access the application from their browsers.
 
-Finally, run the following commands from the Testviewer directory to push the deployment and service to your Kubernetes cluster.
+7. Finally, run the following commands from the Testviewer directory to push the deployment and service to your Kubernetes cluster.
 ```
 kubectl create -f k8reportservice.yaml
 kubectl create -f k8fabricreport.yaml
