@@ -102,7 +102,7 @@ Examples:
 
 
 @daily
-Scenario Outline: FAB-3851: Message Payloads of size <size>, for <type> orderer
+Scenario Outline: FAB-3851: Message Payloads of size <comment>, for <type> orderer
     Given I have a bootstrapped fabric network of type <type> using state-database couchdb
     And I use the NodeJS SDK interface
     When an admin sets up a channel
@@ -113,14 +113,20 @@ Scenario Outline: FAB-3851: Message Payloads of size <size>, for <type> orderer
     And a user queries on the chaincode named "mycc" with args ["get","g"]
     Then a user receives a response containing a value of length <size>
     And a user receives a response with the random value
+
+    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length <size>
+    And I wait "7" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","g"]
+    Then a user receives a response containing a value of length <size>
+    And a user receives a response with the random value
 Examples:
-    | type  |  size   |
-    | solo  | 1048576 |
-    | solo  | 2097152 |
-    | solo  | 4194304 |
-    | kafka | 1048576 |
-    | kafka | 2097152 |
-    | kafka | 4194304 |
+    | type  |  size   | comment |
+    | solo  | 1048576 |   1MB   |
+    | solo  | 2097152 |   2MB   |
+    | solo  | 4194304 |   4MB   |
+    | kafka | 1048576 |   1MB   |
+    | kafka | 2097152 |   2MB   |
+    | kafka | 4194304 |   4MB   |
 
 
 @daily
@@ -168,10 +174,9 @@ Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>
     Then a user receives a response containing a value of length <size>
     And a user receives a response with the random value
 Examples:
-    |   size  |  count  |
-    |   2048  |   20    |
-    | 1048576 |  1024   |
-    | 2097152 |  1024   |
+    |  size  |  count  |
+    |  2048  |   20    |
+    |  256   |  1024   |
 
 
 @daily
