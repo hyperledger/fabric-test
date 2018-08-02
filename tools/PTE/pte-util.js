@@ -26,7 +26,7 @@ var winston = require('winston');
 var KEYUTIL = jsrsa.KEYUTIL;
 
 
-var copService = require('fabric-ca-client/lib/FabricCAClientImpl.js');
+var copService = require('fabric-ca-client/lib/FabricCAServices.js');
 var User = require('fabric-client/lib/User.js');
 //var Constants = require('./constants.js');
 
