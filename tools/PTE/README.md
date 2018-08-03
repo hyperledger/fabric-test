@@ -981,7 +981,7 @@ where:
         * **Channel**: basic option, delivers full events per channel for each block or transaction
     * **listener**: event listener, default: Block
         * **Transaction**: one event per transaction
-        * **Block**: one event per block. The block listener option applies to tranMode CONSTANT only.
+        * **Block**: one event per block. The block listener option applies to tranModes CONSTANT and BURST only.
     * **timeout**: event timeout, unit ms, default: 120000 ms
 * **failoverOpt**: peer failover options
     * **method**: peer failover selection method, default is `RoundRobin`
