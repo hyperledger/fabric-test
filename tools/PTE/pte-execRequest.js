@@ -530,7 +530,7 @@ function assignThreadAllPeers(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllPeers] peers', Nid, channel.getName(), pid, channel.getPeers());
+    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllPeers] peers: %s', Nid, channel.getName(), pid, channel.getPeers());
 }
 
 
@@ -600,7 +600,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllAnchorPeers] peers', Nid, channel.getName(), pid, channel.getPeers());
+    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllAnchorPeers] peers: %s', Nid, channel.getName(), pid, channel.getPeers());
 }
 
 // assign thread all peers from the org
@@ -658,7 +658,7 @@ function assignThreadOrgPeer(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgPeer] add peer: ', Nid, channelName, org, pid, channel.getPeers());
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgPeer] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
 }
 
 
@@ -722,7 +722,7 @@ function assignThreadPeerList(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] add peer: ', Nid, channelName, org, pid, channel.getPeers());
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
 }
 
 function channelAddPeer(channel, client, org) {
@@ -773,7 +773,7 @@ function channelAddPeer(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeer] ', Nid, channelName, org, pid);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeer] peers: %s', Nid, channelName, org, pid, channel.getPeers());
 }
 
 
@@ -876,7 +876,7 @@ function channelAdd1Peer(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAdd1Peer peers: %j] ', Nid, channelName, org, pid, channel.getPeers());
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAdd1Peer] peers: %s ', Nid, channelName, org, pid, channel.getPeers());
 }
 
 
@@ -965,7 +965,7 @@ function assignOrdererList(channel, client) {
             }
         }
     }
-    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] orderer list: %j', Nid, channelName, org, pid, ordererList);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] orderer list: %s', Nid, channelName, org, pid, ordererList);
 }
 
 function channelAddOrderer(channel, client, org) {
@@ -991,7 +991,7 @@ function channelAddOrderer(channel, client, org) {
         channel.addOrderer(client.newOrderer(ORGS['orderer'][ordererID].url));
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, ORGS['orderer'][ordererID].url);
     }
-    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %j ', Nid, channelName, org, pid, channel.getOrderers());
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %s', Nid, channelName, org, pid, channel.getOrderers());
 }
 
 
@@ -1059,7 +1059,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
         }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] Peers:  ', Nid, channelName, org, pid, channel.getPeers());
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] peers: %s', Nid, channelName, org, pid, channel.getPeers());
 }
 
 // add target peers to channel
@@ -2087,10 +2087,6 @@ function invoke_move_mix(freq) {
     var t1 = new Date().getTime();
     getMoveRequest();
 
-    if (mixQuery == 'TRUE') {
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_mix] invoke request:', Nid, channelName, org, pid, request_invoke);
-    }
-
     channel.sendTransactionProposal(request_invoke)
     .then((results) => {
             var proposalResponses = results[0];
@@ -2141,7 +2137,7 @@ function invoke_query_mix(freq) {
         function(response_payloads) {
                 if (mixQuery == 'TRUE') {
                     for(let j = 0; j < response_payloads.length; j++) {
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] query result:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] query result: %j, %j', Nid, channelName, org, pid, request_query.args, response_payloads[j].toString('utf8'));
                     }
                 }
                 isExecDone('Move');

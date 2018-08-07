@@ -194,10 +194,10 @@ var qPeer ;
 var testSummaryArray=[];
 
 function printChainInfo(channel) {
-    logger.info('[printChainInfo] channel name: ', channel.getName());
-    logger.info('[printChainInfo] orderers: ', channel.getOrderers());
-    logger.info('[printChainInfo] peers: ', channel.getPeers());
-    logger.info('[printChainInfo] events: ', allEventhubs);
+    logger.info('[printChainInfo] channel name: %s', channel.getName());
+    logger.info('[printChainInfo] orderers: %s', channel.getOrderers());
+    logger.info('[printChainInfo] peers: %s', channel.getPeers());
+    logger.info('[printChainInfo] events: %s', allEventhubs);
 }
 
 
@@ -248,7 +248,7 @@ function chainAddOrderer(channel, client, org) {
             client.newOrderer(ORGS['orderer'][ordererID].url)
         );
     }
-    //logger.info('[chainAddOrderer] channel orderers: ', channel.getOrderers());
+    logger.info('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
 }
 
 function channelAddPeer(channel, client, org) {
@@ -281,7 +281,7 @@ function channelAddPeer(channel, client, org) {
             }
         }
     }
-    //logger.info('[channelAddPeer] channel peers: ', channel.getPeers());
+    logger.info('[channelAddPeer] channel peers: %s', channel.getPeers());
 
     return targets;
 }
@@ -324,7 +324,7 @@ function channelAddListedPeer(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: ', Nid, channelName, org, channel.getPeers());
+    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: %s', Nid, channelName, org, channel.getPeers());
 
     return targets;
 }
@@ -360,7 +360,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
             }
         }
     }
-    logger.info('[channelAddQIPeer] channel peers: ', channel.getPeers());
+    logger.info('[channelAddQIPeer] channel peers: %s', channel.getPeers());
 
     return targets;
 }
@@ -398,7 +398,7 @@ function channelAddPeer1(channel, client, org, eventHubs) {
             }
         }
     }
-    //logger.debug('[channelAddPeer1] org: %s, channel peers: ', org, channel.getPeers());
+    logger.debug('[channelAddPeer1] org: %s, channel peers: %s', org, channel.getPeers());
 
     return targets;
 }
