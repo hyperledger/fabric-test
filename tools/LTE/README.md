@@ -58,7 +58,8 @@ by varying one or two of the parameters. The parameters are:
 * number of parallel transactions in each chain,
 * number of Key-value pairs,
 * number of transactions,
-* number of keys in each transaction,
+* number of keys to be read in each transaction,
+* number of keys to be written in each transaction,
 * size of batch for ledger,
 * size of Key-value
 

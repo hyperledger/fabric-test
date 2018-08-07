@@ -34,6 +34,7 @@ KVSize=200
 ArrayNumParallelTxPerChain=(1 5 10 20 50 100)
 ArrayNumChains=(1 5 10 20 50)
 ArrayNumWritesPerTx=(1 2 5 10 20)
+ArrayNumReadsPerTx=(1 2 5 10 20)
 ArrayKVSize=(100 200 500 1000 2000)
 ArrayBatchSize=(10 20 100 500)
 ArrayNumParallelTxWithSingleChain=(1 5 10 20 50 100)

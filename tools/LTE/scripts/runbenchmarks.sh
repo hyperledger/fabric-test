@@ -47,6 +47,14 @@ function varyNumWritesPerTx {
     done
 }
 
+function varyNumReadsPerTx {
+    for v in "${ArrayNumReadsPerTx[@]}"
+    do
+        NumReadsPerTx=$v
+        rm -rf $DataDir;runInsertTxs;runReadWriteTxs
+    done
+}
+
 function varyKVSize {
     for v in "${ArrayKVSize[@]}"
     do
@@ -126,6 +134,7 @@ varyNumChains
 varyNumParallelTxWithSingleChain
 varyNumChainsWithNoParallelism
 varyNumWritesPerTx
+varyNumReadsPerTx
 varyKVSize
 varyBatchSize
 varyNumTxs
@@ -172,6 +181,8 @@ case $1 in
     varyNumChainsWithNoParallelism ;;
   varyNumWritesPerTx)
     varyNumWritesPerTx ;;
+  varyNumReadsPerTx)
+    varyNumReadsPerTx ;;
   varyKVSize)
     varyKVSize ;;
   varyBatchSize)
@@ -189,6 +200,7 @@ case $1 in
     varyNumParallelTxWithSingleChain
     varyNumChainsWithNoParallelism
     varyNumWritesPerTx
+    varyNumReadsPerTx
     varyKVSize
     varyBatchSize
     varyNumTxs

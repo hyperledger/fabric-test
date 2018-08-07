@@ -132,24 +132,45 @@ class perf_goleveldb(unittest.TestCase):
                 " failed. \nPlease check the logfile "+logfile.name+" for more "
                 "details.")
 
-    def test_FAB_3800_VaryNumKeysInEachTx(self):
+    def test_FAB_3800a_VaryNumWritesInEachTx(self):
         '''
          In this Performance test, we observe the performance (time to
          complete a set number of Ledger operations) of the Ledger component,
-         with goleveldb as the state database. We vary the number of keys in
+         with goleveldb as the state database. We vary the number of writes in
          each transaction.
 
          Passing criteria: Underlying LTE test completed successfully with
          exit code 0
         '''
-        logfile = open("output_VaryNumKeysInEachTx.log", "w")
+        logfile = open("output_VaryNumWritesPerTx.log", "w")
         returncode = subprocess.call(
                 "./runbenchmarks.sh -f parameters_daily_CI.sh "
-                "varyNumKeysInEachTx",
+                "varyNumWritesPerTx",
                 shell=True, stderr=subprocess.STDOUT, stdout=logfile,
                 cwd=tool_directory)
         logfile.close()
-        self.assertEqual(returncode, 0, msg="varyNumKeysInEachTx performance "
+        self.assertEqual(returncode, 0, msg="varyNumWritesPerTx performance "
+                "test failed. \nPlease check the logfile "+logfile.name
+                +" for more details.")
+
+    def test_FAB_3800b_VaryNumReadsInEachTx(self):
+        '''
+         In this Performance test, we observe the performance (time to
+         complete a set number of Ledger operations) of the Ledger component,
+         with goleveldb as the state database. We vary the number of reads in
+         each transaction.
+
+         Passing criteria: Underlying LTE test completed successfully with
+         exit code 0
+        '''
+        logfile = open("output_VaryNumReadsPerTx.log", "w")
+        returncode = subprocess.call(
+                "./runbenchmarks.sh -f parameters_daily_CI.sh "
+                "varyNumReadsPerTx",
+                shell=True, stderr=subprocess.STDOUT, stdout=logfile,
+                cwd=tool_directory)
+        logfile.close()
+        self.assertEqual(returncode, 0, msg="varyNumReadsPerTx performance "
                 "test failed. \nPlease check the logfile "+logfile.name
                 +" for more details.")
 
@@ -301,23 +322,44 @@ class perf_couchdb(unittest.TestCase):
                 +logfile.name+" for more etails.")
 
 
-    def test_FAB_3876_VaryNumKeysInEachTX(self):
+    def test_FAB_3876a_VaryNumWritesInEachTx(self):
         '''
          In this Performance test, we observe the performance (time to
          complete a set number of Ledger operations) of the Ledger component,
-         with couchdb as the state database. We vary the number of keys in
+         with couchdb as the state database. We vary the number of writes in
          each transaction.
 
          Passing criteria: Underlying LTE test completed successfully with
          exit code 0
         '''
-        logfile = open("output_VaryNumKeysInEachTx_couchdb.log", "w")
+        logfile = open("output_VaryNumWritesPerTx_couchdb.log", "w")
         returncode = subprocess.call(
                 "./runbenchmarks.sh -f parameters_couchdb_daily_CI.sh "
-                "varyNumKeysInEachTx", shell=True, stderr=subprocess.STDOUT,
+                "varyNumWritesPerTx", shell=True, stderr=subprocess.STDOUT,
                 stdout=logfile, cwd=tool_directory)
         logfile.close()
-        self.assertEqual(returncode, 0, msg="varyNumKeysInEachTx for CouchDB "
+        self.assertEqual(returncode, 0, msg="varyNumWritesPerTx for CouchDB "
+                "performance test failed. \nPlease check the logfile "
+                +logfile.name +" for more details.")
+
+
+    def test_FAB_3876b_VaryNumReadsInEachTx(self):
+        '''
+         In this Performance test, we observe the performance (time to
+         complete a set number of Ledger operations) of the Ledger component,
+         with couchdb as the state database. We vary the number of reads in
+         each transaction.
+
+         Passing criteria: Underlying LTE test completed successfully with
+         exit code 0
+        '''
+        logfile = open("output_VaryNumReadsPerTx_couchdb.log", "w")
+        returncode = subprocess.call(
+                "./runbenchmarks.sh -f parameters_couchdb_daily_CI.sh "
+                "varyNumReadsPerTx", shell=True, stderr=subprocess.STDOUT,
+                stdout=logfile, cwd=tool_directory)
+        logfile.close()
+        self.assertEqual(returncode, 0, msg="varyNumReadsPerTx for CouchDB "
                 "performance test failed. \nPlease check the logfile "
                 +logfile.name +" for more details.")
 
