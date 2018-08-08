@@ -7,11 +7,6 @@
 DAILYDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/daily"
 cd $DAILYDIR
 
-echo "======== Behave feature and system tests...========"
-cd ../../feature
-behave --junit --junit-directory ../regression/daily/. --tags=-skip --tags=daily -k -D logs=y
-cd $DAILYDIR
-
 echo "======== Fabric-CA ACL smoke test... ========"
 py.test -v --junitxml results_acl.xml acl_happy_path.py
 
