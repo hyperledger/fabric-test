@@ -22,7 +22,7 @@ LSCDir=$TESTCASE"-SC"
 SCDir=$PTEDir"/"$LSCDir
 
 # thread loop
-for (( NTHREAD = 4; NTHREAD <= 40; NTHREAD+=4 )); do
+for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     timestamp=`date`
     echo "[$0] $TESTCASE with $NTHREAD threads x $NREQ transactions start at $timestamp"
     if [ -e $SCDir ]; then
@@ -33,7 +33,7 @@ for (( NTHREAD = 4; NTHREAD <= 40; NTHREAD+=4 )); do
     mkdir $SCDir
 
     cd $NLDir
-    rm $NLDir"/config-chan*-TLS.json"
+    rm -f config-chan*
 
     #### bring down network
     echo "[$0] bring down network"
@@ -62,6 +62,9 @@ for (( NTHREAD = 4; NTHREAD <= 40; NTHREAD+=4 )); do
 
     # PTE: invokes
     tCurr=`date +%m%d%H%M%S`
+    if [ ! -e ../Logs ]; then
+        mkdir ../Logs
+    fi
     IPTELOG="../Logs/"$TESTCASE"-"$NTHREAD"i-"$tCurr".log"
     echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG"
           ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG
