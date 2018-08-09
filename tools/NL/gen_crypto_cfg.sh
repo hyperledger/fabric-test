@@ -17,6 +17,7 @@ function printHelp {
    echo "    -p: number of peers per organization, default=1"
    echo "    -r: number of organization, default=1"
    echo "    -C: company name, default=example.com"
+   echo "    -M: JSON file containing organization and MSP name mappings (optional) "
    echo " "
    echo "Example:"
    echo " ./gen_crypto_cfg.sh -o 1 -p 2 -r 2"
@@ -32,8 +33,9 @@ nOrderer=1
 peersPerOrg=1
 nOrg=1
 comName="example.com"
+orgMap=
 
-while getopts ":o:p:r:C:" opt; do
+while getopts ":o:p:r:C:M:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -57,6 +59,12 @@ while getopts ":o:p:r:C:" opt; do
     C)
       comName=$OPTARG
       echo "comName:  $comName"
+      ;;
+
+    # filenames containing organization and MSP names
+    M)
+      orgMap=$OPTARG
+      echo "orgMap: $orgMap"
       ;;
 
     # else
@@ -93,8 +101,46 @@ rm -f $cfgOutFile
           echo "PeerOrgs:" >> $cfgOutFile
           for (( i=1; i<=$nOrg; i++  ))
           do
-              echo "    - Name: PeerOrg$i" >> $cfgOutFile
-              tt=org$i"."$comName
+              orgMSP="PeerOrg"$i
+              if [ ! -z $orgMap ] && [ -f $orgMap ]
+              then
+                  omVal=$(jq .$orgMSP $orgMap)
+                  if [ ! -z $omVal ] && [ $omVal != "null" ]
+                  then
+                      # Strip quotes from omVal if they are present
+                      if [ ${omVal:0:1} == "\"" ]
+                      then
+                          omVal=${omVal:1}
+                      fi
+                      let "OMLEN = ${#omVal} - 1"
+                      if [ ${omVal:$OMLEN:1} == "\"" ]
+                      then
+                          omVal=${omVal:0:$OMLEN}
+                      fi
+                      orgMSP=$omVal
+                  fi
+              fi
+              echo "    - Name: $orgMSP" >> $cfgOutFile
+              orgName=org$i
+              if [ ! -z $orgMap ] && [ -f $orgMap ]
+              then
+                  onVal=$(jq .$orgName $orgMap)
+                  if [ ! -z $onVal ] && [ $onVal != "null" ]
+                  then
+                      # Strip quotes from onVal if they are present
+                      if [ ${onVal:0:1} == "\"" ]
+                      then
+                          onVal=${onVal:1}
+                      fi
+                      let "ONLEN = ${#onVal} - 1"
+                      if [ ${onVal:$ONLEN:1} == "\"" ]
+                      then
+                          onVal=${onVal:0:$ONLEN}
+                      fi
+                      orgName=$onVal
+                  fi
+              fi
+              tt=$orgName"."$comName
               echo "      Domain: $tt" >> $cfgOutFile
               echo "      EnableNodeOUs: true" >> $cfgOutFile
               echo "      Template:" >> $cfgOutFile

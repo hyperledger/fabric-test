@@ -54,6 +54,7 @@ This is the main script to execute all tasks.
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
          -S: TLS enablement [disabled|serverauth|clientauth], default=disabled
          -C: company name, default=example.com
+         -M: JSON file containing organization and MSP name mappings (optional)
 
 Note that when `-a down` is invoked to clean network, the company name is used as a key word in searching for docker images to be deleted.  The company name can be set using `-C`. The default company name is `example.com`.
 
@@ -71,8 +72,25 @@ The following commands will generate a network:
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35
     ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -n 1 -f test -w localhost
     ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S enabled
+    ./networkLauncher.sh -o 1 -x 5 -r 5 -p 1 -k 1 -z 1 -n 1 -C trade.com -M sampleOrgMap.json -t kafka -f test -w localhost -S enabled
 
 The above command will invoke cryptogen, cfgtxgen, generate orderer block, channel transaction and launch network.
+
+### Custom Organization Names and MSP IDs
+
+By default, NL will generate organization names `org1`, `org`, etc. and MSP IDs `PeerOrg1`, `PeerOrg2`, etc.
+If your chaincode application depends on other (custom) organization names and MSP IDs, you can specify a mapping from the default names to the custom names in a JSON file, an example of which is given below (see [sampleOrgMap.json](./sampleOrgMap.json)):
+```
+{
+    "org1": "myfirstorg",
+    "org3": "mythirdorg",
+    "PeerOrg2": "SecondOrgMSP",
+    "PeerOrg3": "ThirdOrgMSP"
+}
+```
+In this example, `org1` is replaced with `myfirstorg` in the network that is launched, the MSP ID `PeerOrg3` is replaced with `ThirdOrgMSP`, and so on.
+_Note_: If you are going to run other tools (like PTE) on this network, you will need to configure the service credential and test case files suitably with your custom organization names and MSP IDs.
+_Note_: To use this mapping, you will need to pass the pathname to the JSON file with the `-M` parameter when you run the various scripts in this folder.
 
 # cleanNetwork.sh
 
@@ -122,6 +140,7 @@ The script is used to create configtx.yaml.
        -B: batch size, default=10
        -v: array of organization name, default=0
        -C: company name, default=example.com
+       -M: JSON file containing organization and MSP name mappings (optional)
 
 
 ## Example:
@@ -163,6 +182,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
        -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
        -C: company name, default=example.com
+       -M: JSON file containing organization and MSP name mappings (optional)
 
        peer environment variables
        -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]
@@ -195,6 +215,7 @@ The script generates the service credential json files of a network to be used a
        -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
        -w: host ip, default=localhost
        -C: company name, default=example.com
+       -M: JSON file containing organization and MSP name mappings (optional) "
 
 
 

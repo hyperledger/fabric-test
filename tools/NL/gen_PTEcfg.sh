@@ -28,6 +28,7 @@ function printHelp {
    echo "    -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "    -w: host ip, default=localhost"
    echo "    -C: company name, default=example.com"
+   echo "    -M: JSON file containing organization and MSP name mappings (optional) "
    echo " "
    echo "Example:"
    echo " ./gen_PTEcfg.sh -n 3 -o 3 -p 2 -r 6 -x 6"
@@ -48,8 +49,9 @@ MSPBaseDir="src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen
 ordererBaseDir=$MSPBaseDir"/ordererOrganizations"
 peerBaseDir=$MSPBaseDir"/peerOrganizations"
 comName="example.com"
+orgMap=
 
-while getopts ":o:p:r:n:x:b:w:C:" opt; do
+while getopts ":o:p:r:n:x:b:w:C:M:" opt; do
   case $opt in
     # number of orderers
     o)
@@ -97,6 +99,12 @@ while getopts ":o:p:r:n:x:b:w:C:" opt; do
     C)
       comName=$OPTARG
       echo "comName:  $comName"
+      ;;
+
+    # filenames containing organization and MSP names
+    M)
+      orgMap=$OPTARG
+      echo "orgMap: $orgMap"
       ;;
 
     # else
@@ -183,8 +191,44 @@ function outOrg {
         peerid=$(( (n-1)*nOrgPerChannel+i ))
 
         orgid="org"$peerid
+        if [ ! -z $orgMap ] && [ -f $orgMap ]
+        then
+            oiVal=$(jq .$orgid $orgMap)
+            if [ ! -z $oiVal ] && [ $oiVal != "null" ]
+            then
+                # Strip quotes from oiVal if they are present
+                if [ ${oiVal:0:1} == "\"" ]
+                then
+                    oiVal=${oiVal:1}
+                fi
+                let "OILEN = ${#oiVal} - 1"
+                if [ ${oiVal:$OILEN:1} == "\"" ]
+                then
+                    oiVal=${oiVal:0:$OILEN}
+                fi
+                orgid=$oiVal
+            fi
+        fi
         adminPath=$peerBaseDir"/"$orgid"."$comName"/users/Admin@"$orgid"."$comName"/msp"
         orgPeer="PeerOrg"$peerid
+        if [ ! -z $orgMap ] && [ -f $orgMap ]
+        then
+            opVal=$(jq .$orgPeer $orgMap)
+            if [ ! -z $opVal ] && [ $opVal != "null" ]
+            then
+                # Strip quotes from opVal if they are present
+                if [ ${opVal:0:1} == "\"" ]
+                then
+                    opVal=${opVal:1}
+                fi
+                let "OPLEN = ${#opVal} - 1"
+                if [ ${opVal:$OPLEN:1} == "\"" ]
+                then
+                    opVal=${opVal:0:$OPLEN}
+                fi
+                orgPeer=$opVal
+            fi
+        fi
         tmp="        \"$orgid\": {" >> $scOfile
         echo "$tmp" >> $scOfile
 

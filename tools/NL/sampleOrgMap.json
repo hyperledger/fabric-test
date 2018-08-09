@@ -1,0 +1,6 @@
+{
+	"org2": "secondorg",
+	"org3": "thirdorg",
+	"PeerOrg1": "FirstOrgMSP",
+	"PeerOrg2": "SecondOrgMSP"
+}

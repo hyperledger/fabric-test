@@ -28,6 +28,7 @@ function printHelp {
    echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "       -C: company name, default=example.com"
+   echo "       -M: JSON file containing organization and MSP name mappings (optional) "
    echo " "
    echo "    peer environment variables"
    echo "       -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
@@ -59,8 +60,9 @@ TLSEnabled="disabled"
 MutualTLSEnabled="disabled"
 db="goleveldb"
 comName="example.com"
+orgMap=
 
-while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:" opt; do
+while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:M:" opt; do
   case $opt in
     # peer environment options
     S)
@@ -151,6 +153,11 @@ while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:" opt; do
       echo "comName: $comName"
       ;;
 
+    M)
+      orgMap=$OPTARG
+      echo "orgMap: $orgMap"
+      ;;
+
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -239,13 +246,55 @@ echo "OS: $OS, sedOpt: $sedOpt"
 for (( i=0; i<$nCA; i++ ))
 do
     j=$[ i + 1 ]
-    Dir=$MSPDIR/peerOrganizations/org$j"."$comName"/ca"
+    simpleOrgName=org$j
+    orgName=org$j
+    if [ ! -z $orgMap ] && [ -f $orgMap ]
+    then
+        onVal=$(jq .$orgName $orgMap)
+        if [ ! -z $onVal ] && [ $onVal != "null" ]
+        then
+            # Strip quotes from onVal if they are present
+            if [ ${onVal:0:1} == "\"" ]
+            then
+                onVal=${onVal:1}
+            fi
+            let "ONLEN = ${#onVal} - 1"
+            if [ ${onVal:$ONLEN:1} == "\"" ]
+            then
+                onVal=${onVal:0:$ONLEN}
+            fi
+            orgName=$onVal
+        fi
+    fi
+    simpleOrgMSP=PeerOrg$j
+    orgMSP=PeerOrg$j
+    if [ ! -z $orgMap ] && [ -f $orgMap ]
+    then
+        omVal=$(jq .$orgMSP $orgMap)
+        if [ ! -z $omVal ] && [ $omVal != "null" ]
+        then
+            # Strip quotes from omVal if they are present
+            if [ ${omVal:0:1} == "\"" ]
+            then
+                omVal=${omVal:1}
+            fi
+            let "OMLEN = ${#omVal} - 1"
+            if [ ${omVal:$OMLEN:1} == "\"" ]
+            then
+                omVal=${omVal:0:$OMLEN}
+            fi
+            orgMSP=$omVal
+        fi
+    fi
+    Dir=$MSPDIR/peerOrganizations/$orgName"."$comName"/ca"
     cd $Dir
     tt=`ls *sk`
 
     cd $CWD
 
     sed $sedOpt "s/CA_SK$i/$tt/g" docker-compose.yml
+    sed $sedOpt "s/$simpleOrgName/$orgName/g" docker-compose.yml
+    sed $sedOpt "s/$simpleOrgMSP/$orgMSP/g" docker-compose.yml
 
 done
 

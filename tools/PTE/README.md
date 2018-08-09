@@ -252,6 +252,34 @@ A single test case is described by a user input file. User input files define al
             ]
         },
 
+### Custom Organization Names and MSP IDs
+If you started a network using [Network Launcher](../NL/) and specified an organization map JSON (using the `-M` parameter) to create organizations with custom names and MSPs with custom IDs, you will need to create Service Credential files and test case files with the appropriate organization names.
+
+If you are running PTE using one of the sample chaincodes and test case files already configured here, let's say `samplecc`, you will need to update the pre-configured SC and test case files.
+For example, if your organization map is as follows:
+```
+{
+    "org1": "myfirstorg",
+    "org3": "mythirdorg",
+    "PeerOrg2": "SecondOrgMSP",
+    "PeerOrg3": "ThirdOrgMSP"
+}
+```
+You can update the SC files as follows:
+```
+sed -i "s/org1/myfirstorg/g" SCFiles/*.*
+sed -i "s/org3/mythirdorg/g" SCFiles/*.*
+sed -i "s/PeerOrg2/SecondOrgMSP/g" SCFiles/*.*
+sed -i "s/PeerOrg3/ThirdOrgMSP/g" SCFiles/*.*
+```
+You can update the test cases for `samplecc` as follows:
+```
+sed -i "s/org1/myfirstorg/g" sampleccInputs/*.*
+sed -i "s/org3/mythirdorg/g" sampleccInputs/*.*
+sed -i "s/PeerOrg2/SecondOrgMSP/g" sampleccInputs/*.*
+sed -i "s/PeerOrg3/ThirdOrgMSP/g" sampleccInputs/*.*
+```
+
 
 ### Sample Use Cases
 * ### Latency

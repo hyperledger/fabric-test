@@ -38,6 +38,7 @@ function printHelp {
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS enablement [disabled|serverauth|clientauth], default=disabled"
    echo "    -C: company name, default=example.com "
+   echo "    -M: JSON file containing organization and MSP name mappings (optional) "
    echo " "
    echo " example: "
    echo " ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 1 -z 1 -n 2 -t kafka -f test -w 10.120.223.35 "
@@ -46,6 +47,7 @@ function printHelp {
    echo " ./networkLauncher.sh -o 4 -x 2 -r 2 -p 2 -k 4 -z 4 -n 2 -t kafka -f test -w localhost -S serverauth "
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S serverauth "
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S clientauth -l INFO -q DEBUG"
+   echo " ./networkLauncher.sh -o 1 -x 5 -r 5 -p 1 -k 1 -z 1 -n 1 -C trade.com -M sampleOrgMap.json -t kafka -f test -w localhost -S enabled"
    exit
 }
 
@@ -73,8 +75,10 @@ coreLogLevel="ERROR"
 ordererLogLevel="ERROR"
 batchTimeOut="2s"
 batchSize=10
+orgMap=
+orgMapParam=
 
-while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:" opt; do
+while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:M:" opt; do
   case $opt in
     # peer environment options
     a)
@@ -192,6 +196,11 @@ while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:" opt; do
       echo "comName: $comName"
       ;;
 
+    M)
+      orgMap=$OPTARG
+      echo "orgMap: $orgMap"
+      ;;
+
     # else
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -245,14 +254,19 @@ CWD=$PWD
 echo "current working directory: $CWD"
 echo "GOPATH=$GOPATH"
 
+if [ ! -z $orgMap ]
+then
+	orgMapParam="-M "$orgMap
+fi
+
 echo " "
 echo "        ####################################################### "
 echo "        #                generate crypto-config.yaml          # "
 echo "        ####################################################### "
 echo "generate crypto-config.yaml ..."
 rm -f crypto-config.yaml
-echo "./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg -C $comName"
-./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg -C $comName
+echo "./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg -C $comName $orgMapParam"
+./gen_crypto_cfg.sh -o $nOrderer -r $nOrg -p $nPeersPerOrg -C $comName $orgMapParam
 
 echo " "
 echo "        ####################################################### "
@@ -286,8 +300,8 @@ echo "generate configtx.yaml ..."
 cd $CWD
 echo "current working directory: $PWD"
 
-echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config -c $batchTimeOut -B $batchSize"
-./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config -c $batchTimeOut -B $batchSize
+echo "./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config -c $batchTimeOut -B $batchSize $orgMapParam"
+./gen_configtx_cfg.sh -o $nOrderer -k $nKafka -p $nPeersPerOrg -r $nOrg -h $hashType -s $secType -t $ordServType -f $PROFILE_STRING -w $HostIP1 -C $comName -b $MSPDir/crypto-config -c $batchTimeOut -B $batchSize $orgMapParam
 
 echo " "
 echo "        ####################################################### "
@@ -331,9 +345,28 @@ echo "        ####################################################### "
 echo " "
 for (( i=1; i<=$nOrg; i++ ))
 do
-    OrgMSP=$ordererDir"/PeerOrg"$i"anchors.tx"
-    echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i"
-    $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg PeerOrg$i
+    orgMSP="PeerOrg"$i
+    if [ ! -z $orgMap ] && [ -f $orgMap ]
+    then
+        omVal=$(jq .$orgMSP $orgMap)
+        if [ ! -z $omVal ] && [ $omVal != "null" ]
+        then
+            # Strip quotes from omVal if they are present
+            if [ ${omVal:0:1} == "\"" ]
+            then
+                omVal=${omVal:1}
+            fi
+            let "OMLEN = ${#omVal} - 1"
+            if [ ${omVal:$OMLEN:1} == "\"" ]
+            then
+                omVal=${omVal:0:$OMLEN}
+            fi
+            orgMSP=$omVal
+        fi
+    fi
+    OrgMSP=$ordererDir"/"$orgMSP"anchors.tx"
+    echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg $orgMSP"
+    $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg $orgMSP
 done
 
 echo " "
@@ -345,8 +378,8 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel $orgMapParam"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel $orgMapParam
 
 echo " "
 echo "        ####################################################### "
@@ -354,5 +387,5 @@ echo "        #             generate PTE sc cfg json                # "
 echo "        ####################################################### "
 echo " "
 
-echo "./gen_PTEcfg.sh -n $nChannel -o $nOrderer -p $nPeersPerOrg -r $nOrg -x $nCA -C $comName -w $HostIP1 -b $MSPDir"
-./gen_PTEcfg.sh -n $nChannel -o $nOrderer -p $nPeersPerOrg -r $nOrg -x $nCA -C $comName -w $HostIP1 -b $MSPDir
+echo "./gen_PTEcfg.sh -n $nChannel -o $nOrderer -p $nPeersPerOrg -r $nOrg -x $nCA -C $comName -w $HostIP1 -b $MSPDir $orgMapParam"
+./gen_PTEcfg.sh -n $nChannel -o $nOrderer -p $nPeersPerOrg -r $nOrg -x $nCA -C $comName -w $HostIP1 -b $MSPDir $orgMapParam
