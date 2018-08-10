@@ -214,7 +214,7 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] runForever: %d', Nid,
 var timeoutOpt;
 var reqTimeout=45000; // default 45 sec
 if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
-    timeoutOpt = parseInt(txCfgPtr.timeoutOpt);
+    timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
     if ((typeof( timeoutOpt.request ) !== 'undefined')) {
         reqTimeout = parseInt(timeoutOpt.request);
