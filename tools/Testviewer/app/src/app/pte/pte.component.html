@@ -100,7 +100,7 @@
 			<mat-datepicker #picker></mat-datepicker>
 	  	</mat-form-field>
 	  	<mat-spinner class="spinner" strokeWidth="10" [diameter]="diameter_day"></mat-spinner>
-	  	<h3 id="buildnum"><a href="https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-pte-x86_64/{{buildnum}}/" target='_blank'>Build {{buildnum}} ({{chosendate}})</a></h3>
+	  	<h3 id="buildnum"><a href="https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-pte-master-x86_64/{{buildnum}}/" target='_blank'>Build {{buildnum}} ({{chosendate}})</a></h3>
 	</div>
 	<div class="test-container">
 		<div class="enginetest" *ngFor="let test of objectkeys(tests)">
