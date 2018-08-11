@@ -304,12 +304,24 @@ var ccFuncInst = new ccFunctions(ccDfnPtr, logger, Nid, channel.getName(), org, 
 //set transaction ID: channelName+'_'+org+'_'+Nid+'_'+pid
 var txIDVar=channelName+'_'+org+'_'+Nid+'_'+pid;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] tx IDVar: ', Nid, channel.getName(), org, pid, txIDVar);
+var ccFunctionAccessPolicy = {};
+if (ccFuncInst.getAccessControlPolicyMap) {		// Load access control policy for chaincode is specified
+    ccFunctionAccessPolicy = ccFuncInst.getAccessControlPolicyMap();
+}
+var orgAdmins = {};		// Map org names to client handles
 
 //construct invoke request
 var request_invoke;
 function getMoveRequest() {
     // Get the invoke arguments from the appropriate payload generation files
     ccFuncInst.getInvokeArgs(txIDVar);
+
+    // Set the approprate signing identity for this function based on access policy
+    // If the function has no access control, we can use any signing identity
+    var orgsForAccess = ccFunctionAccessPolicy[ccDfnPtr.invoke.move.fcn];
+    if (orgsForAccess && Array.isArray(orgsForAccess) && orgsForAccess.length > 0) {
+        client.setUserContext(orgAdmins[orgsForAccess[0]], false);		// Just pick the first organization that satisfies the policy
+    }
 
     tx_id = client.newTransactionID();
     hfc.setConfigSetting('E2E_TX_ID', tx_id.getTransactionID());
@@ -339,6 +351,13 @@ var request_query;
 function getQueryRequest() {
     // Get the query arguments from the appropriate payload generation files
     ccFuncInst.getQueryArgs(txIDVar);
+
+    // Set the approprate signing identity for this function based on access policy
+    // If the function has no access control, we can use any signing identity
+    var orgsForAccess = ccFunctionAccessPolicy[ccDfnPtr.invoke.query.fcn];
+    if (orgsForAccess && Array.isArray(orgsForAccess) && orgsForAccess.length > 0) {
+        client.setUserContext(orgAdmins[orgsForAccess[0]], false);		// Just pick the first organization that satisfies the policy
+    }
 
     tx_id = client.newTransactionID();
     request_query = {
@@ -1141,6 +1160,10 @@ function setTargetPeers(tPeers) {
  */
     execTransMode();
 
+function getSubmitterForOrg(username, secret, client, peerOrgAdmin, Nid, org, svcFile) {
+    return testUtil.getSubmitter(username, secret, client, peerOrgAdmin, Nid, org, svcFile);
+}
+
 async function execTransMode() {
 
     // init vars
@@ -1181,9 +1204,22 @@ async function execTransMode() {
              client.setStateStore(store);
         }
             client._userContext = null;
-        return testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile);
+        var getSubmitterForOrgPromises = [];
+        channelOrgName.forEach((orgName) => {
+            getSubmitterForOrgPromises.push(getSubmitterForOrg);
+        })
+        return getSubmitterForOrgPromises.reduce(
+            (promiseChain, currentFunction, currentIndex) =>
+                promiseChain.then((admin) => {
+                    if (currentIndex > 0) {
+                        orgAdmins[channelOrgName[currentIndex - 1]] = admin;
+                    }
+                    return currentFunction(username, secret, client, true, Nid, channelOrgName[currentIndex], svcFile);
+                }), Promise.resolve()
+        );
     }).then(
                 function(admin) {
+                    orgAdmins[channelOrgName[channelOrgName.length - 1]] = admin;
 
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] Successfully loaded user \'admin\'', Nid, channelName, org, pid);
                     the_user = admin;

@@ -22,66 +22,80 @@ const crypto = require('crypto');
 const ccFunctionsBase = require('../ccFunctionsBase.js');
 
 class ccFunctions extends ccFunctionsBase {
-	constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
-		super(ccDfnPtr, logger, Nid, channelName, org, pid);
-		this.keyStart = parseInt(this.ccDfnPtr.ccOpt.keyStart);
-		this.payLoadMin = parseInt(this.ccDfnPtr.ccOpt.payLoadMin)/2;
-		this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax)/2;
-		if ( this.ccDfnPtr.ccOpt.payLoadType )
-			this.payLoadType = this.ccDfnPtr.ccOpt.payLoadType.toUpperCase();
+    constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
+        super(ccDfnPtr, logger, Nid, channelName, org, pid);
+        this.keyStart = parseInt(this.ccDfnPtr.ccOpt.keyStart);
+        this.payLoadMin = parseInt(this.ccDfnPtr.ccOpt.payLoadMin)/2;
+        this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax)/2;
+        if ( this.ccDfnPtr.ccOpt.payLoadType )
+            this.payLoadType = this.ccDfnPtr.ccOpt.payLoadType.toUpperCase();
 
-		// Fixed payload
-		if ( this.payLoadType == 'FIXED' ) {
-			var rlen = this.payLoadMin;
-			var buf = crypto.randomBytes(rlen);
-			for ( var i = 0; i < this.keyPayLoad.length; i++ ) {
-				this.testInvokeArgs[this.keyPayLoad[i]] = buf.toString('hex');
-			}
-		}
+        // Fixed payload
+        if ( this.payLoadType == 'FIXED' ) {
+            var rlen = this.payLoadMin;
+            var buf = crypto.randomBytes(rlen);
+            for ( var i = 0; i < this.keyPayLoad.length; i++ ) {
+                this.testInvokeArgs[this.keyPayLoad[i]] = buf.toString('hex');
+            }
+        }
 
-		this.arg0 = parseInt(this.keyStart);
-		this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-				this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart,
-				parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
-	}
+        this.arg0 = parseInt(this.keyStart);
+        this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
+                this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart,
+                parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
+    }
 
-	getInvokeArgs(txIDVar) {
-		this.arg0 ++;
-		var i = 0;
-		for ( i=0; i<this.keyIdx.length; i++ ) {
-			this.testInvokeArgs[this.keyIdx[i]] = 'key_'+txIDVar+'_'+this.arg0;
-		}
+    getInvokeArgs(txIDVar) {
+        this.arg0 ++;
+        var i = 0;
+        for ( i=0; i<this.keyIdx.length; i++ ) {
+            this.testInvokeArgs[this.keyIdx[i]] = 'key_'+txIDVar+'_'+this.arg0;
+        }
 
-		// randomise length of payload
-		var rlen = Math.floor(Math.random() * (this.payLoadMax - this.payLoadMin)) + this.payLoadMin;
+        // randomise length of payload
+        var rlen = Math.floor(Math.random() * (this.payLoadMax - this.payLoadMin)) + this.payLoadMin;
 
-		if ( this.payLoadType == 'RANDOM' ) {
-			var buf = crypto.randomBytes(rlen);
-			for ( i = 0; i < this.keyPayLoad.length; i++ ) {
-				this.testInvokeArgs[this.keyPayLoad[i]] = buf.toString('hex');
-			}
-		}
-	}
+        if ( this.payLoadType == 'RANDOM' ) {
+            var buf = crypto.randomBytes(rlen);
+            for ( i = 0; i < this.keyPayLoad.length; i++ ) {
+                this.testInvokeArgs[this.keyPayLoad[i]] = buf.toString('hex');
+            }
+        }
+    }
 
-	getQueryArgs(txIDVar) {
-		this.arg0 ++;
-		var i = 0;
-		for ( i=0; i<this.keyIdx.length; i++ ) {
-			this.testQueryArgs[this.keyIdx[i]] = 'key_'+txIDVar+'_'+this.arg0;
-		}
-	}
+    getQueryArgs(txIDVar) {
+        this.arg0 ++;
+        var i = 0;
+        for ( i=0; i<this.keyIdx.length; i++ ) {
+            this.testQueryArgs[this.keyIdx[i]] = 'key_'+txIDVar+'_'+this.arg0;
+        }
+    }
 
-	getExecModeLatencyFreq() {
-		return 0;
-	}
+    getExecModeLatencyFreq() {
+        return 0;
+    }
 
-	getExecModeSimpleFreq() {
-		return 0;
-	}
+    getExecModeSimpleFreq() {
+        return 0;
+    }
 
-	getExecModeProposalFreq() {
-		return 0;
-	}
+    getExecModeProposalFreq() {
+        return 0;
+    }
+
+    // This is an OPTIONAL function
+    // Returns lists of organization names allowed to invoke/query chaincode functions
+    // - <function name> --> <array of organization names>
+    // Default access policy: any organization is allowed to call the function
+    // - If 'getAccessControlPolicyMap' is not defined
+    // - If the return value is an empty JSON: {}
+    // - If the invoke/query function is not a key in the returned JSON
+    // - If the value corresponding to an invoke/query function is an empty array
+    getAccessControlPolicyMap() {
+        return {
+            "invoke": []
+        };
+    }
 }
 
 module.exports = ccFunctions;

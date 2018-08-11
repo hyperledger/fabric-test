@@ -21,84 +21,84 @@
 const ccFunctionsBase = require('../ccFunctionsBase.js');
 
 class ccFunctions extends ccFunctionsBase {
-	constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
-		super(ccDfnPtr, logger, Nid, channelName, org, pid);
-		this.moveMarbleOwner = 'tom';
-		this.moveMarbleName = 'marble';
-		this.queryMarbleOwner = 'tom';
-		this.queryMarbleName = 'marble';
-		this.nOwner = 100;
-		this.queryMarbleDocType = 'marble';
-	    this.keyStart = parseInt(this.ccDfnPtr.ccOpt.keyStart);
-    	this.payLoadMin = parseInt(this.ccDfnPtr.ccOpt.payLoadMin);
-    	this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax);
-    	this.arg0 = parseInt(this.keyStart);
-    	this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
+    constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
+        super(ccDfnPtr, logger, Nid, channelName, org, pid);
+        this.moveMarbleOwner = 'tom';
+        this.moveMarbleName = 'marble';
+        this.queryMarbleOwner = 'tom';
+        this.queryMarbleName = 'marble';
+        this.nOwner = 100;
+        this.queryMarbleDocType = 'marble';
+        this.keyStart = parseInt(this.ccDfnPtr.ccOpt.keyStart);
+        this.payLoadMin = parseInt(this.ccDfnPtr.ccOpt.payLoadMin);
+        this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax);
+        this.arg0 = parseInt(this.keyStart);
+        this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
                  this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart, 
-				 parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
+                 parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
 
-    	// get number of owners
-    	if ( typeof( this.ccDfnPtr.invoke.nOwner ) !== 'undefined'  ) {
-        	this.nOwner=parseInt(this.ccDfnPtr.invoke.nOwner);
-    	}
+        // get number of owners
+        if ( typeof( this.ccDfnPtr.invoke.nOwner ) !== 'undefined'  ) {
+            this.nOwner=parseInt(this.ccDfnPtr.invoke.nOwner);
+        }
 
-    	// get prefix owner name
-    	// moveMarbleOwner
-    	// "args": ["marble", "blue","35","tom"]
-    	if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
-        	this.moveMarbleOwner = this.ccDfnPtr.invoke.move.args[3];
-    	}
-    	this.moveMarbleName=ccDfnPtr.invoke.move.args[0];
+        // get prefix owner name
+        // moveMarbleOwner
+        // "args": ["marble", "blue","35","tom"]
+        if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
+            this.moveMarbleOwner = this.ccDfnPtr.invoke.move.args[3];
+        }
+        this.moveMarbleName=ccDfnPtr.invoke.move.args[0];
 
-    	// queryMarbleByOwner
-    	// "args": ["tom"]
-    	//
-    	// queryMarble
-    	// "args": {
-    	//     "selector": {
-    	//         "owner":"tom",
-    	//         "docType":"marble",
-    	//         "color":"blue",
-    	//         "size":"35",
-    	//     }
-    	// }
-    	if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarblesByOwner' ) {
-        	this.queryMarbleOwner=ccDfnPtr.invoke.query.args[0];
-    	} else if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
-        	if ( typeof( this.ccDfnPtr.invoke.query.args.selector.owner ) !== 'undefined' ) {
-            	this.queryMarbleOwner=this.ccDfnPtr.invoke.query.args.selector.owner;
-        	}
-        	if ( typeof( this.ccDfnPtr.invoke.query.args.selector.docType ) !== 'undefined' ) {
-            	this.queryMarbleDocType=this.ccDfnPtr.invoke.query.args.selector.docType;
-        	}
-    	}
-    	this.queryMarbleName=this.ccDfnPtr.invoke.query.args[0];
+        // queryMarbleByOwner
+        // "args": ["tom"]
+        //
+        // queryMarble
+        // "args": {
+        //     "selector": {
+        //         "owner":"tom",
+        //         "docType":"marble",
+        //         "color":"blue",
+        //         "size":"35",
+        //     }
+        // }
+        if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarblesByOwner' ) {
+            this.queryMarbleOwner=ccDfnPtr.invoke.query.args[0];
+        } else if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
+            if ( typeof( this.ccDfnPtr.invoke.query.args.selector.owner ) !== 'undefined' ) {
+                this.queryMarbleOwner=this.ccDfnPtr.invoke.query.args.selector.owner;
+            }
+            if ( typeof( this.ccDfnPtr.invoke.query.args.selector.docType ) !== 'undefined' ) {
+                this.queryMarbleDocType=this.ccDfnPtr.invoke.query.args.selector.docType;
+            }
+        }
+        this.queryMarbleName=this.ccDfnPtr.invoke.query.args[0];
 
-		this.rqSelector = {};
-		if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
-			if ( typeof( this.ccDfnPtr.invoke.query.args.selector ) !== 'undefined' ) {
-				this.rqSelector = this.ccDfnPtr.invoke.query.args.selector;
-			}
-		}
-	}
+        this.rqSelector = {};
+        if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
+            if ( typeof( this.ccDfnPtr.invoke.query.args.selector ) !== 'undefined' ) {
+                this.rqSelector = this.ccDfnPtr.invoke.query.args.selector;
+            }
+        }
+    }
 
-	getInvokeArgs(txIDVar) {
-		this.arg0 ++;
-		var i = 0;
-		for ( i=0; i<this.keyIdx.length; i++ ) {
-			this.testInvokeArgs[this.keyIdx[i]] = this.moveMarbleName+'_'+txIDVar+'_'+this.arg0;
-		}
-		var index=this.arg0%this.nOwner;
-		if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
-			this.testInvokeArgs[3]=this.moveMarbleOwner+'_'+txIDVar+'_'+index;
-		}
-		// marble size
-		for ( i=0; i<this.keyPayLoad.length; i++ ) {
-			this.testInvokeArgs[this.keyPayLoad[i]] = String(index);
-		}
-	}
+    getInvokeArgs(txIDVar) {
+        this.arg0 ++;
+        var i = 0;
+        for ( i=0; i<this.keyIdx.length; i++ ) {
+            this.testInvokeArgs[this.keyIdx[i]] = this.moveMarbleName+'_'+txIDVar+'_'+this.arg0;
+        }
+        var index=this.arg0%this.nOwner;
+        if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
+            this.testInvokeArgs[3]=this.moveMarbleOwner+'_'+txIDVar+'_'+index;
+        }
+        // marble size
+        for ( i=0; i<this.keyPayLoad.length; i++ ) {
+            this.testInvokeArgs[this.keyPayLoad[i]] = String(index);
+        }
+    }
 
-	getQueryArgs(txIDVar) {
+    getQueryArgs(txIDVar) {
         this.arg0 ++;
         var keyA = this.keyStart;
         if ( this.arg0 - this.keyStart > 10 ) {
@@ -141,24 +141,39 @@ class ccFunctions extends ccFunctionsBase {
             this.testQueryArgs[0]=this.testQueryArgs[0]+'}';
 
         } else {
-			var i = 0;
+            var i = 0;
             for ( i=0; i<this.keyIdx.length; i++ ) {
                 this.testQueryArgs[this.keyIdx[i]] = this.queryMarbleName+'_'+txIDVar+'_'+this.arg0;
             }
         }
-	}
+    }
 
-	getExecModeLatencyFreq() {
-		return 20000;
-	}
+    getExecModeLatencyFreq() {
+        return 20000;
+    }
 
-	getExecModeSimpleFreq() {
-		return 20000;
-	}
+    getExecModeSimpleFreq() {
+        return 20000;
+    }
 
-	getExecModeProposalFreq() {
-		return 20000;
-	}
+    getExecModeProposalFreq() {
+        return 20000;
+    }
+
+    // This is an OPTIONAL function
+    // Returns lists of organization names allowed to invoke/query chaincode functions
+    // - <function name> --> <array of organization names>
+    // Default access policy: any organization is allowed to call the function
+    // - If 'getAccessControlPolicyMap' is not defined
+    // - If the return value is an empty JSON: {}
+    // - If the invoke/query function is not a key in the returned JSON
+    // - If the value corresponding to an invoke/query function is an empty array
+    getAccessControlPolicyMap() {
+        return {
+            "initMarble": ["org1", "org2"],
+            "readMarble": []
+        };
+    }
 }
 
 module.exports = ccFunctions;

@@ -914,7 +914,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
     logger.info('[createOrUpdateOneChannel] channelTX: ', channelTX);
     envelope_bytes = fs.readFileSync(channelTX);
     config = client.extractChannelConfig(envelope_bytes);
-    logger.info('[createOrUpdateOneChannel] Successfull extracted the config update from the configtx envelope: ', channelTX);
+    logger.info('[createOrUpdateOneChannel] Successfully extracted the config update from the configtx envelope: ', channelTX);
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {

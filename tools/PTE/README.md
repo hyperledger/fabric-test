@@ -512,6 +512,9 @@ The following chaincodes are tested and supported:
 ## Transaction Payload Generation
 You can write logic to generate transaction (invoke or query) arguments that is specific to a chaincode type (or `ccType` in your chaincode definition JSON file.)
 
+In addition, you can also write per-chaincode logic to specify the organization to which the submitter of a particular transaction must belong. Such an access control policy can be specified at the chaincode function level; i.e., the function name determines the list of organizations.
+(This feature is useful when a chaincode function implements access control by checking the organization name of the transaction submitter using the `GetCreator()` method in the shim API. If PTE does not assign the right signing identity to the fabric client instance, transaction endorsements attempted during a test run will fail.)
+
 The logic for `<ccType>` should be specified in `ccArgumentsGenerators/<ccType>/ccFunctions.js`, in a class named `ccFunctions` that inherits the `ccFunctionsBase` class defined in `ccArgumentsGenerators/ccFunctionsBase.js`.
 
 (The following `ccType` values are supported by default: {`ccchecker`, `marblescc`, `marblescc_priv`}. If you want to run PTE on a custom `ccType`, create an appropriate folder and JS file.)
@@ -519,44 +522,50 @@ The logic for `<ccType>` should be specified in `ccArgumentsGenerators/<ccType>/
 The `ccFunctions` interface that should be implemented is described below. (_Note_: The functions in these interface will be called by `pte-execRequest.js`, so please ensure that they are defined and return a value of an appropriate type.)
 ```
 class ccFunctions extends ccFunctionsBase {
-	constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
-		super(ccDfnPtr, logger, Nid, channelName, org, pid);
-		// ADD INITIALIZATION LOGIC HERE
-	}
+    constructor(ccDfnPtr, logger, Nid, channelName, org, pid) {
+        super(ccDfnPtr, logger, Nid, channelName, org, pid);
+        // ADD INITIALIZATION LOGIC HERE
+    }
 
-	getInvokeArgs(txIDVar) {
-		// ADD LOGIC TO COMPUTE CHAINCODE INVOCATION ARGUMENTS (EXCLUDING THE FUNCTION NAME)
+    getInvokeArgs(txIDVar) {
+        // ADD LOGIC TO COMPUTE CHAINCODE INVOCATION ARGUMENTS (EXCLUDING THE FUNCTION NAME)
 
-		// POPULATE THE 'this.testInvokeArgs[]' ARRAY WITH THE COMPUTED ARGUMENTS' LIST
+        // POPULATE THE 'this.testInvokeArgs[]' ARRAY WITH THE COMPUTED ARGUMENTS' LIST
 
-		// THIS ARRAY WILL BE READ IN 'pte-execRequest.js:getMoveRequest()'
-	}
+        // THIS ARRAY WILL BE READ IN 'pte-execRequest.js:getMoveRequest()'
+    }
 
-	getQueryArgs(txIDVar) {
-		// ADD LOGIC TO COMPUTE CHAINCODE QUERY ARGUMENTS (EXCLUDING THE FUNCTION NAME)
+    getQueryArgs(txIDVar) {
+        // ADD LOGIC TO COMPUTE CHAINCODE QUERY ARGUMENTS (EXCLUDING THE FUNCTION NAME)
 
-		// POPULATE THE 'this.testQueryArgs[]' ARRAY WITH THE COMPUTED ARGUMENTS' LIST
+        // POPULATE THE 'this.testQueryArgs[]' ARRAY WITH THE COMPUTED ARGUMENTS' LIST
 
-		// THIS ARRAY WILL BE READ IN 'pte-execRequest.js:getQueryRequest()'
-	}
+        // THIS ARRAY WILL BE READ IN 'pte-execRequest.js:getQueryRequest()'
+    }
 
-	getExecModeLatencyFreq() {
-		return 0;	// RETURN APPROPRIATE INTEGER VALUE
+    getExecModeLatencyFreq() {
+        'return 0;	// RETURN APPROPRIATE INTEGER VALUE
 
-		// THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeLatency()'
-	}
+        // THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeLatency()'
+    }
 
-	getExecModeSimpleFreq() {
-		return 0;	// RETURN APPROPRIATE INTEGER VALUE
+    getExecModeSimpleFreq() {
+        return 0;	// RETURN APPROPRIATE INTEGER VALUE
 
-		// THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeSimple()'
-	}
+        // THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeSimple()'
+    }
 
-	getExecModeProposalFreq() {
-		return 0;	// RETURN APPROPRIATE INTEGER VALUE
+    getExecModeProposalFreq() {
+        return 0;	// RETURN APPROPRIATE INTEGER VALUE
 
-		// THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeProposal()'
-	}
+        // THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeProposal()'
+    }
+
+    getAccessControlPolicyMap() {
+        return {};	// RETURN JSON key-value mappings: <function-name> --> <array of org-names>
+
+        // THIS VALUE WILL BE USED IN 'pte-execRequest.js:getMoveRequest()' and 'pte-execRequest.js:getQueryRequest()'
+    }
 }
 ```
 For examples, see:
