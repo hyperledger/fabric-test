@@ -675,11 +675,13 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                             buff = '  ' + '  ' + lvl2_key[k] + ': ' + lvl1_obj[lvl2_key[k]] + '\n';
                             fs.appendFileSync(dFile, buff);
                         } else if ( lvl2_key[k] == 'ports' ) {
-                            buff = '  ' + '  ' + lvl2_key[k] + ':' + '\n';
+                            // Zookeeper ports to be exposed only to other containers (e.g., Kafka)
+                            buff = '  ' + '  expose:' + '\n';
                             fs.appendFileSync(dFile, buff);
                                         for (l=0; l< nZoo; l++) {
                                             var tmp = zport+l;
-                                            buff = '  ' + '    - ' + tmp + ':' + tmp + '\n';
+                                            // Zookeeper ports to be exposed only to other containers (e.g., Kafka)
+                                            buff = '  ' + '    - "' + tmp + '"\n';
                                             fs.appendFileSync(dFile, buff);
                                         }
 
