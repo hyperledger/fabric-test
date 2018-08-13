@@ -111,7 +111,7 @@ var tCurr;
 var timeoutOpt;
 var cfgTimeout=200000;   // default 200 sec
 if ((typeof( txCfgPtr.timeoutOpt ) !== 'undefined')) {
-    timeoutOpt = uiContent.timeoutOpt;
+    timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
     if ((typeof( timeoutOpt.preConfig ) !== 'undefined')) {
         cfgTimeout = parseInt(timeoutOpt.preConfig);
