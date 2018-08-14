@@ -160,12 +160,12 @@ if ( txCfgPtr.invokeCheck ) {
     if ( invokeCheck == 'TRUE' ) {
         if ( txCfgPtr.invokeCheckOpt ) {
             if ( txCfgPtr.invokeCheckOpt.peers ) {
-                invokeCheckPeers=txCfgPtr.invokeCheckOpt.peers;
+                invokeCheckPeers=txCfgPtr.invokeCheckOpt.peers.toUpperCase();
             } else {
-                invokeCheckPeers=txCfgPtr.targetPeers;
+                invokeCheckPeers=txCfgPtr.targetPeers.toUpperCase();
             }
             if ( txCfgPtr.invokeCheckOpt.transactions ) {
-                invokeCheckTx=txCfgPtr.invokeCheckOpt.transactions;
+                invokeCheckTx=txCfgPtr.invokeCheckOpt.transactions.toUpperCase();
             } else {
                 invokeCheckTx='LAST';
             }
@@ -175,7 +175,7 @@ if ( txCfgPtr.invokeCheck ) {
                 invokeCheckTxNum=1;
             }
         } else {
-            invokeCheckPeers=txCfgPtr.targetPeers;
+            invokeCheckPeers=txCfgPtr.targetPeers.toUpperCase();
             invokeCheckTx='LAST';
             invokeCheckTxNum=1;
         }
@@ -401,6 +401,14 @@ function setCurrPeerId(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrPeerId] currPeerId:  ', Nid, channelName, org, pid, currPeerId);
 }
 
+function removeAllPeers() {
+    var peers=channel.getPeers();
+    for ( var i=0; i< peers.length; i++ ) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrPeerId] removeAllPeers: %s', Nid, channelName, org, pid, peers[i]);
+        channel.removePeer(peers[i]);
+    }
+
+}
 // assign thread the peers from List
 function assignPeerListFromList(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignPeerListFromList]', Nid, channel.getName(), org, pid);
@@ -1063,18 +1071,18 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
 }
 
 // add target peers to channel
-function setTargetPeers() {
-    if (targetPeers == 'ORGANCHOR') {
+function setTargetPeers(tPeers) {
+    if (tPeers == 'ORGANCHOR') {
         assignThreadOrgAnchorPeer(channel, client, org);
-    } else if (targetPeers == 'ALLANCHORS'){
+    } else if (tPeers == 'ALLANCHORS'){
         assignThreadAllAnchorPeers(channel,client, org);
-    } else if (targetPeers == 'ORGPEERS'){
+    } else if (tPeers == 'ORGPEERS'){
         assignThreadOrgPeer(channel, client, org);
     } else if (targetPeers == 'ALLPEERS'){
         assignThreadAllPeers(channel,client, org);
-    } else if (targetPeers == 'LIST'){
+    } else if (tPeers == 'LIST'){
         assignThreadPeerList(channel,client,org);
-    } else if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
+    } else if ( (tPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
         serviceDiscovery=true;
         if ((typeof(txCfgPtr.discoveryOpt) !== 'undefined')) {
             var discoveryOpt = txCfgPtr.discoveryOpt;
@@ -1090,12 +1098,12 @@ function setTargetPeers() {
         }
 
         channelAdd1Peer(channel, client, org);       // add one peer to channel to perform service discovery
-        if ( (targetPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
+        if ( (tPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
             initDiscovery();
         }
     } else {
-        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, targetPeers);
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, tPeers);
         process.exit(1);
     }
 
@@ -1163,7 +1171,7 @@ async function execTransMode() {
                     }
 
                     // add target peers to channel
-                    setTargetPeers();
+                    setTargetPeers(targetPeers);
 
                     if (targetPeers != 'DISCOVERY'){
                         setCurrPeerId(channel, client, org);
@@ -1324,11 +1332,10 @@ function invokeValidation(caller) {
 
     logger.info("[Nid:chan:org:id=%d:%s:%s:%d invokeValidation] invokeCheck: %d, %d", Nid, channelName, org, pid, ccFuncInst.arg0, inv_q);
     // remove target peers from channel
-    for ( var i = 0; i < peerList.length; i++ ) {
-        channel.removePeer(peerList[i]);
-    }
+    removeAllPeers();
+
     // add target peers to channel
-    setTargetPeers();
+    setTargetPeers(invokeCheckPeers);
 
     invoke_query_simple(0);
 
