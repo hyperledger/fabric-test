@@ -62,13 +62,6 @@ In brief, PTE has the following features:
 - fabric-test commit level: 359dbfb39f507a737ad52129ac0e4fac9cc03c0b
 
 
-### Future items
-
-- Endorsement policy is not supported yet.
-- Replace fabric-sdk-node with fabric-client and fabric-ca-client.
-
-
-
 ## Prerequisites
 To build and test the following prerequisites must be installed first:
 
