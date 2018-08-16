@@ -120,17 +120,18 @@ Scenario Outline: FAB-3851: Message Payloads of size <comment>, for <type> order
     Then a user receives a response containing a value of length <size>
     And a user receives a response with the random value
 Examples:
-    | type  |  size   | comment |
-    | solo  | 1048576 |   1MB   |
-    | solo  | 2097152 |   2MB   |
-    | solo  | 4194304 |   4MB   |
-    | kafka | 1048576 |   1MB   |
-    | kafka | 2097152 |   2MB   |
-    | kafka | 4194304 |   4MB   |
+    | type  |  size   |         comment              |
+    | solo  | 1048576 |           1MB                |
+    | solo  | 2097152 |           2MB                |
+    | solo  | 4194304 |           4MB                |
+    | kafka |  125000 | 125KB (with default msg size) |
+    | kafka |  320000 | 320KB (with default msg size) |
+    | kafka |  490000 | 490KB (with default msg size) |
+    #| kafka | 1000012 |   1MB   |
 
 
 @daily
-Scenario Outline: FAB-3859: Message Sizes with Configuration Tweaks
+Scenario Outline: FAB-3859: Kafka Network with Large Message Size <comment> with Configuration Tweaks
   Given the ORDERER_ABSOLUTEMAXBYTES environment variable is <absoluteMaxBytes>
   And the ORDERER_PREFERREDMAXBYTES environment variable is <preferredMaxBytes>
   And the KAFKA_MESSAGE_MAX_BYTES environment variable is <messageMaxBytes>
@@ -144,15 +145,17 @@ Scenario Outline: FAB-3859: Message Sizes with Configuration Tweaks
   When a user invokes on the channel "configsz" using chaincode named "mapIt" with random args ["put","g","{random_value}"] of length <size>
   And I wait "10" seconds
   And a user queries on the channel "configsz" using chaincode named "mapIt" for the random key with args ["get","g"] on "peer0.org1.example.com"
-  # And a user queries on the chaincode named "mapIt" with args ["get","g"]
   Then a user receives a response containing a value of length <size>
   And a user receives a response with the random value
 Examples:
-    | absoluteMaxBytes | preferredMaxBytes | messageMaxBytes | replicaFetchMaxBytes | replicaFetchResponseMaxBytes |   size   |
-    |     20 MB        |      2 MB         |     2 MB        |        2 MB          |           20 MB              |  1048576 |
-    |      1 MB        |      1 MB         |     2 MB        |        2 MB          |           10 MB              |  1048576 |
-    |      1 MB        |      1 MB         |     2 MB        |       1.5 MB         |           10 MB              |  1048576 |
-    |     11 MB        |      2 MB         |    11 MB        |       11 MB          |           20 MB              | 10485760 |
+    | absoluteMaxBytes | preferredMaxBytes | messageMaxBytes | replicaFetchMaxBytes | replicaFetchResponseMaxBytes |   size   | comment |
+    |     20 MB        |      2 MB         |     4 MB        |        2 MB          |           20 MB              |  1048576 |   1MB   |
+    |      1 MB        |      1 MB         |     4 MB        |        2 MB          |           10 MB              |  1048576 |   1MB   |
+    |      1 MB        |      1 MB         |     4 MB        |       1.5 MB         |           10 MB              |  1048576 |   1MB   |
+    |      4 MB        |      4 MB         |     4 MB        |        4 MB          |           10 MB              |  1048576 |   1MB   |
+    |      8 MB        |      8 MB         |     8 MB        |        8 MB          |           10 MB              |  2097152 |   2MB   |
+    |     16 MB        |     16 MB         |    16 MB        |       16 MB          |           20 MB              |  4194304 |   4MB   |
+    |     11 MB        |      2 MB         |    22 MB        |       11 MB          |           20 MB              | 10485760 |   10MB  |
 
 @daily
 Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>

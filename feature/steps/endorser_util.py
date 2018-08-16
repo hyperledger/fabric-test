@@ -262,6 +262,7 @@ class SDKInterface(InterfaceBase):
 
     def initializeNode(self):
         shutil.rmtree("./node_modules", ignore_errors=True)
+        shutil.rmtree("./package-lock.json", ignore_errors=True)
         shutil.copyfile("package.json", "../../../package.json")
         node = execjs.get(execjs.runtime_names.Node)
         print("node info: {}".format(node.name))

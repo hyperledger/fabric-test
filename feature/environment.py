@@ -62,6 +62,7 @@ def after_scenario(context, scenario):
         if os.path.exists("./node_modules"):
             shutil.rmtree("./node_modules", ignore_errors=True)
             shutil.rmtree("../../../node_modules", ignore_errors=True)
+            shutil.rmtree("../../../package-lock.json", ignore_errors=True)
             subprocess.call(["npm cache clear --force"], shell=True)
             subprocess.call(["npm i -g npm"], shell=True)
         context.composition.decompose()
