@@ -79,7 +79,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # and the expected count of occurances will be the number of orgs:
         #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"Channel: all, tx Num: 20000,\" result_FAB-3833-2i.log",
+                "grep \"Channel: all, tx Num: 20000,\" result_FAB-3833-2i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
@@ -99,9 +99,10 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"Total QUERY transaction 10000,\" result_FAB-3833-2i.log",
+                "grep \"Total QUERY transaction 10000,\" result_FAB-3833-2i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
+
 
     def test_FAB3832_4i_FAB3834_4q(self):
         '''
@@ -149,7 +150,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # and the expected count of occurances will be the number of orgs:
         #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"Channel: all, tx Num: 40000,\" result_FAB-3832-4i.log",
+                "grep \"Channel: all, tx Num: 40000,\" result_FAB-3832-4i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
@@ -158,7 +159,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"Total QUERY transaction 20000,\" result_FAB-3832-4i.log",
+                "grep \"Total QUERY transaction 20000,\" result_FAB-3832-4i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -217,7 +218,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # and the expected count of occurances will be the number of orgs:
         #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"Channel: all, tx Num: 20000,\" result_FAB-3808-2i.log",
+                "grep \"Channel: all, tx Num: 20000,\" result_FAB-3808-2i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
@@ -226,7 +227,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"Total QUERY transaction 10000,\" result_FAB-3808-2i.log",
+                "grep \"Total QUERY transaction 10000,\" result_FAB-3808-2i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -276,7 +277,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # and the expected count of occurances will be the number of orgs:
         #     2
         invokeTxSucceeded = subprocess.check_output(
-                "grep -c \"Channel: all, tx Num: 40000,\" result_FAB-3807-4i.log",
+                "grep \"Channel: all, tx Num: 40000,\" result_FAB-3807-4i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
@@ -285,6 +286,6 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep -c \"Total QUERY transaction 20000,\" result_FAB-3807-4i.log",
+                "grep \"Total QUERY transaction 20000,\" result_FAB-3807-4i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
