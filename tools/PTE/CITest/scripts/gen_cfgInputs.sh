@@ -64,12 +64,15 @@ usage () {
     echo -e "--keystart\ttransaction starting key [integer]"
     echo -e "\t\t(Default: 0)"
 
+    echo -e "--targetpeers\ttransaction target peers [ORGANCHOR|ALLANCHORS|ORGPEERS|ALLPEERS|DISCOVERY]"
+    echo -e "\t\t(Default: ORGANCHOR)"
+
     echo -e "examples:"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a marbles02 samplecc -i"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -i -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 -t move"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
     echo
     exit
 }
@@ -107,6 +110,7 @@ FREQ=0
 NREQ=1000
 RUNDUR=0
 KEYSTART=0
+TARGETPEERS="ORGANCHOR"
 
 # chaincode path
 CCPathsamplecc="github.com/hyperledger/fabric-test/chaincodes/samplecc/go"
@@ -213,6 +217,7 @@ PreCFGProc() {
 # $5: number of transaction request
 # $6: run duration
 # $7: transaction mode
+# $8: target peers
 PreTXProc() {
 
     cfgTX=$1
@@ -222,6 +227,7 @@ PreTXProc() {
     nreq=$5
     rundur=$6
     transmode=$7
+    targetpeers=$8
 
         sed -i "s/_INVOKETYPE_/$invokeType/g" $cfgTX
         sed -i "s/_NPROC_/$nproc/g" $cfgTX
@@ -229,6 +235,7 @@ PreTXProc() {
         sed -i "s/_NREQ_/$nreq/g" $cfgTX
         sed -i "s/_RUNDUR_/$rundur/g" $cfgTX
         sed -i "s/_TRANSMODE_/$transmode/g" $cfgTX
+        sed -i "s/_TARGETPEERS_/$targetpeers/g" $cfgTX
 
 }
 
@@ -363,7 +370,7 @@ TransactionProc() {
 
                 # create PTE transaction configuration input json
                 PreCFGProc $pteCfgTX $scfile.json $chan $chaincode
-                PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE
+                PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE $TARGETPEERS
 
                 runCaseTX=runCasesTX-$fname".txt"
                 tmp=$runDir/$pteCfgTX
@@ -529,6 +536,13 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --targetpeers)
+          shift
+          TARGETPEERS=$1
+          echo -e "\t- Specify transaction target peers: $TARGETPEERS\n"
+          shift
+          ;;
+
       *)
           echo "Unrecognized command line argument: $1"
           usage
@@ -544,6 +558,7 @@ echo " ChanProc=$ChanProc"
 echo " ORGS length: ${#ORGS[@]}"
 echo " ORGS=${ORGS[@]}"
 echo " NORG=$NORG"
+echo " TARGETPEERS=$TARGETPEERS"
 
     # sanity check: SCDIR
 if [ "$SCDIR" == "" ]; then
