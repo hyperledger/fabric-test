@@ -1,6 +1,6 @@
 ## Fabric Testviewer
 
-Available at http://169.46.120.39:31000
+[View test results here https://testviewer.mybluemix.net](https://testviewer.mybluemix.net)
 
 Testviewer is a dashboard that displays throughput rate trends of a simple Hyperledger Fabric network on a consistent test platform. *(Note: it is not a network optimized for maximum throughput.)* It shows the transactions per second (TPS) achieved by a few selected traffic tests executed daily as part of the Continuous Improvement automated test suites. The tests are driven by the PTE (full network), OTE (orderer system only), and LTE (ledger code only) test tools from the [hyperledger/fabric-test](https://github.com/hyperledger/fabric-test) repository.
 
