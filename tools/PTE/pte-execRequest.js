@@ -49,10 +49,11 @@ var i = 0;
 var inv_m = 0;    // counter of invoke move
 var inv_q = 0;    // counter of invoke query
 var n_sd = 0;     // counter of service discovery
-var evtTimeoutCnt = 0;                // counter of event timeout
 var evtType = 'FILTEREDBLOCK';        // event type: FILTEREDBLOCK|CHANNEL, default: FILTEREDBLOCK
 var evtTimeout = 120000;              // event timeout, default: 120000 ms
 var evtListener = 'BLOCK';            // event listener: BLOCK|TRANSACTION, default: BLOCK
+var evtLastRcvdTime = 0;              // last event received time
+var lastSentTime = 0;                 // last transaction sent time
 var IDone=0;
 var QDone=0;
 var recHist;
@@ -80,6 +81,17 @@ var ARGS_DIR = './ccArgumentsGenerators';
 var requestQueue = [];
 var maxRequestQueueLength = 100;
 
+// transactions status counts
+var tx_stats = [];
+var tx_sent = 0;                                 // tx_stats idx: total transactions sent
+var tx_succ = tx_sent+1;                         // tx_stats idx: total transactions succeeded (event receveid)
+var tx_pFail = tx_succ+1;                        // tx_stats idx: total proposal failure
+var tx_txFail = tx_pFail+1;                      // tx_stats idx: total transaction (orderer ack) failure
+var tx_evtTimeout = tx_txFail+1;                 // tx_stats idx: total event timeout
+var tx_evtUnreceived = tx_evtTimeout+1;          // tx_stats idx: total event unreceived
+for ( var i = 0; i <= tx_evtUnreceived; i++ ) {
+    tx_stats[i] = 0;
+}
 // need to override the default key size 384 to match the member service backend
 // otherwise the client will not be able to decrypt the enrollment challenge
 hfc.setConfigSetting('crypto-keysize', 256);
@@ -339,6 +351,21 @@ function getQueryRequest() {
     //logger.info('request_query: %j', request_query);
 }
 
+function listenToEventHub() {
+    // add event if Block listener
+    if ( evtListener == 'BLOCK') {
+        if (evtType == 'FILTEREDBLOCK') {
+            // filteredBlock event
+            eventRegisterFilteredBlock();
+        } else {
+            // channel event
+            eventRegisterBlock();
+        }
+    }
+}
+
+
+var reConnectEvtHub=0;
 function peerFailover(channel, client) {
     var currId = currPeerId;
     var eh;
@@ -409,6 +436,7 @@ function removeAllPeers() {
     }
 
 }
+
 // assign thread the peers from List
 function assignPeerListFromList(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignPeerListFromList]', Nid, channel.getName(), org, pid);
@@ -1078,7 +1106,7 @@ function setTargetPeers(tPeers) {
         assignThreadAllAnchorPeers(channel,client, org);
     } else if (tPeers == 'ORGPEERS'){
         assignThreadOrgPeer(channel, client, org);
-    } else if (targetPeers == 'ALLPEERS'){
+    } else if (tPeers == 'ALLPEERS'){
         assignThreadAllPeers(channel,client, org);
     } else if (tPeers == 'LIST'){
         assignThreadPeerList(channel,client,org);
@@ -1173,6 +1201,9 @@ async function execTransMode() {
                     // add target peers to channel
                     setTargetPeers(targetPeers);
 
+                    // add event if Block listener
+                    listenToEventHub();
+
                     if (targetPeers != 'DISCOVERY'){
                         setCurrPeerId(channel, client, org);
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] peerList: ' , Nid, channelName, org, pid, peerList);
@@ -1218,7 +1249,7 @@ function isExecDone(trType){
         if ( nRequest > 0 ) {
            if ( (inv_m % (nRequest/10)) == 0 ) {
               logger.info(util.format("[Nid:chan:org:id=%d:%s:%s:%d isExecDone] invokes(%s) sent: number=%d, evtTimeoutCnt=%d, elapsed time= %d",
-                                         Nid, channelName, org, pid, trType, inv_m, evtTimeoutCnt, tCurr-tLocal));
+                                         Nid, channelName, org, pid, trType, inv_m, tx_stats[tx_evtTimeout], tCurr-tLocal));
            }
 
            if ( inv_m >= nRequest ) {
@@ -1227,7 +1258,7 @@ function isExecDone(trType){
         } else {
            if ( (inv_m % 1000) == 0 ) {
               logger.info(util.format("[Nid:chan:org:id=%d:%s:%s:%d isExecDone] invokes(%s) sent: number=%d, evtTimeoutCnt=%d, elapsed time= %d",
-                                         Nid, channelName, org, pid, trType, inv_m, evtTimeoutCnt, tCurr-tLocal));
+                                         Nid, channelName, org, pid, trType, inv_m, tx_stats[tx_evtTimeout], tCurr-tLocal));
            }
 
            if ( runForever == 0 ) {
@@ -1242,10 +1273,10 @@ function isExecDone(trType){
         // and cleanup has not happened so we can finish and clean up now.
         if ( IDone == 1 ) {
             clearInitDiscTimeout();
-            tCurr = new Date().getTime();
-            console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] setup Timeout: %d ms, curr time: %d', Nid, channelName, org, pid, evtTimeout, tCurr);
+            lastSentTime = new Date().getTime();
+            console.log('[Nid:chan:org:id=%d:%s:%s:%d isExecDone] setup Timeout: %d ms, curr time: %d', Nid, channelName, org, pid, evtTimeout, lastSentTime);
             setTimeout(function(){
-                postEventProc('isExecDone', inv_m);
+                postEventProc('isExecDone', tx_stats);
                 if ( invokeCheck !== 'TRUE' ) {
                     process.exit();
                 }
@@ -1330,7 +1361,6 @@ function invokeValidation(caller) {
         return;
     }
 
-    logger.info("[Nid:chan:org:id=%d:%s:%s:%d invokeValidation] invokeCheck: %d, %d", Nid, channelName, org, pid, ccFuncInst.arg0, inv_q);
     // remove target peers from channel
     removeAllPeers();
 
@@ -1355,13 +1385,19 @@ var evtRcv=0;
 var evtCount=0;
 
 
-function postEventProc(caller, txnum) {
+function postEventProc(caller, stats) {
 
-    tCurr = new Date().getTime();
-    var remain = Object.keys(txidList).length;
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, txnum, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (txnum/(tCurr-tLocal)*1000).toFixed(2));
-    if ( remain > 0 ) {
-        console.log('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, caller, remain, txidList);
+    var endTime = new Date().getTime();
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] evtLastRcvdTime: %d, lastSentTime: %d, endTime: %d', Nid, channelName, org, pid, caller, evtLastRcvdTime, lastSentTime, endTime);
+    if ( evtLastRcvdTime == 0 ) {
+        evtLastRcvdTime = endTime;
+    }
+    stats[tx_evtUnreceived] = Object.keys(txidList).length;
+    stats[tx_succ]=stats[tx_sent]-stats[tx_pFail]-stats[tx_txFail]-stats[tx_evtUnreceived];
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] stats ', Nid, channelName, org, pid, caller, stats);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd=%d sent= %d proposal failure %d tx orderer failure %d %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, stats[tx_succ], stats[tx_sent], stats[tx_pFail], stats[tx_txFail], transType, invokeType, evtLastRcvdTime-tLocal, tLocal, evtLastRcvdTime, stats[tx_evtTimeout], stats[tx_evtUnreceived], (stats[tx_succ]/(evtLastRcvdTime-tLocal)*1000).toFixed(2));
+    if ( stats[tx_evtUnreceived] > 0 ) {
+        console.log('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, caller, stats[tx_evtUnreceived], txidList);
     }
 
     evtDisconnect();
@@ -1393,6 +1429,10 @@ function eventRegisterFilteredBlock() {
                       for (i=0; i<filtered_block.filtered_transactions.length; i++) {
                         var txid = filtered_block.filtered_transactions[i].txid;
                         if ( txidList[txid] ) {
+                            evtLastRcvdTime = new Date().getTime();
+                            if ( (evtLastRcvdTime - txidList[txid]) > evtTimeout ) {
+                                tx_stats[tx_evtTimeout]++;
+                            }
                             evtRcv = evtRcv + 1;
                             var tend = new Date().getTime();
                             latency_update(evtRcv, tend-txidList[txid], latency_event);
@@ -1409,9 +1449,10 @@ function eventRegisterFilteredBlock() {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] pte-exec: Failure - received filtered_block.number:%d but filtered_transactions is undefined: %j', Nid, channelName, org, pid, filtered_block);
                     }
 
-                    if ( inv_m == evtRcv  ) {
+                    var totalTx = evtRcv + tx_stats[tx_pFail] + tx_stats[tx_txFail];
+                    if ( inv_m == totalTx ) {
                         if ( IDone == 1 ) {
-                            postEventProc('eventRegisterFilteredBlock', evtRcv);
+                            postEventProc('eventRegisterFilteredBlock', tx_stats);
                             eh.unregisterBlockEvent(block_reg);
                             if ( invokeCheck !== 'TRUE' ) {
                                 process.exit();
@@ -1427,8 +1468,7 @@ function eventRegisterFilteredBlock() {
                 //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] inv_m:evtRcv=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
             });
         }).catch((err) => {
-            //evtTimeoutCnt++;
-            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, evtTimeoutCnt, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, tx_stats[tx_evtTimeout], transType, invokeType, tCurr-tLocal, tLocal, tCurr);
         });
 
     });
@@ -1445,6 +1485,10 @@ function eventRegisterBlock() {
                     var txid = block.data.data[i].payload.header.channel_header.tx_id;
                     //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] tx id= %s', Nid, channelName, org, pid, txid);
                     if ( txidList[txid] ) {
+                        evtLastRcvdTime = new Date().getTime();
+                        if ( (evtLastRcvdTime - txidList[txid]) > evtTimeout ) {
+                            tx_stats[tx_evtTimeout]++;
+                        }
                         evtRcv = evtRcv + 1;
                         var tend = new Date().getTime();
                         latency_update(evtRcv, tend-txidList[txid], latency_event);
@@ -1458,9 +1502,10 @@ function eventRegisterBlock() {
                     }
                 }
 
-                if ( inv_m == evtRcv  ) {
+                var totalTx = evtRcv + tx_stats[tx_pFail] + tx_stats[tx_txFail];
+                if ( inv_m == totalTx ) {
                     if ( IDone == 1 ) {
-                        postEventProc('eventRegisterBlock', evtRcv);
+                        postEventProc('eventRegisterBlock', tx_stats);
                         if ( invokeCheck !== 'TRUE' ) {
                             process.exit();
                         }
@@ -1472,8 +1517,7 @@ function eventRegisterBlock() {
                 //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcv=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
             });
         }).catch((err) => {
-            //evtTimeoutCnt++;
-            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, evtTimeoutCnt, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, tx_stats[tx_evtTimeout], transType, invokeType, tCurr-tLocal, tLocal, tCurr);
         });
 
     });
@@ -1486,24 +1530,16 @@ function eventRegister(tx) {
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
             let handle = setTimeout(function(){eh.unregisterTxEvent(deployId);
-            evtTimeoutCnt++;
-            evtCount = evtRcv + evtTimeoutCnt;
-            if ( ( IDone == 1 ) && ( inv_m == evtCount )  ) {
-                tCurr = new Date().getTime();
-                var remain = Object.keys(txidList).length;
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d TIMEOUT eventRegister] pte-exec:completed  Rcvd(sent)=%d(%d) %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid,  evtRcv, inv_m, transType, invokeType, tCurr-tLocal, tLocal, tCurr, evtTimeoutCnt, remain, (evtRcv/(tCurr-tLocal)*1000).toFixed(2));
-                if ( remain > 0 ) {
-                    console.log('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] unreceived: %d, tx_id: ', Nid, channelName, org, pid, remain, txidList);
-                }
-                latency_output();
-                evtDisconnect();
-            }
             resolve()}, evtTimeout);
 
-            eh.registerTxEvent(deployId.toString(), (tx, code) => {
+            eh.registerTxEvent(deployId.toString(), (tx, code, bk_num) => {
                 clearTimeout(handle);
 
                 if ( txidList[deployId.toString()] ) {
+                    evtLastRcvdTime = new Date().getTime();
+                    if ( (evtLastRcvdTime - txidList[deployId.toString()]) > evtTimeout ) {
+                        tx_stats[tx_evtTimeout]++;
+                    }
                     eh.unregisterTxEvent(deployId);
                     evtRcv++;
                     var tend = new Date().getTime();
@@ -1514,8 +1550,9 @@ function eventRegister(tx) {
                         logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, deployId.toString(), code);
                         reject();
                     } else {
-                        if ( ( IDone == 1 ) && ( inv_m == evtRcv ) ) {
-                            postEventProc('eventRegister', evtRcv);
+                        var totalTx = evtRcv + tx_stats[tx_pFail] + tx_stats[tx_txFail];
+                        if ( ( IDone == 1 ) && ( inv_m == totalTx ) ) {
+                            postEventProc('eventRegister', tx_stats);
                             if ( invokeCheck !== 'TRUE' ) {
                                 process.exit();
                             }
@@ -1526,8 +1563,7 @@ function eventRegister(tx) {
                     clearTimeout(handle);
                 });
             }).catch((err) => {
-                //evtTimeoutCnt++;
-                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, evtTimeoutCnt, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, tx_stats[evtTimeout], transType, invokeType, tCurr-tLocal, tLocal, tCurr);
             });
 
             eventPromises.push(txPromise);
@@ -1574,11 +1610,6 @@ function execModeLatency() {
         if ( invokeType == 'MOVE' ) {
             var freq = ccFuncInst.getExecModeLatencyFreq();
 
-            if (evtType == 'FILTEREDBLOCK') {
-                eventRegisterFilteredBlock();
-            } else {
-                eventRegisterBlock();
-            }
             invoke_move_latency();
         } else if ( invokeType == 'QUERY' ) {
             invoke_query_simple(0);
@@ -1740,7 +1771,7 @@ function latency_output() {
 // calculate latency matrix
 function latency_update(inv_m, td, latency) {
 
-    latency[0] = inv_m;
+    latency[0] = latency[0] + 1;
     latency[1] = latency[1] + td;
     if ( td < latency[2] ) {
         latency[2] = td;
@@ -1777,6 +1808,7 @@ function invoke_move_const_go_evtBlock(t1, freq) {
 // invoke_move_const_evtBlock
 function invoke_move_const_evtBlock(freq) {
     inv_m++;
+    tx_stats[tx_sent]++;
 
     var t1 = new Date().getTime();
     getMoveRequest();
@@ -1793,6 +1825,16 @@ function invoke_move_const_evtBlock(freq) {
             //   logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] u %d proposal: %j ', Nid, channelName, org, pid, u, results[u]);
             //}
 
+            if ( typeof(results[0][0].response) === 'undefined' ) {
+                reConnectEvtHub=1;
+                tx_stats[tx_pFail]++;
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] proposal failed %d, %j', Nid, channelName, org, pid, tx_stats[tx_pFail], tx_id.getTransactionID().toString());
+                isExecDone('Move');
+                if ( IDone != 1 ) {
+                    invoke_move_const_go_evtBlock(t1, freq);
+                }
+                return;
+            }
             getTxRequest(results);
             txidList[tx_id.getTransactionID().toString()] = new Date().getTime();
 
@@ -1802,6 +1844,11 @@ function invoke_move_const_evtBlock(freq) {
 
                     var toe = new Date().getTime();
                     latency_update(inv_m, toe-tos, latency_orderer);
+
+                    if ( reConnectEvtHub == 1 ) {
+                        reConnectEvtHub=reConnectEventHub(reConnectEvtHub);
+                        reConnectEvtHub=0;
+                    }
 
                     if ( results.status != 'SUCCESS' ) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results);
@@ -1829,7 +1876,7 @@ function invoke_move_const_evtBlock(freq) {
                     } else {
                         tCurr = new Date().getTime();
                         var remain = Object.keys(txidList).length;
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, tx_stats[tx_evtTimeout], remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
                         if ( remain > 0 ) {
                             console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
                         }
@@ -1837,7 +1884,10 @@ function invoke_move_const_evtBlock(freq) {
                     }
                     //return results[0];
 
-                }).catch((err) => {
+                },(err) => {
+                    tx_stats[tx_txFail]++;
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const_evtBlock] transaction failed %d, %j', Nid, channelName, org, pid, tx_stats[tx_txFail], tx_id.getTransactionID().toString());
+                    delete txidList[tx_id.getTransactionID().toString()];
                     var toe = new Date().getTime();
                     latency_update(inv_m, toe-tos, latency_orderer);
 
@@ -1849,7 +1899,8 @@ function invoke_move_const_evtBlock(freq) {
                     //evtDisconnect();
                     //return;
                 })
-        }).catch((err) => {
+        },(err) => {
+                tx_stats[tx_pFail]++;
                 var te = new Date().getTime();
                 latency_update(inv_m, te-ts, latency_peer);
 
@@ -1886,6 +1937,7 @@ function invoke_move_const_go(t1, freq) {
 // invoke_move_const
 function invoke_move_const(freq) {
     inv_m++;
+    tx_stats[tx_sent]++;
 
     var t1 = new Date().getTime();
     // getMoveRequest();
@@ -1920,6 +1972,7 @@ function invoke_move_const(freq) {
                 var toe = new Date().getTime();
                 latency_update(inv_m, toe-tos, latency_orderer);
 
+
                 if ( results[0].status != 'SUCCESS' ) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] failed to sendTransaction status: %j ', Nid, channelName, org, pid, results[0]);
                     if (ordererFO == 'TRUE') {
@@ -1946,7 +1999,7 @@ function invoke_move_const(freq) {
                 } else {
                     tCurr = new Date().getTime();
                     var remain = Object.keys(txidList).length;
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, tx_stats[tx_evtTimeout], remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
                     if ( remain > 0 ) {
                         console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
                     }
@@ -1955,6 +2008,7 @@ function invoke_move_const(freq) {
                 //return results[0];
 
             }).catch((err) => {
+                tx_stats[tx_pFail]++;
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
                 if (ordererFO == 'TRUE') {
                     ordererFailover(channel, client);
@@ -1965,6 +2019,10 @@ function invoke_move_const(freq) {
             })
 
         }).catch((err) => {
+            tx_stats[tx_pFail]++;
+            var te = new Date().getTime();
+            latency_update(inv_m, te-ts, latency_peer);
+
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_const] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
             if (peerFO == 'TRUE') {
                 peerFailover(channel, client);
@@ -2056,16 +2114,7 @@ function execModeConstant() {
                 }
             }
 
-            if (evtType == 'FILTEREDBLOCK') {
-                if ( evtListener == 'BLOCK') {
-                    eventRegisterFilteredBlock();
-                    invoke_move_const_evtBlock(freq);
-                } else {
-                   requestPusher(getMoveRequest, (freq / 10));
-                   invoke_move_const(freq);
-                }
-            } else if (evtListener == 'BLOCK') {
-                eventRegisterBlock();
+            if (evtListener == 'BLOCK') {
                 invoke_move_const_evtBlock(freq);
             } else {
                 requestPusher(getMoveRequest, (freq / 10));
@@ -2342,7 +2391,7 @@ function invoke_move_burst_evtBlock() {
                     } else {
                         tCurr = new Date().getTime();
                         var remain = Object.keys(txidList).length;
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst_evtBlock] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst_evtBlock] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, tx_stats[tx_evtTimeout], remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
                         if ( remain > 0 ) {
                             console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst_evtBlock] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
                         }
@@ -2422,7 +2471,7 @@ function invoke_move_burst() {
                 } else {
                     tCurr = new Date().getTime();
                     var remain = Object.keys(txidList).length;
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, evtTimeoutCnt, remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, tx_stats[tx_evtTimeout], remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
                     if ( remain > 0 ) {
                         console.log('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_burst] unreceived events(%d), txidList', Nid, channelName, org, pid, remain, txidList);
                     }
@@ -2524,16 +2573,7 @@ function execModeBurst() {
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
         if ( invokeType == 'MOVE' ) {
-            if (evtType == 'FILTEREDBLOCK') {
-                if ( evtListener == 'BLOCK') {
-                    eventRegisterFilteredBlock();
-                    invoke_move_burst_evtBlock();
-                } else {
-                   requestPusher(getMoveRequest, (bCurrFreq / 10));
-                   invoke_move_burst();
-                }
-            } else if (evtListener == 'BLOCK') {
-                eventRegisterBlock();
+            if (evtListener == 'BLOCK') {
                 invoke_move_burst_evtBlock();
             } else {
                 requestPusher(getMoveRequest, (bCurrFreq / 10));
@@ -2589,6 +2629,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// disconnect event hubs
 function evtDisconnect() {
     for ( i=0; i<eventHubs.length; i++) {
         if (eventHubs[i] && eventHubs[i].isconnected()) {
@@ -2596,6 +2637,22 @@ function evtDisconnect() {
             eventHubs[i].disconnect();
         }
     }
+}
+
+// connect to event hubs
+function reConnectEventHub() {
+
+    logger.info('connecting the event hub');
+    for ( var i=0; i<eventHubs.length; i++) {
+        if ( evtType == 'FILTEREDBLOCK' ) {
+            eventHubs[i].connect();
+        } else {
+            eventHubs[i].connect(true);
+        }
+    }
+    listenToEventHub();
+
+    return;
 }
 
 function requestPusher(fn, delay) {

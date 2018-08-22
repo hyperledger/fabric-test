@@ -1353,9 +1353,13 @@ async function performance_main() {
                         var minQueryDuration=0;
                         var maxMixedDuration=0;
                         var minMixedDuration=0;
-                        var totalInvokeTimeout=0;
 
                         var totalInvokeTrans=0;
+                        var totalInvokeTransRcvd=0;
+                        var totalInvokePeerFailures=0;
+                        var totalInvokeOrdererFailures=0;
+                        var totalInvokeEventTimeout=0;
+                        var totalInvokeEventUnreceived=0;
                         var totalInvokeTps=0;
                         var totalQueryTrans=0;
                         var totalQueryTps=0;
@@ -1382,11 +1386,19 @@ async function performance_main() {
                                 logger.info("ERROR occurred:" +rawText);
                                 continue;
                             };
-                            if (rawText.indexOf("eventRegister")>-1) {
-                                var transNum= parseInt(rawText.substring(rawText.indexOf("(sent)=")+7,rawText.indexOf("(",rawText.indexOf("(sent)=")+7)).trim());
+                            if ( (rawText.indexOf("postEventProc")>-1 ) || (rawText.indexOf("eventRegister")>-1) ) {
+                                var transNum= parseInt(rawText.substring(rawText.indexOf("sent=")+5,rawText.indexOf("(",rawText.indexOf("sent=")+5)).trim());
                                 totalInvokeTrans=totalInvokeTrans+transNum;
+                                var transNum= parseInt(rawText.substring(rawText.indexOf("Rcvd=")+5,rawText.indexOf("(",rawText.indexOf("Rcvd=")+5)).trim());
+                                totalInvokeTransRcvd=totalInvokeTransRcvd+transNum;
+                                var peerFailures=parseInt(rawText.substring(rawText.indexOf("proposal failure")+17,rawText.indexOf("(",rawText.indexOf("proposal failure")+17)).trim());
+                                totalInvokePeerFailures=totalInvokePeerFailures+peerFailures;
+                                var ordererFailures=parseInt(rawText.substring(rawText.indexOf("tx orderer failure")+19,rawText.indexOf("(",rawText.indexOf("tx orderer failure")+19)).trim());
+                                totalInvokeOrdererFailures=totalInvokeOrdererFailures+ordererFailures;
+                                var eventUnreived=parseInt(rawText.substring(rawText.indexOf("event unreceived:")+18).trim());
+                                totalInvokeEventUnreceived=totalInvokeEventUnreceived+eventUnreived;
                                 var tempTimeoutNum=parseInt(rawText.substring(rawText.indexOf("timeout:")+8).trim());
-                                totalInvokeTimeout=totalInvokeTimeout+tempTimeoutNum;
+                                totalInvokeEventTimeout=totalInvokeEventTimeout+tempTimeoutNum;
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalInvokeTime=totalInvokeTime+tempDur;
 
@@ -1516,11 +1528,10 @@ async function performance_main() {
                         }
                         logger.info("Test Summary: Total %d Threads run completed",procDone);
                         if (totalInvokeTrans>0) {
-                            logger.info("Test Summary (%s):Total INVOKE transaction=%d, timeout transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", chaincode_id, totalInvokeTrans, totalInvokeTimeout, minInvokeDuration, maxInvokeDuration,totalInvokeTime/procDone, totalInvokeTps.toFixed(2));
 
                             var dur=etmp-stmp;
-                            var iTPS=1000*totalInvokeTrans/dur;
-                            logger.info("Aggregate Test Summary (%s):Total INVOKE transaction %d, timeout transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalInvokeTrans, totalInvokeTimeout, stmp, etmp, dur, iTPS.toFixed(2));
+                            var iTPS=1000*totalInvokeTransRcvd/dur;
+                            logger.info("Aggregate Test Summary (%s):Total INVOKE transaction %d, timeout %d, unreceveid %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalInvokeTrans, totalInvokeEventTimeout, totalInvokeEventUnreceived, stmp, etmp, dur, iTPS.toFixed(2));
 
 
                             // transaction output
@@ -1528,7 +1539,12 @@ async function performance_main() {
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): INVOKE transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions "+totalInvokeTrans + "  timeout transactions "+totalInvokeTimeout+"\n";
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalInvokeTrans + "  received "+totalInvokeTransRcvd+"\n";
+                            fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tfailures: proposal "+totalInvokePeerFailures + "  transactions "+totalInvokeOrdererFailures+"\n";
+                            fs.appendFileSync(rptFile, buff);
+
+                            buff = "("+channelName+":"+chaincode_id+"):\tevent: received "+totalInvokeTransRcvd + "  timeout "+totalInvokeEventTimeout+ "  unreceived "+ totalInvokeEventUnreceived+"\n";
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
@@ -1542,7 +1558,7 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_peer[0] +"  total time: "+ latency_peer[1] +" ms \n";
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_peer[0] > 0 ) {
-                                buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_peer[2] +" ms  max: "+ latency_peer[3] +" ms  avg: "+ latency_peer[1]/latency_peer[0].toFixed(2) +" ms \n";
+                                buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_peer[2] +" ms  max: "+ latency_peer[3] +" ms  avg: "+ (latency_peer[1]/latency_peer[0]).toFixed(2) +" ms \n";
                                 fs.appendFileSync(rptFile, buff);
                             }
 
@@ -1552,7 +1568,7 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_orderer[0] +"  total time: "+ latency_orderer[1] +" ms \n";
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_orderer[0] > 0 ) {
-                                buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_orderer[2] +" ms  max: "+ latency_orderer[3] +" ms  avg: "+ latency_orderer[1]/latency_orderer[0].toFixed(2) +" ms \n";
+                                buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_orderer[2] +" ms  max: "+ latency_orderer[3] +" ms  avg: "+ (latency_orderer[1]/latency_orderer[0]).toFixed(2) +" ms \n";
                                 fs.appendFileSync(rptFile, buff);
                             }
 
@@ -1562,13 +1578,13 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_event[0] +"  total time: "+ latency_event[1] +" ms \n";
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_event[0] > 0 ) {
-                                buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_event[2] +" ms  max: "+ latency_event[3] +" ms  avg: "+ latency_event[1]/latency_event[0].toFixed(2) +" ms \n\n";
+                                buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_event[2] +" ms  max: "+ latency_event[3] +" ms  avg: "+ (latency_event[1]/latency_event[0]).toFixed(2) +" ms \n\n";
                                 fs.appendFileSync(rptFile, buff);
                             }
                         }
                         if (totalQueryTrans>0) {
                             var dur=etmp-stmp;
-                            logger.info("Test Summary (%s):Total  QUERY transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", chaincode_id, totalQueryTrans, minQueryDuration, maxQueryDuration, totalQueryTime/procDone,totalQueryTps.toFixed(2));
+                            logger.info("Test Summary (%s):Total  QUERY transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", chaincode_id, totalQueryTrans, minQueryDuration, maxQueryDuration, totalQueryTime/procDone, totalQueryTps.toFixed(2));
                             var qTPS=1000*totalQueryTrans/dur;
                             logger.info("Aggregate Test Summary (%s):Total QUERY transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalQueryTrans, stmp, etmp, dur, qTPS.toFixed(2));
 
@@ -1607,7 +1623,7 @@ async function performance_main() {
                         }
                         if (totalDiscoveryTrans>0) {
                             var dur=etmp-stmp;
-                            logger.info("Test Summary (%s):Total  DISCOVERY transaction=%d, duration=%d ms, total throughput=%d TPS", chaincode_id, totalDiscoveryTrans, dur, totalDiscoveryTrans/dur.toFixed(2));
+                            logger.info("Test Summary (%s):Total  DISCOVERY transaction=%d, duration=%d ms, total throughput=%d TPS", chaincode_id, totalDiscoveryTrans, dur, (totalDiscoveryTrans/dur).toFixed(2));
                             var sdTPS=1000*totalDiscoveryTrans/dur;
                             logger.info("Aggregate Test Summary (%s):Total DISCOVERY transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalDiscoveryTrans, stmp, etmp, dur, sdTPS.toFixed(2));
 
