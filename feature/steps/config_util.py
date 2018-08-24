@@ -128,20 +128,22 @@ def setupConfigs(context, channelID):
                  "{0}/peerOrganizations/{1}/users/Admin@{1}/msp/config.yaml".format(testConfigs,
                                                                                     orgDir))
 
-def inspectOrdererConfig(context, filename):
+def inspectOrdererConfig(context, filename, channelID):
     testConfigs = makeProjectConfigDir(context)
     updated_env = updateEnviron(context)
     try:
-        command = ["configtxgen", "-inspectBlock", filename]
+        command = ["configtxgen", "-inspectBlock", filename,
+                   "-channelID", channelID]
         return subprocess.check_output(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to inspect orderer config data: {0}".format(sys.exc_info()[1]))
 
-def inspectChannelConfig(context, filename):
+def inspectChannelConfig(context, filename, channelID):
     testConfigs = makeProjectConfigDir(context)
     updated_env = updateEnviron(context)
     try:
-        command = ["configtxgen", "-inspectChannelCreateTx", filename]
+        command = ["configtxgen", "-inspectChannelCreateTx", filename,
+                   "-channelID", channelID]
         return subprocess.check_output(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to inspect channel config data: {0}".format(sys.exc_info()[1]))

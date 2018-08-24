@@ -56,29 +56,29 @@ def step_impl(context, fileName):
 
 @then(u'the updated config block does not contain {value}')
 def step_impl(context, value):
-    blockInfo = config_util.inspectOrdererConfig(context, "{}.block".format(context.interface.TEST_CHANNEL_ID))
+    blockInfo = config_util.inspectOrdererConfig(context, "{}.block".format(context.interface.TEST_CHANNEL_ID), context.interface.SYS_CHANNEL_ID)
     assert str(value) not in str(blockInfo)
 
 @then(u'the updated config block contains {value}')
 @then(u'the orderer block contains {value}')
 def step_impl(context, value):
-    blockInfo = config_util.inspectOrdererConfig(context, "{}.block".format(context.interface.TEST_CHANNEL_ID))
+    blockInfo = config_util.inspectOrdererConfig(context, "{}.block".format(context.interface.TEST_CHANNEL_ID), context.interface.SYS_CHANNEL_ID)
     assert str(value) in str(blockInfo)
 
 @then(u'the updated config block "{fileName}" contains {value}')
 @then(u'the orderer block "{fileName}" contains {value}')
 def step_impl(context, fileName, value):
-    blockInfo = config_util.inspectOrdererConfig(context, fileName)
+    blockInfo = config_util.inspectOrdererConfig(context, fileName, context.interface.SYS_CHANNEL_ID)
     assert str(value) in str(blockInfo)
 
 @then(u'the channel transaction file contains {value}')
 def step_impl(context, value):
-    blockInfo = config_util.inspectChannelConfig(context, "{}.tx".format(context.interface.TEST_CHANNEL_ID))
+    blockInfo = config_util.inspectChannelConfig(context, "{}.tx".format(context.interface.TEST_CHANNEL_ID), context.interface.SYS_CHANNEL_ID)
     assert str(value) in str(blockInfo)
 
 @then(u'the channel transaction file "{fileName}" contains {value}')
 def step_impl(context, fileName, value):
-    blockInfo = config_util.inspectChannelConfig(context, fileName)
+    blockInfo = config_util.inspectChannelConfig(context, fileName, context.interface.SYS_CHANNEL_ID)
     assert str(value) in str(blockInfo)
 
 @when('the orderer node logs receiving the orderer block')
