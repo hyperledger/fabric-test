@@ -4,6 +4,10 @@
     "chaincodeID": "sample_cc",
 {% elif chaincode == "samplejs" %}
     "chaincodeID": "sample_js",
+{% elif chaincode == "marbles02_private" %}
+    "chaincodeID": "marbles_cc_priv",
+{% elif chaincode == "marbles02" %}
+    "chaincodeID": "marbles_cc",
 {% endif %}
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
@@ -13,7 +17,7 @@
     "invokeType": "Query",
     "targetPeers": "{{ targetPeers }}",
     "nProcPerOrg": "{{ nProcPerOrg }}",
-    "nRequest": "1000",
+    "nRequest": "100",
     "runDur": "0",
     "peerFailover": "{{ peerFailover }}",
     "ordererFailover": "{{ ordererFailover }}",
@@ -31,9 +35,6 @@
 {% endif %}
 {% endfor %}
         ]
-    },
-    "discoveryOpt": {
-        "localHost": "false"
     },
 {% if transMode == "Burst" %}
     "burstOpt": {
@@ -59,6 +60,10 @@
         "org1": ["peer1"],
         "org2": ["peer1"]
     },
+{% elif targetPeers == "Discovery" %}
+    "discoveryOpt": {
+        "localHost": "false"
+    },
 {% endif %}
     "eventOpt": {
         "type": "{{ eventType }}",
@@ -71,11 +76,22 @@
     },
     "timeoutOpt": {
         "preConfig": "{{ preconfig }}",
-        "request": "{{ request }}"
+        "request": "{{ request }}",
+        "grpcTimeout": "{{ grpcTimeout }}"
     },
+{% if chaincode == "samplecc" or chaincode == "samplejs" %}
     "ccType": "ccchecker",
+{% elif chaincode == "marbles02" %}
+    "ccType": "marblescc",
+{% elif chaincode == "marbles02_private" %}
+    "ccType": "marblescc_priv",
+{% endif %}
     "ccOpt": {
+{% if chaincode == "samplecc" or chaincode == "samplejs" %}
         "keyIdx": [1],
+{% elif chaincode == "marbles02" or chaincode == "marbles02_private" %}
+        "keyIdx": [0],
+{% endif %}
         "keyPayLoad": [2],
         "keyStart": "0",
         "payLoadType": "{{ payLoadType }}",
@@ -83,14 +99,36 @@
         "payLoadMax": "{{ payLoadMax }}"
     },
     "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
+{% if chaincode == "samplecc" or chaincode == "samplejs" %}
         "move": {
             "fcn": "invoke",
             "args": ["put", "a1","1"]
+        },
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
         }
+{% elif chaincode == "marbles02" %}
+        "nOwner":"10000",
+        "move": {
+            "fcn": "initMarble",
+            "args": ["marble", "white","35","tom"]
+        },
+        "query": {
+            "fcn": "readMarble",
+            "args": ["marble"]
+        }
+{% elif chaincode == "marbles02_private" %}
+        "nOwner":"10000",
+        "move": {
+            "fcn": "initMarble",
+            "args": ["marble", "blue","35","tom","99"]
+        },
+        "query": {
+            "fcn": "readMarblePrivateDetails",
+            "args": ["marble"]
+        }
+{% endif %}
     },
     "SCFile": [
                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}

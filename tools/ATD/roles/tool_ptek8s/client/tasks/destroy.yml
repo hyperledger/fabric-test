@@ -1,0 +1,17 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+- name: Stop PTE client pod
+  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/pte-client-k8s.yml"
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteclientdown"
+
+- name: Delete configMap
+  command: >-
+    ./kubectl --kubeconfig kubeconfig delete configmap client
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "clientconfig"

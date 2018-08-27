@@ -4,12 +4,14 @@
     "chaincodeID": "sample_cc",
 {% elif chaincode == "samplejs" %}
     "chaincodeID": "sample_js",
+{% elif chaincode == "marbles02_private" %}
+    "chaincodeID": "marbles_cc_priv",
+{% elif chaincode == "marbles02" %}
+    "chaincodeID": "marbles_cc",
 {% endif %}
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
-    "transMode": "Simple",
     "transType": "install",
-    "nProcPerOrg": "4",
     "TLS": "{{ TLS }}",
     "channelOpt": {
         "name":  "{{ item.name }}",
@@ -27,14 +29,21 @@
     },
     "timeoutOpt": {
         "preConfig": "{{ preconfig }}",
-        "request": "{{ request }}"
+        "request": "{{ request }}",
+        "grpcTimeout": "{{ grpcTimeout }}"
     },
     "deploy": {
 {% if chaincode == "samplecc" %}
         "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
 {% elif chaincode == "samplejs" %}
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+        "chaincodePath": "/root/go/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
         "language": "node",
+{% elif chaincode == "marbles02_private" %}
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+        "metadataPath": "/root/go/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go/META-INF",
+{% elif chaincode == "marbles02" %}
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
+        "metadataPath": "/root/go/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF",
 {% endif %}
         "fcn": "init",
         "args": []

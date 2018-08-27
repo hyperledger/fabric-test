@@ -16,12 +16,13 @@ spec:
     - name: task-pv-storage
       persistentVolumeClaim:
         claimName: fabriccerts
-    - name: testcase
+    - name: {{ item }}
       configMap:
-        name: ptetestcase
+        name: {{ item }}
   containers:
     - name: pte{{ item }}
       image: {{ pte.repo.url }}fabric-pte:{{ pte.repo.tag }}
+      #image: {{ pte.repo.url }}fabric-pte:{{ pte.repo.tag }}
       imagePullPolicy: Always
       env:
         - { name: "TESTCASE", value: "{{ testcase }}" }
@@ -29,6 +30,6 @@ spec:
         - { name: "CHAINCODE", value: "{{ chaincode }}" }
       volumeMounts:
         - { mountPath: "/var/hyperledger/fabric/artifacts", name: "task-pv-storage" }
-        - { mountPath: "/var/hyperledger/fabric/testcase", name: "testcase" }
+        - { mountPath: "/var/hyperledger/fabric/testcase", name: "{{ item }}" }
       command: ["bash"]
       args: ["-c","cp /var/hyperledger/fabric/testcase/{{ item }}.sh . && chmod +x {{ item }}.sh && ./{{ item }}.sh"]

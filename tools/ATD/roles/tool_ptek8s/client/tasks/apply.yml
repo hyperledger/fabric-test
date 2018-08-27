@@ -1,0 +1,121 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+
+- name: Create samplecc-invoke file
+  template:
+    src: "{{ playbook_dir }}/client/templates/samplecc-chan-invoke-TLS.j2"
+    dest: "{{ testdir }}/{{ testcase }}/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-{{ testcase }}-TLS.json"
+  with_items: "{{ channellists }}"
+  when: testcase == "multihost"
+
+- name: Create runCases-invoke.txt file
+  template:
+    src: "{{ playbook_dir }}/client/templates/runCases-chan.j2"
+    dest: "{{ testdir }}/{{ item[1] }}/{{ chaincode }}/runCases-chan{{ item[0].channelnum }}-{{ item[1] }}-TLS.txt"
+  with_nested:
+    - "{{ channellists }}"
+    - "{{ testcase }}"
+  when: testcase == "multihost"
+
+- name: Create PTEMgr.txt file for invoke
+  template:
+    src: "{{ playbook_dir }}/client/templates/PTEMgr.j2"
+    dest: "{{ testdir }}/{{ item }}/{{ chaincode }}/PTEMgr-{{ item }}-TLS.txt"
+  with_items: "{{ testcase }}"
+  when: testcase == "multihost"
+
+- name: Create samplecc-query file
+  template:
+    src: "{{ playbook_dir }}/client/templates/samplecc-chan-query-TLS.j2"
+    dest: "{{ testdir }}/{{ testcase_query }}/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-{{ testcase_query }}-TLS.json"
+  with_items: "{{ channellists }}"
+  when: testcase_query == "multihost_query"
+
+- name: Create runCases-query.txt file
+  template:
+    src: "{{ playbook_dir }}/client/templates/runCases-chan.j2"
+    dest: "{{ testdir }}/{{ item[1] }}/{{ chaincode }}/runCases-chan{{ item[0].channelnum }}-{{ item[1] }}-TLS.txt"
+  with_nested:
+    - "{{ channellists }}"
+    - "{{ testcase_query }}"
+  when: testcase_query == "multihost_query"
+
+- name: Create PTEMgr.txt file for query
+  template:
+    src: "{{ playbook_dir }}/client/templates/PTEMgr.j2"
+    dest: "{{ testdir }}/{{ item }}/{{ chaincode }}/PTEMgr-{{ item }}-TLS.txt"
+  with_items: "{{ testcase_query }}"
+  when: testcase_query == "multihost_query"
+
+- name: Create client execution file
+  template:
+    src: "{{ playbook_dir }}/client/templates/client.j2"
+    dest: "{{ testdir }}/client.sh"
+    mode: "u=rx,g=rx"
+  with_together:
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
+- name: Archive the config files to PTE pod
+  archive:
+    path: "{{ testdir }}"
+    dest: "{{ testdir }}/../pteconfig.tgz"
+
+- name: Create configmaps for client file
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create configmap client --from-file={{ testdir }}/client.sh
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+
+- name: Create deployment file for PTE client
+  template:
+    src: "{{ playbook_dir }}/admin/templates/pte-k8s.j2"
+    dest: "{{ playbook_dir }}/../../vars/pte-{{ item }}-k8s.yml"
+  with_items:
+    - "client"
+
+- name: Start PTE client pod
+  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-client-k8s.yml"
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteclientup"
+
+- name: Wait for PTE client pod to come up
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: pteclientstatus
+  until: pteclientstatus.stdout.find("true") >= 0
+  retries: 10
+  delay: 30
+  tags: "pteclientup"
+
+- name: Copy config zip file onto the PTE client pod
+  command: >-
+    ./kubectl --kubeconfig kubeconfig cp {{ testdir }}/../pteconfig.tgz pteclient:/var/hyperledger/fabric/
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteclientconfig"
+
+- name: Check the health of the PTE client
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: ptestatus
+  until: ptestatus.stdout.find("false") >= 0
+  retries: 2500
+  delay: 120
+  tags: "pteclientcheck"
+
+- name: Logs in PTE client to local
+  shell: >-
+    ./kubectl --kubeconfig kubeconfig logs pteclient -c pteclient > {{ playbook_dir }}/../../vars/client-{{ testcase }}-{{ testcase_query }}.log 2>&1
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteclientlogs"

@@ -1,7 +1,7 @@
 {
 "test-network": {
   "orderer": {
-{% for orderer in orderers %}
+{% for orderer in allorderers %}
     "orderer{{ loop.index0 }}": {
         "name": "{{ orderer.org }}",
         "mspid": "{{ orderer.org }}",
@@ -28,14 +28,14 @@
     "comName": "{{ peerorg }}",
     "ordererID": "{{ item.0.orderer }}",
     "ca": {
-{% for ca in cas if ca.org == peerorg %}
+{% for ca in allcas if ca.org == peerorg %}
       "url":"https://{{ ca.name }}:7054",
       "name": "{{ ca.name }}"
 {% endfor %}
     },
     "username": "{{ fabric.ca.admin }}",
     "secret": "{{ fabric.ca.adminpw }}",
-{%  for peer in peers if peer.org == peerorg %}
+{%  for peer in allpeers if peer.org == peerorg %}
     "peer{{ loop.index }}": {
       "requests": "grpcs://{{ peer.name }}:7051",
       "events": "grpcs://{{ peer.name }}:7053",

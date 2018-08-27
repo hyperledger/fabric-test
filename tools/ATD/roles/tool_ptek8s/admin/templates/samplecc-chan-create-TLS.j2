@@ -1,13 +1,4 @@
 {
-    "channelID": "_ch{{ item.channelnum|int }}",
-{% if chaincode == "samplecc" %}
-    "chaincodeID": "sample_cc",
-{% elif chaincode == "samplejs" %}
-    "chaincodeID": "sample_js",
-{% endif %}
-    "chaincodeVer": "v0",
-    "logLevel": "ERROR",
-    "nProcPerOrg": "4",
     "transType": "Channel",
     "TLS": "{{ TLS }}",
     "channelOpt": {
@@ -20,7 +11,8 @@
     },
     "timeoutOpt": {
         "preConfig": "{{ preconfig }}",
-        "request": "{{ request }}"
+        "request": "{{ request }}",
+        "grpcTimeout": "{{ grpcTimeout }}"
     },
     "SCFile": [
                {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}

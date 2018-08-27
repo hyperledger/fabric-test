@@ -40,13 +40,22 @@ sed -i 's/\(\"channelTX\"\:\ \"\)\(.*\)/\1\/var\/hyperledger\/fabric\/artifacts\
 {% if chaincode == 'samplejs' %}
 sed -i 's/\(\"chaincodePath\"\:\ \"\)\(.*\)/\1\/root\/go\/src\/github.com\/hyperledger\/fabric-test\/chaincodes\/samplecc\/node"\,/g' ../{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ ch }}-install-TLS.json
 {% endif %}
+{% if chaincode == 'marbles02' %}
+sed -i 's/\(\"metadataPath\"\:\ \"\)\(.*\)/\1\/root\/go\/src\/github.com\/hyperledger\/fabric-test\/fabric\/examples\/chaincode\/go\/marbles02\/META-INF"\,/g' ../{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ ch }}-install-TLS.json
+{% endif %}
 {% endfor %}
 {% endif %}
 echo "#########################################"
 echo "#          Starting Admin Tasks         #"
 echo "#########################################"
-echo "Creating Channel, Joining Peers to Channel, Installing and Instantiating the Chaincode"
-./test_driver.sh -m {{ testcase }} -p -c {{ chaincode }}
+{% set create = '' | default('true') %}
+{% if create %}
+echo "Creating Channel, Joining Peers to Channel"
+./test_driver.sh -m {{ testcase }} -p
+{% endif %}
+echo "Installing and Instantiating the Chaincode"
+
+./test_driver.sh -m {{ testcase }} -c {{ chaincode }}
 
 echo "#########################################"
 echo "#         Completed Admin Tasks         #"

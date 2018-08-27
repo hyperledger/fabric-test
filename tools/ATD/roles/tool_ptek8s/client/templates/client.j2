@@ -48,6 +48,8 @@ cat ../Logs/{{ testcase_query }}*.log | while read line; do
     echo "$line"
 done
 
+rm -rf ../Logs/{{ testcase_query }}*.log
+
 echo "Sending Invokes"
 ./test_driver.sh -m {{ testcase }} -t {{ testcase }}
 while ps axg | grep -vw grep | grep -w "node ./pte-execRequest.js" > /dev/null; do sleep 60; done
@@ -63,11 +65,20 @@ echo "Sending Queries"
 while ps axg | grep -vw grep | grep -w "node ./pte-execRequest.js" > /dev/null; do sleep 60; done
 
 #Query log
+echo
 echo "###########"Logs for {{ testcase_query }}"############"
+echo
 cat ../Logs/{{ testcase_query }}*.log | while read line; do
     echo "$line"
 done
-sleep 30
+
+echo
+echo "###############"PTE REPORT"##############"
+echo
+cat ../../pteReport.txt | while read line; do
+    echo "$line"
+done
+
 echo "#########################################"
 echo "#      COMPLETED RUNNING THE TESTS      #"
 echo "#########################################"

@@ -4,12 +4,14 @@
     "chaincodeID": "sample_cc",
 {% elif chaincode == "samplejs" %}
     "chaincodeID": "sample_js",
+{% elif chaincode == "marbles02_private" %}
+    "chaincodeID": "marbles_cc_priv",
+{% elif chaincode == "marbles02" %}
+    "chaincodeID": "marbles_cc",
 {% endif %}
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
-    "invokeCheck": "TRUE",
     "transType": "instantiate",
-    "nProcPerOrg": "4",
     "TLS": "{{ TLS }}",
     "channelOpt": {
         "name":  "{{ item.name }}",
@@ -21,7 +23,8 @@
     },
     "timeoutOpt": {
         "preConfig": "{{ preconfig }}",
-        "request": "{{ request }}"
+        "request": "{{ request }}",
+        "grpcTimeout": "{{ grpcTimeout }}"
     },
     "deploy": {
 {% if chaincode == "samplecc" %}
@@ -29,19 +32,14 @@
 {% elif chaincode == "samplejs" %}
         "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
         "language": "node",
+{% elif chaincode == "marbles02_private" %}
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+        "collectionsConfigPath": "github.com/hyperledger/fabric-test/tools/PTE/CITest/{{ testcase }}/preconfig/{{ chaincode }}/collections_config-chan{{ item.channelnum|int }}.json",
+{% elif chaincode == "marbles02" %}
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
 {% endif %}
         "fcn": "init",
         "args": []
-    },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
     },
     "SCFile": [
                 {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.channelnum|int }}-TLS.json"}

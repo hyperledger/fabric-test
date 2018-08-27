@@ -6,18 +6,18 @@
 # This variable defines fabric network attributes
 pte: {
   ptechannels: [
-    {name: "testorgschannel1", orgs: ["orga", "orgb"], orderer: "orderer0"},
-    {name: "testorgschannel2", orgs: ["orga", "orgb"], orderer: "orderer0"},
+    {name: "testorgschannel1", orgs: ["org1", "org2"], orderer: "orderer0"},
+    {name: "testorgschannel2", orgs: ["org1", "org2"], orderer: "orderer0"},
   ],
   transaction: {
     transMode: "Constant",
-    nProcPerOrg: 2,
-    nRequest: 100,
+    nProcPerOrg: 1,
+    nRequest: 1000,
     runDur: 0,
     TLS: "enabled",
     targetPeers: "OrgAnchor",
-    peerFailover: TRUE,
-    ordererFailover: TRUE,
+    peerFailover: FALSE,
+    ordererFailover: FALSE,
     burstOpt: {
       burstFreq0:  500,
       burstDur0:  3000,
@@ -48,7 +48,8 @@ pte: {
     },
     timeoutOpt: {
       preConfig: 300000,
-      request: 300000
+      request: 300000,
+      grpcTimeout: 10000
     },
     ccOpt: {
       payLoadType: "Random",

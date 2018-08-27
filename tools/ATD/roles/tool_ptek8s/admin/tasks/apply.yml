@@ -1,0 +1,161 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+- name: Create samplecc-create file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/samplecc-chan-create-TLS.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/channels/chan{{ item.channelnum }}-create-TLS.json"
+  with_items: "{{ channellists }}"
+  when: testcase == "multihost"
+
+- name: Create runCases-create.txt file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/runCases-chan-create.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/channels/runCases-chan-create{{ item }}-TLS.txt"
+  with_sequence: start=1 end={{ (endlist|int) }}
+  when: testcase == "multihost"
+
+- name: Create samplecc-join file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/samplecc-chan-join-TLS.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/channels/chan{{ item.channelnum }}-join-TLS.json"
+  with_items: "{{ channellists }}"
+  when: testcase == "multihost"
+
+- name: Create runCases-join.txt file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/runCases-chan-join.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/channels/runCases-chan-join{{ item }}-TLS.txt"
+  with_sequence: start=1 end={{ (endlist|int) }}
+  when: testcase == "multihost"
+
+- name: Create samplecc-install file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/samplecc-chan-install-TLS.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-install-TLS.json"
+  with_items: "{{ channellists }}"
+  when: testcase == "multihost"
+
+- name: Create runCases-install.txt file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/runCases-chan-install.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/{{ chaincode }}/runCases-chan-install{{ item }}-TLS.txt"
+  with_sequence: start=1 end={{ (endlist|int) }}
+  when: testcase == "multihost"
+
+- name: Create samplecc-instantiate file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/samplecc-chan-instantiate-TLS.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ item.channelnum }}-instantiate-TLS.json"
+  with_items: "{{ channellists }}"
+  when: testcase == "multihost"
+
+- name: Create Collections Config file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/collections-config.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/{{ chaincode }}/collections_config-chan{{ item.channelnum }}.json"
+  with_items: "{{ channellists }}"
+  when: chaincode == "marbles02_private"
+
+- name: Create runCases-instantiate.txt file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/runCases-chan-instantiate.j2"
+    dest: "{{ testdir }}/{{ testcase }}/preconfig/{{ chaincode }}/runCases-chan-instantiate{{ item }}-TLS.txt"
+  with_sequence: start=1 end={{ (endlist|int) }}
+  when: testcase == "multihost"
+
+- name: Create admin execution file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/admin.j2"
+    dest: "{{ testdir }}/admin.sh"
+    mode: "u=rx,g=rx"
+  with_together:
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
+- name: Archive the config files to PTE pod
+  archive:
+    path: "{{ testdir }}"
+    dest: "{{ testdir }}/../pteconfig.tgz"
+
+- name: Check the status of secret for pulling images
+  command: >-
+    ./kubectl --kubeconfig='kubeconfig' get secrets -o=custom-columns=NAME:.metadata.name
+    regcred
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  ignore_errors: yes
+  no_log: True
+  register: "secretstatus"
+  when: >
+    pte.repo.username | default("") | length > 0 and
+    pte.repo.password | default("") | length > 0
+
+- name: Create secret for image
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create secret docker-registry regcred --docker-server={{ pte.repo.url }}
+    --docker-username={{ pte.repo.username }} --docker-password={{ pte.repo.password }} --docker-email=email@email.com
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: "secretcreate"
+  when: >
+    pte.repo.username | default("") | length > 0 and
+    pte.repo.password | default("") | length > 0 and
+    secretstatus.rc != 0
+
+- name: Create deployment file for PTE
+  template:
+    src: "{{ playbook_dir }}/admin/templates/pte-k8s.j2"
+    dest: "{{ playbook_dir }}/../../vars/pte-{{ item }}-k8s.yml"
+  with_items:
+    - "admin"
+
+- name: Create configmaps for admin file
+  command: >-
+    ./kubectl --kubeconfig kubeconfig create configmap admin --from-file={{ testdir }}/admin.sh
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+
+- name: Start PTE admin pod
+  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-admin-k8s.yml"
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteadminup"
+
+- name: Wait for PTE admin pod to come up
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteadmin
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: pteadminstatus
+  until: pteadminstatus.stdout.find("true") >= 0
+  retries: 10
+  delay: 30
+  tags: "pteadminup"
+
+- name: Copy config zip file onto the PTE admin pod
+  command: >-
+    ./kubectl --kubeconfig kubeconfig cp {{ testdir }}/../pteconfig.tgz pteadmin:/var/hyperledger/fabric/
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  tags: "pteadminconfig"
+
+- name: Wait for PTE admin pod to be completed
+  command: >-
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteadmin
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
+  register: pteadminstatus
+  until: pteadminstatus.stdout.find("false") >= 0
+  retries: 30
+  delay: 120
+  tags: "pteadmincheck"
+
+- name: Logs in PTE admin to local
+  shell: >-
+    ./kubectl --kubeconfig kubeconfig logs pteadmin -c pteadmin > {{ playbook_dir }}/../../vars/admin-{{ testcase }}-{{ testcase_query }}.log 2>&1
+  args:
+    chdir: "{{ playbook_dir }}/../../../../cello_0823/src/agent/ansible/vars/"
+  tags: "pteadminlogs"

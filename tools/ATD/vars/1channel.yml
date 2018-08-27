@@ -6,13 +6,13 @@
 # This variable defines fabric network attributes
 pte: {
   ptechannels: [
-    {name: "testorgschannel1", orgs: ["orga1"], orderer: "orderer0"},
+    {name: "channel1", orgs: ["org1"], orderer: "orderer0"},
   ],
   transaction: {
-    transMode: "Constant",
-    nProcPerOrg: 2,
-    nRequest: 100,
-    runDur: 0,
+    transMode: "Mix",
+    nProcPerOrg: 50,
+    nRequest: 0,
+    runDur: 600,
     TLS: "enabled",
     targetPeers: "OrgAnchor",
     peerFailover: TRUE,
@@ -25,12 +25,12 @@ pte: {
     },
     mixOpt: {
       mixQuery: "false",
-      mixFreq: 3000
+      mixFreq: 10
     },
     constantOpt: {
       recHist: "HIST",
-      constFreq: 0,
-      devFreq: 0
+      constFreq: 20,
+      devFreq: 2
     },
     listOpt: {
       org1: ["peer1", "peer2"],
@@ -39,15 +39,16 @@ pte: {
     eventOpt: {
       type: "FilteredBlock",
       listener: "Block",
-      timeout: 600000
+      timeout: 240000
     },
     failoverOpt: {
       method: "RoundRobin",
       list: "targetPeers"
     },
     timeoutOpt: {
-      preConfig: 300000,
-      request: 300000
+      preConfig: 180000,
+      request: 180000,
+      grpcTimeout: 10000
     },
     ccOpt: {
       payLoadType: "Random",
@@ -56,13 +57,11 @@ pte: {
     }
   },
   repo: {
-
-  repo: {
     # the url defines docker hub project access point
     # official hub - url: "hyperledger/",
     # fabric build hub - url: "nexus3.hyperledger.org:10001/hyperledger/",
     url: "nexus3.hyperledger.org:10001/hyperledger/",
-    repo: "1.2.0",
+    tag: "1.1.0",
     username: "",
     password: ""
   }

@@ -1,0 +1,196 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+- name: Reuse common code
+  include_tasks: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/roles/common/config_apply.yml"
+
+- name: Setup variables
+  set_fact:
+    testdir: "{{ playbook_dir }}/../../vars/{{ pteenv }}/CITest"
+
+- name : Create channel and channel orgs list
+  set_fact:
+    channels: |
+      {{ channels | default([]) + [{ 'name':item.name | default(),
+        'orgs':item.orgs | default([]),
+        'orderer': item.orderer | default() }] }}
+  with_items: "{{ pte.ptechannels }}"
+
+- name: Sort the channel list
+  set_fact:
+    channels: "{{ channels | unique | sort }}"
+
+- name: Get the number of channels
+  set_fact:
+    channelnum: "{{ channelnum | default() + item | default() }}"
+  with_sequence: count={{ channels|length }}
+
+- name: make channelnum list
+  set_fact:
+    channelnum: "{{ channelnum | list }}"
+
+- name: Transaction rate parameters
+  set_fact:
+    transMode: "{{ pte.transaction.transMode }}"
+    targetPeers: "{{ pte.transaction.targetPeers }}"
+    TLS: "{{ pte.transaction.TLS }}"
+    nProcPerOrg: "{{ pte.transaction.nProcPerOrg }}"
+    nRequest: "{{ pte.transaction.nRequest }}"
+    runDur: "{{ pte.transaction.runDur }}"
+    peerFailover: "{{ pte.transaction.peerFailover }}"
+    ordererFailover: "{{ pte.transaction.ordererFailover }}"
+
+- name: Transaction mode for MIX
+  set_fact:
+    mixQuery: "{{ pte.transaction.mixOpt.mixQuery }}"
+    mixFreq: "{{ pte.transaction.mixOpt.mixFreq }}"
+  when: transMode == "Mix"
+
+- name: Transaction mode for BURST
+  set_fact:
+    burstFreq0: "{{ pte.transaction.burstOpt.burstFreq0 }}"
+    burstDur0: "{{ pte.transaction.burstOpt.burstDur0 }}"
+    burstFreq1: "{{ pte.transaction.burstOpt.burstFreq1 }}"
+    burstDur1: "{{ pte.transaction.burstOpt.burstDur1 }}"
+  when: transMode == "Burst"
+
+- name: Transaction mode for CONSTANT
+  set_fact:
+    recHist: "{{ pte.transaction.constantOpt.recHist }}"
+    constFreq: "{{ pte.transaction.constantOpt.constFreq }}"
+    devFreq: "{{ pte.transaction.constantOpt.devFreq }}"
+  when: transMode == "Constant"
+
+- name: Event options
+  set_fact:
+    eventType: "{{ pte.transaction.eventOpt.type }}"
+    eventListener: "{{ pte.transaction.eventOpt.listener }}"
+    eventTimeout: "{{ pte.transaction.eventOpt.timeout }}"
+
+- name: Timeout Options
+  set_fact:
+    preconfig: "{{ pte.transaction.timeoutOpt.preConfig }}"
+    request: "{{ pte.transaction.timeoutOpt.request }}"
+    grpcTimeout: "{{ pte.transaction.timeoutOpt.grpcTimeout }}"
+
+- name: failover Options
+  set_fact:
+    method: "{{ pte.transaction.failoverOpt.method }}"
+    list: "{{ pte.transaction.failoverOpt.list }}"
+
+- name: Payload options
+  set_fact:
+    payLoadType: "{{ pte.transaction.ccOpt.payLoadType }}"
+    payLoadMin: "{{ pte.transaction.ccOpt.payLoadMin }}"
+    payLoadMax: "{{ pte.transaction.ccOpt.payLoadMax }}"
+
+- name: Create list
+  set_fact:
+    channellists: |
+      {{ channellists | default([]) + [{ 'name':item.0.name | default(),
+        'orgs':item.0.orgs | default([]),
+        'orderer': item.0.orderer | default(),
+        'channelnum': item.1|int }] }}
+  with_together:
+    - "{{ channels }}"
+    - "{{ channelnum }}"
+
+- name: Create orgs list
+  set_fact:
+    channelorgs: "{{ channelorgs | default([]) + item.orgs | default([]) }}"
+  with_items: "{{ pte.ptechannels }}"
+
+- name: Number of orgs in channels
+  set_fact:
+    numorgs: "{{ numorgs | default([]) + [ item | default() ] }}"
+  with_sequence: count={{ channelorgs|length }}
+
+- name: make numorgs list
+  set_fact:
+    numorgs: "{{ numorgs | list }}"
+
+- name: Make list for channels
+  set_fact:
+    endlist: "{{ (channelnum|length)/2 | int }}"
+  when: "{{ (channelnum|length) | int }} is even"
+  register: countvar
+
+- name: Make list for channels
+  set_fact:
+    endlist: "{{ (channelnum|length + 1)/2 | int }}"
+  when: "{{ (channelnum|length) | int }} is odd"
+  register: countvar
+
+- name: testcase
+  set_fact:
+    testcase: "{{ testcase | default('multihost') }}"
+
+- name: testcase_query
+  set_fact:
+    testcase_query: "{{ testcase_query | default('multihost_query') }}"
+
+- name: Create testcase root directory
+  file:
+    path: "{{ testdir }}"
+    state: directory
+    force: yes
+    mode: 0775
+
+- name: Create the channel transaction
+  shell: >-
+    export FABRIC_CFG_PATH={{ fabricworkdir }} &&
+    {{ fabricpath }}/bin/configtxgen -profile OrgChannel
+    -outputCreateChannelTx {{ testdir }}/{{ item.name }}.tx -channelID {{ item.name }}
+  args:
+    chdir: "{{ testdir }}"
+  with_items: "{{ channels }}"
+
+- name: Create scenario directory
+  file:
+    path: "{{ testdir }}/{{ item }}"
+    state: directory
+    force: yes
+    mode: 0775
+  with_items:
+    - "{{ testcase }}"
+    - "{{ testcase_query }}"
+  when: testcase == "multihost"
+
+- name: Create preconfig directory for invoke
+  file:
+    path: "{{ testdir }}/{{ testcase }}/preconfig/{{ item }}"
+    state: directory
+    force: yes
+    mode: 0755
+  with_items:
+    - channels
+    - "{{ chaincode }}"
+  when: testcase == "multihost"
+
+- name: Create chaincode directory for invoke and query
+  file:
+    path: "{{ testdir }}/{{ item }}/{{ chaincode }}"
+    state: directory
+    force: yes
+    mode: 0755
+  with_items:
+    - "{{ testcase }}"
+    - "{{ testcase_query }}"
+  when: testcase == "multihost"
+
+- name: Create CISCFiles directory
+  file:
+    path: "{{ testdir }}/CISCFiles"
+    state: directory
+    mode: 0755
+
+- name: Create config file
+  template:
+    src: "{{ playbook_dir }}/admin/templates/config-chan-TLS.j2"
+    dest: "{{ testdir }}/CISCFiles/config-chan{{ item.1 }}-TLS.json"
+  with_together:
+    - "{{ channels }}"
+    - "{{ channelnum }}"
