@@ -1576,24 +1576,38 @@ function eventRegister(tx) {
 function invoke_move_latency() {
 
     inv_m++;
+    tx_stats[tx_sent]++;
 
     getMoveRequest();
 
+    var ts = new Date().getTime();
     channel.sendTransactionProposal(request_invoke)
     .then(
         function(results) {
             var proposalResponses = results[0];
 
+            // setup tx id array and update proposal latency
+            var te = new Date().getTime();
             getTxRequest(results);
-            txidList[tx_id.getTransactionID().toString()] = new Date().getTime();
+            txidList[tx_id.getTransactionID().toString()] = te;
+            // update proposal latency
+            latency_update(inv_m, te-ts, latency_peer);
+
+            var tos = new Date().getTime();
             return channel.sendTransaction(txRequest)
             .then((results) => {
-                // do nothing here
+                // update transaction latency
+                var toe = new Date().getTime();
+                latency_update(inv_m, toe-tos, latency_orderer);
             }).catch((err) => {
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
             })
         },
         function(err) {
+            tx_stats[tx_txFail]++;
+            delete txidList[tx_id.getTransactionID().toString()];
+            var toe = new Date().getTime();
+            latency_update(inv_m, toe-tos, latency_orderer);
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
         })
 }

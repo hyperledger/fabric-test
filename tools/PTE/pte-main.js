@@ -1346,13 +1346,7 @@ async function performance_main() {
                     if ( procDone === nProcPerOrg*channelOrgName.length ) {
 
                         var summaryIndex;
-
-                        var maxInvokeDuration=0;
-                        var minInvokeDuration=0;
-                        var maxQueryDuration=0;
-                        var minQueryDuration=0;
-                        var maxMixedDuration=0;
-                        var minMixedDuration=0;
+                        var transMode=txCfgPtr.transMode.toUpperCase();
 
                         var totalInvokeTrans=0;
                         var totalInvokeTransRcvd=0;
@@ -1402,12 +1396,6 @@ async function performance_main() {
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalInvokeTime=totalInvokeTime+tempDur;
 
-                                if (tempDur >maxInvokeDuration ) {
-                                    maxInvokeDuration= tempDur;
-                                }
-                                if ((tempDur <minInvokeDuration ) ||(minInvokeDuration ==0) ) {
-                                    minInvokeDuration= tempDur;
-                                }
                                 var tempInvokeTps=parseFloat(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
                                 if (tempInvokeTps >0 ) {
                                     totalInvokeTps =totalInvokeTps+tempInvokeTps;
@@ -1445,12 +1433,6 @@ async function performance_main() {
                                 totalMixedQuery=totalMixedQuery+mixedQueryNum;
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalMixedTime=totalMixedTime+tempDur;
-                                if (tempDur >maxMixedDuration ) {
-                                    maxMixedDuration= tempDur;
-                                }
-                                if ((tempDur <minMixedDuration ) ||(minMixedDuration ==0) ) {
-                                    minMixedDuration= tempDur;
-                                }
                                 var tempMixedTps=parseFloat(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
                                 if (tempMixedTps >0 ) {
                                     totalMixedTPS =totalMixedTPS+tempMixedTps;
@@ -1477,12 +1459,6 @@ async function performance_main() {
 
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalQueryTime=totalQueryTime+tempDur;
-                                if (tempDur >maxQueryDuration ) {
-                                    maxQueryDuration= tempDur;
-                                }
-                                if ((tempDur <minQueryDuration ) ||(minQueryDuration ==0) ) {
-                                    minQueryDuration= tempDur;
-                                }
                                 var tempQueryTps=parseFloat(rawText.substring(rawText.indexOf("Throughput=")+11,rawText.indexOf("TPS")).trim());
                                 if (tempQueryTps >0 ) {
                                     totalQueryTps =totalQueryTps+tempQueryTps;
@@ -1530,14 +1506,11 @@ async function performance_main() {
                         if (totalInvokeTrans>0) {
 
                             var dur=etmp-stmp;
-                            var iTPS=1000*totalInvokeTransRcvd/dur;
-                            logger.info("Aggregate Test Summary (%s):Total INVOKE transaction %d, timeout %d, unreceveid %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalInvokeTrans, totalInvokeEventTimeout, totalInvokeEventUnreceived, stmp, etmp, dur, iTPS.toFixed(2));
-
 
                             // transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"): INVOKE transaction stats\n";
+                            buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalInvokeTrans + "  received "+totalInvokeTransRcvd+"\n";
                             fs.appendFileSync(rptFile, buff);
@@ -1549,8 +1522,16 @@ async function performance_main() {
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"):\tTPS "+iTPS.toFixed(2)+ "\n";
-                            fs.appendFileSync(rptFile, buff);
+
+                            if ( transMode === 'LATENCY' ) {
+                                var iTPS=dur/totalInvokeTransRcvd;
+                                buff = "("+channelName+":"+chaincode_id+"):\tLatency "+iTPS.toFixed(2)+" ms \n";
+                                fs.appendFileSync(rptFile, buff);
+                            } else {
+                                var iTPS=1000*totalInvokeTransRcvd/dur;
+                                buff = "("+channelName+":"+chaincode_id+"):\tTPS "+iTPS.toFixed(2)+ "\n";
+                                fs.appendFileSync(rptFile, buff);
+                            }
 
                             // peer latency output (endorsement)
                             buff = "("+channelName+":"+chaincode_id+"): peer latency stats (endorsement)\n";
@@ -1584,7 +1565,6 @@ async function performance_main() {
                         }
                         if (totalQueryTrans>0) {
                             var dur=etmp-stmp;
-                            logger.info("Test Summary (%s):Total  QUERY transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", chaincode_id, totalQueryTrans, minQueryDuration, maxQueryDuration, totalQueryTime/procDone, totalQueryTps.toFixed(2));
                             var qTPS=1000*totalQueryTrans/dur;
                             logger.info("Aggregate Test Summary (%s):Total QUERY transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalQueryTrans, stmp, etmp, dur, qTPS.toFixed(2));
 
@@ -1604,7 +1584,6 @@ async function performance_main() {
                         if (totalMixedTPS) {
                             var dur=etmp-stmp;
                             var mixTotal=totalMixedInvoke+totalMixedQuery;
-                            logger.info("Test Summary (%s):Total mixed transaction=%d, the Min duration is %d ms,the Max duration is %d ms,Avg duration=%d ms, total throughput=%d TPS", chaincode_id, mixTotal, minMixedDuration, maxMixedDuration, (totalMixedTime)/(procDone),(totalMixedTPS).toFixed(2));
                             var mTPS=1000*(totalMixedInvoke+totalMixedQuery)/dur;
                             logger.info("Aggregate Test Summary (%s):Total MIX transaction invoke %d query %d total %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalMixedInvoke, totalMixedQuery, totalMixedInvoke+totalMixedQuery, stmp, etmp, etmp-stmp, mTPS.toFixed(2));
 
