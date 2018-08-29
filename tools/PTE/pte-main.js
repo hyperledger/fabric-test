@@ -1356,6 +1356,7 @@ async function performance_main() {
                         var totalInvokeEventUnreceived=0;
                         var totalInvokeTps=0;
                         var totalQueryTrans=0;
+                        var totalQueryFailed=0;
                         var totalQueryTps=0;
                         var totalInvokeTime=0;
                         var totalQueryTime=0;
@@ -1456,6 +1457,9 @@ async function performance_main() {
                             if ( (invokeType == "QUERY") && (rawText.indexOf("invoke_query_")>-1) ) {
                                 var queryTransNum= parseInt(rawText.substring(rawText.indexOf("pte-exec:completed")+18,rawText.indexOf("transaction",rawText.indexOf("pte-exec:completed")+18)).trim());
                                 totalQueryTrans=totalQueryTrans+queryTransNum;
+
+                                var queryTransFailed= parseInt(rawText.substring(rawText.indexOf("with")+4,rawText.indexOf("failures",rawText.indexOf("with")+4)).trim());
+                                totalQueryFailed=totalQueryFailed+queryTransFailed;
 
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalQueryTime=totalQueryTime+tempDur;
@@ -1564,16 +1568,17 @@ async function performance_main() {
                             }
                         }
                         if (totalQueryTrans>0) {
+                            var totalQueryReceived=totalQueryTrans-totalQueryFailed;
                             var dur=etmp-stmp;
-                            var qTPS=1000*totalQueryTrans/dur;
-                            logger.info("Aggregate Test Summary (%s):Total QUERY transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalQueryTrans, stmp, etmp, dur, qTPS.toFixed(2));
+                            var qTPS=1000*totalQueryReceived/dur;
+                            logger.info("Aggregate Test Summary (%s):Total QUERY transaction %d received %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalQueryTrans, totalQueryReceived, stmp, etmp, dur, qTPS.toFixed(2));
 
                             // query transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"): QUERY transaction stats\n";
+                            buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " QUERY transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions "+totalQueryTrans + "\n";
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalQueryTrans + "  received "+totalQueryReceived+"\n";
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
@@ -1590,9 +1595,9 @@ async function performance_main() {
                             // mix transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"): MIX transaction stats\n";
+                            buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE/QUERY transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions "+mixTotal+" INVOKE "+totalMixedInvoke+"  QUERY "+ totalMixedQuery + "\n";
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+mixTotal+" INVOKE "+totalMixedInvoke+"  QUERY "+ totalMixedQuery + "\n";
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
