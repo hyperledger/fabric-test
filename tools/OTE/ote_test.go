@@ -309,153 +309,153 @@ func Test_ORD105_1ch_3ord_kafka_4kbs(t *testing.T) {
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-6996_1ch_solo - DEFAULT testcase - send txns to 1 chan on solo orderer with default batchsize and payload size
-func Test_FAB6996_1ch_1ord_solo(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-6996_1ch_solo", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+//FAB-6996_30ktx_1ch_solo - DEFAULT testcase - send txns to 1 chan on solo orderer with default batchsize and payload size
+func Test_FAB6996_30ktx_1ch_solo(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-6996_30ktx_1ch_solo", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7936 - short test of ote functionalities: send 100 TXs to 3 chans on 3 orderers, 3 kafka brokers, 1 zookeeper with default batchsize and payload size
+//FAB-7936_100tx_3ch_3ord_3kb - short test of ote functionalities: send 100 TXs to 3 chans on 3 orderers, 3 kafka brokers, 1 zookeeper with default batchsize and payload size
 func Test_FAB7936_100tx_3ch_3ord_3kb(t *testing.T) {
         // TODO: Later we should use spyDefer, after FAB-7996 is finished to repair that OTE functionality.
         passResult, finalResultSummaryString := ote("FAB-7936_100tx_3ch_3ord_3kb", 100, 3, 3, "kafka", 3, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7070 - send txns to solo orderer with default batchsize and higher payload
-func Test_FAB7070_1ch_1ord_solo_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7070", 30000, 1, 1, "solo", 0, spyOff, 1, 10 )
+//FAB-7070_30ktx_1ch_solo_10kpayload - send txns to solo orderer with default batchsize and higher payload
+func Test_FAB7070_30ktx_1ch_solo_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7070_30ktx_1ch_solo_10kpayload", 30000, 1, 1, "solo", 0, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7024 - send txns to solo orderer with higher batchsize and default payload
-func Test_FAB7024_1ch_1ord_solo_500batchsize(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7024", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+//FAB-7024_30ktx_1ch_solo_500batchsize( - send txns to solo orderer with higher batchsize and default payload
+func Test_FAB7024_30ktx_1ch_solo_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7024_30ktx_1ch_solo_500batchsize", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7071 - send txns to solo orderer with higher batchsize and higher payload
-func Test_FAB7071_1ch_1ord_solo_500batchsize_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7071", 30000, 1, 1, "solo", 0, spyOff, 1, 10 )
+//FAB-7071_30ktx_1ch_solo_500batchsize_10kpayload - send txns to solo orderer with higher batchsize and higher payload
+func Test_FAB7071_30ktx_1ch_solo_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7071_30ktx_1ch_solo_500batchsize_10kpayload", 30000, 1, 1, "solo", 0, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7026 - send txns to solo orderer on 3 channels with default batchsize and default payload
-func Test_FAB7026_3ch_1ord_solo(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7026", 30000, 3, 1, "solo", 0, spyOff, 1, 0 )
+//FAB-7026_30ktx_3ch_solo - send txns to solo orderer on 3 channels with default batchsize and default payload
+func Test_FAB7026_30ktx_3ch_solo(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7026_30ktx_3ch_solo", 30000, 3, 1, "solo", 0, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7072 - send txns to solo orderer on 3 channels with default batchsize and higher payload
-func Test_FAB7072_3ch_1ord_solo_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7072", 30000, 3, 1, "solo", 0, spyOff, 1, 10 )
+//FAB-7072_30ktx_3ch_solo_10kpayload - send txns to solo orderer on 3 channels with default batchsize and higher payload
+func Test_FAB7072_30ktx_3ch_solo_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7072_30ktx_3ch_solo_10kpayload", 30000, 3, 1, "solo", 0, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7027 - send txns to solo orderer on 3 channels with higher batchsize and default payload
-func Test_FAB7027_3ch_1ord_solo_500batchsize(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7027", 30000, 3, 1, "solo", 0, spyOff, 1, 0 )
+//FAB-7027_30ktx_3ch_solo_500batchsize - send txns to solo orderer on 3 channels with higher batchsize and default payload
+func Test_FAB7027_30ktx_3ch_solo_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7027_30ktx_3ch_solo_500batchsize", 30000, 3, 1, "solo", 0, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7073 - send txns to solo orderer on 3 channels with higher batchsize and higher payload
-func Test_FAB7073_3ch_1ord_solo_500batchsize_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7073", 30000, 3, 1, "solo", 0, spyOff, 1, 10 )
+//FAB-7073_30ktx_3ch_solo_500batchsize_10kpayload - send txns to solo orderer on 3 channels with higher batchsize and higher payload
+func Test_FAB7073_30ktx_3ch_solo_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7073_30ktx_3ch_solo_500batchsize_10kpayload", 30000, 3, 1, "solo", 0, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7036 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
-func Test_FAB7036_1ch_3ord_5kb(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7036", 30000, 1, 3, "kafka", 5, spyOff, 1, 0 )
+//FAB-7036_30ktx_1ch_3ord_5kb - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7036_30ktx_1ch_3ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7036_30ktx_1ch_3ord_5kb", 30000, 1, 3, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7074 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
-func Test_FAB7074_1ch_3ord_5kb_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7074", 15000, 1, 3, "kafka", 5, spyOff, 1, 10 )
+//FAB-7074_15ktx_1ch_3ord_5kb_10kpayload - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7074_15ktx_1ch_3ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7074_15ktx_1ch_3ord_5kb_10kpayload", 15000, 1, 3, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7037 - send txns to 3 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
-func Test_FAB7037_1ch_3ord_5kb_500batchsize(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7037", 30000, 1, 3, "kafka", 5, spyOff, 1, 0 )
+//FAB-7037_30ktx_1ch_3ord_5kb_500batchsize - send txns to 3 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7037_30ktx_1ch_3ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7037_30ktx_1ch_3ord_5kb_500batchsize", 30000, 1, 3, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7075 - send txns to 3 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
-func Test_FAB7075_1ch_3ord_5kb_500batchsize_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7075", 15000, 1, 3, "kafka", 5, spyOff, 1, 10 )
+//FAB-7075_15ktx_1ch_3ord_5kb_500batchsize_10kpayload - send txns to 3 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7075_15ktx_1ch_3ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7075_15ktx_1ch_3ord_5kb_500batchsize_10kpayload", 15000, 1, 3, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7038 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
-func Test_FAB7038_3ch_3ord_5kb(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7038", 30000, 3, 3, "kafka", 5, spyOff, 1, 0 )
+//FAB-7038_30ktx_3ch_3ord_5kb - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7038_30ktx_3ch_3ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7038_30ktx_3ch_3ord_5kb", 30000, 3, 3, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7076 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
-func Test_FAB7076_3ch_3ord_5kb_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7076", 15000, 3, 3, "kafka", 5, spyOff, 1, 10 )
+//FAB-7076_15ktx_3ch_3ord_5kb_10kpayload - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7076_15ktx_3ch_3ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7076_15ktx_3ch_3ord_5kb_10kpayload", 15000, 3, 3, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7039 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
-func Test_FAB7039_3ch_3ord_5kb_500batchsize(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7039", 30000, 3, 3, "kafka", 5, spyOff, 1, 0 )
+//FAB-7039_30ktx_3ch_3ord_5kb_500batchsize - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7039_30ktx_3ch_3ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7039_30ktx_3ch_3ord_5kb_500batchsize", 30000, 3, 3, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7077 - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
-func Test_FAB7077_3ch_3ord_5kb_500batchsize_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7077", 15000, 3, 3, "kafka", 5, spyOff, 1, 10 )
+//FAB-7077_15ktx_3ch_3ord_5kb_500batchsize_10kpayload - send txns to 3 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7077_15ktx_3ch_3ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7077_15ktx_3ch_3ord_5kb_500batchsize_10kpayload", 15000, 3, 3, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7058 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
-func Test_FAB7058_1ch_6ord_5kb(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7058", 30000, 1, 6, "kafka", 5, spyOff, 1, 0 )
+//FAB-7058_30ktx_1ch_6ord_5kb - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7058_30ktx_1ch_6ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7058_30ktx_1ch_6ord_5kb", 30000, 1, 6, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7078 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
-func Test_FAB7078_1ch_6ord_5kb_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7078", 15000, 1, 6, "kafka", 5, spyOff, 1, 10 )
+//FAB-7078_15ktx_1ch_6ord_5kb_10kpayload - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7078_15ktx_1ch_6ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7078_15ktx_1ch_6ord_5kb_10kpayload", 15000, 1, 6, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7059 - send txns to 6 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
-func Test_FAB7059_1ch_6ord_5kb_500batchsize(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7059", 30000, 1, 6, "kafka", 5, spyOff, 1, 0 )
+//FAB-7059_30ktx_1ch_6ord_5kb_500batchsize - send txns to 6 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7059_30ktx_1ch_6ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7059_30ktx_1ch_6ord_5kb_500batchsize", 30000, 1, 6, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7079 - send txns to 6 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
-func Test_FAB7079_1ch_6ord_5kb_500batchsize_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7079", 15000, 1, 6, "kafka", 5, spyOff, 1, 10 )
+//FAB-7079_15ktx_1ch_6ord_5kb_500batchsize_10kpayload - send txns to 6 orderers 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7079_15ktx_1ch_6ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7079_15ktx_1ch_6ord_5kb_500batchsize_10kpayload", 15000, 1, 6, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7060 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
-func Test_FAB7060_3ch_6ord_5kb(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7060", 30000, 3, 6, "kafka", 5, spyOff, 1, 0 )
+//FAB-7060_30ktx_3ch_6ord_5kb - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and default payload
+func Test_FAB7060_30ktx_3ch_6ord_5kb(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7060_30ktx_3ch_6ord_5kb", 30000, 3, 6, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7080 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
-func Test_FAB7080_3ch_6ord_5kb_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7080", 15000, 3, 6, "kafka", 5, spyOff, 1, 10 )
+//FAB-7080_15ktx_3ch_6ord_5kb_10kpayload - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with default batchsize and higher payload
+func Test_FAB7080_15ktx_3ch_6ord_5kb_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7080_15ktx_3ch_6ord_5kb_10kpayload", 15000, 3, 6, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7061 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
-func Test_FAB7061_3ch_6ord_5kb_500batchsize(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7061", 30000, 3, 6, "kafka", 5, spyOff, 1, 0 )
+//FAB-7061_30ktx_3ch_6ord_5kb_500batchsize - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and default payload
+func Test_FAB7061_30ktx_3ch_6ord_5kb_500batchsize(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7061_30ktx_3ch_6ord_5kb_500batchsize", 30000, 3, 6, "kafka", 5, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-7081 - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
-func Test_FAB7081_3ch_6ord_5kb_500batchsize_10kpayload(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-7081", 15000, 3, 6, "kafka", 5, spyOff, 1, 10 )
+//FAB-7081_15ktx_3ch_6ord_5kb_500batchsize_10kpayload - send txns to 6 orderers, 5 kafka brokers, 3 zookeepers with higher batchsize and higher payload
+func Test_FAB7081_15ktx_3ch_6ord_5kb_500batchsize_10kpayload(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-7081_15ktx_3ch_6ord_5kb_500batchsize_10kpayload", 15000, 3, 6, "kafka", 5, spyOff, 1, 10 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
