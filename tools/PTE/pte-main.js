@@ -1516,6 +1516,8 @@ async function performance_main() {
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalInvokeTrans + "  received "+totalInvokeTransRcvd+"\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tfailures: proposal "+totalInvokePeerFailures + "  transactions "+totalInvokeOrdererFailures+"\n";
@@ -1578,6 +1580,8 @@ async function performance_main() {
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " QUERY transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalQueryTrans + "  received "+totalQueryReceived+"\n";
                             fs.appendFileSync(rptFile, buff);
 
@@ -1597,6 +1601,8 @@ async function performance_main() {
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE/QUERY transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+mixTotal+" INVOKE "+totalMixedInvoke+"  QUERY "+ totalMixedQuery + "\n";
                             fs.appendFileSync(rptFile, buff);
 
@@ -1615,6 +1621,8 @@ async function performance_main() {
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): DISCOVERY transaction stats\n";
+                            fs.appendFileSync(rptFile, buff);
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions "+totalDiscoveryTrans + "\n";
                             fs.appendFileSync(rptFile, buff);

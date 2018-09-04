@@ -8,10 +8,5 @@
 
 ########## CI test ##########
 
-CWD=$PWD
-PREFIX="result"   # result log prefix
-
-cd ../scripts
-
-#### execute testcase FAB-8695-4q: 1M (4x250000) 2-field indexing rich queries
-./test_driver.sh -t FAB-8695-4q
+./run_scenarios.sh -q FAB-8695-4q
+exit
