@@ -84,7 +84,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         self.assertEqual(int(invokeTxSucceeded.strip()), 2)
 
         # Check the result log file for an output line containing
-        # "Total QUERY transaction <number>,"
+        # "Total QUERY transaction <number>"
         # This is seen on the same line as "Aggregate Test Summary".
         # If the query testcase ran to completion and the results were
         # tabulated ok, then we should see one line printed for each
@@ -99,7 +99,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep \"Total QUERY transaction 10000,\" result_FAB-3833-2i.log | wc -l",
+                "grep \"Total QUERY transaction 10000 received 10000,\" result_FAB-3833-2i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -159,7 +159,7 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep \"Total QUERY transaction 20000,\" result_FAB-3832-4i.log | wc -l",
+                "grep \"Total QUERY transaction 20000 received 20000,\" result_FAB-3832-4i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -227,7 +227,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep \"Total QUERY transaction 10000,\" result_FAB-3808-2i.log | wc -l",
+                "grep \"Total QUERY transaction 10000 received 10000,\" result_FAB-3808-2i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
 
@@ -286,6 +286,6 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         # and compute the count of occurances as (#orgs * #threads per org * #channels):
         #     2*1*1=2
         queryTxSucceeded = subprocess.check_output(
-                "grep \"Total QUERY transaction 20000,\" result_FAB-3807-4i.log | wc -l",
+                "grep \"Total QUERY transaction 20000 received 20000,\" result_FAB-3807-4i.log | wc -l",
                 cwd=scenarios_directory, shell=True)
         self.assertEqual(int(queryTxSucceeded.strip()), 2)
