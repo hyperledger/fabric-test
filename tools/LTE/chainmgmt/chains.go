@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/hyperledger/fabric/bccsp/factory"
 	"github.com/hyperledger/fabric/common/configtx/test"
 	"github.com/hyperledger/fabric/core/chaincode/platforms"
 	"github.com/hyperledger/fabric/core/chaincode/platforms/golang"
@@ -49,7 +50,10 @@ type chainsMgr struct {
 }
 
 func newChainsMgr(mgrConf *ChainMgrConf, batchConf *BatchConf, initOp chainInitOp) *chainsMgr {
-	ledgermgmt.Initialize(nil, platforms.NewRegistry(&golang.Platform{}))
+	factory.InitFactories(nil)
+	ledgermgmt.Initialize(&ledgermgmt.Initializer{
+		PlatformRegistry: platforms.NewRegistry(&golang.Platform{}),
+	})
 	return &chainsMgr{mgrConf, batchConf, initOp, make(map[ChainID]*Chain), &sync.WaitGroup{}}
 }
 
