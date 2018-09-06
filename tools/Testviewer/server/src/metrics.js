@@ -81,7 +81,7 @@ const getPTE = (req,res) => {
 	// ////
 
 
-	const url_pte= `https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-pte-master-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/tools/PTE/CITest/scenarios/result_${fab}.log`
+	const url_pte= `https://logs.hyperledger.org/production/vex-yul-hyp-jenkins-3/fabric-test-daily-pte-master-x86_64/${buildnum}/PTE_Test_Logs/${fab}-pteReport.log`
 	request(url_pte, { json: false }, (err, response, body) => {
 	  if (err) { res.send({"success":false}); return console.log(err);}
 
@@ -188,7 +188,7 @@ const getOTE = (req,res) => {
 	// return
 	// ////
 
-	const url_ote = `https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-ote-master-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/regression/daily/ote_logs/ote_${fab}.log`
+	const url_ote = `https://logs.hyperledger.org/production/vex-yul-hyp-jenkins-3/fabric-test-daily-ote-master-x86_64/${buildnum}/OTE_Test_Logs/ote_${fab}.log`
 	request(url_ote, { json: false }, (err, response, body) => {
 	  if (err) { res.send({"success":false}); return console.log(err);}
 	  // Page must contain a line containing "RESULT=" since that's where the relevant data is
@@ -226,7 +226,10 @@ const getLTE = (req,res) => {
 		return
 	}
 
-	const url_lte = `https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-lte-master-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments/BenchmarkReadWriteTxs/results.csv`
+        # Retrieve the artifacts. Script fabric-test/regression/daily/runLteTestSuite.sh archives the LTE artifacts from
+        #    $GOPATH/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments/BenchmarkReadWriteTxs/results.csv
+        # to $WORKSPACE/archives/LTE_Test_Results/experiments/BenchmarkReadWriteTxs
+	const url_lte = `https://logs.hyperledger.org/production/vex-yul-hyp-jenkins-3/fabric-test-daily-lte-master-x86_64/${buildnum}/LTE_Test_Results/experiments/BenchmarkReadWriteTxs/results.csv`
 	// fabs taken from script at https://github.com/hyperledger/fabric-test/blob/master/regression/daily/ledger_lte.py
 	const fabs = ['FAB-3790','FAB-3795','FAB-3798','FAB-3799','FAB-3801','FAB-3802','FAB-3800','FAB-3803','FAB-3870','FAB-3871','FAB-3872','FAB-3873','FAB-3874','FAB-3875','FAB-3876','FAB-3877']
 
@@ -244,7 +247,8 @@ const getLTE = (req,res) => {
 	////
 
 	// check if build log exists
-	request(`https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-lte-master-x86_64/${buildnum}/artifact/gopath/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments`, { json: false }, (err, response, body) => {
+	request(`https://logs.hyperledger.org/production/vex-yul-hyp-jenkins-3/fabric-test-daily-lte-master-x86_64/${buildnum}/LTE_Test_Results/experiments`, { json: false }, (err, response, body) => {
+
 		// Check if log file exists
 		if (body == null || body.includes("404 Not Found")) {
 			res.send({"success":false})
