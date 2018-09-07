@@ -77,7 +77,7 @@ for(i in array) {
         //console.log(array[i]);
     } else if ( array[i].indexOf('Total processes') > -1) {
         procNum = procNum + parseInt(array[i].substring(array[i].indexOf('processes')+9).trim());
-        console.log('procNum=%d', procNum);
+        //console.log('procNum=%d', procNum);
     } else if ( array[i].indexOf('Total transactions sent') > -1) {
         sentTx = sentTx + parseInt(array[i].substring(array[i].indexOf('sent')+4).trim());
         receivedTx = receivedTx + parseInt(array[i].substring(array[i].indexOf('received')+8).trim());
