@@ -32,6 +32,7 @@ PTEDir=$fabricTestDir"/tools/PTE"
 LSCDir=$TESTCASE"-SC"
 SCDir=$PTEDir"/"$LSCDir
 logDir=$PTEDir"/CITest/Logs"
+mkdir -p $logDir
 
 # PTE report file
 pteReport=$PTEDir"/pteReport.txt"
@@ -84,17 +85,13 @@ procTX() {
     ./networkLauncher.sh -a down
 
     echo "[$TESTCASE] launch network"
-    ./networkLauncher.sh -o 1 -x 2 -r 2 -p 2 -k 4 -z 3 -n 1 -e 3 -f test -w localhost -S serverauth -c 2s -l INFO -B 500
+    ./networkLauncher.sh -o 3 -x 2 -r 2 -p 2 -k 4 -z 3 -n 1 -e 3 -f test -w localhost -S serverauth -c 2s -l INFO -B 500
 
     cp config-chan*-TLS.json $SCDir
     sleep 30
 
     cd $CWD
     cd ../scripts
-
-    if [ ! -e $logDir ]; then
-        mkdir $logDir
-    fi
 
     # PTE: pre-config
     echo ""
@@ -143,7 +140,9 @@ procTX() {
     echo "          *                               rest 2 days                                 *"
     echo "          *****************************************************************************"
     echo ""
+    echo "starts 2 days rest at `date`"
     sleep 172800
+    echo "ends 2 days rest at `date`"
 
     # PTE: 2nd invokes run
     echo ""

@@ -134,6 +134,10 @@ fi
 echo "MSPBaseDir=$MSPBaseDir"
 nOrgPerChannel=$(( nOrg/nChannel ))
 echo "nOrgPerChannel: $nOrgPerChannel"
+if [ $nOrgPerChannel -eq 0 ]; then
+    echo "Warning: unable to create PTE configuration json for configuration: $nOrg org and $nChannel channels"
+    exit
+fi
 
 
 function outOrderer {
@@ -243,14 +247,13 @@ function outOrg {
         tmp="                \"comName\": \"$comName\"," >> $scOfile
         echo "$tmp" >> $scOfile
 
-        ordID=$(( ordID % nOrderer ))
+        ordID=$(( (n-1) % nOrderer ))
         tmp="                \"ordererID\": \"orderer$ordID\"," >> $scOfile
         echo "$tmp" >> $scOfile
-        ordID=$(( ordID+1 ))
 
         tmp="                \"ca\": {" >> $scOfile
         echo "$tmp" >> $scOfile
-        caID=$(( caID % nCA ))
+        caID=$(( (n-1) % nCA ))
         capid=$(( CAPort + caID ))
         caPort="https://"$HostIP":"$capid
         tmp="                    \"url\": \"$caPort\"," >> $scOfile
@@ -258,7 +261,6 @@ function outOrg {
         caName="ca"$caID
         tmp="                    \"name\": \"$caName\"" >> $scOfile
         echo "$tmp" >> $scOfile
-        caID=$(( caID + 1 ))
         tmp="                }," >> $scOfile
         echo "$tmp" >> $scOfile
 
