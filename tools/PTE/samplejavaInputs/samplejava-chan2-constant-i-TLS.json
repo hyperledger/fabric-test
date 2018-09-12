@@ -1,0 +1,17 @@
+{
+    "txCfgPtr": "samplejavaInputs/txCfgOpt.json",
+    "ccDfnPtr": "samplejavaInputs/ccDfnOpt.json",
+    "channelID": "_ch2",
+    "chaincodeID": "sample_java",
+    "chaincodeVer": "v0",
+    "channelOpt": {
+        "name": "testorgschannel2",
+        "orgName": [
+            "org3",
+            "org4"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
+    ]
+}

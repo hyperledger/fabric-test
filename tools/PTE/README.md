@@ -507,6 +507,15 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
+* **sample_java**: This is the java chaincode of sample_cc. See directory `samplejavaInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/java`.  Set the deploy.chaincodePath to this directory in the user input file.
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/java",
+            "fcn": "init",
+            "language": "java",
+            "args": []
+        },
+
 
 
 ## Transaction Payload Generation
@@ -1047,6 +1056,7 @@ where:
     * **language**: the chaincode language including:
         * **golang**: golang chaincode, this is the default language
         * **node**: Node JS chaincode
+        * **java**: java chaincode
 * **invoke** invoke transaction contents
     * **query**: query content
     * **move**: move content

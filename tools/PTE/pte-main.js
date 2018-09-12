@@ -623,7 +623,7 @@ async function chaincodeInstantiate(channel, client, org) {
             tx_id = request.txId;
 
             // sendInstantiateProposal
-            //logger.info('request_instantiate: ', request_instantiate);
+            //logger.info('request_instantiate: ', request);
             return channel.sendInstantiateProposal(request, cfgTimeout);
         },
         function(err) {
@@ -1078,7 +1078,7 @@ async function joinChannel(channel, client, org) {
                 return channel.joinChannel(request);
         })
         .then((results) => {
-                logger.info(util.format('[joinChannel] join Channel R E S P O N S E : %j', results));
+                logger.info(util.format('[joinChannel:%s] join Channel R E S P O N S E : %j', org, results));
 
                 if(results[0] && results[0].response && results[0].response.status == 200) {
                         logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);

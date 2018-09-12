@@ -1,0 +1,27 @@
+{
+    "channelID": "_ch3",
+    "chaincodeID": "sample_java",
+    "chaincodeVer": "v0",
+    "transType": "instantiate",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel3",
+        "action":  "create",
+        "orgName": [
+            "org5"
+        ]
+    },
+    "timeoutOpt": {
+        "preConfig": "120000",
+        "request": "180000"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/java",
+        "fcn": "init",
+        "language": "java",
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
+    ]
+}

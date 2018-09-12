@@ -1,0 +1,3 @@
+sdk=node samplejavaInputs/samplejava-chan1-create-TLS.json
+sdk=node samplejavaInputs/samplejava-chan2-create-TLS.json
+sdk=node samplejavaInputs/samplejava-chan3-create-TLS.json

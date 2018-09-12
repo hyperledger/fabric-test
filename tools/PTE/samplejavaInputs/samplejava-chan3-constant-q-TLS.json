@@ -1,0 +1,64 @@
+{
+    "channelID": "_ch3",
+    "chaincodeID": "sample_java",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Query",
+    "targetPeers": "OrgAnchor",
+    "nProcPerOrg": "1",
+    "nRequest": "1000",
+    "runDur": "1200",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel3",
+        "action":  "create",
+        "orgName": [
+            "org5",
+            "org6"
+        ]
+    },
+    "burstOpt": {
+        "burstFreq": ["500", "200", "300", "100"],
+        "burstDur":  ["3000", "2000", "3000", "1000"]
+    },
+    "mixOpt": {
+        "mixQuery": "false",
+        "mixFreq": "3000"
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "0",
+        "devFreq": "0"
+    },
+    "listOpt": {
+        "org1": ["peer1"],
+        "org2": ["peer1"]
+    },
+    "eventOpt": {
+        "timeout": "240000"
+    },
+    "ccType": "ccchecker",
+    "ccOpt": {
+        "keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "0",
+        "payLoadMin": "4096",
+        "payLoadMax": "4096"
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
+    ]
+}
