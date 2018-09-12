@@ -1,0 +1,25 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "sample_java",
+    "chaincodeVer": "v0",
+    "transType": "install",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel1",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/java",
+        "fcn": "init",
+        "language": "java",
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+    ]
+}
