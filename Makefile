@@ -11,11 +11,13 @@
 #                and executes daily test suite.
 #   - svt-daily     - pulls the images, binaries from Nexus and runs the daily test suite.
 #   - svt-smoke     - pulls the images, binaries from Nexus and runs the smoke tests.
-#   - docker-images - builds fabric & ca docker images.
+#   - build-docker-images - builds fabric & ca docker images.
 #   - fabric        - clones fabric repository.
+#   - fabric-chaincode-java - clones the fabric-chaincode-java repository.
 #   - smoke-tests   - runs Smoke Test Suite.
 #   - daily-tests   - runs Daily Test Suite.
 #   - pull-images   - pull the images and binaries from Nexus.
+#   - javaenv  - clone the fabric-chaincode-java repository and build the javaenv image.
 #   - svt-daily-behave-tests - pulls the images, binaries from Nexus and runs the Behave feature tests.
 #   - svt-daily-pte-tests - pulls the images, binaries from Nexus and runs the PTE Performance tests.
 #   - svt-daily-ote-tests - pulls the images, runs the OTE test suite.
@@ -38,17 +40,19 @@ PROJECT_VERSION=$(BASE_VERSION)-$(EXTRA_VERSION)
 
 FABRIC = https://gerrit.hyperledger.org/r/fabric
 FABRIC_CA = https://gerrit.hyperledger.org/r/fabric-ca
+FABRIC-CHAINCODE-JAVA = https://gerrit.hyperledger.org/r/fabric-chaincode-java
 HYPERLEDGER_DIR = $(GOPATH)/src/github.com/hyperledger
 INSTALL_BEHAVE_DEPS = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/install_behave.sh
 FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
 CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
+CHAINCODE-JAVA_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-java
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/pre_setup.sh
 PTE_IMAGE = $(DOCKER_NS)/fabric-pte
 TEST_VIEWER_IMAGE = $(DOCKER_NS)/fabric-testviewer
 TARGET = pte test-viewer
 
 .PHONY: ci-smoke
-ci-smoke: git-init git-latest fabric ca clean pre-setup docker-images smoke-tests
+ci-smoke: git-init git-latest fabric ca clean pre-setup build-docker-images javaenv smoke-tests
 
 .PHONY: git-latest
 git-latest:
@@ -65,7 +69,7 @@ pre-setup:
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: ci-daily
-ci-daily: git-init git-latest fabric ca clean pre-setup docker-images daily-tests
+ci-daily: git-init git-latest fabric ca clean pre-setup build-docker-images javaenv daily-tests
 
 .PHONY: fabric
 fabric:
@@ -77,8 +81,8 @@ fabric:
 		cd $(FABRIC_DIR) && git pull $(FABRIC); \
 	fi
 
-.PHONY: docker-images
-docker-images:
+.PHONY: build-docker-images
+build-docker-images:
 	@make docker -C $(FABRIC_DIR)
 	@make native -C $(FABRIC_DIR)
 	@make docker -C $(CA_DIR)
@@ -93,6 +97,20 @@ ca:
 	else \
 		cd $(CA_DIR) && git pull $(FABRIC_CA); \
 	fi
+
+.PHONY: fabric-chaincode-java
+fabric-chaincode-java:
+	if [ ! -d "$(CHAINCODE-JAVA_DIR)" ]; then \
+		echo "Clone FABRIC-CHAINCODE-JAVA REPO"; \
+		cd $(HYPERLEDGER_DIR); \
+		git clone --single-branch -b master $(FABRIC-CHAINCODE-JAVA) $(CHAINCODE-JAVA_DIR); \
+	else \
+		cd $(CHAINCODE-JAVA_DIR) && git pull $(FABRIC-CHAINCODE-JAVA); \
+	fi
+
+.PHONY: javaenv
+javaenv: fabric-chaincode-java
+	@cd $(CHAINCODE-JAVA_DIR) && ./gradlew buildimage
 
 .PHONY: smoke-tests
 smoke-tests:
