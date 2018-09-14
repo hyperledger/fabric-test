@@ -1,0 +1,24 @@
+{
+    "channelID": "_ch2",
+    "chaincodeID": "sbe_cc",
+    "chaincodeVer": "v0",
+    "transType": "install",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel2",
+        "action":  "create",
+        "orgName": [
+            "org3",
+            "org4"
+        ]
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+        "fcn": "init",
+        "language": "golang",
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
+    ]
+}

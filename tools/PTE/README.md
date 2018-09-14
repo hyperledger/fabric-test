@@ -516,6 +516,22 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
+* **sbecc**: This is the golang chaincode of state-based endorsement. See directory `sbeccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/sbe`.  Set the deploy.chaincodePath to this directory in the user input file.
+
+        "deploy": {
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+            "fcn": "init",
+            "language": "golang",
+            "args": []
+        },
+This chaincode requires packages not provided by the Go standard library, you will need to include those packages with this chaincode for managing or
+[vendoring](https://hyperledger-fabric.readthedocs.io/en/release-1.2/chaincode4ade.html?highlight=vendor#managing-external-dependencies-for-chaincode-written-in-go) these dependencies by executing the following commands:
+
+        - cd $GOPATH/src/github.com/hyperledger/fabric-test
+        - make pre-setup
+        - cd chaincodes/sbe
+        - govendor init
+        - govendor add +external
 
 
 ## Transaction Payload Generation
@@ -526,7 +542,7 @@ In addition, you can also write per-chaincode logic to specify the organization 
 
 The logic for `<ccType>` should be specified in `ccArgumentsGenerators/<ccType>/ccFunctions.js`, in a class named `ccFunctions` that inherits the `ccFunctionsBase` class defined in `ccArgumentsGenerators/ccFunctionsBase.js`.
 
-(The following `ccType` values are supported by default: {`ccchecker`, `marblescc`, `marblescc_priv`}. If you want to run PTE on a custom `ccType`, create an appropriate folder and JS file.)
+(The following `ccType` values are supported by default: {`ccchecker`, `marblescc`, `marblescc_priv`, `sbecc`}. If you want to run PTE on a custom `ccType`, create an appropriate folder and JS file.)
 
 The `ccFunctions` interface that should be implemented is described below. (_Note_: The functions in these interface will be called by `pte-execRequest.js`, so please ensure that they are defined and return a value of an appropriate type.)
 ```
@@ -578,10 +594,11 @@ class ccFunctions extends ccFunctionsBase {
 }
 ```
 For examples, see:
+
 * [ccArgumentsGenerators/ccchecker/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/ccchecker/ccFunctions.js)
 * [ccArgumentsGenerators/marblescc/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/marblescc/ccFunctions.js)
 * [ccArgumentsGenerators/marblescc_priv/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/marblescc_priv/ccFunctions.js)
-
+* [ccArgumentsGenerators/sbecc/ccFunctions.js](https://github.com/hyperledger/fabric-test/tools/PTE/ccArgumentsGenerators/sbecc/ccFunctions.js)
 
 ## Output
 * **Statistical Output Message**

@@ -1,0 +1,3 @@
+sdk=node sbeccInputs/sbecc-chan1-instantiate-TLS.json
+sdk=node sbeccInputs/sbecc-chan2-instantiate-TLS.json
+sdk=node sbeccInputs/sbecc-chan3-instantiate-TLS.json

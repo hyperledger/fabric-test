@@ -335,10 +335,10 @@ function getMoveRequest() {
     };
 
     if ( (transMode == 'MIX') && (mixQuery == 'TRUE') ) {
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: ', Nid, channel.getName(), org, pid, request_invoke);
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: %j', Nid, channel.getName(), org, pid, request_invoke);
     } else if ( (inv_m == nRequest) && (nRequest>0) ) {
         if (invokeCheck == 'TRUE') {
-            logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: ', Nid, channel.getName(), org, pid, request_invoke);
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d getMoveRequest] request_invoke: %j', Nid, channel.getName(), org, pid, request_invoke);
         }
     }
 
