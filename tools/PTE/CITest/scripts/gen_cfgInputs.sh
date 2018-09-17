@@ -34,7 +34,7 @@ usage () {
     echo -e "-i, --install\tinstall/instantiate chaincode"
     echo -e "\t\t(Default: No)"
 
-    echo -e "-a, --app\tlist of chaincode"
+    echo -e "-a, --app\tblank-separated list of chaincodes, [samplecc|samplejs|samplejava|marbles02]"
     echo -e "\t\t(Default: None)"
 
     echo -e "-d, --scdir\tservice credential files directory"
@@ -72,7 +72,7 @@ usage () {
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a marbles02 samplecc -i"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -i -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplejava samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
     echo
     exit
 }
@@ -117,6 +117,8 @@ CCPathsamplecc="github.com/hyperledger/fabric-test/chaincodes/samplecc/go"
 CCPathsamplecc="${CCPathsamplecc//\//\\/}"
 CCPathsamplejs="github.com/hyperledger/fabric-test/chaincodes/samplecc/node"
 CCPathsamplejs="${CCPathsamplejs//\//\\/}"
+CCPathsamplejava="github.com/hyperledger/fabric-test/chaincodes/samplecc/java"
+CCPathsamplejava="${CCPathsamplejava//\//\\/}"
 CCPathmarbles02="github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02"
 CCPathmarbles02="${CCPathmarbles02//\//\\/}"
 MatadataPath="github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF"
@@ -135,6 +137,9 @@ getCCPath() {
     elif [ $cc == "samplejs" ]; then
         CCPath=$CCPathsamplejs
         LANGUAGE="node"
+    elif [ $cc == "samplejava" ]; then
+        CCPath=$CCPathsamplejava
+        LANGUAGE="java"
     elif [ $cc == "marbles02" ]; then
         CCPath=$CCPathmarbles02
         MDPath=$MatadataPath
