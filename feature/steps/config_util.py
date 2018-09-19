@@ -59,19 +59,18 @@ def updateEnviron(context):
         updated_env.update(context.composition.getEnv())
     return updated_env
 
-def makeProjectConfigDir(context):
+def makeProjectConfigDir(context, returnContext=False):
     # Save all the files to a specific directory for the test
     if not hasattr(context, "projectName") and not hasattr(context, "composition"):
-        projectName = str(uuid.uuid1()).replace('-','')
-        context.projectName = projectName
+        context.projectName = str(uuid.uuid1()).replace('-','')
     elif hasattr(context, "composition"):
-        projectName = context.composition.projectName
-    else:
-        projectName = context.projectName
+        context.projectName = context.composition.projectName
 
-    testConfigs = "configs/%s" % projectName
+    testConfigs = "configs/%s" % context.projectName
     if not os.path.isdir(testConfigs):
         os.mkdir(testConfigs)
+    if returnContext:
+        return testConfigs, context
     return testConfigs
 
 def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgMSP=None, ouEnable=False):
@@ -103,6 +102,53 @@ def buildCryptoFile(context, numOrgs, numPeers, numOrderers, numUsers, orgMSP=No
     cryptoStr = ordererStr + "\n\n" + peerStr
     with open("{0}/crypto.yaml".format(testConfigs), "w") as fd:
         fd.write(cryptoStr)
+
+def setCAConfig(context):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    orgDirs = getOrgs(context)
+    for orgDir in orgDirs:
+        with open("configs/fabric-ca-server-config.yaml", "r") as fd:
+            config_template = fd.read()
+            config = config_template.format(orgName=orgDir)
+        with open("{0}/{1}/fabric-ca-server-config.yaml".format(testConfigs, orgDir), "w") as fd:
+            fd.write(config)
+    return context
+
+def setupConfigsForCA(context, channelID):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    print("testConfigs: {0}".format(testConfigs))
+
+    configFile = "configtx_fca.yaml"
+    if os.path.isfile("configs/%s.yaml" % channelID):
+        configFile = "%s.yaml" % channelID
+
+    copyfile("configs/%s" % configFile, "%s/configtx.yaml" % testConfigs)
+
+    orgDirs = getOrgs(context)
+    print("Org Dirs: {}".format(orgDirs))
+
+    for orgDir in orgDirs:
+        copyfile("{0}/configtx.yaml".format(testConfigs),
+                 "{0}/{1}/msp/config.yaml".format(testConfigs, orgDir))
+
+        os.mkdir("{0}/{1}/msp/cacerts".format(testConfigs, orgDir))
+        os.mkdir("{0}/{1}/msp/admincerts".format(testConfigs, orgDir))
+        copyfile("{0}/ca.{1}-cert.pem".format(testConfigs, orgDir),
+                 "{0}/{1}/msp/cacerts/ca.{1}-cert.pem".format(testConfigs, orgDir))
+        copyfile("{0}/ca.{1}-cert.pem".format(testConfigs, orgDir),
+                 "{0}/{1}/msp/admincerts/ca.{1}-cert.pem".format(testConfigs, orgDir))
+
+def certificateSetupForCA(context):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    orgDirs = [d for d in os.listdir("./{0}/".format(testConfigs)) if (("example.com" in d) and (os.path.isdir("./{0}/{1}".format(testConfigs, d))))]
+    for orgDir in orgDirs:
+        if os.path.isdir("{0}/{1}/orderer0.example.com".format(testConfigs, orgDir)):
+            copyfile("{0}/configtx.yaml".format(testConfigs),
+                     "{0}/{1}/orderer0.example.com/msp/config.yaml".format(testConfigs, orgDir))
+            copyfile("{0}/{1}/orderer0.example.com/msp/signcerts/cert.pem".format(testConfigs, orgDir),
+                     "{0}/{1}/msp/admincerts/cert.pem".format(testConfigs, orgDir))
+            copyfile("{0}/ca.{1}-cert.pem".format(testConfigs, orgDir),
+                     "{0}/{1}/msp/cacerts/ca.{1}-cert.pem".format(testConfigs, orgDir))
 
 def setupConfigs(context, channelID):
     testConfigs = makeProjectConfigDir(context)
@@ -148,6 +194,13 @@ def inspectChannelConfig(context, filename, channelID):
     except:
         print("Unable to inspect channel config data: {0}".format(sys.exc_info()[1]))
 
+def generateConfigForCA(context, channelID, profile, ordererProfile, block="orderer.block"):
+    setupConfigsForCA(context, channelID)
+    generateOrdererConfig(context, channelID, ordererProfile, block)
+    generateChannelConfig(channelID, profile, context)
+    generateChannelAnchorConfig(channelID, profile, context)
+    certificateSetupForCA(context)
+
 def generateConfig(context, channelID, profile, ordererProfile, block="orderer.block"):
     setupConfigs(context, channelID)
     generateOrdererConfig(context, channelID, ordererProfile, block)
@@ -175,6 +228,15 @@ def generateChannelConfig(channelID, profile, context):
         subprocess.check_call(command, cwd=testConfigs, env=updated_env)
     except:
         print("Unable to generate channel config data: {0}".format(sys.exc_info()[1]))
+
+def getOrgs(context):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    if os.path.exists("./{0}/peerOrganizations".format(testConfigs)):
+        orgs = os.listdir("./{0}/peerOrganizations".format(testConfigs)) + os.listdir("./{0}/ordererOrganizations".format(testConfigs))
+    else:
+        orgs = [d for d in os.listdir("./{0}/".format(testConfigs)) if (("example.com" in d) and (os.path.isdir("./{0}/{1}".format(testConfigs, d))))]
+
+    return orgs
 
 def generateChannelAnchorConfig(channelID, profile, context):
     testConfigs = makeProjectConfigDir(context)
@@ -297,7 +359,7 @@ def buildConfigtx(testConfigs, orgName, mspID):
         fd.write(configtx)
 
 def getNewOrg(context, mspID):
-    testConfigs = makeProjectConfigDir(context)
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
     updated_env = updateEnviron(context)
 
     orgName = mspID.title().replace(".", "")
@@ -335,6 +397,50 @@ def delNewOrg(context, group, mspID, channel):
 
     config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"].pop(mspID)
     return config
+
+def getCaCert(context, node, fca):
+    #fabric-ca-client getcacert -d -u https://$CA_HOST:7054 -M $ORG_MSP_DIR
+    if node.startswith("orderer"):
+        mspdir = context.composition.getEnvFromContainer(node, 'ORDERER_GENERAL_LOCALMSPDIR')
+    elif node.startswith("peer"):
+        mspdir = context.composition.getEnvFromContainer(node, 'CORE_PEER_MSPCONFIGPATH')
+    output = context.composition.docker_exec(["fabric-ca-client getcacert -d -u https://{0}:7054 -M {1}".format(fca, mspdir)], [node])
+    print("Output getcacert: {}".format(output))
+
+def getUserPass(context, container_name):
+    for container in context.composition.containerDataList:
+        if container_name in container.containerName:
+            userpass = container.getEnv('BOOTSTRAP_USER_PASS')
+            break
+
+def registerUsers(context):
+    for user in context.users.keys():
+        #fabric-ca-client register -d --id.name $ADMIN_NAME --id.secret $ADMIN_PASS
+        org = context.users[user]['organization']
+        passwd = context.users[user]['password']
+        role = context.users[user]['role']
+        fca = 'ca.{}'.format(org)
+        output = context.composition.docker_exec(["fabric-ca-client register -d --id.name {0} --id.secret {1}".format(user, passwd)], [fca])
+        print("user register: {}".format(output))
+
+def registerWithABAC(context, user):
+    '''
+    ABAC == Attribute Based Access Control
+    '''
+    org = context.users[user]['organization']
+    passwd = context.users[user]['password']
+    role = context.users[user]['role']
+    fca = 'ca.{}'.format(org)
+    attr = []
+    for abac in context.abac.keys():
+        if context.abac[abac] == 'required':
+            attr.append("{0}=true:ecert".format(abac))
+        else:
+            attr.append("{0}=true".format(abac))
+    #fabric-ca-client register -d --id.name $ADMIN_NAME --id.secret $ADMIN_PASS --id.attrs "hf.admin=true:ecert"
+    attr_reqs = ",".join(attr)
+    output = context.composition.docker_exec(['fabric-ca-client register -d --id.name {0} --id.secret {1} --id.attrs "{2}"'.format(user, passwd, attr_reqs)], [fca])
+    print("ABAC register: {}".format(output))
 
 def addNewOrg(context, config_update, group, channel):
     updated_env = updateEnviron(context)

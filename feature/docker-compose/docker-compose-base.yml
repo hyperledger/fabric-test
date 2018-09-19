@@ -26,8 +26,20 @@ services:
         ports:
             - 9092
 
+    ca:
+        image: hyperledger/fabric-ca
+        environment:
+            - FABRIC_CA_HOME=/var/hyperledger/fabric-ca-server
+            - FABRIC_CA_SERVER_HOME=/var/hyperledger/fabric-ca-server
+            - FABRIC_CA_SERVER_TLS_ENABLED=${FABRIC_CA_SERVER_TLS_ENABLED}
+            - FABRIC_CA_SERVER_DEBUG=true
+        ports:
+            - 7054
+        volumes:
+            - ../configs/${CORE_PEER_NETWORKID}:/var/hyperledger/fabric-ca-server-config
+
     orderer:
-        image: hyperledger/fabric-orderer
+        image: hyperledger/fabric-ca-orderer
         environment:
             - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - ORDERER_HOME=/var/hyperledger/orderer
@@ -55,6 +67,7 @@ services:
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}:/var/hyperledger/configs
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/users:/var/hyperledger/users
+            - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/ca:/var/hyperledger/ca
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
         command: orderer
         ports:
@@ -64,7 +77,7 @@ services:
         image: hyperledger/fabric-couchdb
 
     peer:
-        image: hyperledger/fabric-peer
+        image: hyperledger/fabric-ca-peer
         environment:
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
@@ -74,10 +87,15 @@ services:
             - CORE_PEER_GOSSIP_USELEADERELECTION=true
             - CORE_PEER_PROFILE_ENABLED=true
             - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/msp
-            #- CORE_LEDGER_STATE_STATEDATABASE=LevelDB
+            - FABRIC_CA_HOME=/var/hyperledger
+            - FABRIC_CA_CLIENT_HOME=/var/hyperledger
+            - FABRIC_CA_CLIENT_TLS_CERTFILES=/var/hyperledger/tls/ca.crt
             - CORE_LOGGING_LEVEL=DEBUG
             - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
-            - CORE_LOGGING_MSP=DEBUG
+            - CORE_LOGGING_MSP=INFO
+            - CORE_LOGGING_POLICIES=DEBUG
+            - CORE_LOGGING_LEDGER=DEBUG
+            - CORE_LOGGING_PEER_GOSSIP=INFO
             # TLS settings
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CLIENTAUTHREQUIRED=${CORE_PEER_TLS_CLIENTAUTHREQUIRED}

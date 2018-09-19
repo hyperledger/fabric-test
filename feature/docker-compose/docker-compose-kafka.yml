@@ -10,6 +10,69 @@ networks:
 
 services:
 
+    ca.example.com:
+        extends:
+            file: docker-compose-base.yml
+            service: ca
+        container_name: ca.example.com
+        environment:
+            - FABRIC_CA_SERVER_CA_NAME=ca.example.com
+            - BOOTSTRAP_USER_PASS=Admin:adminpw
+            - FABRIC_CA_SERVER_CSR_CN=ca.example.com
+            - FABRIC_CA_SERVER_CSR_HOSTS=ca.example.com
+            - FABRIC_CA_SERVER_CA_CERTFILE=/var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem
+            - FABRIC_CA_SERVER_CA_KEYFILE=${FABRIC_CA_SERVER_EXAMPLE_TLS_KEYFILE}
+        command: /bin/bash -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem --tls.certfile /var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
+        volumes:
+            - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/ca:/var/hyperledger/fabric-ca-server-config
+            - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com:/var/hyperledger/fabric-ca-server
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
+    ca.org1.example.com:
+        extends:
+            file: docker-compose-base.yml
+            service: ca
+        container_name: ca.org1.example.com
+        environment:
+            - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
+            - BOOTSTRAP_USER_PASS=Admin:adminpw
+            - FABRIC_CA_SERVER_CSR_CN=ca.org1.example.com
+            - FABRIC_CA_SERVER_CSR_HOSTS=ca.org1.example.com
+            - FABRIC_CA_SERVER_TLS_CERTFILE=/var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+            - FABRIC_CA_SERVER_CA_KEYFILE=${FABRIC_CA_SERVER_ORG1_TLS_KEYFILE}
+        command: /bin/bash -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem --tls.certfile  /var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
+        volumes:
+            - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/ca:/var/hyperledger/fabric-ca-server-config
+            - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com:/var/hyperledger/fabric-ca-server
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
+    ca.org2.example.com:
+        extends:
+            file: docker-compose-base.yml
+            service: ca
+        container_name: ca.org2.example.com
+        environment:
+            - FABRIC_CA_SERVER_CA_NAME=ca.org2.example.com
+            - BOOTSTRAP_USER_PASS=Admin:adminpw
+            - FABRIC_CA_SERVER_CSR_CN=ca.org2.example.com
+            - FABRIC_CA_SERVER_CSR_HOSTS=ca.org2.example.com
+            - FABRIC_CA_SERVER_CA_CERTFILE=/var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
+            - FABRIC_CA_SERVER_CA_KEYFILE=${FABRIC_CA_SERVER_ORG2_TLS_KEYFILE}
+        command: /bin/bash -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem --tls.certfile /var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
+        volumes:
+            - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com/ca:/var/hyperledger/fabric-ca-server-config
+            - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com:/var/hyperledger/fabric-ca-server
+        networks:
+          behave:
+             aliases:
+               - ${CORE_PEER_NETWORKID}
+
     zookeeper0:
         extends:
             file: docker-compose-base.yml
@@ -240,6 +303,7 @@ services:
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/var/hyperledger/msp
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/var/hyperledger/tls
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/users:/var/hyperledger/users
+            - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/ca:/var/hyperledger/ca
         depends_on:
             - orderer0.example.com
             - orderer1.example.com

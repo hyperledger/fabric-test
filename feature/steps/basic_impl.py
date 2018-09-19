@@ -49,23 +49,27 @@ def compose_impl(context, composeYamlFile, projectName=None, startContainers=Tru
         context.composition.up()
     context.compose_containers = context.composition.collectServiceNames()
 
-
-def getCompositionFiles(context, curpath, ordererType, database="leveldb"):
+def getCompositionFiles(context, curpath, ordererType, database="leveldb", fca=False):
     # Get the correct composition file
     composeFiles = ["%s/docker-compose/docker-compose-%s.yml" % (curpath, ordererType)]
     if database.lower() != "leveldb":
         composeFiles.append("%s/docker-compose/docker-compose-%s.yml" % (curpath, database.lower()))
     composeFiles.append("%s/docker-compose/docker-compose-cli.yml" % (curpath))
+
+    # If using fabric-ca insert the fabric-ca composition file to start first
+    if fca:
+        composeFiles.insert(0, "%s/docker-compose/docker-compose-fca.yml" % (curpath))
+
     for composeFile in composeFiles:
         assert os.path.exists(composeFile), "The docker compose file does not exist: {0}".format(composeFile)
     return composeFiles
 
-def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=300, ouEnabled=False):
+def bootstrapped_impl(context, ordererType, database, tlsEnabled=False, timeout=300, ouEnabled=False, fca=False):
     assert ordererType in config_util.ORDERER_TYPES, "Unknown network type '%s'" % ordererType
     curpath = os.path.realpath('.')
 
     # Get the correct composition file
-    context.composeFile = getCompositionFiles(context, curpath, ordererType, database)
+    context.composeFile = getCompositionFiles(context, curpath, ordererType, database, fca)
 
     # Should TLS be enabled
     context.tls = tlsEnabled
@@ -118,6 +122,61 @@ def wait_for_bootstrap_completion(context, timeout):
     # A 5-second additional delay ensures ready state
     time.sleep(5)
 
+
+def bootstrap_fca_impl(context, tlsEnabled=False):
+    # Should TLS be enabled
+    context.tls = tlsEnabled
+    compose_util.enableTls(context, tlsEnabled)
+    context = config_util.setCAConfig(context)
+    compose_impl(context, ["docker-compose/docker-compose-preca.yml"], context.projectName)
+
+@given(u'I bootstrap a fabric-ca server without tls')
+def step_impl(context):
+    bootstrap_fca_impl(context, False)
+
+@given(u'I bootstrap a fabric-ca server with tls')
+def step_impl(context):
+    bootstrap_fca_impl(context, True)
+
+@given(u'I bootstrap a fabric-ca server')
+def step_impl(context):
+    bootstrap_fca_impl(context, False)
+
+
+@given(u'I have a fabric-ca bootstrapped fabric network of type {ordererType} using state-database {database} with tls')
+def step_impl(context, ordererType, database):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, ordererType, database, True, fca=True)
+
+@given(u'I have a fabric-ca bootstrapped fabric network of type {ordererType} using state-database {database} without tls')
+def step_impl(context, ordererType, database):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, ordererType, database, False, fca=True)
+
+@given(u'I have a fabric-ca bootstrapped fabric network of type {ordererType} using state-database {database}')
+def step_impl(context, ordererType, database):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, ordererType, database, True, fca=True)
+
+@given(u'I have a fabric-ca bootstrapped fabric network using state-database {database} with tls')
+def step_impl(context, database):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, "solo", database, True, fca=True)
+
+@given(u'I have a fabric-ca bootstrapped fabric network of type {ordererType} with tls')
+def step_impl(context, ordererType):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, ordererType, "leveldb", True, fca=True)
+
+@given(u'I have a fabric-ca bootstrapped fabric network with tls')
+def step_impl(context):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, "solo", "leveldb", True, fca=True)
+
+@given(u'I have a fabric-ca bootstrapped fabric network of type {ordererType}')
+def step_impl(context, ordererType):
+    config_util.setCAConfig(context)
+    bootstrapped_impl(context, ordererType, "leveldb", True, fca=True)
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} with tls with organizational units enabled on all nodes')
 def step_impl(context, ordererType):
