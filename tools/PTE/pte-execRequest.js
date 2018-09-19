@@ -303,6 +303,7 @@ var latency_event = [0, 0, 99999999, 0];
 var ccFuncInst = new ccFunctions(ccDfnPtr, logger, Nid, channel.getName(), org, pid);
 //set transaction ID: channelName+'_'+org+'_'+Nid+'_'+pid
 var txIDVar=channelName+'_'+org+'_'+Nid+'_'+pid;
+var bookmark='';
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] tx IDVar: ', Nid, channel.getName(), org, pid, txIDVar);
 var ccFunctionAccessPolicy = {};
 if (ccFuncInst.getAccessControlPolicyMap) {		// Load access control policy for chaincode is specified
@@ -350,7 +351,7 @@ function getMoveRequest() {
 var request_query;
 function getQueryRequest() {
     // Get the query arguments from the appropriate payload generation files
-    ccFuncInst.getQueryArgs(txIDVar);
+    ccFuncInst.getQueryArgs(txIDVar, bookmark);
 
     // Set the approprate signing identity for this function based on access policy
     // If the function has no access control, we can use any signing identity
@@ -2103,6 +2104,14 @@ function invoke_query_const(freq) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] query return:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
                 }
             }
+            if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
+                // get bookmark from query returned
+                var qc=JSON.parse(response_payloads[0].toString('utf8'));
+                bookmark=qc[1][0].ResponseMetadata.Bookmark;
+            } else {
+                // reset bookmark
+                bookmark='';
+            }
             // output
             if ( recHist == 'HIST' ) {
                 tCurr = new Date().getTime();
@@ -2280,6 +2289,23 @@ function invoke_query_mix(freq) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] query result: %j, %j', Nid, channelName, org, pid, request_query.args, response_payloads[j].toString('utf8'));
                     }
                 }
+                // query check
+                var qcheck = response_payloads[0].toString('utf8').toUpperCase();
+                if ( qcheck.includes('ERROR') || qcheck.includes('FAIL') ) {
+                    tx_stats[tx_pFail]++;
+                    for(let j = 0; j < response_payloads.length; j++) {
+                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] query return:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
+                    }
+                }
+                if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
+                    // get bookmark from query returned
+                    var qc=JSON.parse(response_payloads[0].toString('utf8'));
+                    bookmark=qc[1][0].ResponseMetadata.Bookmark;
+                } else {
+                    // reset bookmark
+                    bookmark='';
+                }
+
                 isExecDone('Move');
                 if ( IDone != 1 ) {
                     invoke_move_mix(freq);
@@ -2590,6 +2616,23 @@ function invoke_query_burst() {
     channel.queryByChaincode(request_query)
     .then(
         function(response_payloads) {
+            // query check
+            var qcheck = response_payloads[0].toString('utf8').toUpperCase();
+            if ( qcheck.includes('ERROR') || qcheck.includes('FAIL') ) {
+                tx_stats[tx_pFail]++;
+                for(let j = 0; j < response_payloads.length; j++) {
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_burst] query return:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
+                }
+            }
+            if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
+                // get bookmark from query returned
+                var qc=JSON.parse(response_payloads[0].toString('utf8'));
+                bookmark=qc[1][0].ResponseMetadata.Bookmark;
+            } else {
+                // reset bookmark
+                bookmark='';
+            }
+
             isExecDone('Query');
             if ( QDone != 1 ) {
                 setTimeout(function(){

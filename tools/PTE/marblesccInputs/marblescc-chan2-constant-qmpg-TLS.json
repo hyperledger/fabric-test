@@ -1,0 +1,76 @@
+{
+    "channelID": "_ch2",
+    "chaincodeID": "marbles_cc",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Query",
+    "targetPeers": "OrgAnchor",
+    "nProcPerOrg": "1",
+    "nRequest": "1000",
+    "runDur": "1200",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel2",
+        "action":  "create",
+        "orgName": [
+            "org3",
+            "org4"
+        ]
+    },
+    "burstOpt": {
+        "burstFreq": ["500", "200", "300", "100"],
+        "burstDur":  ["3000", "2000", "3000", "1000"]
+    },
+    "mixOpt": {
+        "mixQuery": "false",
+        "mixFreq": "3000"
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "0",
+        "devFreq": "0"
+    },
+    "listOpt": {
+        "org1": ["peer1"],
+        "org2": ["peer1"]
+    },
+    "eventOpt": {
+        "timeout": "240000"
+    },
+    "ccType": "marblescc",
+    "ccOpt": {
+        "keyIdx": [0],
+        "keyPayLoad": [2],
+        "keyStart": "0",
+        "payLoadMin": "1024",
+        "payLoadMax": "1024"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
+        "fcn": "init",
+        "args": []
+    },
+    "invoke": {
+        "nOwner":"100",
+        "query": {
+            "fcn": "queryMarblesWithPagination",
+            "args": {
+                "selector": {
+                    "owner":"tom",
+                    "color":"white"
+                },
+                "pagesize": "5"
+            }
+        },
+        "move": {
+            "fcn": "initMarble",
+            "args": ["marble", "white","35","tom"]
+        }
+    },
+    "SCFile": [
+        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
+    ]
+}

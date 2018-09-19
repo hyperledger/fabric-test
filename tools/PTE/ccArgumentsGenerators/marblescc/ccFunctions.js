@@ -28,14 +28,12 @@ class ccFunctions extends ccFunctionsBase {
         this.queryMarbleOwner = 'tom';
         this.queryMarbleName = 'marble';
         this.nOwner = 100;
+        this.pagesize = 1000000000;
         this.queryMarbleDocType = 'marble';
         this.keyStart = parseInt(this.ccDfnPtr.ccOpt.keyStart);
-        this.payLoadMin = parseInt(this.ccDfnPtr.ccOpt.payLoadMin);
-        this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax);
         this.arg0 = parseInt(this.keyStart);
-        this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart, 
-                 parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
+        this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d',
+                 this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart);
 
         // get number of owners
         if ( typeof( this.ccDfnPtr.invoke.nOwner ) !== 'undefined'  ) {
@@ -64,7 +62,7 @@ class ccFunctions extends ccFunctionsBase {
         // }
         if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarblesByOwner' ) {
             this.queryMarbleOwner=ccDfnPtr.invoke.query.args[0];
-        } else if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
+        } else if ( (this.ccDfnPtr.invoke.query.fcn == 'queryMarbles') && (this.ccDfnPtr.invoke.query.fcn == 'queryMarblesWithPagination') ) {
             if ( typeof( this.ccDfnPtr.invoke.query.args.selector.owner ) !== 'undefined' ) {
                 this.queryMarbleOwner=this.ccDfnPtr.invoke.query.args.selector.owner;
             }
@@ -75,9 +73,14 @@ class ccFunctions extends ccFunctionsBase {
         this.queryMarbleName=this.ccDfnPtr.invoke.query.args[0];
 
         this.rqSelector = {};
-        if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
+        if ( (this.ccDfnPtr.invoke.query.fcn == 'queryMarbles') || (this.ccDfnPtr.invoke.query.fcn == 'queryMarblesWithPagination') ) {
             if ( typeof( this.ccDfnPtr.invoke.query.args.selector ) !== 'undefined' ) {
                 this.rqSelector = this.ccDfnPtr.invoke.query.args.selector;
+            }
+        }
+        if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarblesWithPagination' ) {
+            if ( typeof( this.ccDfnPtr.invoke.query.args.pagesize ) !== 'undefined' ) {
+                this.pagesize = this.ccDfnPtr.invoke.query.args.pagesize;
             }
         }
     }
@@ -99,7 +102,11 @@ class ccFunctions extends ccFunctionsBase {
     }
 
     getQueryArgs(txIDVar) {
-        this.arg0 ++;
+        if ( arguments.length !== 2 ) {
+            this.arg0 ++;
+        } else if ( (arguments[1] == '') || (this.arg0 == 0) ) {
+            this.arg0 ++;
+        }
         var keyA = this.keyStart;
         if ( this.arg0 - this.keyStart > 10 ) {
             this.keyA = this.arg0 - 10;
@@ -111,8 +118,8 @@ class ccFunctions extends ccFunctionsBase {
             // marbles02 rich query: queryMarblesByOwner
             var index=this.arg0%this.nOwner;
             this.testQueryArgs[0] = this.queryMarbleOwner+'_'+txIDVar+'_'+index;
-        } else if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) {
-            // marbles02 rich query: queryMarbles
+        } else if ( ( this.ccDfnPtr.invoke.query.fcn == 'queryMarbles' ) || ( this.ccDfnPtr.invoke.query.fcn == 'queryMarblesWithPagination' ) ) {
+            // marbles02 rich query: queryMarbles, queryMarblesWithPagination
             var selector=0;
             var index=this.arg0%this.nOwner;
             if ( this.rqSelector ) {
@@ -139,6 +146,10 @@ class ccFunctions extends ccFunctionsBase {
             }
 
             this.testQueryArgs[0]=this.testQueryArgs[0]+'}';
+            if ( this.ccDfnPtr.invoke.query.fcn == 'queryMarblesWithPagination' ) {
+                this.testQueryArgs[1]=this.pagesize;
+                this.testQueryArgs[2]=arguments[1];
+            }
 
         } else {
             var i = 0;
