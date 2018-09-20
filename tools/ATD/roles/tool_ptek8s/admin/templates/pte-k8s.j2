@@ -5,9 +5,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: pte{{ item }}
+  name: pte{{ item }}{{ pteenv }}{{ chaincode | replace('_', '') }}
   labels:
-    k8s-app: pte{{ item }}
+    k8s-app: pte{{ item }}{{ pteenv }}{{ chaincode | replace('_', '') }}
 spec:
   imagePullSecrets:
     - name: regcred
@@ -16,13 +16,12 @@ spec:
     - name: task-pv-storage
       persistentVolumeClaim:
         claimName: fabriccerts
-    - name: {{ item }}
+    - name: {{ item }}{{ pteenv }}{{ chaincode | replace('_', '') }}
       configMap:
-        name: {{ item }}
+        name: {{ item }}{{ pteenv }}{{ chaincode | replace('_', '') }}
   containers:
-    - name: pte{{ item }}
+    - name: pte{{ item }}{{ pteenv }}{{ chaincode | replace('_', '') }}
       image: {{ pte.repo.url }}fabric-pte:{{ pte.repo.tag }}
-      #image: {{ pte.repo.url }}fabric-pte:{{ pte.repo.tag }}
       imagePullPolicy: Always
       env:
         - { name: "TESTCASE", value: "{{ testcase }}" }
@@ -30,6 +29,6 @@ spec:
         - { name: "CHAINCODE", value: "{{ chaincode }}" }
       volumeMounts:
         - { mountPath: "/var/hyperledger/fabric/artifacts", name: "task-pv-storage" }
-        - { mountPath: "/var/hyperledger/fabric/testcase", name: "{{ item }}" }
+        - { mountPath: "/var/hyperledger/fabric/testcase", name: "{{ item }}{{ pteenv }}{{ chaincode | replace('_', '') }}" }
       command: ["bash"]
       args: ["-c","cp /var/hyperledger/fabric/testcase/{{ item }}.sh . && chmod +x {{ item }}.sh && ./{{ item }}.sh"]

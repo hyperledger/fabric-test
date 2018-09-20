@@ -4,14 +4,14 @@
 #
 ---
 - name: Stop PTE client pod
-  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/pte-client-k8s.yml"
+  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/{{ pteenv }}/pte-client-{{ pteenv }}-{{ chaincode | replace('_', '') }}-k8s.yml"
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "pteclientdown"
 
 - name: Delete configMap
   command: >-
-    ./kubectl --kubeconfig kubeconfig delete configmap client
+    ./kubectl --kubeconfig kubeconfig delete configmap client{{ pteenv }}{{ chaincode | replace('_', '') }}
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "clientconfig"

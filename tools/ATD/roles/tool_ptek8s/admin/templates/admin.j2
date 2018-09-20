@@ -48,11 +48,12 @@ sed -i 's/\(\"metadataPath\"\:\ \"\)\(.*\)/\1\/root\/go\/src\/github.com\/hyperl
 echo "#########################################"
 echo "#          Starting Admin Tasks         #"
 echo "#########################################"
-{% set create = '' | default('true') %}
-{% if create %}
+{% if createChannel %}
 echo "Creating Channel, Joining Peers to Channel"
+
 ./test_driver.sh -m {{ testcase }} -p
 {% endif %}
+
 echo "Installing and Instantiating the Chaincode"
 
 ./test_driver.sh -m {{ testcase }} -c {{ chaincode }}

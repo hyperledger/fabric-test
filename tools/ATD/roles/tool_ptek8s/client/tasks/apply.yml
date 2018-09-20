@@ -67,26 +67,26 @@
 
 - name: Create configmaps for client file
   command: >-
-    ./kubectl --kubeconfig kubeconfig create configmap client --from-file={{ testdir }}/client.sh
+    ./kubectl --kubeconfig kubeconfig create configmap client{{ pteenv }}{{ chaincode | replace('_', '') }} --from-file={{ testdir }}/client.sh
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
 
 - name: Create deployment file for PTE client
   template:
     src: "{{ playbook_dir }}/admin/templates/pte-k8s.j2"
-    dest: "{{ playbook_dir }}/../../vars/pte-{{ item }}-k8s.yml"
+    dest: "{{ playbook_dir }}/../../vars/{{ pteenv }}/pte-{{ item }}-{{ pteenv }}-{{ chaincode | replace('_', '') }}-k8s.yml"
   with_items:
     - "client"
 
 - name: Start PTE client pod
-  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/pte-client-k8s.yml"
+  command: "./kubectl --kubeconfig='kubeconfig' apply -f ../../../../../tools/ATD/vars/{{ pteenv }}/pte-client-{{ pteenv }}-{{ chaincode | replace('_', '') }}-k8s.yml"
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "pteclientup"
 
 - name: Wait for PTE client pod to come up
   command: >-
-    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient{{ pteenv }}{{ chaincode | replace('_', '') }}
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   register: pteclientstatus
@@ -97,14 +97,14 @@
 
 - name: Copy config zip file onto the PTE client pod
   command: >-
-    ./kubectl --kubeconfig kubeconfig cp {{ testdir }}/../pteconfig.tgz pteclient:/var/hyperledger/fabric/
+    ./kubectl --kubeconfig kubeconfig cp {{ testdir }}/../pteconfig.tgz pteclient{{ pteenv }}{{ chaincode | replace('_', '') }}:/var/hyperledger/fabric/
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "pteclientconfig"
 
 - name: Check the health of the PTE client
   command: >-
-    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient
+    ./kubectl --kubeconfig kubeconfig get -o=custom-columns=STATUS:.status.containerStatuses[].ready pods pteclient{{ pteenv }}{{ chaincode | replace('_', '') }}
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   register: ptestatus
@@ -115,7 +115,7 @@
 
 - name: Logs in PTE client to local
   shell: >-
-    ./kubectl --kubeconfig kubeconfig logs pteclient -c pteclient > {{ playbook_dir }}/../../vars/client-{{ testcase }}-{{ testcase_query }}.log 2>&1
+    ./kubectl --kubeconfig kubeconfig logs pteclient{{ pteenv }}{{ chaincode | replace('_', '') }} > {{ playbook_dir }}/../../vars/client-{{ pteenv }}-{{ chaincode }}-{{ testcase }}-{{ testcase_query }}.log 2>&1
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "pteclientlogs"

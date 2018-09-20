@@ -2,11 +2,12 @@
  {
          "name": "collectionMarbles",
          "policy": {
-             "identities": [{
-{% for peerorg in item.0.orgs if peerorg in peerorgs %}
+             "identities": [
+{% for org in identities[0].orgs if org in item.orgs %}
+               {
                  "role": {
-                   "name": "member",
-                   "mspId": "{{ peerorg }}"
+                   "name": "{{ identities[0].role }}",
+                   "mspId": "{{ org }}"
                  }
 {%  if not loop.last %}
                },
@@ -16,28 +17,32 @@
 {% endfor %}
              ],
              "policy": {
-               "1-of": [
-                 {
-                   "signed-by": 0
-                 },
-                 {
-                   "signed-by": 1
-                 }
-               ]
+                 "1-of": [
+{% for i in range(identities[0].orgs|length) %}
+                    {
+                       "signed-by": {{ i }}
+{% if not loop.last %}
+                    },
+{% else %}
+                    }
+{% endif %}
+{% endfor %}
+                 ]
              }
          },
-         "requiredPeerCount": 0,
-         "maxPeerCount": 0,
+         "requiredPeerCount": 1,
+         "maxPeerCount": 2,
          "blockToLive": 1000000
  },
  {
          "name": "collectionMarblePrivateDetails",
          "policy": {
-             "identities": [{
-{% for peerorg in item.0.orgs if peerorg in peerorgs %}
+             "identities": [
+{% for org in identities[0].orgs if org in item.orgs %}
+               {
                  "role": {
-                   "name": "member",
-                   "mspId": "{{ peerorg }}"
+                   "name": "{{ identities[0].role }}",
+                   "mspId": "{{ org }}"
                  }
 {%  if not loop.last %}
                },
@@ -47,18 +52,21 @@
 {% endfor %}
              ],
              "policy": {
-               "1-of": [
-                 {
-                   "signed-by": 0
-                 },
-                 {
-                   "signed-by": 1
-                 }
-               ]
+                 "1-of": [
+{% for i in range(identities[0].orgs|length) %}
+                    {
+                       "signed-by": {{ i }}
+{% if not loop.last %}
+                    },
+{% else %}
+                    }
+{% endif %}
+{% endfor %}
+                 ]
              }
          },
-         "requiredPeerCount": 0,
-         "maxPeerCount": 0,
+         "requiredPeerCount": 1,
+         "maxPeerCount": 2,
          "blockToLive": 1000000
  }
 ]

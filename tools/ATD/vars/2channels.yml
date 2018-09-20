@@ -42,6 +42,12 @@ pte: {
       listener: "Block",
       timeout: 600000
     },
+    endorsement: {
+      identities: [
+        { role: "peer", orgs: ["org1", "org2"] }
+      ],
+      policy: "\"1-of\": [{ \"signed-by\": 0 }, { \"signed-by\": 1 }]"
+    },
     failoverOpt: {
       method: "RoundRobin",
       list: "targetPeers"

@@ -11,11 +11,11 @@
   set_fact:
     testdir: "{{ playbook_dir }}/../../vars/{{ pteenv }}/CITest"
 
-- name : Create channel and channel orgs list
+- name: Create channel and channel orgs list
   set_fact:
     channels: |
-      {{ channels | default([]) + [{ 'name':item.name | default(),
-        'orgs':item.orgs | default([]),
+      {{ channels | default([]) + [{ 'name': item.name | default(),
+        'orgs': item.orgs | default([]),
         'orderer': item.orderer | default() }] }}
   with_items: "{{ pte.ptechannels }}"
 
@@ -34,83 +34,82 @@
 
 - name: Transaction rate parameters
   set_fact:
-    transMode: "{{ pte.transaction.transMode }}"
-    targetPeers: "{{ pte.transaction.targetPeers }}"
-    TLS: "{{ pte.transaction.TLS }}"
-    nProcPerOrg: "{{ pte.transaction.nProcPerOrg }}"
-    nRequest: "{{ pte.transaction.nRequest }}"
-    runDur: "{{ pte.transaction.runDur }}"
-    peerFailover: "{{ pte.transaction.peerFailover }}"
-    ordererFailover: "{{ pte.transaction.ordererFailover }}"
+    transMode: "{{ pte.transaction.transMode | default('Constant') }}"
+    targetPeers: "{{ pte.transaction.targetPeers | default('OrgAnchor') }}"
+    TLS: "{{ pte.transaction.TLS | default('enabled') }}"
+    nProcPerOrg: "{{ pte.transaction.nProcPerOrg | default(1) }}"
+    nRequest: "{{ pte.transaction.nRequest | default(1000) }}"
+    runDur: "{{ pte.transaction.runDur | default(120) }}"
+    peerFailover: "{{ pte.transaction.peerFailover | default('False') }}"
+    ordererFailover: "{{ pte.transaction.ordererFailover | default('False') }}"
 
 - name: Transaction mode for MIX
   set_fact:
-    mixQuery: "{{ pte.transaction.mixOpt.mixQuery }}"
-    mixFreq: "{{ pte.transaction.mixOpt.mixFreq }}"
+    mixQuery: "{{ pte.transaction.mixOpt.mixQuery | default('False') }}"
+    mixFreq: "{{ pte.transaction.mixOpt.mixFreq | default(1000) }}"
   when: transMode == "Mix"
 
 - name: Transaction mode for BURST
   set_fact:
-    burstFreq0: "{{ pte.transaction.burstOpt.burstFreq0 }}"
-    burstDur0: "{{ pte.transaction.burstOpt.burstDur0 }}"
-    burstFreq1: "{{ pte.transaction.burstOpt.burstFreq1 }}"
-    burstDur1: "{{ pte.transaction.burstOpt.burstDur1 }}"
+    burstFreq0: "{{ pte.transaction.burstOpt.burstFreq0 | default(500) }}"
+    burstDur0: "{{ pte.transaction.burstOpt.burstDur0 | default(3000) }}"
+    burstFreq1: "{{ pte.transaction.burstOpt.burstFreq1 | default(2000) }}"
+    burstDur1: "{{ pte.transaction.burstOpt.burstDur1 | default(10000) }}"
   when: transMode == "Burst"
 
 - name: Transaction mode for CONSTANT
   set_fact:
-    recHist: "{{ pte.transaction.constantOpt.recHist }}"
-    constFreq: "{{ pte.transaction.constantOpt.constFreq }}"
-    devFreq: "{{ pte.transaction.constantOpt.devFreq }}"
+    recHist: "{{ pte.transaction.constantOpt.recHist | default('HIST') }}"
+    constFreq: "{{ pte.transaction.constantOpt.constFreq | default(100) }}"
+    devFreq: "{{ pte.transaction.constantOpt.devFreq | default(20) }}"
   when: transMode == "Constant"
 
 - name: Event options
   set_fact:
-    eventType: "{{ pte.transaction.eventOpt.type }}"
-    eventListener: "{{ pte.transaction.eventOpt.listener }}"
-    eventTimeout: "{{ pte.transaction.eventOpt.timeout }}"
+    eventType: "{{ pte.transaction.eventOpt.type | default('FilteredBlock') }}"
+    eventListener: "{{ pte.transaction.eventOpt.listener | default('Block') }}"
+    eventTimeout: "{{ pte.transaction.eventOpt.timeout | default(480000) }}"
 
 - name: Timeout Options
   set_fact:
-    preconfig: "{{ pte.transaction.timeoutOpt.preConfig }}"
-    request: "{{ pte.transaction.timeoutOpt.request }}"
-    grpcTimeout: "{{ pte.transaction.timeoutOpt.grpcTimeout }}"
+    preconfig: "{{ pte.transaction.timeoutOpt.preConfig | default(300000) }}"
+    request: "{{ pte.transaction.timeoutOpt.request | default(300000) }}"
+    grpcTimeout: "{{ pte.transaction.timeoutOpt.grpcTimeout | default(10000) }}"
 
 - name: failover Options
   set_fact:
-    method: "{{ pte.transaction.failoverOpt.method }}"
-    list: "{{ pte.transaction.failoverOpt.list }}"
+    method: "{{ pte.transaction.failoverOpt.method | default('RoundRobin') }}"
+    list: "{{ pte.transaction.failoverOpt.list | default('targetPeers') }}"
 
 - name: Payload options
   set_fact:
-    payLoadType: "{{ pte.transaction.ccOpt.payLoadType }}"
-    payLoadMin: "{{ pte.transaction.ccOpt.payLoadMin }}"
-    payLoadMax: "{{ pte.transaction.ccOpt.payLoadMax }}"
+    payLoadType: "{{ pte.transaction.ccOpt.payLoadType | default('Random') }}"
+    payLoadMin: "{{ pte.transaction.ccOpt.payLoadMin | default(1024) }}"
+    payLoadMax: "{{ pte.transaction.ccOpt.payLoadMax | default(1024) }}"
 
 - name: Create list
   set_fact:
     channellists: |
-      {{ channellists | default([]) + [{ 'name':item.0.name | default(),
-        'orgs':item.0.orgs | default([]),
+      {{ channellists | default([]) + [{ 'name': item.0.name | default(),
+        'orgs': item.0.orgs | default([]),
+        'nOrgs': item.0.orgs | length | default(),
         'orderer': item.0.orderer | default(),
         'channelnum': item.1|int }] }}
   with_together:
     - "{{ channels }}"
     - "{{ channelnum }}"
 
-- name: Create orgs list
+- name: Endorsement Policy Identities
   set_fact:
-    channelorgs: "{{ channelorgs | default([]) + item.orgs | default([]) }}"
-  with_items: "{{ pte.ptechannels }}"
+    identities: |
+      {{ identities | default([]) + [{ 'role': item.role | default('peer'),
+        'orgs': item.orgs | default([]) }] }}
+  with_items: "{{ pte.transaction.endorsement.identities }}"
 
-- name: Number of orgs in channels
+- name: Endorsement policy
   set_fact:
-    numorgs: "{{ numorgs | default([]) + [ item | default() ] }}"
-  with_sequence: count={{ channelorgs|length }}
-
-- name: make numorgs list
-  set_fact:
-    numorgs: "{{ numorgs | list }}"
+    policy: "{{ item | default('\"1-of\": [{ \"signed-by\": 0 }, { \"signed-by\": 1 }]') }}"
+  with_items: "{{ pte.transaction.endorsement.policy }}"
 
 - name: Make list for channels
   set_fact:
@@ -147,6 +146,18 @@
   args:
     chdir: "{{ testdir }}"
   with_items: "{{ channels }}"
+
+- name: Create the anchor peer transaction
+  shell: >-
+    export FABRIC_CFG_PATH={{ fabricworkdir }} &&
+    {{ fabricpath }}/bin/configtxgen -profile OrgChannel
+    -outputAnchorPeersUpdate {{ testdir }}/{{ item.1 }}{{ item.0.name }}anchor.tx -channelID {{ item.0.name }} -asOrg {{ item.1 }}
+  args:
+    chdir: "{{ testdir }}"
+  when: item.1 in item.0.orgs
+  with_nested:
+    - "{{ channellists }}"
+    - "{{ peerorgs }}"
 
 - name: Create scenario directory
   file:

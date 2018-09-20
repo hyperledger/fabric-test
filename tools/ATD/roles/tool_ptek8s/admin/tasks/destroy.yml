@@ -5,7 +5,7 @@
 
 ---
 - name: Stop PTE admin pod
-  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/pte-admin-k8s.yml"
+  command: "./kubectl --kubeconfig='kubeconfig' delete -f ../../../../../tools/ATD/vars/{{ pteenv }}/pte-admin-{{ pteenv }}-{{ chaincode | replace('_', '') }}-k8s.yml"
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "pteadmindown"
@@ -35,7 +35,7 @@
 
 - name: Delete configMap
   command: >-
-    ./kubectl --kubeconfig kubeconfig delete configmap admin
+    ./kubectl --kubeconfig kubeconfig delete configmap admin{{ pteenv }}{{ chaincode | replace('_', '') }}
   args:
     chdir: "{{ playbook_dir }}/../../../../cello/src/agent/ansible/vars/"
   tags: "config"

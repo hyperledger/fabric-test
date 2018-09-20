@@ -1,0 +1,25 @@
+{
+    "transType": "Channel",
+    "TLS": "{{ TLS }}",
+    "channelOpt": {
+        "name": "{{ item.0.name }}",
+        "channelTX": "/var/hyperledger/fabric/artifacts/keyfiles/{{ item.1 }}{{ item.0.name }}anchor.tx",
+        "action":  "update",
+{% for i in range(item.0.nOrgs) %}
+{% if item.1 == item.0.orgs[i|int] %}
+{% set index = ((item.0.channelnum|int * item.0.orgs|length) - (item.0.orgs|length - 1)) %}
+        "orgName": [
+            "org{{ index + (i|int) }}"
+        ]
+{% endif %}
+{% endfor %}
+    },
+    "timeoutOpt": {
+        "preConfig": "{{ preconfig }}",
+        "request": "{{ request }}",
+        "grpcTimeout": "{{ grpcTimeout }}"
+    },
+    "SCFile": [
+               {"ServiceCredentials":"CITest/CISCFiles/config-chan{{ item.0.channelnum|int }}-TLS.json"}
+       ]
+}
