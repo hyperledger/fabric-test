@@ -68,12 +68,6 @@ Scenario: Access to the fabric protobuf files
     Then there are no errors
 
 @smoke
-Scenario: Basic operations to create a useful blockchain network
-    Given I have a bootstrapped fabric network
-    When an admin sets up a channel
-    And an admin deploys chaincode
-
-@smoke
 Scenario: Setting of environment variables
     Given the KAFKA_DEFAULT_REPLICATION_FACTOR environment variable is 1
     And the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is 10 minutes

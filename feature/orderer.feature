@@ -60,6 +60,42 @@ Scenario: FAB-1306: Multiple organizations in a cluster - remove all, reinstate 
 
 
 @smoke
+Scenario: FAB-3852: Message Payloads Less than 1MB, for kafka-based orderer using the NodeJS SDK interface
+    Given I have a bootstrapped fabric network of type kafka using state-database couchdb with tls
+    And I use the NodeJS SDK interface
+    # Following lines are equivaent to "When an admin sets up a channel"
+    When an admin creates a channel
+    When an admin fetches genesis information using peer "peer0.org1.example.com"
+    When an admin makes all peers join the channel
+    # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]"
+    When an admin installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""] on all peers
+    When an admin instantiates the chaincode on "peer0.org1.example.com"
+
+    # 1K
+    And a user invokes on the chaincode named "mycc" with random args ["put","a","{random_value}"] of length 1024
+    And I wait "3" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","a"]
+    Then a user receives a response containing a value of length 1024
+    And a user receives a response with the random value
+    # 64K
+    When a user invokes on the chaincode named "mycc" with random args ["put","b","{random_value}"] of length 65536
+    And I wait "3" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","b"]
+    Then a user receives a response containing a value of length 65536
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","d","{random_value}"] of length 100000
+    And I wait "3" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","d"]
+    Then a user receives a response containing a value of length 100000
+    #
+    When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length 130610
+    And I wait "3" seconds
+    And a user queries on the chaincode named "mycc" with args ["get","g"]
+    Then a user receives a response containing a value of length 130610
+    And a user receives a response with the random value
+
+
+@daily
 Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer using the <interface> interface
     Given I have a bootstrapped fabric network of type <type>
     And I use the <interface> interface

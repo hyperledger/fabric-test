@@ -35,7 +35,7 @@ Examples:
     | kafka |   with tls  |     CLI    |
 
 
-@smoke
+@daily
 Scenario Outline: FAB-1440, FAB-3861: Basic Chaincode Execution - <type> orderer type, using <database>, <security>
     Given I have a bootstrapped fabric network of type <type> using state-database <database> <security>
     When an admin sets up a channel
