@@ -33,9 +33,9 @@ console.log('pteReport file: ', pteReport);
 
 var nPTE=0;
 
-// transaction vars
-var transMode;
-var transType;
+// transaction keys
+var transKey1;
+var transKey2;
 var procNum=0;
 var sentTx=0;
 var receivedTx=0
@@ -72,8 +72,8 @@ for(i in array) {
         nPTE++;
     } else if ( array[i].indexOf('transaction stats') >-1 ) {
         var arr = array[i].split(' ');
-        transMode = arr[1];
-        transType = arr[2];
+        transKey1 = arr[1];
+        transKey2 = arr[2];
         //console.log(array[i]);
     } else if ( array[i].indexOf('Total processes') > -1) {
         procNum = procNum + parseInt(array[i].substring(array[i].indexOf('processes')+9).trim());
@@ -154,17 +154,17 @@ for(i in array) {
 
 
 // output results
-    var hdr = transMode+' '+transType;
-        var buff = '=======  '+hdr+' Overall Performance Summary  =======\n';
-        fs.appendFileSync(pteReport, buff);
+    var hdr = transKey1+' '+transKey2;
+    var buff = '=======  '+hdr+' Overall Performance Summary  =======\n';
+    fs.appendFileSync(pteReport, buff);
 
-        buff = '    '+hdr+' Overall number of PTE: '+nPTE+'\n';
-        fs.appendFileSync(pteReport, buff);
+    buff = '    '+hdr+' Overall number of PTE: '+nPTE+'\n';
+    fs.appendFileSync(pteReport, buff);
 
-        buff = '    '+hdr+' Overall processes: '+procNum+'\n';
-        fs.appendFileSync(pteReport, buff);
+    buff = '    '+hdr+' Overall processes: '+procNum+'\n';
+    fs.appendFileSync(pteReport, buff);
 
-    if ( transType == 'INVOKE' ) {
+    if ( transKey2 == 'INVOKE' ) {
         buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+'\n';
         fs.appendFileSync(pteReport, buff);
 
@@ -178,12 +178,12 @@ for(i in array) {
         buff = '    '+hdr+' Overall time: start '+startTime+' end '+endTime+' duration '+duration+'\n';
         fs.appendFileSync(pteReport, buff);
 
-        if ( transMode == 'LATENCY' ) {
+        if ( transKey1 == 'LATENCY' ) {
             var tLatency=duration/receivedTx;
-            buff = '    '+hdr+' Overall '+transMode+' '+transType+' LATENCY '+tLatency.toFixed(2)+'\n';
+            buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' LATENCY '+tLatency.toFixed(2)+'\n';
         } else {
             var tTPS=1000*receivedTx/duration;
-            buff = '    '+hdr+' Overall '+transMode+' '+transType+' TPS '+tTPS.toFixed(2)+'\n';
+            buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
         }
         fs.appendFileSync(pteReport, buff);
 
@@ -200,7 +200,7 @@ for(i in array) {
         avg=eventLatency[1]/eventLatency[0];
         buff = '        '+hdr+' Overall events latency '+eventLatency[0]+' min '+eventLatency[2]+' ms max '+eventLatency[3]+' ms avg '+avg.toFixed(2)+' ms\n';
         fs.appendFileSync(pteReport, buff);
-    } else if ( transType == 'QUERY' ) {
+    } else if ( transKey2 == 'QUERY' ) {
         buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+'\n';
         fs.appendFileSync(pteReport, buff);
 
@@ -208,15 +208,26 @@ for(i in array) {
         buff = '    '+hdr+' Overall time: start '+startTime+' end '+endTime+' duration '+duration+'\n';
         fs.appendFileSync(pteReport, buff);
 
-        if ( transMode == 'LATENCY' ) {
+        if ( transKey1 == 'LATENCY' ) {
             var tLatency=duration/receivedTx;
-            buff = '    '+hdr+' Overall '+transMode+' '+transType+' Latency '+tLatency.toFixed(2)+'\n';
+            buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' Latency '+tLatency.toFixed(2)+'\n';
         } else {
             var tTPS=1000*receivedTx/duration;
-            buff = '    '+hdr+' Overall '+transMode+' '+transType+' TPS '+tTPS.toFixed(2)+'\n';
+            buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
         }
         fs.appendFileSync(pteReport, buff);
-    } else if ( transMode == 'MIX' ) {
+    } else if ( transKey2 == 'DISCOVERY' ) {
+        buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+'\n';
+        fs.appendFileSync(pteReport, buff);
+
+        var duration = endTime - startTime;
+        buff = '    '+hdr+' Overall time: start '+startTime+' end '+endTime+' duration '+duration+'\n';
+        fs.appendFileSync(pteReport, buff);
+
+        var tTPS=1000*receivedTx/duration;
+        buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
+        fs.appendFileSync(pteReport, buff);
+    } else if ( transKey1 == 'MIX' ) {
         var sentInvoke=sentTx/2;
         var sentQuery=sentTx/2;
         buff = '    '+hdr+' Overall transactions: total sent '+sentTx+' INVOKE '+sentInvoke+' QUERY '+sentQuery+'\n';
@@ -227,10 +238,10 @@ for(i in array) {
         fs.appendFileSync(pteReport, buff);
 
         var tTPS=1000*sentTx/duration;
-        buff = '    '+hdr+' Overall '+transMode+' '+transType+' TPS '+tTPS.toFixed(2)+'\n';
+        buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
         fs.appendFileSync(pteReport, buff);
     }
 
     // append a blank line at the end
-        buff = '\n';
-        fs.appendFileSync(pteReport, buff);
+    buff = '\n';
+    fs.appendFileSync(pteReport, buff);

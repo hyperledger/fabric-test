@@ -9,7 +9,8 @@
         "name":  "testorgschannel2",
         "action":  "create",
         "orgName": [
-            "org1"
+            "org1",
+            "org2"
         ]
     },
     "deploy": {

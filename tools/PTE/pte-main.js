@@ -1365,6 +1365,7 @@ async function performance_main() {
                         var totalMixedInvoke=0;
                         var totalMixedQuery=0;
                         var totalDiscoveryTrans=0;
+                        var totalDiscoveryTransFailures=0;
                         var totalDiscoveryTime=0;
 
                         var stmp=0;
@@ -1486,6 +1487,8 @@ async function performance_main() {
                             if (rawText.indexOf("invoke_discovery")>-1) {
                                 var transNum= parseInt(rawText.substring(rawText.indexOf("sent")+4,rawText.indexOf("transactions")).trim());
                                 totalDiscoveryTrans=totalDiscoveryTrans+transNum;
+                                var transNumFailures= parseInt(rawText.substring(rawText.indexOf("failed")+6,rawText.indexOf("transactions")).trim());
+                                totalDiscoveryTransFailures=totalDiscoveryTransFailures+transNumFailures;
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalDiscoveryTime=totalDiscoveryTime+tempDur;
 
@@ -1613,18 +1616,19 @@ async function performance_main() {
                         }
                         if (totalDiscoveryTrans>0) {
                             var dur=etmp-stmp;
-                            logger.info("Test Summary (%s):Total  DISCOVERY transaction=%d, duration=%d ms, total throughput=%d TPS", chaincode_id, totalDiscoveryTrans, dur, (totalDiscoveryTrans/dur).toFixed(2));
+                            logger.info("Test Summary (%s):Total  DISCOVERY transaction=%d, failed=%d, duration=%d ms, total throughput=%d TPS", chaincode_id, totalDiscoveryTrans, totalDiscoveryTransFailures, dur, (totalDiscoveryTrans/dur).toFixed(2));
                             var sdTPS=1000*totalDiscoveryTrans/dur;
-                            logger.info("Aggregate Test Summary (%s):Total DISCOVERY transaction %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalDiscoveryTrans, stmp, etmp, dur, sdTPS.toFixed(2));
+                            logger.info("Aggregate Test Summary (%s):Total DISCOVERY transaction %d, failed %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalDiscoveryTrans, totalDiscoveryTransFailures, stmp, etmp, dur, sdTPS.toFixed(2));
 
                             // service discovery transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"): DISCOVERY transaction stats\n";
+                            buff = "("+channelName+":"+chaincode_id+"): "+transMode+" "+transType+" transaction stats\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
                             fs.appendFileSync(rptFile, buff);
-                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions "+totalDiscoveryTrans + "\n";
+                            var totalDiscoveryTransReceived = totalDiscoveryTrans - totalDiscoveryTransFailures;
+                            buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalDiscoveryTrans + "  received "+totalDiscoveryTransReceived+"\n";
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
