@@ -320,7 +320,7 @@ function getMoveRequest() {
     // Set the approprate signing identity for this function based on access policy
     // If the function has no access control, we can use any signing identity
     var orgsForAccess = ccFunctionAccessPolicy[ccDfnPtr.invoke.move.fcn];
-    if (orgsForAccess && Array.isArray(orgsForAccess) && orgsForAccess.length > 0) {
+    if (orgsForAccess && Array.isArray(orgsForAccess) && orgsForAccess.length > 0 && orgAdmins[orgsForAccess[0]]) {
         client.setUserContext(orgAdmins[orgsForAccess[0]], false);		// Just pick the first organization that satisfies the policy
     }
 
@@ -356,7 +356,7 @@ function getQueryRequest() {
     // Set the approprate signing identity for this function based on access policy
     // If the function has no access control, we can use any signing identity
     var orgsForAccess = ccFunctionAccessPolicy[ccDfnPtr.invoke.query.fcn];
-    if (orgsForAccess && Array.isArray(orgsForAccess) && orgsForAccess.length > 0) {
+    if (orgsForAccess && Array.isArray(orgsForAccess) && orgsForAccess.length > 0 && orgAdmins[orgsForAccess[0]]) {
         client.setUserContext(orgAdmins[orgsForAccess[0]], false);		// Just pick the first organization that satisfies the policy
     }
 
