@@ -1,0 +1,2 @@
+driver=pte CITest/FAB-11615-2i/sbe_cc/runCases-constant-iVal1-TLS.txt
+driver=pte CITest/FAB-11615-2i/sbe_cc/runCases-constant-iVal2-TLS.txt

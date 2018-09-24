@@ -1,0 +1,36 @@
+{
+    "channelID": "_ch2",
+    "chaincodeID": "sbe_cc",
+    "chaincodeVer": "v0",
+    "transType": "instantiate",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel2",
+        "action":  "create",
+        "orgName": [
+            "org3"
+        ]
+    },
+    "timeoutOpt": {
+        "preConfig": "120000",
+        "request": "180000"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+        "fcn": "init",
+        "language": "golang",
+        "endorsement": {
+            "identities": [
+                { "role": { "name": "peer", "mspId": "PeerOrg3" }},
+                { "role": { "name": "peer", "mspId": "PeerOrg4" }}
+            ],
+            "policy": {
+                "2-of": [{ "signed-by": 0 }, { "signed-by": 1 }]
+            }
+        },
+        "args": []
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
+    ]
+}

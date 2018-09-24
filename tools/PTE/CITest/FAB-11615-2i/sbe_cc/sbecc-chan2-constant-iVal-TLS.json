@@ -1,0 +1,82 @@
+{
+    "channelID": "_ch2",
+    "chaincodeID": "sbe_cc",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Move",
+    "targetPeers": "List",
+    "peerFailover": "TRUE",
+    "ordererFailover": "TRUE",
+    "nProcPerOrg": "1",
+    "nRequest": "50000",
+    "runDur": "600",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel2",
+        "orgName": [
+            "org3"
+        ]
+    },
+    "burstOpt": {
+        "burstFreq": ["500", "200", "300", "100"],
+        "burstDur":  ["3000", "2000", "3000", "1000"]
+    },
+    "mixOpt": {
+        "mixQuery": "false",
+        "mixFreq": "3000"
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "0",
+        "devFreq": "0"
+    },
+    "listOpt": {
+        "org3": ["peer1"],
+        "org4": ["peer1"]
+    },
+    "eventOpt": {
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "480000"
+    },
+    "failoverOpt": {
+        "method": "RoundRobin",
+        "list": "targetPeers"
+    },
+    "invokeCheckOpt": {
+        "peers": "AllPeers",
+        "transactions": "LAST",
+        "txNum": "5"
+    },
+    "timeoutOpt": {
+        "preConfig": "200000",
+        "request": "45000",
+        "grpcTimeout": "3000"
+    },
+    "ccType": "sbecc",
+    "ccOpt": {
+        "keyIdx": [0],
+        "keyStart": "1000"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+        "fcn": "init",
+        "args": []
+    },
+    "invoke": {
+        "query": {
+            "fcn": "getRecord",
+            "args": ["key"]
+        },
+        "move": {
+            "fcn": "updateRecordVal",
+            "args": ["key","200"]
+        }
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
+    ]
+}

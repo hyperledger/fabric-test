@@ -1,0 +1,17 @@
+{
+    "channelID": "_ch2",
+    "transType": "Channel",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel2",
+        "action":  "join",
+        "orgName": [
+            "org3",
+            "org4"
+        ]
+    },
+    "SCFile": [
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
+    ]
+}

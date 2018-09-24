@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-11615-2i/preconfig/sbe_cc/sbecc-chan1-instantiate-TLS.json
+sdk=node CITest/FAB-11615-2i/preconfig/sbe_cc/sbecc-chan2-instantiate-TLS.json
