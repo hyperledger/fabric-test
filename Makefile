@@ -84,9 +84,14 @@ fabric:
 .PHONY: build-docker-images
 build-docker-images:
 	@make docker -C $(FABRIC_DIR)
+	@make docker-thirdparty -C $(FABRIC_DIR)
 	@make native -C $(FABRIC_DIR)
 	@make docker -C $(CA_DIR)
 	@make docker-fvt -C $(CA_DIR)
+
+.PHONY: pull-thirdparty-images
+pull-thirdparty-images:
+	@make docker-thirdparty -C $(FABRIC_DIR)
 
 .PHONY: ca
 ca:
@@ -136,7 +141,7 @@ svt-daily-ote-tests: pull-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runOteTestSuite.sh
 
 .PHONY: svt-daily-lte-tests
-svt-daily-lte-tests: pull-images
+svt-daily-lte-tests:  fabric pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
 
 .PHONY: svt-daily-ca-tests
