@@ -37,6 +37,11 @@
         "method": "RoundRobin",
         "list": "targetPeers"
     },
+    "invokeCheckOpt": {
+        "peers": "_CHKPEERS_",
+        "transactions": "_CHKTX_",
+        "txNum": "_CHKTXNUM_"
+    },
     "timeoutOpt": {
         "preConfig": "200000",
         "request": "45000"

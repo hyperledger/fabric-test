@@ -100,8 +100,10 @@ The command is located in `PTE/CITest/scripts`
         FAB-10190-4i: 4 processes X 10,000 invokes with service discovery
         FAB-10190-4q: 4 processes X 100 queries with all peers, useful to prime ALL peers in the standard network of 2 orgs/4 peers, which is required when using service discovery
         FAB-10191-4i: 4 processes X 1 hour invokes with service discovery and simultaneously execute test_chaos.sh to restart all orderers, peers, kafkas, and zookeepers one at a time for robustness test
-        FAB-10677: multiple processes (4, 8, 12, ..., 40) X 10000 transactions, both invoke and query, 1 channel, 1 org, 1 peer, 1 ca, solo orderer, levelDB, 1 samplcc go cc.  This is a test driver, which creates a bare bones network as described, and runs a performance test multiple times, collecting stats for each. It is useful to determine the peak throughput and optimum number of threads, for a chosen hardware platform and testcase.
+        FAB-10677: multiple processes (4, 8, 12, ..., 52) X 10000 transactions, both invoke and query, 1 channel, 1 org, 1 peer, 1 ca, solo orderer, levelDB, 1 samplecc go cc.  This is a test driver, which creates a bare bones network as described, and runs a performance test multiple times, collecting stats for each. It is useful to determine the peak throughput and optimum number of threads, for a chosen hardware platform and testcase.
+        FAB-11638: samplecc chaincode, TLS, option to bring up a network of levelDB, 1 channel, 2 org, 2 peers per org, filtered block event service, 2 processes X 10000 invokes and validation of all transaction on all peers, then sleep for 2 days, then another 2 processes X 10000 invokes and validation of all transaction on all peers
         FAB-11726-4i: samplecc java chaincode, 4 processes X 10000 invokes, TLS, levelDB, 2 channel, filtered block event service, event listener: per block
+        FAB-12055: multiple processes (4, 8, 12, ..., 52) X 10000 transactions, both invoke and query, 1 channel, 1 org, 1 peer, 1 ca, solo orderer, levelDB, samplecc.  This is a test driver, which creates a bare bones network as described, and runs a performance test multiple times against sample cc in three languages (go, Node js, and java), collecting stats for each.
 
     **Note that a query testcase requires execution of corresponding invoke testcase first to avoid errors due to the absence of transactions.**
 
@@ -190,7 +192,9 @@ The command is located in `PTE/CITest/scripts`
         FAB-10190-4i.sh: execute FAB-10190-4i
         FAB-10191-4i.sh: execute FAB-10191-4i
         FAB-10677.sh: execute FAB-10677
+        FAB-11638.sh: execute FAB-11638
         FAB-11726-4i.sh: execute FAB-11726-4i
+        FAB-12055.sh: execute FAB-12055
 
 * ### Network
 

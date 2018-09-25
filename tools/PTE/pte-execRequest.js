@@ -1383,6 +1383,7 @@ function invokeValidation(caller) {
     logger.info("[Nid:chan:org:id=%d:%s:%s:%d invokeValidation] caller(%s) %s, %s, %d", Nid, channelName, org, pid, caller, invokeCheckPeers, invokeCheckTx, invokeCheckTxNum);
 
     // reset transaction index
+    nRequest = inv_m;
     if (invokeCheckTx == 'LAST') {
         if ( invokeCheckTxNum > inv_m ) {
             ccFuncInst.arg0 = ccFuncInst.keyStart;
