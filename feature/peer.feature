@@ -241,7 +241,8 @@ Scenario: FAB-8380: Test MSP Identity - Malicious Peer
   Then a user receives a success response of 1000
 
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer1.org2.example.com"
-  Then the logs on peer1.org2.example.com contains "VSCC error: endorsement policy failure, err: signature set did not satisfy policy" within 10 seconds
+  Then the logs on peer1.org2.example.com contains "VSCCValidateTx for transaction txId " within 10 seconds
+  And the logs on peer1.org2.example.com contains "returned error: validation of endorsement policy for chaincode mycc in tx 2:0 failed: signature set did not satisfy policy" within 10 seconds
   And I wait "2" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 1000
@@ -263,7 +264,8 @@ Scenario: FAB-8381: Test MSP Identity - Malicious Peer (Clients set as writers i
   Then a user receives a success response of 1000
 
   When a user using a peer identity invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
-  Then the logs on peer0.org1.example.com contains "VSCC error: endorsement policy failure, err: signature set did not satisfy policy" within 10 seconds
+  Then the logs on peer0.org2.example.com contains "VSCCValidateTx for transaction txId " within 10 seconds
+  And the logs on peer0.org2.example.com contains "returned error: validation of endorsement policy for chaincode mycc in tx 2:0 failed: signature set did not satisfy policy" within 10 seconds
   And I wait "2" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
@@ -283,7 +285,8 @@ Scenario: FAB-8382: Test MSP Identity with inconsistencies
   Then a user receives a success response of 1000 from "peer0.org2.example.com"
 
   When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
-  Then the logs on peer0.org2.example.com contains "VSCC error: endorsement policy failure, err: signature set did not satisfy policy" within 10 seconds
+  Then the logs on peer0.org2.example.com contains "VSCCValidateTx for transaction txId " within 10 seconds
+  And the logs on peer0.org2.example.com contains "returned error: validation of endorsement policy for chaincode mycc in tx 2:0 failed: signature set did not satisfy policy" within 10 seconds
   And I wait "2" seconds
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 1000
