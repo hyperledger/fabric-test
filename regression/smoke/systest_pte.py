@@ -76,7 +76,7 @@ class PTE_Functions(unittest.TestCase):
         # Output Summary should include lines like these for the Query portion of the test:
         #    CONSTANT QUERY Overall number of PTE: 4
         #    CONSTANT QUERY Overall processes: 8
-        #    CONSTANT QUERY Overall transactions: sent 800 received 800
+        #    CONSTANT QUERY Overall transactions: sent 800 received 800 failures 0
         #    CONSTANT QUERY Overall time: start 1536676374892 end 1536676376872 duration 1980
         #    CONSTANT QUERY Overall CONSTANT QUERY TPS 404.04
 
@@ -100,7 +100,7 @@ class PTE_Functions(unittest.TestCase):
         self.assertEqual(int(count.strip()), 1)
 
         count = subprocess.check_output(
-                "grep \"CONSTANT QUERY Overall transactions: sent 800 received 800\" FAB-7929-8i-pteReport.log | wc -l",
+                "grep \"CONSTANT QUERY Overall transactions: sent 800 received 800 failures 0\" FAB-7929-8i-pteReport.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1)
 

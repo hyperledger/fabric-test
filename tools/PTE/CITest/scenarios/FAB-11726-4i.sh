@@ -9,4 +9,3 @@
 ########## CI test ##########
 
 ./run_scenarios.sh -a samplejava -n FAB-11726-4i -p FAB-11726-4q -i FAB-11726-4i -q FAB-11726-4q
-exit

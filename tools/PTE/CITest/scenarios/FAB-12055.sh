@@ -165,4 +165,3 @@ done       # applcc loop
 
 cd $CWD
 
-exit

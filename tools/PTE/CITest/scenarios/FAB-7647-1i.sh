@@ -9,4 +9,3 @@
 ########## CI test ##########
 
 ./run_scenarios.sh -a samplecc -n FAB-7647-1i -p FAB-7647-1q -i FAB-7647-1i -q FAB-7647-1q
-exit

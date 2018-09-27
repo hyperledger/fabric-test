@@ -97,4 +97,3 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
 
 done
 
-exit

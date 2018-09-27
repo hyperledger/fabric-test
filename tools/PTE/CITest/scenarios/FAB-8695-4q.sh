@@ -9,4 +9,3 @@
 ########## CI test ##########
 
 ./run_scenarios.sh -q FAB-8695-4q
-exit
