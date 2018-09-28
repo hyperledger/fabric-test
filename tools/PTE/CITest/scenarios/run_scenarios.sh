@@ -117,8 +117,6 @@ CIpteReport=$LOGDIR"/"$TESTCASE"-pteReport.log"
 if [ -e $CIpteReport ]; then
     rm -f $CIpteReport
 fi
-# print testcase name at the top of CIpteReport file
-echo "PTE testcase: $TESTCASE" >> $CIpteReport
 
 cd ../scripts
 
@@ -156,8 +154,22 @@ if [ $invokes != "none" ]; then
     echo "[$0] ./test_driver.sh -t $invokes"
     ./test_driver.sh -t $invokes
 
+    #### set the CIpteReport name to run testcase if TESTCASE is not set
+    if [ $TESTCASE == "pteTest" ]; then
+        CIpteReport=$LOGDIR"/"$invokes"-pteReport.log"
+        if [ -e $CIpteReport ]; then
+            rm -f $CIpteReport
+        fi
+        # print testcase name at the top of CIpteReport file
+        echo "PTE testcase: $invokes" >> $CIpteReport
+    else
+        # print testcase name at the top of CIpteReport file
+        echo "PTE testcase: $TESTCASE" >> $CIpteReport
+    fi
     #### calculate overall invoke TPS from pteReport
+    echo "[$0] testcase [$invokes] CIpteReport=$CIpteReport"
     node get_pteReport.js $pteReport
+
     cat $pteReport >> $CIpteReport
     rm -f $pteReport
 fi
@@ -168,7 +180,21 @@ if [ $queries != "none" ]; then
     echo "[$0] ./test_driver.sh -t $queries"
     ./test_driver.sh -t $queries
 
+    #### set the CIpteReport name to run testcase if TESTCASE is not set
+    if [ $TESTCASE == "pteTest" ]; then
+        CIpteReport=$LOGDIR"/"$queries"-pteReport.log"
+        if [ -e $CIpteReport ]; then
+            rm -f $CIpteReport
+        fi
+        echo "[$0] CIpteReport=$CIpteReport"
+        # print testcase name at the top of CIpteReport file
+        echo "PTE testcase: $queries" >> $CIpteReport
+    else
+        # print testcase name at the top of CIpteReport file
+        echo "PTE testcase: $TESTCASE" >> $CIpteReport
+    fi
     #### calculate overall query TPS from pteReport
+    echo "[$0] testcase [$invokes] CIpteReport=$CIpteReport"
     node get_pteReport.js $pteReport
     cat $pteReport >> $CIpteReport
     rm -f $pteReport

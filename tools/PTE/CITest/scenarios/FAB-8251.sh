@@ -10,7 +10,6 @@
 CWD=$PWD
 PREFIX="result"   # result log prefix
 
-cd ../scripts
 
 #### move the old index files and put the new index file in the chaincode installation folder
 #### purpose is to restore the index directory as it was, once the test is done
@@ -22,18 +21,13 @@ mv $indexDir/*.* $backupDir/
 indexFile2Field="index-2field.json"
 indexFile4Field="index-4field.json"
 
-#### Launch network
-./test_driver.sh -n -m FAB-9575-4i -p -c marbles02 >& ../Logs/FAB-8251-4i-precfg.log
-
-#### synch-up ledger
-./test_driver.sh -t marbles02-4q
-#### remove PTE log from synch-up ledger run
-rm -f ../Logs/marbles02-4q*.log
-
+#### Launch network, priming, and
 #### prerequisite: testcase FAB-8694-4i: 1M (4x250000) invokes: initMarble, couchDB
-./test_driver.sh -t FAB-8694-4i
+cd $CWD
+./run_scenarios.sh -a marbles02 -n FAB-9575-4i -p marbles02-4q -i FAB-8694-4i
 
 #### Put the index files in the chaincode installation folder prior to upgrade
+cd ../scripts
 cp ../FAB-8251/indexes/$indexFile2Field $indexDir/
 cp ../FAB-8251/indexes/$indexFile4Field $indexDir/
 
@@ -42,10 +36,10 @@ cp ../FAB-8251/indexes/$indexFile4Field $indexDir/
 ./test_driver.sh -m FAB-8251/upgrade  -u marbles02 >& ../Logs/FAB-8251-4i-precfg.log &
 
 #### execute testcase FAB-8251: 1M (4x250000) invokes and 2M (4x500000) 2-field queries simultaneously
-./test_driver.sh -t FAB-8251
-./get_peerStats.sh -r FAB-8251 -p peer0.org1.example.com peer0.org2.example.com -c testorgschannel1 testorgschannel2 -n $PREFIX -o $CWD
+cd $CWD
+./run_scenarios.sh -a marbles02 -i FAB-8251
 
 #### return the original index files
-rm -f $indexDir/$indexFile1st $indexDir/$indexFile2nd
+rm -f $indexDir/$indexFile2Field $indexDir/$indexFile4Field
 mv $backupDir/*.* $indexDir/
 rmdir $backupDir
