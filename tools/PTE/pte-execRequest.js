@@ -84,8 +84,8 @@ var maxRequestQueueLength = 100;
 // transactions status counts
 var tx_stats = [];
 var tx_sent = 0;                                 // tx_stats idx: total transactions sent
-var tx_succ = tx_sent+1;                         // tx_stats idx: total transactions succeeded (event receveid)
-var tx_pFail = tx_succ+1;                        // tx_stats idx: total proposal (peer) failure
+var tx_rcvd = tx_sent+1;                         // tx_stats idx: total transactions succeeded (event or query results received)
+var tx_pFail = tx_rcvd+1;                        // tx_stats idx: total proposal (peer) failure
 var tx_txFail = tx_pFail+1;                      // tx_stats idx: total transaction (orderer ack) failure
 var tx_evtTimeout = tx_txFail+1;                 // tx_stats idx: total event timeout
 var tx_evtUnreceived = tx_evtTimeout+1;          // tx_stats idx: total event unreceived
@@ -1431,9 +1431,9 @@ function postEventProc(caller, stats) {
         evtLastRcvdTime = endTime;
     }
     stats[tx_evtUnreceived] = Object.keys(txidList).length;
-    stats[tx_succ]=stats[tx_sent]-stats[tx_pFail]-stats[tx_txFail]-stats[tx_evtUnreceived];
+    stats[tx_rcvd]=stats[tx_sent]-stats[tx_pFail]-stats[tx_txFail]-stats[tx_evtUnreceived];
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] stats ', Nid, channelName, org, pid, caller, stats);
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd=%d sent= %d proposal failure %d tx orderer failure %d %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, stats[tx_succ], stats[tx_sent], stats[tx_pFail], stats[tx_txFail], transType, invokeType, evtLastRcvdTime-tLocal, tLocal, evtLastRcvdTime, stats[tx_evtTimeout], stats[tx_evtUnreceived], (stats[tx_succ]/(evtLastRcvdTime-tLocal)*1000).toFixed(2));
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd=%d sent= %d proposal failure %d tx orderer failure %d %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, stats[tx_rcvd], stats[tx_sent], stats[tx_pFail], stats[tx_txFail], transType, invokeType, evtLastRcvdTime-tLocal, tLocal, evtLastRcvdTime, stats[tx_evtTimeout], stats[tx_evtUnreceived], (stats[tx_rcvd]/(evtLastRcvdTime-tLocal)*1000).toFixed(2));
     if ( stats[tx_evtUnreceived] > 0 ) {
         console.log('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, caller, stats[tx_evtUnreceived], txidList);
     }
@@ -2087,6 +2087,23 @@ function invoke_move_const(freq) {
         });
 }
 
+// query validation
+function queryValidation(response) {
+    var payload=response[0].data;
+    var founderr = 0;
+    tx_stats[tx_rcvd]=tx_stats[tx_rcvd]+response.length;
+    for(let j = 0; j < response.length; j++) {
+        var qResp = response[j].toString('utf8').toUpperCase();
+        if ( qResp.includes('ERROR') || qResp.includes('FAIL') ) {
+            tx_stats[tx_pFail]++;
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d queryValidation] query return:', Nid, channelName, org, pid, response[j].toString('utf8'));
+        }
+        if ( (founderr == 0) && (payload !== response[j].data) ) {
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d queryValidation] query responses of same tx from different peers contain different data: %j', Nid, channelName, org, pid, response);
+            founderr = 1;
+        }
+    }
+}
 
 // invoke_query_const
 function invoke_query_const(freq) {
@@ -2097,14 +2114,11 @@ function invoke_query_const(freq) {
     channel.queryByChaincode(request_query)
     .then(
         function(response_payloads) {
-            // query check
+            // query validation
+            queryValidation(response_payloads);
+
+            // check bookmark
             var qcheck = response_payloads[0].toString('utf8').toUpperCase();
-            if ( qcheck.includes('ERROR') || qcheck.includes('FAIL') ) {
-                tx_stats[tx_pFail]++;
-                for(let j = 0; j < response_payloads.length; j++) {
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] query return:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
-                }
-            }
             if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
                 // get bookmark from query returned
                 var qc=JSON.parse(response_payloads[0].toString('utf8'));
@@ -2135,8 +2149,7 @@ function invoke_query_const(freq) {
                 for(let j = 0; j < response_payloads.length; j++) {
                     logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] query result:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
                 }
-                tx_stats[tx_succ]=tx_stats[tx_sent]-tx_stats[tx_pFail];
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed %d transaction %s(%s) with %d failures in %d ms, timestamp: start %d end %d,Throughput=%d TPS', Nid, channelName, org, pid, tx_stats[tx_sent], transType, invokeType, tx_stats[tx_pFail], tCurr-tLocal, tLocal, tCurr,(tx_stats[tx_succ]/(tCurr-tLocal)*1000).toFixed(2));
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed %d transaction %s(%s) with %d failures %d received in %d ms, timestamp: start %d end %d,Throughput=%d TPS', Nid, channelName, org, pid, tx_stats[tx_sent], transType, invokeType, tx_stats[tx_pFail], tx_stats[tx_rcvd], tCurr-tLocal, tLocal, tCurr,(tx_stats[tx_rcvd]/(tCurr-tLocal)*1000).toFixed(2));
                 process.exit();
             }
         },
@@ -2151,8 +2164,7 @@ function invoke_query_const(freq) {
                 },freq_n);
             } else {
                 tCurr = new Date().getTime();
-                tx_stats[tx_succ]=tx_stats[tx_sent]-tx_stats[tx_pFail];
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed %d transaction %s(%s) with %d failures in %d ms, timestamp: start %d end %d,Throughput=%d TPS', Nid, channelName, org, pid, tx_stats[tx_sent], transType, invokeType, tx_stats[tx_pFail], tCurr-tLocal, tLocal, tCurr,(tx_stats[tx_succ]/(tCurr-tLocal)*1000).toFixed(2));
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed %d transaction %s(%s) with %d failures %d received in %d ms, timestamp: start %d end %d,Throughput=%d TPS', Nid, channelName, org, pid, tx_stats[tx_sent], transType, invokeType, tx_stats[tx_pFail], tx_stats[tx_rcvd], tCurr-tLocal, tLocal, tCurr,(tx_stats[tx_rcvd]/(tCurr-tLocal)*1000).toFixed(2));
                 process.exit();
             }
         })
@@ -2168,8 +2180,8 @@ function invoke_query_const(freq) {
                 },freq_n);
             } else {
                 tCurr = new Date().getTime();
-                tx_stats[tx_succ]=tx_stats[tx_sent]-tx_stats[tx_pFail];
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed %d transaction %s(%s) with %d failures in %d ms, timestamp: start %d end %d,Throughput=%d TPS', Nid, channelName, org, pid, tx_stats[tx_sent], transType, invokeType, tx_stats[tx_pFail], tCurr-tLocal, tLocal, tCurr,(tx_stats[tx_succ]/(tCurr-tLocal)*1000).toFixed(2));
+                tx_stats[tx_rcvd]=tx_stats[tx_sent]-tx_stats[tx_pFail];
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_const] pte-exec:completed %d transaction %s(%s) with %d failures in %d ms, timestamp: start %d end %d,Throughput=%d TPS', Nid, channelName, org, pid, tx_stats[tx_sent], transType, invokeType, tx_stats[tx_pFail], tCurr-tLocal, tLocal, tCurr,(tx_stats[tx_rcvd]/(tCurr-tLocal)*1000).toFixed(2));
                 process.exit();
             }
         }
@@ -2290,14 +2302,12 @@ function invoke_query_mix(freq) {
                         logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] query result: %j, %j', Nid, channelName, org, pid, request_query.args, response_payloads[j].toString('utf8'));
                     }
                 }
-                // query check
+
+                // query validation
+                queryValidation(response_payloads);
+
+                // check bookmark
                 var qcheck = response_payloads[0].toString('utf8').toUpperCase();
-                if ( qcheck.includes('ERROR') || qcheck.includes('FAIL') ) {
-                    tx_stats[tx_pFail]++;
-                    for(let j = 0; j < response_payloads.length; j++) {
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] query return:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
-                    }
-                }
                 if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
                     // get bookmark from query returned
                     var qc=JSON.parse(response_payloads[0].toString('utf8'));
@@ -2617,14 +2627,11 @@ function invoke_query_burst() {
     channel.queryByChaincode(request_query)
     .then(
         function(response_payloads) {
-            // query check
+            // query validation
+            queryValidation(response_payloads);
+
+            // check bookmark
             var qcheck = response_payloads[0].toString('utf8').toUpperCase();
-            if ( qcheck.includes('ERROR') || qcheck.includes('FAIL') ) {
-                tx_stats[tx_pFail]++;
-                for(let j = 0; j < response_payloads.length; j++) {
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_burst] query return:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
-                }
-            }
             if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
                 // get bookmark from query returned
                 var qc=JSON.parse(response_payloads[0].toString('utf8'));

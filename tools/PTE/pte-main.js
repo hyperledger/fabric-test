@@ -1357,6 +1357,7 @@ async function performance_main() {
                         var totalInvokeTps=0;
                         var totalQueryTrans=0;
                         var totalQueryFailed=0;
+                        var totalQueryReceived=0;
                         var totalQueryTps=0;
                         var totalInvokeTime=0;
                         var totalQueryTime=0;
@@ -1461,6 +1462,9 @@ async function performance_main() {
 
                                 var queryTransFailed= parseInt(rawText.substring(rawText.indexOf("with")+4,rawText.indexOf("failures",rawText.indexOf("with")+4)).trim());
                                 totalQueryFailed=totalQueryFailed+queryTransFailed;
+
+                                var queryTransRcvd= parseInt(rawText.substring(rawText.indexOf("failures")+8,rawText.indexOf("received",rawText.indexOf("failures")+8)).trim());
+                                totalQueryReceived=totalQueryReceived+queryTransRcvd;
 
                                 var tempDur=parseInt(rawText.substring(rawText.indexOf(") in")+4,rawText.indexOf("ms")).trim());
                                 totalQueryTime=totalQueryTime+tempDur;
@@ -1573,9 +1577,8 @@ async function performance_main() {
                             }
                         }
                         if (totalQueryTrans>0) {
-                            var totalQueryReceived=totalQueryTrans-totalQueryFailed;
                             var dur=etmp-stmp;
-                            var qTPS=1000*totalQueryReceived/dur;
+                            var qTPS=1000*(totalQueryReceived-totalQueryFailed)/dur;
                             logger.info("Aggregate Test Summary (%s):Total QUERY transaction %d received %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalQueryTrans, totalQueryReceived, stmp, etmp, dur, qTPS.toFixed(2));
 
                             // query transaction output
