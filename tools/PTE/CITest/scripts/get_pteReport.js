@@ -40,6 +40,7 @@ var procNum=0;
 var sentTx=0;
 var receivedTx=0
 var proposalFailed=0
+var queryFailed=0
 var txFailed=0
 var evtReceived=0
 var evtTimeout=0
@@ -83,9 +84,14 @@ for(i in array) {
         receivedTx = receivedTx + parseInt(array[i].substring(array[i].indexOf('received')+8).trim());
         //console.log('sentTx=%d, receivedTx=%d', sentTx, receivedTx);
     } else if ( array[i].indexOf('failures:') > -1) {
-        proposalFailed = proposalFailed + parseInt(array[i].substring(array[i].indexOf('proposal')+8).trim());
-        txFailed = txFailed + parseInt(array[i].substring(array[i].indexOf('transactions')+12).trim());
-        //console.log('proposalFailed=%d, txFailed=%d', proposalFailed, txFailed);
+        if ( array[i].indexOf('proposal') > -1) {
+            proposalFailed = proposalFailed + parseInt(array[i].substring(array[i].indexOf('proposal')+8).trim());
+            txFailed = txFailed + parseInt(array[i].substring(array[i].indexOf('transactions')+12).trim());
+            //console.log('proposalFailed=%d, txFailed=%d', proposalFailed, txFailed);
+        }  else if ( array[i].indexOf('query') > -1 ) {
+            queryFailed = queryFailed + parseInt(array[i].substring(array[i].indexOf('transactions')+12).trim());
+            //console.log('queryFailed=%d', queryFailed);
+        }
     } else if ( array[i].indexOf('event:') > -1) {
         evtReceived = evtReceived + parseInt(array[i].substring(array[i].indexOf('received')+8).trim());
         evtTimeout = evtTimeout + parseInt(array[i].substring(array[i].indexOf('timeout')+7).trim());
@@ -201,7 +207,7 @@ for(i in array) {
         buff = '        '+hdr+' Overall events latency '+eventLatency[0]+' min '+eventLatency[2]+' ms max '+eventLatency[3]+' ms avg '+avg.toFixed(2)+' ms\n';
         fs.appendFileSync(pteReport, buff);
     } else if ( transKey2 == 'QUERY' ) {
-        buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+'\n';
+        buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+' failures '+queryFailed+'\n';
         fs.appendFileSync(pteReport, buff);
 
         var duration = endTime - startTime;
@@ -212,7 +218,7 @@ for(i in array) {
             var tLatency=duration/receivedTx;
             buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' Latency '+tLatency.toFixed(2)+'\n';
         } else {
-            var tTPS=1000*receivedTx/duration;
+            var tTPS=1000*(receivedTx-queryFailed)/duration;
             buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
         }
         fs.appendFileSync(pteReport, buff);

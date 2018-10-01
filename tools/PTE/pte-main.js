@@ -1591,6 +1591,9 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalQueryTrans + "  received "+totalQueryReceived+"\n";
                             fs.appendFileSync(rptFile, buff);
 
+                            buff = "("+channelName+":"+chaincode_id+"):\tfailures: query transactions "+totalQueryFailed+"\n";
+                            fs.appendFileSync(rptFile, buff);
+
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+qTPS.toFixed(2)+ "\n\n";
