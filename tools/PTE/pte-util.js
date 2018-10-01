@@ -354,11 +354,17 @@ function getTLSCert(key, subkey) {
         data = ORGS.tls_cert;
     } else {
         var caRootsPath = path.resolve(goPath, ORGS[key][subkey].tls_cacerts);
-        if (fs.existsSync(caRootsPath)) {
-            data = fs.readFileSync(caRootsPath);
+        if (caRootsPath.includes('BEGIN CERTIFICATE')) {
+           //caRootsPath is a cert
+           data = caRootsPath;
         } else {
-            logger.info('[getTLSCert] tls_cacerts does not exist: caRootsPath: %s, key: %s, subkey: %s', caRootsPath, key, subkey);
-            return null;
+            if (fs.existsSync(caRootsPath)) {
+                //caRootsPath is a cert path
+                data = fs.readFileSync(caRootsPath);
+            } else {
+                logger.info('[getTLSCert] tls_cacerts does not exist: caRootsPath: %s, key: %s, subkey: %s', caRootsPath, key, subkey);
+                return null;
+            }
         }
     }
     return data;
