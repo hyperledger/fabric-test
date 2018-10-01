@@ -981,6 +981,7 @@ Note that
 
 4. User can opt to include `admin_cert` in the json by setting `admin_cert` within each **org** section.  If the `admin_cert` is set, then the files specified in `adminPath` are ignored.  This allows the certificate to be included in the config json file rather than copy it in multiple locations.
 
+5. Key **tls_cacerts** for orderer or org can be the path to the tls_cacerts or the certificate.
 
 ## Creating a local Fabric network
 Prequisite: If you do not yet have the Fabric docker images in your local docker registry, please either build them from Fabric source or download them from dockerhub.
