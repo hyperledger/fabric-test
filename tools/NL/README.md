@@ -128,7 +128,7 @@ The script is used to create configtx.yaml.
     options:
        -o: number of orderers, default=1
        -k: number of kafka, default=0
-       -p: number of peers per organiztion, default=1
+       -p: number of peers per organization, default=1
        -h: hash type, default=SHA2
        -r: number of organization, default=1
        -s: security service type, default=256
@@ -175,7 +175,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -k: number of brokers
        -e: number of kafka replications, defualt=brokers
        -z: number of zookeeper
-       -r: number of organiztions
+       -r: number of organizations
        -S: TLS enablement [enabled|disabled], default=disabled
        -m: Mutual TLS enablement [enabled|disabled], default=disabled
        -x: number of ca
