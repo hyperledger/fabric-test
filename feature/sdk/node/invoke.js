@@ -5,33 +5,71 @@
  */
 
 'use strict';
-const path = require('path');
 const fs = require('fs');
 const util = require('util');
 const hfc = require('fabric-client');
-const Peer = require('fabric-client/lib/Peer.js');
-const common = require('./sdk/node/common.js');
-// const common = require('./common.js');
-let client = new hfc();
-var channel;
+const {Gateway, InMemoryWallet, X509WalletMixin} = require('fabric-network');
+const common = require('./common.js');
+const client = new hfc();
 
-var invoke = function(username, org, chaincode, peerNames, orderer, network_config_path) {
-    var temptext = '\n\n Username : '+username +
-                    '\n\n Org: '+org+
-                    '\n\n chaincode : '+util.format(chaincode)+
-                    '\n\n peerNames : '+peerNames+
-                    '\n\n orderer: '+orderer+
-                    '\n\n network_config_path: '+network_config_path;
-    var peerNames = [peerNames];
+/**
+ * Perform an "invoke" action on installed/instantiated chaincode
+ * @param {String} username the username
+ * @param {String} org the organisation to use
+ * @param {String} cc string in JSON format describing the chaincode parameters
+ * @param {String} inputPeerNames the peers to use
+ * @param {String} orderer the orderer to use
+ * @param {String} network_config_path the network configuration file path
+ * @param {String} options string in JSON format containing additional test parameters
+ */
+function invoke(username, org, cc, inputPeerNames, orderer, network_config_path, options) {
+
+    const chaincode = JSON.parse(cc);
+    let opts;
+
+    if (options){
+        opts = JSON.parse(options);
+    }
+
+    const temptext = '\n\n Username : '+ username +
+                    '\n\n Org: '+ org +
+                    '\n\n chaincode : '+ util.format(chaincode) +
+                    '\n\n peerNames : '+ inputPeerNames +
+                    '\n\n orderer: '+ orderer +
+                    '\n\n network_config_path: '+ network_config_path +
+                    '\n\n opts: '+ opts;
+
     // Read Network JSON PATH from behave
     let network_config;
     try {
-        var all_network_config = JSON.parse(fs.readFileSync(network_config_path));
-        network_config = all_network_config;
+        network_config = JSON.parse(fs.readFileSync(network_config_path));
     } catch(err) {
-        console.error(err);
-        return err;
+        throw new Error('network_config error: ' + err.message);
     }
+
+    // Node SDK implements transaction as well as invoke, disambiguate on the passed opts
+    if(opts && opts['network-model'] && opts['network-model'].localeCompare("true") === 0){
+        return _submitTransaction(org, chaincode, network_config)
+    } else {
+        // inputPeerNames is a string representation of an array of peers "[peer,peer,...,peer]"
+        // need to convert to an actual array [peer,peer,...,peer]
+        const peerList = inputPeerNames.slice(1, -1);
+        let peerNames = peerList.split(",");
+        return _invoke(username, org, chaincode, peerNames, orderer, network_config)
+    }
+};
+
+/**
+ * Perform an invoke using the NodeSDK
+ * @param {Strinrg} username the user name to perform the action under
+ * @param {String} org the organisation to use
+ * @param {JSON} chaincode the chaincode descriptor
+ * @param {[String]} peerNames string array of peers
+ * @param {String} orderer the orderer
+ * @param {JSON} network_config the network configuration
+ */
+function _invoke(username, org, chaincode, peerNames, orderer, network_config) {
+    let channel;
 
     let targets = (peerNames) ? common.newPeers(peerNames, org, network_config['network-config'], client) : undefined;
 
@@ -84,7 +122,6 @@ var invoke = function(username, org, chaincode, peerNames, orderer, network_conf
             // set the transaction listener and set a timeout of 30sec
             // if the transaction did not get committed within the timeout period,
             // fail the test
-            let transactionID = tx_id.getTransactionID();
             let eventPromises = [];
 
             if (!peerNames) {
@@ -129,11 +166,50 @@ var invoke = function(username, org, chaincode, peerNames, orderer, network_conf
         return 'Failed to send transaction due to error: ' + err.stack ? err.stack :
             err;
     });
-};
+}
+
+/**
+ * Perform a transaction invoke using the network APIs
+ * @param {String} org the organisation to use
+ * @param {JSON} chaincode the chaincode descriptor
+ * @param {JSON} network_config the network configuration
+ */
+async function _submitTransaction(org, chaincode, network_config){
+    const ccp = network_config['common-connection-profile'];
+    const orgConfig = ccp.organizations[org];
+    const cert = common.readAllFiles(orgConfig.signedCertPEM)[0];
+    const key = common.readAllFiles(orgConfig.adminPrivateKeyPEM)[0];
+    const inMemoryWallet = new InMemoryWallet();
+
+    const gateway = new Gateway();
+
+    try {
+        await inMemoryWallet.import('admin', X509WalletMixin.createIdentity(orgConfig.mspid, cert, key));
+
+        const opts = {
+            wallet: inMemoryWallet,
+            identity: 'admin',
+            discovery: { enabled: false }
+        };
+
+        await gateway.connect(ccp, opts);
+
+        const network = await gateway.getNetwork(chaincode.channelId)
+        const contract = await network.getContract(chaincode.chaincodeId);
+
+        const args = [chaincode.fcn, ...chaincode.args];
+        const result = await contract.submitTransaction(...args);
+
+        gateway.disconnect();
+        return result;
+    } catch(err) {
+        throw new Error(err);
+    };
+}
 
 exports.invoke = invoke;
+require('make-runnable');
 
-// invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['m', '26687534657789098765432345654edddfdfdafde4567898767890987654567898765678765678765456765434'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'put'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/704c56a4b5c711e79e510214683e8447/network-config.json");
-//invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['a', 'b', '10'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'invoke'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/3ea89a44b03211e79e510214683e8447/network-config.json");
-//invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['a', 'b', '10'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'invoke'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/aaa49940839b11e8ab9a0214683e8447/network-config.json");
-//invoke('User1@org1.example.com', 'Org1ExampleCom', {'channelId': 'behavesystest', 'args': ['g', '26687534657789098765432345654edddfdfdafde4567898767890987654567898765678765678765456765434'], 'chaincodeId': 'mycc', 'name': 'mycc', 'fcn': 'put'}, "peer0.org1.example.com", "orderer0.example.com", "/opt/gopath/src/github.com/hyperledger/fabric-test/feature/configs/9be3329a862011e8ab9a0214683e8447/network-config.json");
+// Example test calls
+// node invoke.js invoke User1@org1.example.com Org1ExampleCom '{"channelId": "behavesystest", "args": ["a", "b", "10"], "chaincodeId": "mycc", "name": "mycc", "fcn": "invoke"}' ['peer0.org1.example.com'] orderer0.example.com /Users/nkl/go/src/github.com/hyperledger/fabric-test/feature/configs/0be5908ac30011e88d70acbc32c08695/network-config.json '{"transaction": "true"}'
+// node invoke.js invoke User1@org1.example.com Org1ExampleCom '{"channelId": "behavesystest", "args": ["a", "b", "10"], "chaincodeId": "mycc", "name": "mycc", "fcn": "invoke"}' ['peer0.org1.example.com'] orderer0.example.com /Users/nkl/go/src/github.com/hyperledger/fabric-test/feature/configs/4fe4f54cc62411e8977eacbc32c08695/network-config.json '{"transaction": "true"}'

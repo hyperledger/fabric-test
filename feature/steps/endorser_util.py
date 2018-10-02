@@ -15,7 +15,6 @@ import subprocess
 import sys
 import time
 import common_util
-import execjs
 
 try:
     pbFilePath = "../feature-upgrade"
@@ -147,11 +146,11 @@ class InterfaceBase:
     def join_channel(self, context, peers, channelId, user="Admin"):
         return self.cli.join_channel(context, peers, channelId, user=user)
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, targs="", user="User1"):
-        # targs and user are optional parameters with defaults set if they are not included
-        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId, targs, user)
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, targs="", user="User1", opts={}):
+        # targs, user and opts are optional parameters with defaults set if they are not included
+        return self.cli.invoke_chaincode(context, chaincode, orderer, peer, channelId, targs, user, opts)
 
-    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1"):
+    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1", opts={}):
         # targs and user are optional parameters with defaults set if they are not included
         return self.cli.query_chaincode(context, chaincode, peer, channelId, targs, user)
 
@@ -220,8 +219,8 @@ class ToolInterface(InterfaceBase):
             results[peer] = subprocess.check_call(cmd.split(), env=os.environ)
         return results
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, targs="", user="User1"):
-        # targs and user are optional parameters with defaults set if they are not included
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId, targs="", user="User1", opts={}):
+        # targs, usesr and opts are optional parameters with defaults set if they are not included
         args = json.loads(chaincode["args"])
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
         cmd = "node v1.0_sdk_tests/app.js invoke -c {0} -i {1} -v 1 -p {2} -m {3}".format(channelId,
@@ -231,7 +230,7 @@ class ToolInterface(InterfaceBase):
         print(cmd)
         return {peer: subprocess.check_call(cmd.split(), env=os.environ)}
 
-    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1"):
+    def query_chaincode(self, context, chaincode, peer, channelId, targs="", user="User1", opts={}):
         # targs and user are optional parameters with defaults set if they are not included
         peer_name = context.networkInfo["nodes"][peer]["nodeName"]
         cmd = "node v1.0_sdk_tests/app.js query -c {0} -i {1} -v 1 -p {2}".format(channelId,
@@ -282,8 +281,6 @@ class SDKInterface(InterfaceBase):
         shutil.rmtree("./node_modules", ignore_errors=True)
         shutil.rmtree("./package-lock.json", ignore_errors=True)
         shutil.copyfile("package.json", "../../../package.json")
-        node = execjs.get(execjs.runtime_names.Node)
-        print("node info: {}".format(node.name))
         npminstall = subprocess.check_output(["npm install --silent"],
                                             env=os.environ,
                                             cwd="../../..",
@@ -300,21 +297,21 @@ class SDKInterface(InterfaceBase):
         chaincode['channelId'] = str(channelId)
         return chaincode
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1", opts={}):
         # channelId, targs and user are optional parameters with defaults set if they are not included
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
-        result = self.invoke_func(chaincode, channelId, user, org, [peer], orderer)
+        result = self.invoke_func(chaincode, channelId, user, org, [peer], orderer, opts)
         print("Invoke: {}".format(result))
         return {peer: result}
 
-    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
+    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1", opts={}):
         # targs and user are optional parameters with defaults set if they are not included
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         print("Class:", self.__class__)
-        result = self.query_func(chaincode, channelId, user, org, [peer])
-        #print("Query Result: {}".format(result))
+        result = self.query_func(chaincode, channelId, user, org, [peer], opts)
+        print("Query Result: {}".format(result))
         return {peer: result}
 
     def wait_for_deploy_completion(self, context, chaincode_container, timeout):
@@ -335,27 +332,27 @@ class SDKInterface(InterfaceBase):
 
 
 class NodeSDKInterface(SDKInterface):
-    def invoke_func(self, chaincode, channelId, user, org, peers, orderer):
+    def invoke_func(self, chaincode, channelId, user, org, peers, orderer, opts):
         reformatted = self.reformat_chaincode(chaincode, channelId)
         print("Chaincode", chaincode)
         orgName = org.title().replace('.', '')
 
-        with open("./sdk/node/invoke.js", "r") as fd:
-            invoke_text = fd.read()
-        invoke_func = execjs.compile(invoke_text)
-        return invoke_func.call("invoke", "{0}@{1}".format(user, org), orgName, reformatted, peers, orderer, self.networkConfigFile)
+        cmd = "node ./sdk/node/invoke.js invoke {0}@{1} {2} '{3}' {4} {5} {6} '{7}'".format(user, org, orgName, json.dumps(reformatted), peers, orderer, self.networkConfigFile, json.dumps(opts))
+        print("cmd: {0}".format(cmd))
+        return subprocess.check_call(cmd, shell=True)
 
-    def query_func(self, chaincode, channelId, user, org, peers):
+    def query_func(self, chaincode, channelId, user, org, peers, opts):
         print("Chaincode", chaincode)
         reformatted = self.reformat_chaincode(chaincode, channelId)
         orgName = org.title().replace('.', '')
-        print("Query Info: {0}@{1}, {2}, {3}, {4}".format(user, org, orgName, reformatted, peers))
 
-        with open("./sdk/node/query.js", "r") as fd:
-            query_text = fd.read()
-        query_func = execjs.compile(query_text)
-        return query_func.call("query", "{0}@{1}".format(user, org), orgName, reformatted, peers, self.networkConfigFile)
-
+        cmd="node ./sdk/node/query.js query {0}@{1} {2} '{3}' {4} {5} '{6}'".format(user, org, orgName, json.dumps(reformatted), peers, self.networkConfigFile, json.dumps(opts))
+        print("cmd: {0}".format(cmd))
+        response = subprocess.check_output(cmd, shell=True)
+        regex = "\{.*response.*:\"(.*?)\"\}"
+        match = re.findall(regex, response, re.MULTILINE | re.DOTALL)
+        assert match, "No matching response within query result {}".format(response)
+        return match[0]
 
 class CLIInterface(InterfaceBase):
 
@@ -629,8 +626,8 @@ class CLIInterface(InterfaceBase):
         print("[{0}]: {1}".format(" ".join(setup + command), output))
         return output
 
-    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
-        # channelId, targs and user are optional parameters with defaults set if they are not included
+    def invoke_chaincode(self, context, chaincode, orderer, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1", opts={}):
+        # channelId, targs, user and opts are optional parameters with defaults set if they are not included
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = chaincode.get('args', '[]').replace('"', r'\"')
         setup = self.get_env_vars(context, peer, user=user)
@@ -662,7 +659,7 @@ class CLIInterface(InterfaceBase):
         output = self.retry(context, output, peer, setup, command)
         return output
 
-    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1"):
+    def query_chaincode(self, context, chaincode, peer, channelId=TEST_CHANNEL_ID, targs="", user="User1", opts={}):
         # channelId, targs and user are optional parameters with defaults set if they are not included
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')

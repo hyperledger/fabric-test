@@ -409,7 +409,7 @@ def step_impl(context, channel, name, args, peer):
 
 @when(u'a user queries on the chaincode named "{name}" for the random key with args {args} on "{peer}"')
 def step_impl(context, name, args, peer):
-    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args.format(random_key=context.random_key), peer)
+    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args.format(random_key=context.random_key), str(peer))
 
 @when(u'a user queries on the chaincode named "{name}" for the random key with args {args}')
 def step_impl(context, name, args):
@@ -434,17 +434,17 @@ def step_impl(context, name, args, peer):
     chaincode = {"args": args.format(last_key=context.last_key),
                  "chaincodeId": str(name),
                  "name": str(name)}
-    context.result = context.interface.query_chaincode(context, chaincode, peer, context.interface.TEST_CHANNEL_ID, user="User1")
+    context.result = context.interface.query_chaincode(context, chaincode, str(peer), context.interface.TEST_CHANNEL_ID, user="User1")
 
 @when(u'a user queries on version "{version:d}" of the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
-def query_impl(context, channel, name, args, peer, targs='', version=0, user="User1"):
+def query_impl(context, channel, name, args, peer, targs='', version=0, user="User1", opts={}):
     # Temporarily sleep for 2 sec. This delay should be able to be removed once we start using events for being sure the invokes are complete
     time.sleep(2)
     chaincode = {"args": args,
                  "chaincodeId": str(name),
                  "version": version,
                  "name": str(name)}
-    context.result = context.interface.query_chaincode(context, chaincode, peer, channel, targs, user=user)
+    context.result = context.interface.query_chaincode(context, chaincode, peer, channel, targs, user=user, opts=opts)
 
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, channel, name, args, peer):
@@ -458,7 +458,7 @@ def step_impl(context, user, channel, name, args, peer):
 def step_impl(context, name, args, peer, targs):
     # This is a workaround to allow targs to send a json structure
     generated = targs[2:-2].format(**context.command_result)
-    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, peer, targs[:2] + generated+ targs[-2:])
+    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, str(peer), targs[:2] + generated+ targs[-2:])
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} and generated transient args {targs}')
 def step_impl(context, name, args, targs):
@@ -468,7 +468,7 @@ def step_impl(context, name, args, targs):
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} and transient args {targs} on "{peer}"')
 def step_impl(context, name, args, peer, targs):
-    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, peer, targs)
+    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, str(peer), targs)
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} and transient args {targs}')
 def step_impl(context, name, args, targs):
@@ -476,11 +476,11 @@ def step_impl(context, name, args, targs):
 
 @when(u'a user queries on the chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, name, args, peer):
-    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, peer)
+    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, str(peer))
 
 @when(u'a user "{user}" queries on the chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, user, name, args, peer):
-    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, peer, user=user)
+    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, str(peer), user=user)
 
 @when(u'a user queries on the chaincode named "{name}" on channel "{channel}" with args {args}')
 def step_impl(context, name, channel, args):
@@ -497,6 +497,10 @@ def step_impl(context, name, args):
 @when(u'a user "{user}" queries on the chaincode named "{name}" with args {args}')
 def step_impl(context, user, name, args):
     query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", user=user)
+
+@when(u'a user evaluates a transaction on the chaincode named "{name}" with args {args}')
+def step_impl(context, name, args):
+    query_impl(context, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", opts={"network-model": "true"})
 
 @when(u'a user queries on the channel "{channel}" using chaincode named "{name}" with args {args}')
 def step_impl(context, channel, name, args):
@@ -516,11 +520,11 @@ def step_impl(context, user, channel, args):
 
 @when(u'a user queries on the chaincode with args {args} from "{peer}"')
 def step_impl(context, args, peer):
-    query_impl(context, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], args, peer)
+    query_impl(context, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], args, str(peer))
 
 @when(u'a user "{user}" queries on the chaincode with args {args} from "{peer}"')
 def step_impl(context, user, args, peer):
-    query_impl(context, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], args, peer, user=user)
+    query_impl(context, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], args, str(peer), user=user)
 
 @when(u'a user queries on the chaincode with args {args}')
 def step_impl(context, args):
@@ -539,12 +543,12 @@ def step_impl(context):
     query_impl(context, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], '["query","a"]', "peer0.org1.example.com")
 
 @when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}" using orderer "{orderer}"')
-def invokes_impl(context, numInvokes, channel, name, args, peer, orderer="orderer0.example.com", targs='', user="User1"):
+def invokes_impl(context, numInvokes, channel, name, args, peer, orderer="orderer0.example.com", targs='', user="User1", opts={}):
     chaincode = {"args": args,
                  "name": str(name),
                  "chaincodeId": str(name)}
     for count in range(numInvokes):
-        context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, channel, targs, user=user)
+        context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, channel, targs, user=user, opts=opts)
 
 @when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, numInvokes, channel, name, args):
@@ -595,7 +599,7 @@ def step_impl(context, channel, name, args, peer):
 def step_impl(context, name, args, targs, peer):
     # This is a workaround to allow targs to send a json structure
     generated = targs[2:-2].format(**context.command_result)
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, targs=targs[:2] + generated + targs[-2:])
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, str(peer), targs=targs[:2] + generated + targs[-2:])
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} and generated transient args {targs}')
 def step_impl(context, name, args, targs):
@@ -605,7 +609,7 @@ def step_impl(context, name, args, targs):
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} and transient args {targs} on "{peer}"')
 def step_impl(context, name, args, peer, targs):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, targs=targs)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, str(peer), targs=targs)
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} and transient args {targs}')
 def step_impl(context, name, args, targs):
@@ -613,15 +617,15 @@ def step_impl(context, name, args, targs):
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, name, args, peer):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, str(peer))
 
 @when(u'a user invokes on the chaincode with args {args} on "{peer}"')
 def step_impl(context, args, peer):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, peer)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, str(peer))
 
 @when(u'a user "{user}" invokes on the chaincode with args {args} on "{peer}"')
 def step_impl(context, user, args, peer):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, peer, user=user)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, str(peer), user=user)
 
 @when(u'a user invokes on the chaincode with args {args}')
 def step_impl(context, args):
@@ -645,7 +649,7 @@ def step_impl(context, name, args, org):
 
 @when(u'a user "{user}" invokes on the chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, user, name, args, peer):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, peer, user=user)
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, str(peer), user=user)
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args}')
 def step_impl(context, name, args):
@@ -654,6 +658,10 @@ def step_impl(context, name, args):
 @when(u'a user "{user}" invokes on the chaincode named "{name}" with args {args}')
 def step_impl(context, user, name, args):
     invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", user=user)
+
+@when(u'a user submits a transaction on the chaincode named "{name}" with args {args}')
+def step_impl(context, name, args):
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com","orderer0.example.com", opts={"network-model": "true"})
 
 @when(u'a user invokes {numInvokes:d} times on the chaincode')
 def step_impl(context, numInvokes):
@@ -700,11 +708,11 @@ def step_impl(context, channel, name, args, length):
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}" using orderer "{orderer}"')
 def step_impl(context, name, args, length):
-    random_invoke_impl(context, name, args, length, peer, orderer, context.interface.TEST_CHANNEL_ID)
+    random_invoke_impl(context, name, args, length, str(peer), orderer, context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d} on peer "{peer}"')
 def step_impl(context, name, args, length):
-    random_invoke_impl(context, name, args, length, peer, "orderer0.example.com", context.interface.TEST_CHANNEL_ID)
+    random_invoke_impl(context, name, args, length, str(peer), "orderer0.example.com", context.interface.TEST_CHANNEL_ID)
 
 @when(u'a user invokes on the chaincode named "{name}" with random args {args} of length {length:d}')
 def step_impl(context, name, args, length):
@@ -909,7 +917,7 @@ def step_impl(context, response, org, status):
 def expected_impl(context, response, peer, status="a success"):
     assert peer in context.result, "There is no response from {0}".format(peer)
     if status == "a success":
-        assert context.result[peer] == "{0}\n".format(response), \
+        assert str(context.result[peer].strip()) == str(response.strip()), \
                "Expected response was {0}; received {1}".format(response,
                                                                 context.result[peer])
     elif status == "an error":

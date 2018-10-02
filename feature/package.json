@@ -14,10 +14,12 @@
   "dependencies": {
     "fabric-ca-client": "unstable",
     "fabric-client": "unstable",
+    "fabric-network": "unstable",
     "fs-extra": "^2.0.0",
     "log4js": "^0.6.38"
   },
   "devDependencies": {
+    "make-runnable": "^1.3.6",
     "sync-dir": "^1.5.1"
   }
 }

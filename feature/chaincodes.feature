@@ -29,6 +29,25 @@ Examples:
     | kafka |  MYcc_Test |
 
 @daily
+Scenario Outline: FAB-11808: Test the use of the network model API to successfully commit to the ledger
+    Given I have a bootstrapped fabric network of type <type> <security>
+    And I use the NodeJS SDK interface
+    When an admin sets up a channel
+    And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+    # evaluating a transaction == query, but using the network model API
+    When a user evaluates a transaction on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 1000
+    # submitting a transaction == invoke, but using the network model API
+    When a user submits a transaction on the chaincode named "mycc" with args ["invoke","a","b","10"]
+    And I wait "5" seconds
+    When a user evaluates a transaction on the chaincode named "mycc" with args ["query","a"]
+    Then a user receives a success response of 990
+Examples:
+    | type  |   security  |
+    | solo  | without tls |
+    | kafka |   with tls  |
+
+@daily
 Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric/examples/example04/cmd
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -39,7 +58,6 @@ Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric/examples
   Then a user receives a success response of 1000
   When a user queries on the chaincode named "myex04" with args ["query","Event", "myex02_a", "a", "channel2"]
   Then a user receives a success response of 1000
-
 
 @shimAPI
 @daily

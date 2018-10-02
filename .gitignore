@@ -33,3 +33,5 @@ bin/
 *.block
 # vscode settings
 .vscode
+#node_modules
+feature/node_modules/*
