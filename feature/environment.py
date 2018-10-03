@@ -34,10 +34,27 @@ def getLogFiles(containers, fileSuffix):
             print("Unable to get the logs for {}".format(namePart + fileSuffix))
 
 
+def before_scenario(context, scenario):
+    # Remove all existing containers if any
+    cmd = ["docker", "ps", "-qa"]
+    output = str(subprocess.check_output(["docker ps -aq"], shell=True))
+    container_list = output.strip().split('\n')
+    for container in container_list:
+        if container != '':
+            subprocess.call(['docker rm -f {}'.format(container)], shell=True)
+
+
 def after_scenario(context, scenario):
     # Display memory usage before tearing down the network
     mem = psutil.virtual_memory()
     print("Memory Info Before Network Teardown:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
+
+    # Show files in the configs directory for this test
+    if hasattr(context, "projectName"):
+        output = str(subprocess.check_output(["ls -ltr configs/{}".format(context.projectName)], shell=True))
+        print(output)
+        output = str(subprocess.check_output(["ls -ltr configs/{}/peerOrganizations/org1.example.com/users".format(context.projectName)], shell=True))
+        print(output)
 
     getLogs = context.config.userdata.get("logs", "N")
     if getLogs.lower() == "force" or (scenario.status == "failed" and getLogs.lower() == "y" and "compose_containers" in context):
