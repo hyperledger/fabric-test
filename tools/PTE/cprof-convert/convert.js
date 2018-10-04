@@ -44,6 +44,7 @@ if (cpJsons.length === 0)
 
 var pteJson = {
   'test-network': {
+    'gopath':'GOPATH',
     'orderer': {}
   }
 };
@@ -112,7 +113,7 @@ orgKeys.forEach(orgKey => {
     if (cpOrg.signedCert.pem != null) {
       org['admin_cert'] = cpOrg.signedCert.pem;
       // It is possible that cpOrg.signedCert.pem is present but not cpOrg.adminPrivateKey.pem due to
-      //  privacy restrictions. In such cases, org.priv defaults to below, and is replaced if 
+      //  privacy restrictions. In such cases, org.priv defaults to below, and is replaced if
       //  cpOrg.adminPrivateKey.pem is non-null
       org.priv = '<could not read from connection profiles, please insert your private key manually>'
     } else pathsNotPems = true;
