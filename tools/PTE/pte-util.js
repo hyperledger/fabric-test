@@ -353,11 +353,12 @@ function getTLSCert(key, subkey) {
     if ( typeof(ORGS.tls_cert) !== 'undefined' ) {
         data = ORGS.tls_cert;
     } else {
-        var caRootsPath = path.resolve(goPath, ORGS[key][subkey].tls_cacerts);
-        if (caRootsPath.includes('BEGIN CERTIFICATE')) {
-           //caRootsPath is a cert
-           data = caRootsPath;
+        var tlscerts = ORGS[key][subkey].tls_cacerts;
+        if (tlscerts.includes('BEGIN CERTIFICATE')) {
+           //tlscerts is a cert
+           data = tlscerts;
         } else {
+            var caRootsPath = path.resolve(goPath, ORGS[key][subkey].tls_cacerts);
             if (fs.existsSync(caRootsPath)) {
                 //caRootsPath is a cert path
                 data = fs.readFileSync(caRootsPath);
