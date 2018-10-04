@@ -741,6 +741,19 @@ class CLIInterface(InterfaceBase):
 
     def placeCertsInDirStruct(self, context, user, org, peer):
         fca = 'ca.{}'.format(org)
+
+        # Ensure that the owner of all of the user directories are the same
+        print("Checking file ownership: /var/hyperledger/users/{0}@{1} ...".format(user, org))
+        output = context.composition.docker_exec(['stat -c "%u %g" /var/hyperledger/users/Admin@{0}'.format(org)], [peer])
+        out = output[peer].strip().split(" ")
+        print("Existing stat:: {}".format(out))
+        output = context.composition.docker_exec(['stat -c "%u %g" /var/hyperledger/users/{0}@{1}'.format(user, org)], [peer])
+        new = output[peer].strip().split(" ")
+        print("New stat:: {}".format(new))
+        if new[0] != out[0]:
+            context.printEnvWarning = True
+            output = context.composition.docker_exec(['chown -R {2}:{3} /var/hyperledger/users/{0}@{1}'.format(user, org, out[0], out[1])], [peer])
+
         os.mkdir("configs/{2}/peerOrganizations/{1}/users/{0}@{1}/msp".format(user, org, context.projectName))
         os.mkdir("configs/{2}/peerOrganizations/{1}/users/{0}@{1}/msp/signcerts".format(user, org, context.projectName))
         os.mkdir("configs/{2}/peerOrganizations/{1}/users/{0}@{1}/msp/keystore".format(user, org, context.projectName))
@@ -762,6 +775,7 @@ class CLIInterface(InterfaceBase):
         command = "fabric-ca-client getcacert -d -u https://{0}:7054 -M /var/hyperledger/users/{1}@{2}/msp --tls.certfiles /var/hyperledger/msp/cacerts/ca.{2}-cert.pem".format(fca, user, org)
         output = context.composition.docker_exec([command], [peer])
         print("CACert Output: {}".format(output))
+        output = context.composition.docker_exec(['chown -R {2}:{3} /var/hyperledger/users/{0}@{1}'.format(user, org, out[0], out[1])], [peer])
 
     def addIdemixIdentities(self, context, user, passwd, role, org):
         peer = 'peer0.{}'.format(org)

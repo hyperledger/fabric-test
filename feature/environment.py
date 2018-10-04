@@ -49,11 +49,14 @@ def after_scenario(context, scenario):
     mem = psutil.virtual_memory()
     print("Memory Info Before Network Teardown:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
 
+    if hasattr(context, "printEnvWarning") and context.printEnvWarning:
+        print("WARNING: The permissions on the newly generated user files did not match the original files. Workaround was deployed.")
+
     # Show files in the configs directory for this test
     if hasattr(context, "projectName"):
-        output = str(subprocess.check_output(["ls -ltr configs/{}".format(context.projectName)], shell=True))
+        output = subprocess.check_output(["ls -ltr configs/{}".format(context.projectName)], shell=True)
         print(output)
-        output = str(subprocess.check_output(["ls -ltr configs/{}/peerOrganizations/org1.example.com/users".format(context.projectName)], shell=True))
+        output = subprocess.check_output(["ls -ltr configs/{}/peerOrganizations/org*.example.com/users".format(context.projectName)], shell=True)
         print(output)
 
     getLogs = context.config.userdata.get("logs", "N")
