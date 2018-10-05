@@ -46,9 +46,7 @@ usage () {
     echo
     echo -e "\tExamples:"
     echo -e "\t    ./run_scenarios.sh -a samplecc -n FAB-3833-2i -p FAB-3810-2q -i FAB-3833-2i -q FAB-3810-2q"
-
     echo
-    exit
 }
 
 
@@ -59,7 +57,8 @@ while [[ $# -gt 0 ]]; do
     case $arg in
 
       -h | --help)
-          usage              # displays usage info; exits
+          usage              # displays usage info
+          exit 0             # exit cleanly, since the use just asked for help/usage info
           ;;
 
       -a | --application)
@@ -94,8 +93,9 @@ while [[ $# -gt 0 ]]; do
           ;;
 
       *)
-          echo "Unrecognized command line argument: $1"
+          echo "Error: Unrecognized command line argument: $1"
           usage
+          exit 1
           ;;
     esac
 done

@@ -167,4 +167,3 @@ procTX() {
     echo ""
     echo "[$TESTCASE] $TESTCASE with $NTHREAD threads x $NREQ transactions completed at $timestamp"
 
-exit

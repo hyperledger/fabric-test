@@ -9,4 +9,3 @@
 ########## CI test ##########
 
 ./run_scenarios.sh -a samplecc -n FAB-10581-4i -i FAB-10581-4i
-exit

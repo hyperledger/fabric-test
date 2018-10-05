@@ -40,6 +40,12 @@ echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-join-T
 echo "[$0] update channel"
 echo " ./pte_driver.sh CITest/$PrecfgDir/preconfig/channels/runCases-chan-update-TLS.txt"
 
+    # We could redirect stderr of the following "ls" to /dev/null, but that would make debugging
+    # more difficult in testcases where it is absolutely needed but forgotten by the test writer.
+    # Although it is recommended for all tests, only the sidedb tests such as those using marbles02-private
+    # actually NEED to connect the orgs of each a channal using anchor-peer channel-updates. Thus, it is OK
+    # to ignore the following error msg in the output logs for those tests that simply do not do it:
+    #   ls: cannot access 'CITest/FAB-8192-4i/preconfig/channels/runCases*update*': No such file or directory
     runUpdate=`ls CITest/$PrecfgDir/preconfig/channels/runCases*update*`
     echo "runUpdate $runUpdate"
     for ri in $runUpdate; do

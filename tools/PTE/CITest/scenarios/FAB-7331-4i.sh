@@ -9,4 +9,3 @@
 ########## CI test ##########
 
 ./run_scenarios.sh -a samplejs -n FAB-7331-4i -p FAB-7204-4q -i FAB-7331-4i
-exit
