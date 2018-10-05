@@ -7,17 +7,16 @@
     "transMode": "Constant",
     "transType": "Invoke",
     "invokeType": "Query",
-    "targetPeers": "OrgAnchor",
+    "targetPeers": "AllPeers",
     "nProcPerOrg": "1",
-    "nRequest": "1000",
+    "nRequest": "10",
     "runDur": "1200",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
-            "org1",
-            "org2"
+            "org1"
         ]
     },
     "burstOpt": {
@@ -47,8 +46,8 @@
         "keyIdx": [1],
         "keyPayLoad": [2],
         "keyStart": "0",
-        "payLoadMin": "4096",
-        "payLoadMax": "4096"
+        "payLoadMin": "1024",
+        "payLoadMax": "1024"
     },
     "deploy": {
         "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
@@ -66,6 +65,6 @@
         }
     },
     "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
-	]
+        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+    ]
 }
