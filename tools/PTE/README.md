@@ -820,7 +820,7 @@ The user input file contains configuration parameters including chaincode defini
         "deploy": {
             "chaincodePath": "github.com/hyperledger/fabric-test/fabric-sdk-node/test/fixtures/src/github.com/sample_cc",
             "fcn": "init",
-            "language": "golang"
+            "language": "golang",
             "args": []
         },
         "invoke": {
