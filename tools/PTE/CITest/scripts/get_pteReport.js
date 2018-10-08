@@ -206,6 +206,13 @@ for(i in array) {
         avg=eventLatency[1]/eventLatency[0];
         buff = '        '+hdr+' Overall events latency '+eventLatency[0]+' min '+eventLatency[2]+' ms max '+eventLatency[3]+' ms avg '+avg.toFixed(2)+' ms\n';
         fs.appendFileSync(pteReport, buff);
+
+        var overallResult='PASSED';
+        if ( (sentTx > receivedTx) || (evtUnreceived > 0) ) {
+            overallResult='FAILED';
+        }
+        buff = '        '+hdr+' Overall TEST RESULTS '+overallResult+'\n';
+        fs.appendFileSync(pteReport, buff);
     } else if ( transKey2 == 'QUERY' ) {
         buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+' failures '+queryFailed+'\n';
         fs.appendFileSync(pteReport, buff);
@@ -222,6 +229,13 @@ for(i in array) {
             buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
         }
         fs.appendFileSync(pteReport, buff);
+
+        var overallResult='PASSED';
+        if ( (sentTx > receivedTx) || (queryFailed > 0) ) {
+            overallResult='FAILED';
+        }
+        buff = '    '+hdr+' Overall TEST RESULTS '+overallResult+'\n';
+        fs.appendFileSync(pteReport, buff);
     } else if ( transKey2 == 'DISCOVERY' ) {
         buff = '    '+hdr+' Overall transactions: sent '+sentTx+' received '+receivedTx+'\n';
         fs.appendFileSync(pteReport, buff);
@@ -232,6 +246,13 @@ for(i in array) {
 
         var tTPS=1000*receivedTx/duration;
         buff = '    '+hdr+' Overall '+transKey1+' '+transKey2+' TPS '+tTPS.toFixed(2)+'\n';
+        fs.appendFileSync(pteReport, buff);
+
+        var overallResult='PASSED';
+        if ( sentTx !== receivedTx ) {
+            overallResult='FAILED';
+        }
+        buff = '    '+hdr+' Overall TEST RESULTS '+overallResult+'\n';
         fs.appendFileSync(pteReport, buff);
     } else if ( transKey1 == 'MIX' ) {
         var sentInvoke=sentTx/2;
