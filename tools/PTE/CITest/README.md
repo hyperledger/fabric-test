@@ -196,6 +196,32 @@ The command is located in `PTE/CITest/scripts`
         FAB-11726-4i.sh: execute FAB-11726-4i
         FAB-12055.sh: execute FAB-12055
 
+* ### run_scenarios.sh
+The script, PTE/CITest/scenarios/run_scenarios.sh, can be used to execute a full test scenario, including launching a network (optional), priming, invokes, queries, and generating results in a pteReport file.
+
+        ./run_scenarios -h
+
+            -h, --help      View this help message
+
+            -a, --application       application
+                    Default: none
+
+            -n, --network   network
+                    Default: none
+
+            -p, --prime     priming
+                    Default: none
+
+            -i, --invoke    invokes
+                    Default: none
+
+            -q, --query     queries
+                    Default: none
+
+            Examples:
+                ./run_scenarios.sh -a samplecc -n FAB-3833-2i -p FAB-3810-2q -i FAB-3833-2i -q FAB-3810-2q
+
+
 * ### Network
 
     When `-n` is invoked, the default network configuration is as follow:
@@ -227,6 +253,7 @@ The following chaincodes are available:
 - [sample chaincode](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc/go)
 - [marbles chaincode](https://github.com/hyperledger/fabric/tree/master/examples/chaincode/go/marbles02)
 - [sample Node JS chaincode](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc/node)
+- [sample java chaincode](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc/java)
 
 The user can add a chaincode for his test case by following the same directory structure in `preconfig` directory.
 
