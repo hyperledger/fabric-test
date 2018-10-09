@@ -2122,7 +2122,7 @@ function invoke_query_const(freq) {
             if ( qcheck.includes('BOOKMARK') && qcheck.includes('KEY') ) {
                 // get bookmark from query returned
                 var qc=JSON.parse(response_payloads[0].toString('utf8'));
-                bookmark=qc[1][0].ResponseMetadata.Bookmark;
+                bookmark=qc.ResponseMetadata.Bookmark;
             } else {
                 // reset bookmark
                 bookmark='';
