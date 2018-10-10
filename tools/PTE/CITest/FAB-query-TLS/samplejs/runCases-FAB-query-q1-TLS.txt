@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-query-TLS/samplejs/samplejs-chan1-FAB-query-q-TLS.json

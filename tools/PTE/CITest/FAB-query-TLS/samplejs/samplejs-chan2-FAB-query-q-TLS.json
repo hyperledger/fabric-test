@@ -1,6 +1,6 @@
 {
     "channelID": "_ch2",
-    "chaincodeID": "sample_cc",
+    "chaincodeID": "sample_js",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
@@ -50,8 +50,9 @@
         "payLoadMax": "1024"
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
         "fcn": "init",
+        "language": "node",
         "args": []
     },
     "invoke": {
