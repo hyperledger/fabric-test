@@ -1,0 +1,129 @@
+{
+    "name": "Your Network Name",
+    "description": "Connection Profile for a Blockchain Network",
+    "x-networkId": "<network id>",
+    "x-fabricVersion": "latest",
+    "version": "1.0.3",
+    "client": {
+        "organization": "org1",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300",
+                    "eventHub": "300",
+                    "eventReg": "300"
+                },
+                "orderer": "300"
+            }
+        },
+        "x-organizationName": "Company A"
+    },
+    "channels": {
+        "defaultchannel": {
+            "x-status": "membership_valid",
+            "orderers": [
+                "orderer"
+            ],
+            "peers": {
+                "org1-peer1": {
+                    "x-chaincode": {}
+                }
+            },
+            "x-members": [
+                "org1",
+                "org2"
+            ]
+        }
+    },
+    "organizations": {
+        "org1": {
+            "mspid": "org1",
+            "peers": [
+                "org1-peer1"
+            ],
+            "certificateAuthorities": [
+                "org1-ca"
+            ],
+            "signedCert": {
+                "pem": "-----BEGIN CERTIFICATE----- <etc>",
+                "x-name": "default"
+            },
+            "adminPrivateKey": {
+                "pem": "-----BEGIN PRIVATE KEY----- <etc>"
+            }
+        }
+    },
+    "orderers": {
+        "orderer": {
+            "url": "grpcs://<network id:port>",
+            "grpcOptions": {
+                "grpc.http2.keepalive_time": 360,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.http2.keepalive_timeout": 180,
+                "grpc.keepalive_timeout_ms": 180000
+            },
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE----- <etc>"
+            }
+        }
+    },
+    "peers": {
+        "org1-peer1": {
+            "url": "grpcs://<network id:port>",
+            "eventUrl": "grpcs://<network id:port>",
+            "grpcOptions": {
+                "grpc.http2.keepalive_time": 360,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.http2.keepalive_timeout": 180,
+                "grpc.keepalive_timeout_ms": 180000
+            },
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE----- <etc>"
+            },
+            "x-mspid": "org1",
+            "x-ledgerDbType": "couch"
+        },
+        "org2-peer1": {
+            "url": "grpcs://<network id:port>",
+            "eventUrl": "grpcs://<network id:port>",
+            "grpcOptions": {
+                "grpc.http2.keepalive_time": 360,
+                "grpc.keepalive_time_ms": 360000,
+                "grpc.http2.keepalive_timeout": 180,
+                "grpc.keepalive_timeout_ms": 180000
+            },
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE----- <etc>"
+            },
+            "x-mspid": "org2",
+            "x-ledgerDbType": "couch"
+        }
+    },
+    "certificateAuthorities": {
+        "org1-ca": {
+            "url": "https://<network id:port>",
+            "httpOptions": {
+                "verify": true
+            },
+            "tlsCACerts": {
+                "pem": "-----BEGIN CERTIFICATE----- <etc>"
+            },
+            "registrar": [
+                {
+                    "enrollId": "admin",
+                    "enrollSecret": "<secret password>",
+                    "x-affiliations": [
+                        "org1",
+                        "org1.department1",
+                        "org1.department2",
+                        "org2",
+                        "org2.department1"
+                    ]
+                }
+            ],
+            "caName": "org1CA",
+            "x-mspid": "org1"
+        }
+    },
+    "x-type": "hlfv1"
+}
