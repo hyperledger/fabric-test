@@ -117,17 +117,25 @@ orgKeys.forEach(orgKey => {
       //  cpOrg.adminPrivateKey.pem is non-null
       org.priv = '<could not read from connection profiles, please insert your private key manually>'
     } else pathsNotPems = true;
+  } else {
+    console.log(`Error: cannot find signedCert in org key %s in connection profile`, orgKey);
+    process.exit(1);
   }
 
   if (cpOrg.adminPrivateKey != null) {
     if (cpOrg.adminPrivateKey.pem != null) org.priv = cpOrg.adminPrivateKey.pem;
     else pathsNotPems = true;
+  } else {
+    console.log(`Error: cannot find adminPrivateKey in org key %s in connection profile`, orgKey);
+    process.exit(1);
   }
 
   // Assumption: if paths are used, then both admin private key and signed cert are guaranteed to be non-null
   if (pathsNotPems == true) {
-    // If pathsNotPems is true, then (given the above assumption) both cpOrg.adminPrivateKey and cpOrg.signedCert are
-    //  guaranteed to be non-null
+    if ( (cpOrg.adminPrivateKey.path == null) || ( cpOrg.signedCert.path == null ) ) {
+      console.log(`Error: cannot find either (signedCert.pem and adminPrivateKey.pem) or (adminPrivateKey.path and signedCert.path) in org key %s in connection profile`, orgKey);
+      process.exit(1);
+    }
     var paths = [cpOrg.adminPrivateKey.path, cpOrg.signedCert.path].sort();
 
     // Starting at the first character of both strings, iterate through the strings' characters and compare until the characters
