@@ -39,7 +39,7 @@ cp ../FAB-8251/indexes/$indexFile4Field $indexDir/
 
 #### execute testcase FAB-9575-4i: 1M (4x250000) invokes and 2M (4x500000) 4-field queries simultaneously
 cd $CWD
-./run_scenarios.sh -a marbles02 -i FAB-9575-4i
+./run_scenarios.sh -i FAB-9575-4i
 
 #### return the original index files
 rm -f $indexDir/$indexFile2Field $indexDir/$indexFile4Field
