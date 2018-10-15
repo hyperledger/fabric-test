@@ -104,8 +104,9 @@ The command is located in `PTE/CITest/scripts`
         FAB-11638: samplecc chaincode, TLS, option to bring up a network of levelDB, 1 channel, 2 org, 2 peers per org, filtered block event service, 2 processes X 10000 invokes and validation of all transaction on all peers, then sleep for 2 days, then another 2 processes X 10000 invokes and validation of all transaction on all peers
         FAB-11726-4i: samplecc java chaincode, 4 processes X 10000 invokes, TLS, levelDB, 2 channel, filtered block event service, event listener: per block
         FAB-12055: multiple processes (4, 8, 12, ..., 52) X 10000 transactions, both invoke and query, 1 channel, 1 org, 1 peer, 1 ca, solo orderer, levelDB, samplecc.  This is a test driver, which creates a bare bones network as described, and runs a performance test multiple times against sample cc in three languages (go, Node js, and java), collecting stats for each.
+        FAB-11614-2iSBE: SBEcc chaincode, 2 processes X 50000 invokes with value and Endorsement policiesi for half the keys, TLS, CouchDB, 2 Channel
         FAB-11615-2i: SBEcc chaincode, 2 processes X 50000 invokes with valuee only, TLS, CouchDB, 2 Channel
-        FAB-11615-2iSBE: SBEcc chaincode, 2 processes X 50000 invokes with valuee and Endorsement policies, TLS, CouchDB, 2 Channel
+        FAB-11615-2iSBE: SBEcc chaincode, 2 processes X 50000 invokes with value and Endorsement policies, TLS, CouchDB, 2 Channel
 
     **Note that a query testcase requires execution of corresponding invoke testcase first to avoid errors due to the absence of transactions.**
 
@@ -195,6 +196,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-10191-4i.sh: execute FAB-10191-4i
         FAB-10677.sh: execute FAB-10677
         FAB-11638.sh: execute FAB-11638
+        FAB-11614-2iSBE.sh: execute FAB-11614 with invokes in 2 threads to update Endorsement policy of values and half the keys
         FAB-11615-2i.sh: execute FAB-11615 with invokes in 2 threads to update value only 
         FAB-11615-2iSBE.sh: execute FAB-11615 with invokes in 2 threads to update Endorsement policy and value
         FAB-11726-4i.sh: execute FAB-11726-4i
