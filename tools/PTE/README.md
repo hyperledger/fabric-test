@@ -229,7 +229,7 @@ A single test case is described by a user input file. User input files define al
 
 
 * ### Invoke (query)
-    To execute invoke (move) transactions, set the transType to Invoke and invokeType to Query, and specify the network parameters and desired execution parameters:
+    To execute invoke (query) transactions, set the transType to Invoke and invokeType to Query, and specify the network parameters and desired execution parameters:
 
         "invokeCheck": "TRUE",
         "transMode": "Constant",
