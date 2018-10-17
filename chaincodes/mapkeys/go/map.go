@@ -45,16 +45,18 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	switch function {
 
 	case "put":
-		if len(args) != 4 {
+		if len(args) < 4 {
+			fmt.Println("Args list is too short!")
 			return shim.Error("Args list is too short!!!!!!!!!!!!!!!!")
 		}
 
 		if len(args)%2 != 0 {
+			fmt.Println("Odd number of arguments. Need to supply key/value pairs!")
 			return shim.Error("put operation must include an even number of key/value pair arguments: [key, value]")
 		}
 		fmt.Println("In mapkeys put")
 		for index, element := range args {
-                        if index%2 == 0 {
+			if index%2 == 0 {
 				key := element
 				value := args[index+1]
 				fmt.Printf("key %s\n", key)

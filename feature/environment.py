@@ -98,8 +98,12 @@ def after_scenario(context, scenario):
     # Clean up memory in between scenarios, just in case
     if hasattr(context, "random_key"):
         del context.random_key
+    if hasattr(context, "payload"):
+        del context.payload
     if hasattr(context, "composition"):
         del context.composition
+    if hasattr(context, "result"):
+        del context.result
     gc.collect()
 
 def before_all(context):

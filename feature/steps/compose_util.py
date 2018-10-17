@@ -11,7 +11,7 @@ import shutil
 import json
 import uuid
 import time
-from common_util import Timeout, convertBoolean
+from common_util import convertBoolean
 
 
 def enableTls(context, tlsEnabled, projectName=None):
