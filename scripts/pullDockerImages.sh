@@ -31,7 +31,7 @@ echo "Fetching images from Nexus"
 NEXUS_URL=nexus3.hyperledger.org:10001
 ORG_NAME="hyperledger/fabric"
 ARCH=$(go env GOARCH)
-: ${STABLE_VERSION:=1.3.0-stable}
+: ${STABLE_VERSION:=1.3.1-stable}
 STABLE_TAG=$ARCH-$STABLE_VERSION
 echo "---------> STABLE_VERSION:" $STABLE_VERSION
 
