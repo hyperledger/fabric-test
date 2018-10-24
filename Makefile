@@ -33,7 +33,7 @@
 #
 # ------------------------------------------------------------------
 
-BASE_VERSION = 1.2.0
+BASE_VERSION = 1.3.0
 DOCKER_NS = hyperledger
 EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
 PROJECT_VERSION=$(BASE_VERSION)-$(EXTRA_VERSION)
@@ -56,8 +56,11 @@ ci-smoke: git-init git-latest fabric ca clean pre-setup build-docker-images java
 
 .PHONY: git-latest
 git-latest:
-	@git submodule foreach git checkout master
-	@git submodule foreach git pull origin master
+	cd $(HYPERLEDGER_DIR)/fabric-test/cello && git checkout master && git fetch origin master && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric && git checkout release-1.3 && git fetch origin release-1.3 && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-ca && git checkout release-1.3 && git fetch origin release-1.3 && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-samples && git checkout release-1.3 && git fetch origin release-1.3 && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-sdk-node && git checkout release-1.3 && git fetch origin release-1.3 && git reset --hard FETCH_HEAD && git show-ref HEAD
 
 .PHONY: git-init
 git-init:
@@ -76,7 +79,7 @@ fabric:
 	if [ ! -d "$(FABRIC_DIR)" ]; then \
 		echo "Clone FABRIC REPO"; \
 		cd $(HYPERLEDGER_DIR); \
-		git clone --single-branch -b master $(FABRIC) $(FABRIC_DIR); \
+		git clone --single-branch -b release-1.3 $(FABRIC) $(FABRIC_DIR); \
 	else \
 		cd $(FABRIC_DIR) && git pull $(FABRIC); \
 	fi
@@ -98,7 +101,7 @@ ca:
 	if [ ! -d "$(CA_DIR)" ]; then \
 		echo "Clone CA REPO"; \
 		cd $(HYPERLEDGER_DIR); \
-		git clone --single-branch -b master $(FABRIC_CA) $(CA_DIR); \
+		git clone --single-branch -b release-1.3 $(FABRIC_CA) $(CA_DIR); \
 	else \
 		cd $(CA_DIR) && git pull $(FABRIC_CA); \
 	fi
@@ -108,7 +111,7 @@ fabric-chaincode-java:
 	if [ ! -d "$(CHAINCODE-JAVA_DIR)" ]; then \
 		echo "Clone FABRIC-CHAINCODE-JAVA REPO"; \
 		cd $(HYPERLEDGER_DIR); \
-		git clone --single-branch -b master $(FABRIC-CHAINCODE-JAVA) $(CHAINCODE-JAVA_DIR); \
+		git clone --single-branch -b release-1.3 $(FABRIC-CHAINCODE-JAVA) $(CHAINCODE-JAVA_DIR); \
 	else \
 		cd $(CHAINCODE-JAVA_DIR) && git pull $(FABRIC-CHAINCODE-JAVA); \
 	fi
