@@ -21,7 +21,7 @@ function printHelp {
    echo "       -k: number of brokers, default=0"
    echo "       -e: number of replicas, default=brokers"
    echo "       -z: number of zookeeper, default=0"
-   echo "       -r: number of organiztions, default=1"
+   echo "       -r: number of organizations, default=1"
    echo "       -S: TLS enablement [enabled|disabled], default=disabled "
    echo "       -m: Mutual TLS enablement [enabled|disabled], default=disabled "
    echo "       -x: number of ca, default=0"
