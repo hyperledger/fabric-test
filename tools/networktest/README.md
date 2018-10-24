@@ -20,7 +20,7 @@ For reference, a formatted sample connection profile is provided in the default 
 
 1. Git-clone fabric-test repository, and go to the networktest directory
 
-    For example, to set up fabric-test in latest master branch (*Note*: when testing with a release branch, replace `master` with the branch name, e.g. `release-1.3`)::
+    For example, to set up fabric-test in latest master branch (*Note*: when testing with a release branch, replace `master` with the branch name, e.g. `release-1.3`):
 
         cd $GOPATH/src/github.com/hyperledger
         git clone --single-branch -b master https://github.com/hyperledger/fabric-test.git
@@ -70,10 +70,10 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
         --dir           absolute path or relative path from .../fabric-test/tools/networktest/ to the directory that contains the network connection profile to be converted
                         (Default: ./connectionprofile/)
 
-        --channel <list of channel name>
+        --channel <channel name>
                         (Must match channel names in connection profile. Default: defaultchannel)
 
-        --org <list of 2 or more org names>
+        --org <list of org names>
                         (Must match org names in connection profile. Default: org1 org2)
 
         -t, --testcase <list of testcases>

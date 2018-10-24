@@ -1,8 +1,6 @@
 {
     "name": "Your Network Name",
     "description": "Connection Profile for a Blockchain Network",
-    "x-networkId": "<network id>",
-    "x-fabricVersion": "latest",
     "version": "1.0.3",
     "client": {
         "organization": "org1",
@@ -15,24 +13,16 @@
                 },
                 "orderer": "300"
             }
-        },
-        "x-organizationName": "Company A"
+        }
     },
     "channels": {
         "defaultchannel": {
-            "x-status": "membership_valid",
             "orderers": [
                 "orderer"
             ],
             "peers": {
-                "org1-peer1": {
-                    "x-chaincode": {}
-                }
-            },
-            "x-members": [
-                "org1",
-                "org2"
-            ]
+                "org1-peer1": {}
+            }
         }
     },
     "organizations": {
@@ -45,8 +35,7 @@
                 "org1-ca"
             ],
             "signedCert": {
-                "pem": "-----BEGIN CERTIFICATE----- <etc>",
-                "x-name": "default"
+                "pem": "-----BEGIN CERTIFICATE----- <etc>"
             },
             "adminPrivateKey": {
                 "pem": "-----BEGIN PRIVATE KEY----- <etc>"
@@ -79,9 +68,7 @@
             },
             "tlsCACerts": {
                 "pem": "-----BEGIN CERTIFICATE----- <etc>"
-            },
-            "x-mspid": "org1",
-            "x-ledgerDbType": "couch"
+            }
         },
         "org2-peer1": {
             "url": "grpcs://<network id:port>",
@@ -94,9 +81,7 @@
             },
             "tlsCACerts": {
                 "pem": "-----BEGIN CERTIFICATE----- <etc>"
-            },
-            "x-mspid": "org2",
-            "x-ledgerDbType": "couch"
+            }
         }
     },
     "certificateAuthorities": {
@@ -111,19 +96,10 @@
             "registrar": [
                 {
                     "enrollId": "admin",
-                    "enrollSecret": "<secret password>",
-                    "x-affiliations": [
-                        "org1",
-                        "org1.department1",
-                        "org1.department2",
-                        "org2",
-                        "org2.department1"
-                    ]
+                    "enrollSecret": "<secret password>"
                 }
             ],
-            "caName": "org1CA",
-            "x-mspid": "org1"
+            "caName": "org1CA"
         }
-    },
-    "x-type": "hlfv1"
+    }
 }
