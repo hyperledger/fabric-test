@@ -29,11 +29,11 @@ usage () {
     echo -e "\t\t(Default: ./connectionprofile/)"
     echo
 
-    echo -e "--channel <list of channel names>"
-    echo -e "\t\t(Must match channel names in connection profile. Default: defaultchannel)"
+    echo -e "--channel <channel name>"
+    echo -e "\t\t(Must match channel name in connection profile. Default: defaultchannel)"
     echo
 
-    echo -e "--org <list of 2 or more org names>"
+    echo -e "--org <list of org names>"
     echo -e "\t\t(Must match org names in connection profile. Default: org1 org2)"
     echo
 
@@ -167,7 +167,7 @@ testPreProc() {
     for (( idx=0; idx<${#Channel[@]}; idx++ ))
     do
         idx1=$[ idx + 1 ]
-        echo -e "[testPreProc] replace testorgschannel$idx1 with $Channel"
+        echo -e "[testPreProc] replace testorgschannel$idx1 with ${Channel[@]}"
         if [ -e CITest/$tcase/preconfig ]; then
             sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/channels/*
             sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
@@ -175,7 +175,7 @@ testPreProc() {
         sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/$tcc/*
     done
 
-    # org1
+    # orgs
     for (( idx=0; idx<${#Organization[@]}; idx++ ))
     do
         idx1=$[ idx + 1 ]
@@ -250,7 +250,7 @@ ccProc() {
     echo -e "[ccProc] ./pte_driver.sh $installTXT"
     ./pte_driver.sh $installTXT
     if [ "$?" -ne "0" ]; then
-        echo -e "[ccProc] Warning: installation failed, chaincode: $chaincode"
+        echo -e "[ccProc] Warning: installation failed, chaincode: $chaincode (can ignore this warning if done during previous test or prior to running this test)"
     fi
 
     # instantiate chaincode
@@ -259,7 +259,7 @@ ccProc() {
     echo -e "[ccProc] ./pte_driver.sh $instantiateTXT"
     ./pte_driver.sh $instantiateTXT
     if [ "$?" -ne "0" ]; then
-        echo -e "[ccProc] Warning: instantiation failed, chaincode: $chaincode"
+        echo -e "[ccProc] Warning: instantiation failed, chaincode: $chaincode (can ignore this warning if done during previous test or prior to running this test)"
     fi
 
     # priming ...
@@ -452,12 +452,12 @@ if [ "$Channel" == "" ]; then
     Channel="defaultchannel"      # default channel
 fi
 if [ "$Organization" == "" ]; then
-    echo -e "use default org: org1 org2"
+    echo -e "use default org list: org1 org2"
     Organization=("org1" "org2")  # dafault org
 fi
 
-echo -e "Channel: $Channel"
-echo -e "Organization: ${Organization[@]}"
+echo -e "Channel: ${Channel[@]}"
+echo -e "Organizations: ${Organization[@]}"
 
 # npm install fabric packages
 if [ $NPMInstall != "none" ]; then
