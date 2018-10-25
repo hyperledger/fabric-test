@@ -70,10 +70,10 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
         --dir           absolute path or relative path from .../fabric-test/tools/networktest/ to the directory that contains the network connection profile to be converted
                         (Default: ./connectionprofile/)
 
-        --channel <list of channel name>
-                        (Must match channel names in connection profile. Default: defaultchannel)
+        --channel <channel name>
+                        (Must match channel name in connection profile. Default: defaultchannel)
 
-        --org <list of 2 or more org names>
+        --org <list of org names>
                         (Must match org names in connection profile. Default: org1 org2)
 
         -t, --testcase <list of testcases>
