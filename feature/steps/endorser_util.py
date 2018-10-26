@@ -328,7 +328,7 @@ class SDKInterface(InterfaceBase):
                     containers = subprocess.check_output(["docker ps -a"], shell=True)
                     time.sleep(1)
         finally:
-            assert chaincode_container in containers, "The expected chaincode container {} is not running".format(chaincode_container)
+            assert chaincode_container in containers, "The expected chaincode container {0} is not running\n{1}".format(chaincode_container, containers)
 
         # Allow time for chaincode initialization to complete
         time.sleep(15)
@@ -798,7 +798,7 @@ class CLIInterface(InterfaceBase):
                     containers = subprocess.check_output(["docker ps -a"], shell=True)
                     time.sleep(1)
         finally:
-            assert chaincode_container in containers, "The expected chaincode container {} is not running".format(chaincode_container)
+            assert chaincode_container in containers, "The expected chaincode container {0} is not running\n{1}".format(chaincode_container, containers)
 
         # Allow time for chaincode initialization to complete
         time.sleep(10)
