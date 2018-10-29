@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-12262-4i/preconfig/marbles02_private/marbles02_private-chan2-instantiate-TLS.json

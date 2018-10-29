@@ -1,0 +1,1 @@
+sdk=node CITest/FAB-12262-sidedb-4i/marbles02_private/marbles02_prv-chan2-FAB-12262-sidedb-4i-TLS.json
