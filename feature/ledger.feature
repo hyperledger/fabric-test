@@ -14,7 +14,7 @@ Feature: Ledger Service
 
 @skip
 Scenario Outline: FAB-6036-1: Test marbles02_private initMarble, readMarble, deleteMarble, transferMarble, getMarblesByRange, stateTransfer
-  Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
+  Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type <type>
   When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
 

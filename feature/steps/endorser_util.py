@@ -98,7 +98,7 @@ class InterfaceBase:
         waittime=5
         try:
             with common_util.Timeout(max_waittime):
-                while  org not in context.initial_leader:
+                while org not in context.initial_leader:
                     for container in self.get_peers(context):
                         if ((org in container) and common_util.get_leadership_status(container)):
                             context.initial_leader[org]=container

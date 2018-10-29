@@ -16,7 +16,7 @@ services:
         environment:
             - GOPATH=/opt/gopath
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-            - CORE_LOGGING_LEVEL=DEBUG
+            - FABRIC_LOGGING_SPEC=DEBUG
             # TLS settings
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CERT_FILE=/var/hyperledger/tls/server.crt

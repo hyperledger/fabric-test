@@ -121,7 +121,7 @@ Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_
 
 @daily
 Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, using marbles02, for <type> orderer
-  Given the CORE_LOGGING_GOSSIP environment variable is "DEBUG"
+  Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type <type>
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"

@@ -90,12 +90,9 @@ services:
             - FABRIC_CA_HOME=/var/hyperledger
             - FABRIC_CA_CLIENT_HOME=/var/hyperledger
             - FABRIC_CA_CLIENT_TLS_CERTFILES=/var/hyperledger/tls/ca.crt
-            - CORE_LOGGING_LEVEL=DEBUG
-            - CORE_LOGGING_GOSSIP=${CORE_LOGGING_GOSSIP}
-            - CORE_LOGGING_MSP=INFO
-            - CORE_LOGGING_POLICIES=DEBUG
-            - CORE_LOGGING_LEDGER=DEBUG
-            - CORE_LOGGING_PEER_GOSSIP=INFO
+            #- FABRIC_LOGGING_SPEC=peer=DEBUG:endorser=DEBUG:nodeCmd=DEBUG:committer=DEBUG
+            #- FABRIC_LOGGING_SPEC=peer=DEBUG
+            - FABRIC_LOGGING_SPEC=${FABRIC_LOGGING_SPEC}
             # TLS settings
             - CORE_PEER_TLS_ENABLED=${CORE_PEER_TLS_ENABLED}
             - CORE_PEER_TLS_CLIENTAUTHREQUIRED=${CORE_PEER_TLS_CLIENTAUTHREQUIRED}

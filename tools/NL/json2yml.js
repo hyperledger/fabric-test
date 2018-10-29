@@ -109,10 +109,10 @@ console.log('HOSTCONFIG_NETWORKMODE: ', HOSTCONFIG_NETWORKMODE);
 // Peer environment var
 var peer_env_name=[];
 var peer_env_val=[];
-if ( process.env.CORE_LOGGING_LEVEL != null ) {
-    console.log(' CORE_LOGGING_LEVEL= ', process.env.CORE_LOGGING_LEVEL);
-    peer_env_name.push('CORE_LOGGING_LEVEL');
-    peer_env_val.push(process.env.CORE_LOGGING_LEVEL);
+if ( process.env.FABRIC_LOGGING_SPEC != null ) {
+    console.log(' FABRIC_LOGGING_SPEC= ', process.env.FABRIC_LOGGING_SPEC);
+    peer_env_name.push('FABRIC_LOGGING_SPEC');
+    peer_env_val.push(process.env.FABRIC_LOGGING_SPEC);
 }
 if ( process.env.CORE_PEER_BCCSP_SW_SECURITY != null ) {
     console.log(' CORE_PEER_BCCSP_SW_SECURITY= ', process.env.CORE_PEER_BCCSP_SW_SECURITY);

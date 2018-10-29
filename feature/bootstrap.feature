@@ -72,14 +72,16 @@ Scenario: Setting of environment variables
     Given the KAFKA_DEFAULT_REPLICATION_FACTOR environment variable is 1
     And the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is 10 minutes
     And the CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT environment variable is 10
-    And the CORE_LOGGING_GOSSIP environment variable is INFO
+    And the FABRIC_LOGGING_SPEC environment variable is gossip.discovery=DEBUG:nodeCmd=DEBUG
     And I have a bootstrapped fabric network of type kafka with tls
     Then the KAFKA_DEFAULT_REPLICATION_FACTOR environment variable is 1 on node "kafka1"
     And the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is 10 minutes on node "orderer0.example.com"
     And the CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT environment variable is 10 on node "orderer1.example.com"
     And the ORDERER_GENERAL_TLS_ENABLED environment variable is true on node "orderer2.example.com"
     And the CORE_PEER_TLS_ENABLED environment variable is true on node "peer0.org1.example.com"
-    And the CORE_LOGGING_GOSSIP environment variable is INFO on node "peer1.org2.example.com"
+    And the FABRIC_LOGGING_SPEC environment variable is gossip.discovery=DEBUG:nodeCmd=DEBUG on node "peer1.org2.example.com"
+    And the logs on peer1.org2.example.com contains "\[gossip.discovery\] periodicalSendAlive -> DEBU" within 5 seconds
+    And the logs on peer1.org2.example.com contains "\[nodeCmd\] serve -> DEBU" within 5 seconds
 
 
 @daily

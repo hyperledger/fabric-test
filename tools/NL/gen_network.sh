@@ -80,9 +80,9 @@ while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:M:" opt; do
       echo "number of CA: $nCA"
       ;;
     l)
-      CORE_LOGGING_LEVEL=$OPTARG
-      export CORE_LOGGING_LEVEL=$CORE_LOGGING_LEVEL
-      echo "CORE_LOGGING_LEVEL: $CORE_LOGGING_LEVEL"
+      FABRIC_LOGGING_SPEC=$OPTARG
+      export FABRIC_LOGGING_SPEC=$FABRIC_LOGGING_SPEC
+      echo "FABRIC_LOGGING_SPEC: $FABRIC_LOGGING_SPEC"
       ;;
     d)
       db=$OPTARG

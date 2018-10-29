@@ -16,7 +16,7 @@ usage () {
     echo -e " 2. parses block information in the peers logs"
     echo -e " 3. calculates TPS for specified channels in addition to all channels"
     echo
-    echo -e " requirement: set CORE_LOGGING_LEVEL to INFO for peers"
+    echo -e " requirement: set FABRIC_LOGGING_SPEC to INFO for peers"
     echo
     echo -e "\nUSAGE:\t./get_peerStats.sh [options] [values]"
     echo -e "\tThe output file is <output dir>/<prefix name>_<runid>.log"
