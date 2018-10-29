@@ -76,6 +76,15 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
         --org <list of org names>
                         (Must match org names in connection profile. Default: org1 org2)
 
+        --ccver <chaincode version to instantiate>
+                        (Default: v0. Note: cannot be used with --ccupgrade)
+
+        --ccprefix <chaincode name prefix>
+                        (Default: sample_)
+
+        --ccupgrade     <chaincode version to upgrade>
+                        (Note: cannot be used with --ccver)
+
         -t, --testcase <list of testcases>
 
         -s, --sanity    execute a sanity test of 2 predefined testcases: FAB-3808-2i FAB-3811-2q (~30 min)

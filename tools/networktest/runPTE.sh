@@ -37,6 +37,18 @@ usage () {
     echo -e "\t\t(Must match org names in connection profile. Default: org1 org2)"
     echo
 
+    echo -e "--ccver <chaincode version to instantiate>"
+    echo -e "\t\t(Default: v0. Note: cannot be used with --ccupgrade)"
+    echo
+
+    echo -e "--ccprefix <chaincode name prefix>"
+    echo -e "\t\t(Default: sample_)"
+    echo
+
+    echo -e "--ccupgrade <chaincode version to upgrade >"
+    echo -e "\t\t(Note: cannot be used with --ccver)"
+    echo
+
     echo -e "-t, --testcase <list of testcases>"
     echo
 
@@ -96,6 +108,12 @@ Chaincodes=""
 CProfConv="yes"
 CCProc="yes"
 CHANNEL="defaultchannel"
+CCVER="v0"
+CCVERUPD="no"
+CCPREFIX=""
+PRESET_CCPREFIX="sample_"
+CCPREFIXUPD="no"
+CCUPGRADE="no"
 
 
 ### error message handler
@@ -160,7 +178,11 @@ cProfConversion() {
 testPreProc() {
     tcase=$1
     tcc=$2
-    echo -e "[testPreProc] executes test pre-process: testcase $tcase, chaincode $tcc"
+
+    # restore testcase first in case the testcase was changed
+    # by the way, if advanced users want to run a modified testcase, comment out this line
+    restoreCITestcase $tcase
+
     cd $PTEDir
 
     # channel
@@ -174,6 +196,30 @@ testPreProc() {
         fi
         sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/$tcc/*
     done
+
+    # chaincode version and prefix
+    if [ $CCVERUPD == "yes" ]; then
+        echo -e "[testPreProc] replace v0 with $CCVER"
+        if [ -e CITest/$tcase/preconfig ]; then
+            sed -i "s/v0/$CCVER/g" CITest/$tcase/preconfig/$tcc/*
+        fi
+        sed -i "s/v0/$CCVER/g" CITest/$tcase/$tcc/*
+    fi
+
+    if [ $CCPREFIXUPD == "yes" ]; then
+        echo -e "[testPreProc] replace $PRESET_CCPREFIX with $CCPREFIX"
+        if [ -e CITest/$tcase/preconfig ]; then
+            sed -i "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/preconfig/$tcc/*
+        fi
+        sed -i "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/$tcc/*
+    fi
+
+    if [ $CCUPGRADE == "yes" ]; then
+        echo -e "[testPreProc] chaincode upgrade"
+        if [ -e CITest/$tcase/preconfig ]; then
+            sed -i "s/instantiate/upgrade/g" CITest/$tcase/preconfig/$tcc/sample*
+        fi
+    fi
 
     # orgs
     for (( idx=0; idx<${#Organization[@]}; idx++ ))
@@ -220,7 +266,7 @@ primeProc() {
     ./pte_driver.sh CITest/$pcase/$cc"/runCases-FAB-query-q1-TLS.txt" >& $testLogs
     if [ "$?" -ne "0" ]; then
         restoreCITestcase $pcase
-        errMsg "primeProc" "pte_driver.sh"
+        return 1
     fi
 
     # restore changes made by testPreProc()
@@ -253,17 +299,26 @@ ccProc() {
         echo -e "[ccProc] Warning: installation failed, chaincode: $chaincode (can ignore this warning if done during previous test or prior to running this test)"
     fi
 
-    # instantiate chaincode
-    echo -e "[ccProc] instantiate chaincode: $chaincode"
+    # instantiate/upgrade chaincode
+    ccAction="instantiation"
+    if [ $CCUPGRADE == "yes" ]; then
+        ccAction="upgrade"
+    fi
+    echo -e "[ccProc] instantiate/upgrade chaincode: $chaincode"
     instantiateTXT=CITest/$tcase/preconfig/$chaincode/runCases-$chaincode"-instantiate-TLS.txt"
     echo -e "[ccProc] ./pte_driver.sh $instantiateTXT"
     ./pte_driver.sh $instantiateTXT
     if [ "$?" -ne "0" ]; then
-        echo -e "[ccProc] Warning: instantiation failed, chaincode: $chaincode (can ignore this warning if done during previous test or prior to running this test)"
+        echo -e "[ccProc] Warning: $ccAction failed, chaincode: $chaincode (can ignore this warning if done during previous test or prior to running this test)"
     fi
 
     # priming ...
     primeProc $chaincode
+    if [ "$?" -ne "0" ]; then
+        # restore changes made by testPreProc
+        restoreCITestcase $tcase
+        errMsg "ccProc" "pte_driver.sh"
+    fi
 }
 
 # get chaincode from the testcase
@@ -381,6 +436,45 @@ while [[ $# -gt 0 ]]; do
           echo -e "\t- Specify Organization: ${Organization[@]}"
           ;;
 
+      --ccver)
+          # sanity check
+          if [ $CCUPGRADE == "yes" ]; then
+              echo -e "Error: cannot use option --ccupgrade with option --ccver"
+              usage
+              exit 1
+          fi
+
+          shift
+          CCVER=$1            # chaincode version
+          CCVERUPD="yes"      # cc version updated
+          echo -e "\t- Specify CCVER to instantiate: $CCVER\n"
+          shift
+          ;;
+
+      --ccprefix)
+          shift
+          CCPREFIX=$1         # chaincode name prefix
+          CCPREFIXUPD="yes"   # chaincode name prefix updated
+          echo -e "\t- Specify CCPREFIX: $CCPREFIX\n"
+          shift
+          ;;
+
+      --ccupgrade)
+          # sanity check
+          if [ $CCVERUPD == "yes" ]; then
+              echo -e "Error: cannot use option --ccver with option --ccupgrade"
+              usage
+              exit 1
+          fi
+
+          shift
+          CCVER=$1            # chaincode version
+          CCVERUPD="yes"      # cc version upgraded
+          CCUPGRADE="yes"     # chaincode name prefix
+          echo -e "\t- Specify CCVER to upgrade: $CCVER\n"
+          shift
+          ;;
+
       -s | --sanity)
           CCProc="yes"         # install/instantiate chaincode
           TestCases=("FAB-3808-2i" "FAB-3811-2q")  # testcases
@@ -469,6 +563,7 @@ if [ $CProfConv != "none" ]; then
     cProfConversion
 fi
 
+echo "CCVER: $CCVER, CCPREFIXUPD: $CCPREFIXUPD, CCUPGRADE: $CCUPGRADE"
 
 # execute PTE transactions
 if [ ${#TestCases[@]} -gt 0 ]; then
