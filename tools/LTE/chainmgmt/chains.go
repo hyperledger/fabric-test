@@ -26,6 +26,7 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/platforms/golang"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/hyperledger/fabric/core/ledger/ledgermgmt"
+	"github.com/hyperledger/fabric/core/ledger/mock"
 	"github.com/hyperledger/fabric/protos/common"
 	benchcommon "github.com/hyperledger/fabric/test/tools/LTE/common"
 )
@@ -52,7 +53,8 @@ type chainsMgr struct {
 func newChainsMgr(mgrConf *ChainMgrConf, batchConf *BatchConf, initOp chainInitOp) *chainsMgr {
 	factory.InitFactories(nil)
 	ledgermgmt.Initialize(&ledgermgmt.Initializer{
-		PlatformRegistry: platforms.NewRegistry(&golang.Platform{}),
+		PlatformRegistry:              platforms.NewRegistry(&golang.Platform{}),
+		DeployedChaincodeInfoProvider: &mock.DeployedChaincodeInfoProvider{},
 	})
 	return &chainsMgr{mgrConf, batchConf, initOp, make(map[ChainID]*Chain), &sync.WaitGroup{}}
 }

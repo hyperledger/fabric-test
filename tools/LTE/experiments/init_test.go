@@ -42,14 +42,13 @@ var conf *configuration
 // parses this and does not recognized this flag (-testParams)
 func TestMain(m *testing.M) {
 	testutil.SetupCoreYAMLConfig()
-	flogging.SetModuleLevels(".+", "error")
 	testParams := parseTestParams()
 	conf = confFromTestParams(testParams)
 	if os.Getenv("useCouchDB") == "yes" {
 		viper.Set("ledger.state.stateDatabase", "CouchDB")
 	}
+	flogging.ActivateSpec("ledgermgmt,fsblkstorage,common.tools.configtxgen.localconfig,kvledger,statebasedval=error")
 	logger.Infof("Running experiment with configuration: %s\n", spew.Sdump(conf))
-	disableLogging()
 	os.Exit(m.Run())
 }
 

@@ -131,10 +131,6 @@ func verifyJSONValue(keyNumber int, value []byte) bool {
 	return bytes.Equal(valuePrefix, prefix)
 }
 
-func disableLogging() {
-	logging.SetLevel(logging.ERROR, "")
-}
-
 func calculateShare(total int, numParts int, partNum int) int {
 	share := total / numParts
 	remainder := total % numParts
