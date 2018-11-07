@@ -259,7 +259,7 @@ function channelAddPeer(channel, client, org) {
 
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -298,7 +298,7 @@ function channelAddListedPeer(channel, client, org) {
         for (i = 0; i < listOpt[key].length; i++) {
             if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
-                if (peername.includes('peer')) {
+                if (ORGS[key][peername].requests) {
                     if (TLS > testUtil.TLSDISABLED) {
                         data = testUtil.getTLSCert(key, peername);
                         if ( data !== null ) {
@@ -373,7 +373,7 @@ function channelAddPeer1(channel, client, org, eventHubs) {
 
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -414,7 +414,7 @@ function channelAddPeerEventJoin(channel, client, org) {
 
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
-                    if (key.includes('peer')) {
+                    if (ORGS[org][key].requests) {
                         if (TLS > testUtil.TLSDISABLED) {
                             data = testUtil.getTLSCert(org, key);
                             if ( data !== null ) {

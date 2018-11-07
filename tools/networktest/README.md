@@ -11,7 +11,7 @@ Users may write their own customized test scripts to run with their own custom n
 
 A valid connection profile is required as input; and your network must be running (with channels created, peers joined, etc) before starting these tests.
 The connection profile may be based on the fabric deployment of choice (cloud offering, Cello, K8S or customized deployment).
-For reference, a formatted sample connection profile is provided in the default location ./connectionprofile/. (*The sample cannot be used to actually run any tests; the user must supply an actual connection profile of their own network with orgs, peers, appropriate certs, etc.*)
+For reference, a formatted sample connection profile is provided in the default location ./connectionprofile/. (*The sample cannot be used to actually run any tests; the user must supply an actual connection profile of their own network with orgs, peers, appropriate admin certs, etc.*)
 
 
 ![](overviewPTE.png)
@@ -33,11 +33,11 @@ For reference, a formatted sample connection profile is provided in the default 
     Or, you may use the default directory, ./connectionprofile/ and replace the sample files there.
     The fully automated tests assume a specific network topology to be defined in the
     connection profile, and the network should be running already.
-    The topology **MUST** include:
+    The topology **MUST** include the following items. (Note the predefined testcases use names matching the default channel, orgs, peers, chaincode version, etc, as specified here.  If your network used names other than the default names, then you must remember to use the corresponding options of runPTE.sh, such as --org, to provide the names from your connection profile to use in the test.)
 
     * one channel; you can specify the channel name or use the default channel name: defaultchannel
     * two organizations in the channel; you can specify the org names or use the default org names: org1 and org2
-    * a minimum of 1 peer in each org that has joined the channel, and its name must contain string `peer`
+    * a minimum of 1 peer in each org that has joined the channel
     * network must use TLS enabled
 
 
