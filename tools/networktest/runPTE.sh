@@ -45,8 +45,12 @@ usage () {
     echo -e "\t\t(Default: sample_)"
     echo
 
-    echo -e "--ccupgrade <chaincode version to upgrade >"
+    echo -e "--ccupgrade <chaincode version to upgrade>"
     echo -e "\t\t(Note: cannot be used with --ccver)"
+    echo
+
+    echo -e "--txtarget <OrgAnchor|AllAnchors|OrgPeers|AllPeers>"
+    echo -e "\t\t(Default: OrgAnchor)"
     echo
 
     echo -e "-t, --testcase <list of testcases>"
@@ -114,6 +118,7 @@ CCPREFIX=""
 PRESET_CCPREFIX="sample_"
 CCPREFIXUPD="no"
 CCUPGRADE="no"
+TXTARGET=""
 
 
 ### error message handler
@@ -171,6 +176,42 @@ cProfConversion() {
     fi
 }
 
+
+# set PTE transaction configuration key with new value in testcase
+# $1: key
+# $2: new key val
+# $3: testcase
+# $4: chaincode
+setCfgKeyVal() {
+    key=$1
+    keyValNew=$2
+    tc=$3
+    cc=$4
+    echo "[setCfgKeyVal] key: $key, tc: $tc, cc: $cc"
+
+    cd $PTEDir/CITest
+
+    # search for key val in the testcase
+    tmpFile="/tmp/runPTEtmp.txt"
+    keyValCurr="none"
+    if [ -e $tmpFile ]; then
+        echo "rm -f $tmpFile"
+        rm -f $tmpFile
+    fi
+    grep $key $tc/$cc/* >& $tmpFile
+    keyValCurr=`tail -1 $tmpFile | cut -f 4 -d '"'`
+    echo "[setCfgKeyVal] key: $key, val: $keyValCurr"
+    rm -f $tmpFile
+
+    if [ "$keyValCurr" == "none" ]; then
+        echo "Error: [setCfgKeyVal] $key not found"
+        exit 1
+    fi
+
+    # set key val
+    echo -e "[setCfgKeyVal] replace $keyValCurr with $keyValNew"
+    sed -i "s/$keyValCurr/$keyValNew/g" $tc/$cc/*
+}
 
 # pre-process
 # $1: test case, e.g., FAB-3807-4i
@@ -232,6 +273,12 @@ testPreProc() {
         fi
         sed -i "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/$tcc/*
     done
+
+    # target peer
+    if [ "$TXTARGET" != "" ]; then
+        key="targetPeers"
+        setCfgKeyVal $key $TXTARGET $tcase $tcc
+    fi
 }
 
 # restore changes
@@ -261,6 +308,7 @@ primeProc() {
 
     # pre process testcase
     testPreProc $pcase $cc
+    cd $PTEDir
     tCurr=`date +%Y%m%d%H%M%S`
     testLogs=$LOGSDir/$pcase"-"$tCurr".log"
     ./pte_driver.sh CITest/$pcase/$cc"/runCases-FAB-query-q1-TLS.txt" >& $testLogs
@@ -472,6 +520,18 @@ while [[ $# -gt 0 ]]; do
           CCVERUPD="yes"      # cc version upgraded
           CCUPGRADE="yes"     # chaincode name prefix
           echo -e "\t- Specify CCVER to upgrade: $CCVER\n"
+          shift
+          ;;
+
+      --txtarget)
+          shift
+          TXTARGET=`echo $1 | tr a-z A-Z`         # transaction target peer
+          echo -e "\t- Specify TXTARGET: $TXTARGET\n"
+          if [ "$TXTARGET" != "ORGANCHOR" ] && [ "$TXTARGET" != "ALLANCHORS" ] && [ "$TXTARGET" != "ORGPEERS" ] && [ "$TXTARGET" != "ALLPEERS" ]; then
+              echo -e "Error: txtarget value for target peer is unknown: $1"
+              usage
+              exit 1
+          fi
           shift
           ;;
 

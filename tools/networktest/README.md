@@ -85,13 +85,17 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
         --ccupgrade     <chaincode version to upgrade>
                         (Note: cannot be used with --ccver)
 
+        --txtarget      <OrgAnchor|AllAnchors|OrgPeers|AllPeers>
+                        (Default: OrgAnchor)
+
         -t, --testcase <list of testcases>
 
         -s, --sanity    execute a sanity test of 2 predefined testcases: FAB-3808-2i FAB-3811-2q (~30 min)
 
         -a, --all       execute all predefined testcases (~3.5 hrs)
 
-
+Note: see [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/blob/master/tools/PTE)
+for txtarget option.
 
 ### Examples:
 
