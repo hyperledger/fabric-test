@@ -470,7 +470,7 @@ function assignPeerListFromList(channel, client, org) {
         for (i = 0; i < listOpt[key].length; i++) {
             if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
-                if (peername.includes('peer')) {
+                if (ORGS[key][peername].requests) {
                     if (TLS > testUtil.TLSDISABLED) {
                         data = testUtil.getTLSCert(key, peername);
                         if ( data !== null ) {
@@ -503,7 +503,7 @@ function assignPeerList(channel, client, org) {
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
-                if (key.includes('peer')) {
+                if (ORGS[key1][key].requests) {
                     if (TLS > testUtil.TLSDISABLED) {
                         data = testUtil.getTLSCert(key1, key);
                         if ( data !== null ) {
@@ -537,7 +537,7 @@ function assignThreadAllPeers(channel, client, org) {
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
-            if (key.includes('peer')) {
+            if (ORGS[key1][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(key1, key);
                     if ( data !== null ) {
@@ -600,7 +600,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
     for (let key1 in ORGS) {
         if (ORGS.hasOwnProperty(key1)) {
             for (let key in ORGS[key1]) {
-            if (key.includes('peer')) {
+            if (ORGS[key1][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(key1, key);
                     if ( data !== null ) {
@@ -667,7 +667,7 @@ function assignThreadOrgPeer(channel, client, org) {
     var data;
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -731,7 +731,7 @@ function assignThreadPeerList(channel, client, org) {
         for (i = 0; i < listOpt[key].length; i++) {
             if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
-                if (peername.includes('peer')) {
+                if (ORGS[key][peername].requests) {
                     if (TLS > testUtil.TLSDISABLED) {
                         data = testUtil.getTLSCert(key, peername);
                         if ( data !== null ) {
@@ -788,7 +788,7 @@ function channelAddPeer(channel, client, org) {
     var eh;
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -841,7 +841,7 @@ function channelAddPeerEvent(channel, client, org) {
     for (let key in ORGS[org]) {
         logger.info('key: ', key);
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -899,7 +899,7 @@ function channelAdd1Peer(channel, client, org) {
     var eh;
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -1000,7 +1000,7 @@ function assignOrdererList(channel, client) {
     var data;
     var ordererTmp;
     for (let key in ORGS['orderer']) {
-        if (key.includes('orderer')) {
+        if (ORGS['orderer'][key].url) {
             if (TLS > testUtil.TLSDISABLED) {
                 data = testUtil.getTLSCert('orderer', key);
                 if ( data !== null ) {
@@ -1061,7 +1061,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
     for (let key in ORGS) {
         if ( key == org ) {
         for ( let subkey in ORGS[key] ) {
-            if (subkey.includes('peer')) {
+            if (ORGS[key][subkey].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
                     data = testUtil.getTLSCert(key, subkey);
                     if ( data !== null ) {
