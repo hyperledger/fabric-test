@@ -3,19 +3,6 @@ set -o pipefail
 
 cd $GOPATH/src/github.com/hyperledger/fabric-test
 
-echo "Update fabric-test submodules and install nodejs"
-
-for TARGET in git-init git-latest fabric ca clean pre-setup; do
-  make $TARGET
-    if [ $? != 0 ]; then
-      echo "FAILED: make $TARGET failed to execute"
-      exit 1
-    else
-      echo "make $TARGET is successful"
-      echo
-    fi
-done
-
 ###################
 # Install govender
 ###################

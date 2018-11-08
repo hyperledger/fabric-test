@@ -125,7 +125,7 @@ smoke-tests:
 daily-tests:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh; ./runPteTestSuite.sh; ./runOteTestSuite.sh; ./runLteTestSuite.sh; ./runCATestSuite.sh
 .PHONY: pull-images
-pull-images:
+pull-images: git-init git-latest fabric ca clean pre-setup
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh
 
 .PHONY: svt-daily-behave-tests
