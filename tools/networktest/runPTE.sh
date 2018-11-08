@@ -210,7 +210,13 @@ setCfgKeyVal() {
 
     # set key val
     echo -e "[setCfgKeyVal] replace $keyValCurr with $keyValNew"
-    sed -i "s/$keyValCurr/$keyValNew/g" $tc/$cc/*
+    ### Note: "sed -i pattern filename" works fine on linux (gnu) - but not on
+    ### mac (OSX, freebsd) which requires a string parameter for the -i option.
+    ### Without going into details, we need to make this work on both platforms.
+    ### Refer to the jira FAB-12629 comments for explanation of why we are using
+    ### the -e option and then removing backup files (named with -e extension).
+    sed -i -e "s/$keyValCurr/$keyValNew/g" $tc/$cc/*
+    rm -f $tc/$cc/*-e
 }
 
 # pre-process
@@ -232,33 +238,37 @@ testPreProc() {
         idx1=$[ idx + 1 ]
         echo -e "[testPreProc] replace testorgschannel$idx1 with ${Channel[@]}"
         if [ -e CITest/$tcase/preconfig ]; then
-            sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/channels/*
-            sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
+            sed -i -e "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/channels/*
+            sed -i -e "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
         fi
-        sed -i "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/$tcc/*
+        sed -i -e "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/$tcc/*
+        rm -f CITest/$tcase/preconfig/channels/*-e CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     done
 
     # chaincode version and prefix
     if [ $CCVERUPD == "yes" ]; then
         echo -e "[testPreProc] replace v0 with $CCVER"
         if [ -e CITest/$tcase/preconfig ]; then
-            sed -i "s/v0/$CCVER/g" CITest/$tcase/preconfig/$tcc/*
+            sed -i -e "s/v0/$CCVER/g" CITest/$tcase/preconfig/$tcc/*
         fi
-        sed -i "s/v0/$CCVER/g" CITest/$tcase/$tcc/*
+        sed -i -e "s/v0/$CCVER/g" CITest/$tcase/$tcc/*
+        rm -f CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     fi
 
     if [ $CCPREFIXUPD == "yes" ]; then
         echo -e "[testPreProc] replace $PRESET_CCPREFIX with $CCPREFIX"
         if [ -e CITest/$tcase/preconfig ]; then
-            sed -i "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/preconfig/$tcc/*
+            sed -i -e "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/preconfig/$tcc/*
         fi
-        sed -i "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/$tcc/*
+        sed -i -e "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/$tcc/*
+        rm -f CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     fi
 
     if [ $CCUPGRADE == "yes" ]; then
         echo -e "[testPreProc] chaincode upgrade"
         if [ -e CITest/$tcase/preconfig ]; then
-            sed -i "s/instantiate/upgrade/g" CITest/$tcase/preconfig/$tcc/sample*
+            sed -i -e "s/instantiate/upgrade/g" CITest/$tcase/preconfig/$tcc/sample*
+            rm -f CITest/$tcase/preconfig/$tcc/sample*-e
         fi
     fi
 
@@ -268,10 +278,11 @@ testPreProc() {
         idx1=$[ idx + 1 ]
         echo -e "[testPreProc] replace org$idx1 with ${Organization[$idx]}"
         if [ -e CITest/$tcase/preconfig ]; then
-            sed -i "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/preconfig/channels/*
-            sed -i "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
+            sed -i -e "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/preconfig/channels/*
+            sed -i -e "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
         fi
-        sed -i "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/$tcc/*
+        sed -i -e "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/$tcc/*
+        rm -f CITest/$tcase/preconfig/channels/*-e CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     done
 
     # target peer
