@@ -150,10 +150,13 @@ InsertOrgs() {
         do
             #echo -e "i=$i, ORGS length=$NORG"
             if [ $i -eq $NORG ]; then
-                sed -i "/\"$preOrg\"/a \            \"org$i\"" $InJson
+                sed -i -e "/\"$preOrg\"/a \            \"org$i\"" $InJson
             else
-                sed -i "/\"$preOrg\"/a \            \"org$i\"," $InJson
+                sed -i -e "/\"$preOrg\"/a \            \"org$i\"," $InJson
             fi
+            # Remove backup files; cleanup is needed when running on the mac (freebsd), where
+            # a backup file would be created by the -i option; refer to FAB-12629 comments.
+            rm -f $InJson"-e"
             preOrg="org"$i
             ((i++))
         done
@@ -161,10 +164,11 @@ InsertOrgs() {
         for org in "${ORGS[@]}"; do
             #echo -e "i=$i, ORGS length=${#ORGS[@]}"
             if [ $i -eq ${#ORGS[@]} ]; then
-                sed -i "/\"$preOrg\"/a \            \"$org\"" $InJson
+                sed -i -e "/\"$preOrg\"/a \            \"$org\"" $InJson
             else
-                sed -i "/\"$preOrg\"/a \            \"$org\"," $InJson
+                sed -i -e "/\"$preOrg\"/a \            \"$org\"," $InJson
             fi
+            rm -f $InJson"-e"
             ((i++))
             preOrg=$org
         done
@@ -188,18 +192,19 @@ PreCFGProc() {
     else
         cc=""
     fi
-        sed -i "s/_CHANNELNAME_/$chnl/g" $cfgName
-        sed -i "s/_CHANNELID_/$chnl/g" $cfgName
-        sed -i "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
-        sed -i "s/_SCFILENAME_/$sc/g" $cfgName
-        sed -i "s/_CHAINCODEPATH_/$CCPath/g" $cfgName
-        sed -i "s/_CHAINCODEID_/$cc/g" $cfgName
-        sed -i "s/_LANGUAGE_/$LANGUAGE/g" $cfgName
+        sed -i -e "s/_CHANNELNAME_/$chnl/g" $cfgName
+        sed -i -e "s/_CHANNELID_/$chnl/g" $cfgName
+        sed -i -e "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
+        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
+        sed -i -e "s/_CHAINCODEPATH_/$CCPath/g" $cfgName
+        sed -i -e "s/_CHAINCODEID_/$cc/g" $cfgName
+        sed -i -e "s/_LANGUAGE_/$LANGUAGE/g" $cfgName
         if [ "$MDPath" == "" ]; then
-            sed -i "s/metadataPath/unused/g" $cfgName
+            sed -i -e "s/metadataPath/unused/g" $cfgName
         else
-            sed -i "s/_METADATAPATH_/$MDPath/g" $cfgName
+            sed -i -e "s/_METADATAPATH_/$MDPath/g" $cfgName
         fi
+        rm -f $cfgName"-e"
 
         InsertOrgs $cfgName
 
@@ -223,13 +228,13 @@ PreTXProc() {
     rundur=$6
     transmode=$7
 
-        sed -i "s/_INVOKETYPE_/$invokeType/g" $cfgTX
-        sed -i "s/_NPROC_/$nproc/g" $cfgTX
-        sed -i "s/_FREQ_/$freq/g" $cfgTX
-        sed -i "s/_NREQ_/$nreq/g" $cfgTX
-        sed -i "s/_RUNDUR_/$rundur/g" $cfgTX
-        sed -i "s/_TRANSMODE_/$transmode/g" $cfgTX
-
+        sed -i -e "s/_INVOKETYPE_/$invokeType/g" $cfgTX
+        sed -i -e "s/_NPROC_/$nproc/g" $cfgTX
+        sed -i -e "s/_FREQ_/$freq/g" $cfgTX
+        sed -i -e "s/_NREQ_/$nreq/g" $cfgTX
+        sed -i -e "s/_RUNDUR_/$rundur/g" $cfgTX
+        sed -i -e "s/_TRANSMODE_/$transmode/g" $cfgTX
+        rm -f $cfgTX"-e"
 }
 
 # channel process: create and join
@@ -358,7 +363,8 @@ TransactionProc() {
                 if [ ! -e $ccDfnOpt.json ]; then
                     echo -e "copy $chaincode DfnOpt.json"
                     cp $TEMPLATEDIR/$chaincode"DfnOpt.json" $runDir
-                    sed -i "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
+                    sed -i -e "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
+                    rm -f $chaincode"DfnOpt.json-e"
                 fi
 
                 # create PTE transaction configuration input json
