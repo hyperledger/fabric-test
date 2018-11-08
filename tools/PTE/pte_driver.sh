@@ -66,12 +66,21 @@ done < $1
 
 echo "Node Array: ${nodeArray[@]}"
 
+nanoOpt=""
+myOS=`uname -s`
+if [ "$myOS" != 'Darwin' ]; then
+   # Linux supports nanoseconds option of date command, but not mac/freebsd/Darwin.
+   # Use this detail to put millisecs into the tCurr, to prevent collisions if starting multiple PTEs at same time.
+   nanoOpt="%N"
+fi
+echo "$0: nanoOpt $nanoOpt, myOS $myOS"
+
 # node requests
 function nodeProc {
     nInstances=${#nodeArray[@]}
     if [ $tStart -eq 0 ]; then
         tWait=$[nInstances*4000+10000]
-        tCurr=`date +%s%N | cut -b1-13`
+        tCurr=`date +%s$nanoOpt | cut -b1-13`
         tStart=$[tCurr+tWait]
     fi
     echo "iPTE: $iPTE, nInstances: $nInstances, tStart: $tStart"

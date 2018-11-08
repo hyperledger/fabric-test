@@ -53,12 +53,21 @@ done < $1
 
 echo "PTE Array: ${pteArray[@]}"
 
+nanoOpt=""
+myOS=`uname -s`
+if [ "$myOS" != 'Darwin' ]; then
+   # Linux supports nanoseconds option of date command, but not mac/freebsd/Darwin.
+   # Use this detail to put millisecs into the tCurr, to prevent collisions if starting multiple PTEs at same time.
+   nanoOpt="%N"
+fi
+echo "$0: nanoOpt $nanoOpt, myOS $myOS"
+
 # PTE requests
 function pteProc {
     nPTE=${#pteArray[@]}
     if [ $tStart -eq 0 ]; then
         tWait=$[nPTE*4000+10000]
-        tCurr=`date +%s%N | cut -b1-13`
+        tCurr=`date +%s$nanoOpt | cut -b1-13`
         tStart=$[tCurr+tWait]
     fi
     echo "nPTE: $nPTE, tStart: $tStart"
