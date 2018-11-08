@@ -233,15 +233,13 @@ CWD=$PWD
 echo $CWD
 echo "GOPATH: $GOPATH"
 
-OS=`uname -s`
-
-myOS=$(echo $OS | awk '{print tolower($OS)}')
-if [ $myOS == 'darwin' ]; then
+myOS=`uname -s`
+if [ "$myOS" == 'Darwin' ]; then
    sedOpt="-it"
 else
    sedOpt="-i"
 fi
-echo "OS: $OS, sedOpt: $sedOpt"
+echo "$0: myOS: $myOS, sedOpt: $sedOpt"
 
 for (( i=0; i<$nCA; i++ ))
 do
