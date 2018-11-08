@@ -246,7 +246,7 @@ function channelAddPeer(channel, client, org) {
 
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -317,7 +317,7 @@ function channelAddPeer1(channel, client, org) {
 
     for (let key in ORGS[org]) {
         if (ORGS[org].hasOwnProperty(key)) {
-            if (key.includes('peer')) {
+            if (ORGS[org][key].requests) {
                 if (TLS == 'ENABLED') {
                     data = testUtil.getTLSCert(org, key);
                     if ( data !== null ) {
@@ -356,7 +356,7 @@ function channelAddPeerEventJoin(channel, client, org) {
 
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
-                    if (key.includes('peer')) {
+                    if (ORGS[org][key].requests) {
                         if (TLS == 'ENABLED') {
                             data = testUtil.getTLSCert(org, key);
                             if ( data !== null ) {
@@ -414,8 +414,7 @@ function channelAddEvent(channel, client, org) {
 
             for (let key in ORGS[org]) {
                 if (ORGS[org].hasOwnProperty(key)) {
-                    if (key.includes('peer')) {
-
+                    if (ORGS[org][key].events) {
                         eh=client.newEventHub();
                         if (TLS == 'ENABLED') {
                             data = testUtil.getTLSCert(org, key);
