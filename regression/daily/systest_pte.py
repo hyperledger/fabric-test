@@ -168,20 +168,24 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         self.assertEqual(int(count.strip()), 1, msg=queryCountFailure)
 
 
-    def test_FAB8192_4i_marbles_FAB8199_4q_FAB8200_4q_FAB8201_4q(self):
+    def test_FAB6813_4i_marbles_FAB8199_4q_FAB8200_4q_FAB8201_4q(self):
         '''
         Description:
 
         Launch standard network with couchdb using 1 channel and marbles02 cc.
-            FAB-8192-4i 4 threads x 1000 invokes (initMarble)
+            FAB-6813-4i 4 threads x 1000 invokes (initMarble)
         followed by three sets of queries:
             FAB-8199-4q: 4 threads queries: readMarble
             FAB-8200-4q: 4 threads rich queries: queryMarblesByOwner
             FAB-8201-4q: 4 threads rich queries: queryMarbles
+
+        This test uses indexing for the rich queries, by including a metadataPath
+        for index files during the install step. This is the only difference between
+        this and FAB8192, which does not use indexing for the queries and runs much slower.
         '''
 
         # Run the test scenario: launch network and run the tests
-        returncode = subprocess.call("./FAB-8192-4i.sh", cwd=scenarios_directory, shell=True)
+        returncode = subprocess.call("./FAB-6813-4i.sh", cwd=scenarios_directory, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
         # tear down the network, including all the nodes docker containers
         returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
@@ -189,30 +193,30 @@ class Perf_Stress_CouchDB(unittest.TestCase):
         # check if logfiles were created and contain the desired output, and check counts
         logfilelist = subprocess.check_output("ls", cwd=logs_directory, shell=True)
 
-        # FAB-8192-4i
-        self.assertIn("FAB-8192-4i_", logfilelist)
-        self.assertIn("FAB-8192-4i-pteReport.log", logfilelist)
+        # FAB-6813-4i
+        self.assertIn("FAB-6813-4i_", logfilelist)
+        self.assertIn("FAB-6813-4i-pteReport.log", logfilelist)
 
         count = subprocess.check_output(
-                "grep \"INVOKE Overall transactions:\" FAB-8192-4i-pteReport.log | wc -l",
+                "grep \"INVOKE Overall transactions:\" FAB-6813-4i-pteReport.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=noTxSummary)
         count = subprocess.check_output(
-                "grep \"CONSTANT INVOKE Overall transactions: sent 4000 received 4000\" FAB-8192-4i-pteReport.log | wc -l",
+                "grep \"CONSTANT INVOKE Overall transactions: sent 4000 received 4000\" FAB-6813-4i-pteReport.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
         count = subprocess.check_output(
-                "grep \"CONSTANT INVOKE Overall failures: proposal 0 transactions 0\" FAB-8192-4i-pteReport.log | wc -l",
+                "grep \"CONSTANT INVOKE Overall failures: proposal 0 transactions 0\" FAB-6813-4i-pteReport.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=invokeSendFailure)
         count = subprocess.check_output(
-                "grep \"CONSTANT INVOKE Overall event: received 4000 timeout 0 unreceived 0\" FAB-8192-4i-pteReport.log | wc -l",
+                "grep \"CONSTANT INVOKE Overall event: received 4000 timeout 0 unreceived 0\" FAB-6813-4i-pteReport.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=eventReceiveFailure)
         # invokeCheck - verify there were no errors from query requests
         # in the detailed pte output log (note: the underscore in the log filename)
         count = subprocess.check_output(
-                "grep \"query result: Error:\" FAB-8192-4i_*.log | wc -l",
+                "grep \"query result: Error:\" FAB-6813-4i_*.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 0, msg=invokeCheckError)
 
