@@ -34,7 +34,7 @@ class ccFunctions extends ccFunctionsBase {
         this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax);
         this.arg0 = parseInt(this.keyStart);
         this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
-                 this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart, 
+                 this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart,
                  parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
 
         // get number of owners
@@ -83,7 +83,7 @@ class ccFunctions extends ccFunctionsBase {
         }
         var index=this.arg0%this.nOwner;
         if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
-            this.testInvokeArgs[3]=this.moveMarbleOwner+'_'+txIDVar+'_'+this.index;
+            this.testInvokeArgs[3]=this.moveMarbleOwner+'_'+txIDVar+'_'+index;
         }
         // marble size
         for ( i=0; i<this.keyPayLoad.length; i++ ) {
