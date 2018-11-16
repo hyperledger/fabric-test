@@ -16,7 +16,6 @@ if [ ! -z $GERRIT_BRANCH ] && [ ! -z $WORKSPACE ]; then
     rm -rf $WORKSPACE/archives
     mkdir -p $WORKSPACE/archives/PTE_Test_Logs
     cp $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE/CITest/Logs/*.log $WORKSPACE/archives/PTE_Test_Logs/
-    cp $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE/CITest/scenarios/*.log $WORKSPACE/archives/PTE_Test_Logs/
     mkdir -p $WORKSPACE/archives/PTE_Test_XML
     cp $GOPATH/src/github.com/hyperledger/fabric-test/regression/daily/*.xml $WORKSPACE/archives/PTE_Test_XML/
 fi

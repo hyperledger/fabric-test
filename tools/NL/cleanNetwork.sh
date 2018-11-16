@@ -26,9 +26,10 @@ fi
 
 keyWord=$1
 
-#bring down network
+# Bring down network
+# Maybe this is the first testcase to run, and therefore there might be no network to clean up. Redirect stderr.
 echo "..... clean network ..... docker images key word: $keyWord"
-docker-compose down
+docker-compose down 2>/dev/null
 
 #remove dead docker containers
 echo "..... remove containers ....."
@@ -49,4 +50,4 @@ else
     docker rmi -f $dockerImageIDs
 fi
 
-echo "clean Network completed."
+echo "..... clean Network completed."
