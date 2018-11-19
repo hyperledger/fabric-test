@@ -19,11 +19,18 @@ inFile=$1
 PIDS=""
 
 # set starting time for each pte
+nanoOpt=""
+myOS=`uname -s`
+if [ "$myOS" != 'Darwin' ]; then
+   # Linux supports nanoseconds option of date command, but not mac/freebsd/Darwin.
+   # Use this detail to put millisecs into the tCurr, to prevent collisions if starting multiple PTEs at same time.
+   nanoOpt="%N"
+fi
+echo "$0: nanoOpt $nanoOpt, myOS $myOS"
+tCurr=`date +%s$nanoOpt | cut -b1-13`
 tWait=50000
-tCurr=`date +%s%N | cut -b1-13`
 tStart=$[tCurr+tWait]
 echo "tStart $tStart"
-
 
 # read input file
 while read line
