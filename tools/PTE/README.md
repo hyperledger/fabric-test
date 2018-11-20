@@ -966,11 +966,12 @@ where:
 * **chaincodeVer**: chaincode version.
 * **logLevel**: logging level for the run. Options are ERROR, DEBUG, or INFO.  Set to ERROR for performance test. The default value is ERROR.
 * **invokeCheck**: if this is `TRUE`, then queries will be executed for validation based on the setting of `invokeCheckOpt` once the event of all invokes are received. This value is ignored for query test.  Default: `FALSE`
-* **transMode**: transaction mode (applicable for each thread). Note: the per-thread transaction send rates for all modes have an upper bound. For example, if it typically takes 5 ms to get ack responses for sending transactions to peers in your network, then that limits your max effective rate to be 200 tps - such as when you use transMode = Constant with constantOpt.constFreq = any value between 1 - 5 ms. The host hardware cpu and memory resources may also impose limitations, especially when your test uses higher numbers of simultaneous connections and threads competing for those resources.
+* **transMode**: transaction mode (applicable for each thread). Note: the per-thread transaction send rates for all modes have an upper bound. For example, if it typically takes 5 ms to get ack responses for sending transactions to peers in your network, then that limits your max effective rate to be 200 tps - such as when you use transMode = Constant with constantOpt.constFreq = any value between 1 - 5 ms. The host hardware cpu and memory resources may also impose limitations, especially when your test uses higher numbers of simultaneous connections and threads competing for those resources. (See *Notes on Statistical Distributions* for more info.)
     * **Simple**: one transaction type and rate only, the subsequent transaction is sent when the response of sending transaction (not the event handler), success or failure, of the previous transaction received
-    * **Burst**: various traffic rates, see burstOpt for detailed
-    * **Mix**: mix invoke and query transactions, see mixOpt for detailed
-    * **Constant**: the transactions are sent by the specified rate, see constantOpt for detailed
+    * **Burst**: various traffic rates, see burstOpt for details
+    * **Mix**: mix invoke and query transactions, see mixOpt for details
+    * **Constant**: the transactions are sent by the specified rate, see constantOpt for details
+    * **Poisson**: the transactions are sent according to a Poisson distribution, see poissonOpt for details
     * **Latency**: one transaction type and rate only, the subsequent transaction is sent when the event message (ledger update is completed) of the previous transaction is received
 * **transType**: transaction type
     * **Channel**: channel activities specified in channelOpt.action
@@ -1015,12 +1016,15 @@ where:
 * **burstOpt**: the frequencies and durations for Burst transaction mode traffic. Each PTE thread will issue transactions at the specified frequency for the corresponding duration for each interval. It will cycle through all intervals, repeating the cycles as necessary until the test completes (as specified by nRequest or runDur). The first burstFreq corresponds to the first burstDur, and the second burstFreq corresponds to the second burstDur, and so on.  If the length, number of modes, of burstFreq and burstDur are not the same, then the extra parameters wll be ignored from the longer list.  These parameters are valid only if the transMode is set to **Burst**.
     * **burstFreq**: list of frequencies, in ms; the time between sending two successive msgs; tester must provide one transmit frequency per corresponding burstDur interval
     * **burstDur**:  list of interval durations for sending transactions, in ms
-* **mixOpt**: each invoke is followed by a query on every process. This parameter is valid only the transMode is set to **Mix**.
+* **mixOpt**: each invoke is followed by a query on every process. This parameter is valid only if the transMode is set to **Mix**.
 * **mixFreq**: frequency in ms for the transaction rate. This value should be set based on the characteristics of the chaincode to avoid the failure of the immediate query.
-* **constantOpt**: the transactions are sent at the specified rate. This parameter is valid only the transMode is set to **Constant**.
+* **constantOpt**: the transactions are sent at the specified rate. This parameter is valid only if the transMode is set to **Constant**.
     * **recHist**: This parameter indicates if brief history of the run will be saved.  If this parameter is set to HIST, then the output is saved into a file, namely ConstantResults.txt, under the current working directory.  Otherwise, no history is saved.
     * **constFreq**: frequency in ms for the transaction rate.
     * **devFreq**: deviation of frequency in ms for the transaction rate. A random frequency is calculated between `constFrq-devFreq` and `constFrq+devFreq` for the next transaction.  The value is set to default value, 0, if this value is not set in the user input json file.  All transactions are sent at constant rate if this number is set to 0.
+* **poissonOpt**: the transactions are sent according to a Poisson distribution. This parameter is valid only if the transMode is set to **Poisson**.
+    * **recHist**: This parameter indicates if brief history of the run will be saved.  If this parameter is set to HIST, then the output is saved into a file, namely PoissonResults.txt, under the current working directory.  Otherwise, no history is saved.
+    * **lambda**: average transaction rate in an interval, in seconds. This can be an integer or a fraction.
 * **listOpt**: targetPeers list of the peers that the transactions are sent. These parameters are valid only when the targetPeers is set to List. Each line includes two parameters: **org name** and **peer array within the org**, for example:
 
              "listOpt": {
@@ -1078,6 +1082,49 @@ where:
     * **query**: query content
     * **move**: move content
 * **SCFile**: the service credentials json.
+
+
+### Notes on Statistical Distributions
+PTE can be extended to support transaction generation according to a particular statistical distribution, or even a custom schedule. Two distributions have currently been implemented:
+* Uniform Distribution: see `transMode` *Constant*
+* Poisson Distribution: see `transMode` *Poisson*
+To generate and configure transaction events according to a different distribution, you need to do update `pte-execRequest.js` as follows:
+* Define a new `transMode` (e.g., *Poisson* for a Poisson distribution)
+* Define a JSON structure for parameters (e.g., `poissonOpt` for *Poisson*; see previous section)
+* Add code to the function `execTransMode()` to handle this new distribution (example for *Poisson* below):
+```
+    } else if (transMode == 'POISSON') {
+        distOpt = txCfgPtr.poissonOpt;
+        execModePoisson();
+    } ...
+```
+* Create a function to call `execModeDistribution(backoffCalculator, delayCalculator)` with the right parameters (e.g., `execModePoisson` for *Poisson* below):
+```
+    function execModePoisson() {
+        execModeDistribution(backoffCalculatorPoisson);
+    }
+```
+* Create a function to dynamically calculate the backoff (in milliseconds) to the next transaction. The parameter `backoffCalculator` above represents the handle to this function. (e.g., `backoffCalculatorPoisson()` for *Poisson* as below):
+```
+    function backoffCalculatorPoisson() {
+        var lambda = parseFloat(txCfgPtr.poissonOpt.lambda);
+        return -1000 * Math.log(1 - Math.random()) / lambda;
+    }
+```
+* Optionally, create a separate function to support secondary deviations from the main event distribution. The *Constant* (or uniform) distribution supports this using the `devFreq` parameter.
+    * Example: for *Constant* distribution, we have two functions, `backoffCalculatorConstantFreq()` to compute uniform-value backoffs, and `backoffCalculatorConstant()` to compute uniform-value backoffs with small random deviations in every iteration.
+    * Here, the parameters supplied to `execModeDistribution` are as follows:
+```
+        execModeDistribution(backoffCalculatorConstant, backoffCalculatorConstantFreq);
+```
+  In the function `execModeDistribution`, the `backoffCalculator` parameter represents the backoff calculator with secondary deviations, whereas the `delayCalculator` parameter supports represents the backoff calculator according to the base statistical distribution.
+
+For example input files to run Poisson-based traffic, see:
+* `sampleccInputs/runCases-poisson-i1-TLS.txt`
+* `sampleccInputs/runCases-poisson-q1-TLS.txt`
+* `sampleccInputs/samplecc-chan1-poisson-i-TLS.json`
+* `sampleccInputs/samplecc-chan1-poisson-q-TLS.json`
+* `sampleccInputs/txCfgOpt-poisson.json`
 
 
 ## Service Credentials file
