@@ -18,9 +18,13 @@ Feature: Testing Fabric CouchDB indexing
     # Invoke in the channel
     When a user invokes on the channel "mychannel1" using chaincode named "mycc1" with args ["initMarble","marble100","red","5","cassey"] on "peer0.org1.example.com"
 
-    # Do explicit query: rich query with the index explicitly specified
+    # Do sanity-check rich query
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles","{\\"selector\\":{\\"size\\":5}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"cassey"
+
+    # Explicitly check with CouchDB to confirm the index is set up correctly for the rich query to pass using index
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"size":"asc"}] from the couchDB container
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num   |
@@ -46,13 +50,21 @@ Examples:
     And a user invokes on the channel "mychannel2" using chaincode named "mycc2" with args ["initMarble","marble2","yellow","20","alex"] on "peer0.org1.example.com"
     And a user invokes on the channel "mychannel3" using chaincode named "mycc3" with args ["initMarble","marble3","red","5","jose"] on "peer0.org1.example.com"
 
-    # Do explicit query: rich query with the index explicitly specified
+    # Do sanity-check rich query
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"matt"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"alex\\", \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"alex"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"jose\\", \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"jose"
+
+    # Explicitly check with CouchDB to confirm the index is set up correctly for the rich query to pass using index
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num   |
@@ -80,7 +92,7 @@ Examples:
     And a user invokes on the channel "mychannel2" using chaincode named "mycc2" with args ["initMarble","marble2","yellow","20","alex"] on "peer0.org1.example.com"
     And a user invokes on the channel "mychannel3" using chaincode named "mycc3" with args ["initMarble","marble3","red","5","jose"] on "peer0.org1.example.com"
 
-    # Do explicit query: rich query with the index explicitly specified
+    # Do sanity-check rich query
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_1\\", \\"index_behave_test_1\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"matt"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"alex\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_1\\", \\"index_behave_test_1\\"]}"] on "peer0.org1.example.com"
@@ -99,6 +111,26 @@ Examples:
     Then a user receives a response containing "owner":"alex"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_3\\", \\"index_behave_test_3\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"jose"
+
+    # Explicitly check with CouchDB to confirm the index is set up correctly for the rich query to pass using index
+    When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_2" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_2":{"map":{"fields":{"docType":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_2" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_2":{"map":{"fields":{"docType":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_2" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_2":{"map":{"fields":{"docType":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_3" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_3":{"map":{"fields":{"color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_3" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_3":{"map":{"fields":{"color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_3" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_3":{"map":{"fields":{"color":"asc"}] from the couchDB container
 
 
 Examples:
@@ -123,11 +155,17 @@ Examples:
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
     And an admin upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
 
-    # Do explicit query: rich query with the index explicitly specified
+    # Do sanity-check rich query
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"matt"
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_v1\\", \\"index_behave_test_v1\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"matt"
+
+    # Explicitly check with CouchDB to confirm the index is set up correctly for the rich query to pass using index
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_v1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num   |
@@ -158,8 +196,7 @@ Examples:
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc1"
     And an admin upgrades the chaincode with name "mycc1" on channel "mychannel1" to version "1" with args [""]
 
-    # Do explicit query: rich query with the index explicitly specified
-    # non-upgraded cc expected to fail for new indexes
+    # Do sanity-check rich query
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"matt"
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_v1\\", \\"index_behave_test_v1\\"]}"] on "peer0.org1.example.com"
@@ -167,11 +204,29 @@ Examples:
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"alex\\", \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"alex"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"alex\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_v1\\", \\"index_behave_test_v1\\"]}"] on "peer0.org1.example.com"
-    Then a user receives a response containing no_usable_index
+    Then a user receives a response containing "owner":"alex"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"jose\\", \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"jose"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"jose\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_v1\\", \\"index_behave_test_v1\\"]}"] on "peer0.org1.example.com"
-    Then a user receives a response containing no_usable_index
+    Then a user receives a response containing "owner":"jose"
+
+    # Check index in CouchDB for channel1 with upgraded CC
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_v1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+
+    #Check index in CouchDB for channel2 with non-upgraded CC
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives error response of [{"error":"not_found","reason":"missing"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+
+    #Check index in CouchDB for channel3 with non-upgraded CC
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives error response of [{"error":"not_found","reason":"missing"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num   |
@@ -206,8 +261,7 @@ Examples:
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "1" with args [""] with name "mycc3"
     And an admin upgrades the chaincode with name "mycc3" on channel "mychannel3" to version "1" with args [""]
 
-    # Do explicit query: rich query with the index explicitly specified
-    # all ccs expected to pass with both indexes
+    # Do sanity-check rich query
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"matt"
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_v1\\", \\"index_behave_test_v1\\"]}"] on "peer0.org1.example.com"
@@ -220,6 +274,25 @@ Examples:
     Then a user receives a response containing "owner":"jose"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"jose\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test_v1\\", \\"index_behave_test_v1\\"]}"] on "peer0.org1.example.com"
     Then a user receives a response containing "owner":"jose"
+
+    # Check index in CouchDB for channel1 with upgraded CC
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_v1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+
+    # Check index in CouchDB for channel2 with upgraded CC
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_v1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+
+    # Check index in CouchDB for channel3 with upgraded CC
+    When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_v1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num                      |
@@ -265,13 +338,21 @@ Examples:
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
 
-    # Do explicit queryi 4th peer: rich query with the index explicitly specified
+    # Do sanity-check rich query in 4th peer
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
     Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"alex\\", \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
     Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"jose\\", \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
     Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+
+    # Explicitly check with CouchDB in 4th peer to confirm the index is set up correctly for the rich query to pass using index
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:8984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:8984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:8984"
+    Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num           |
@@ -319,7 +400,7 @@ Examples:
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
 
-    # Do explicit query in 4th peer: rich query with the index explicitly specified
+    # Do sanity-check rich query in 4th peer
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
     Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"alex\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
@@ -338,6 +419,26 @@ Examples:
     Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
     Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+
+    # Explicitly check with CouchDB to confirm the index is set up correctly for the rich query to pass using index
+    When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_1":{"map":{"fields":{"owner":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_2" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_2":{"map":{"fields":{"docType":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_2" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_2":{"map":{"fields":{"docType":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_2" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_2":{"map":{"fields":{"docType":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_3" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_3":{"map":{"fields":{"color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_3" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_3":{"map":{"fields":{"color":"asc"}] from the couchDB container
+    When a user requests to get the design doc "indexdoc_behave_test_3" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
+    Then a user receives success response of ["views":{"index_behave_test_3":{"map":{"fields":{"color":"asc"}] from the couchDB container
 
 Examples:
     |                             cc_path                            |                      index_path                              | language  |  jira_num    |
