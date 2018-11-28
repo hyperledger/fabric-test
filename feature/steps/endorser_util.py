@@ -255,6 +255,8 @@ class SDKInterface(InterfaceBase):
 
         if language.lower() == "nodejs":
             self.initializeNode()
+        elif language.lower() == "java":
+            self.initializeJava()
         else:
             raise "Language {} is not supported in the test framework yet.".format(language)
 
@@ -263,15 +265,27 @@ class SDKInterface(InterfaceBase):
             networkConfig = fd.read()
 
         grpcType = "grpc"
+        proto = "http"
         if context.tls:
             grpcType = "grpcs"
+            proto = "https"
         networkConfigFile = "{0}/configs/{1}/network-config.json".format(os.path.abspath('.'),
                                                                          context.projectName)
+
+        with open("{1}/configs/{0}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem".format(context.projectName, os.path.abspath('.')), "r") as fd:
+              certs = fd.read().replace("\n", "\\r\\n")
+
+        for org in ["org1.example.com", "org2.example.com"]:
+            with open("{2}/configs/{0}/peerOrganizations/{1}/ca/ca.{1}-cert.pem".format(context.projectName, org, os.path.abspath('.')), "r") as fd:
+                  certs += fd.read().replace("\n", "\\r\\n")
+
         with open(networkConfigFile, "w+") as fd:
             structure = {"config": "{0}/configs/{1}".format(os.path.abspath('.'),
                                                             context.projectName),
                          "tls": common_util.convertBoolean(context.tls),
                          "grpcType": grpcType,
+                         "proto": proto,
+                         "cacerts": certs,
                          "networkId": context.projectName}
             updated = json.loads(networkConfig % (structure))
             fd.write(json.dumps(updated, indent=2))
@@ -280,6 +294,21 @@ class SDKInterface(InterfaceBase):
     def initializeNode(self):
         self.__class__ = NodeSDKInterface
         self.inputFile = "commandInputs.json"
+
+    def initializeJava(self):
+        self.__class__ = JavaSDKInterface
+        whichJava = subprocess.check_output(["which java"],
+                                            env=os.environ,
+                                            shell=True)
+        print("***{}***".format(whichJava.strip()))
+        javaVers = subprocess.check_output(["java -version"],
+                                            env=os.environ,
+                                            shell=True)
+        print("***{}***".format(javaVers))
+        javaVers = subprocess.check_output(["ls -ltr "],
+                                            env=os.environ,
+                                            shell=True)
+        print("***{}***".format(javaVers))
 
     def reformat_chaincode(self, chaincode, channelId):
         reformatted = yaml.safe_load(chaincode.get('args', '[]'))
@@ -354,6 +383,80 @@ class NodeSDKInterface(SDKInterface):
         assert match, "No matching response within query result {}".format(response)
         return match[0]
 
+class JavaSDKInterface(SDKInterface):
+    def invoke_func(self, chaincode, channelId, user, org, peers, orderer, opts):
+        print("Chaincode", chaincode)
+        result = {}
+        reformatted = self.reformat_chaincode(chaincode, channelId)
+        passInfo = self.context.users.get(user, None)
+        if passInfo is None:
+            if "Admin" in user:
+                password = "adminpw"
+            elif "User" in user:
+                password = "{}pw".format(user.lower())
+        else:
+            password = passInfo["password"]
+        for peer in peers:
+            inputs = {'peer': peer,
+                      'org': org,
+                      'orgName': org.title().replace('.', ''),
+                      'user': user,
+                      'password': password,
+                      'orderer': orderer,
+                      'config': "{0}/configs/{1}".format(os.path.abspath('.'), self.context.projectName),
+                      #'cacert': "./configs/{0}/peerOrganizations/{1}/ca/ca.{1}-cert.pem".format(self.context.projectName, org),
+                      'cacert': "{1}/configs/{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem".format(self.context.projectName, os.path.abspath('.')),
+                      'srvcert': "./configs/{0}/peerOrganizations/{1}/peers/peer0.{1}/tls/server.crt".format(self.context.projectName, org),
+                      'channel': channelId,
+                      'name': chaincode.get("name", "mycc"),
+                      'func': reformatted["fcn"],
+                      'args': str(reformatted["args"]).replace(" ", ""),
+                      }
+            invoke_inputs = '-n {peer} -i 127.0.0.1 -p 7051 -r {org} -c {config} -a {cacert} -s {srvcert} -d {orderer} -h {channel} -m {name} -f {func} -g {args} -u {user} -w {password}'.format(**inputs)
+            invoke_call = 'java -jar {0}/sdk/java/peer-javasdk.jar -o invoke {1}'.format(os.path.abspath('.'), invoke_inputs)
+            print("Invoke command::", invoke_call)
+            result[peer] = subprocess.check_output(invoke_call, shell=True)
+        return result
+
+    def query_func(self, chaincode, channelId, user, org, peers, opts):
+        print("Chaincode", chaincode)
+
+        result = {}
+        reformatted = self.reformat_chaincode(chaincode, channelId)
+        passInfo = self.context.users.get(user, None)
+        if passInfo is None:
+            if "Admin" in user:
+                password = "adminpw"
+            elif "User" in user:
+                password = "{}pw".format(user.lower())
+        else:
+            password = passInfo["password"]
+        for peer in peers:
+            inputs = {'peer': peer,
+                      'org': org,
+                      'orgName': org.title().replace('.', ''),
+                      'user': user,
+                      'password': password,
+                      'orderer': "orderer0.example.com",
+                      'config': "{0}/configs/{1}".format(os.path.abspath('.'), self.context.projectName),
+                      'cacert': "{1}/configs/{0}/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem".format(self.context.projectName, os.path.abspath('.')),
+                      'srvcert': "{2}/configs/{0}/peerOrganizations/{1}/peers/peer0.{1}/tls/server.crt".format(self.context.projectName, org, os.path.abspath('.')),
+                      'channel': channelId,
+                      'name': chaincode.get("name", "mycc"),
+                      'func': reformatted["fcn"],
+                      'args': reformatted["args"],
+                      }
+            print("Inputs", inputs)
+            query_inputs = '-n {peer} -i 127.0.0.1 -p 7051 -r {org} -c {config} -a {cacert} -s {srvcert} -d {orderer} -h {channel} -m {name} -f {func} -g {args} -u {user} -w {password}'.format(**inputs)
+            query_call = 'java -jar {0}/sdk/java/peer-javasdk.jar -o query {1}'.format(os.path.abspath('.'), query_inputs)
+            print("Query command::", query_call)
+            answer = subprocess.check_output(query_call, shell=True)
+            print("answer:", answer.split("\n")[-3:])
+            result[peer] = "\n".join(answer.split("\n")[-2:])
+        # Only return the last bit of the query response
+        return "\n".join(answer.split("\n")[-2:])
+
+
 class CLIInterface(InterfaceBase):
 
     def get_env_vars(self, context, peer="peer0.org1.example.com", user="Admin", includeAll=True):
@@ -427,7 +530,7 @@ class CLIInterface(InterfaceBase):
     def instantiate_chaincode(self, context, peer="peer0.org1.example.com", user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         args = context.chaincode.get('args', '[]').replace('"', r'\"')
-        output = {}
+        #output = {}
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
         setup = self.get_env_vars(context, peer, user=user)
@@ -456,7 +559,8 @@ class CLIInterface(InterfaceBase):
             command = command + ["--policy", context.chaincode["policy"].replace('"', r'\"')]
         command.append('"')
 
-        output[peer] = context.composition.docker_exec(setup + command, [peer])
+        #output[peer] = context.composition.docker_exec(setup + command, [peer])
+        output = context.composition.docker_exec(setup + command, [peer])
         print("[{0}]: {1}".format(" ".join(setup + command), output))
         return output
 
@@ -690,10 +794,14 @@ class CLIInterface(InterfaceBase):
         return result
 
     def enrollCAadmin(self, context, nodes):
+        proto = "http"
+        if context.tls:
+            proto = "https"
+
         for node in nodes:
             org = node.split(".", 1)[1]
             userpass = context.composition.getEnvFromContainer("ca.{}".format(org), 'BOOTSTRAP_USER_PASS')
-            url = "https://{0}@ca.{1}:7054".format(userpass, org)
+            url = "{2}://{0}@ca.{1}:7054".format(userpass, org, proto)
             output = context.composition.docker_exec(["fabric-ca-client enroll -d -u {0} -M /var/hyperledger/msp --caname ca.{1} --csr.cn ca.{1} --tls.certfiles /var/hyperledger/msp/cacerts/ca.{1}-cert.pem".format(url, org)], [node])
             print("Output Enroll: {}".format(output))
 
@@ -708,8 +816,12 @@ class CLIInterface(InterfaceBase):
 
     def enrollUser(self, context, user, org, passwd, enrollType, peer):
         fca = 'ca.{}'.format(org)
+        proto = "http"
+        if context.tls:
+            proto = "https"
+
         adminUser = context.composition.getEnvFromContainer(fca, "BOOTSTRAP_USER_PASS")
-        command = "fabric-ca-client enroll -d --enrollment.profile tls -u https://{0}:{1}@{3}:7054 -M /var/hyperledger/users/{0}@{2}/tls --csr.hosts {4} --enrollment.type {5} --tls.certfiles /var/hyperledger/configs/{6}/peerOrganizations/{2}/ca/ca.{2}-cert.pem".format(user, passwd, org, fca, peer, enrollType, context.projectName)
+        command = "fabric-ca-client enroll -d --enrollment.profile tls -u {7}://{0}:{1}@{3}:7054 -M /var/hyperledger/users/{0}@{2}/tls --csr.hosts {4} --enrollment.type {5} --tls.certfiles /var/hyperledger/configs/{6}/peerOrganizations/{2}/ca/ca.{2}-cert.pem".format(user, passwd, org, fca, peer, enrollType, context.projectName, proto)
         output = context.composition.docker_exec([command], [peer])
         print("Output: {}".format(output))
 
@@ -739,6 +851,9 @@ class CLIInterface(InterfaceBase):
 
     def placeCertsInDirStruct(self, context, user, org, peer):
         fca = 'ca.{}'.format(org)
+        proto = "http"
+        if context.tls:
+            proto = "https"
 
         # Ensure that the owner of all of the user directories are the same
         print("Checking file ownership: /var/hyperledger/users/{0}@{1} ...".format(user, org))
@@ -770,7 +885,7 @@ class CLIInterface(InterfaceBase):
         shutil.copy("configs/{2}/peerOrganizations/{1}/users/{0}@{1}/msp/signcerts/{0}@{1}-cert.pem".format(user, org, context.projectName),
                     "configs/{2}/peerOrganizations/{1}/users/{0}@{1}/msp/admincerts/{0}@{1}-cert.pem".format(user, org, context.projectName))
 
-        command = "fabric-ca-client getcacert -d -u https://{0}:7054 -M /var/hyperledger/users/{1}@{2}/msp --tls.certfiles /var/hyperledger/msp/cacerts/ca.{2}-cert.pem".format(fca, user, org)
+        command = "fabric-ca-client getcacert -d -u {3}://{0}:7054 -M /var/hyperledger/users/{1}@{2}/msp --tls.certfiles /var/hyperledger/msp/cacerts/ca.{2}-cert.pem".format(fca, user, org, proto)
         output = context.composition.docker_exec([command], [peer])
         print("CACert Output: {}".format(output))
         output = context.composition.docker_exec(['chown -R {2}:{3} /var/hyperledger/users/{0}@{1}'.format(user, org, out[0], out[1])], [peer])

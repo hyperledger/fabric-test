@@ -13,3 +13,6 @@
 [submodule "fabric-samples"]
 	path = fabric-samples
 	url = https://gerrit.hyperledger.org/r/fabric-samples
+[submodule "fabric-sdk-java"]
+	path = fabric-sdk-java
+	url = https://gerrit.hyperledger.org/r/fabric-sdk-java
