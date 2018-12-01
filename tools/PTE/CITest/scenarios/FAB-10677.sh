@@ -12,14 +12,20 @@
 
 TESTCASE="FAB-10677"
 NREQ=10000
-PREFIX="result"   # result log prefix
 
 CWD=$PWD
 FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
 NLDir=$FabricTestDir"/tools/NL"
 PTEDir=$FabricTestDir"/tools/PTE"
 LSCDir=$TESTCASE"-SC"
-SCDir=$PTEDir"/"$LSCDir
+LOGDir=$PTEDir"/CITest/Logs"
+CMDDir=$PTEDir"/CITest/scripts"
+CIpteReport=$LOGDir"/"$TESTCASE"-pteReport.log"
+pteReport=$PTEDir"/pteReport.txt"
+echo "PTE report=$CIpteReport"
+if [ -e $CIpteReport ]; then
+    rm -f $CIpteReport
+fi
 
 # thread loop
 for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
@@ -52,8 +58,7 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     echo "          *****************************************************************************"
     echo ""
 
-    cd $CWD
-    cd ../scripts
+    cd $CMDDir
 
     # PTE: create/join channel, install/instantiate chaincode
     echo "./gen_cfgInputs.sh -d $LSCDir -c -i -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD"
@@ -62,33 +67,34 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
 
     # PTE: invokes
     tCurr=`date +%m%d%H%M%S`
-    if [ ! -e ../Logs ]; then
-        mkdir ../Logs
+    if [ ! -e $LOGDir ]; then
+        mkdir $LOGDir
     fi
-    IPTELOG="../Logs/"$TESTCASE"-"$NTHREAD"i-"$tCurr".log"
+    IPTELOG=$LOGDir"/"$TESTCASE"-"$NTHREAD"i-"$tCurr".log"
+    if [ -e $pteReport ]; then
+       rm -f $pteReport
+    fi
     echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG"
           ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG
     sleep 30
+    echo "node get_pteReport.js $pteReport"
+    node get_pteReport.js $pteReport
+    echo "$TESTCASE Threads=$NTHREAD Invokes" >> $CIpteReport
+    cat $pteReport >> $CIpteReport
 
     # PTE: queries
     tCurr=`date +%m%d%H%M%S`
-    QPTELOG="../Logs/"$TESTCASE"-"$NTHREAD"q-"$tCurr".log"
+    QPTELOG=$LOGDir"/"$TESTCASE"-"$NTHREAD"q-"$tCurr".log"
+    if [ -e $pteReport ]; then
+       rm -f $pteReport
+    fi
     echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t query >& $QPTELOG"
           ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t query >& $QPTELOG
 
-    # stats
-    echo ""
-    echo "          *****************************************************************************"
-    echo "          *                               process stats                               *"
-    echo "          *****************************************************************************"
-    echo ""
-
-    # stats: invokes
-    ./get_peerStats.sh -r $TESTCASE"-"$NTHREAD -p peer0.org1.example.com -c testorgschannel1 -n $PREFIX -o $CWD -v
-
-    # stats: queries
-    STATSLOG=$CWD"/"$PREFIX"_"$TESTCASE"-"$NTHREAD".log"
-    grep Summary $QPTELOG | grep QUERY >> $STATSLOG
+    echo "node get_pteReport.js $pteReport"
+    node get_pteReport.js $pteReport
+    echo "$TESTCASE Threads=$NTHREAD Queries" >> $CIpteReport
+    cat $pteReport >> $CIpteReport
 
     cd $CWD
 
