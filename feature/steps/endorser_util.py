@@ -288,6 +288,7 @@ class SDKInterface(InterfaceBase):
         print("npm install: {}".format(npminstall))
         shutil.copytree("../../../node_modules", "./node_modules")
         self.__class__ = NodeSDKInterface
+        self.inputFile = "commandInputs.json"
 
     def reformat_chaincode(self, chaincode, channelId):
         reformatted = yaml.safe_load(chaincode.get('args', '[]'))
@@ -337,7 +338,10 @@ class NodeSDKInterface(SDKInterface):
         print("Chaincode", chaincode)
         orgName = org.title().replace('.', '')
 
-        cmd = "node ./sdk/node/invoke.js invoke {0}@{1} {2} '{3}' {4} {5} {6} '{7}'".format(user, org, orgName, json.dumps(reformatted), peers, orderer, self.networkConfigFile, json.dumps(opts))
+        jsonArgs = {"user": user, "org": org, "orgName": orgName, "chaincode":reformatted, "peers": peers, "orderer": orderer, "networkConfigFile": self.networkConfigFile, "opts": opts}
+        with open(self.inputFile, "w") as fd:
+            json.dump(jsonArgs, fd)
+        cmd = "node ./sdk/node/invoke.js invoke ../../{0}".format(self.inputFile)
         print("cmd: {0}".format(cmd))
         return subprocess.check_call(cmd, shell=True)
 
@@ -346,7 +350,12 @@ class NodeSDKInterface(SDKInterface):
         reformatted = self.reformat_chaincode(chaincode, channelId)
         orgName = org.title().replace('.', '')
 
-        cmd="node ./sdk/node/query.js query {0}@{1} {2} '{3}' {4} {5} '{6}'".format(user, org, orgName, json.dumps(reformatted), peers, self.networkConfigFile, json.dumps(opts))
+        jsonArgs = {"user": user, "org": org, "orgName": orgName, "chaincode": reformatted, "peers": peers, "networkConfigFile": self.networkConfigFile, "opts": opts}
+
+        with open(self.inputFile, "w") as fd:
+            json.dump(jsonArgs, fd)
+        cmd = "node ./sdk/node/query.js query ../../{0}".format(self.inputFile)
+
         print("cmd: {0}".format(cmd))
         response = subprocess.check_output(cmd, shell=True)
         regex = "\{.*response.*:\"(.*?)\"\}"
