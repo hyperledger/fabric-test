@@ -36,6 +36,9 @@ dockerTag() {
           fi
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$LATEST_TAG
+    if [ $IMAGE == javaenv ]; then
+        docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-1.4.0
+    fi
     echo "$ORG_NAME-$IMAGE:$LATEST_TAG"
     echo "Deleting Nexus docker images: $IMAGE"
     docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG

@@ -4,34 +4,35 @@
 # -------------------------------------------------------------
 # This makefile defines the following targets
 #
-#   - ca       - clones the fabric-ca repository.
-#   - ci-smoke - update submodules, clone fabric & fabric-ca, build docker images
-#                and executes smoke tests.
-#   - ci-daily - update submodules, clone fabric & fabric-ca, build docker images
-#                and executes daily test suite.
-#   - svt-daily     - pulls the images, binaries from Nexus and runs the daily test suite.
-#   - svt-smoke     - pulls the images, binaries from Nexus and runs the smoke tests.
-#   - build-docker-images - builds fabric & ca docker images.
-#   - build-fabric - builds fabric docker images and binaries.
-#   - build-fabric-ca - builds fabric-ca docker images and binaries.
-#   - fabric        - clones fabric repository.
-#   - fabric-chaincode-java - clones the fabric-chaincode-java repository.
-#   - smoke-tests   - runs Smoke Test Suite.
-#   - daily-tests   - runs Daily Test Suite.
-#   - pull-images   - pull the images and binaries from Nexus.
-#   - javaenv  - clone the fabric-chaincode-java repository and build the javaenv image.
-#   - svt-daily-behave-tests - pulls the images, binaries from Nexus and runs the Behave feature tests.
-#   - svt-daily-pte-tests - pulls the images, binaries from Nexus and runs the PTE Performance tests.
-#   - svt-daily-ote-tests - pulls the images, runs the OTE test suite.
-#   - svt-daily-lte-tests - pulls the images, runs the LTE test suite.
-#   - svt-daily-ca-tests - pulls the images, runs the CA test suite.
+#   - ca                       - clones the fabric-ca repository.
+#   - ci-smoke                 - update submodules, clone fabric, pulls docker images and executes smoke
+#                              tests.
+#   - ci-daily                 - update submodules, clone fabric, pulls docker images and executes daily
+#                              test suite. NOT USED?
+#   - svt-daily                - clones fabric, pulls the images, binaries from Nexus and runs the daily
+#                              test suite. NOT USED?
+#   - svt-smoke                - pulls the images, binaries from Nexus and runs the smoke tests. NOT USED?
+#   - build-docker-images      - builds fabric & ca docker images.
+#   - build-fabric             - builds fabric docker images and binaries.
+#   - build-fabric-ca          - builds fabric-ca docker images and binaries.
+#   - fabric                   - clones fabric repository.
+#   - fabric-chaincode-java    - clones the fabric-chaincode-java repository.
+#   - smoke-tests              - runs Smoke Test Suite.
+#   - daily-tests              - runs Daily Test Suite.
+#   - pull-images              - pull the images and binaries from Nexus.
+#   - javaenv                  - clone the fabric-chaincode-java repository and build the javaenv image.
+#   - svt-daily-behave-tests   - pulls the images, binaries from Nexus and runs the Behave feature tests.
+#   - svt-daily-pte-tests      - pulls the images, binaries from Nexus and runs the PTE Performance tests.
+#   - svt-daily-ote-tests      - clones fabric, pulls the images, runs the OTE test suite.
+#   - svt-daily-lte-tests      - pulls the images, runs the LTE test suite.
+#   - svt-daily-ca-tests       - pulls the images, runs the CA test suite.
 #   - svt-weekly-pte-12hr-test - pulls the images, binaries from Nexus and runs the weekly 12hr PTE test.
-#   - git-latest    - init git submodules to latest available commit.
-#   - git-init      - init git submodules.
-#   - pre-setup     - installs node, govendor and behave pre-requisites.
-#   - pte     - builds pte docker image
-#   - test-viewer - builds test-viewer docker image
-#   - clean         - cleans the docker containers and images.
+#   - git-latest               - init git submodules to latest available commit.
+#   - git-init                 - init git submodules.
+#   - pre-setup                - installs node, govendor and behave pre-requisites.
+#   - pte                      - builds pte docker image
+#   - test-viewer              - builds test-viewer docker image
+#   - clean                    - cleans the docker containers and images.
 #
 # ------------------------------------------------------------------
 
@@ -54,7 +55,7 @@ TEST_VIEWER_IMAGE = $(DOCKER_NS)/fabric-testviewer
 TARGET = pte test-viewer
 
 .PHONY: ci-smoke
-ci-smoke: pull-images pull-binaries javaenv smoke-tests
+ci-smoke: fabric pull-images pull-binaries pull-thirdparty-images smoke-tests
 
 .PHONY: git-latest
 git-latest:
@@ -71,7 +72,7 @@ pre-setup:
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: ci-daily
-ci-daily: pull-images pull-binaries javaenv daily-tests
+ci-daily: fabric pull-images pull-binaries pull-thirdparty-images daily-tests
 
 .PHONY: fabric
 fabric:
@@ -138,7 +139,7 @@ interop-tests:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/interop && ./runInteropTestSuite.sh
 
 .PHONY: pull-images
-pull-images: git-init git-latest fabric ca clean pre-setup
+pull-images: git-init git-latest clean pre-setup
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh all
 
 .PHONY: pull-binaries
@@ -193,11 +194,11 @@ svt-daily-behave-tests: pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
 
 .PHONY: svt-daily-pte-tests
-svt-daily-pte-tests: pull-binaries pull-images
+svt-daily-pte-tests: pull-binaries pull-images pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
 
 .PHONY: svt-daily-ote-tests
-svt-daily-ote-tests: pull-binaries pull-images
+svt-daily-ote-tests: fabric pull-binaries pull-images pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runOteTestSuite.sh
 
 .PHONY: svt-daily-lte-tests
@@ -209,14 +210,14 @@ svt-daily-ca-tests: pull-binaries pull-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
 
 .PHONY: svt-weekly-pte-12hr-test
-svt-weekly-pte-12hr-test: pull-binaries pull-images
+svt-weekly-pte-12hr-test: pull-binaries pull-images pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest.sh
 
 .PHONY: svt-daily
-svt-daily: pull-images pull-binaries pull-thirdparty-images daily-tests
+svt-daily: fabric pull-images pull-binaries pull-thirdparty-images daily-tests
 
 .PHONY: svt-smoke
-svt-smoke: pull-binaries pull-images smoke-tests
+svt-smoke: fabric pull-binaries pull-images pull-thirdparty-images smoke-tests
 
 .PHONY: pte
 pte:

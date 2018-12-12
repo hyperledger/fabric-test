@@ -82,4 +82,8 @@ echo $PATH
 # Copy new binaries to the exported PATH bin dir
 mkdir -p $GOPATH/src/github.com/hyperledger/fabric/.build/bin
 cp -r $WD/bin/* $GOPATH/src/github.com/hyperledger/fabric/.build/bin/
+
+# PTE looks for binaries in fabric submodule dir
+mkdir -p $GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin
+cp -r $WD/bin/* $GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin/
 echo
