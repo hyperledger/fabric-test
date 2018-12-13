@@ -203,9 +203,9 @@ Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>
     When a user invokes on the chaincode named "mycc" with args ["put","c","3F","d","76D"]
     When I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["get","c"]
-    Then a user receives a success response of "3F"
+    Then a user receives a success response of 3F
     When a user queries on the chaincode named "mycc" with args ["get","d"]
-    Then a user receives a success response of "76D"
+    Then a user receives a success response of 76D
 
     When a user invokes args with <count> random key/values of length <size> on the chaincode named "mycc"
     And I wait "5" seconds
