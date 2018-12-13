@@ -79,12 +79,6 @@ def after_scenario(context, scenario):
         shutil.rmtree("configs/%s" % context.composition.projectName)
         shutil.rmtree("/tmp/fabric-client-kvs_org1", ignore_errors=True)
         shutil.rmtree("/tmp/fabric-client-kvs_org2", ignore_errors=True)
-        if os.path.exists("./node_modules"):
-            shutil.rmtree("./node_modules", ignore_errors=True)
-            shutil.rmtree("../../../node_modules", ignore_errors=True)
-            shutil.rmtree("../../../package-lock.json", ignore_errors=True)
-            subprocess.call(["npm cache clear --force"], shell=True)
-            subprocess.call(["npm i -g npm"], shell=True)
         context.composition.decompose()
     elif hasattr(context, 'projectName'):
         shutil.rmtree("configs/%s" % context.projectName)
@@ -107,6 +101,16 @@ def after_scenario(context, scenario):
     gc.collect()
 
 def before_all(context):
+    # Performing `npm install` before test suit not before test cases.
+    shutil.rmtree("./node_modules", ignore_errors=True)
+    shutil.rmtree("./package-lock.json", ignore_errors=True)
+    shutil.copyfile("package.json", "../../../package.json")
+    npminstall = subprocess.check_output(["npm install --silent"],
+                                            env=os.environ,
+                                            cwd="../../..",
+                                            shell=True)
+    print("npm install: {}".format(npminstall))
+    shutil.copytree("../../../node_modules", "./node_modules")
     context.interface = CLIInterface()
     context.remote = False
     if context.config.userdata.get("network", None) is not None:
@@ -118,5 +122,12 @@ def before_all(context):
     print("Starting Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
 
 def after_all(context):
+    # Removing Node modules at the end of the test suites
+    if os.path.exists("./node_modules"):
+        shutil.rmtree("./node_modules", ignore_errors=True)
+        shutil.rmtree("../../../node_modules", ignore_errors=True)
+        shutil.rmtree("../../../package-lock.json", ignore_errors=True)
+        subprocess.call(["npm cache clear --force"], shell=True)
+        subprocess.call(["npm i -g npm"], shell=True)
     mem = psutil.virtual_memory()
     print("\nEnding Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}".format(mem.free, mem.used, mem.percent))
