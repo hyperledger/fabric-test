@@ -278,15 +278,6 @@ class SDKInterface(InterfaceBase):
         return networkConfigFile
 
     def initializeNode(self):
-        shutil.rmtree("./node_modules", ignore_errors=True)
-        shutil.rmtree("./package-lock.json", ignore_errors=True)
-        shutil.copyfile("package.json", "../../../package.json")
-        npminstall = subprocess.check_output(["npm install --silent"],
-                                            env=os.environ,
-                                            cwd="../../..",
-                                            shell=True)
-        print("npm install: {}".format(npminstall))
-        shutil.copytree("../../../node_modules", "./node_modules")
         self.__class__ = NodeSDKInterface
         self.inputFile = "commandInputs.json"
 
