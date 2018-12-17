@@ -194,11 +194,11 @@ svt-daily-behave-tests: pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
 
 .PHONY: svt-daily-pte-tests
-svt-daily-pte-tests: pull-binaries pull-images pull-thirdparty-images
+svt-daily-pte-tests: pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
 
 .PHONY: svt-daily-ote-tests
-svt-daily-ote-tests: fabric pull-binaries pull-images pull-thirdparty-images
+svt-daily-ote-tests: fabric pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runOteTestSuite.sh
 
 .PHONY: svt-daily-lte-tests
@@ -206,18 +206,18 @@ svt-daily-lte-tests:  fabric pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
 
 .PHONY: svt-daily-ca-tests
-svt-daily-ca-tests: pull-binaries pull-images
+svt-daily-ca-tests: pull-images pull-binaries
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
 
 .PHONY: svt-weekly-pte-12hr-test
-svt-weekly-pte-12hr-test: pull-binaries pull-images pull-thirdparty-images
+svt-weekly-pte-12hr-test: pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest.sh
 
 .PHONY: svt-daily
 svt-daily: fabric pull-images pull-binaries pull-thirdparty-images daily-tests
 
 .PHONY: svt-smoke
-svt-smoke: fabric pull-binaries pull-images pull-thirdparty-images smoke-tests
+svt-smoke: fabric pull-images pull-binaries pull-thirdparty-images smoke-tests
 
 .PHONY: pte
 pte:
