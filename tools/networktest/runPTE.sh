@@ -41,8 +41,8 @@ usage () {
     echo -e "\t\t(Default: v0. Note: cannot be used with --ccupgrade)"
     echo
 
-    echo -e "--ccprefix <chaincode name prefix>"
-    echo -e "\t\t(Default: sample_)"
+    echo -e "--ccname <chaincode name>"
+    echo -e "\t\t(Default: the name defined in each testcase.)"
     echo
 
     echo -e "--ccupgrade <chaincode version to upgrade>"
@@ -114,9 +114,8 @@ CCProc="yes"
 CHANNEL="defaultchannel"
 CCVER="v0"
 CCVERUPD="no"
-CCPREFIX=""
-PRESET_CCPREFIX="sample_"
-CCPREFIXUPD="no"
+CCNAME=""
+CCNAMEUPD="no"
 CCUPGRADE="no"
 TXTARGET=""
 
@@ -216,6 +215,8 @@ setCfgKeyVal() {
     ### Refer to the jira FAB-12629 comments for explanation of why we are using
     ### the -e option and then removing backup files (named with -e extension).
     sed -i -e "s/$keyValCurr/$keyValNew/g" $tc/$cc/*
+    sed -i -e "s/$keyValCurr/$keyValNew/g" $tc/preconfig/channels/*
+    sed -i -e "s/$keyValCurr/$keyValNew/g" $tc/preconfig/$cc/*
     rm -f $tc/$cc/*-e
 }
 
@@ -255,13 +256,10 @@ testPreProc() {
         rm -f CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     fi
 
-    if [ $CCPREFIXUPD == "yes" ]; then
-        echo -e "[testPreProc] replace $PRESET_CCPREFIX with $CCPREFIX"
-        if [ -e CITest/$tcase/preconfig ]; then
-            sed -i -e "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/preconfig/$tcc/*
-        fi
-        sed -i -e "s/$PRESET_CCPREFIX/$CCPREFIX/g" CITest/$tcase/$tcc/*
-        rm -f CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
+    if [ $CCNAMEUPD == "yes" ]; then
+        echo -e "[testPreProc] set chaincodeID with $CCNAME"
+        key="chaincodeID"
+        setCfgKeyVal $key $CCNAME $tcase $tcc
     fi
 
     if [ $CCUPGRADE == "yes" ]; then
@@ -510,11 +508,11 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
-      --ccprefix)
+      --ccname)
           shift
-          CCPREFIX=$1         # chaincode name prefix
-          CCPREFIXUPD="yes"   # chaincode name prefix updated
-          echo -e "\t- Specify CCPREFIX: $CCPREFIX\n"
+          CCNAME=$1         # chaincode name
+          CCNAMEUPD="yes"   # chaincode name updated
+          echo -e "\t- Specify CCNAME: $CCNAME\n"
           shift
           ;;
 
@@ -634,7 +632,7 @@ if [ $CProfConv != "none" ]; then
     cProfConversion
 fi
 
-echo "CCVER: $CCVER, CCPREFIXUPD: $CCPREFIXUPD, CCUPGRADE: $CCUPGRADE"
+echo "CCVER: $CCVER, CCNAMEUPD: $CCNAMEUPD, CCUPGRADE: $CCUPGRADE"
 
 # execute PTE transactions
 if [ ${#TestCases[@]} -gt 0 ]; then
