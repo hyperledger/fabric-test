@@ -79,8 +79,8 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
         --ccver <chaincode version to instantiate>
                         (Default: v0. Note: cannot be used with --ccupgrade)
 
-        --ccprefix <chaincode name prefix>
-                        (Default: sample_)
+        --ccname <chaincode name>
+                        (Default: the name defined in each testcase.)
 
         --ccupgrade     <chaincode version to upgrade>
                         (Note: cannot be used with --ccver)
