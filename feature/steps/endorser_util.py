@@ -419,6 +419,7 @@ class CLIInterface(InterfaceBase):
                 command = command + ["--username", context.chaincode["user"]]
             command.append('"')
             ret = context.composition.docker_exec(setup+command, ['cli'])
+            assert "Error occurred" not in ret['cli'], "The install failed with the following error: {}".format(ret['cli'])
             output[peer] = ret['cli']
         print("[{0}]: {1}".format(" ".join(setup + command), output))
         return output

@@ -36,7 +36,6 @@ def getLogFiles(containers, fileSuffix):
 
 def before_scenario(context, scenario):
     # Remove all existing containers if any
-    cmd = ["docker", "ps", "-qa"]
     output = str(subprocess.check_output(["docker ps -aq"], shell=True))
     container_list = output.strip().split('\n')
     for container in container_list:
@@ -101,6 +100,9 @@ def after_scenario(context, scenario):
     gc.collect()
 
 def before_all(context):
+    # Be sure to use a fresh install of the vendored packages for this chaincode
+    shutil.rmtree("../fabric/examples/chaincode/go/enccc_example/vendor", ignore_errors=True)
+
     # Performing `npm install` before test suit not before test cases.
     shutil.rmtree("./node_modules", ignore_errors=True)
     shutil.rmtree("./package-lock.json", ignore_errors=True)
