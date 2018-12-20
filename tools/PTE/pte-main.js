@@ -1113,7 +1113,52 @@ function joinOneChannel(channel, client, org) {
 }
 
 
-function queryBlockchainInfo(channel, client, org) {
+var totalLength=0;
+async function execQueryBlock(channel, sB, eB) {
+    var qBlks = [];
+    for (i = sB; i <= eB; i++) {
+        qBlks.push(parseInt(i));
+    }
+
+    var qPromises = [];
+    var qb = null;
+    var qi = 0;
+    qBlks.forEach((qi) => {
+        qb = new Promise(function(resolve, reject) {
+            resolve(channel.queryBlock(qi));
+        });
+        qPromises.push(qb);
+    });
+    return Promise.all(qPromises).then((block) => {
+        block.forEach(function(block){
+
+            totalLength = totalLength + block.data.data.length;
+            logger.info('[execQueryBlock] block:Length:accu length= %d:%d:%d', block.header.number, block.data.data.length, totalLength);
+        });
+        logger.info('[execQueryBlock] blocks= %d:%d, totalLength= %j', sBlock, eB, totalLength);
+
+    }).catch((err) => {
+            throw new Error(err.stack ? err.stack : err);
+    });
+
+}
+async function preQueryBlock(channel, sB, eB) {
+    logger.info('[preQueryBlock] sB:eB= %d:%d', sB, eB);
+    while ( eBlock > sB ) {
+        var tB = eBlock - sB;
+        if ( tB > 100 ) {
+            eB = parseInt(sB) + 100 - 1;
+        } else {
+            eB=eBlock;
+        }
+
+        logger.info('[preQueryBlock] starting Block:ending Block= %d:%d', sB, eB);
+        await execQueryBlock(channel, sB, eB);
+        sB=eB+1;
+    }
+}
+
+async function queryBlockchainInfo(channel, client, org) {
 
     logger.info('[queryBlockchainInfo] channel (%s)', channelName);
     var username = ORGS[org].username;
@@ -1155,33 +1200,8 @@ function queryBlockchainInfo(channel, client, org) {
                  logger.info('[queryBlockchainInfo] reset eBlock to block height');
                  eBlock = blockHeight;
             }
-            //var block;
 
-            var qBlks = [];
-            for (i = sBlock; i <= eBlock; i++) {
-                qBlks.push(parseInt(i));
-            }
-
-            var qPromises = [];
-            var qi = 0;
-            var qb = null;
-            qBlks.forEach((qi) => {
-                qb = new Promise(function(resolve, reject) {
-                    resolve(channel.queryBlock(qi));
-                });
-                qPromises.push(qb);
-            });
-            return Promise.all(qPromises);
-            //return channel.queryBlock(6590);
-    }).then((block) => {
-            var totalLength=0;
-            block.forEach(function(block){
-
-                totalLength = totalLength + block.data.data.length;
-                logger.info('[queryBlockchainInfo] block:Length:accu length= %d:%d:%d', block.header.number, block.data.data.length, totalLength);
-            });
-            logger.info('[queryBlockchainInfo] blocks= %d:%d, totalLength= %j', sBlock, eBlock, totalLength);
-            process.exit();
+            preQueryBlock(channel, sBlock, eBlock);
 
     }).catch((err) => {
             throw new Error(err.stack ? err.stack : err);
