@@ -343,30 +343,33 @@ echo "        ####################################################### "
 echo "        #         create anchor peer update for orgs          # "
 echo "        ####################################################### "
 echo " "
-for (( i=1; i<=$nOrg; i++ ))
+for (( j=1; j<=$nChannel; j++ ))
 do
-    orgMSP="PeerOrg"$i
-    if [ ! -z $orgMap ] && [ -f $orgMap ]
-    then
-        omVal=$(jq .$orgMSP $orgMap)
-        if [ ! -z $omVal ] && [ $omVal != "null" ]
+    for (( i=1; i<=$nOrg; i++ ))
+    do
+        orgMSP="PeerOrg"$i
+        if [ ! -z $orgMap ] && [ -f $orgMap ]
         then
-            # Strip quotes from omVal if they are present
-            if [ ${omVal:0:1} == "\"" ]
+            tmpVal=$(jq .$orgMSP $orgMap)
+            if [ ! -z $tmpVal ] && [ $tmpVal != "null" ]
             then
-                omVal=${omVal:1}
+                # Strip quotes from tmpVal if they are present
+                if [ ${tmpVal:0:1} == "\"" ]
+                then
+                    tmpVal=${tmpVal:1}
+                fi
+                let "tmpLen = ${#tmpVal} - 1"
+                if [ ${tmpVal:$tmpLen:1} == "\"" ]
+                then
+                    tmpVal=${tmpVal:0:$tmpLen}
+                fi
+                orgMSP=$tmpVal
             fi
-            let "OMLEN = ${#omVal} - 1"
-            if [ ${omVal:$OMLEN:1} == "\"" ]
-            then
-                omVal=${omVal:0:$OMLEN}
-            fi
-            orgMSP=$omVal
         fi
-    fi
-    OrgMSP=$ordererDir"/"$orgMSP"anchors.tx"
-    echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg $orgMSP"
-    $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$i" -asOrg $orgMSP
+        OrgMSP=$ordererDir"/"$testChannel"$j"$orgMSP"anchors.tx"
+        echo "$CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$j" -asOrg $orgMSP"
+        $CFGEXE -profile $ORG_PROFILE -outputAnchorPeersUpdate $OrgMSP -channelID $ORG_PROFILE"$j" -asOrg $orgMSP
+    done
 done
 
 echo " "

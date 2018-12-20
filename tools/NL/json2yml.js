@@ -767,7 +767,8 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                             buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ tmp_port + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_GOSSIP_ENDPOINT' ) {
-                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peerName +':'+ tmp_port + '\n';
+                                            var k1 = vp0Port + (t-1)*nPeerPerOrg;
+                                            buff = '  ' + '    - ' + lvl3_key[m] + '=' + peer0Name +':'+ k1 + '\n';
                                             fs.appendFileSync(dFile, buff);
                                     } else if ( lvl3_key[m] == 'CORE_PEER_EVENTS_ADDRESS' ) {
                                             var t1 = evtPort + v;
