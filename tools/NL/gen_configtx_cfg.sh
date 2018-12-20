@@ -401,7 +401,7 @@ do
              echo "        Policies:" >> $cfgOutFile
              echo "            Readers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.peer')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.peer', '$orgMSP.client')\"" >> $cfgOutFile
              echo "            Writers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.client')\"" >> $cfgOutFile
