@@ -6,7 +6,7 @@ REPO=$1
 WD=$GOPATH/src/github.com/hyperledger/fabric-test
 cd $WD
 
-RELEASE_VERSION=${RELEASE_VERSION:=latest}
+RELEASE_VERSION=${RELEASE_VERSION:=1.4.0-stable}
 # Get the arch value
 ARCH=$(dpkg --print-architecture)
 if [ "$ARCH" = "amd64" ]; then

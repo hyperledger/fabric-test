@@ -17,7 +17,7 @@ echo "Fetching images from Nexus"
 NEXUS_URL=nexus3.hyperledger.org:10001
 ORG_NAME="hyperledger/fabric"
 ARCH=$(go env GOARCH)
-LATEST_TAG=${LATEST_TAG:=$ARCH-latest}
+LATEST_TAG=${LATEST_TAG:=$ARCH-1.4.0-stable}
 echo "---------> REPO:" $REPO
 echo "---------> LATEST_TAG:" $LATEST_TAG
 
@@ -38,7 +38,6 @@ dockerTag() {
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$LATEST_TAG
     if [ $IMAGE == javaenv ]; then
         docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-1.4.0
-        docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-2.0.0
     fi
     echo "$ORG_NAME-$IMAGE:$LATEST_TAG"
     echo "Deleting Nexus docker images: $IMAGE"
@@ -49,14 +48,13 @@ dockerTag() {
 dockerThirdParty() {
   for IMAGE in kafka zookeeper couchdb; do
     echo "$ORG_NAME-$IMAGE"
-    docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:latest
+    # 3rd party images are on dockerhub
+    docker pull $ORG_NAME-$IMAGE:$ARCH-0.4.14
     if [ $? != 0 ]; then
        echo  "FAILED: Docker Pull Failed on $IMAGE"
        exit 1
     fi
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:latest $ORG_NAME-$IMAGE:latest
-    echo "Deleting Nexus docker images: $IMAGE"
-    docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGE:latest
+    docker tag $ORG_NAME-$IMAGE:$ARCH-0.4.14 $ORG_NAME-$IMAGE:latest
   done
 }
 

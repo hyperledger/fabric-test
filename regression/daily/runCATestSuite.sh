@@ -20,7 +20,8 @@ fi
 }
 
 echo "======== Fabric-CA ACL smoke test... ========"
-py.test -v --junitxml results_acl.xml acl_happy_path.py && echo "------> Fabric-CA ACL smoke-test completed."
+echo "No longer in the fabric-samples repo - Skipping..."
+#py.test -v --junitxml results_acl.xml acl_happy_path.py && echo "------> Fabric-CA ACL smoke-test completed."
 
 echo "======== Fabric-CA tests...========"
 py.test -v --junitxml results_fabric-ca_tests.xml ca_tests.py && echo "------> Fabric-CA tests completed."

@@ -12,9 +12,9 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-ca-client": "unstable",
-    "fabric-client": "unstable",
-    "fabric-network": "unstable",
+    "fabric-ca-client": "unstable-1.4",
+    "fabric-client": "unstable-1.4",
+    "fabric-network": "unstable-1.4",
     "fs-extra": "^2.0.0",
     "log4js": "^0.6.38"
   },

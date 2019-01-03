@@ -13,7 +13,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "fabric-ca-client": "unstable",
-    "fabric-client": "unstable"
+    "fabric-ca-client": "unstable-1.4",
+    "fabric-client": "unstable-1.4",
+    "fabric-network": "unstable-1.4"
   }
 }

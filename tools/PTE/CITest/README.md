@@ -4,11 +4,11 @@
 ---
 # Introduction
 
-The purpose of this CI test is to automatically execute the predefined tests daily or weekly that any unexpected or undesired code changes may be uncovered as soon as possible and to flexibly incorporate an user supplied chaincode test.  The CI test uses [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) to driver transactions.  The functions of the CI tool include the following:
+The purpose of this CI test is to automatically execute the predefined tests daily or weekly that any unexpected or undesired code changes may be uncovered as soon as possible and to flexibly incorporate an user supplied chaincode test.  The CI test uses [PTE](https://github.com/hyperledger/fabric-test/tree/release-1.4/tools/PTE) to driver transactions.  The functions of the CI tool include the following:
 
-- setup PTE environment, see [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) for detail
+- setup PTE environment, see [PTE](https://github.com/hyperledger/fabric-test/tree/release-1.4/tools/PTE) for detail
 
-- create Blockchain network using [Network Launcher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL)
+- create Blockchain network using [Network Launcher](https://github.com/hyperledger/fabric-test/tree/release-1.4/tools/NL)
 
 - configure Blockchain network including create/join channels and install/instantiate chaincodes
 
@@ -256,10 +256,10 @@ The script, PTE/CITest/scenarios/run_scenarios.sh, can be used to execute a full
 
 The following chaincodes are available:
 
-- [sample chaincode](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc/go)
-- [marbles chaincode](https://github.com/hyperledger/fabric/tree/master/examples/chaincode/go/marbles02)
-- [sample Node JS chaincode](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc/node)
-- [sample java chaincode](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc/java)
+- [sample chaincode](https://github.com/hyperledger/fabric-test/tree/release-1.4/chaincodes/samplecc/go)
+- [marbles chaincode](https://github.com/hyperledger/fabric/tree/release-1.4/examples/chaincode/go/marbles02)
+- [sample Node JS chaincode](https://github.com/hyperledger/fabric-test/tree/release-1.4/chaincodes/samplecc/node)
+- [sample java chaincode](https://github.com/hyperledger/fabric-test/tree/release-1.4/chaincodes/samplecc/java)
 
 The user can add a chaincode for his test case by following the same directory structure in `preconfig` directory.
 

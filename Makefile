@@ -37,11 +37,11 @@
 #
 # ------------------------------------------------------------------
 
-BASE_VERSION = 1.2.0
+BASE_VERSION = 1.4.0
 DOCKER_NS = hyperledger
 EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
 PROJECT_VERSION = $(BASE_VERSION)-$(EXTRA_VERSION)
-BRANCH = master
+BRANCH = release-1.4
 FABRIC = https://gerrit.hyperledger.org/r/fabric
 FABRIC_CA = https://gerrit.hyperledger.org/r/fabric-ca
 FABRIC-CHAINCODE-JAVA = https://gerrit.hyperledger.org/r/fabric-chaincode-java
@@ -60,8 +60,11 @@ ci-smoke: fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrap
 
 .PHONY: git-latest
 git-latest:
-	@git submodule foreach git checkout $(BRANCH)
-	@git submodule foreach git pull origin $(BRANCH)
+	cd $(HYPERLEDGER_DIR)/fabric-test/cello && git checkout master && git fetch origin master && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-ca && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-samples && git checkout master && git fetch origin master && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-sdk-node && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
 
 .PHONY: git-init
 git-init:

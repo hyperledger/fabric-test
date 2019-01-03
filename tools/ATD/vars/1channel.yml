@@ -61,7 +61,7 @@ pte: {
     # official hub - url: "hyperledger/",
     # fabric build hub - url: "nexus3.hyperledger.org:10001/hyperledger/",
     url: "nexus3.hyperledger.org:10001/hyperledger/",
-    tag: "1.3.0",
+    tag: "1.4.0",
     username: "",
     password: ""
   }
