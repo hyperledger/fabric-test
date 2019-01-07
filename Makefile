@@ -195,11 +195,11 @@ interop-fabric-sdk-java: pull-thirdparty-images pull-binaries pull-fabric-ca pul
 interop-fabric-javaenv: pull-thirdparty-images pull-binaries pull-fabric-ca javaenv build-sdk-wrapper interop-tests
 
 .PHONY: svt-daily-behave-tests
-svt-daily-behave-tests: pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper
+svt-daily-behave-tests: fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
 
 .PHONY: svt-daily-pte-tests
-svt-daily-pte-tests: pull-images pull-binaries pull-thirdparty-images
+svt-daily-pte-tests: fabric pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
 
 .PHONY: svt-daily-ote-tests
@@ -215,7 +215,7 @@ svt-daily-ca-tests: pull-images pull-binaries
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
 
 .PHONY: svt-weekly-pte-12hr-test
-svt-weekly-pte-12hr-test: pull-images pull-binaries pull-thirdparty-images
+svt-weekly-pte-12hr-test: fabric pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest.sh
 
 .PHONY: svt-daily

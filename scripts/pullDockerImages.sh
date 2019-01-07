@@ -49,15 +49,19 @@ dockerTag() {
 dockerThirdParty() {
   for IMAGE in kafka zookeeper couchdb; do
     echo "$ORG_NAME-$IMAGE"
-    docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:latest
+    docker pull $ORG_NAME-$IMAGE:latest
     if [ $? != 0 ]; then
        echo  "FAILED: Docker Pull Failed on $IMAGE"
        exit 1
     fi
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:latest $ORG_NAME-$IMAGE:latest
-    echo "Deleting Nexus docker images: $IMAGE"
-    docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGE:latest
+    docker tag $ORG_NAME-$IMAGE:latest $ORG_NAME-$IMAGE:$ARCH-latest
   done
+
+  docker pull alpine:3.8
+  docker pull node:8-alpine
+  docker pull openjdk:8-jdk-alpine3.8
+  docker pull golang:1.11-alpine
+  docker pull golang:1.11-alpine3.8
 }
 
 
