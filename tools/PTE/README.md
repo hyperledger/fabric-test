@@ -803,6 +803,9 @@ The user input file contains configuration parameters including chaincode defini
             "transactions": "LAST",
             "txNum": "10"
         },
+        "ordererOpt": {
+            "method": "UserDefined"
+        },
         "timeoutOpt": {
             "preConfig": "200000",
             "request": "45000",
@@ -920,6 +923,9 @@ where
             "peers": "OrgAnchor",
             "transactions": "LAST",
             "txNum": "10"
+        },
+        "ordererOpt": {
+            "method": "RoundRobin"
         },
         "timeoutOpt": {
             "preConfig": "200000",
@@ -1056,6 +1062,10 @@ where:
          * **ALL**: all transactions.
          * **LAST**: last `txNum` transactions.
     * **txNum**: last txNum transactions to be validated. Valid only if **transactions** is `LAST`. Defailt: 1.
+* **ordererOpt**: transaction orderer options
+    * **method**: orderer selection method, default: `UserDefined`. Note a Service Credentials File must contain exact orderers to be used for a channel.
+         * **UserDefined**: the orderer defined in the `ordererID` in the Service Credentials File for each org is used for invoke transactions. Note this is the same orderer used for all admin transactions.
+         * **RoundRobin**: an orderer from the orderer section of Service Credentials File is assigned to each thread in the round robin fashion
 * **timeoutOpt**: timeout configuration
     * **preConfig**: The timeout for channel creation and join and chaincode installation and instantiation. Unit: ms. Default:200,000.
     * **request**: The timeout for proposal and transaction. Unit: ms. Default:45,000.
@@ -1204,7 +1214,7 @@ Note that
 
 1. Key **gopath** is the GOPATH used by PTE. Set to `GOPATH` to use the environment variable `GOPATH`.
 
-2. Key **ordererID** is the orderer that the org will communicate.
+2. Key **ordererID** is the orderer that the org will communicate.  This orderer will be used for transactions only if the ordererOpt method is **UserDefined**, see ordererOpt in the User Input file for detail usage.
 
 3. User can opt to use the same `tls_cert` for all orderers and peers by setting `tls_cert` at the same level as the **orderer**.  If the `tls_cert` is set, then the file defined in `tls_cacerts` is ignored. This can simplify the setting of tls_cert for a network with large number of peers and orderers.
 

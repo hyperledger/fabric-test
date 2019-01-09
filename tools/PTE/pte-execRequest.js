@@ -232,6 +232,16 @@ if ( transType == 'DISCOVERY' && TLS != testUtil.TLSCLIENTAUTH ) {
 
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] transMode: %s, transType: %s, invokeType: %s, nRequest: %d', Nid, channel.getName(), org, pid,  transMode, transType, invokeType, nRequest);
 
+
+// orderer parameters
+var ordererMethod='USERDEFINED';    // default method
+if (typeof( txCfgPtr.ordererOpt ) !== 'undefined') {
+    if (typeof(txCfgPtr.ordererOpt.method) !== 'undefined') {
+        ordererMethod=txCfgPtr.ordererOpt.method.toUpperCase();
+    }
+}
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: ordererMethod=%s', Nid, channelName, org, pid, ordererMethod);
+
 //failover parameters
 var peerList = [];
 var currPeerId = 0;
@@ -985,7 +995,10 @@ function ordererFailover(channel, client) {
 
 // set currOrdererId
 function setCurrOrdererId(channel, client, org) {
-    var ordererID = ORGS[org].ordererID;
+    // assign ordererID
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, svcFile, ordererMethod);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrOrdererId] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
+
     var i;
     for (i=0; i<ordererList.length; i++) {
         if (ordererList[i]._url === ORGS['orderer'][ordererID].url) {
@@ -997,7 +1010,7 @@ function setCurrOrdererId(channel, client, org) {
 
 // assign Orderer List
 function assignOrdererList(channel, client) {
-    logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d assignOrdererList] ', Nid, channelName, org, pid);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] ', Nid, channelName, org, pid);
     var data;
     var ordererTmp;
     for (let key in ORGS['orderer']) {
@@ -1026,7 +1039,10 @@ function assignOrdererList(channel, client) {
 }
 
 function channelAddOrderer(channel, client, org) {
-    var ordererID = ORGS[org].ordererID;
+    // assign ordererID
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, svcFile, ordererMethod);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
+
     var data;
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s channelAddOrderer] ', Nid, channelName, org, pid, ordererID );
     if (TLS > testUtil.TLSDISABLED) {

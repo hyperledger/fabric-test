@@ -31,16 +31,6 @@
                                 "url": "grpcs://localhost:5007",
                                 "server-hostname": "orderer2.example.com",
                                 "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
-                        },
-		        "orderer3": {
-			        "name": "OrdererOrg",
-			        "mspid": "OrdererOrg",
-			        "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
-			        "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp",
-			        "comName": "example.com",
-                                "url": "grpcs://localhost:5008",
-                                "server-hostname": "orderer3.example.com",
-                                "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer3.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
                         }
                 },
 		"org1": {

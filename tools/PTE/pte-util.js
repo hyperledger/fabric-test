@@ -429,3 +429,31 @@ module.exports.setTLS=function(txCfgPtr) {
 
     return TLS;
 }
+
+// get ordererID for transactions
+module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, svcFile, method) {
+    hfc.addConfigFile(svcFile);
+    ORGS = hfc.getConfigSetting('test-network');
+    var ordererID;
+
+    logger.info('[org:id=%s:%d getOrdererID] orderer method: %s', org, pid, method);
+    // find ordererID
+    if ( method == 'ROUNDROBIN' ) {
+        // Round Robin
+        var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
+        var orgNameLen=orgName.length;
+        var orgIdx=orgName.indexOf(org);
+        var SCordList=Object.keys(ORGS.orderer);
+        logger.info('[org:id=%s:%d getOrdererID] SC orderer list: %j', org, pid, SCordList);
+        var ordLen=SCordList.length;
+        var ordIdx=(pid*orgNameLen+orgIdx)%ordLen;
+        ordererID=SCordList[ordIdx];
+    } else {
+        // default method: USERDEFINED
+        ordererID = ORGS[org].ordererID;
+    }
+
+    logger.info('[org:id=%s:%d getOrdererID] orderer assigned to the test: %s', org, pid, ordererID);
+
+    return ordererID;
+}

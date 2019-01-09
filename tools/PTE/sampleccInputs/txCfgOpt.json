@@ -42,6 +42,9 @@
         "transactions": "LAST",
         "txNum": "10"
     },
+    "ordererOpt": {
+        "method": "UserDefined"
+    },
     "timeoutOpt": {
         "preConfig": "200000",
         "request": "45000",
