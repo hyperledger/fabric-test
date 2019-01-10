@@ -893,7 +893,7 @@ def step_impl(context, ddoc_name, cc_name, ch_name, couchdb_instance):
     context.result=subprocess.check_output(cmd, env=os.environ)
     print("result is: "+context.result+"\n")
 
-@then(u'a user receives {status} response of [{response}] from the CouchDB container')
+@then(u'a user receives {status} response of [{response}] from the couchDB container')
 def step_impl(context, status, response):
     print("response is: "+response)
     if status == "success":
