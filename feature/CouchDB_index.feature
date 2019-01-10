@@ -220,7 +220,7 @@ Examples:
     And I wait "2" seconds
     When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
     And I wait "2" seconds
-    Then a user receives error response of {"error":"not_found","reason":"missing"} from the couchDB container
+    Then a user receives error response of [{"error":"not_found","reason":"missing"}] from the couchDB container
     When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc2" in the channel "mychannel2" and from the CouchDB instance "http://localhost:5984"
     Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
@@ -228,7 +228,7 @@ Examples:
     And I wait "2" seconds
     When a user requests to get the design doc "indexdoc_behave_test_v1" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
     And I wait "2" seconds
-    Then a user receives error response of {"error":"not_found","reason":"missing"} from the couchDB container
+    Then a user receives error response of [{"error":"not_found","reason":"missing"}] from the couchDB container
     When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc3" in the channel "mychannel3" and from the CouchDB instance "http://localhost:5984"
     Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
