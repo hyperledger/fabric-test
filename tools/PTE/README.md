@@ -1096,40 +1096,47 @@ where:
 
 ### Notes on Statistical Distributions
 PTE can be extended to support transaction generation according to a particular statistical distribution, or even a custom schedule. Two distributions have currently been implemented:
+
 * Uniform Distribution: see `transMode` *Constant*
 * Poisson Distribution: see `transMode` *Poisson*
-To generate and configure transaction events according to a different distribution, you need to do update `pte-execRequest.js` as follows:
+
+To generate and configure transaction events according to a different distribution, you need to update `pte-execRequest.js` as follows:
+
 * Define a new `transMode` (e.g., *Poisson* for a Poisson distribution)
 * Define a JSON structure for parameters (e.g., `poissonOpt` for *Poisson*; see previous section)
 * Add code to the function `execTransMode()` to handle this new distribution (example for *Poisson* below):
-```
-    } else if (transMode == 'POISSON') {
-        distOpt = txCfgPtr.poissonOpt;
-        execModePoisson();
-    } ...
-```
-* Create a function to call `execModeDistribution(backoffCalculator, delayCalculator)` with the right parameters (e.g., `execModePoisson` for *Poisson* below):
-```
-    function execModePoisson() {
-        execModeDistribution(backoffCalculatorPoisson);
-    }
-```
+
+
+        } else if (transMode == 'POISSON') {
+            distOpt = txCfgPtr.poissonOpt;
+            execModePoisson();
+        } ...
+
+
+* Create a function to call `execModeDistribution(backoffCalculator, delayCalculator)` with the right parameter values (e.g., `execModePoisson` for *Poisson* below):
+
+        function execModePoisson() {
+            execModeDistribution(backoffCalculatorPoisson);
+        }
+
+
 * Create a function to dynamically calculate the backoff (in milliseconds) to the next transaction. The parameter `backoffCalculator` above represents the handle to this function. (e.g., `backoffCalculatorPoisson()` for *Poisson* as below):
-```
-    function backoffCalculatorPoisson() {
-        var lambda = parseFloat(txCfgPtr.poissonOpt.lambda);
-        return -1000 * Math.log(1 - Math.random()) / lambda;
-    }
-```
+
+        function backoffCalculatorPoisson() {
+            var lambda = parseFloat(txCfgPtr.poissonOpt.lambda);
+            return -1000 * Math.log(1 - Math.random()) / lambda;
+        }
+
 * Optionally, create a separate function to support secondary deviations from the main event distribution. The *Constant* (or uniform) distribution supports this using the `devFreq` parameter.
     * Example: for *Constant* distribution, we have two functions, `backoffCalculatorConstantFreq()` to compute uniform-value backoffs, and `backoffCalculatorConstant()` to compute uniform-value backoffs with small random deviations in every iteration.
     * Here, the parameters supplied to `execModeDistribution` are as follows:
-```
-        execModeDistribution(backoffCalculatorConstant, backoffCalculatorConstantFreq);
-```
-  In the function `execModeDistribution`, the `backoffCalculator` parameter represents the backoff calculator with secondary deviations, whereas the `delayCalculator` parameter supports represents the backoff calculator according to the base statistical distribution.
+
+            execModeDistribution(backoffCalculatorConstant, backoffCalculatorConstantFreq);
+
+        In the function `execModeDistribution`, the `backoffCalculator` parameter represents the backoff calculator with secondary deviations, whereas the `delayCalculator` parameter represents the backoff calculator according to the base statistical distribution.
 
 For example input files to run Poisson-based traffic, see:
+
 * `sampleccInputs/runCases-poisson-i1-TLS.txt`
 * `sampleccInputs/runCases-poisson-q1-TLS.txt`
 * `sampleccInputs/samplecc-chan1-poisson-i-TLS.json`
