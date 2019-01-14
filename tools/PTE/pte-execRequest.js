@@ -983,6 +983,13 @@ function initDiscovery() {
 
 }
 
+// reconnect orderer
+function ordererReconnect(channel, client, org) {
+    channel.removeOrderer(ordererList[currOrdererId]);
+    channelAddOrderer(channel, client, org);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d ordererReconnect] Orderer reconnect (%s)', Nid, channel.getName(), org, pid, ordererList[currOrdererId]._url);
+}
+
 // update orderer
 function ordererFailover(channel, client) {
     var currId = currOrdererId;
@@ -1658,16 +1665,44 @@ function invoke_move_latency() {
                 // update transaction latency
                 var toe = new Date().getTime();
                 latency_update(inv_m, toe-tos, latency_orderer);
+                if ( results.status != 'SUCCESS' ) {
+                    tx_stats[tx_txFail]++;
+                    delete txidList[tx_id.getTransactionID().toString()];
+                    logger.warn('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send transaction due to invalid status: ', Nid, channelName, org, pid, results.status);
+                    isExecDone('Move');
+                    if ( IDone != 1 ) {
+                        sleep (grpcTimeout);
+                        invoke_move_latency();
+                    }
+                }
             }).catch((err) => {
+                tx_stats[tx_txFail]++;
+                delete txidList[tx_id.getTransactionID().toString()];
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+                if (ordererFO == 'TRUE') {
+                    ordererFailover(channel, client);
+                } else {
+                    ordererReconnect(channel, client, org);
+                    sleep (grpcTimeout);
+                }
+                isExecDone('Move');
+                if ( IDone != 1 ) {
+                    invoke_move_latency();
+                }
             })
         },
         function(err) {
-            tx_stats[tx_txFail]++;
-            delete txidList[tx_id.getTransactionID().toString()];
-            var toe = new Date().getTime();
-            latency_update(inv_m, toe-tos, latency_orderer);
+            tx_stats[tx_pFail]++;
+            var te = new Date().getTime();
+            latency_update(inv_m, te-ts, latency_peer);
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_latency] Failed to send proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
+            if (peerFO == 'TRUE') {
+                peerFailover(channel, client);
+            }
+            isExecDone('Move');
+            if ( IDone != 1 ) {
+                invoke_move_latency();
+            }
         })
 }
 
