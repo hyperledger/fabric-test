@@ -42,6 +42,9 @@
         "transactions": "_CHKTX_",
         "txNum": "_CHKTXNUM_"
     },
+    "ordererOpt": {
+        "method": "_TARGETORDERERS_"
+    },
     "timeoutOpt": {
         "preConfig": "200000",
         "request": "45000"
