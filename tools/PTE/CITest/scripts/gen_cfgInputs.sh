@@ -20,16 +20,25 @@ usage () {
     echo -e "-h, --help\tView this help message"
 
     echo -e "-n, --name\tblank-separated list of channels"
+    echo -e "\t\t(Default: defaultchannel. Note: cannot be used with --nchan)"
+
+    echo -e "--nchan \tnumber of channels"
+    echo -e "\t\t(Default: 0. Note: cannot be used with -n nor --name)"
+
+    echo -e "--chanprefix\tchannel name prefix, used with option --nchan"
     echo -e "\t\t(Default: defaultchannel)"
 
     echo -e "-c, --channel\tcreate/join channel"
     echo -e "\t\t(Default: No)"
 
     echo -e "-o, --org\tblank-separated list of organizations"
-    echo -e "\t\t(Default: None)"
+    echo -e "\t\t(Default: None. Note: cannot be used with --norg)"
 
-    echo -e "--norg\tnumber of organization"
-    echo -e "\t\t(Default: 0)"
+    echo -e "--norg  \tnumber of organization"
+    echo -e "\t\t(Default: 0. Note: cannot be used with -o nor --org)"
+
+    echo -e "--orgprefix\torg name prefix"
+    echo -e "\t\t(Default: org. Note: used with option --norg)"
 
     echo -e "-i, --install\tinstall/instantiate chaincode"
     echo -e "\t\t(Default: No)"
@@ -70,26 +79,86 @@ usage () {
     echo -e "--chkpeers\tinvoke check target peers [ORGANCHOR|ALLANCHORS|ORGPEERS|ALLPEERS|DISCOVERY]"
     echo -e "\t\t(Default: ORGANCHOR)"
 
-    echo -e "--chktx\tinvoke check transaction [LAST|ALL]"
+    echo -e "--chktx \tinvoke check transaction [LAST|ALL]"
     echo -e "\t\t(Default: LAST)"
 
     echo -e "--chktxnum\tinvoke check transactions number [integer]"
     echo -e "\t\t(Default: 1)"
 
-    echo -e "--targetorderers\ttransaction target orderers [UserDefined|RoundRobin]"
+    echo -e "--targetorderers\ttransaction target orderer [UserDefined|RoundRobin]"
     echo -e "\t\t(Default: UserDefined)"
 
     echo -e "examples:"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a marbles02 samplecc -i"
+    echo -e "./gen_cfgInputs.sh -d SCDir --nchan 3 --chanprefix testorgschannel --org org1 org2 -a samplecc -c -i"
+    echo -e "./gen_cfgInputs.sh -d SCDir --nchan 3 --chanprefix testorgschannel --norg 2 -a marbles02 samplecc -i"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 --orgprefix testorg -a samplecc samplejs marbles02 -p -t Move -i"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a samplejava -i -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplejava samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 --orgprefix org -a samplejava samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc --freq 10 --nreq 1000 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d SCDir --nchan 3 --chanprefix testorgschannel --norg 2 -a samplecc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --targetorderers RoundRobin --chkpeers ORGANCHOR -t move"
     echo
     exit
 }
 
+
+## printVar(): print input vars
+printVars () {
+
+echo
+echo
+echo "*********************************************************"
+echo "***                                                      "
+echo "***                   input parameters                   "
+echo "***                                                      "
+echo "***  service credential file directory                   "
+echo "***      SCDIR: $SCDIR                                   "
+echo "***                                                      "
+echo "***  chaincodes                                          "
+echo "***      number: ${#Chaincode[@]}                        "
+echo "***      Chaincode: ${Chaincode[@]}                      "
+echo "***                                                      "
+echo "***  processes parameters                                "
+echo "***      TXProc: $TXType                                 "
+echo "***      PrimeProc: $PrimeProc                           "
+echo "***      CCProc: $CCProc                                 "
+echo "***      ChanProc: $ChanProc                             "
+echo "***                                                      "
+echo "***  network parameters                                  "
+echo "***      CHANNEL set name: $setChanName                  "
+echo "***      CHANNEL set num: $setChanNum                    "
+echo "***      NCHAN: $NCHAN                                   "
+echo "***      CHANPREFIX: $CHANPREFIX                         "
+echo "***      CHANNEL length: ${#CHANNEL[@]}                  "
+echo "***      CHANNEL: ${CHANNEL[@]}                          "
+echo "***                                                      "
+echo "***      ORGS set name: $setOrgName                      "
+echo "***      ORGS set num: $setOrgNum                        "
+echo "***      NORG: $NORG                                     "
+echo "***      ORGPREFIX: $ORGPREFIX                           "
+echo "***      ORGS length: ${#ORGS[@]}                        "
+echo "***      ORGS: ${ORGS[@]}                                "
+echo "***                                                      "
+echo "***  transaction parameters                              "
+echo "***      NPROC: $NPROC                                   "
+echo "***      NREQ: $NREQ                                     "
+echo "***      TXType: $TXType                                 "
+echo "***      TXMODE: $TXMODE                                 "
+echo "***      FREQ: $FREQ                                     "
+echo "***      TARGETPEERS: $TARGETPEERS                       "
+echo "***      TARGETORDERERS: $TARGETORDERERS                 "
+echo "***      RUNDUR: $RUNDUR                                 "
+echo "***      KEYSTART: $KEYSTART                             "
+echo "***                                                      "
+echo "***  validation parameters                               "
+echo "***      CHKPEERS: $CHKPEERS                             "
+echo "***      CHKTX: $CHKTX                                   "
+echo "***      CHKTXNUM: $CHKTXNUM                             "
+echo "***                                                      "
+echo "*********************************************************"
+
+}
 
 # FUNCTION: error
 #           Displays error message; exits.
@@ -107,15 +176,22 @@ PTEDIR=$PWD
 TEMPLATEDIR=$PTEDIR/CITest/scripts/cfgTemplates
 runDir=$PTEDIR/runPTE
 
-CHANNEL="defaultchannel"   # channel name
+CHANNEL="defaultchannel"       # channel name
 ChanProc="NO"
 CCProc="NO"
 PrimeProc="NO"
 TXType=""
 Chaincode=""
 SCDIR=""
+setOrgName="no"
+setOrgNum="no"
 ORGS=""
+ORGPREFIX="org"                # default org name
 
+setChanName="no"
+setChanNum="no"
+CHANPREFIX="defaultchannel"    # default channel name
+NCHAN=0
 NORG=0
 TXMODE="Constant"
 NPROC=1
@@ -457,6 +533,11 @@ while [[ $# -gt 0 ]]; do
           ;;
 
       -n | --name)
+          if [ $setChanNum == "yes" ]; then
+              echo "Error: cannot use option $1 with option --nchan"
+              usage
+          fi
+          setChanName="yes"
           shift
           i=0
           CHANNEL[$i]=$1  # Channels
@@ -470,7 +551,31 @@ while [[ $# -gt 0 ]]; do
           echo -e ""
           ;;
 
+      --nchan)
+          if [ $setChanName == "yes" ]; then
+              echo "Error: cannot use option $1 with option -n or --name"
+              usage
+          fi
+          setChanNum="yes"
+          shift
+          NCHAN=$1           # number of channels
+          echo -e "\t- Specify number of channels: $NCHAN\n"
+          shift
+          ;;
+
+      --chanprefix)
+          shift
+          CHANPREFIX=$1      # channel name prefix
+          echo -e "\t- Specify channel name prefix: $CHANPREFIX\n"
+          shift
+          ;;
+
       -o | --org)
+          if [ $setOrgNum == "yes" ]; then
+              echo "Error: cannot use option $1 with option --norg"
+              usage
+          fi
+          setOrgName="yes"
           shift
           i=0
           ORGS[$i]=$1  # organization
@@ -485,9 +590,21 @@ while [[ $# -gt 0 ]]; do
           ;;
 
       --norg)
+          if [ $setOrgName == "yes" ]; then
+              echo "Error: cannot use option $1 with option -o or --org"
+              usage
+          fi
+          setOrgNum="yes"
           shift
           NORG=$1           # number of organization
           echo -e "\t- Specify number of org: $NORG\n"
+          shift
+          ;;
+
+      --orgprefix)
+          shift
+          ORGPREFIX=$1      # org name prefix
+          echo -e "\t- Specify org name prefix: $ORGPREFIX\n"
           shift
           ;;
 
@@ -614,15 +731,25 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo " TXProc=$TXType"
-echo " PrimeProc=$PrimeProc"
-echo " CCProc=$CCProc"
-echo " ChanProc=$ChanProc"
+    # setup CHANNEL
+if [ $NCHAN -gt 0 ]; then
+    for (( i=0; i < $NCHAN; i++ ))
+    do
+        j=$((i + 1))
+        CHANNEL[$i]=$CHANPREFIX$j
+    done
+fi
 
-echo " ORGS length: ${#ORGS[@]}"
-echo " ORGS=${ORGS[@]}"
-echo " NORG=$NORG"
-echo " TARGETPEERS=$TARGETPEERS"
+    # setup ORGS
+if [ $NORG -gt 0 ]; then
+    for (( i=0; i < $NORG; i++ ))
+    do
+        j=$((i + 1))
+        ORGS[$i]=$ORGPREFIX$j
+    done
+fi
+
+printVars
 
     # sanity check: SCDIR
 if [ "$SCDIR" == "" ]; then
