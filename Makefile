@@ -37,10 +37,10 @@
 #
 # ------------------------------------------------------------------
 
-BASE_VERSION = 1.2.0
+TOOL_VERSION = 1.2.0
 DOCKER_NS = hyperledger
 EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
-PROJECT_VERSION = $(BASE_VERSION)-$(EXTRA_VERSION)
+PROJECT_TOOL_VERSION = $(TOOL_VERSION)-$(EXTRA_VERSION)
 BRANCH = master
 FABRIC = https://gerrit.hyperledger.org/r/fabric
 FABRIC_CA = https://gerrit.hyperledger.org/r/fabric-ca
@@ -54,9 +54,10 @@ PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/pre_setup.s
 PTE_IMAGE = $(DOCKER_NS)/fabric-pte
 TEST_VIEWER_IMAGE = $(DOCKER_NS)/fabric-testviewer
 TARGET = pte test-viewer
+STABLE_TAG ?= $(ARCH)-$(BRANCH)-stable
 
 .PHONY: ci-smoke
-ci-smoke: fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper smoke-tests
+ci-smoke: fabric pull-images pull-binaries pull-thirdparty-images build-fabric-ca build-sdk-wrapper smoke-tests
 
 .PHONY: git-latest
 git-latest:
@@ -96,8 +97,9 @@ build-fabric: fabric
 
 .PHONY: build-fabric-ca
 build-fabric-ca: ca
-	@make docker-all -C $(CA_DIR)
-	@make docker-fvt -C $(CA_DIR)
+	@make docker -C $(CA_DIR)
+	@make fabric-ca-client -C $(CA_DIR)
+	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./buildFabricCaImages.sh $(BRANCH) $(CA_DIR)
 
 .PHONY: build-sdk-wrapper
 build-sdk-wrapper:
@@ -195,7 +197,7 @@ interop-fabric-sdk-java: pull-thirdparty-images pull-binaries pull-fabric-ca pul
 interop-fabric-javaenv: pull-thirdparty-images pull-binaries pull-fabric-ca javaenv build-sdk-wrapper interop-tests
 
 .PHONY: svt-daily-behave-tests
-svt-daily-behave-tests: fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper
+svt-daily-behave-tests: fabric pull-images pull-binaries pull-thirdparty-images build-fabric-ca build-sdk-wrapper
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
 
 .PHONY: svt-daily-pte-tests
@@ -211,7 +213,7 @@ svt-daily-lte-tests:  fabric pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
 
 .PHONY: svt-daily-ca-tests
-svt-daily-ca-tests: pull-images pull-binaries
+svt-daily-ca-tests: pull-images pull-binaries build-fabric-ca
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
 
 .PHONY: svt-weekly-pte-12hr-test
@@ -227,12 +229,12 @@ svt-smoke: fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wra
 .PHONY: pte
 pte:
 	docker build -t $(PTE_IMAGE) images/PTE
-	docker tag $(PTE_IMAGE) $(PTE_IMAGE):$(PROJECT_VERSION)
+	docker tag $(PTE_IMAGE) $(PTE_IMAGE):$(PROJECT_TOOL_VERSION)
 
 .PHONY: test-viewer
 test-viewer:
 	docker build -t $(TEST_VIEWER_IMAGE) tools/Testviewer
-	docker tag $(TEST_VIEWER_IMAGE) $(TEST_VIEWER_IMAGE):$(PROJECT_VERSION)
+	docker tag $(TEST_VIEWER_IMAGE) $(TEST_VIEWER_IMAGE):$(PROJECT_TOOL_VERSION)
 
 .PHONY: clean
 clean:

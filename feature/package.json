@@ -1,6 +1,6 @@
 {
   "name": "Integration",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "Behave Node.js SDK Integration",
   "keywords": [
     "Behave node-sdk integration",

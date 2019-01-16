@@ -2,6 +2,7 @@
 set -o pipefail
 
 REPO=$1
+VERSION=2.0.0
 
 ###################
 # Install govender
@@ -27,8 +28,8 @@ dockerTag() {
   echo "Images: $IMAGELIST"
 
   for IMAGE in $IMAGELIST; do
-    echo "Image: $IMAGE"
     echo
+    echo "Image: $IMAGE"
     docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG
           if [ $? != 0 ]; then
              echo  "FAILED: Docker Pull Failed on $IMAGE"
@@ -36,8 +37,9 @@ dockerTag() {
           fi
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$LATEST_TAG
+    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$VERSION
     if [ $IMAGE == javaenv ]; then
-        docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-2.0.0
+        docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-$VERSION
     fi
     echo "$ORG_NAME-$IMAGE:$LATEST_TAG"
     echo "Deleting Nexus docker images: $IMAGE"
@@ -71,19 +73,19 @@ fabric)
   ;;
 fabric-ca)
   echo "Pull all images except fabric-ca"
-  dockerTag peer orderer ccenv tools javaenv
+  dockerTag peer orderer baseos ccenv nodeenv tools javaenv
   ;;
 fabric-sdk-node)
   echo "Pull all images except fabric-sdk-node"
-  dockerTag peer orderer ccenv tools ca ca-tools ca-peer ca-orderer ca-fvt javaenv
+  dockerTag peer orderer baseos ccenv nodeenv tools ca javaenv
   ;;
 fabric-sdk-java)
   echo "Pull all images except fabric-sdk-java"
-  dockerTag peer orderer ccenv tools ca ca-tools ca-peer ca-orderer ca-fvt javaenv
+  dockerTag peer orderer baseos ccenv nodeenv tools ca javaenv
   ;;
 fabric-javaenv)
   echo "Pull all images except fabric-javaenv"
-  dockerTag peer orderer ccenv tools ca ca-tools ca-peer ca-orderer ca-fvt
+  dockerTag peer orderer baseos ccenv nodeenv tools ca
   ;;
 third-party)
   echo "Pull all third-party docker images"
@@ -91,7 +93,7 @@ third-party)
   ;;
 *)
   echo "Pull all images"
-  dockerTag peer orderer ccenv tools ca ca-tools ca-peer ca-orderer ca-fvt javaenv
+  dockerTag peer orderer baseos ccenv nodeenv tools ca javaenv
   ;;
 esac
 

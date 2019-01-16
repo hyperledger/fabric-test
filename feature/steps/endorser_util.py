@@ -463,7 +463,7 @@ class CLIInterface(InterfaceBase):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
-        setup = ["/bin/bash", "-c",
+        setup = ["sh", "-c",
                  '"CORE_PEER_MSPCONFIGPATH={0}/peerOrganizations/{2}/users/{1}@{2}/msp'.format(configDir, user, org)]
 
         if includeAll:
