@@ -226,6 +226,7 @@ setCfgKeyVal() {
 testPreProc() {
     tcase=$1
     tcc=$2
+    echo "[testPreProc] input: tcase: $tcase, tcc: $tcc"
 
     # restore testcase first in case the testcase was changed
     # by the way, if advanced users want to run a modified testcase, comment out this line
@@ -388,7 +389,7 @@ getCCfromTestcase() {
     # search for chaincode for each testcase
     ccDir=`ls $tc`
     for dd in ${ccDir[@]}; do
-        if [ $dd == "samplecc" ] || [ $dd == "samplejs" ] || [ $dd == "marbles02" ]; then
+        if [ $dd == "samplecc" ] || [ $dd == "samplejs" ] || [ $dd == "marbles02" ] || [ $dd == "marbles02_private" ]; then
             res=$dd
         fi
     done
