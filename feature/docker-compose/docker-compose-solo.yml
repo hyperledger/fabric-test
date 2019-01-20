@@ -22,7 +22,7 @@ services:
             - FABRIC_CA_SERVER_CSR_HOSTS=ca.example.com
             - FABRIC_CA_SERVER_CA_CERTFILE=/var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem
             - FABRIC_CA_SERVER_CA_KEYFILE=${FABRIC_CA_SERVER_EXAMPLE_TLS_KEYFILE}
-        command: /bin/bash -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem --tls.certfile /var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
+        command: sh -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem --tls.certfile /var/hyperledger/fabric-ca-server-config/ca.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com/ca:/var/hyperledger/fabric-ca-server-config
             - ../configs/${CORE_PEER_NETWORKID}/ordererOrganizations/example.com:/var/hyperledger/fabric-ca-server
@@ -43,7 +43,7 @@ services:
             - FABRIC_CA_SERVER_CSR_HOSTS=ca.org1.example.com
             - FABRIC_CA_SERVER_TLS_CERTFILE=/var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
             - FABRIC_CA_SERVER_CA_KEYFILE=${FABRIC_CA_SERVER_ORG1_TLS_KEYFILE}
-        command: /bin/bash -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem --tls.certfile  /var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
+        command: sh -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem --tls.certfile  /var/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com/ca:/var/hyperledger/fabric-ca-server-config
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org1.example.com:/var/hyperledger/fabric-ca-server
@@ -64,7 +64,7 @@ services:
             - FABRIC_CA_SERVER_CSR_HOSTS=ca.org2.example.com
             - FABRIC_CA_SERVER_CA_CERTFILE=/var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
             - FABRIC_CA_SERVER_CA_KEYFILE=${FABRIC_CA_SERVER_ORG2_TLS_KEYFILE}
-        command: /bin/bash -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem --tls.certfile /var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
+        command: sh -c 'fabric-ca-server start --ca.certfile /var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem --tls.certfile /var/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem --ca.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} --tls.keyfile $${FABRIC_CA_SERVER_CA_KEYFILE} -b $${BOOTSTRAP_USER_PASS} -d'
         volumes:
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com/ca:/var/hyperledger/fabric-ca-server-config
             - ../configs/${CORE_PEER_NETWORKID}/peerOrganizations/org2.example.com:/var/hyperledger/fabric-ca-server
