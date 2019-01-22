@@ -18,6 +18,7 @@ FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
 NLDir=$FabricTestDir"/tools/NL"
 PTEDir=$FabricTestDir"/tools/PTE"
 LSCDir=$TESTCASE"-SC"
+SCDir=$PTEDir/$LSCDir
 LOGDir=$PTEDir"/CITest/Logs"
 CMDDir=$PTEDir"/CITest/scripts"
 CIpteReport=$LOGDir"/"$TESTCASE"-pteReport.log"
