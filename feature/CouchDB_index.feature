@@ -344,11 +344,11 @@ Examples:
 
     # Do sanity-check rich query in 4th peer
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"matt\\", \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"matt"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"alex\\", \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"alex"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\",\\"owner\\":\\"jose\\", \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"jose"' from "peer1.org1.example.com"
 
     # Explicitly check with CouchDB in 4th peer to confirm the index is set up correctly for the rich query to pass using index
     When a user requests to get the design doc "indexdoc_behave_test" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:8984"
@@ -406,23 +406,23 @@ Examples:
 
     # Do sanity-check rich query in 4th peer
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"matt"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"alex\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"alex"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"jose\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"jose"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_docType\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"matt"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_docType\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"alex"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{\\"docType\\":\\"marble\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_docType\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"jose"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"green\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"matt" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"matt"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel2" using chaincode named "mycc2" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"yellow\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"alex" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"alex"' from "peer1.org1.example.com"
     When a user queries on the channel "mychannel3" using chaincode named "mycc3" with args ["queryMarbles", "{\\"selector\\":{ \\"color\\":\\"red\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_color\\"]}"] on "peer1.org1.example.com"
-    Then a user receives a response containing "owner":"jose" from "peer1.org1.example.com"
+    Then a user receives a response containing '"owner":"jose"' from "peer1.org1.example.com"
 
     # Explicitly check with CouchDB to confirm the index is set up correctly for the rich query to pass using index
     When a user requests to get the design doc "indexdoc_behave_test_1" for the chaincode named "mycc1" in the channel "mychannel1" and from the CouchDB instance "http://localhost:5984"

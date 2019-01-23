@@ -7,6 +7,7 @@
 
 import subprocess
 import os
+import re
 import sys
 from shutil import copyfile
 import uuid
@@ -30,9 +31,23 @@ Organizations:
         Name: {orgName}
         ID: {orgMSP}
         MSPDir: ./peerOrganizations/{orgMSP}/peers/peer0.{orgMSP}/msp
+        AdminPrincipal: Role.ADMIN
         AnchorPeers:
             - Host: peer0.{orgMSP}
-              Port: 7051 '''
+              Port: 7051
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: OR('{orgMSP}.member')
+            Writers:
+                Type: Signature
+                Rule: OR('{orgMSP}.member')
+            Admins:
+                Type: Signature
+                Rule: OR('{orgMSP}.admin')
+            Endorsement:
+                Type: Signature
+                Rule: OR('{orgMSP}.member') '''
 
 ORDERER_STR = '''
 OrdererOrgs:
@@ -61,13 +76,15 @@ def updateEnviron(context):
 
 def makeProjectConfigDir(context, returnContext=False):
     # Save all the files to a specific directory for the test
-    if not hasattr(context, "projectName") and not hasattr(context, "composition"):
+    if hasattr(context, "projectName"):
+        print("test {} already exists!!!".format(context.projectName))
+    elif not hasattr(context, "projectName") and not hasattr(context, "composition"):
         context.projectName = str(uuid.uuid1()).replace('-','')
     elif hasattr(context, "composition"):
         context.projectName = context.composition.projectName
 
     testConfigs = "configs/%s" % context.projectName
-    if not os.path.isdir(testConfigs):
+    if not os.path.exists(testConfigs) and not os.path.isdir(testConfigs):
         os.mkdir(testConfigs)
     if returnContext:
         return testConfigs, context
@@ -116,7 +133,7 @@ def setCAConfig(context):
 
 def setupConfigsForCA(context, channelID):
     testConfigs, context = makeProjectConfigDir(context, returnContext=True)
-    print("testConfigs: {0}".format(testConfigs))
+    print("ca testConfigs: {0}".format(testConfigs))
 
     configFile = "configtx_fca.yaml"
     if os.path.isfile("configs/%s.yaml" % channelID):
@@ -125,7 +142,6 @@ def setupConfigsForCA(context, channelID):
     copyfile("configs/%s" % configFile, "%s/configtx.yaml" % testConfigs)
 
     orgDirs = getOrgs(context)
-    print("Org Dirs: {}".format(orgDirs))
 
     for orgDir in orgDirs:
         copyfile("{0}/configtx.yaml".format(testConfigs),
@@ -151,14 +167,15 @@ def certificateSetupForCA(context):
                      "{0}/{1}/msp/cacerts/ca.{1}-cert.pem".format(testConfigs, orgDir))
 
 def setupConfigs(context, channelID):
-    testConfigs = makeProjectConfigDir(context)
-    print("testConfigs: {0}".format(testConfigs))
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    print("reg testConfigs: {0}".format(testConfigs))
 
     configFile = "configtx.yaml"
     if os.path.isfile("configs/%s.yaml" % channelID):
         configFile = "%s.yaml" % channelID
 
-    copyfile("configs/%s" % configFile, "%s/configtx.yaml" % testConfigs)
+    if not os.path.exists("{}/configtx.yaml".format(testConfigs)):
+        copyfile("configs/%s" % configFile, "%s/configtx.yaml" % testConfigs)
 
     # Copy config to orderer org structures
     for orgDir in os.listdir("./{0}/ordererOrganizations".format(testConfigs)):
@@ -182,7 +199,6 @@ def inspectOrdererConfig(context, filename, channelID):
                    "-configPath", ".",
                    "-channelID", channelID]
         return subprocess.check_output(command, cwd=testConfigs, env=updated_env)
-        #return subprocess.check_output(command, env=updated_env)
     except:
         print("Unable to inspect orderer config data: {0}".format(sys.exc_info()[1]))
 
@@ -194,7 +210,6 @@ def inspectChannelConfig(context, filename, channelID):
                    "-configPath", ".",
                    "-channelID", channelID]
         return subprocess.check_output(command, cwd=testConfigs, env=updated_env)
-        #return subprocess.check_output(command, env=updated_env)
     except:
         print("Unable to inspect channel config data: {0}".format(sys.exc_info()[1]))
 
@@ -215,12 +230,12 @@ def generateOrdererConfig(context, channelID, ordererProfile, block):
     testConfigs = makeProjectConfigDir(context)
     updated_env = updateEnviron(context)
     try:
-        command = ["configtxgen", "-profile", ordererProfile,
+        command = ["configtxgen",
+                   "-profile", ordererProfile,
                    "-outputBlock", block,
                    "-configPath", ".",
                    "-channelID", channelID]
         subprocess.check_call(command, cwd=testConfigs, env=updated_env)
-        #subprocess.check_call(command, env=updated_env)
     except:
         print("Unable to generate orderer config data: {0}".format(sys.exc_info()[1]))
 
@@ -228,12 +243,12 @@ def generateChannelConfig(channelID, profile, context):
     testConfigs = makeProjectConfigDir(context)
     updated_env = updateEnviron(context)
     try:
-        command = ["configtxgen", "-profile", profile,
+        command = ["configtxgen",
+                   "-profile", profile,
                    "-outputCreateChannelTx", "%s.tx" % channelID,
                    "-configPath", ".",
                    "-channelID", channelID]
         subprocess.check_call(command, cwd=testConfigs, env=updated_env)
-        #subprocess.check_call(command, env=updated_env)
     except:
         print("Unable to generate channel config data: {0}".format(sys.exc_info()[1]))
 
@@ -251,7 +266,8 @@ def generateChannelAnchorConfig(channelID, profile, context):
     updated_env = updateEnviron(context)
     for org in os.listdir("./{0}/peerOrganizations".format(testConfigs)):
         try:
-            command = ["configtxgen", "-profile", profile,
+            command = ["configtxgen",
+                       "-profile", profile,
                        "-outputAnchorPeersUpdate", "{0}{1}Anchor.tx".format(org, channelID),
                        "-channelID", channelID,
                        "-configPath", testConfigs,
@@ -263,6 +279,7 @@ def generateChannelAnchorConfig(channelID, profile, context):
 
 def generateCrypto(context, cryptoLoc="./configs/crypto.yaml"):
     testConfigs = makeProjectConfigDir(context)
+
     updated_env = updateEnviron(context)
     try:
         subprocess.check_call(["cryptogen", "generate",
@@ -368,7 +385,34 @@ def buildConfigtx(testConfigs, orgName, mspID):
     with open("{}/configtx.yaml".format(testConfigs), "w") as fd:
         fd.write(configtx)
 
-def getNewOrg(context, mspID):
+def changeCapabilities(context, capType, capVersion):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    if os.path.exists("{}/configtx.yaml".format(testConfigs)):
+        copyfile("{}/configtx.yaml".format(testConfigs), "{}/orig_configtx.yaml".format(testConfigs))
+    else:
+        copyfile("configs/configtx.yaml", "{}/configtx.yaml".format(testConfigs))
+
+    with open("{}/configtx.yaml".format(testConfigs), "r") as fd:
+        config = fd.read()
+
+    upgradeConfig = config.replace("{0}: &{0}Capabilities\n        V1_3: true".format(capType),
+                                   "{0}: &{0}Capabilities\n        {1}: true".format(capType, capVersion))
+    with open("{}/configtx.yaml".format(testConfigs), "w") as fd:
+        fd.write(upgradeConfig)
+    return context
+
+def getCurrentConfig(context, channel):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    updated_env = updateEnviron(context)
+    block = "{}.block".format(channel)
+
+    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", block, "--type", "common.Block"], cwd=testConfigs , env=updated_env)
+    config = json.loads(configStr)
+    with open("{0}/config.json".format(testConfigs), "w") as fd:
+        fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
+    return config
+
+def getNewOrg(context, mspID, channelID):
     testConfigs, context = makeProjectConfigDir(context, returnContext=True)
     updated_env = updateEnviron(context)
 
@@ -376,8 +420,12 @@ def getNewOrg(context, mspID):
     copyfile("{}/configtx.yaml".format(testConfigs), "{}/orig_configtx.yaml".format(testConfigs))
     buildConfigtx(testConfigs, orgName, mspID)
     try:
-        command = ["configtxgen", "-printOrg", orgName]
-        args = subprocess.check_output(command, cwd=testConfigs, env=updated_env)
+        command = ["configtxgen",
+                "-configPath", testConfigs,
+                "-channelID", channelID,
+                "-printOrg",
+                orgName]
+        args = subprocess.check_output(command, env=updated_env)
         print("Result of printOrg: ".format(args))
     except:
         print("Unable to inspect orderer config data: {0}".format(sys.exc_info()[1]))
@@ -391,16 +439,7 @@ def getNewOrg(context, mspID):
 def delNewOrg(context, group, mspID, channel):
     updated_env = updateEnviron(context)
     testConfigs = "./configs/{0}".format(context.projectName)
-    inputFile = "{0}.block".format(channel)
-
-    # configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
-    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", inputFile, "--type", "common.Block"], cwd=testConfigs , env=updated_env)
-    config = json.loads(configStr)
-
-    with open("{0}/config.json".format(testConfigs), "w") as fd:
-        fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
-
-    # configtxlator proto_encode --input config.json --type common.Config --output config.pb
+    config = getCurrentConfig(context, channel)
     subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
                                         cwd=testConfigs,
                                         env=updated_env)
@@ -455,23 +494,26 @@ def registerWithABAC(context, user):
 def addNewOrg(context, config_update, group, channel):
     updated_env = updateEnviron(context)
     testConfigs = "./configs/{0}".format(context.projectName)
-    inputFile = "{0}.block".format(channel)
-
-    # configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
-    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", inputFile, "--type", "common.Block"], cwd=testConfigs , env=updated_env)
-    config = json.loads(configStr)
-
-    with open("{0}/config.json".format(testConfigs), "w") as fd:
-        fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
-
-    # configtxlator proto_encode --input config.json --type common.Config --output config.pb
+    config = getCurrentConfig(context, channel)
     subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
                                         cwd=testConfigs,
                                         env=updated_env)
 
     # groups = "Application"
     # config_update = {"Org3ExampleCom": <data>}
+    print(config_update)
     config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"].update(config_update)
+    return config
+
+def updateCapabilityConfig(context, channel, capType, capVers):
+    updated_env = updateEnviron(context)
+    testConfigs = "./configs/{0}".format(context.projectName)
+    config = getCurrentConfig(context, channel)
+    subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
+                                        cwd=testConfigs,
+                                        env=updated_env)
+
+    config['data']['data'][0]['payload']['data']['config']['channel_group']['groups'][capType]['values']['Capabilities']['value']['capabilities'] = {capVers: {}}
     return config
 
 def configUpdate(context, config, group, channel):
@@ -481,7 +523,8 @@ def configUpdate(context, config, group, channel):
     with open("{0}/modified_config.json".format(testConfigs), "w") as fd:
         fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
 
-    print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"]))
+    #print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"]))
+    print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["values"]))
 
     # configtxlator proto_encode --input config.json --type common.Config --output config.pb
     subprocess.check_output(["configtxlator", "proto_encode", "--input", "config.json", "--type", "common.Config", "--output", "config.pb"],
@@ -521,3 +564,31 @@ def configUpdate(context, config, group, channel):
                                         env=updated_env)
 
     return "{0}/update{1}.pb".format(testConfigs, channel)
+<<<<<<< Updated upstream
+=======
+
+def generateCollections(context, collectionsFile):
+    template = "./configs/collections.json"
+    pattern = r"github.com/hyperledger/fabric-test/(?P<chaincodePath>[\s\S]*)"
+    result = re.match(pattern, context.chaincode["path"])
+    if result is not None:
+        path = "../{0}".format(result.groupdict()["chaincodePath"])
+        if os.path.exists(template):
+            template = "./{0}/collections.json".format(path)
+
+    structure = {}
+    structure["name"] = context.chaincode["name"]
+    structure["policy"] = str(context.chaincode["policy"].replace(" ", "").replace("\'", "'"))
+    print(structure)
+
+    with open(template, "r") as tfd:
+        #collectionConfig = tfd.read() % context.chaincode
+        collectionConfig = json.loads(tfd.read() % (structure))
+
+    finalConfig = "configs/{0}/{1}".format(context.projectName, collectionsFile)
+    with open(finalConfig, "w") as fd:
+        fd.write(json.dumps(collectionConfig, indent=2))
+        #fd.write(collectionConfig)
+
+    return "/var/hyperledger/{}".format(finalConfig)
+>>>>>>> Stashed changes

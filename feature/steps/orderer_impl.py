@@ -37,15 +37,23 @@ def step_impl(context):
 
 @given(u'the {key} environment variable is {value}')
 def step_impl(context, key, value):
+    projectName = None
+    if hasattr(context, "projectName"):
+        projectName = context.projectName
+
     if not hasattr(context, "composition"):
-        context.composition = compose_util.Composition(context, startContainers=False)
+        context.composition = compose_util.Composition(context, projectName=projectName, startContainers=False)
     changedString = common_util.changeFormat(value)
     context.composition.environ[key] = changedString
 
 @given(u'the peer "{peer}" is setup to use a client identity')
 def step_impl(context, peer):
+    projectName = None
+    if hasattr(context, "projectName"):
+        projectName = context.projectName
+
     if not hasattr(context, "composition"):
-        context.composition = compose_util.Composition(context, startContainers=False)
+        context.composition = compose_util.Composition(context, projectName=projectName, startContainers=False)
     peerInfo = peer.split('.')
     if peer not in context.composition.environ:
         context.composition.environ[peer] = {}

@@ -298,6 +298,12 @@ Application: &ApplicationDefaults
     # For Application policies, their canonical path is
     #   /Channel/Application/<PolicyName>
     Policies: &ApplicationDefaultPolicies
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
         Readers:
             Type: ImplicitMeta
             Rule: "ANY Readers"
@@ -350,6 +356,22 @@ Profiles:
                 - *ExampleCom
             Capabilities:
                 <<: *ApplicationCapabilities
+            Policies:
+                Readers:
+                  Type: ImplicitMeta
+                  Rule: ANY Readers
+                Writers:
+                  Type: ImplicitMeta
+                  Rule: ANY Writers
+                Admins:
+                  Type: ImplicitMeta
+                  Rule: MAJORITY Admins
+                LifecycleEndorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
+                Endorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -377,6 +399,22 @@ Profiles:
                 - *ExampleCom
             Capabilities:
                 <<: *ApplicationCapabilities
+            Policies:
+                Readers:
+                  Type: ImplicitMeta
+                  Rule: ANY Readers
+                Writers:
+                  Type: ImplicitMeta
+                  Rule: ANY Writers
+                Admins:
+                  Type: ImplicitMeta
+                  Rule: MAJORITY Admins
+                LifecycleEndorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
+                Endorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -400,6 +438,22 @@ Profiles:
                 - *ExampleCom
             Capabilities:
                 <<: *ApplicationCapabilities
+            Policies:
+                Readers:
+                  Type: ImplicitMeta
+                  Rule: ANY Readers
+                Writers:
+                  Type: ImplicitMeta
+                  Rule: ANY Writers
+                Admins:
+                  Type: ImplicitMeta
+                  Rule: MAJORITY Admins
+                LifecycleEndorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
+                Endorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -448,6 +502,22 @@ Profiles:
                 - *Org2ExampleCom
             Capabilities:
                 <<: *ApplicationCapabilities
+            Policies:
+                Readers:
+                  Type: ImplicitMeta
+                  Rule: ANY Readers
+                Writers:
+                  Type: ImplicitMeta
+                  Rule: ANY Writers
+                Admins:
+                  Type: ImplicitMeta
+                  Rule: MAJORITY Admins
+                LifecycleEndorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
+                Endorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
 
     # SampleSingleMSPChannel defines a channel with only the sample org as a
     # member.  It is designed to be used in conjunction with SampleSingleMSPSolo
@@ -464,4 +534,20 @@ Profiles:
                 - *Org2ExampleCom
             Capabilities:
                 <<: *ApplicationCapabilities
+            Policies:
+                Readers:
+                  Type: ImplicitMeta
+                  Rule: ANY Readers
+                Writers:
+                  Type: ImplicitMeta
+                  Rule: ANY Writers
+                Admins:
+                  Type: ImplicitMeta
+                  Rule: MAJORITY Admins
+                LifecycleEndorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
+                Endorsement:
+                  Type: ImplicitMeta
+                  Rule: "MAJORITY Endorsement"
 

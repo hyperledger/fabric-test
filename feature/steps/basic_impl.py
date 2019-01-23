@@ -42,6 +42,37 @@ def wait_impl(context, seconds, peer):
                                                    context.chaincode.get("version", 0))
     context.interface.wait_for_deploy_completion(context, chaincode_container, seconds)
 
+@given(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed on peer "{peer}"')
+@when(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed on peer "{peer}"')
+@then(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed on peer "{peer}"')
+def committed_impl(context, seconds, peer):
+    user = "Admin"
+    peerParts = peer.split('.')
+    org = '.'.join(peerParts[1:])
+
+    assert "Error occurred" not in context.result[peer], "There was an error in the chaincode commit: {}".format(context.result[peer])
+    #assert "chaincode definition not agreed to by this org" not in context.result[peer], "There was an error in the chaincode commit: {}".format(context.result[peer])
+
+    # Now wait for the chaincode to be committed
+    try:
+        count = 0
+        ret = context.interface.list_chaincode(context, peer, user, list_type="querycommitted")
+        with ic_timeout(seconds, exception=Exception):
+            while context.chaincode["version"] not in ret[peer] and count <= seconds:
+                ret = context.interface.list_chaincode(context, peer, user, list_type="querycommitted")
+                time.sleep(1)
+                count = count + 1
+    except:
+        print("Error occurred: {0}".format(sys.exc_info()[1]))
+    finally:
+        assert context.chaincode["version"] in ret[peer], "The chaincode {0} has not been committed\n{1}".format(context.chaincode['name'], ret)
+
+@given(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed')
+@when(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed')
+@then(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed')
+def step_impl(context, seconds):
+    committed_impl(context, seconds, "peer0.org1.example.com")
+
 @given(u'I wait up to "{seconds:d}" seconds for instantiation to complete')
 @when(u'I wait up to "{seconds:d}" seconds for instantiation to complete')
 @then(u'I wait up to "{seconds:d}" seconds for instantiation to complete')
@@ -258,7 +289,37 @@ def step_impl(context, capType, capVersion):
 
 @when(u'a user defines a couchDB index named {indexName} with design document name "{docName}" containing the fields "{fields}" to the chaincode at path "{path}"')
 def step_impl(context, indexName, docName, fields, path):
-    database_util.generateIndex(indexName, docName, fields, path)
+    database_util.generateIndex(context, indexName, docName, fields, path)
+
+@when('an admin generates a collections file named "{fileName}" for chaincode named "{name}" with policy {policy}')
+def step_impl(context, fileName, name, policy):
+    print(context.chaincode)
+    context.chaincode['name'] = name
+    context.chaincode['policy'] = policy
+    print(context.chaincode)
+    database_util.generateCollections(context, fileName)
+    database_util.generateIndex(context, indexName, docName, fields, path)
+
+@when('an admin generates a collections file named "{fileName}" for chaincode named "{name}" at path "{path}" with policy {policy}')
+def step_impl(context, fileName, name, path, policy):
+    if not hasattr(context, "chaincode"):
+        context.chaincode = {}
+
+    print(context.chaincode)
+    context.chaincode['name'] = name
+    context.chaincode['path'] = path
+    context.chaincode['policy'] = policy
+    config_util.generateCollections(context, fileName)
+
+@when('an admin generates a collections file named "{fileName}" for chaincode named "{name}" with policy {policy}')
+def step_impl(context, fileName, name, policy):
+    if not hasattr(context, "chaincode"):
+        context.chaincode = {}
+
+    print(context.chaincode)
+    context.chaincode['name'] = name
+    context.chaincode['policy'] = policy
+    config_util.generateCollections(context, fileName)
 
 @given(u'I have a bootstrapped fabric network of type {ordererType} with tls')
 def step_impl(context, ordererType):
@@ -432,7 +493,7 @@ def add_org_impl(context, orgMSP, channelName):
     config_util.buildCryptoFile(context, 1, 2, 0, 2, orgMSP=orgMSP)
     config_util.generateCrypto(context, "{0}/crypto.yaml".format(configDir))
     config_util.generateCryptoDir(context, 1, 2, 0, 2, tlsExist=context.tls, orgMSP=orgMSP)
-    args = config_util.getNewOrg(context, orgMSP)
+    args = config_util.getNewOrg(context, orgMSP, channelName)
     updated_config = config_util.addNewOrg(context, args, "Application", channelName)
 
     update_impl(context, 'peer', channelName, updated_config, userName='Admin')

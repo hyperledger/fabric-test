@@ -42,6 +42,12 @@ def before_scenario(context, scenario):
         if container != '':
             subprocess.call(['docker rm -f {}'.format(container)], shell=True)
 
+    context.interface = CLIInterface()
+    if context.remote == True:
+        context.interface = ToolInterface(context)
+
+    context.newlifecycle = False
+
 
 def after_scenario(context, scenario):
     # Display memory usage before tearing down the network
@@ -114,12 +120,10 @@ def before_all(context):
                                             shell=True)
     print("npm install: {}".format(npminstall))
     shutil.copytree("../../../node_modules", "./node_modules")
-    context.interface = CLIInterface()
     context.remote = False
     if context.config.userdata.get("network", None) is not None:
         context.network = context.config.userdata["network"]
         context.remote = True
-        context.interface = ToolInterface(context)
 
     mem = psutil.virtual_memory()
     print("Starting Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
