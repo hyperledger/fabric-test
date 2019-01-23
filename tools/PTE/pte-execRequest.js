@@ -791,6 +791,65 @@ function assignThreadPeerList(channel, client, org) {
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
 }
+// assign thread the peers from getPeerID
+function assignThreadPeerID(channel, client, org, method) {
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID: method %s]', Nid, channel.getName(), org, pid, method);
+    var peerTmp;
+    var eh;
+    var data;
+    //var listOpt=txCfgPtr.listOpt;
+    var peername=testUtil.getPeerID(pid, org, txCfgPtr, svcFile, method);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID: %s]', Nid, channel.getName(), org, pid, peername);
+    //var peername;
+    var event_connected = false;
+    if (ORGS[org].hasOwnProperty(peername)) {
+        if (ORGS[org][peername].requests) {
+            if (TLS > testUtil.TLSDISABLED) {
+                data = testUtil.getTLSCert(org, peername);
+                if ( data !== null ) {
+                    peerTmp = client.newPeer(
+                        ORGS[org][peername].requests,
+                        {
+                            pem: Buffer.from(data).toString(),
+                            'ssl-target-name-override': ORGS[org][peername]['server-hostname']
+                        }
+                    );
+                    targets.push(peerTmp);
+                    channel.addPeer(peerTmp);
+                    if ( peerFOList == 'TARGETPEERS' ) {
+                        peerList.push(peerTmp);
+                    }
+
+                    if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                        eh = channel.newChannelEventHub(peerTmp);
+                        eventHubs.push(eh);
+                        if ( evtType == 'FILTEREDBLOCK' ) {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
+                    }
+                }
+            } else {
+                peerTmp = client.newPeer(ORGS[org][peername].requests);
+                channel.addPeer(peerTmp);
+                if ( peerFOList == 'TARGETPEERS' ) {
+                    peerList.push(peerTmp);
+                }
+                if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                    eh = channel.newChannelEventHub(peerTmp);
+                    eventHubs.push(eh);
+                    if ( evtType == 'FILTEREDBLOCK' ) {
+                        eh.connect();
+                    } else {
+                        eh.connect(true);
+                    }
+                }
+            }
+        }
+    }
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
+}
 
 function channelAddPeer(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeer]', Nid, channelName, org, pid);
@@ -1154,6 +1213,8 @@ function setTargetPeers(tPeers) {
         assignThreadAllPeers(channel,client, org);
     } else if (tPeers == 'LIST'){
         assignThreadPeerList(channel,client,org);
+    } else if (tPeers == 'ROUNDROBIN'){
+        assignThreadPeerID(channel,client,org,tPeers);
     } else if ( (tPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
         serviceDiscovery=true;
         if ((typeof(txCfgPtr.discoveryOpt) !== 'undefined')) {
@@ -1647,7 +1708,6 @@ function eventRegister(tx) {
         });
 
 }
-
 
 // orderer handler:
 //    failover if failover is set

@@ -747,7 +747,7 @@ The user input file contains configuration parameters including chaincode defini
         "transMode": "Constant",
         "transType": "Invoke",
         "invokeType": "Move",
-        "targetPeers": "OrgAnchor",
+        "targetPeers": "RoundRobin",
         "peerFailover": "TRUE",
         "ordererFailover": "TRUE",
         "nProcPerOrg": "4",
@@ -999,6 +999,7 @@ where:
     * **AllPeers**: send to all peers in all organizations
     * **List**: only send to the peers given in listOpt, see listOpt below for details
     * **Disovery**: use service discovery to determine the target peers, see discoveryOpt below for details
+    * **RoundRobin**: a peer from the org section of Service Credentials File is assigned to each thread in the round robin fashion
 * **nProcPerOrg**: number of processes for the test
 * **nRequest**: number of transactions to be executed for each process
 * **runDur**: run duration in seconds to be executed  for each process.
