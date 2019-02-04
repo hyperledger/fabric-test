@@ -29,6 +29,9 @@ usage () {
     echo
     echo -e "\t-h, --help\tView this help message"
     echo
+    echo -e "\t--scdir\tservica credential directory, relative path to PTE dir"
+    echo -e "\t\tDefault: PTEScaleTest-SC"
+    echo
     echo -e "\t--chaincode\tchaincode [samplecc|samplejs|marblecc]"
     echo -e "\t\tDefault: samplecc"
     echo
@@ -55,6 +58,12 @@ usage () {
     echo
     echo -e "\t--nreq\tnumber of transactions per process [integer]"
     echo -e "\t\tDefault: 10000."
+    echo
+    echo -e "\t--rundur\tduration of execution in sec [integer]"
+    echo -e "\t\tDefault: 0."
+    echo
+    echo -e "\t--freq\ttransaction sending frequency in ms [integer]"
+    echo -e "\t\tDefault: 0."
     echo
     echo -e "\t--keystart\tstarting key of transactions [integer]"
     echo -e "\t\tDefault: 0."
@@ -86,9 +95,10 @@ printVars() {
     echo ""
     echo "input parameters: TESTCASE=$TESTCASE"
     echo "input parameters: NETWORK=$NETWORK, chaincode=$chaincode, PRECONFIG=$PRECONFIG"
-    echo "input parameters: NCHAN=$NCHAN, NORG=$NORG"
-    echo "input parameters: TXMODE=$TXMODE, NPROC=$NPROC, key0=$key0"
+    echo "input parameters: NCHAN=$NCHAN, NORG=$NORG, LSCDIR=$LSCDir"
+    echo "input parameters: TXMODE=$TXMODE, NPROC=$NPROC"
     echo "input parameters: targetpeers=$targetpeers, targetorderers=$targetorderers"
+    echo "input parameters: NREQ=$NREQ, RUNDUR=$RUNDUR, FREQ=$FREQ, key0=$key0"
     echo "input parameters: PRIME=$PRIME, INVOKE=$INVOKE, QUERY=$QUERY"
     echo ""
 }
@@ -99,6 +109,7 @@ TESTCASE="PTEScaleTest"
 
 # default vars
 NETWORK="none"
+LSCDir="PTEScaleTest-SC"
 chaincode="samplecc"
 PRECONFIG="none"
 PRIME="none"
@@ -110,6 +121,8 @@ NTHREAD=1
 NCHAN=1
 CHANPREFIX="testorgschannel"
 NREQ=10000
+RUNDUR=0
+FREQ=0
 NORG=1
 targetpeers="RoundRobin"
 targetorderers="RoundRobin"
@@ -130,6 +143,12 @@ while [[ $# -gt 0 ]]; do
       -h | --help)
           usage                    # displays usage info
           exit 0                   # exit cleanly, since the use just asked for help/usage info
+          ;;
+
+      --scdir)
+          shift
+          LSCDir=$1                # service credential directory
+          shift
           ;;
 
       -a | --chaincode)
@@ -184,6 +203,18 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --rundur)
+          shift
+          RUNDUR=$1                # execution duration
+          shift
+          ;;
+
+      --freq)
+          shift
+          FREQ=$1                  # transaction sending freq
+          shift
+          ;;
+
       --keystart)
           shift
           key0=$1                  # starting key of transactions
@@ -229,14 +260,8 @@ done
 #print vars
 printVars
 
-FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
-NLDir=$FabricTestDir"/tools/NL"
-PTEDir=$FabricTestDir"/tools/PTE"
-LSCDir=$TESTCASE"-SC"
-SCDir=$PTEDir/$LSCDir
-LOGDir=$PTEDir"/CITest/Logs"
-CMDDir=$PTEDir"/CITest/scripts"
-
+# source PTE CI utils
+source PTECIutils.sh
 
 CIpteReport=$LOGDir"/"$TESTCASE"-pteReport.log"
 pteReport=$PTEDir"/pteReport.txt"
@@ -264,22 +289,34 @@ function PTEexec() {
     fi
 
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
+    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
+    CMDResult="$?"
     set +x
+    if [ $CMDResult -ne "0" ]; then
+        echo "Error: Failed to execute gen_cfgInputs.sh"
+        exit 1
+    fi
     sleep 30
 
     # PTE report
     if [ $report == "yes" ]; then
-        echo "node get_pteReport.js $pteReport"
-        node get_pteReport.js $pteReport
         echo "$TESTCASE Channels=$NCHAN Threads=$NTHREAD $invoke" >> $CIpteReport
-        cat $pteReport >> $CIpteReport
+        set -x
+        PTEReport $pteReport $CIpteReport
+        CMDResult="$?"
+        set +x
+        if [ $CMDResult -ne "0" ]; then
+            echo "Error: Failed to execute PTEReport"
+            exit 1
+        fi
     fi
 }
 
 
 ### bring up network
 if [ $NETWORK != "none" ]; then
+    SCDir=$PTEDir/$LSCDir
+
     if [ -e $SCDir ]; then
         echo "[$0] clean up $SCDir"
         rm -rf $SCDir
@@ -344,7 +381,11 @@ echo "                                      PTE: CHANNELS=$NCHAN THREADS=$NTHREA
 echo "          *****************************************************************************"
 echo ""
 timestamp=`date`
-echo "[$0] $TESTCASE with $NCHAN channels, each channel has $NTHREAD threads x $NREQ transactions start at $timestamp"
+if [ $NREQ > 0 ]; then
+    echo "[$0] $TESTCASE with $NCHAN channels, each channel has $NTHREAD threads x $NREQ transactions start at $timestamp"
+else
+    echo "[$0] $TESTCASE with $NCHAN channels, each channel has $NTHREAD threads x $RUNDUR seconds start at $timestamp"
+fi
 
 cd $CMDDir
 
@@ -361,4 +402,4 @@ fi
 cd $CWD
 
 timestamp=`date`
-echo "[$0] $TESTCASE with $NCHAN channels, each channel has $NTHREAD threads x $NREQ transactions end at $timestamp"
+echo "[$0] $TESTCASE completes at $timestamp"

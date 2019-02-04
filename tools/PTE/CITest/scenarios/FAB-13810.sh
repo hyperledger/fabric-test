@@ -6,34 +6,37 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# testcase: FAB-13703
-# channels: 3
+# testcase: FAB-13810
+# channels: 1
 # org: 1
-# thread: 1 (1 per org)
-# tx 10,000 per thread
-# traffic mode: Latency
+# threads: 1 (1 per org)
+# tx duration: 3 days
+# traffic mode: Constant
+# frequency: 10 per second per thread
 
 # source PTE CI utils
 source PTECIutils.sh
 
-myTESTCASE="FAB-13703"
+myTESTCASE="FAB-13810"
 mySCDir="PTEScaleTest-SC"
 
 myCC="samplecc"
-myTXMODE="Latency"
+myTXMODE="Constant"
+
+myRundur=259200
+myNREQ=0
+myFREQ=100
+
 myNORG=1
-
-myNREQ=10000
-
-myMinChan=3
-myMaxChan=3
+myMinChan=1
+myMaxChan=1
 myChanIncr=1
 myMinTh=1
 myMaxTh=1
 myThIncr=1
 
 myKey0=0
-myKeyIncr=$myNREQ
+myKeyIncr=0
 
 CWD=$PWD
 
@@ -46,7 +49,7 @@ if [ -e $CIpteReport ]; then
 fi
 
 # execute PTE
-optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --norg $myNORG --nreq $myNREQ --txmode $myTXMODE -i"
+optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --norg $myNORG --nreq $myNREQ --rundur $myRundur --freq $myFREQ --txmode $myTXMODE -i"
 echo "[$myTESTCASE] optString=$optString"
 PTEExecLoop $myMinChan $myMaxChan $myChanIncr $myMinTh $myMaxTh $myThIncr $myKey0 $myKeyIncr "${optString[@]}"
 
