@@ -52,7 +52,7 @@ usage () {
     echo -e "-p, --prime\texecute query to sych-up ledger, [YES|NO]"
     echo -e "\t\t(Default: No)"
 
-    echo -e "--txmode\ttransaction mode, [Constant|Mix|Burst]"
+    echo -e "--txmode\ttransaction mode, [Latency|Constant|Mix]"
     echo -e "\t\t(Default: Constant)"
 
     echo -e "-t, --tx\ttransaction type, [MOVE|QUERY]"
@@ -67,7 +67,7 @@ usage () {
     echo -e "--freq  \ttransaction frequency [unit: ms]"
     echo -e "\t\t(Default: 0)"
 
-    echo -e "--rundur\tduration of execution [integer]"
+    echo -e "--rundur\tduration of execution [unit: sec]"
     echo -e "\t\t(Default: 0)"
 
     echo -e "--keystart\ttransaction starting key [integer]"
@@ -87,6 +87,15 @@ usage () {
 
     echo -e "--targetorderers\ttransaction target orderer [UserDefined|RoundRobin]"
     echo -e "\t\t(Default: UserDefined)"
+
+    echo -e "--evttimeout \ttimeout waiting for event (writing TX to ledger) [unit: ms]"
+    echo -e "\t\t(Default: 3600000)"
+
+    echo -e "--reqtimeout \ttimeout waiting for response from orderer for a broadcast TX request [unit: ms]"
+    echo -e "\t\t(Default: 45000)"
+
+    echo -e "--grpctimeout \ttimeout waiting for set up grpc connection from PTE client to peer or to orderer [unit: ms]"
+    echo -e "\t\t(Default: 30000)"
 
     echo -e "examples:"
     echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
@@ -145,11 +154,14 @@ echo "***      NPROC: $NPROC                                   "
 echo "***      NREQ: $NREQ                                     "
 echo "***      TXType: $TXType                                 "
 echo "***      TXMODE: $TXMODE                                 "
-echo "***      FREQ: $FREQ                                     "
+echo "***      FREQ: $FREQ ms                                  "
 echo "***      TARGETPEERS: $TARGETPEERS                       "
 echo "***      TARGETORDERERS: $TARGETORDERERS                 "
-echo "***      RUNDUR: $RUNDUR                                 "
+echo "***      RUNDUR: $RUNDUR sec                             "
 echo "***      KEYSTART: $KEYSTART                             "
+echo "***      EVENT TIMEOUT: $EVTTIMEOUT ms                   "
+echo "***      REQUEST TIMEOUT: $REQTIMEOUT ms                 "
+echo "***      GRPC WAIT TIMEOUT: $GRPCTIMEOUT ms              "
 echo "***                                                      "
 echo "***  validation parameters                               "
 echo "***      CHKPEERS: $CHKPEERS                             "
@@ -204,6 +216,9 @@ CHKPEERS="ORGANCHOR"
 CHKTX="LAST"
 CHKTXNUM=1
 TARGETORDERERS="UserDefined"
+EVTTIMEOUT=3600000
+REQTIMEOUT=45000
+GRPCTIMEOUT=30000
 
 # chaincode path
 CCPathsamplecc="github.com/hyperledger/fabric-test/chaincodes/samplecc/go"
@@ -315,38 +330,25 @@ PreCFGProc() {
 # create PTE input json: transaction
 # $1: cfg json
 # $2: invoke type
-# $3: number of proc
-# $4: transaction frequency
-# $5: number of transaction request
-# $6: run duration
-# $7: transaction mode
-# $8: target peers
 PreTXProc() {
 
     cfgTX=${1}
     invokeType=${2}
-    nproc=${3}
-    freq=${4}
-    nreq=${5}
-    rundur=${6}
-    transmode=${7}
-    targetpeers=${8}
-    chkpeers=${9}
-    chktx=${10}
-    chktxnum=${11}
-    targetorderers=${12}
 
         sed -i -e "s/_INVOKETYPE_/$invokeType/g" $cfgTX
-        sed -i -e "s/_NPROC_/$nproc/g" $cfgTX
-        sed -i -e "s/_FREQ_/$freq/g" $cfgTX
-        sed -i -e "s/_NREQ_/$nreq/g" $cfgTX
-        sed -i -e "s/_RUNDUR_/$rundur/g" $cfgTX
-        sed -i -e "s/_TRANSMODE_/$transmode/g" $cfgTX
-        sed -i -e "s/_TARGETPEERS_/$targetpeers/g" $cfgTX
-        sed -i -e "s/_CHKPEERS_/$chkpeers/g" $cfgTX
-        sed -i -e "s/_CHKTX_/$chktx/g" $cfgTX
-        sed -i -e "s/_CHKTXNUM_/$chktxnum/g" $cfgTX
-        sed -i -e "s/_TARGETORDERERS_/$targetorderers/g" $cfgTX
+        sed -i -e "s/_NPROC_/$NPROC/g" $cfgTX
+        sed -i -e "s/_FREQ_/$FREQ/g" $cfgTX
+        sed -i -e "s/_NREQ_/$NREQ/g" $cfgTX
+        sed -i -e "s/_RUNDUR_/$RUNDUR/g" $cfgTX
+        sed -i -e "s/_TRANSMODE_/$TXMODE/g" $cfgTX
+        sed -i -e "s/_TARGETPEERS_/$TARGETPEERS/g" $cfgTX
+        sed -i -e "s/_CHKPEERS_/$CHKPEERS/g" $cfgTX
+        sed -i -e "s/_CHKTX_/$CHKTX/g" $cfgTX
+        sed -i -e "s/_CHKTXNUM_/$CHKTXNUM/g" $cfgTX
+        sed -i -e "s/_TARGETORDERERS_/$TARGETORDERERS/g" $cfgTX
+        sed -i -e "s/_EVTTIMEOUT_/$EVTTIMEOUT/g" $cfgTX
+        sed -i -e "s/_REQTIMEOUT_/$REQTIMEOUT/g" $cfgTX
+        sed -i -e "s/_GRPCTIMEOUT_/$GRPCTIMEOUT/g" $cfgTX
         rm -f $cfgTX"-e"
 }
 
@@ -482,7 +484,7 @@ TransactionProc() {
 
                 # create PTE transaction configuration input json
                 PreCFGProc $pteCfgTX $scfile.json $chan $chaincode
-                PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE $TARGETPEERS $CHKPEERS $CHKTX $CHKTXNUM $TARGETORDERERS
+                PreTXProc $pteTXopt $INVOKETYPE
 
                 runCaseTX=runCasesTX-$fname".txt"
                 tmp=$runDir/$pteCfgTX
@@ -721,6 +723,27 @@ while [[ $# -gt 0 ]]; do
           shift
           TARGETORDERERS=$1
           echo -e "\t- Specify ordererOpt method: $TARGETORDERERS\n"
+          shift
+          ;;
+
+      --evttimeout)
+          shift
+          EVTTIMEOUT=$1
+          echo -e "\t- Specify event timeout: $EVTTIMEOUT\n"
+          shift
+          ;;
+
+      --reqtimeout)
+          shift
+          REQTIMEOUT=$1
+          echo -e "\t- Specify request timeout: $REQTIMEOUT\n"
+          shift
+          ;;
+
+      --grpctimeout)
+          shift
+          GRPCTIMEOUT=$1
+          echo -e "\t- Specify GRPC timeout: $GRPCTIMEOUT\n"
           shift
           ;;
 

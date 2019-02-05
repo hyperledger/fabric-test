@@ -31,7 +31,7 @@
     "eventOpt": {
         "type": "FilteredBlock",
         "listener": "Block",
-        "timeout": "240000"
+        "timeout": "_EVTTIMEOUT_"
     },
     "failoverOpt": {
         "method": "RoundRobin",
@@ -47,6 +47,7 @@
     },
     "timeoutOpt": {
         "preConfig": "200000",
-        "request": "45000"
+        "request": "_REQTIMEOUT_",
+        "grpcTimeout": "_GRPCTIMEOUT_"
     }
 }
