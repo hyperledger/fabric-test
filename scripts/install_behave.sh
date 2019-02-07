@@ -52,6 +52,7 @@ pip install cython
 pip install psutil
 # commenting out until we can get started using Java SDK in test runs
 #pip install pyjnius
+pip install interruptingcow
 
 # Install Tcl prerequisites for busywork
 apt-get install --yes tcl tclx tcllib

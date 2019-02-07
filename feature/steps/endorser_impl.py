@@ -63,7 +63,7 @@ def step_impl(context, path, args, name, language, peer, channel, timeout):
     deploy_impl(context, path, args, name, language, peer, channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with version "{version}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
-def deploy_impl(context, path, args, name, language, peer, channel, version=0, timeout=300, username="Admin", policy=None):
+def deploy_impl(context, path, args, name, language, peer, channel, version=0, timeout=60, username="Admin", policy=None):
     context.interface.deploy_chaincode(context, path, args, name, language, peer, username, timeout, channel, version, policy=policy)
 
 @when(u'an admin deploys chaincode at path "{path}" with version "{version}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}"')
@@ -76,15 +76,15 @@ def step_impl(context, path, args, name, language, channel, version):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with policy {policy}')
 def step_impl(context, path, args, policy):
-    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, 300, policy=policy)
+    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, policy=policy)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}"')
 def step_impl(context, path, args, name, language, peer, channel):
-    deploy_impl(context, path, args, name, language, peer, channel, 300)
+    deploy_impl(context, path, args, name, language, peer, channel)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, peer, channel, timeout):
-    deploy_impl(context, path, args, name, "GOLANG", peer, channel, timeout)
+    deploy_impl(context, path, args, name, "GOLANG", peer, channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" to "{peer}" on channel "{channel}"')
 def step_impl(context, path, args, name, peer, channel):
@@ -100,7 +100,7 @@ def step_impl(context, path, args, name, org):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, language, channel, timeout):
-    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel, timeout)
+    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" on channel "{channel}"')
 def step_impl(context, path, args, name, language, channel):
@@ -108,7 +108,7 @@ def step_impl(context, path, args, name, language, channel):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, language, timeout):
-    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
+    deploy_impl(context, path, args, name, language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" with language "{language}"')
 def step_impl(context, path, args, name, language):
@@ -116,7 +116,7 @@ def step_impl(context, path, args, name, language):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with language "{language}" within {timeout:d} seconds')
 def step_impl(context, path, args, language, timeout):
-    deploy_impl(context, path, args, "mycc", language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
+    deploy_impl(context, path, args, "mycc", language, "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with language "{language}"')
 def step_impl(context, path, args, language):
@@ -124,7 +124,7 @@ def step_impl(context, path, args, language):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, channel, timeout):
-    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel, timeout)
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" on channel "{channel}"')
 def step_impl(context, path, args, name, channel):
@@ -132,7 +132,7 @@ def step_impl(context, path, args, name, channel):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}" within {timeout:d} seconds')
 def step_impl(context, path, args, name, timeout):
-    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
+    deploy_impl(context, path, args, name, "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} with name "{name}"')
 def step_impl(context, path, args, name):
@@ -140,7 +140,7 @@ def step_impl(context, path, args, name):
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args} within {timeout:d} seconds')
 def step_impl(context, path, args, timeout):
-    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout)
+    deploy_impl(context, path, args, "mycc", "GOLANG", "peer0.org1.example.com", context.interface.TEST_CHANNEL_ID, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with args {args}')
 def step_impl(context, path, args):
@@ -154,7 +154,7 @@ def step_impl(context, channel, args, timeout):
                 "mycc",
                 "GOLANG",
                 "peer0.org1.example.com",
-                channel, timeout)
+                channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode on channel "{channel}" with args {args}')
 def step_impl(context, channel, args):
@@ -174,7 +174,7 @@ def step_impl(context, channel, timeout):
                 "mycc",
                 "GOLANG",
                 "peer0.org1.example.com",
-                channel, timeout)
+                channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode on channel "{channel}"')
 def step_impl(context, channel):
@@ -194,7 +194,7 @@ def step_impl(context, name, channel, timeout):
                 name,
                 "GOLANG",
                 "peer0.org1.example.com",
-                channel, timeout)
+                channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode with name "{name}" on channel "{channel}"')
 def step_impl(context, name, channel):
@@ -215,7 +215,6 @@ def step_impl(context, args, policy):
                 "GOLANG",
                 "peer0.org1.example.com",
                 context.interface.TEST_CHANNEL_ID,
-                300,
                 policy=policy)
 
 @when(u'an admin deploys chaincode with args {args} within {timeout:d} seconds')
@@ -226,7 +225,7 @@ def step_impl(context, args, timeout):
                 "mycc",
                 "GOLANG",
                 "peer0.org1.example.com",
-                context.interface.TEST_CHANNEL_ID, timeout)
+                context.interface.TEST_CHANNEL_ID, timeout=timeout)
 
 @when(u'an admin deploys chaincode with args {args}')
 def step_impl(context, args):
@@ -246,7 +245,7 @@ def step_impl(context, timeout):
                 "mycc",
                 "GOLANG",
                 "peer0.org1.example.com",
-                context.interface.TEST_CHANNEL_ID, timeout)
+                context.interface.TEST_CHANNEL_ID, timeout=timeout)
 
 @when(u'an admin deploys chaincode')
 def step_impl(context):

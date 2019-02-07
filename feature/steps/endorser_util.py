@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import time
+from interruptingcow import timeout
 import common_util
 
 try:
@@ -48,12 +49,12 @@ class InterfaceBase:
                 peers.append(container)
         return peers
 
-    def deploy_chaincode(self, context, path, args, name, language, peer, username, timeout, channel=TEST_CHANNEL_ID, version=0, policy=None):
+    def deploy_chaincode(self, context, path, args, name, language, peer, username, seconds, channel=TEST_CHANNEL_ID, version=0, policy=None):
         self.pre_deploy_chaincode(context, path, args, name, language, channel, version, policy)
         all_peers = self.get_peers(context)
         self.install_chaincode(context, all_peers, username)
         self.instantiate_chaincode(context, peer, username)
-        self.post_deploy_chaincode(context, peer, timeout)
+        self.post_deploy_chaincode(context, peer, seconds)
 
     def pre_deploy_chaincode(self, context, path, args, name, language, channelId=TEST_CHANNEL_ID, version=0, policy=None):
         orderers = self.get_orderers(context)
@@ -71,12 +72,12 @@ class InterfaceBase:
         if policy:
             context.chaincode['policy'] = policy
 
-    def post_deploy_chaincode(self, context, peer, timeout):
+    def post_deploy_chaincode(self, context, peer, seconds):
         chaincode_container = "{0}-{1}-{2}-{3}".format(context.projectName,
                                                        peer,
                                                        context.chaincode['name'],
                                                        context.chaincode.get("version", 0))
-        context.interface.wait_for_deploy_completion(context, chaincode_container, timeout)
+        context.interface.wait_for_deploy_completion(context, chaincode_container, seconds)
 
     def channel_block_present(self, context, containers, channelId):
         ret = False
@@ -96,7 +97,7 @@ class InterfaceBase:
         max_waittime=15
         waittime=5
         try:
-            with common_util.Timeout(max_waittime):
+            with timeout(max_waittime, exception=Exception):
                 while org not in context.initial_leader:
                     for container in self.get_peers(context):
                         if ((org in container) and common_util.get_leadership_status(container)):
@@ -128,7 +129,7 @@ class InterfaceBase:
             string = re.sub(item, str(dictionary[item]), string)
         return string
 
-    def wait_for_deploy_completion(self, context, chaincode_container, timeout):
+    def wait_for_deploy_completion(self, context, chaincode_container, seconds):
         pass
 
     def install_chaincode(self, context, peers, user="Admin"):
@@ -335,13 +336,13 @@ class SDKInterface(InterfaceBase):
         print("Query Result: {}".format(result))
         return {peer: result}
 
-    def wait_for_deploy_completion(self, context, chaincode_container, timeout):
+    def wait_for_deploy_completion(self, context, chaincode_container, seconds):
         if context.remote:
             time.sleep(30)
 
-        containers = subprocess.check_output(["docker ps -a"], shell=True)
         try:
-            with common_util.Timeout(timeout):
+            containers = subprocess.check_output(["docker ps -a"], shell=True)
+            with timeout(seconds, exception=Exception):
                 while chaincode_container not in containers:
                     containers = subprocess.check_output(["docker ps -a"], shell=True)
                     time.sleep(1)
@@ -349,7 +350,7 @@ class SDKInterface(InterfaceBase):
             assert chaincode_container in containers, "The expected chaincode container {0} is not running\n{1}".format(chaincode_container, containers)
 
         # Allow time for chaincode initialization to complete
-        time.sleep(15)
+        time.sleep(5)
 
 
 class NodeSDKInterface(SDKInterface):
@@ -568,11 +569,11 @@ class CLIInterface(InterfaceBase):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
         # Ideally this would NOT be a 5 minute timeout, but more like a 2 minute timeout.
-        timeout = 300 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s'))
+        seconds = 300 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s'))
         command = ["peer", "channel", "create",
                    "--file", "/var/hyperledger/configs/{0}/{1}.tx".format(context.composition.projectName, channelId),
                    "--channelID", channelId,
-                   "--timeout", "{}s".format(timeout),
+                   "--timeout", "{}s".format(seconds),
                    "--orderer", '{0}:7050'.format(orderer)]
         if context.tls:
             command = command + ["--tls",
@@ -903,10 +904,10 @@ class CLIInterface(InterfaceBase):
         output = context.composition.docker_exec(["fabric-ca-client identity list"], [peer])
         print("Ident List: {}".format(output))
 
-    def wait_for_deploy_completion(self, context, chaincode_container, timeout):
-        containers = subprocess.check_output(["docker ps -a"], shell=True)
+    def wait_for_deploy_completion(self, context, chaincode_container, seconds):
         try:
-            with common_util.Timeout(timeout):
+            containers = subprocess.check_output(["docker ps -a"], shell=True)
+            with timeout(seconds, exception=Exception):
                 while chaincode_container not in containers:
                     containers = subprocess.check_output(["docker ps -a"], shell=True)
                     time.sleep(1)

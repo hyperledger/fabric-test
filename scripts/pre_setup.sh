@@ -24,3 +24,9 @@ node -v
 ###################
 echo "Install govendor"
 go get -u github.com/kardianos/govendor
+
+###########################
+# Install interrupting cow
+###########################
+echo "Install interruptingcow"
+python -m pip install --user --quiet interruptingcow
