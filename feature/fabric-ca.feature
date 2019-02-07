@@ -7,7 +7,6 @@
 Feature: Fabric-CA Service
     As a user I want to be able to use the Fabric-CA for generation of certificates
 
-#@doNotDecompose
 @interop
 @daily
 Scenario Outline: FAB-6489: Interoperability Test using <type> based orderer with a <database> db using the <interface> with <language> chaincode
@@ -34,11 +33,11 @@ Scenario Outline: FAB-6489: Interoperability Test using <type> based orderer wit
     Then a user receives a success response of 980
     # We should use the JavaSDK once the TLS version of this is working correctly
 Examples:
-    | type  | database | interface  |                          path                                     | language |
-    #| solo  | leveldb  |  Java SDK  | github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd |  GOLANG  |
-    | solo  | leveldb  | NodeJS SDK | github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd |  GOLANG  |
-    | kafka | couchdb  |    CLI     |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
-    | solo  | leveldb  | NodeJS SDK |   ../../fabric-samples/chaincode/chaincode_example02/java         |   JAVA   |
+    | type  | database | interface  |                          path                                  | language |
+    #| solo  | leveldb  |  Java SDK  | github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd |  GOLANG  |
+    | solo  | leveldb  | NodeJS SDK | github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd |  GOLANG  |
+    | kafka | couchdb  |    CLI     |        ../../fabric-test/chaincodes/example02/node             |   NODE   |
+    | solo  | leveldb  | NodeJS SDK |   ../../fabric-samples/chaincode/chaincode_example02/java      |   JAVA   |
 
 
 @daily
@@ -65,10 +64,10 @@ Scenario Outline: FAB-11621: JavaSDK interoperability Test using <language> chai
     When a user "latitia" queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 980
 Examples:
-    |                          path                                     | language |
-    | github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd |  GOLANG  |
-    |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
-    |   ../../fabric-samples/chaincode/chaincode_example02/java         |   JAVA   |
+    |                          path                                  | language |
+    | github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd |  GOLANG  |
+    |        ../../fabric-test/chaincodes/example02/node             |   NODE   |
+    |   ../../fabric-samples/chaincode/chaincode_example02/java      |   JAVA   |
 
     #@daily
     #Scenario Outline: FAB-11728: Identity Mixer Test Happy Path
@@ -96,6 +95,6 @@ Examples:
     #    Then a user receives a success response of 980
     #Examples:
     #    | interface  |                                     path                                                | language |
-    #    |    CLI     |            github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd            |  GOLANG  |
+    #    |    CLI     |            github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd            |  GOLANG  |
     #    |  Java SDK  | github.com/hyperledger/fabric-sdk-java/chaincode/gocc/sample1/src/github.com/example_cc |  GOLANG  |
     #    | NodeJS SDK |                   ../../fabric-test/chaincodes/example02/java                           |   JAVA   |

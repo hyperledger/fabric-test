@@ -102,7 +102,7 @@ def after_scenario(context, scenario):
 
 def before_all(context):
     # Be sure to use a fresh install of the vendored packages for this chaincode
-    shutil.rmtree("../fabric/examples/chaincode/go/enccc_example/vendor", ignore_errors=True)
+    shutil.rmtree("../chaincodes/enccc_example/vendor", ignore_errors=True)
 
     # Performing `npm install` before test suit not before test cases.
     shutil.rmtree("./node_modules", ignore_errors=True)

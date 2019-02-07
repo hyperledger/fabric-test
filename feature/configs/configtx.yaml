@@ -27,19 +27,11 @@ Capabilities:
     # supported by both.  Set the value of the capability to true to require it.
     Global: &ChannelCapabilities
         V1_3: true
-        # (V1_2 not defined in fabric)
-        # Note: older ones are superceded, e.g. V1_3 capabilities include V1_1.
-        # Thus, those like V1_1 need not be set if V1_3 or later is set true.
-        # But keep them, to allow disabling V1_3 when bringing up a new test
-        # network, if desired, possibly in anticipation of an upgrade test.
-        V1_1: true
 
     # Orderer capabilities apply only to the orderers, and may be safely
     # manipulated without concern for upgrading peers.  Set the value of the
     # capability to true to require it.
     Orderer: &OrdererCapabilities
-        # (V1_3 not defined in fabric)
-        # (V1_2 not defined in fabric)
         V1_1: true
 
     # Application capabilities apply only to the peer network, and may be safely
@@ -47,14 +39,6 @@ Capabilities:
     # capability to true to require it.
     Application: &ApplicationCapabilities
         V1_3: true
-        V1_2: true
-        # Note: older ones are superceded, e.g. V1_2 capabilities include V1_1.
-        # Thus, older ones like V1_1 need not be set if we set V1_2 or later.
-        # But keep them all; that would allow tester to override and disable
-        # newer ones like Capabilities.Global.V1_3 and
-        # Capabilities.Application.V1_3 when bringing up a new test network,
-        # if desired, possibly in anticipation of an upgrade test.
-        V1_1: true
 
 ################################################################################
 #
@@ -81,6 +65,9 @@ Organizations:
             Admins:
                 Type: Signature
                 Rule: "OR('example.com.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('example.com.member')"
 
     - &Org1ExampleCom
         Name: Org1ExampleCom
@@ -100,6 +87,9 @@ Organizations:
             Admins:
                 Type: Signature
                 Rule: "OR('org1.example.com.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('org1.example.com.member')"
 
     - &Org2ExampleCom
         Name: Org2ExampleCom
@@ -119,6 +109,9 @@ Organizations:
             Admins:
                 Type: Signature
                 Rule: "OR('org2.example.com.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('org2.example.com.member')"
 
 ################################################################################
 #
@@ -133,48 +126,23 @@ Orderer: &OrdererDefaults
     # Orderer Type: The orderer implementation to start.
     # Available types are "solo" and "kafka".
     OrdererType: solo
-
     Addresses:
         - orderer0.example.com:7050
 
-    # Batch Timeout: The amount of time to wait before creating a batch.
     BatchTimeout: 2s
-
-    # Batch Size: Controls the number of messages batched into a block.
     BatchSize:
-
-        # Max Message Count: The maximum number of messages to permit in a
-        # batch.
         MaxMessageCount: 10
-
-        # Absolute Max Bytes: The absolute maximum number of bytes allowed for
-        # the serialized messages in a batch. If the "kafka" OrdererType is
-        # selected, set 'message.max.bytes' and 'replica.fetch.max.bytes' on the
-        # Kafka brokers to a value that is larger than this one.
         AbsoluteMaxBytes: 98 MB
-
-        # Preferred Max Bytes: The preferred maximum number of bytes allowed for
-        # the serialized messages in a batch. A message larger than the
-        # preferred max bytes will result in a batch larger than preferred max
-        # bytes.
         PreferredMaxBytes: 512 KB
 
-    # Max Channels is the maximum number of channels to allow on the ordering
-    # network. When set to 0, this implies no maximum number of channels.
     MaxChannels: 0
-
     Kafka:
-        # Brokers: A list of Kafka brokers to which the orderer connects. Edit
-        # this list to identify the brokers of the ordering service.
-        # NOTE: Use IP:port notation.
         Brokers:
             - kafka0:9092
             - kafka1:9092
             - kafka2:9092
             - kafka3:9092
 
-    # Organizations is the list of orgs which are defined as participants on
-    # the orderer side of the network.
     Organizations:
 
     # Policies defines the set of policies at this level of the config tree
@@ -190,8 +158,6 @@ Orderer: &OrdererDefaults
         Admins:
             Type: ImplicitMeta
             Rule: "MAJORITY Admins"
-        # BlockValidation specifies what signatures must be included in the block
-        # from the orderer for the peer to validate it.
         BlockValidation:
             Type: ImplicitMeta
             Rule: "ANY Writers"
@@ -215,15 +181,12 @@ Channel: &ChannelDefaults
     # For Channel policies, their canonical path is
     #   /Channel/<PolicyName>
     Policies:
-        # Who may invoke the 'Deliver' API
         Readers:
             Type: ImplicitMeta
             Rule: "ANY Readers"
-        # Who may invoke the 'Broadcast' API
         Writers:
             Type: ImplicitMeta
             Rule: "ANY Writers"
-        # By default, who may modify elements at this config level
         Admins:
             Type: ImplicitMeta
             Rule: "MAJORITY Admins"
@@ -329,6 +292,12 @@ Application: &ApplicationDefaults
         Admins:
             Type: ImplicitMeta
             Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
 
     # Capabilities describes the application level capabilities, see the
     # dedicated Capabilities section elsewhere in this file for a full

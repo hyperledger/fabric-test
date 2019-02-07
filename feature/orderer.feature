@@ -67,8 +67,8 @@ Scenario: FAB-3852: Message Payloads Less than 1MB, for kafka-based orderer usin
     When an admin creates a channel
     When an admin fetches genesis information using peer "peer0.org1.example.com"
     When an admin makes all peers join the channel
-    # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]"
-    When an admin installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""] on all peers
+    # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]"
+    When an admin installs chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""] on all peers
     When an admin instantiates the chaincode on "peer0.org1.example.com"
 
     # 1K
@@ -103,8 +103,8 @@ Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer u
     When an admin creates a channel
     When an admin fetches genesis information using peer "peer0.org1.example.com"
     When an admin makes all peers join the channel
-    # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]"
-    When an admin installs chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""] on all peers
+    # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]"
+    When an admin installs chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""] on all peers
     When an admin instantiates the chaincode on "peer0.org1.example.com"
 
     # 1K
@@ -142,7 +142,7 @@ Scenario Outline: FAB-3851: Message Payloads of size <comment>, for <type> order
     Given I have a bootstrapped fabric network of type <type> using state-database couchdb
     And I use the NodeJS SDK interface
     When an admin sets up a channel
-    And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args [""]
+    And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]
 
     When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length <size>
     And I wait "7" seconds
@@ -176,7 +176,7 @@ Scenario Outline: FAB-3859: Kafka Network with Large Message Size <comment> with
   Given I have a bootstrapped fabric network of type kafka
   And I use the NodeJS SDK interface
   When an admin sets up a channel named "configsz"
-  And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/map" with args ["init"] with name "mapIt" on channel "configsz"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args ["init"] with name "mapIt" on channel "configsz"
 
   When a user invokes on the channel "configsz" using chaincode named "mapIt" with random args ["put","g","{random_value}"] of length <size>
   And I wait "10" seconds
@@ -224,7 +224,7 @@ Examples:
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     When an admin sets up a channel
-    And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+    And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "10" seconds
     And a user queries on the chaincode named "mycc" with args ["query","a"]
@@ -266,7 +266,7 @@ Scenario Outline: [FAB-4770] [FAB-4845]: <takeDownType> all kafka brokers in the
     # and the min ISR is 2(KAFKA_MIN_INSYNC_REPLICAS)
     Given I have a bootstrapped fabric network of type kafka
     When an admin sets up a channel
-    When an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+    When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "5" seconds
     And a user queries on the chaincode named "mycc" with args ["query","a"]
@@ -335,7 +335,7 @@ Scenario Outline: FAB-4808,FAB-3937,FAB-3938: Orderer_BatchTimeOut is honored, f
     Given the CONFIGTX_ORDERER_BATCHTIMEOUT environment variable is <envValue>
     And I have a bootstrapped fabric network of type <type>
     When an admin sets up a channel
-    And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/example02/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+    And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 1000
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
