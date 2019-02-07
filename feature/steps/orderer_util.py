@@ -10,13 +10,6 @@ import datetime
 from pykafka import KafkaClient
 import endorser_util
 
-try:
-    pbFilePath = "../feature-upgrade"
-    sys.path.insert(0, pbFilePath)
-    from common import common_pb2
-except:
-    print("ERROR! Unable to import the protobuf libraries from the ../feature-upgrade directory: {0}".format(sys.exc_info()[0]))
-    sys.exit(1)
 
 def getOrdererList(context):
     # Get the Orderers list from the orderer container name
@@ -88,7 +81,3 @@ def generateMessageEnvelope():
                                  data=str.encode("Functional test: {0}".format(datetime.datetime.utcnow())) )
     envelope = common_pb2.Envelope(payload=payload.SerializeToString())
     return envelope
-
-def _testAccessPBMethods():
-    envelope = generateMessageEnvelope()
-    assert isinstance(envelope, common_pb2.Envelope), "Unable to import protobufs from feature-upgrade directory"

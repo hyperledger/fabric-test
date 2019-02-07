@@ -31,6 +31,7 @@ services:
         environment:
             - FABRIC_CA_HOME=/var/hyperledger/fabric-ca-server
             - FABRIC_CA_SERVER_HOME=/var/hyperledger/fabric-ca-server
+            - FABRIC_CA_SERVER_CSR_HOSTS=0.0.0.0
             - FABRIC_CA_SERVER_TLS_ENABLED=${FABRIC_CA_SERVER_TLS_ENABLED}
             - FABRIC_CA_SERVER_DEBUG=true
         ports:
@@ -39,7 +40,7 @@ services:
             - ../configs/${CORE_PEER_NETWORKID}:/var/hyperledger/fabric-ca-server-config
 
     orderer:
-        image: hyperledger/fabric-ca-orderer
+        image: hyperledger/fabric-orderer
         environment:
             - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${CORE_PEER_NETWORKID}_behave
             - ORDERER_HOME=/var/hyperledger/orderer
@@ -77,7 +78,7 @@ services:
         image: hyperledger/fabric-couchdb
 
     peer:
-        image: hyperledger/fabric-ca-peer
+        image: hyperledger/fabric-peer
         environment:
             - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
             - CORE_PEER_NETWORKID=${CORE_PEER_NETWORKID}
@@ -101,6 +102,7 @@ services:
             - CORE_PEER_TLS_ROOTCERT_FILE=/var/hyperledger/tls/ca.crt
         volumes:
             - /var/run/:/host/var/run/
+            #- ../configs/${CORE_PEER_NETWORKID}:/var/hyperledger
             - ../../../common:/opt/gopath/src/github.com/hyperledger/fabric/common
             - ../../../vendor:/opt/gopath/src/github.com/hyperledger/fabric/vendor
             - ../configs:/var/hyperledger/configs

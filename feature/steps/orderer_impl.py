@@ -23,10 +23,6 @@ PROFILE_TYPES = {"solo": "SampleInsecureSolo",
                  "solo-msp": "SampleSingleMSPSolo"}
 
 
-@given(u'I test the access to the generated python protobuf files')
-def step_impl(context):
-    orderer_util._testAccessPBMethods()
-
 @given(u'a bootstrapped orderer network of type {ordererType}')
 def step_impl(context, ordererType):
     basic_impl.bootstrapped_impl(context, ordererType)
