@@ -28,7 +28,7 @@ function printHelp {
    echo "    -p: number of peers per organization, default=1"
    echo "    -r: number of organizations, default=1"
    echo "    -s: security type, default=256"
-   echo "    -t: ledger orderer service type [solo|kafka], default=solo"
+   echo "    -t: ledger orderer service type [solo|kafka|etcdraft], default=solo"
    echo "    -w: host ip, default=0.0.0.0"
    echo "    -l: core logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
    echo "    -q: orderer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
@@ -48,6 +48,7 @@ function printHelp {
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S serverauth "
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S clientauth -l INFO -q DEBUG"
    echo " ./networkLauncher.sh -o 1 -x 5 -r 5 -p 1 -k 1 -z 1 -n 1 -C trade.com -M sampleOrgMap.json -t kafka -f test -w localhost -S enabled"
+   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -n 3 -t etcdraft -f test -w localhost -S serverauth "
    exit
 }
 
@@ -234,16 +235,23 @@ if [ $TLSEnabled == "serverauth" ]; then
 fi
 
 echo "TLSEnabled $TLSEnabled, MutualTLSEnabled $MutualTLSEnabled"
-#if [ $nCA -eq 0 ]; then
-#   nCA=$nOrg
-#fi
+
+orderering=$(echo $ordServType | awk '{print tolower($ordServType)}')
+if [ $orderering == "etcdraft" ]; then
+    nKafka=0
+    nZoo=0
+fi
 
 if [ $nReplica -eq 0 ]; then
     nReplica=$nKafka
 fi
 
-# sanity check
-echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer, nZoo=$nZoo"
+# input vars
+if [ $orderering == "etcdraft" ]; then
+    echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nOrderer=$nOrderer"
+else
+    echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer, nZoo=$nZoo"
+fi
 echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType, comName=$comName"
 
 CHAN_PROFILE=$PROFILE_STRING"Channel"

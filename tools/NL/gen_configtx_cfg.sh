@@ -25,7 +25,7 @@ function printHelp {
    echo "    -h: hash type, default=SHA2"
    echo "    -r: number of organization, default=1"
    echo "    -s: security service type, default=256"
-   echo "    -t: orderer service [solo|kafka], default=solo"
+   echo "    -t: orderer service [solo|kafka|etcdraft], default=solo"
    echo "    -f: profile name, default=test"
    echo "    -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
    echo "    -w: host ip 1, default=0.0.0.0"
@@ -259,6 +259,26 @@ do
 
       elif [ "$t1" == "OrdererType:" ]; then
           echo "    $t1 $ordServType" >> $cfgOutFile
+          if [ "$ordServType" == "etcdraft" ]; then
+              echo "    EtcdRaft:" >> $cfgOutFile
+              tmp="Consenters:"
+              echo "      $tmp" >> $cfgOutFile
+              for (( i=1; i<=$nOrderer; i++  ))
+              do
+                  j=$[ i - 1 ]
+                  tmpAddr="orderer"$j"."$comName
+                  tmp="- Host: $tmpAddr"
+                  echo "      $tmp" >> $cfgOutFile
+                  tmpPort=$[ ordererPort + j ]
+                  tmp="Port: "$tmpPort
+                  echo "        $tmp" >> $cfgOutFile
+                  OrdCert=$MSPBaseDir/"ordererOrganizations/$comName/orderers/"$tmpAddr"/tls/server.crt"
+                  tmp="ClientTLSCert: "$OrdCert
+                  echo "        $tmp" >> $cfgOutFile
+                  tmp="ServerTLSCert: "$OrdCert
+                  echo "        $tmp" >> $cfgOutFile
+              done
+          fi
 
       elif [ "$t1" == "&ProfileOrderString" ]; then
           tmp=$PROFILE_STRING"OrgsOrdererGenesis"
@@ -298,6 +318,29 @@ do
       elif [ "$t1" == "MaxMessageCount:" ]; then
           echo "        $t1 $batchSize" >> $cfgOutFile
 
+      elif [ "$t2" == "*OrdererDefaults" ]; then
+          echo "**OrdererDefaults ... "
+          echo "$line" >> $cfgOutFile
+          if [ "$ordServType" == "etcdraft" ]; then
+              echo "            EtcdRaft:" >> $cfgOutFile
+              tmp="Consenters:"
+              echo "              $tmp" >> $cfgOutFile
+              for (( i=1; i<=$nOrderer; i++  ))
+              do
+                  j=$[ i - 1 ]
+                  tmpAddr="orderer"$j"."$comName
+                  tmp="- Host: $tmpAddr"
+                  echo "                $tmp" >> $cfgOutFile
+                  tmpPort=$[ ordererPort + j ]
+                  tmp="Port: "$tmpPort
+                  echo "                  $tmp" >> $cfgOutFile
+                  OrdCert=$MSPBaseDir/"ordererOrganizations/$comName/orderers/"$tmpAddr"/tls/server.crt"
+                  tmp="ClientTLSCert: "$OrdCert
+                  echo "                  $tmp" >> $cfgOutFile
+                  tmp="ServerTLSCert: "$OrdCert
+                  echo "                  $tmp" >> $cfgOutFile
+              done
+          fi
       elif [ "$t2" == "*OrdererOrg" ]; then
           echo "*OrdererOrg ... "
           #Save this idea for later; the cryptogen tool version only supports one OrdererOrg for now.

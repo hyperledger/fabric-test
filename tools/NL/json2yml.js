@@ -78,14 +78,18 @@ if ( process.env.CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT != null ) {
     ord_env_name.push('CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT);
 }
+
+var ORDERERTYPE='solo';
 if ( process.env.CONFIGTX_ORDERER_ORDERERTYPE != null ) {
     console.log(' CONFIGTX_ORDERER_ORDERERTYPE= ', process.env.CONFIGTX_ORDERER_ORDERERTYPE);
     ord_env_name.push('CONFIGTX_ORDERER_ORDERERTYPE');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_ORDERERTYPE);
+    ORDERERTYPE=process.env.CONFIGTX_ORDERER_ORDERERTYPE;
     if ( process.env.CONFIGTX_ORDERER_ORDERERTYPE == 'kafka' ) {
        KAFKA=1;
     }
 }
+console.log('ORDERERTYPE: ', ORDERERTYPE);
 if ( process.env.CONFIGTX_ORDERER_BATCHTIMEOUT != null ) {
     console.log(' CONFIGTX_ORDERER_BATCHTIMEOUT= ', process.env.CONFIGTX_ORDERER_BATCHTIMEOUT);
     ord_env_name.push('CONFIGTX_ORDERER_BATCHTIMEOUT');
@@ -466,6 +470,21 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                              buff = buff + ', ' + peerCA;
                                         }
                                         buff = buff + ']'+'\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    }
+
+                                    // RAFT orderering service
+                                    if ( ORDERERTYPE.toUpperCase() == 'ETCDRAFT' ) {
+                                        var serv=OrdTLSDir+'/server.key';
+                                        buff = '  ' + '    - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY='+serv+'\n';
+                                        fs.appendFileSync(dFile, buff);
+
+                                        serv=OrdTLSDir+'/server.crt';
+                                        buff = '  ' + '    - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE='+serv+'\n';
+                                        fs.appendFileSync(dFile, buff);
+
+                                        serv=OrdTLSDir+'/ca.crt';
+                                        buff = '  ' + '    - ORDERER_GENERAL_CLUSTER_ROOTCAS='+serv+'\n';
                                         fs.appendFileSync(dFile, buff);
                                     }
                                 }

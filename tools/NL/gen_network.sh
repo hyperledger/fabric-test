@@ -35,7 +35,7 @@ function printHelp {
    echo "       -d: core ledger state DB [goleveldb|couchdb], default=goleveldb"
    echo " "
    echo "    orderer environment variables"
-   echo "       -t: orderer type [solo|kafka] "
+   echo "       -t: orderer type [solo|kafka|etcdraft] "
    echo "       -q: orderer logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
    echo " "
    echo "Example:"
