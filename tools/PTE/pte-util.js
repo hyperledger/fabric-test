@@ -330,7 +330,8 @@ function PTELogger(opts) {
         logger[method] = (function (context, tag, f) {
             return function () {
                 if (arguments.length > 0) {
-                    var prefix = '[' + tag + ']: ';
+                    var timenow=new Date().toISOString();
+                    var prefix = '[' + timenow + ' ' + tag + ']: ';
                     arguments[0] = prefix + arguments[0];
                 }
 

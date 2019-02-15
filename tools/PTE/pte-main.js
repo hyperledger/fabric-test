@@ -51,6 +51,10 @@ var PTEid = parseInt(process.argv[5]);
 var loggerMsg='PTE ' + PTEid + ' main';
 var logger = new testUtil.PTELogger({"prefix":loggerMsg, "level":"info"});
 
+// output local time
+var localTime = new Date();
+logger.info('The local time is: %j', localTime.toLocaleString());
+
 var Nid = parseInt(process.argv[2]);
 var uiFile = process.argv[3];
 var tStart = parseInt(process.argv[4]);
@@ -1359,9 +1363,9 @@ async function performance_main() {
                 workerProcess.on('close', function (code) {
                 });
 
-                workerProcess.on('exit', function (code) {
+                workerProcess.on('exit', function (code, signal) {
                     procDone = procDone+1;
-                    logger.info("Child proc exited, procId=%d ,exit code=%d",procDone, code );
+                    logger.info("Child proc exited, procId= " + procDone + ", exit with code= " + code + " and signal= " + signal);
 
                     if ( procDone === nProcPerOrg*channelOrgName.length ) {
 
