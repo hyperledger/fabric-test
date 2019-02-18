@@ -318,3 +318,26 @@ Scenario: FAB-13971: Test adding new org using new chaincode lifecycle
   Then a user receives a success response of 950
   When a user queries on the chaincode with args ["query","a"] from "peer0.org2.example.com"
   Then a user receives a success response of 960 from "peer0.org2.example.com"
+
+
+@daily
+Scenario: FAB-13959: An admin from an org does not install chaincode package
+  Given I changed the "Application" capability to version "V2_0"
+  And I have a bootstrapped fabric network of type solo
+  And I want to use the new chaincode lifecycle
+  When an admin sets up a channel
+  #When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc2"
+  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "17.0.1" with name "helloNurse"
+  #When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "17.0.1" with name "helloNurse" written in "GOLANG" using peer "peer0.org1.example.com"
+  And the organization admins install the built "helloNurse" chaincode package on peer "peer0.org1.example.com"
+  Then a hash value is received on peer "peer0.org1.example.com"
+  When the organization admins install the built "helloNurse" chaincode package on peer "peer1.org1.example.com"
+  Then a hash value is received on peer "peer1.org1.example.com"
+  # Note install does not take place on org2 peers
+  When each organization admin approves the chaincode package with policy "OR ('org1.example.com.member','org2.example.com.member')"
+  # Failed: peer lifecycle chaincode approveformyorg --name mycc2 --channelID behavesystest --version 2 --peerAddresses 192.168.240.6:7051 --peerAddresses 192.168.240.7:7051 --hash 730045c6268d8b4dc31800b0bee475b3c9776d59734f91ac8e130b03d4a025c5 --sequence 1 --init-required --waitForEvent --orderer orderer0.example.com:7050 --policy \\"OR (\'org1.example.com.member\',\'org2.example.com.member\')\\" "']: Error: error endorsing proposal: rpc error: code = Unknown desc = access denied: channel [behavesystest] creator org [org1.example.com]
+  And an admin commits the chaincode package to the channel
+  Then a user receives a response containing 'Error: could not assemble transaction: ProposalResponsePayloads do not match' from "peer0.org1.example.com"
+  #  And I wait up to "10" seconds for the chaincode to be committed
+  #  Then a user receives a response containing 'error endorsing proposal' from "peer0.org2.example.com"
+  #  Then a user receives a response containing '<Error Message>' from "peer1.org2.example.com"
