@@ -520,3 +520,17 @@ Scenario: FAB-13968: Upgrade chaincode for different orgs, but committing the ch
   And a user invokes on the chaincode with args ["init","a","1000","b","2000"]
   When a user queries on the chaincode with args ["query","a"]
   Then a user receives a success response of 1000
+
+
+@daily
+Scenario: FAB-13960: Using the wrong hash in approveformyorg
+  Given I changed the "Application" capability to version "V2_0"
+  And I have a bootstrapped fabric network of type solo
+  And I want to use the new chaincode lifecycle
+  When an admin sets up a channel
+  And an admin packages a chaincode
+  And the organization admins install the chaincode package on all peers
+  Then a hash value is received on all peers
+  When an admin approves the chaincode package on peer "peer0.org1.example.com" using hash "1234567890" with policy "OR ('org1.example.com.member','org2.example.com.member')"
+  And an admin commits the chaincode package to the channel
+  Then a user receives a response containing 'Error: could not assemble transaction: ProposalResponsePayloads do not match' from "peer0.org1.example.com"
