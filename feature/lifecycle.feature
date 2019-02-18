@@ -534,3 +534,15 @@ Scenario: FAB-13960: Using the wrong hash in approveformyorg
   When an admin approves the chaincode package on peer "peer0.org1.example.com" using hash "1234567890" with policy "OR ('org1.example.com.member','org2.example.com.member')"
   And an admin commits the chaincode package to the channel
   Then a user receives a response containing 'Error: could not assemble transaction: ProposalResponsePayloads do not match' from "peer0.org1.example.com"
+
+
+@daily
+Scenario: FAB-13961: install command with mismatched packages
+  Given I changed the "Application" capability to version "V2_0"
+  And I have a bootstrapped fabric network of type solo
+  And I want to use the new chaincode lifecycle
+  When an admin sets up a channel
+  And an admin packages a chaincode
+
+  And the organization admins install the built "mycc2" chaincode package on all peers
+  Then a user receives a response containing 'no such file or directory' from "peer0.org1.example.com"
