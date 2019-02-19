@@ -43,7 +43,8 @@
         "txNum": "_CHKTXNUM_"
     },
     "ordererOpt": {
-        "method": "_TARGETORDERERS_"
+        "method": "_TARGETORDERERS_",
+        "nOrderers": "_NORDERERS_"
     },
     "timeoutOpt": {
         "preConfig": "200000",

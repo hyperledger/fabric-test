@@ -74,6 +74,9 @@ usage () {
     echo -e "\t--targetorderers\ttarget orderers [ROUNDROBIN|USERDEFINED]"
     echo -e "\t\tDefault: ROUNDROBIN."
     echo
+    echo -e "\t--norderers\tnumber of ingress orderers to which transactions will be sent [integer]"
+    echo -e "\t\tDefault: 0 (all orderers participate)."
+    echo
     echo -e "\t-p, --prime\tpriming"
     echo -e "\t\tDefault: none"
     echo
@@ -97,7 +100,7 @@ printVars() {
     echo "input parameters: NETWORK=$NETWORK, chaincode=$chaincode, PRECONFIG=$PRECONFIG"
     echo "input parameters: NCHAN=$NCHAN, NORG=$NORG, LSCDIR=$LSCDir"
     echo "input parameters: TXMODE=$TXMODE, NPROC=$NPROC"
-    echo "input parameters: targetpeers=$targetpeers, targetorderers=$targetorderers"
+    echo "input parameters: targetpeers=$targetpeers, targetorderers=$targetorderers, norderers=$norderers"
     echo "input parameters: NREQ=$NREQ, RUNDUR=$RUNDUR, FREQ=$FREQ, key0=$key0"
     echo "input parameters: PRIME=$PRIME, INVOKE=$INVOKE, QUERY=$QUERY"
     echo ""
@@ -126,6 +129,7 @@ FREQ=0
 NORG=1
 targetpeers="RoundRobin"
 targetorderers="RoundRobin"
+norderers=0
 key0=0
 
 if [ $# -eq 0 ]; then
@@ -233,6 +237,12 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --norderers)
+          shift
+          norderers=$1             # number of orderers participate in transactions
+          shift
+          ;;
+
       -p | --prime)
           PRIME="yes"
           shift
@@ -289,7 +299,7 @@ function PTEexec() {
     fi
 
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
+    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
     CMDResult="$?"
     set +x
     if [ $CMDResult -ne "0" ]; then

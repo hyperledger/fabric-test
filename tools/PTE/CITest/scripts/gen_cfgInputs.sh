@@ -88,6 +88,9 @@ usage () {
     echo -e "--targetorderers\ttransaction target orderer [UserDefined|RoundRobin]"
     echo -e "\t\t(Default: UserDefined)"
 
+    echo -e "--norderers\tnumber of ingress orderers to which transactions will be sent [integer]"
+    echo -e "\t\t(Default: 0 (all orderers particiapte))"
+
     echo -e "--evttimeout \ttimeout waiting for event (writing TX to ledger) [unit: ms]"
     echo -e "\t\t(Default: 3600000)"
 
@@ -157,6 +160,7 @@ echo "***      TXMODE: $TXMODE                                 "
 echo "***      FREQ: $FREQ ms                                  "
 echo "***      TARGETPEERS: $TARGETPEERS                       "
 echo "***      TARGETORDERERS: $TARGETORDERERS                 "
+echo "***      NORDERERS: $NORDERERS                           "
 echo "***      RUNDUR: $RUNDUR sec                             "
 echo "***      KEYSTART: $KEYSTART                             "
 echo "***      EVENT TIMEOUT: $EVTTIMEOUT ms                   "
@@ -216,6 +220,7 @@ CHKPEERS="ORGANCHOR"
 CHKTX="LAST"
 CHKTXNUM=1
 TARGETORDERERS="UserDefined"
+NORDERERS=0
 EVTTIMEOUT=3600000
 REQTIMEOUT=45000
 GRPCTIMEOUT=30000
@@ -346,6 +351,7 @@ PreTXProc() {
         sed -i -e "s/_CHKTX_/$CHKTX/g" $cfgTX
         sed -i -e "s/_CHKTXNUM_/$CHKTXNUM/g" $cfgTX
         sed -i -e "s/_TARGETORDERERS_/$TARGETORDERERS/g" $cfgTX
+        sed -i -e "s/_NORDERERS_/$NORDERERS/g" $cfgTX
         sed -i -e "s/_EVTTIMEOUT_/$EVTTIMEOUT/g" $cfgTX
         sed -i -e "s/_REQTIMEOUT_/$REQTIMEOUT/g" $cfgTX
         sed -i -e "s/_GRPCTIMEOUT_/$GRPCTIMEOUT/g" $cfgTX
@@ -723,6 +729,13 @@ while [[ $# -gt 0 ]]; do
           shift
           TARGETORDERERS=$1
           echo -e "\t- Specify ordererOpt method: $TARGETORDERERS\n"
+          shift
+          ;;
+
+      --norderers)
+          shift
+          NORDERERS=$1
+          echo -e "\t- Specify number of ingress orderers to which transactions will be sent: $NORDERERS\n"
           shift
           ;;
 
