@@ -447,7 +447,19 @@ module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, svcFile, metho
         var SCordList=Object.keys(ORGS.orderer);
         logger.info('[org:id=%s:%d getOrdererID] SC orderer list: %j', org, pid, SCordList);
         var ordLen=SCordList.length;
-        var ordIdx=(pid*orgNameLen+orgIdx)%ordLen;
+
+        var nOrderers=0;
+        if ( txCfgPtr.ordererOpt && txCfgPtr.ordererOpt.nOrderers ) {
+            nOrderers= parseInt(txCfgPtr.ordererOpt.nOrderers);
+        }
+        if ( nOrderers == 0 ) {
+            nOrderers = ordLen;
+        } else if ( ordLen < nOrderers ) {
+            nOrderers = ordLen;
+        }
+        logger.info('[org:id=%s:%d getOrdererID] orderer orgNameLen %d, ordLen %d, nOrderers %d', org, pid, orgNameLen, ordLen, nOrderers);
+
+        var ordIdx=(pid*orgNameLen+orgIdx)%nOrderers;
         ordererID=SCordList[ordIdx];
     } else {
         // default method: USERDEFINED
