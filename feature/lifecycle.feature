@@ -629,3 +629,42 @@ Scenario: FAB-13966: Different orgs use different version label during upgrade
   #  And I wait up to "30" seconds for deploy to complete
   #  When a user queries on the chaincode with args ["query","a"]
   #  Then a user receives a success response of 1000
+
+
+@daily
+Scenario: FAB-13969: Reuse the same sequence number
+  Given I changed the "Application" capability to version "V2_0"
+  And I have a bootstrapped fabric network of type solo
+  And I want to use the new chaincode lifecycle
+  When an admin sets up a channel
+  And an admin packages a chaincode
+  And the organization admins install the chaincode package on all peers
+  Then a hash value is received on all peers
+  #When each organization admin approves the chaincode package
+  When each organization admin approves the chaincode package with policy "OR ('org1.example.com.member','org2.example.com.member')"
+  And an admin commits the chaincode package to the channel
+  And I wait up to "10" seconds for the chaincode to be committed
+
+  And a user invokes on the chaincode with args ["init","a","1000","b","2000"] on both orgs
+  And I wait up to "30" seconds for deploy to complete
+
+  When a user queries on the chaincode with args ["query","a"]
+  Then a user receives a success response of 1000
+
+  Given the chaincode at location "example02/go/cmd" is upgraded
+  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc"
+  And the organization admins install the chaincode package on all peers
+  Then a hash value is received for version "2" on all peers
+  When an admin removes the previous chaincode docker containers
+
+
+
+
+  When an admin approves the chaincode package using sequence "1" on peer "peer0.org1.example.com"
+  When an admin approves the upgraded chaincode package on peer "peer0.org2.example.com"
+  Then a user receives a response containing 'attempted to define the current sequence' from "peer0.org1.example.com"
+  Then a user receives a response containing "but: Version '0' != '2'" from "peer0.org1.example.com"
+  #When the organization admins approve the upgraded chaincode package on all peers
+  When an admin commits the chaincode package to the channel
+  When a user invokes on the chaincode with args ["init","a","1000","b","2000"] on "peer0.org1.example.com"
+  Then a user receives a response containing 'chaincode definition not agreed to by this org'
