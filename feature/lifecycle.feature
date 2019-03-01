@@ -405,5 +405,82 @@ Scenario: FAB-13965: Install same chaincode on different channels with different
   When a user queries on the channel "channel1" with args ["query","a"]
   Then a user receives a success response of 100
 
-  When a user queries on the channel "channel2" with args ["query","b"]
-  Then a user receives a success response of 2000
+  And the organization admins install version "17.0.1" of the chaincode package on all peers
+  Then a hash value is received on all peers
+  When each organization admin approves the chaincode package with policy "OR ('org1.example.com.member','org2.example.com.member')"
+  Then a user receives a response containing '<Error Message>'
+
+
+@daily
+Scenario: FAB-13977: Test setting of collections data in new chaincode definition
+  Given I changed the "Application" capability to version "V2_0"
+  And I have a bootstrapped fabric network of type solo using state-database couchdb
+  And I want to use the new chaincode lifecycle
+  When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "configs/test-config"
+
+  When an admin sets up a channel
+  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" as version "2.0.1" with name "marbles"
+  And the organization admins install the built "marbles" chaincode package on all peers
+  Then a hash value is received on all peers
+
+  When an admin generates a collections file named "marblesCollection.json" for chaincode named "marbles" with policy "OR('org1.example.com.member','org2.example.com.member')"
+  When each organization admin approves the "marbles" chaincode package with no init using collections file named "marblesCollection.json" with policy "OR ('org1.example.com.member','org2.example.com.member')"
+  And an admin commits the chaincode package with no init using collections file named "marblesCollection.json" to the channel
+  And I wait up to "10" seconds for the chaincode to be committed
+
+  When a user invokes on the chaincode named "marbles" with args ["initMarble","marble1","blue","35","tom"]
+  When a user invokes on the chaincode named "marbles" with args ["initMarble","marble2","red","50","tom"]
+  And I wait up to "30" seconds for deploy to complete
+  When a user queries on the chaincode named "marbles" with args ["readMarble","marble1"]
+  Then a user receives a response containing "name":"marble1"
+  And a user receives a response containing "owner":"tom"
+
+  When a user queries on the chaincode named "marbles" with args ["readMarble","marble2"]
+  Then a user receives a response containing "name":"marble2"
+  And a user receives a response containing "owner":"tom"
+
+  # queryMarblesByOwner
+  When a user queries on the chaincode named "marbles" with args ["queryMarblesByOwner","tom"]
+  Then a user receives a response containing "Key":"marble1"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "owner":"tom"
+  And a user receives a response containing "Key":"marble2"
+  And a user receives a response containing "name":"marble2"
+
+  # queryMarbles
+  When a user queries on the chaincode named "marbles" with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\"}}"]
+  Then a user receives a response containing "Key":"marble1"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "owner":"tom"
+  And a user receives a response containing "Key":"marble2"
+  And a user receives a response containing "name":"marble2"
+
+  # queryMarbles on more than one selector
+  When a user queries on the chaincode named "marbles" with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\",\\"color\\":\\"red\\"}}"]
+
+  Then a user receives a response containing "Key":"marble2"
+  And a user receives a response containing "name":"marble2"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "owner":"tom"
+  Then a user receives a response not containing "Key":"marble1"
+  And a user receives a response not containing "color":"blue"
+
+  When a user invokes on the chaincode named "marbles" with args ["transferMarble","marble1","jerry"]
+  And I wait "3" seconds
+  And a user queries on the chaincode named "marbles" with args ["readMarble","marble1"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "color":"blue"
+  And a user receives a response containing "size":35
+  And a user receives a response containing "owner":"jerry"
+  When a user invokes on the chaincode named "marbles" with args ["transferMarble","marble2","jerry"]
+  And I wait "3" seconds
+  And a user queries on the chaincode named "marbles" with args ["readMarble","marble2"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble2"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "size":50
+  And a user receives a response containing "owner":"jerry"
+
+  When a user queries on the chaincode named "marbles" with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\"}}"]
+  Then a user receives a success response of []

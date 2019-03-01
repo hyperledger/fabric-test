@@ -1,0 +1,8 @@
+[
+  {"name": "%(name)sCollection",
+   "policy": %(policy)s,
+   "requiredPeerCount": 0,
+   "maxPeerCount": 0,
+   "blockToLive": 10000000
+  }
+]

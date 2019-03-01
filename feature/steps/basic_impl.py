@@ -291,15 +291,6 @@ def step_impl(context, capType, capVersion):
 def step_impl(context, indexName, docName, fields, path):
     database_util.generateIndex(context, indexName, docName, fields, path)
 
-@when('an admin generates a collections file named "{fileName}" for chaincode named "{name}" with policy {policy}')
-def step_impl(context, fileName, name, policy):
-    print(context.chaincode)
-    context.chaincode['name'] = name
-    context.chaincode['policy'] = policy
-    print(context.chaincode)
-    database_util.generateCollections(context, fileName)
-    database_util.generateIndex(context, indexName, docName, fields, path)
-
 @when('an admin generates a collections file named "{fileName}" for chaincode named "{name}" at path "{path}" with policy {policy}')
 def step_impl(context, fileName, name, path, policy):
     if not hasattr(context, "chaincode"):

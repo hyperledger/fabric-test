@@ -564,8 +564,6 @@ def configUpdate(context, config, group, channel):
                                         env=updated_env)
 
     return "{0}/update{1}.pb".format(testConfigs, channel)
-<<<<<<< Updated upstream
-=======
 
 def generateCollections(context, collectionsFile):
     template = "./configs/collections.json"
@@ -591,4 +589,3 @@ def generateCollections(context, collectionsFile):
         #fd.write(collectionConfig)
 
     return "/var/hyperledger/{}".format(finalConfig)
->>>>>>> Stashed changes
