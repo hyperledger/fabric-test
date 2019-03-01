@@ -563,3 +563,29 @@ Scenario: FAB-13958: Test new chaincode lifecycle - upgrade from old to new
   And I wait "5" seconds
   When a user queries on the chaincode named "mycc2" with args ["query","a"]
   Then a user receives a success response of 990
+
+
+@daily
+Scenario: FAB-13964: Install same chaincode on different channels with different chaincode definitions
+  Given I changed the "Application" capability to version "V2_0"
+  And I have a bootstrapped fabric network of type solo
+  And I want to use the new chaincode lifecycle
+  When an admin sets up a channel
+
+  And an admin packages a chaincode
+  And the organization admins install the chaincode package on all peers
+  Then a hash value is received on all peers
+
+  When each organization admin approves the chaincode package with policy "AND ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org1.example.com"
+  When each organization admin approves the chaincode package with policy "OR ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org2.example.com"
+
+  When an admin commits the chaincode package to the channel with policy "AND ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org1.example.com"
+  Then a user receives a response containing 'chaincode definition not agreed to by this org' from "peer0.org1.example.com"
+
+  #  When an admin commits the chaincode package to the channel with policy "OR ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org2.example.com"
+  #  Then a user receives a response containing 'chaincode definition not agreed to by this org' from "peer0.org2.example.com"
+
+  When a user invokes on the chaincode with args ["init","a","1000","b","2000"] on "peer0.org1.example.com"
+  Then a user receives a response containing 'chaincode mycc not found' from "peer0.org1.example.com"
+  When a user invokes on the chaincode with args ["init","a","1000","b","2000"] on "peer0.org2.example.com"
+  Then a user receives a response containing 'chaincode mycc not found' from "peer0.org2.example.com"
