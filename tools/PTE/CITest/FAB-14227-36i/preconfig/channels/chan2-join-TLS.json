@@ -1,0 +1,19 @@
+{
+    "channelID": "_ch1",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v0",
+    "transType": "Channel",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel2",
+        "action":  "join",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "SCFile": [
+		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+	]
+}

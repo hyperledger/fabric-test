@@ -1,0 +1,72 @@
+{
+    "channelID": "_ch2",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v1",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Move",
+    "targetPeers": "OrgAnchor",
+    "nProcPerOrg": "6",
+    "nRequest": "10000",
+    "runDur": "0",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel2",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "burstOpt": {
+        "burstFreq0":  "500",
+        "burstDur0":  "3000",
+        "burstFreq1": "2000",
+        "burstDur1": "10000"
+    },
+    "mixOpt": {
+        "mixQuery": "FALSE",
+        "mixFreq": "1000"
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "0",
+        "devFreq": "0"
+    },
+    "listOpt": {
+        "org1": ["peer1"],
+        "org2": ["peer1"]
+    },
+    "eventOpt": {
+        "type": "Channel",
+        "listener": "Block",
+        "timeout": "240000"
+    },
+    "ccType": "ccchecker",
+    "ccOpt": {
+        "keyIdx": [1],
+        "keyPayLoad": [2],
+        "keyStart": "5",
+        "payLoadMin": "1024",
+        "payLoadMax": "2048"
+    },
+    "ordererOpt": {
+        "method": "RoundRobin",
+        "nOrderers": "0"
+    },
+    "invoke": {
+        "query": {
+            "fcn": "invoke",
+            "args": ["get", "a1"]
+        },
+        "move": {
+            "fcn": "invoke",
+            "args": ["put", "a1","1"]
+        }
+    },
+    "SCFile": [
+		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
+	]
+}

@@ -1,0 +1,3 @@
+sdk=node CITest/FAB-14227-36i/samplecc/samplecc-chan1-FAB-14227-12i-TLS.json
+sdk=node CITest/FAB-14227-36i/samplecc/samplecc-chan2-FAB-14227-12i-TLS.json
+sdk=node CITest/FAB-14227-36i/samplecc/samplecc-chan3-FAB-14227-12i-TLS.json
