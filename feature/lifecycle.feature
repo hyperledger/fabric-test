@@ -233,7 +233,8 @@ Scenario: FAB-13971: Test adding new org using new chaincode lifecycle
   Then a hash value is received on peer "peer1.org3.example.com"
 
   #When each organization admin approves the upgraded chaincode package with policy "OR (AND ('org1.example.com.member','org2.example.com.member'), AND ('org1.example.com.member','org3.example.com.member'), AND ('org2.example.com.member','org3.example.com.member'))"
-  When each organization admin approves the upgraded chaincode package with policy "OutOf(2,'org1.example.com.member','org2.example.com.member','org3.example.member')"
+  #When each organization admin approves the upgraded chaincode package with policy "OutOf(1,'org1.example.com.member','org2.example.com.member')"
+  When each organization admin approves the upgraded chaincode package with policy "OutOf(1,'org1.example.com.member','org2.example.com.member','org3.example.member')"
 
   And an admin commits the chaincode package to the channel on peer "peer0.org3.example.com"
   And I wait up to "10" seconds for the chaincode to be committed on peer "peer0.org3.example.com"
@@ -661,9 +662,9 @@ Scenario: FAB-13969: Reuse the same sequence number
 
 
   When an admin approves the chaincode package using sequence "1" on peer "peer0.org1.example.com"
-  When an admin approves the upgraded chaincode package on peer "peer0.org2.example.com"
   Then a user receives a response containing 'attempted to define the current sequence' from "peer0.org1.example.com"
   Then a user receives a response containing "but: Version '0' != '2'" from "peer0.org1.example.com"
+  When an admin approves the upgraded chaincode package on peer "peer0.org2.example.com"
   #When the organization admins approve the upgraded chaincode package on all peers
   When an admin commits the chaincode package to the channel
   When a user invokes on the chaincode with args ["init","a","1000","b","2000"] on "peer0.org1.example.com"
@@ -689,7 +690,7 @@ Scenario: FAB-13970: 2 Different org admins perform the commit
   When an admin commits the chaincode package to the channel with policy "OR ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org1.example.com"
   When an admin commits the chaincode package to the channel with policy "OR ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org2.example.com"
   # The error here should denote the possibility that someone else has already committed this definition.
-  #Then a user receives a response containing 'already committed' from "peer0.org2.example.com"
+  # Then a user receives a response containing 'already committed' from "peer0.org2.example.com"
   Then a user receives a response containing 'requested sequence is 1, but new definition must be sequence 2' from "peer0.org2.example.com"
 
 
@@ -743,8 +744,8 @@ Scenario: FAB-13974: An org admin should be able to recover after sending a wron
 
   #When each organization admin approves the upgraded chaincode package with policy "OR (AND ('org1.example.com.member','org2.example.com.member'), AND ('org1.example.com.member','org3.example.com.member'), AND ('org2.example.com.member','org3.example.com.member'))"
   When each organization admin approves the upgraded chaincode package with policy "AND ('org1.example.com.member','org2.example.com.member')" on peer "peer0.org1.example.com"
-  When each organization admin approves the upgraded chaincode package with policy "OutOf(2,'org1.example.com.member','org2.example.com.member','org3.example.member')" on peer "peer0.org2.example.com"
-  When each organization admin approves the upgraded chaincode package with policy "OutOf(2,'org1.example.com.member','org2.example.com.member','org3.example.member')" on peer "peer0.org3.example.com"
+  When each organization admin approves the upgraded chaincode package with policy "OutOf(1,'org1.example.com.member','org2.example.com.member','org3.example.member')" on peer "peer0.org2.example.com"
+  When each organization admin approves the upgraded chaincode package with policy "OutOf(1,'org1.example.com.member','org2.example.com.member','org3.example.member')" on peer "peer0.org3.example.com"
 
   And an admin commits the chaincode package to the channel on peer "peer0.org3.example.com"
   And I wait up to "10" seconds for the chaincode to be committed on peer "peer0.org3.example.com"
@@ -782,6 +783,10 @@ Scenario: FAB-13975: Different chaincode version used in install and approve
   And the organization admins install version "17.0.1" of the chaincode package on all peers
   Then a hash value is received on all peers
   When each organization admin approves the chaincode package with policy "OR ('org1.example.com.member','org2.example.com.member')"
+  And an admin commits the chaincode package to the channel
+  And I wait up to "10" seconds for the chaincode to be committed
+  And a user invokes on the chaincode with args ["init","a","1000","b","2000"]
+  And I wait up to "30" seconds for deploy to complete
   Then a user receives a response containing '<Error Message>'
 
 
@@ -805,6 +810,73 @@ Scenario: FAB-13977: Test setting of collections data in new chaincode definitio
   When a user invokes on the chaincode named "marbles" with args ["initMarble","marble1","blue","35","tom"]
   When a user invokes on the chaincode named "marbles" with args ["initMarble","marble2","red","50","tom"]
   And I wait up to "30" seconds for deploy to complete
+  When a user queries on the chaincode named "marbles" with args ["readMarble","marble1"]
+  Then a user receives a response containing "name":"marble1"
+  And a user receives a response containing "owner":"tom"
+
+  When a user queries on the chaincode named "marbles" with args ["readMarble","marble2"]
+  Then a user receives a response containing "name":"marble2"
+  And a user receives a response containing "owner":"tom"
+
+  # queryMarblesByOwner
+  When a user queries on the chaincode named "marbles" with args ["queryMarblesByOwner","tom"]
+  Then a user receives a response containing "Key":"marble1"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "owner":"tom"
+  And a user receives a response containing "Key":"marble2"
+  And a user receives a response containing "name":"marble2"
+
+  # queryMarbles
+  When a user queries on the chaincode named "marbles" with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\"}}"]
+  Then a user receives a response containing "Key":"marble1"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "owner":"tom"
+  And a user receives a response containing "Key":"marble2"
+  And a user receives a response containing "name":"marble2"
+
+  # queryMarbles on more than one selector
+  When a user queries on the chaincode named "marbles" with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\",\\"color\\":\\"red\\"}}"]
+
+  Then a user receives a response containing "Key":"marble2"
+  And a user receives a response containing "name":"marble2"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "owner":"tom"
+  Then a user receives a response not containing "Key":"marble1"
+  And a user receives a response not containing "color":"blue"
+
+  When a user invokes on the chaincode named "marbles" with args ["transferMarble","marble1","jerry"]
+  And I wait "3" seconds
+  And a user queries on the chaincode named "marbles" with args ["readMarble","marble1"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble1"
+  And a user receives a response containing "color":"blue"
+  And a user receives a response containing "size":35
+  And a user receives a response containing "owner":"jerry"
+  When a user invokes on the chaincode named "marbles" with args ["transferMarble","marble2","jerry"]
+  And I wait "3" seconds
+  And a user queries on the chaincode named "marbles" with args ["readMarble","marble2"]
+  Then a user receives a response containing "docType":"marble"
+  And a user receives a response containing "name":"marble2"
+  And a user receives a response containing "color":"red"
+  And a user receives a response containing "size":50
+  And a user receives a response containing "owner":"jerry"
+
+  When a user queries on the chaincode named "marbles" with args ["queryMarbles","{\\"selector\\":{\\"owner\\":\\"tom\\"}}"]
+  Then a user receives a success response of []
+
+
+@daily
+Scenario: FAB-13976: Test setting of collections data using old chaincode lifecycle
+  Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
+  And I have a bootstrapped fabric network of type solo using state-database couchdb
+  When an admin sets up a channel
+  And an admin generates a collections file named "marblesCollection.json" for chaincode named "marbles" at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with policy "OR('org1.example.com.member','org2.example.com.member')"
+  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" using collections config "marblesCollection.json" with args [""] with name "marbles"
+  And I wait up to "30" seconds for deploy to complete
+
+  When a user invokes on the chaincode named "marbles" with args ["initMarble","marble1","blue","35","tom"]
+  When a user invokes on the chaincode named "marbles" with args ["initMarble","marble2","red","50","tom"]
+  And I wait "3" seconds
   When a user queries on the chaincode named "marbles" with args ["readMarble","marble1"]
   Then a user receives a response containing "name":"marble1"
   And a user receives a response containing "owner":"tom"
