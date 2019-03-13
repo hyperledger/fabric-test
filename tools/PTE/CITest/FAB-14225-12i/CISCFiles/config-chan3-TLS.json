@@ -1,0 +1,98 @@
+{
+    "test-network": {
+        "gopath": "GOPATH",
+        "orderer": {
+            "orderer5th-ordererorg2": {
+                "name": "ordererorg2",
+                "mspid": "ordererorg2",
+                "adminPath": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/ordererorg2/users/Admin@ordererorg2/msp",
+                "comName": "ordererorg2",
+                "url": "grpcs://169.63.221.2:32638",
+                "server-hostname": "orderer5th-ordererorg2",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/ordererorg2/orderers/orderer5th-ordererorg2.ordererorg2/tls/ca.crt"
+            },
+            "orderer6th-ordererorg2": {
+                "name": "ordererorg2",
+                "mspid": "ordererorg2",
+                "adminPath": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/ordererorg2/users/Admin@ordererorg2/msp",
+                "comName": "ordererorg2",
+                "url": "grpcs://169.63.221.2:30600",
+                "server-hostname": "orderer6th-ordererorg2",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/ordererorg2/orderers/orderer6th-ordererorg2.ordererorg2/tls/ca.crt"
+            },
+            "orderer7th-ordererorg2": {
+                "name": "ordererorg2",
+                "mspid": "ordererorg2",
+                "adminPath": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/ordererorg2/users/Admin@ordererorg2/msp",
+                "comName": "ordererorg2",
+                "url": "grpcs://169.63.221.2:30525",
+                "server-hostname": "orderer7th-ordererorg2",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/ordererorg2/orderers/orderer7th-ordererorg2.ordererorg2/tls/ca.crt"
+            }
+        },
+        "ordererorg1": {
+            "name": "ordererorg1",
+            "mspid": "ordererorg1",
+            "username": "admin",
+            "secret": "adminpw",
+            "ordererID": "orderer1st-ordererorg1"
+        },
+        "ordererorg2": {
+            "name": "ordererorg2",
+            "mspid": "ordererorg2",
+            "username": "admin",
+            "secret": "adminpw",
+            "ordererID": "orderer5th-ordererorg2"
+        },
+        "org1": {
+            "name": "org1",
+            "mspid": "org1",
+            "adminPath": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/org1/users/Admin@org1/msp",
+            "comName": "org1",
+            "username": "admin",
+            "secret": "adminpw",
+            "ca": {
+                "name": "ca1st-org1",
+                "url": "https://169.63.221.2:32376"
+            },
+            "ordererID": "orderer5th-ordererorg2",
+            "peer1": {
+                "requests": "grpcs://169.63.221.2:32029",
+                "events": "grpcs://169.63.221.2:32396",
+                "server-hostname": "peer1st-org1",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/org1/tlsca/tlsca.org1-cert.pem"
+            },
+            "peer2": {
+                "requests": "grpcs://169.63.221.2:31657",
+                "events": "grpcs://169.63.221.2:32748",
+                "server-hostname": "peer2nd-org1",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/org1/tlsca/tlsca.org1-cert.pem"
+            }
+        },
+        "org2": {
+            "name": "org2",
+            "mspid": "org2",
+            "adminPath": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/org2/users/Admin@org2/msp",
+            "comName": "org2",
+            "username": "admin",
+            "secret": "adminpw",
+            "ca": {
+                "name": "ca1st-org2",
+                "url": "https://169.63.221.2:31383"
+            },
+            "ordererID": "orderer5th-ordererorg2",
+            "peer1": {
+                "requests": "grpcs://169.63.221.2:30784",
+                "events": "grpcs://169.63.221.2:30122",
+                "server-hostname": "peer1st-org2",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/org2/tlsca/tlsca.org2-cert.pem"
+            },
+            "peer2": {
+                "requests": "grpcs://169.63.221.2:31248",
+                "events": "grpcs://169.63.221.2:31302",
+                "server-hostname": "peer2nd-org2",
+                "tls_cacerts": "/home/ibmadmin/cello/src/agent/ansible/vars/raft-svt/fabric/keyfiles/org2/tlsca/tlsca.org2-cert.pem"
+            }
+        }
+    }
+}

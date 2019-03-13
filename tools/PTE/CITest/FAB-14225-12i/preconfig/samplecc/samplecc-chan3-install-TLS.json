@@ -1,0 +1,24 @@
+{
+    "channelID": "_ch3",
+    "chaincodeID": "sample_cc",
+    "chaincodeVer": "v0",
+    "transType": "install",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel3",
+        "action":  "create",
+        "orgName": [
+            "org1",
+            "org2"
+        ]
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
+        "fcn": "init",
+        "args": []
+    },
+    "SCFile": [
+		{"ServiceCredentials":"CITest/FAB-14225-12i/CISCFiles/config-chan3-TLS.json"}
+	]
+}

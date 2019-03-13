@@ -1,0 +1,3 @@
+sdk=node CITest/FAB-14225-12i/preconfig/channels/chan1-create-TLS.json
+sdk=node CITest/FAB-14225-12i/preconfig/channels/chan2-create-TLS.json
+sdk=node CITest/FAB-14225-12i/preconfig/channels/chan3-create-TLS.json

@@ -108,7 +108,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-11615-2i: SBEcc chaincode, 2 processes X 50000 invokes with valuee only, TLS, CouchDB, 2 Channel
         FAB-11615-2iSBE: SBEcc chaincode, 2 processes X 50000 invokes with value and Endorsement policies, TLS, CouchDB, 2 Channel
         FAB-14227-36i: 2 peers in 2 orgs, 6 orderers roundrobin, 3 channels each with 12 processes X 10K invokes scripts to run on IKS k8s (Note: NL script uses kafka)
-        
+        FAB-14225-12i: 2 peers in 2 orgs, 7 orderers in 3 channels with partially overlapping consenter sets (requires 3 channel profile consenter sets and 3 unique SCfiles), each with 4 processes X 10K invokes scripts to run on IKS k8s     
     **Note that a query testcase requires execution of corresponding invoke testcase first to avoid errors due to the absence of transactions.**
 
 * ### Examples
