@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -euo pipefail
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
@@ -236,7 +236,7 @@ RemoveOrderer(){
         hostName=$(echo $(jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters['${i}'].host' config.json))
         if [ $hostName = "\"${RemoveOrderer}\"" ]; then
             concenter=$(jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters[0]' config.json)
-            jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters -= ['"${concenter}"']' config.json >& cfgTmp.json
+            jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters -= ['"${concenter}"']' cfgTmp.json >& modified_config.json
         fi
     done
 
