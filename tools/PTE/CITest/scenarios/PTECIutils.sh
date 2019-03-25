@@ -88,9 +88,9 @@ PTEExecLoop () {
 
 
 # AddOrderer
-# $1: RAFT base directory. When run on personal vLaunch, 
-#     this is the directory (e.g. raft-quality) relative to .../PTE/CITest/scenarios/, 
-#     or optionally the absolute path. When run on k8s from cello-launcher, this is the 
+# $1: RAFT base directory. When run on personal vLaunch,
+#     this is the directory (e.g. raft-quality) relative to .../PTE/CITest/scenarios/,
+#     or optionally the absolute path. When run on k8s from cello-launcher, this is the
 #     directory name (e.g. raft-quality) relative to ~/cello/src/agent/ansible/vars/.
 # $2: chanel name, e.g., orderersystemchannel or testorgchannel1
 # $3: one orderer IP to retrieve orderer block, e.g., 169.60.99.43
@@ -179,15 +179,15 @@ AddOrderer() {
 }
 
 # RemoveOrderer
-# $1: RAFT base directory. When run on personal vLaunch, 
-#     this is the directory (e.g. raft-quality) relative to .../PTE/CITest/scenarios/, 
-#     or optionally the absolute path. When run on k8s from cello-launcher, this is the 
+# $1: RAFT base directory. When run on personal vLaunch,
+#     this is the directory (e.g. raft-quality) relative to .../PTE/CITest/scenarios/,
+#     or optionally the absolute path. When run on k8s from cello-launcher, this is the
 #     directory name (e.g. raft-quality) relative to ~/cello/src/agent/ansible/vars/.
 # $2: chanel name, e.g., orderersystemchannel or testorgchannel1
 # $3: one orderer IP to retrieve orderer block, e.g., 169.60.99.43
 # $4: one orderer name to retrieve orderer block, e.g., orderer1st-ordererorg
 # $5: name of the orderer to remove, for example, orderer4th-ordererorg
-# 
+#
 # Example:
 #      source PTECIutils.sh
 #      RemoveOrderer raft-quality testorgchannel1 169.60.99.43 orderer1st-ordererorg1 orderer4th-ordererorg2
@@ -235,7 +235,7 @@ RemoveOrderer(){
     for i in $(jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters | keys | .[]' config.json); do
         hostName=$(echo $(jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters['${i}'].host' config.json))
         if [ $hostName = "\"${RemoveOrderer}\"" ]; then
-            concenter=$(jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters[0]' config.json)
+            concenter=$(jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters['${i}']' config.json)
             jq '.channel_group.groups.Orderer.values.ConsensusType.value.metadata.consenters -= ['"${concenter}"']' cfgTmp.json >& modified_config.json
         fi
     done
