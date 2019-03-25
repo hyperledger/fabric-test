@@ -146,9 +146,7 @@ class Composition:
         fullOrg = name[1].split('.')
         org = fullOrg[0]
 
-        self.environ['FABRIC_CA_SERVER_{}_TLS_KEYFILE'.format(org.upper())] = '/var/hyperledger/fabric-ca-server/ca/{}'.format(filename)
         self.environ['FABRIC_CA_SERVER_{}_CA_KEYFILE'.format(org.upper())] = '/var/hyperledger/fabric-ca-server/ca/{}'.format(filename)
-
         #copy keyfile to msp/keystore
         if not os.path.exists("{0}../msp/keystore".format(fileLoc)):
             os.mkdir("{0}../msp/keystore".format(fileLoc))
@@ -252,7 +250,6 @@ class Composition:
             if cmd[0].startswith("docker exec"):
                 process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.getEnv())
                 output, _error = process.communicate()
-                #print(_error)
                 if "Error: " in _error or "CRIT " in _error:
                     raise Exception(_error)
             else:

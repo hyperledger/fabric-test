@@ -33,6 +33,7 @@ type SimpleChaincode struct {
 
 // Init is a no-op
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+	fmt.Println("Initialize...")
 	return shim.Success(nil)
 }
 
@@ -159,16 +160,16 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 			return shim.Error("put operation must include an even number of key/value pair arguments: [key, value]")
 		}
 		fmt.Println("In mapkeys put")
-                for index, element := range args {
-                        if index%2 == 0 {
-                                key := element
-                                value := args[index+1]
-                                fmt.Println("Saved {%s,%s}", key, value)
+		for index, element := range args {
+			if index%2 == 0 {
+				key := element
+				value := args[index+1]
+				fmt.Println("Saved {%s,%s}", key, value)
 
-                                if err := stub.PutState(key, []byte(value)); err != nil {
-                                        fmt.Printf("Error putting state %s", err)
-                                        return shim.Error(fmt.Sprintf("put operation failed. Error updating state: %s", err))
-                                }
+				if err := stub.PutState(key, []byte(value)); err != nil {
+					fmt.Printf("Error putting state %s", err)
+					return shim.Error(fmt.Sprintf("put operation failed. Error updating state: %s", err))
+				}
 			}
 		}
 

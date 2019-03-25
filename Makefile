@@ -22,6 +22,7 @@
 #   - daily-tests              - runs Daily Test Suite.
 #   - pull-images              - pull the images and binaries from Nexus.
 #   - javaenv                  - clone the fabric-chaincode-java repository and build the javaenv image.
+#   - nodeenv                  - clone the fabric-chaincode-node repository and build the nodeenv image.
 #   - svt-daily-behave-tests   - pulls the images, binaries from Nexus and runs the Behave feature tests.
 #   - svt-daily-pte-tests      - pulls the images, binaries from Nexus and runs the PTE Performance tests.
 #   - svt-daily-ote-tests      - clones fabric, pulls the images, runs the OTE test suite.
@@ -45,11 +46,13 @@ BRANCH = master
 FABRIC = https://gerrit.hyperledger.org/r/fabric
 FABRIC_CA = https://gerrit.hyperledger.org/r/fabric-ca
 FABRIC-CHAINCODE-JAVA = https://gerrit.hyperledger.org/r/fabric-chaincode-java
+FABRIC-CHAINCODE-NODE = https://gerrit.hyperledger.org/r/fabric-chaincode-node
 HYPERLEDGER_DIR = $(GOPATH)/src/github.com/hyperledger
 INSTALL_BEHAVE_DEPS = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/install_behave.sh
 FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
 CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
 CHAINCODE-JAVA_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-java
+CHAINCODE-NODE_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-node
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/pre_setup.sh
 PTE_IMAGE = $(DOCKER_NS)/fabric-pte
 TEST_VIEWER_IMAGE = $(DOCKER_NS)/fabric-testviewer
@@ -135,6 +138,20 @@ fabric-chaincode-java:
 .PHONY: javaenv
 javaenv: fabric-chaincode-java
 	@cd $(CHAINCODE-JAVA_DIR) && ./gradlew buildimage
+
+.PHONY: fabric-chaincode-node
+fabric-chaincode-node:
+	if [ ! -d "$(CHAINCODE-NODE_DIR)" ]; then \
+		echo "Clone FABRIC-CHAINCODE-NODE REPO"; \
+		cd $(HYPERLEDGER_DIR); \
+		git clone --single-branch -b $(BRANCH) $(FABRIC-CHAINCODE-NODE) $(CHAINCODE-NODE_DIR); \
+	else \
+		cd $(CHAINCODE-NODE_DIR) && git pull $(FABRIC-CHAINCODE-NODE); \
+	fi
+
+.PHONY: nodeenv
+nodeenv: fabric-chaincode-node
+	@cd $(CHAINCODE-NODE_DIR) && npm install gulp -g && npm install && ./gulp docker-image-build
 
 .PHONY: smoke-tests
 smoke-tests:

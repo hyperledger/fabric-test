@@ -181,6 +181,7 @@ ldap:
 #  Affiliation section
 #############################################################################
 affiliations:
+   #{orgName}:
    example.com:
    org1.example.com:
    org2.example.com:
@@ -247,7 +248,7 @@ signing:
 ###########################################################################
 csr:
    #cn: fabric-ca-server
-   cn: {orgName}
+   cn: ca.{orgName}
    names:
       - C: US
         ST: "North Carolina"
@@ -255,7 +256,6 @@ csr:
         O: Hyperledger
         OU: Fabric
    hosts:
-     - 48d614b43b5d
      - localhost
      - ca.{orgName}
    ca:

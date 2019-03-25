@@ -107,8 +107,11 @@ function _invoke(username, org, orgName, chaincode, peerNames, orderer, network_
         let all_good = true;
         for (var i in proposalResponses) {
             let one_good = false;
-            if (proposalResponses && proposalResponses[i].response &&
-                    proposalResponses[i].response.status === 200) {
+            console.info('Proposal Response length: ' + proposalResponses.length);
+            console.info('Proposal Response payload \'' + proposalResponses[i].payload + '\'. ');
+            //console.info('Proposal Response status \'' + proposalResponses[i].response.status + '\'. ' );
+            //console.info('Proposal Response status \'' + proposalResponses[i].response + '\'. ' + proposalResponses[i].response.status);
+            if (proposalResponses && (proposalResponses[i].payload || (proposalResponses[i].response && proposalResponses[i].response.status === 200) ) ) {
                 one_good = true;
             } else {
                 console.error('transaction proposal was bad');
@@ -120,6 +123,7 @@ function _invoke(username, org, orgName, chaincode, peerNames, orderer, network_
                 proposalResponses: proposalResponses,
                 proposal: proposal
             };
+            console.info('All good');
             // set the transaction listener and set a timeout of 30sec
             // if the transaction did not get committed within the timeout period,
             // fail the test
@@ -131,8 +135,10 @@ function _invoke(username, org, orgName, chaincode, peerNames, orderer, network_
                 });
             }
 
+            console.info('Now send transaction ');
             let sendPromise = channel.sendTransaction(request);
             return Promise.all([sendPromise].concat(eventPromises)).then((results) => {
+                console.info('Results \'' + results[0] + '\'. ' );
                 return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
             }).catch((err) => {
                 console.error(JSON.stringify(

@@ -22,7 +22,8 @@ from endorser_util import CLIInterface, ToolInterface, SDKInterface
 
 @given('the chaincode at location "{path}" is upgraded')
 def step_impl(context, path):
-    check = "../chaincodes/{0}".format(path)
+    #check = "../chaincodes/{0}".format(path)
+    check = "../../../../{0}".format(path)
     if os.path.isdir(check):
         # list the files and update a file in that directory
         files = os.listdir(check)
@@ -558,12 +559,15 @@ def step_impl(context):
     query_impl(context, context.interface.TEST_CHANNEL_ID, context.chaincode["name"], '["query","a"]', "peer0.org1.example.com")
 
 @when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}" using orderer "{orderer}"')
-def invokes_impl(context, numInvokes, channel, name, args, peer, orderer="orderer0.example.com", targs='', user="User1", opts={}):
+def invokes_impl(context, numInvokes, channel, name, args, peer, orderer="orderer0.example.com", targs='', user="User1", opts={}, orgs=[]):
+    if orgs == []:
+        org = peer.split(".", 1)[1]
+        orgs = [org]
     chaincode = {"args": args,
                  "name": str(name),
                  "chaincodeId": str(name)}
     for count in range(numInvokes):
-        context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, channel, targs, user=user, opts=opts)
+        context.result = context.interface.invoke_chaincode(context, chaincode, orderer, peer, channel, targs, user=user, opts=opts, orgs=orgs)
 
 @when(u'a user invokes {numInvokes:d} times on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, numInvokes, channel, name, args):
@@ -608,25 +612,19 @@ def step_impl(context, user, channel, name, args, peer):
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} on all orgs')
 def step_impl(context, name, args):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com")
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org2.example.com")
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org3.example.com")
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", orgs=["org1.example.com", "org2.example.com", "org3.example.com"])
 
 @when(u'a user invokes on the chaincode with args {args} on all orgs')
 def step_impl(context, args):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com")
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org2.example.com")
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org3.example.com")
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com", orgs=["org1.example.com", "org2.example.com", "org3.example.com"])
 
 @when(u'a user invokes on the chaincode named "{name}" with args {args} on both orgs')
 def step_impl(context, name, args):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com")
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org2.example.com")
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, name, args, "peer0.org1.example.com", orgs=["org1.example.com", "org2.example.com"])
 
 @when(u'a user invokes on the chaincode with args {args} on both orgs')
 def step_impl(context, args):
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com")
-    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org2.example.com")
+    invokes_impl(context, 1, context.interface.TEST_CHANNEL_ID, "mycc", args, "peer0.org1.example.com", orgs=["org1.example.com", "org2.example.com"])
 
 @when(u'a user invokes on the channel "{channel}" using chaincode named "{name}" with args {args} on "{peer}"')
 def step_impl(context, channel, name, args, peer):
@@ -947,10 +945,13 @@ def step_impl(context, ddoc_name, cc_name, ch_name, couchdb_instance):
 @when('an admin packages chaincode at path "{path}" as version "{version}" with name "{name}" written in "{lang}" using peer "{peer}"')
 def build_impl(context, version, lang, path, name, peer):
     context.interface.pre_deploy_chaincode(context, path, "", name, lang, version=version)
-    #context.tarball = context.interface.build_tarball(context)
     context.tarball = "{0}-chaincode-package.tar.gz".format(context.chaincode['name'])
     ret = context.interface.package_chaincode(context, peer, context.tarball, user="Admin")
     print(ret)
+
+@when('an admin packages chaincode at path "{path}" written in "{lang}"')
+def step_impl(context, path, lang):
+    build_impl(context, "0", lang, path, "mycc", "peer0.org1.example.com")
 
 @when('an admin packages chaincode at path "{path}" as version "{version}" with name "{name}"')
 def step_impl(context, path, version, name):
@@ -1033,11 +1034,11 @@ def step_impl(context, name, channel, policy):
     context.chaincode['name'] = name
     context.result = context.interface.approve_chaincode(context, peers, user="Admin", policy=policy)
 
-@when('an admin approves the chaincode package on peer "{peer}" using hash "{hashVal}" with policy {policy}')
-def step_impl(context, peer, hashVal, policy):
+@when('an admin approves the chaincode package on peer "{peer}" using packageId "{packageId}" with policy {policy}')
+def step_impl(context, peer, packageId, policy):
     peerParts = peer.split('.')
     org = '.'.join(peerParts[1:])
-    context.hash[org] = hashVal
+    context.packageId[org] = packageId
     context.result = context.interface.approve_chaincode(context, [peer], user="Admin", upgrade=False, policy=policy, collections=None)
 
 @when('each organization admin approves the chaincode package with policy {policy}')
@@ -1055,6 +1056,11 @@ def step_impl(context, version, policy):
     context.chaincode["version"] = version
     peers = context.interface.get_peers(context)
     context.result = context.interface.approve_chaincode(context, peers, user="Admin", upgrade=True, policy=policy)
+
+@when('an admin approves the "{name}" chaincode package with policy {policy} on peer "{peer}"')
+def step_impl(context, name, policy, peer):
+    context.chaincode['name'] = name
+    context.result = context.interface.approve_chaincode(context, [peer], user="Admin", upgrade=False, policy=policy)
 
 @when('an admin approves the upgraded version "{version}" chaincode package with policy {policy} on peer "{peer}"')
 def step_impl(context, version, policy, peer):
@@ -1091,6 +1097,11 @@ def step_impl(context):
 @when(u'an admin commits the chaincode package to the channel with policy {policy} on peer "{peer}"')
 def step_impl(context, policy, peer):
     context.result = context.interface.commit_chaincode(context, peer, user="Admin", policy=policy, collections=None)
+
+@when('an admin commits the "{label}" labeled chaincode package to the channel')
+def step_impl(context, label):
+    context.chaincode['name'] = label
+    context.result = context.interface.commit_chaincode(context, "peer0.org1.example.com", user="Admin", policy=None)
 
 @when('an admin commits the version "{version}" chaincode package to the channel')
 def step_impl(context, version):
@@ -1244,29 +1255,29 @@ def step_impl(context, fileName, peer):
     info = fileName.split('.')
     block_found_impl(context, info[0], peer, None)
 
-@then(u'a hash value is received on peer "{peer}"')
+@then(u'a packageId is received on peer "{peer}"')
 def step_impl(context, peer):
     if context.newlifecycle:
         ret = context.interface.list_chaincode(context, peer, list_type="queryinstalled")
     else:
         ret = context.interface.list_chaincode(context, peer, list_type="installed")
 
-    if not hasattr(context, "hash"):
-        context.hash = {}
-    hashPat = r"[\s\S]*\nName: (?P<name>.*), Version: (?P<version>.*), Hash: (?P<hash>.*)\n"
+    if not hasattr(context, "packageId"):
+        context.packageId = {}
+    pat = r"[\s\S]*\nPackage ID: (?P<packageId>.*), Label: (?P<label>.*)\n"
     peerParts = peer.split('.')
     org = '.'.join(peerParts[1:])
-    hashMatch = re.match(hashPat, ret[peer])
-    assert hashMatch is not None, "There was no hash returned for the chaincode install on peer '{}'".format(peer)
-    hashRes = hashMatch.groupdict()['hash']
-    context.hash[org] = hashRes
+    pkgMatch = re.match(pat, ret[peer])
+    assert pkgMatch is not None, "There was no packageId returned for the chaincode install on peer '{}'".format(peer)
+    pkgRes = pkgMatch.groupdict()['packageId']
+    context.packageId[org] = pkgRes
 
-@then(u'a hash value is received on all peers')
+@then(u'a packageId is received on all peers')
 def step_impl(context):
-    if not hasattr(context, "hash"):
-        context.hash = {}
+    if not hasattr(context, "packageId"):
+        context.packageId = {}
     peers = context.interface.get_peers(context)
-    hashPat = r"[\s\S]*\nName: (?P<name>.*), Version: (?P<version>.*), Hash: (?P<hash>.*)\n"
+    pat = r"[\s\S]*\nPackage ID: (?P<packageId>.*), Label: (?P<label>.*)\n"
     for peer in peers:
         if context.newlifecycle:
             ret = context.interface.list_chaincode(context, peer, list_type="queryinstalled")
@@ -1275,17 +1286,17 @@ def step_impl(context):
 
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
-        hashMatch = re.match(hashPat, ret[peer])
-        assert hashMatch is not None, "There was no hash returned for the chaincode install on peer '{}'".format(peer)
-        hashRes = hashMatch.groupdict()['hash']
-        context.hash[org] = hashRes
+        pkgMatch = re.match(pat, ret[peer])
+        assert pkgMatch is not None, "There was no packageId returned for the chaincode install on peer '{}'".format(peer)
+        pkgRes = pkgMatch.groupdict()['packageId']
+        context.packageId[org] = pkgRes
 
-@then(u'a hash value is received for version "{version}" on all peers')
-def step_impl(context, version):
-    if not hasattr(context, "hash"):
-        context.hash = {}
+@then(u'a packageId is received for chaincode "{label}" on all peers')
+def step_impl(context, label):
+    if not hasattr(context, "packageId"):
+        context.packageId = {}
     peers = context.interface.get_peers(context)
-    hashPat = r"[\s\S]*\nName: (?P<name>.*), Version: {0}, Hash: (?P<hash>.*)\n".format(version)
+    pat = r"[\s\S]*\nPackage ID: (?P<packageId>.*), Label: {0}\n".format(label)
     for peer in peers:
         if context.newlifecycle:
             ret = context.interface.list_chaincode(context, peer, list_type="queryinstalled")
@@ -1294,7 +1305,7 @@ def step_impl(context, version):
 
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
-        hashMatch = re.match(hashPat, ret[peer])
-        assert hashMatch is not None, "There was no hash returned for the version {0} chaincode install on peer '{1}'".format(version, peer)
-        hashRes = hashMatch.groupdict()['hash']
-        context.hash[org] = hashRes
+        pkgMatch = re.match(pat, ret[peer])
+        assert pkgMatch is not None, "There was no packageId returned for the version {0} chaincode install on peer '{1}'".format(label, peer)
+        pkgRes = pkgMatch.groupdict()['packageId']
+        context.packageId[org] = pkgRes

@@ -10,7 +10,6 @@ OrdererOrgs:
     CA:
       Hostname: ca
       SANS:
-        - 0.0.0.0
         - localhost
     Specs:
       - Hostname: orderer0
@@ -24,7 +23,6 @@ PeerOrgs:
     CA:
       Hostname: ca
       SANS:
-        - 0.0.0.0
         - localhost
     Template:
       Count: 2
@@ -39,7 +37,6 @@ PeerOrgs:
     CA:
       Hostname: ca
       SANS:
-        - 0.0.0.0
         - localhost
     Template:
       Count: 2

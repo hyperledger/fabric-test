@@ -33,6 +33,7 @@ type SimpleChaincode struct {
 
 // Init is a no-op
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+	fmt.Println("Initialize...")
 	return shim.Success(nil)
 }
 
@@ -45,10 +46,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	switch function {
 
 	case "put":
-		if len(args) < 4 {
-			fmt.Println("Args list is too short!")
-			return shim.Error("Args list is too short!!!!!!!!!!!!!!!!")
-		}
+		//		if len(args) < 4 {
+		//			fmt.Println("Args list is too short!")
+		//			return shim.Error("Args list is too short!!!!!!!!!!!!!!!!")
+		//		}
 
 		if len(args)%2 != 0 {
 			fmt.Println("Odd number of arguments. Need to supply key/value pairs!")

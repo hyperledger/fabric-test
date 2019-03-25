@@ -62,8 +62,15 @@ PEER_ORG_STR = '''
   - Name: {name}
     Domain: {domain}
     EnableNodeOUs: {ouEnable}
+    CA:
+      Hostname: ca
+      SANS:
+        - 0.0.0.0
+        - localhost
     Template:
       Count: {numPeers}
+      SANS:
+        - 0.0.0.0
     Users:
       Count: {numUsers}
 '''
@@ -272,7 +279,6 @@ def generateChannelAnchorConfig(channelID, profile, context):
                        "-channelID", channelID,
                        "-configPath", testConfigs,
                        "-asOrg", org.title().replace('.', '')]
-            #subprocess.check_call(command, cwd=testConfigs, env=updated_env)
             subprocess.check_call(command, env=updated_env)
         except:
             print("Unable to generate channel anchor config data: {0}".format(sys.exc_info()[1]))
@@ -348,9 +354,11 @@ def mspandtlsCheck(path, tlsExist):
 
 def fileExistWithExtension(path, message, fileExt=''):
     for root, dirnames, filenames in os.walk(path):
-        assert len(filenames) > 0, "{0}: len: {1}".format(message, len(filenames))
+        assert len(filenames) > 0, "{0}: [{1}] len: {2}".format(message, path, len(filenames))
         fileCount = [filename.endswith(fileExt) for filename in filenames]
         assert fileCount.count(True) >= 1
+        if "tls" in dirnames:
+            break
 
 def rolebasedCertificate(path):
     adminpath = path + "admincerts/"
@@ -359,8 +367,8 @@ def rolebasedCertificate(path):
     capath = path + "cacerts/"
     fileExistWithExtension(capath, "There is not .pem cert in {0}.".format(capath), '.pem')
 
-    signcertspath = path + "signcerts/"
-    fileExistWithExtension(signcertspath, "There is not .pem cert in {0}.".format(signcertspath), '.pem')
+#    signcertspath = path + "signcerts/"
+#    fileExistWithExtension(signcertspath, "There is not .pem cert in {0}.".format(signcertspath), '.pem')
 
     tlscertspath = path + "tlscerts/"
     fileExistWithExtension(tlscertspath, "There is not .pem cert in {0}.".format(tlscertspath), '.pem')
@@ -523,7 +531,6 @@ def configUpdate(context, config, group, channel):
     with open("{0}/modified_config.json".format(testConfigs), "w") as fd:
         fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
 
-    #print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["groups"]))
     print("Modified config: {}".format(config["data"]["data"][0]["payload"]["data"]["config"]["channel_group"]["groups"][group]["values"]))
 
     # configtxlator proto_encode --input config.json --type common.Config --output config.pb
@@ -580,12 +587,10 @@ def generateCollections(context, collectionsFile):
     print(structure)
 
     with open(template, "r") as tfd:
-        #collectionConfig = tfd.read() % context.chaincode
         collectionConfig = json.loads(tfd.read() % (structure))
 
     finalConfig = "configs/{0}/{1}".format(context.projectName, collectionsFile)
     with open(finalConfig, "w") as fd:
         fd.write(json.dumps(collectionConfig, indent=2))
-        #fd.write(collectionConfig)
 
     return "/var/hyperledger/{}".format(finalConfig)

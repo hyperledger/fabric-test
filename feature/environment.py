@@ -23,7 +23,7 @@ def getLogFiles(containers, fileSuffix):
             namePart, sep, _ = container.rpartition("-")
             containerName = container
         else:
-            namePart = container.containerName
+            namePart = container.containerName.replace(":","_")
             containerName = container.containerName
         try:
             with open(namePart + fileSuffix, "w+") as logfile:
@@ -111,6 +111,7 @@ def before_all(context):
     shutil.rmtree("../chaincodes/enccc_example/vendor", ignore_errors=True)
 
     # Performing `npm install` before test suit not before test cases.
+    shutil.rmtree("../../../node_modules", ignore_errors=True)
     shutil.rmtree("./node_modules", ignore_errors=True)
     shutil.rmtree("./package-lock.json", ignore_errors=True)
     shutil.copyfile("package.json", "../../../package.json")

@@ -298,12 +298,6 @@ Application: &ApplicationDefaults
     # For Application policies, their canonical path is
     #   /Channel/Application/<PolicyName>
     Policies: &ApplicationDefaultPolicies
-        LifecycleEndorsement:
-            Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
-        Endorsement:
-            Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
         Readers:
             Type: ImplicitMeta
             Rule: "ANY Readers"
@@ -315,10 +309,10 @@ Application: &ApplicationDefaults
             Rule: "MAJORITY Admins"
         LifecycleEndorsement:
             Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
+            Rule: "ANY Endorsement"
         Endorsement:
             Type: ImplicitMeta
-            Rule: "MAJORITY Endorsement"
+            Rule: "ANY Endorsement"
 
     # Capabilities describes the application level capabilities, see the
     # dedicated Capabilities section elsewhere in this file for a full
@@ -368,10 +362,10 @@ Profiles:
                   Rule: MAJORITY Admins
                 LifecycleEndorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
                 Endorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -411,10 +405,10 @@ Profiles:
                   Rule: MAJORITY Admins
                 LifecycleEndorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
                 Endorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -450,10 +444,10 @@ Profiles:
                   Rule: MAJORITY Admins
                 LifecycleEndorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
                 Endorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
         Consortiums:
             SampleConsortium:
                 Organizations:
@@ -484,10 +478,10 @@ Profiles:
                   Rule: MAJORITY Admins
                 LifecycleEndorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
                 Endorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
 
     # SysTestChannel defines a channel for use with the System Test Orgs
     SysTestChannel:
@@ -514,10 +508,10 @@ Profiles:
                   Rule: MAJORITY Admins
                 LifecycleEndorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
                 Endorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
 
     # SampleSingleMSPChannel defines a channel with only the sample org as a
     # member.  It is designed to be used in conjunction with SampleSingleMSPSolo
@@ -546,8 +540,8 @@ Profiles:
                   Rule: MAJORITY Admins
                 LifecycleEndorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
                 Endorsement:
                   Type: ImplicitMeta
-                  Rule: "MAJORITY Endorsement"
+                  Rule: ANY Endorsement
 

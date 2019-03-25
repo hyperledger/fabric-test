@@ -62,7 +62,7 @@ services:
             - ORDERER_GENERAL_TLS_CERTIFICATE=${ORDERER_GENERAL_TLS_CERTIFICATE}
             - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/tls/ca.crt]
             - ORDERER_TLS_CLIENTAUTHREQUIRED=${ORDERER_TLS_CLIENTAUTHREQUIRED}
-            - ORDERER_TLS_CLIENTROOTCAS_FILES=/var/hyperledger/users/Admin@example.com/tls/ca.crt
+            - ORDERER_TLS_CLIENTROOTCAS_FILES=/var/hyperledger/tls/ca.crt
             - ORDERER_TLS_CLIENTCERT_FILE=/var/hyperledger/users/Admin@example.com/tls/client.crt
             - ORDERER_TLS_CLIENTKEY_FILE=/var/hyperledger/users/Admin@example.com/tls/client.key
         volumes:

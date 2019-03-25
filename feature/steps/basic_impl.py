@@ -7,6 +7,7 @@
 from behave import *
 import time
 import os
+import re
 import sys
 import subprocess
 import json
@@ -40,12 +41,31 @@ def wait_impl(context, seconds, peer):
                                                    peer,
                                                    context.chaincode['name'],
                                                    context.chaincode.get("version", 0))
+    if context.newlifecycle:
+        peerParts = peer.split('.')
+        org = '.'.join(peerParts[1:])
+        packageId = context.packageId.get(org, "0")
+
+        pat = r"{}:(?P<hash>.*)".format(context.chaincode['name'])
+        pkgMatch = re.match(pat, packageId)
+        if pkgMatch is None:
+            pat = r"(?P<label>.*):(?P<hash>.*)"
+            pkgMatch = re.match(pat, packageId)
+            assert pkgMatch is not None, "The packageId is not formatted as expected: '{}'".format(packageId)
+            pkgLabel = pkgMatch.groupdict()['label']
+            print("Using the label '{0}' instead of the name '{1}'".format(pkgLabel, context.chaincode['name']))
+        pkgRes = pkgMatch.groupdict()['hash']
+
+        chaincode_container = "{0}-{1}-{2}-{3}".format(context.projectName,
+                                                       peer,
+                                                       context.chaincode['name'],
+                                                       pkgRes)
     context.interface.wait_for_deploy_completion(context, chaincode_container, seconds)
 
 @given(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed on peer "{peer}"')
 @when(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed on peer "{peer}"')
 @then(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed on peer "{peer}"')
-def committed_impl(context, seconds, peer):
+def committed_impl(context, seconds, peer, verifyError=True):
     user = "Admin"
     peerParts = peer.split('.')
     org = '.'.join(peerParts[1:])
@@ -58,14 +78,24 @@ def committed_impl(context, seconds, peer):
         count = 0
         ret = context.interface.list_chaincode(context, peer, user, list_type="querycommitted")
         with ic_timeout(seconds, exception=Exception):
-            while context.chaincode["version"] not in ret[peer] and count <= seconds:
+            while context.chaincode["name"] not in ret[peer] and count <= seconds:
                 ret = context.interface.list_chaincode(context, peer, user, list_type="querycommitted")
                 time.sleep(1)
                 count = count + 1
     except:
         print("Error occurred: {0}".format(sys.exc_info()[1]))
     finally:
-        assert context.chaincode["version"] in ret[peer], "The chaincode {0} has not been committed\n{1}".format(context.chaincode['name'], ret)
+        if verifyError:
+            assert context.chaincode["name"] in ret[peer], "The chaincode {0} has not been committed\n{1}".format(context.chaincode['name'], ret)
+        else:
+            context.result[peer] = ret[peer]
+            print(context.result[peer])
+
+@given(u'I wait up to "{seconds:d}" seconds for the chaincode to attempt to be committed on peer "{peer}"')
+@when(u'I wait up to "{seconds:d}" seconds for the chaincode to attempt to be committed on peer "{peer}"')
+@then(u'I wait up to "{seconds:d}" seconds for the chaincode to attempt to be committed on peer "{peer}"')
+def step_impl(context, seconds, peer):
+    committed_impl(context, seconds, peer, verifyError=False)
 
 @given(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed')
 @when(u'I wait up to "{seconds:d}" seconds for the chaincode to be committed')
