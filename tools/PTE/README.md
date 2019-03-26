@@ -220,7 +220,7 @@ A single test case is described by a user input file. User input files define al
 
         "channelOpt": {
             "name": "testchannel1",
-            "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+            "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
             "action":  "create",
             "orgName": [
                 "testOrg1"
@@ -245,7 +245,7 @@ A single test case is described by a user input file. User input files define al
 
         "channelOpt": {
             "name": "testchannel1",
-            "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+            "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
             "action":  "create",
             "orgName": [
                 "testOrg1"
@@ -311,7 +311,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
 
             "channelOpt": {
                 "name": "testchannel1",
-                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
                 "action":  "create",
                 "orgName": [
                     "testOrg1"
@@ -323,7 +323,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
 
             "channelOpt": {
                 "name": "testchannel1",
-                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
                 "action":  "join",
                 "orgName": [
                     "testOrg1"
@@ -382,7 +382,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
 
             "channelOpt":
                 "name":  "testchannel1",
-                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
                 "action":  "create",
                 "orgName": [
                     "testOrg1",
@@ -416,7 +416,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
 
             "channelOpt": {
                 "name":  "testchannel1",
-                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+                "channelTX": "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
                 "action":  "create",
                 "orgName": [
                     "testOrg1",
@@ -762,7 +762,7 @@ The user input file contains configuration parameters including chaincode defini
         },
         "channelOpt": {
             "name": "testchannel1",
-            "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+            "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
             "action":  "create",
             "orgName": [
                 "org1"
@@ -855,7 +855,7 @@ The user input file contains configuration parameters including chaincode defini
         "chaincodeVer": "v0",
         "channelOpt": {
             "name": "testchannel1",
-            "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+            "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
             "action":  "create",
             "orgName": [
                 "org1"
@@ -1158,19 +1158,19 @@ The service credentials contain the information of the network and are stored in
                  "orderer0": {
                     "name": "OrdererMSP",
                     "mspid": "OrdererMSP",
-                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
-                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp",
+                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config",
+                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp",
                     "comName": "example.com",
                     "url": "grpcs://localhost:5005",
                     "server-hostname": "orderer0.example.com",
-                    "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+                    "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
                 }
             },
             "org1": {
                     "name": "Org1MSP",
                     "mspid": "Org1MSP",
-                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
-                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
+                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config",
+                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
                     "comName": "example.com",
                     "ordererID": "orderer0",
                     "ca": {
@@ -1183,20 +1183,20 @@ The service credentials contain the information of the network and are stored in
                             "requests": "grpc://localhost:7061",
                             "events": "grpc://localhost:7051",
                             "server-hostname": "peer0.org1.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
                     },
                     "peer2": {
                             "requests": "grpc://localhost:7062",
                             "events": "grpc://localhost:7052",
                             "server-hostname": "peer1.org1.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
                     }
             },
             "org2": {
                     "name": "Org2MSP",
                     "mspid": "Org2MSP",
-                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config",
-                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
+                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config",
+                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
                     "comName": "example.com",
                     "ordererID": "orderer0",
                     "ca": {
@@ -1209,13 +1209,13 @@ The service credentials contain the information of the network and are stored in
                             "requests": "grpcs://localhost:7063",
                             "events": "grpcs://localhost:7053",
                             "server-hostname": "peer0.org2.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
                     },
                     "peer2": {
                             "requests": "grpcs://localhost:7064",
                             "events": "grpcs://localhost:7054",
                             "server-hostname": "peer1.org2.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
+                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
                     }
             }
         }

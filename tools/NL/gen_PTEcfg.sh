@@ -25,7 +25,7 @@ function printHelp {
    echo "    -r: number of organizations, default=1"
    echo "    -n: number of channels, default=1"
    echo "    -x: number of ca, default=1"
-   echo "    -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+   echo "    -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
    echo "    -w: host ip, default=localhost"
    echo "    -C: company name, default=example.com"
    echo "    -M: JSON file containing organization and MSP name mappings (optional) "
@@ -45,7 +45,7 @@ nCA=1
 nPeersPerOrg=1
 nChannel=1
 nOrgPerChannel=1
-MSPBaseDir="src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+MSPBaseDir="src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
 ordererBaseDir=$MSPBaseDir"/ordererOrganizations"
 peerBaseDir=$MSPBaseDir"/peerOrganizations"
 comName="example.com"

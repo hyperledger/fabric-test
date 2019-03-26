@@ -7,7 +7,7 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel8",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel8.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel8.tx",
         "action":  "create",
         "orgName": [
             "org1"

@@ -86,11 +86,11 @@ Check your Docker and Docker-Compose versions with the following commands:
 
 - ote-compose.yml is used to launch the OTE container by mounting the certificates and channel artifacts into the container and starts running a testcase from ote_test.go when testcase number is passed with ote-compose.yml
 - If using Network Launcher for launching the network, OTE container should be joined to the same network bridge as `network_mode: nl_default` in ote-compose.yml. Otherwise, `network_mode: nl_default` can be changed to `network_mode: <bridge name>` in ote-compose.yml to get connected to the network bridge to which fabric containers are connected
-- If using Network Launcher for launching the network with default location i.e, $GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen for crypto-config, channel-artifacts, current ote-compose.yml can be used as is. If not, the lines shown below for volumes, can be changed on the left side of the `:` to reflect the exact location of the certificates and channel artifacts in the ote-compose.yml
+- If using Network Launcher for launching the network with default location i.e, $GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen for crypto-config, channel-artifacts, current ote-compose.yml can be used as is. If not, the lines shown below for volumes, can be changed on the left side of the `:` to reflect the exact location of the certificates and channel artifacts in the ote-compose.yml
    ```bash
       volumes:
           - ../../../fabric-test/tools/NL/configtx.yaml:/var/hyperledger/fabric/configtx.yaml
-          - ../../../fabric-test/fabric/common/tools/cryptogen/crypto-config:/var/hyperledger/fabric/artifacts
+          - ../../../fabric-test/fabric/internal/cryptogen/crypto-config:/var/hyperledger/fabric/artifacts
    ```
 - Also, when using a different tool or different way for launching the fabric network, change the above the lines in the ote-compose.yml to reflect the path for crypto-config, channel-artifacts and the location of the configtx.yaml
 

@@ -27,7 +27,7 @@ function printHelp {
    echo "    -s: security service type, default=256"
    echo "    -t: orderer service [solo|kafka|etcdraft], default=solo"
    echo "    -f: profile name, default=test"
-   echo "    -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+   echo "    -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
    echo "    -w: host ip 1, default=0.0.0.0"
    echo "    -c: batch timeout, default=2s"
    echo "    -B: batch size, default=10"
@@ -36,7 +36,7 @@ function printHelp {
    echo "    -M: JSON file containing organization and MSP name mappings (optional) "
    echo " "
    echo "Example:"
-   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -w 10.120.223.35 -v 1 -v 3"
+   echo " ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 2 -h SHA2 -s 256 -t kafka -b $GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -w 10.120.223.35 -v 1 -v 3"
    exit
 }
 
@@ -97,7 +97,7 @@ peersPerOrg=1
 hashType="SHA2"
 SecType="256"
 PROFILE_STRING="test"
-MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+MSPBaseDir=$GOPATH"/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
 comName="example.com"
 batchTimeOut="2s"
 batchSize=10
@@ -379,6 +379,9 @@ do
              echo "            Admins:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$ordMSP.admin')\"" >> $cfgOutFile
+             echo "            Endorsement:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
 #             echo "        BCCSP:" >> $cfgOutFile
@@ -451,6 +454,9 @@ do
              echo "            Admins:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$orgMSP.admin')\"" >> $cfgOutFile
+             echo "            Endorsement:" >> $cfgOutFile
+             echo "                Type: Signature" >> $cfgOutFile
+             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.peer', '$orgMSP.client')\"" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
 #             echo "        BCCSP:" >> $cfgOutFile

@@ -8,7 +8,7 @@
 
 # default directories
 FabricDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric"
-MSPDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen"
+MSPDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
@@ -34,7 +34,7 @@ function printHelp {
    echo "    -q: orderer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
    echo "    -c: batch timeout, default=2s"
    echo "    -B: batch size, default=10"
-   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
+   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS enablement [disabled|serverauth|clientauth], default=disabled"
    echo "    -C: company name, default=example.com "

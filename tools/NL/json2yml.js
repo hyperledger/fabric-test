@@ -18,7 +18,7 @@ if ( process.env.GOPATH != null ) {
 }
 
 var srcMSPDir='/opt/hyperledger/fabric/msp/crypto-config';
-var MSPDir=GOPATHDir+'/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config';
+var MSPDir=GOPATHDir+'/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config';
 var CADir='/etc/hyperledger/fabric-ca-server-config';
 var CA=0;
 var CDB=0;

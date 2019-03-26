@@ -3,7 +3,7 @@
     "TLS": "clientauth",
     "channelOpt": {
         "name": "testorgschannel1",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
         "action":  "create",
         "orgName": [
             "org1"

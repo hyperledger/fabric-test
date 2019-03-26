@@ -24,7 +24,7 @@
             ],
             "command": "sh -c 'fabric-ca-server start --cfg.identities.allowremove --cfg.affiliations.allowremove -b admin:adminpw -d'",
             "volumes": [
-                 "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config",
+                 "/root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config",
                  "./fabricca/tlsOrg1:/etc/hyperledger/fabric-ca-server"
             ],
             "container_name": "ca"

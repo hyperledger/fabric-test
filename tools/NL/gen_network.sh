@@ -25,7 +25,7 @@ function printHelp {
    echo "       -S: TLS enablement [enabled|disabled], default=disabled "
    echo "       -m: Mutual TLS enablement [enabled|disabled], default=disabled "
    echo "       -x: number of ca, default=0"
-   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "       -C: company name, default=example.com"
    echo "       -M: JSON file containing organization and MSP name mappings (optional) "
@@ -39,8 +39,8 @@ function printHelp {
    echo "       -q: orderer logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
    echo " "
    echo "Example:"
-   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
-   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S enabled "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S enabled "
    echo " "
    exit
 }
@@ -54,7 +54,7 @@ nPeerPerOrg=1
 nOrg=1
 nOrderer=1
 nCA=0
-MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 TLSEnabled="disabled"
 MutualTLSEnabled="disabled"
