@@ -87,4 +87,8 @@ cp -r $WD/bin/* $GOPATH/src/github.com/hyperledger/fabric/.build/bin/
 # PTE looks for binaries in fabric submodule dir
 mkdir -p $GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin
 cp -r $WD/bin/* $GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin/
+
+# Temporarily copy fabric-ca binaries to the exported fabric bin dir
+cp -r $GOPATH/src/github.com/hyperledger/fabric-ca/bin/* $GOPATH/src/github.com/hyperledger/fabric/.build/bin/
+cp -r $GOPATH/src/github.com/hyperledger/fabric-ca/bin/* $GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin/
 echo

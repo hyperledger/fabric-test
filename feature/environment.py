@@ -89,6 +89,7 @@ def after_scenario(context, scenario):
     print("*** Memory Info:\n\tFree: {}\n\tUsed: {}\n\tPercentage: {}\n".format(mem.free, mem.used, mem.percent))
 
     # Clean up memory in between scenarios, just in case
+    rc = subprocess.call(["docker volume prune -f"], shell=True)
     if hasattr(context, "random_key"):
         del context.random_key
     if hasattr(context, "payload"):

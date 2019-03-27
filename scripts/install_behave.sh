@@ -28,31 +28,31 @@ apt-get install --yes build-essential
 # required dependencies for cryptography, which is required by pyOpenSSL
 # https://cryptography.io/en/stable/installation/#building-cryptography-on-linux
 apt-get install --yes libssl-dev libffi-dev
-pip install --upgrade pip
-pip install behave
-pip install nose
+pip2 install --upgrade pip2
+pip2 install behave
+pip2 install nose
 
 # updater-server, update-engine, and update-service-common dependencies (for running locally)
-pip install -I flask==0.10.1 python-dateutil==2.2 pytz==2014.3 pyyaml==3.10 couchdb==1.0 flask-cors==2.0.1 requests==2.4.3 pyOpenSSL==16.2.0 pysha3==1.0b1
+pip2 install -I flask==0.10.1 python-dateutil==2.2 pytz==2014.3 pyyaml==3.10 couchdb==1.0 flask-cors==2.0.1 requests==2.4.3 pyOpenSSL==16.2.0 pysha3==1.0b1
 
 # Python grpc package for behave tests
 # Required to update six for grpcio
-pip install --ignore-installed six
-pip install --upgrade 'grpcio==0.13.1'
+pip2 install --ignore-installed six
+pip2 install --upgrade 'grpcio==0.13.1'
 
 # Pip packages required for some behave tests
-pip install ecdsa python-slugify b3j0f.aop
-pip install google
-pip install protobuf
-pip install pyyaml
-pip install pykafka
-pip install requests
-pip install pyexecjs
-pip install cython
-pip install psutil
+pip2 install ecdsa python-slugify b3j0f.aop
+pip2 install google
+pip2 install protobuf
+pip2 install pyyaml
+pip2 install pykafka
+pip2 install requests
+pip2 install pyexecjs
+pip2 install cython
+pip2 install psutil
 # commenting out until we can get started using Java SDK in test runs
 #pip install pyjnius
-pip install interruptingcow
+pip2 install interruptingcow
 
 # Install Tcl prerequisites for busywork
 apt-get install --yes tcl tclx tcllib
