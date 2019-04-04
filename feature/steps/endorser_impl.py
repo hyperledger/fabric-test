@@ -20,6 +20,11 @@ import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
 
 
+@given(u'an admin creates an idemix MSP for organization "{org}"')
+def step_impl(context, org):
+    testConfigs, context = makeProjectConfigDir(context, returnContext=True)
+    config_util.buildConfigtx(testConfigs, org, "{}.idemix".format(org))
+
 @given('the chaincode at location "{path}" is upgraded')
 def step_impl(context, path):
     #check = "../chaincodes/{0}".format(path)

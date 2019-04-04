@@ -938,6 +938,7 @@ class CLIInterface(InterfaceBase):
                          "./configs/{0}/ordererOrganizations/example.com/orderers/{1}/tls/server.crt".format(context.composition.projectName, orderer),
                          "./configs/{0}/ordererOrganizations/example.com/ca/ca.example.com-cert.pem".format(context.composition.projectName),
                          "./configs/{0}/ordererOrganizations/example.com/orderers/{1}/tls/ca.crt".format(context.composition.projectName, orderer),
+                         "./configs/{0}/ordererOrganizations/example.com/tls-cert.pem".format(context.composition.projectName),
 
                          "./configs/{}/ordererOrganizations/example.com/tlsca/tlsca.example.com-cert.pem".format(context.composition.projectName),
                          "./configs/{}/ordererOrganizations/example.com/tls-cert.pem".format(context.composition.projectName),
@@ -1074,7 +1075,7 @@ class CLIInterface(InterfaceBase):
             process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=newEnv)
             output, err = process.communicate()
             print("Output Enroll: {}".format(output))
-            #print("Err Enroll: {}".format(err))
+            print("Err Enroll: {}".format(err))
 
     def registerUser(self, context, user, org, passwd, role, peer):
         url = self.getCAUrl(context, org)
@@ -1092,7 +1093,7 @@ class CLIInterface(InterfaceBase):
         process = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=newEnv)
         output, err = process.communicate()
         print("user register: {}".format(output))
-        #print("user err: {}".format(err))
+        print("user err: {}".format(err))
 
     def enrollUser(self, context, user, org, passwd, enrollType, peer):
         fca = 'ca.{}'.format(org)
@@ -1112,7 +1113,7 @@ class CLIInterface(InterfaceBase):
             process = subprocess.Popen([command], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=newEnv)
             output, err = process.communicate()
             print("Output: {}".format(output))
-            #print("Err: {}".format(err))
+            print("Err: {}".format(err))
         for container in context.composition.containerDataList:
             if container.containerName == fca:
                 local = container.ports['7054/tcp'][0]

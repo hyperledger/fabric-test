@@ -20,6 +20,9 @@ def enableTls(context, tlsEnabled, projectName=None):
     context.composition.environ["ORDERER_GENERAL_TLS_ENABLED"] = convertBoolean(tlsEnabled)
     context.composition.environ["CORE_PEER_TLS_ENABLED"] = convertBoolean(tlsEnabled)
     context.composition.environ["FABRIC_CA_SERVER_TLS_ENABLED"] = convertBoolean(tlsEnabled)
+    context.composition.environ["FABRIC_CA_SERVER_TLS_OPTION"] = ""
+    if tlsEnabled:
+        context.composition.environ["FABRIC_CA_SERVER_TLS_OPTION"] = "--tls.enabled"
 
 
 class ContainerData:
