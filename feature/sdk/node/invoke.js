@@ -107,14 +107,14 @@ function _invoke(username, org, orgName, chaincode, peerNames, orderer, network_
         let all_good = true;
         for (var i in proposalResponses) {
             let one_good = false;
-            console.info('Proposal Response length: ' + proposalResponses.length);
-            console.info('Proposal Response payload \'' + proposalResponses[i].payload + '\'. ');
+            console.info('Proposal Response ' + i + ' of ' + proposalResponses.length + ' responses.');
+            //console.info('Proposal Response payload \'' + proposalResponses[i].payload + '\'. ');
             //console.info('Proposal Response status \'' + proposalResponses[i].response.status + '\'. ' );
             //console.info('Proposal Response status \'' + proposalResponses[i].response + '\'. ' + proposalResponses[i].response.status);
             if (proposalResponses && (proposalResponses[i].payload || (proposalResponses[i].response && proposalResponses[i].response.status === 200) ) ) {
                 one_good = true;
             } else {
-                console.error('transaction proposal was bad');
+                console.error('transaction proposal (or response) was bad');
             }
             all_good = all_good & one_good;
         }
