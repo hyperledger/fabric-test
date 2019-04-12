@@ -1148,7 +1148,7 @@ async function execQueryBlock(channel, sB, eB) {
 }
 async function preQueryBlock(channel, sB, eB) {
     logger.info('[preQueryBlock] sB:eB= %d:%d', sB, eB);
-    while ( eBlock > sB ) {
+    while ( eBlock >= sB ) {
         var tB = eBlock - sB;
         if ( tB > 100 ) {
             eB = parseInt(sB) + 100 - 1;
