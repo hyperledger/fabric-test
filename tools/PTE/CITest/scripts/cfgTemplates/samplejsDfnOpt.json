@@ -5,8 +5,8 @@
         "keyPayLoad": [2],
         "keyStart": "_KEYSTART_",
         "payLoadType": "Random",
-        "payLoadMin": "1024",
-        "payLoadMax": "1024"
+        "payLoadMin": "8",
+        "payLoadMax": "8"
     },
     "deploy": {
         "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
