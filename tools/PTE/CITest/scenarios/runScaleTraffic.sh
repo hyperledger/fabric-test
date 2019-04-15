@@ -44,6 +44,9 @@ usage () {
     echo -e "\t--nchan\tnumber of channels [integer]"
     echo -e "\t\tDefault: 1."
     echo
+    echo -e "\t--chan0\tthe starting channel number [integer] used for this test"
+    echo -e "\t\tDefault: 1."
+    echo
     echo -e "\t--norg\tnumber of org [integer]"
     echo -e "\t\tDefault: 1."
     echo
@@ -98,7 +101,7 @@ printVars() {
     echo ""
     echo "input parameters: TESTCASE=$TESTCASE"
     echo "input parameters: NETWORK=$NETWORK, chaincode=$chaincode, PRECONFIG=$PRECONFIG"
-    echo "input parameters: NCHAN=$NCHAN, NORG=$NORG, LSCDIR=$LSCDir"
+    echo "input parameters: NCHAN=$NCHAN, CHAN0=$CHAN0, NORG=$NORG, LSCDIR=$LSCDir"
     echo "input parameters: TXMODE=$TXMODE, NPROC=$NPROC"
     echo "input parameters: targetpeers=$targetpeers, targetorderers=$targetorderers, norderers=$norderers"
     echo "input parameters: NREQ=$NREQ, RUNDUR=$RUNDUR, FREQ=$FREQ, key0=$key0"
@@ -122,11 +125,13 @@ TXMODE="Constant"
 
 NTHREAD=1
 NCHAN=1
+CHAN0=1
 CHANPREFIX="testorgschannel"
 NREQ=10000
 RUNDUR=0
 FREQ=0
 NORG=1
+NPROC=1
 targetpeers="RoundRobin"
 targetorderers="RoundRobin"
 norderers=0
@@ -175,6 +180,12 @@ while [[ $# -gt 0 ]]; do
       --nchan)
           shift
           NCHAN=$1                 # number of channels
+          shift
+          ;;
+
+      --chan0)
+          shift
+          CHAN0=$1                 # the first channel
           shift
           ;;
 
@@ -299,7 +310,7 @@ function PTEexec() {
     fi
 
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
+    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
     CMDResult="$?"
     set +x
     if [ $CMDResult -ne "0" ]; then
@@ -366,7 +377,7 @@ if [ $PRECONFIG != "none" ]; then
     timestamp=`date`
     echo "[$0 $timestamp] create/join channel, install/instantiate chaincode started"
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir -c -i --nchan $NCHAN --chanprefix $CHANPREFIX --norg $NORG -a $chaincode
+    ./gen_cfgInputs.sh -d $LSCDir -c -i --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode
     set +x
     timestamp=`date`
     echo "[$0 $timestamp] create/join channel, install/instantiate chaincode completed"

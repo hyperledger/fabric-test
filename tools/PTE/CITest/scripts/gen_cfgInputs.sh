@@ -28,6 +28,9 @@ usage () {
     echo -e "--chanprefix\tchannel name prefix, used with option --nchan"
     echo -e "\t\t(Default: defaultchannel)"
 
+    echo -e "--chan0\tthe starting channel number [integer] used for this test"
+    echo -e "\t\t(Default: 1)"
+
     echo -e "-c, --channel\tcreate/join channel"
     echo -e "\t\t(Default: No)"
 
@@ -207,6 +210,7 @@ ORGPREFIX="org"                # default org name
 setChanName="no"
 setChanNum="no"
 CHANPREFIX="defaultchannel"    # default channel name
+CHAN0=1                        # default first channel
 NCHAN=0
 NORG=0
 TXMODE="Constant"
@@ -578,6 +582,13 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --chan0)
+          shift
+          CHAN0=$1           # first channel
+          echo -e "\t- Specify first channel: $CHAN0\n"
+          shift
+          ;;
+
       -o | --org)
           if [ $setOrgNum == "yes" ]; then
               echo "Error: cannot use option $1 with option --norg"
@@ -735,7 +746,7 @@ while [[ $# -gt 0 ]]; do
       --norderers)
           shift
           NORDERERS=$1
-          echo -e "\t- Specify number of ingress orderers to which transactions will be sent: $NORDERERS\n"
+          echo -e "\t- Specify number of orderers participate in transaction: $NORDERERS\n"
           shift
           ;;
 
@@ -771,8 +782,8 @@ done
 if [ $NCHAN -gt 0 ]; then
     for (( i=0; i < $NCHAN; i++ ))
     do
-        j=$((i + 1))
-        CHANNEL[$i]=$CHANPREFIX$j
+        CHANNEL[$i]=$CHANPREFIX$CHAN0
+        CHAN0=$((CHAN0 + 1))
     done
 fi
 
