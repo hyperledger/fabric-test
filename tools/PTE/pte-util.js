@@ -27,10 +27,10 @@ var KEYUTIL = jsrsa.KEYUTIL;
 
 
 var copService = require('fabric-ca-client/lib/FabricCAServices.js');
-var User = require('fabric-client/lib/User.js');
+var User = require('fabric-common/lib/User.js');
 //var Constants = require('./constants.js');
 
-// var logger = require('fabric-client/lib/utils.js').getLogger('PTE util');
+// var logger = require('fabric-common/lib/Utils.js').getLogger('PTE util');
 
 var PTEid = parseInt(process.argv[5]);
 var loggerMsg='PTE ' + PTEid + ' util';

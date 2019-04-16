@@ -36,7 +36,7 @@ var path = require('path');
 var util = require('util');
 
 var testUtil = require('./pte-util.js');
-var utils = require('fabric-client/lib/utils.js');
+var utils = require('fabric-common/lib/Utils.js');
 
 
 hfc.setConfigSetting('crypto-keysize', 256);
@@ -906,7 +906,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
     var secret;
     var submitter = null;
 
-    hfc.setConfigSetting('key-value-store', 'fabric-client/lib/impl/FileKeyValueStore.js');
+    hfc.setConfigSetting('key-value-store', 'fabric-common/lib/impl/FileKeyValueStore.js');
 
     // If user defines goPath, then they must also specify path relative to gopath in the input json file.
     // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the channelTX exactly as
@@ -1174,7 +1174,7 @@ async function queryBlockchainInfo(channel, client, org) {
     qPeer = txCfgPtr.queryBlockOpt.peer;
     logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%s:%d:%d', qOrg, qPeer, sBlock, eBlock);
 
-    hfc.setConfigSetting('key-value-store','fabric-client/lib/impl/FileKeyValueStore.js');
+    hfc.setConfigSetting('key-value-store','fabric-common/lib/impl/FileKeyValueStore.js');
     var cryptoSuite = hfc.newCryptoSuite();
     cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
     client.setCryptoSuite(cryptoSuite);
