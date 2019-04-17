@@ -108,7 +108,7 @@ The command is located in `PTE/CITest/scripts`
         FAB-11615-2i: SBEcc chaincode, 2 processes X 50000 invokes with valuee only, TLS, CouchDB, 2 Channel
         FAB-11615-2iSBE: SBEcc chaincode, 2 processes X 50000 invokes with value and Endorsement policies, TLS, CouchDB, 2 Channel
         FAB-14227-36i: 2 peers in 2 orgs, 6 orderers roundrobin, 3 channels each with 12 processes X 10K invokes scripts to run on IKS k8s (Note: NL script uses kafka)
-        FAB-14225-12i: 2 peers in 2 orgs, 7 orderers in 3 channels with partially overlapping consenter sets (requires 3 channel profile consenter sets and 3 unique SCfiles), each with 4 processes X 10K invokes scripts to run on IKS k8s     
+        FAB-14225-12i: 2 peers in 2 orgs, 7 orderers in 3 channels with partially overlapping consenter sets (requires 3 channel profile consenter sets and 3 unique SCfiles), each with 4 processes X 10K invokes scripts to run on IKS k8s
     **Note that a query testcase requires execution of corresponding invoke testcase first to avoid errors due to the absence of transactions.**
 
 * ### Examples
@@ -198,10 +198,14 @@ The command is located in `PTE/CITest/scripts`
         FAB-10677.sh: execute FAB-10677
         FAB-11638.sh: execute FAB-11638
         FAB-11614-2iSBE.sh: execute FAB-11614 with invokes in 2 threads to update Endorsement policy of values and half the keys
-        FAB-11615-2i.sh: execute FAB-11615 with invokes in 2 threads to update value only 
+        FAB-11615-2i.sh: execute FAB-11615 with invokes in 2 threads to update value only
         FAB-11615-2iSBE.sh: execute FAB-11615 with invokes in 2 threads to update Endorsement policy and value
         FAB-11726-4i.sh: execute FAB-11726-4i
         FAB-12055.sh: execute FAB-12055
+        FAB-14230.sh: execute FAB-14230
+        FAB-14269.sh: execute FAB-14269
+        FAB-14350.sh: execute FAB-14350
+        FAB-14922.sh: execute FAB-14922
 
 * ### run_scenarios.sh
 The script, PTE/CITest/scenarios/run_scenarios.sh, can be used to execute a full test scenario, including launching a network (optional), priming, invokes, queries, and generating results in a pteReport file.
@@ -227,6 +231,65 @@ The script, PTE/CITest/scenarios/run_scenarios.sh, can be used to execute a full
 
             Examples:
                 ./run_scenarios.sh -a samplecc -n FAB-3833-2i -p FAB-3810-2q -i FAB-3833-2i -q FAB-3810-2q
+
+* ### runRemoteScenarios.sh
+The script, PTE/CITest/scenarios/runRemoteScenarios.sh, can be used to execute a task [specified by option -t] simultaneously on a group of remote hosts. The task is a bash test script that has been previously installed in each remote host in path /home/ibmadmin/gopath/src/github.com/hyperledger/fabric-test/tools/PTE/CITest/scenarios/<task>
+
+     Requirements:
+
+     1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/README.md#remote-pte on how to setup remote access
+     2. git clone fabric-test under /home/ibmadmin/gopath/src/github.com/hyperledger/
+     3. on each remote host, create a bash script in fabric-test/tools/PTE/CITest/scenarios
+
+     Usage:
+
+        ./runRemoteScenarios.sh -t <remote task> -r <list of remote hosts> [options] [value]
+
+            -h, --help      View this help message
+
+            -u, --userid    remote host userid [userid]
+                Default: root, the same userid is used for all remote hosts
+
+            -t, --task      remote task [required]
+                Default: none
+
+            -r, --rhost     remote hosts [list of remote host addresses]
+                Default: none. Note: Cannot be used with --rhostfile
+
+            --rhostfile     a text file contains remote hosts addresses, one address per line
+                Default: none. Note: Cannot be used with -r or --rhost
+
+    Example:
+
+        ./runRemoteScenarios.sh -u admin -t FAB-14230.sh
+        ./runRemoteScenarios.sh -u admin -r 10.11.12.13 10.11.12.14 -t FAB-14230.sh
+        ./runRemoteScenarios.sh -u admin --rhostfile rhosts.txt -t FAB-14230.sh
+
+
+* ### runRemotePTEReport.sh
+The script, PTE/CITest/scenarios/runRemotePTEReport.sh, can be used to Fetch PTE reports from a group of remote hosts and calculate the overall PTE report.
+
+     Requirements:
+     1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/README.md#remote-pte on how to setup remote access
+     2. git clone fabric-test under /home/ibmadmin/gopath/src/github.com/hyperledger/
+
+     Usage:
+
+        ./runRemotePTEReport.sh -r <list of remote hosts> [options] [value]
+
+            -h, --help      View this help message
+
+            -r, --rhost     remote hosts [list of remote host addresses]
+                Default: none. Note: Cannot be used with --rhostfile
+
+            --rhostfile     a text file contains remote hosts addresses, one address per line
+                Default: none. Note: Cannot be used with -r or --rhost
+
+    Example:
+
+        ./runRemotePTEReport.sh -r 10.11.12.13 10.11.12.14
+        ./runRemotePTEReport.sh --rhostfile rhosts.txt
+
 
 
 * ### Network
