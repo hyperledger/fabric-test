@@ -1,5 +1,4 @@
-#!/bin/bash -e
-set -o pipefail
+#!/bin/bash
 
 REPO=$1
 VERSION=2.0.0
@@ -30,11 +29,10 @@ dockerTag() {
   for IMAGE in $IMAGELIST; do
     echo
     echo "Image: $IMAGE"
-    docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG
-          if [ $? != 0 ]; then
-             echo  "FAILED: Docker Pull Failed on $IMAGE"
-             exit 1
-          fi
+    if ! docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG > /dev/null; then
+           echo  "FAILED: Docker Pull Failed on $IMAGE"
+           exit 1
+    fi
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$LATEST_TAG
     docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$VERSION
@@ -50,21 +48,13 @@ dockerTag() {
 dockerThirdParty() {
   for IMAGE in kafka zookeeper couchdb; do
     echo "$ORG_NAME-$IMAGE"
-    docker pull $ORG_NAME-$IMAGE:latest
-    if [ $? != 0 ]; then
+    if ! docker pull $ORG_NAME-$IMAGE:latest > /dev/null; then
        echo  "FAILED: Docker Pull Failed on $IMAGE"
        exit 1
     fi
     docker tag $ORG_NAME-$IMAGE:latest $ORG_NAME-$IMAGE:$ARCH-latest
   done
-
-  docker pull alpine:3.8
-  docker pull node:8-alpine
-  docker pull openjdk:8-jdk-alpine3.8
-  docker pull golang:1.11-alpine
-  docker pull golang:1.11-alpine3.8
 }
-
 
 case $REPO in
 fabric)

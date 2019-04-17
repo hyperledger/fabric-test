@@ -60,7 +60,7 @@ TARGET = pte test-viewer
 STABLE_TAG ?= $(ARCH)-$(BRANCH)-stable
 
 .PHONY: ci-smoke
-ci-smoke: fabric ca pre-req pull-images pull-binaries pull-thirdparty-images build-fabric-ca build-sdk-wrapper smoke-tests
+ci-smoke: fabric ca pre-req pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca smoke-tests
 
 .PHONY: git-latest
 git-latest:
@@ -217,7 +217,7 @@ interop-fabric-sdk-java: pre-req fabric pull-thirdparty-images pull-binaries pul
 interop-fabric-javaenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca javaenv build-sdk-wrapper interop-tests
 
 .PHONY: svt-daily-behave-tests
-svt-daily-behave-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images build-fabric-ca build-sdk-wrapper
+svt-daily-behave-tests: pre-req fabric pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca build-sdk-wrapper
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
 
 .PHONY: svt-daily-pte-tests
@@ -233,7 +233,7 @@ svt-daily-lte-tests: pre-req fabric pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
 
 .PHONY: svt-daily-ca-tests
-svt-daily-ca-tests: pre-req pull-images pull-binaries build-fabric-ca
+svt-daily-ca-tests: pre-req pull-images pull-binaries-fabric build-fabric-ca
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
 
 .PHONY: svt-weekly-pte-12hr-test
