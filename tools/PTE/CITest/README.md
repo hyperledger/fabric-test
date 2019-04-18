@@ -31,6 +31,29 @@ The command is located in `PTE/CITest/scripts`
                 -u: chaincode to be installed and upgraded [all|<chaincode>], default=no
                 -t [value1 value2 value3 ...]: test cases to be executed
 
+---
+* ### Running Test using NodeJS
+
+The tool allows users to run the tests using nodeJS files. This duplicates funtionality of the CLI test_driver.sh, allowing the use of nodeJS and mocha to display test results.To run the tests using javascript files,
+
+- go to `PTE/CITest/scripts`
+- run `npm install`
+- execute command `node test_driver.js [opt] [values] && npm test`
+- it will run through all the steps as per the options and values in the above step and generates a `results.tap` file at the end of the test. To see `results.tap`, go to `PTE/CITest/scripts/tap_output`
+- logs of each step will be stored in `PTE/CITest/Logs/<test_case>`
+- To get the list of options, run the command `node test_driver.js` or `node test_driver.js -h`
+
+        node test_driver.js [opt] [values]
+                -e: install sdk packages, default=no
+                -n: create network, default=no
+                -m: directory containing test_nl.sh to be used to create network and PTE config input files to be used to configure channels and to install and instantiate chaincode, default=scripts
+                -p: preconfigure creation/join channels, default=no
+                -s: synchup peer ledgers, recommended when network brought up, default=no
+                -c: chaincode to be installed and instantiated [all|<chaincode>], default=no
+                -u: chaincode to be installed and upgraded [all|<chaincode>], default=no
+                -t [value1,value2.value3, ...]: test cases to be executed
+
+
 * ### available test cases
 
         FAB-query-TLS: 4 processes X 1000 queries, TLS
@@ -365,11 +388,13 @@ The tool allows users to create a customized test case easily.  For example, the
 - create `preconfig` directory containing channels and chaincode PTE input files if the default will not be used
 - create PTE manager, run cases, and user inputs under `PTE/CITest/myTest/myCC` based on his test scenarios
 - go to `PTE/CITest/scripts`
-- execute command `./test_driver.sh -t myTest`
+- execute command `./test_driver.sh -t myTest` or `node test_driver.js -t myTest`
 
 It will be easier if copy and change an available test case.
+
 
 
 ---
 
 <a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
+

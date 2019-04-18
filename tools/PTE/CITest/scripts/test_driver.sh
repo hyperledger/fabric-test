@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
@@ -110,7 +110,6 @@ while getopts ":t:c:u:b:m:enps" opt; do
       testDriverHelp
       exit
       ;;
-
     :)
       echo "Option -$OPTARG requires an argument." >&2
       testDriverHelp
@@ -121,6 +120,7 @@ while getopts ":t:c:u:b:m:enps" opt; do
 done
 
 echo "SETUP $SETUP, NL $NL, NLDir $NLDir, CHANNEL $CHANNEL, CHAINCODE $CHAINCODE, TStart $TStart"
+echo "SYNCHUP $SYNCHUP"
 echo "total: ${#TCases[@]} test cases: ${TCases[@]}"
 
 CWD=$PWD

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -e
 #
 # Copyright IBM Corp. All Rights Reserved.
 #

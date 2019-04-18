@@ -1,0 +1,24 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "main": "get_pteReport.js",
+  "scripts": {
+    "test": "mkdir tap_output && TAP_FILE=./tap_output/results.tap node_modules/.bin/mocha -b --exit $NODE_DEBUG_OPTION test/test.js --reporter tap-file --timeout 900000"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^7.0.1",
+    "shelljs": "^0.8.3",
+    "tap-file": "0.0.2",
+    "yargs": "^13.2.2"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "description": ""
+}

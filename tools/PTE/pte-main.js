@@ -546,6 +546,7 @@ async function chaincodeInstall(channel, client, org) {
                     logger.info('[chaincodeInstall] org(%s): install proposal was good', org);
                 } else {
                     logger.error('[chaincodeInstall] org(%s): install proposal was bad', org);
+                    process.exit(1);
                 }
                 all_good = all_good & one_good;
             }
@@ -633,7 +634,7 @@ async function chaincodeInstantiate(channel, client, org) {
         function(err) {
             logger.error('[chaincodeInstantiate:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);
             evtDisconnect();
-            process.exit();
+            process.exit(1);
         })
     .then(
         function(results) {

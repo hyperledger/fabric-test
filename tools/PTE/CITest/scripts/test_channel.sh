@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -exo pipefail
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
@@ -39,6 +39,7 @@ else
     echo "[$0] warning: CITest/$PrecfgDir/preconfig/channels/runCases*join* file NOT found; skipping joining any peers to channel"
 fi
 
+set +exo pipefail
 # Although it is recommended for all tests, only the sidedb tests such as those using marbles02-private
 # with multiple orgs participating in a private collection (eg FAB-10135) actually NEED to connect the
 # orgs of each a channal using anchor-peer channel-updates. Thus, we can hide and ignore an error like
