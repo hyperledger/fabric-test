@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/hyperledger/fabric/examples/chaincode/go/example02"
+	example02 "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd"
 )
 
 var chaincodeName = "ex02"

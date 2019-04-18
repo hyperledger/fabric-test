@@ -341,8 +341,8 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
     If installing chaincode on CouchDB with indexing, then inside the `deploy` section we should also add `metadataPath` for the location of the index definition files. Note: if `gopath` is defined in the service credential json, then specify the relative path from `$GOPATH/src/` (as is done in this example); otherwise use a fully specified absolute path.
 
         "deploy": {
-            "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
-            "metadataPath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF",
+            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go",
+            "metadataPath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go/META-INF",
             "fcn": "init",
             "args": []
         },
@@ -481,10 +481,10 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
-* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc` when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02`.  Set the deploy.chaincodePath to this directory in the user input file.
+* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc` when using this chaincode.  See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
-            "chaincodePath": "github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02",
+            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go",
             "fcn": "init",
             "args": []
         },
@@ -1235,21 +1235,7 @@ Note that
 
 ## Creating a local Fabric network
 Prequisite: If you do not yet have the Fabric docker images in your local docker registry, please either build them from Fabric source or download them from dockerhub.
-    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/e2e_cli/`
-    - `sh ./download-dockerimages.sh -c x86_64-1.0.0 -f x86_64-1.0.0`
-Here are two ways to create a local netork:
-- Using the Fabric e2e example:
-    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/fabric/examples/e2e_cli/`
-    - Edit `network_setup.sh`
-
-        * change **COMPOSE_FILE** to
-
-            COMPOSE_FILE=docker-compose-e2e.yaml
-
-        * comment out `docker logs -f cli`
-
-    - `./network_setup.sh up`
-- Alternatively, by using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL) tool:
+Create a local netork using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL) tool:
     - `cd $GOPATH/src/github.com/hyperledger/`
     - `git clone https://github.com/hyperledger/fabric-test`
     - `cd tools/NL`

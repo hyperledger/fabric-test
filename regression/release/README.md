@@ -32,15 +32,6 @@ These tests make up our Release Criteria. They must pass for a stamp of approval
 
 ```
 
-## Chaincode Tests
-These tests launch a network, and deploy and execute an end-to-end test for several different examples of chaincodes. *Note: this is all of them; we should choose a subset...*
-
-```
-        cd ../daily; py.test -v --junitxml results.xml test_pte.py
-        chaincodeTests/runChaincodes.sh
-        *TBD: list of tests names using example02, example05, etc.*
-
-```
 
 ## Another Category of Tests
 (Description...)

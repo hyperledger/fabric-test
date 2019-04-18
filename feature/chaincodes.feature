@@ -142,7 +142,7 @@ Scenario Outline: FAB-3888: State Transfer Test, bouncing a non-leader peer, usi
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type <type>
   When an admin sets up a channel
-  #And an admin deploys chaincode at path "github.com/hyperledger/fabric/examples/chaincode/go/marbles02" with args [""] with name "mycc"
+  #And an admin deploys chaincode at path "github.com/hyperledger/fabric-samples/chaincode/marbles02/go" with args [""] with name "mycc"
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with args [""] with name "mycc"
 
   When a user invokes on the chaincode named "mycc" with args ["initMarble","marble1","red","35","tom"]
@@ -291,7 +291,7 @@ Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim l
     Given I have a bootstrapped fabric network of type <type>
     When an admin sets up a channel
     #Warning: if you see errors during deploy instantiation, you may need to first remove outdated vendored materials inside the chaincode folder, 
-    #e.g. `rm -rf ../../fabric-test/fabric/examples/chaincode/go/encc/vendor`
+    #e.g. `rm -rf ../../fabric-test/chaincodes/encc-example/vendor`
     And I vendor "GOLANG" packages for fabric-based chaincode at "../fabric-test/chaincodes/enccc_example"
     And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/enccc_example" with args ["init", ""] with name "mycc"
     And I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
