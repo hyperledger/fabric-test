@@ -43,7 +43,6 @@ pullBinary() {
         mkdir -p "$WD"/bin
         curl "$NEXUS_URL"/hyperledger-"$repo"-$RELEASE_VERSION-"$VERSION".tar.gz | tar xz
         rm hyperledger-"$repo"-*.tar.gz
-        cd -
         rm -f maven-metadata.xml
         echo "Finished pulling $repo..."
         echo

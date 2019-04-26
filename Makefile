@@ -171,15 +171,15 @@ pull-images:
 
 .PHONY: pull-binaries
 pull-binaries:
-	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && . ./pullBinaries.sh
+	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullBinaries.sh
 
 .PHONY: pull-binaries-fabric
 pull-binaries-fabric:
-	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && . ./pullBinaries.sh fabric
+	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullBinaries.sh fabric
 
 .PHONY: pull-binaries-fabric-ca
 pull-binaries-fabric-ca:
-	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && . ./pullBinaries.sh fabric-ca
+	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullBinaries.sh fabric-ca
 
 .PHONY: pull-fabric
 pull-fabric:
