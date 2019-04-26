@@ -29,7 +29,7 @@ keyWord=$1
 # Bring down network
 # Maybe this is the first testcase to run, and therefore there might be no network to clean up. Redirect stderr.
 echo "..... clean network ..... docker images key word: $keyWord"
-docker-compose down 2>/dev/null
+docker-compose --no-ansi down 2>/dev/null
 
 #remove dead docker containers
 echo "..... remove containers ....."
