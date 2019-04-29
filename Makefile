@@ -215,7 +215,8 @@ svt-daily-lte-tests:  fabric pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
 
 .PHONY: svt-daily-ca-tests
-svt-daily-ca-tests: pull-images pull-binaries
+svt-daily-ca-tests: pull-images pull-binaries build-fabric-ca
+	@make docker-fvt -C $(CA_DIR)
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
 
 .PHONY: svt-weekly-pte-12hr-test
