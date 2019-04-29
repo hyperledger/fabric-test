@@ -59,7 +59,7 @@ dockerThirdParty() {
 case $REPO in
 fabric)
   echo "Pull all images except fabric"
-  dockerTag javaenv tools ca
+  dockerTag javaenv nodeenv ca
   ;;
 fabric-ca)
   echo "Pull all images except fabric-ca"
@@ -76,6 +76,10 @@ fabric-sdk-java)
 fabric-javaenv)
   echo "Pull all images except fabric-javaenv"
   dockerTag peer orderer baseos ccenv nodeenv tools ca
+  ;;
+fabric-nodeenv)
+  echo "Pull all images except fabric-nodeenv"
+  dockerTag peer orderer baseos ccenv tools ca javaenv
   ;;
 third-party)
   echo "Pull all third-party docker images"

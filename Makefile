@@ -151,7 +151,7 @@ fabric-chaincode-node:
 
 .PHONY: nodeenv
 nodeenv: fabric-chaincode-node
-	@cd $(CHAINCODE-NODE_DIR) && npm install gulp -g && npm install && ./gulp docker-image-build
+	@cd $(CHAINCODE-NODE_DIR) && npm install && npm install gulp -g && gulp docker-image-build
 
 .PHONY: smoke-tests
 smoke-tests:
@@ -209,6 +209,9 @@ interop-fabric-ca: pre-req fabric pull-thirdparty-images pull-fabric pull-binari
 
 .PHONY: interop-fabric-sdk-node
 interop-fabric-sdk-node: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv build-sdk-wrapper interop-tests
+
+.PHONY: interop-fabric-nodeenv
+interop-fabric-nodeenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-nodeenv nodeenv build-sdk-wrapper interop-tests
 
 .PHONY: interop-fabric-sdk-java
 interop-fabric-sdk-java: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv build-sdk-wrapper interop-tests
