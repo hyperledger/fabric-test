@@ -197,6 +197,16 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
     ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
+## Notes
+
+   Docker-compose verion 1.16.0 or later is required to bring up the network in local host.  Below are the steps to upgrade docker-compose:
+
+   + docker-compose -v
+   + sudo rm -rf docker-compose
+   + sudo curl -L "https://github.com/docker/compose/releases/download/1.24.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose  (replace 1.24.0 if needed)
+   + sudo chmod +x /usr/local/bin/docker-compose
+   + docker-compose -v
+
 
 # gen_PTEcfg.sh
 
