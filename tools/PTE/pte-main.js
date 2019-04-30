@@ -59,23 +59,29 @@ var Nid = parseInt(process.argv[2]);
 var uiFile = process.argv[3];
 var tStart = parseInt(process.argv[4]);
 logger.info('input parameters: Nid=%d, uiFile=%s, tStart=%d PTEid=%d', Nid, uiFile, tStart, PTEid);
-var uiContent = JSON.parse(fs.readFileSync(uiFile));
+var uiContent = testUtil.readConfigFileSubmitter(uiFile);
+logger.info('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent);
 
 var txCfgPtr;
+var txCfgTmp;
 if ( typeof(uiContent.txCfgPtr) === 'undefined' ) {
-    txCfgPtr=uiContent;
+    txCfgTmp = uiFile;
 } else {
-    logger.info('[Nid=%d pte-main] txCfgPtr: %s', Nid, uiContent.txCfgPtr);
-    txCfgPtr = JSON.parse(fs.readFileSync(uiContent.txCfgPtr));
+    txCfgTmp = uiContent.txCfgPtr;
 }
+txCfgPtr = testUtil.readConfigFileSubmitter(txCfgTmp);
+logger.info('[Nid=%d pte-main] input txCfgPtr[%s]: %j', Nid, txCfgTmp, txCfgPtr);
+
 
 var ccDfnPtr;
+var ccDfnTmp;
 if ( typeof(uiContent.ccDfnPtr) === 'undefined' ) {
-    ccDfnPtr=uiContent;
+    ccDfnTmp = uiFile;
 } else {
-    ccDfnPtr = JSON.parse(fs.readFileSync(uiContent.ccDfnPtr));
-    logger.info('[Nid=%d pte-main] ccDfnPtr: %s', Nid, uiContent.ccDfnPtr);
+    ccDfnTmp = uiContent.ccDfnPtr;
 }
+ccDfnPtr = testUtil.readConfigFileSubmitter(ccDfnTmp);
+logger.info('[Nid=%d pte-main] input ccDfnPtr[%s]: %j', Nid, ccDfnTmp, ccDfnPtr);
 
 
 var TLS=testUtil.setTLS(txCfgPtr);
@@ -92,8 +98,7 @@ logger.info('channelOrgName.length: %d, channelOrgName: %s', channelOrgName.leng
 
 var svcFile = uiContent.SCFile[0].ServiceCredentials;
 logger.info('svcFile; ', svcFile);
-hfc.addConfigFile(path.resolve(__dirname, svcFile));
-var ORGS = hfc.getConfigSetting('test-network');
+var ORGS = testUtil.readConfigFileSubmitter(svcFile, 'test-network');
 var goPath=process.env.GOPATH;
 if ( typeof(ORGS.gopath) === 'undefined' ) {
     goPath = '';
@@ -210,7 +215,7 @@ function clientNewOrderer(client, org) {
     var data;
     logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID);
+        data = testUtil.getTLSCert('orderer', ordererID, svcFile);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
@@ -233,7 +238,7 @@ function chainAddOrderer(channel, client, org) {
     var ordererID = ORGS[org].ordererID;
     var data;
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID);
+        data = testUtil.getTLSCert('orderer', ordererID, svcFile);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
@@ -265,7 +270,7 @@ function channelAddPeer(channel, client, org) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key);
+                    data = testUtil.getTLSCert(org, key, svcFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             ORGS[org][key].requests,
@@ -304,7 +309,7 @@ function channelAddListedPeer(channel, client, org) {
                 peername = listOpt[key][i];
                 if (ORGS[key][peername].requests) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername);
+                        data = testUtil.getTLSCert(key, peername, svcFile);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 ORGS[key][peername].requests,
@@ -344,7 +349,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
         if (ORGS[qorg].hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(qorg, key);
+                    data = testUtil.getTLSCert(qorg, key, svcFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             ORGS[qorg][key].requests,
@@ -379,7 +384,7 @@ function channelAddPeer1(channel, client, org, eventHubs) {
         if (ORGS[org].hasOwnProperty(key)) {
             if (ORGS[org][key].requests) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key);
+                    data = testUtil.getTLSCert(org, key, svcFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             ORGS[org][key].requests,
@@ -420,7 +425,7 @@ function channelAddPeerEventJoin(channel, client, org) {
                 if (ORGS[org].hasOwnProperty(key)) {
                     if (ORGS[org][key].requests) {
                         if (TLS > testUtil.TLSDISABLED) {
-                            data = testUtil.getTLSCert(org, key);
+                            data = testUtil.getTLSCert(org, key, svcFile);
                             if ( data !== null ) {
                                 targets.push(
                                     client.newPeer(

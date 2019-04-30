@@ -1,0 +1,31 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+# PTE chaincode definition
+# chaincode type
+ccType: ccchecker
+
+# chaincode option
+ccOpt:
+  keyIdx: [1]
+  keyPayLoad: [2]
+  keyStart: 0
+  payLoadType: Random
+  payLoadMin: 1024
+  payLoadMax: 1024
+
+# chaincode deployment
+deploy:
+  chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+  fcn: init
+  args: []
+
+# invoke
+invoke:
+  query:
+    fcn: invoke
+    args: ["get","a1"]
+  move:
+    fcn: invoke
+    args: ["put","a1","1"]
