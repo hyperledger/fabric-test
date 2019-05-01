@@ -95,10 +95,10 @@ if ( process.env.CONFIGTX_ORDERER_BATCHTIMEOUT != null ) {
     ord_env_name.push('CONFIGTX_ORDERER_BATCHTIMEOUT');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_BATCHTIMEOUT);
 }
-if ( process.env.ORDERER_GENERAL_LOGLEVEL != null ) {
-    console.log(' ORDERER_GENERAL_LOGLEVEL= ', process.env.ORDERER_GENERAL_LOGLEVEL);
-    ord_env_name.push('ORDERER_GENERAL_LOGLEVEL');
-    ord_env_val.push(process.env.ORDERER_GENERAL_LOGLEVEL);
+if ( process.env.ORDERER_FABRIC_LOGGING_SPEC != null ) {
+    console.log(' FABRIC_LOGGING_SPEC= ', process.env.ORDERER_FABRIC_LOGGING_SPEC);
+    ord_env_name.push('FABRIC_LOGGING_SPEC');
+    ord_env_val.push(process.env.ORDERER_FABRIC_LOGGING_SPEC);
 }
 console.log('ord_env_name: ', ord_env_name.length, ord_env_name);
 console.log('ord_env_val: ', ord_env_val.length, ord_env_val);
@@ -113,10 +113,10 @@ console.log('HOSTCONFIG_NETWORKMODE: ', HOSTCONFIG_NETWORKMODE);
 // Peer environment var
 var peer_env_name=[];
 var peer_env_val=[];
-if ( process.env.FABRIC_LOGGING_SPEC != null ) {
-    console.log(' FABRIC_LOGGING_SPEC= ', process.env.FABRIC_LOGGING_SPEC);
+if ( process.env.PEER_FABRIC_LOGGING_SPEC != null ) {
+    console.log(' FABRIC_LOGGING_SPEC= ', process.env.PEER_FABRIC_LOGGING_SPEC);
     peer_env_name.push('FABRIC_LOGGING_SPEC');
-    peer_env_val.push(process.env.FABRIC_LOGGING_SPEC);
+    peer_env_val.push(process.env.PEER_FABRIC_LOGGING_SPEC);
 }
 if ( process.env.CORE_PEER_BCCSP_SW_SECURITY != null ) {
     console.log(' CORE_PEER_BCCSP_SW_SECURITY= ', process.env.CORE_PEER_BCCSP_SW_SECURITY);

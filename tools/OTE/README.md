@@ -135,9 +135,9 @@ Check your Docker and Docker-Compose versions with the following commands:
   ```bash
     Usage:
       ./runote.sh [opt] [value]
-                   -t    <testcase number (default=FAB-6996_30ktx_1ch_solo)>
+                   -t    <testcase number (default=FAB-6996_3000tx_1ch_solo)>
     Examples:
       ./runote.sh
-      ./runote.sh -t FAB-6996_30ktx_1ch_solo
+      ./runote.sh -t FAB-6996_3000tx_1ch_solo
       ./runote.sh -t FAB-7936_100tx_3ch_3ord_3kb
   ```

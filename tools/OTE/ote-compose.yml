@@ -26,4 +26,5 @@ services:
       - ../../fabric-test/tools/NL/configtx.yaml:/etc/hyperledger/fabric/configtx.yaml
       - ../../fabric-test/fabric/internal/cryptogen/crypto-config:/etc/hyperledger/fabric/artifacts
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/OTE
-    command: sh -c 'sleep 40 && ./script.sh'
+    command: sh -c 'echo docker-compose OTE service waiting a bit for fabric containers to stabilize before calling script.sh to create channels and run the test... && sleep 120 && ./script.sh'
+

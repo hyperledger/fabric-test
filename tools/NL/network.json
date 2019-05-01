@@ -63,7 +63,7 @@
         "orderer": {
             "image": "hyperledger/fabric-orderer",
             "environment": {
-                "ORDERER_GENERAL_LOGLEVEL": "ERROR",
+                "FABRIC_LOGGING_SPEC": "ERROR",
                 "ORDERER_GENERAL_LISTENADDRESS": "0.0.0.0",
                 "ORDERER_GENERAL_LISTENPORT": "0.0.0.0",
                 "ORDERER_GENERAL_GENESISMETHOD": "file",
