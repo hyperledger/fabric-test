@@ -201,6 +201,10 @@ pull-fabric-sdk-java:
 pull-fabric-javaenv:
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh fabric-javaenv
 
+.PHONY: pull-fabric-nodeenv
+pull-fabric-nodeenv:
+	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh fabric-nodeenv
+
 .PHONY: interop-fabric
 interop-fabric: pre-req fabric pull-thirdparty-images pull-fabric-javaenv pull-binaries-fabric-ca build-fabric build-fabric-ca build-sdk-wrapper interop-tests
 
