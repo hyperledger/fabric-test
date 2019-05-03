@@ -2407,9 +2407,6 @@ function execModeDistribution(backoffCalculator, delayCalculator) {
 
 function backoffCalculatorConstantFreq() {
     var freq = parseInt(txCfgPtr.constantOpt.constFreq);
-    if ( (invokeType == 'MOVE') && (ccType == 'general') && (freq < 20000) ) {
-        freq = 20000;
-    }
     return freq;
 }
 
@@ -2595,11 +2592,6 @@ function execModeMix() {
         }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeMix] tStart %d, tEnd %d, tLocal %d', Nid, channelName, org, pid, tStart, tEnd, tLocal);
         var freq = parseInt(txCfgPtr.mixOpt.mixFreq);
-        if ( ccType == 'general' ) {
-            if ( freq < 20000 ) {
-                freq = 20000;
-            }
-        }
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeMix] Mix Freq: %d ms', Nid, channelName, org, pid, freq);
         invoke_move_mix(freq);
     } else {

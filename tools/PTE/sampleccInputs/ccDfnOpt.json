@@ -1,8 +1,11 @@
 {
-    "ccType": "ccchecker",
+    "ccType": "general",
     "ccOpt": {
 	"keyIdx": [1],
         "keyPayLoad": [2],
+        "keyPayLoadType": ["Random"],
+        "keyPayLoadMin": [10],
+        "keyPayLoadMax": [10],
         "keyStart": "0",
         "payLoadType": "Random",
         "payLoadMin": "1024",
