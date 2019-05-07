@@ -32,7 +32,7 @@ Examples:
     | solo  | without tls | NodeJS SDK |
     | kafka |   with tls  | NodeJS SDK |
     | solo  | without tls |     CLI    |
-    | kafka |   with tls  |     CLI    |
+    | kafka | without tls |     CLI    |
 
 
 @daily
@@ -48,13 +48,13 @@ Scenario Outline: FAB-1440, FAB-3861: Basic Chaincode Execution - <type> orderer
     Then a user receives a success response of 95
 Examples:
     | type  | database |  security   |
-    | solo  | leveldb  |  with tls   |
+    #  | solo  | leveldb  |  with tls   |
     | solo  | leveldb  | without tls |
-    | solo  | couchdb  |  with tls   |
+    #  | solo  | couchdb  |  with tls   |
     | solo  | couchdb  | without tls |
-    | kafka | leveldb  |  with tls   |
+    #  | kafka | leveldb  |  with tls   |
     | kafka | leveldb  | without tls |
-    | kafka | couchdb  |  with tls   |
+    #  | kafka | couchdb  |  with tls   |
     | kafka | couchdb  | without tls |
 
 
@@ -88,7 +88,7 @@ Examples:
     | kafka |
 
 
-@daily
+##@daily
 Scenario Outline: FAB-3866: Multiple Chaincodes Per Peer, with <type> orderer
     Given I have a bootstrapped fabric network of type <type>
     When an admin sets up a channel
@@ -197,8 +197,10 @@ Examples:
     | type  |   security  |  interface |
     | kafka |   with tls  | NodeJS SDK |
     | solo  |   with tls  | NodeJS SDK |
-    | kafka |   with tls  |     CLI    |
-    | solo  |   with tls  |     CLI    |
+    #  | kafka |   with tls  |     CLI    |
+    #  | solo  |   with tls  |     CLI    |
+    # Delete the below test-case and uncomment the above to run with tls and CLI as interface
+    | solo  | without tls |     CLI    |
     | kafka | without tls |     CLI    |
     | solo  | without tls | NodeJS SDK |
 
@@ -214,7 +216,7 @@ Scenario: FAB-3855: Empty Payload Messages
     Then a user receives a success response of ""
 
 
-@daily
+##@daily
 Scenario: FAB-8379: Test MSP Identity - Happy Path
   Given I have a bootstrapped fabric network of type kafka with tls with organizational units enabled on all nodes
   When an admin sets up a channel
@@ -228,7 +230,7 @@ Scenario: FAB-8379: Test MSP Identity - Happy Path
   Then a user receives a success response of 990
 
 
-@daily
+##@daily
 Scenario: FAB-8380: Test MSP Identity - Malicious Peer
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
@@ -248,7 +250,7 @@ Scenario: FAB-8380: Test MSP Identity - Malicious Peer
   Then a user receives a success response of 1000
 
 
-@daily
+##@daily
 Scenario: FAB-8381: Test MSP Identity - Malicious Peer (Clients set as writers in policy)
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
@@ -272,7 +274,7 @@ Scenario: FAB-8381: Test MSP Identity - Malicious Peer (Clients set as writers i
   Then a user receives a success response of 1000
 
 
-@daily
+##@daily
 Scenario: FAB-8382: Test MSP Identity with inconsistencies
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
@@ -291,7 +293,7 @@ Scenario: FAB-8382: Test MSP Identity with inconsistencies
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer0.org1.example.com"
   Then a user receives a success response of 1000
 
-@daily
+##@daily
 Scenario: FAB-8759: Test querying a peer with two different versions of chaincode - values change
   Given I have a bootstrapped fabric network of type kafka with tls
   When an admin sets up a channel named "versioningtest"
@@ -313,7 +315,7 @@ Scenario: FAB-8759: Test querying a peer with two different versions of chaincod
   Then a user receives a success response of 1000 from "peer0.org2.example.com"
 
 
-@daily
+##@daily
 Scenario: FAB-8759: Test querying a peer that has two different versions of chaincode - no change in data
   Given I have a bootstrapped fabric network of type kafka with tls
   When an admin sets up a channel named "versioningtest"
@@ -335,7 +337,7 @@ Scenario: FAB-8759: Test querying a peer that has two different versions of chai
   When a user queries on version "0" of the channel "versioningtest" using chaincode named "vt" with args ["get","c"] on "peer0.org2.example.com"
   Then a user receives a success response of "3000" from "peer0.org2.example.com"
 
-@daily
+@##daily
 Scenario: FAB-7407: Update the channel policies - add an organization
   Given I have a bootstrapped fabric network of type solo with tls
   When an admin sets up a channel
