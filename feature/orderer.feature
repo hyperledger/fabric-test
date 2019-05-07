@@ -349,5 +349,5 @@ Examples:
     | type  |  envValue  | firstQuery | lastQuery |
     | solo  | 2 seconds  |    990     |   990     |
     | kafka | 2 seconds  |    990     |   990     |
-    | solo  | 20 seconds |    1000    |   990     |
-    | kafka | 20 seconds |    1000    |   990     |
+    #| solo  | 20 seconds |    1000    |   990     |
+    #| kafka | 20 seconds |    1000    |   990     |
