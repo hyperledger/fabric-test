@@ -224,7 +224,7 @@ interop-fabric-sdk-java: pre-req fabric pull-thirdparty-images pull-binaries pul
 interop-fabric-javaenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca javaenv build-sdk-wrapper interop-tests
 
 .PHONY: svt-daily-behave-tests
-svt-daily-behave-tests: pre-req fabric pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca build-sdk-wrapper
+svt-daily-behave-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images build-fabric-ca build-sdk-wrapper
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
 
 .PHONY: svt-daily-pte-tests
