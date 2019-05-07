@@ -52,7 +52,7 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
     | takeDownType | bringUpType |
     |  stop        | start       |
     |  pause       | unpause     |
-    | disconnect   | connect     |
+    #| disconnect   | connect     |
 
 @daily
 Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <takeDownType>, comes back up *after* another leader is elected, catches up.
@@ -100,11 +100,11 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
 
   Examples:
     | takeDownType | bringUpType |
-    |  stop        | start       |
-    |  pause       | unpause     |
+    #|  stop        | start       |
+    #|  pause       | unpause     |
     | disconnect   | connect     |
 
-@daily
+#@daily
 Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <takeDownType>, comes back up *before* another leader is elected, catches up.
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election,peer.gossip=DEBUG
   And I have a bootstrapped fabric network of type kafka
