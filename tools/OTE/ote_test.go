@@ -309,9 +309,9 @@ func Test_ORD105_1ch_3ord_kafka_4kbs(t *testing.T) {
         if !passResult { t.Error(finalResultSummaryString) }
 }
 
-//FAB-6996_30ktx_1ch_solo - DEFAULT testcase - send txns to 1 chan on solo orderer with default batchsize and payload size
-func Test_FAB6996_30ktx_1ch_solo(t *testing.T) {
-        passResult, finalResultSummaryString := ote("FAB-6996_30ktx_1ch_solo", 30000, 1, 1, "solo", 0, spyOff, 1, 0 )
+//FAB-6996_3000tx_1ch_solo - DEFAULT testcase - send txns to 1 chan on solo orderer with default batchsize and payload size
+func Test_FAB6996_3000tx_1ch_solo(t *testing.T) {
+        passResult, finalResultSummaryString := ote("FAB-6996_3000tx_1ch_solo", 3000, 1, 1, "solo", 0, spyOff, 1, 0 )
         if !passResult { t.Error(finalResultSummaryString) }
 }
 

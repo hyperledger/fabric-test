@@ -45,7 +45,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/hyperledger/fabric/common/crypto"
 	"io/ioutil"
 	"log"
 	"math"
@@ -58,11 +57,11 @@ import (
 	"sync"
 	"time"
 
-	commonsigner "github.com/hyperledger/fabric/cmd/common/signer"
+	"github.com/hyperledger/fabric/internal/pkg/identity"
 	"github.com/hyperledger/fabric/common/tools/protolator"
-	genesisconfig "github.com/hyperledger/fabric/internal/configtxgen/localconfig" // config for genesis.yaml
+	genesisconfig "github.com/hyperledger/fabric/internal/configtxgen/localconfig"
 	mspmgmt "github.com/hyperledger/fabric/msp/mgmt"
-	ordererConf "github.com/hyperledger/fabric/orderer/common/localconfig" // config, for the orderer.yaml
+	ordererConf "github.com/hyperledger/fabric/orderer/common/localconfig"
 	cb "github.com/hyperledger/fabric/protos/common"
 	ab "github.com/hyperledger/fabric/protos/orderer"
 	utils "github.com/hyperledger/fabric/protoutil"
@@ -231,21 +230,21 @@ type config struct {
 type ordererdriveClient struct {
 	client ab.AtomicBroadcast_DeliverClient
 	chanID string
-	signer crypto.LocalSigner
+	signer identity.SignerSerializer
 	quiet  bool
 }
 
 type broadcastClient struct {
 	client ab.AtomicBroadcast_BroadcastClient
 	chanID string
-	signer crypto.LocalSigner
+	signer identity.SignerSerializer
 }
 
-func newOrdererdriveClient(client ab.AtomicBroadcast_DeliverClient, chanID string, signer crypto.LocalSigner, quiet bool) *ordererdriveClient {
+func newOrdererdriveClient(client ab.AtomicBroadcast_DeliverClient, chanID string, signer identity.SignerSerializer, quiet bool) *ordererdriveClient {
 	return &ordererdriveClient{client: client, chanID: chanID, signer: signer, quiet: quiet}
 }
 
-func newBroadcastClient(client ab.AtomicBroadcast_BroadcastClient, chanID string, signer crypto.LocalSigner) *broadcastClient {
+func newBroadcastClient(client ab.AtomicBroadcast_BroadcastClient, chanID string, signer identity.SignerSerializer) *broadcastClient {
 	return &broadcastClient{client: client, chanID: chanID, signer: signer}
 }
 
@@ -340,15 +339,18 @@ func (b *broadcastClient) getAck() error {
 
 func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txRecvCntrP *int64, blockRecvCntrP *int64, consumerConnP **grpc.ClientConn, seek int, quiet bool, tlsEnabled bool, orgMSPID string) {
 	myName := clientName("Consumer", ordererIndex, channelIndex)
-	signer := commonsigner.NewSigner()
 	ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort+uint16(ordererIndex)))
 	fpath := fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s"+"*", ordererName)
 	matches, err := filepath.Glob(fpath)
-	if debugflagLaunch {
-		fmt.Printf("[startConsumer myName=%s] ordererName=%s, fpath=%s, len(matches)=%d\n", myName, ordererName, fpath, len(matches))
-	}
 	if err != nil {
-		panic(fmt.Sprintf("startConsumer: cannot find filepath %s ; err: %v", fpath, err))
+		panic(fmt.Sprintf("[startConsumer myName=%s] Cannot find filepath %s ; err: %v\n", myName, fpath, err))
+	}
+	if debugflagLaunch {
+		fmt.Printf("[startConsumer myName=%s] ordererName=%s, fpath=%s, len(matches)=%d, matches[0]=%s\n", myName, ordererName, fpath, len(matches), matches[0])
+	}
+	signer, loaderr := mspmgmt.GetLocalMSP().GetDefaultSigningIdentity()
+	if loaderr != nil {
+		panic(fmt.Sprintf("[startConsumer myName=%s] Failed to load local signing identity; loaderr: %v\n", myName, loaderr))
 	}
 	if seek < -2 {
 		fmt.Println("Wrong seek value.")
@@ -360,17 +362,9 @@ func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIn
 		grpc.MaxCallRecvMsgSize(maxGrpcMsgSize)))
 	if tlsEnabled {
 		if len(matches) > 0 {
-			ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath = fmt.Sprintf("%s/msp/keystore", matches[0])
-			if ordererIndex == 0 { // Loading the msp's of orderer0 for every channel is enough to create the deliver client
-				err = mspmgmt.LoadLocalMsp(fmt.Sprintf("%s/msp", matches[0]), ordConf.General.BCCSP, orgMSPID)
-				if err != nil { // Handle errors reading the config file
-					fmt.Printf("\nFailed to initialize local MSP for %s on chan %s: %s\n", myName, chanID, err)
-					os.Exit(0)
-				}
-			}
 			creds, err := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
 			if err != nil {
-				panic(fmt.Sprintf("Error on client %s creating grpc tls client creds, serverAddr %s, err: %v", myName, serverAddr, err))
+				panic(fmt.Sprintf("[startConsumer myName=%s] Error tls client creating grpc tls client creds, serverAddr %s, err: %v\n", myName, serverAddr, err))
 			}
 			dialOpts = append(dialOpts, grpc.WithTransportCredentials(creds))
 		} else {
@@ -384,18 +378,18 @@ func startConsumer(serverAddr string, chanID string, ordererIndex int, channelIn
 	defer cancel()
 	(*consumerConnP), err = grpc.DialContext(ctx, serverAddr, dialOpts...)
 	if err != nil {
-		panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+		panic(fmt.Sprintf("[startConsumer myName=%s] Error on client connecting (grpc) to %s, err: %v\n", myName, serverAddr, err))
 	}
 	client, err := ab.NewAtomicBroadcastClient(*consumerConnP).Deliver(context.TODO())
 	if err != nil {
-		panic(fmt.Sprintf("Error on client %s invoking Deliver() on grpc connection to %s, err: %v", myName, serverAddr, err))
+		panic(fmt.Sprintf("[startConsumer myName=%s] Error on client invoking Deliver() on grpc connection to %s, err: %v\n", myName, serverAddr, err))
 	}
 	s := newOrdererdriveClient(client, chanID, signer, quiet)
 	if err = s.seekOldest(); err != nil {
-		panic(fmt.Sprintf("ERROR starting client %s srvr=%s chID=%s; err: %v", myName, serverAddr, chanID, err))
+		panic(fmt.Sprintf("[startConsumer myName=%s] ERROR on clientseeking srvr=%s chID=%s; err: %v\n", myName, serverAddr, chanID, err))
 	}
 	if debugflag1 {
-		logger(fmt.Sprintf("Started client %s to recv delivered batches srvr=%s chID=%s", myName, serverAddr, chanID))
+		logger(fmt.Sprintf("Started client %s to recv delivered batches from srvr=%s chID=%s", myName, serverAddr, chanID))
 	}
 	s.readUntilClose(ordererIndex, channelIndex, txRecvCntrP, blockRecvCntrP)
 }
@@ -417,7 +411,10 @@ func startConsumerMaster(serverAddr string, chanIdsP *[]string, ordererIndex int
 			panic(fmt.Sprintf("Error on client %s invoking Deliver() on grpc connection to %s, err: %v", myName, serverAddr, err))
 		}
 		quiet := true
-		signer := commonsigner.NewSigner()
+		signer, loaderr := mspmgmt.GetLocalMSP().GetDefaultSigningIdentity()
+		if loaderr != nil {
+			panic(fmt.Sprintf("[startConsumerMaster myName=%s] Failed to load local signing identity; loaderr: %s\n", myName, loaderr))
+		}
 		dc[c] = newOrdererdriveClient(client, (*chanIdsP)[c], signer, quiet)
 		if err = dc[c].seekOldest(); err != nil {
 			panic(fmt.Sprintf("ERROR starting client %s srvr=%s chID=%s; err: %v", myName, serverAddr, (*chanIdsP)[c], err))
@@ -576,51 +573,52 @@ func moreDeliveries(txSentP *[][]int64, totalNumTxSentP *int64, txSentFailuresP 
 	return moreReceived
 }
 
-func startProducer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txReq int64, txSentCntrP *int64, txSentFailureCntrP *int64, tlsEnabled bool, payload int) {
+func startProducer(serverAddr string, chanID string, ordererIndex int, channelIndex int, txReq int64, txSentCntrP *int64, txSentFailureCntrP *int64, tlsEnabled bool, payload int, orgMSPID string) {
 	myName := clientName("Producer", ordererIndex, channelIndex)
-	signer := commonsigner.NewSigner()
 	ordererName := strings.Trim(serverAddr, fmt.Sprintf(":%d", ordStartPort+uint16(ordererIndex)))
 	fpath := fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/orderers/%s"+"*", ordererName)
 	matches, err := filepath.Glob(fpath)
-	if debugflagLaunch {
-		fmt.Printf("[startProducer myName=%s] ordererName=%s, fpath=%s, len(matches)=%d\n", myName, ordererName, fpath, len(matches))
-	}
 	if err != nil {
-		panic(fmt.Sprintf("startProducer: cannot find filepath %s ; err: %v", fpath, err))
+		panic(fmt.Sprintf("[startProducer myName=%s] Cannot find filepath %s ; err: %v\n", myName, fpath, err))
 	}
-
+	if debugflagLaunch {
+		fmt.Printf("[startProducer myName=%s] ordererName=%s, fpath=%s, len(matches)=%d, matches[0]=%s\n", myName, ordererName, fpath, len(matches), matches[0])
+	}
+	signer, loaderr := mspmgmt.GetLocalMSP().GetDefaultSigningIdentity()
+	if loaderr != nil {
+		panic(fmt.Sprintf("[startProducer myName=%s] Failed to load local signing identity; loaderr: %v\n", myName, loaderr))
+	}
 	var conn *grpc.ClientConn
 	if tlsEnabled {
 		if len(matches) > 0 {
-			ordConf.General.BCCSP.SwOpts.FileKeystore.KeyStorePath = fmt.Sprintf("%s/msp/keystore", matches[0])
 			creds, err1 := credentials.NewClientTLSFromFile(fmt.Sprintf("%s/tls/ca.crt", matches[0]), fmt.Sprintf("%s", ordererName))
 			conn, err1 = grpc.Dial(serverAddr, grpc.WithTransportCredentials(creds))
 			if err1 != nil {
-				panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+				panic(fmt.Sprintf("[startProducer myName=%s] Error while tls client connecting (grpc) to %s, err: %v\n", myName, serverAddr, err))
 			}
 		} else {
-			panic(fmt.Sprintf("[startProducer myName=%s] ERROR: no msp directory filepath name matches: %s\n", myName, fpath))
+			panic(fmt.Sprintf("[startProducer myName=%s] ERROR: no msp directory filepath name matches: %v\n", myName, fpath))
 		}
 	} else {
 		conn, err = grpc.Dial(serverAddr, grpc.WithInsecure())
 		if err != nil {
-			panic(fmt.Sprintf("Error on client %s connecting (grpc) to %s, err: %v", myName, serverAddr, err))
+			panic(fmt.Sprintf("[startProducer myName=%s] Error while non-tls client connecting (grpc) to %s, err: %v\n", myName, serverAddr, err))
 		}
 	}
 	defer func() {
 		_ = conn.Close()
 	}()
 	if err != nil {
-		panic(fmt.Sprintf("Error creating connection for Producer for ord[%d] ch[%d], err: %v", ordererIndex, channelIndex, err))
+		panic(fmt.Sprintf("[startProducer myName=%s] Error creating connection for Producer for ord[%d] ch[%d], err: %v\n", myName, ordererIndex, channelIndex, err))
 	}
 	client, err := ab.NewAtomicBroadcastClient(conn).Broadcast(context.TODO())
 	if err != nil {
-		panic(fmt.Sprintf("Error creating Producer for ord[%d] ch[%d], err: %v", ordererIndex, channelIndex, err))
+		panic(fmt.Sprintf("[startProducer myName=%s] Error creating Producer for ord[%d] ch[%d], err: %v\n", myName, ordererIndex, channelIndex, err))
 	}
 
 	time.Sleep(3 * time.Second)
 	if debugflag1 {
-		logger(fmt.Sprintf("Starting Producer to send %d TXs to ord[%d] ch[%d] srvr=%s chID=%s, %v", txReq, ordererIndex, channelIndex, serverAddr, chanID, time.Now()))
+		logger(fmt.Sprintf("[startProducer myName=%s] Starting Producer to send %d TXs to ord[%d] ch[%d] srvr=%s chID=%s, %v", myName, txReq, ordererIndex, channelIndex, serverAddr, chanID, time.Now()))
 	}
 	b := newBroadcastClient(client, chanID, signer)
 	time.Sleep(2 * time.Second)
@@ -726,7 +724,10 @@ func startProducerMaster(serverAddr string, chanIdsP *[]string, ordererIndex int
 	// create the broadcast clients for every channel on this orderer
 	bc := make([]*broadcastClient, numChannels)
 	for c := 0; c < numChannels; c++ {
-		signer := commonsigner.NewSigner()
+		signer, loaderr := mspmgmt.GetLocalMSP().GetDefaultSigningIdentity()
+		if loaderr != nil {
+			panic(fmt.Sprintf("[startProducerMaster myName=%s] Failed to load local signing identity; loaderr: %s\n", myName, loaderr))
+		}
 		bc[c] = newBroadcastClient(client, (*chanIdsP)[c], signer)
 	}
 
@@ -1016,6 +1017,13 @@ func ote(testname string, txs int64, chans int, orderers int, ordType string, kb
 	genConf = genesisconfig.Load(fmt.Sprintf("%s", p.Profile))
 	var launchAppendFlags string
 
+	// Initializing ordererorg admin's msp
+	err = mspmgmt.LoadLocalMsp(fmt.Sprintf("/etc/hyperledger/fabric/artifacts/ordererOrganizations/example.com/users/Admin@example.com/msp"), ordConf.General.BCCSP, orgMSPID)
+	if err != nil { // Handle errors reading the config file
+		panic(fmt.Sprintf("Failed to initialize local MSP; err: %v\n", err))
+	}
+
+
 	////////////////////////////////////////////////////////////////////////
 	// Check parameters and/or env vars to see if user wishes to override
 	// default config parms.
@@ -1279,7 +1287,7 @@ func ote(testname string, txs int64, chans int, orderers int, ordType string, kb
 		//channelIDs[0] = genesisconfigProvisional.TestChainID
 		logger(fmt.Sprintf("Using DEFAULT channelID = %s", channelIDs[0]))
 	} else {
-		logger(fmt.Sprintf("Using %d new channelIDs, e.g. testchan321", numChannels))
+		logger(fmt.Sprintf("Using %d channelIDs", numChannels))
 		// create all the channels using orderer0
 		// CONFIGTX_ORDERER_ADDRESSES is the list of orderers. use the first one. Default is [127.0.0.1:7050]
 		for c := 0; c < numChannels; c++ {
@@ -1361,7 +1369,7 @@ func ote(testname string, txs int64, chans int, orderers int, ordType string, kb
 			// Normal mode: create a unique consumer client
 			// go thread for each channel
 			for c := 0; c < numChannels; c++ {
-				go startProducer(serverAddr, channelIDs[c], ord, c, countToSend[ord][c], &(txSent[ord][c]), &(txSentFailures[ord][c]), tlsEnabled, payload)
+				go startProducer(serverAddr, channelIDs[c], ord, c, countToSend[ord][c], &(txSent[ord][c]), &(txSentFailures[ord][c]), tlsEnabled, payload, orgMSPID)
 			}
 		}
 	}
