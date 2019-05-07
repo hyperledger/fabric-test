@@ -33,7 +33,7 @@ Examples:
     | database | interface  |                          path                                     | language |
     |  leveldb |   CLI      |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
     |  leveldb |   CLI      |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
-    |  leveldb |   CLI      |    ../../fabric-samples/chaincode/chaincode_example02/java        |   JAVA   |
+    |  leveldb |   CLI      |    ../../fabric-samples/chaincode/abstore/java                    |   JAVA   |
     # Once the FAB-13979 and FAB-13980 are complete for new lifecycle these should pass.
     #  |  leveldb |   Java SDK    |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
     #  |  leveldb | NodeJS SDK    |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |

@@ -39,7 +39,7 @@ Examples:
     | type  | database | interface  |                          path                                     | language |
     | solo  | leveldb  |  Java SDK  |  github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd   |  GOLANG  |
     | kafka | couchdb  |    CLI     |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
-    | kafka | leveldb  | NodeJS SDK |   ../../fabric-samples/chaincode/chaincode_example02/java         |   JAVA   |
+    | kafka | leveldb  | NodeJS SDK |   ../../fabric-samples/chaincode/abstore/java                     |   JAVA   |
 
 
 @daily
@@ -69,7 +69,7 @@ Examples:
     |                          path                                     | language |
     |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
     |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
-    |   ../../fabric-samples/chaincode/chaincode_example02/java         |   JAVA   |
+    |   ../../fabric-samples/chaincode/abstore/java                     |   JAVA   |
 
 @daily
 Scenario Outline: FAB-11728: Identity Mixer Test Happy Path
