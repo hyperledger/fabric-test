@@ -293,7 +293,7 @@ Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim l
     When an admin sets up a channel
     #Warning: if you see errors during deploy instantiation, you may need to first remove outdated vendored materials inside the chaincode folder, 
     #e.g. `rm -rf ../../fabric-test/chaincodes/encc-example/vendor`
-    And I vendor "GOLANG" packages for fabric-based chaincode at "../fabric-test/chaincodes/enccc_example"
+    And I vendor "GOLANG" packages for fabric-based chaincode at "../../fabric-test/chaincodes/enccc_example"
     And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/enccc_example" with args ["init", ""] with name "mycc"
     And I locally execute the command "openssl rand 32 -base64" saving the results as "ENCKEY"
     And a user invokes on the chaincode named "mycc" with args ["ENCRYPT","Social-Security-Number","123-45-6789"] and generated transient args "{\\"ENCKEY\\":\\"{ENCKEY}\\"}"
@@ -344,7 +344,7 @@ Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, p
 
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
-  And I vendor "GOLANG" packages for fabric-based chaincode at "../fabric-test/chaincodes/enccc_example"
+  And I vendor "GOLANG" packages for fabric-based chaincode at "../../fabric-test/chaincodes/enccc_example"
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/enccc_example" with args ["init", ""] with name "mycc"
 
   #first we test for invoke failures by passing in bad keys
