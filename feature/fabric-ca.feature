@@ -71,7 +71,7 @@ Examples:
     |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
     |   ../../fabric-samples/chaincode/abstore/java                     |   JAVA   |
 
-@daily
+#@daily
 Scenario Outline: FAB-11728: Identity Mixer Test Happy Path
     Given an admin creates an idemix MSP for organization "org1.example.com"
     Given I have a bootstrapped fabric network with tls
