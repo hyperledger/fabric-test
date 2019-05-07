@@ -160,7 +160,7 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode
   And I wait up to "30" seconds for deploy to complete
 
   When an admin sets up a channel named "channel1"
-  And an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example04/cmd" with name "ex04"
+  And an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example04/go/cmd" with name "ex04"
   And the organization admins install the built "ex04" chaincode package on all peers
   Then a packageId is received on all peers
   When each organization admin approves the "ex04" chaincode package on "channel1" with policy "OR ('org1.example.com.member','org2.example.com.member')"
@@ -186,8 +186,8 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode
   And a user invokes on the channel "channel2" using chaincode named "ex02_02" with args ["init","a","1000","b","2000"]
   And I wait up to "30" seconds for deploy to complete
 
-  Given the chaincode at location "github.com/hyperledger/fabric-test/chaincodes/example04/cmd" is upgraded
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example04/cmd" as version "2" with name "ex04_02"
+  Given the chaincode at location "github.com/hyperledger/fabric-test/chaincodes/example04/go/cmd" is upgraded
+  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example04/go/cmd" as version "2" with name "ex04_02"
   And the organization admins install the built "ex04_02" chaincode package on all peers
   Then a packageId is received for chaincode "ex04_02" on all peers
 
