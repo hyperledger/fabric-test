@@ -6,7 +6,7 @@
 Feature: Gossip Service
     As a user I expect the gossip component work correctly
 
-@daily
+#@daily
 Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down by <takeDownType>, comes back up and catches up eventually.
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
@@ -52,9 +52,9 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
     | takeDownType | bringUpType |
     |  stop        | start       |
     |  pause       | unpause     |
-    #| disconnect   | connect     |
+    | disconnect   | connect     |
 
-@daily
+#@daily
 Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <takeDownType>, comes back up *after* another leader is elected, catches up.
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
@@ -100,8 +100,8 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
 
   Examples:
     | takeDownType | bringUpType |
-    #|  stop        | start       |
-    #|  pause       | unpause     |
+    |  stop        | start       |
+    |  pause       | unpause     |
     | disconnect   | connect     |
 
 #@daily
