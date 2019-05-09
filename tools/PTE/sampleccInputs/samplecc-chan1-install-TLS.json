@@ -18,6 +18,6 @@
         "args": []
     },
     "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
+        {"ServiceCredentials":"SCFiles/config-chan1-TLS.yaml"}
     ]
 }

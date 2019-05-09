@@ -20,6 +20,7 @@ var FabricCAServices = require('fabric-ca-client');
 var jsrsa = require('jsrsasign');
 var os = require('os');
 var path = require('path');
+var yaml = require('js-yaml');
 var util = require('util');
 var winston = require('winston');
 
@@ -102,6 +103,32 @@ var	tlsOptions = {
 	verify: false
 };
 
+// set pointer to the keyreq in the input File
+// if key is missing or invalid, set the pointer to the beginning of the File
+function readConfigFile(inFile, keyreq) {
+    var temp;
+    var file_ext = path.extname(inFile);
+    logger.info('[readConfigFile] input File: ', inFile);
+    if ((/(yml|yaml)$/i).test(file_ext)) {
+        temp = yaml.safeLoad(fs.readFileSync(inFile, 'utf8'));
+    } else {
+        temp = JSON.parse(fs.readFileSync(inFile));
+    }
+
+    if ( temp[keyreq] ) {
+        logger.info('[readConfigFile] set pointer to %s[%s] ', inFile, keyreq);
+        return temp[keyreq];
+    } else {
+        logger.info('[readConfigFile] set pointer to %s', inFile);
+        return temp;
+    }
+
+}
+
+module.exports.readConfigFileSubmitter=function(inFile, keyreq) {
+    return readConfigFile(inFile, keyreq);
+}
+
 function getgoPath() {
 
         if ( typeof(ORGS.gopath) === 'undefined' ) {
@@ -114,8 +141,7 @@ function getgoPath() {
 }
 
 function getMember(username, password, client, nid, userOrg, svcFile) {
-	hfc.addConfigFile(svcFile);
-	ORGS = hfc.getConfigSetting('test-network');
+        ORGS = readConfigFile(svcFile, 'test-network');
 
 	var caUrl = ORGS[userOrg].ca.url;
 
@@ -166,8 +192,7 @@ function getMember(username, password, client, nid, userOrg, svcFile) {
 }
 
 function getAdmin(client, nid, userOrg, svcFile) {
-        hfc.addConfigFile(svcFile);
-        ORGS = hfc.getConfigSetting('test-network');
+        ORGS = readConfigFile(svcFile, 'test-network');
         var keyPath;
         var keyPEM;
         var certPath;
@@ -205,8 +230,7 @@ function getAdmin(client, nid, userOrg, svcFile) {
 }
 
 function getOrdererAdmin(client, userOrg, svcFile) {
-        hfc.addConfigFile(svcFile);
-        ORGS = hfc.getConfigSetting('test-network');
+        ORGS = readConfigFile(svcFile, 'test-network');
         var keyPath;
         var keyPEM;
         var certPath;
@@ -344,11 +368,11 @@ function PTELogger(opts) {
 }
 module.exports.PTELogger = PTELogger;
 
-function getTLSCert(key, subkey) {
+function getTLSCert(key, subkey, svcFile) {
 
     var data;
     logger.info('[getTLSCert] key: %s, subkey: %s', key, subkey);
-    ORGS = hfc.getConfigSetting('test-network');
+    ORGS = readConfigFile(svcFile, 'test-network');
     getgoPath();
 
     if ( typeof(ORGS.tls_cert) !== 'undefined' ) {
@@ -374,11 +398,9 @@ function getTLSCert(key, subkey) {
 module.exports.getTLSCert = getTLSCert;
 
 module.exports.tlsEnroll = async function(client, orgName, svcFile) {
+    var orgs = readConfigFile(svcFile, 'test-network');
     logger.info('[tlsEnroll] CA tls enroll: %s, svcFile: %s', orgName, svcFile);
-    hfc.addConfigFile(svcFile);
     return new Promise(function (resolve, reject) {
-        FabricCAServices.addConfigFile(svcFile);
-        let orgs = FabricCAServices.getConfigSetting('test-network');
         if (!orgs[orgName]) {
                 throw new Error('Invalid org name: ' + orgName);
         }
@@ -433,8 +455,7 @@ module.exports.setTLS=function(txCfgPtr) {
 
 // get ordererID for transactions
 module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, svcFile, method) {
-    hfc.addConfigFile(svcFile);
-    ORGS = hfc.getConfigSetting('test-network');
+    ORGS = readConfigFile(svcFile, 'test-network');
     var ordererID;
 
     logger.info('[org:id=%s:%d getOrdererID] orderer method: %s', org, pid, method);
@@ -473,8 +494,7 @@ module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, svcFile, metho
 
 // get peerID for transactions
 module.exports.getPeerID=function(pid, org, txCfgPtr, svcFile, method) {
-    hfc.addConfigFile(svcFile);
-    ORGS = hfc.getConfigSetting('test-network');
+    ORGS = readConfigFile(svcFile, 'test-network');
     var peerID="UNKNOWN";
 
     logger.info('[org:id=%s:%d getPeerID] peer method: %s', org, pid, method);

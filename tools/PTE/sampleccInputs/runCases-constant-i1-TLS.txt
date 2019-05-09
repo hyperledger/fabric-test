@@ -1,1 +1,1 @@
-sdk=node sampleccInputs/samplecc-chan1-constant-i-TLS.json
+sdk=node sampleccInputs/samplecc-chan1-constant-i-TLS.yaml

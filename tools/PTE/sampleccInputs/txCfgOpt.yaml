@@ -1,0 +1,56 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+# transaction configuration
+logLevel: ERROR
+invokeCheck: true
+transMode: Constant
+transType: Invoke
+invokeType: Move
+targetPeers: OrgAnchor
+peerFailover: true
+ordererFailover: true
+nProcPerOrg: 1
+nRequest: 1000
+runDur: 600
+TLS: enabled
+burstOpt:
+  burstFreq: [500 200 300 100]
+  burstDur:  [3000 2000 3000 1000]
+
+mixOpt:
+  mixQuery: false
+  mixFreq: 3000
+
+constantOpt:
+  recHist: HIST
+  constFreq: 0
+  devFreq: 0
+
+listOpt:
+  org1: [peer1 peer2]
+  org2: [peer1 peer2]
+
+eventOpt:
+  type: FilteredBlock
+  listener: Block
+  timeout: 240000
+
+failoverOpt:
+  method: RoundRobin
+  list: targetPeers
+
+invokeCheckOpt:
+  peers: OrgAnchor
+  transactions: LAST
+  txNum: 10
+
+ordererOpt:
+  method: UserDefined
+  nOrderers: 0
+
+timeoutOpt:
+  preConfig: 200000
+  request: 45000
+  grpcTimeout: 3000
