@@ -262,8 +262,10 @@ class Composition:
                     raise Exception(_error)
         except:
             err = "Error occurred {0}: {1}".format(cmd, sys.exc_info()[1])
-            print(err)
+            ###print(err)
             output = err
+            err0 = "Error occurred with issueCommand {0}; To see error details, enable issueCommand print statement and rerun".format(cmd)
+            print(err0)
 
         # Don't rebuild if ps command
         if command[0] !="ps" and command[0] !="config":
