@@ -20,6 +20,8 @@ fi
 }
 
 echo "======== Behave feature and system tests...========"
+echo "======== Tests are running and the results are being redirected to a log file ========"
+echo "======== You can check the progress in workspace/gopath/src/github.com/hyperledger/fabric-test/feature/behave_tests.log ========"
 cd ../../feature
-behave --junit --junit-directory ../regression/daily/. --tags=-skip --tags=daily -k -D logs=y && echo "------> Behave feature tests completed."
+behave --junit --junit-directory ../regression/daily/. --tags=-skip --tags=daily -k -D logs=y &> behave_tests.log && echo "------> Behave feature tests completed."
 archiveBehave

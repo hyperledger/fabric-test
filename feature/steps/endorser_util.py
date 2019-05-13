@@ -333,10 +333,10 @@ class SDKInterface(InterfaceBase):
                                             env=os.environ,
                                             shell=True)
         print("***{}***".format(javaVers))
-        ###javaVers = subprocess.check_output(["ls -ltr "],
-        ###                                    env=os.environ,
-        ###                                    shell=True)
-        ###print("***{}***".format(javaVers))
+        javaVers = subprocess.check_output(["ls -ltr "],
+                                           env=os.environ,
+                                           shell=True)
+        print("***{}***".format(javaVers))
 
     def reformat_chaincode(self, chaincode, channelId):
         reformatted = yaml.safe_load(chaincode.get('args', '[]'))
