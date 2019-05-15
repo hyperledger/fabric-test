@@ -9,7 +9,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric-test/chaincodes/example04"
+	example04 "github.com/hyperledger/fabric-test/chaincodes/example04/go"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 

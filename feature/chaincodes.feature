@@ -47,7 +47,7 @@ Examples:
     | solo  | without tls |
     | kafka | without tls |
 
-#@daily
+@daily
 Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric-test/chaincodes/example04/go/cmd
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -60,7 +60,7 @@ Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric-test/cha
   Then a user receives a success response of 1000
 
 @shimAPI
-#@daily
+@daily
 Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05 when cc_05 and cc_02 are on different channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -73,7 +73,7 @@ Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel 
   Then a user receives a success response of 3000
 
 
-#@daily
+@daily
 Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -85,7 +85,7 @@ Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty st
   Then a user receives a success response of 3000
 
 
-#@daily
+@daily
 Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name when cc_ex02 and cc_ex05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -98,7 +98,7 @@ Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case pas
   And a user receives an error response of Failed to get policy manager for channel [non-existing-channel]
 
 
-#@daily
+@daily
 Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase passing an incorrect ot non-existing string for channelname when cc_ex02 and cc_ex05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -113,7 +113,7 @@ Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase pass
 
 
 #This scenario failed due to kafka containers are not ready in the allotted time 
-##@daily
+@daily
 Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase passing an empty string for channelname when cc_ex02 and cc_ex05 installed on different channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -126,7 +126,7 @@ Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase pass
   Then a user receives an error response of status:500
   And a user receives an error response of chaincode myex02_b not found
 
-#@daily
+@daily
 Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_ex02 and cc_ex05 installed on same channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel

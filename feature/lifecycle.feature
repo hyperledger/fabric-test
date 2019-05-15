@@ -143,7 +143,7 @@ Scenario: FAB-13701c: Test new chaincode lifecycle - Recover after chaincode goe
   Then a user receives a success response of 980
 
 
-##@daily
+@daily
 Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
