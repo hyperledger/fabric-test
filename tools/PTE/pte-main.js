@@ -327,9 +327,11 @@ function channelAddListedPeer(channel, client, org) {
                     }
                 } else {
                     logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) incorrect peer name', Nid, channel.getName(), org, key, listOpt[key][i]);
+                    process.exit(1)
                 }
             } else {
                 logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) does not exist', Nid, channel.getName(), org, key, listOpt[key][i]);
+                process.exit(1)
             }
         }
     }
@@ -499,6 +501,7 @@ performance_main();
 
 // install chaincode
 async function chaincodeInstall(channel, client, org) {
+    try{
     var orgName = ORGS[org].name;
     logger.info('[chaincodeInstall] org: %s, org Name: %s, channel name: %s', org, orgName, channel.getName());
 
@@ -517,7 +520,7 @@ async function chaincodeInstall(channel, client, org) {
     if ( (typeof(txCfgPtr.targetPeers) !== 'undefined') && (txCfgPtr.targetPeers.toUpperCase() == 'LIST') ) {
         if ( typeof(txCfgPtr.listOpt) == 'undefined' ) {
             logger.error('[Nid:chan:org=%d:%s:%s chaincodeInstall] listOpt undefined', Nid, channel.getName(), org);
-            process.exit();
+            process.exit(1);
         }
         targets = channelAddListedPeer(channel, client, org);
     } else {
@@ -538,91 +541,94 @@ async function chaincodeInstall(channel, client, org) {
     //logger.info('request_install: %j', request_install);
 
     client.installChaincode(request_install)
-    .then(
-        function(results) {
-            var proposalResponses = results[0];
-            var proposal = results[1];
-            var header   = results[2];
-            var all_good = true;
-            for(var i in proposalResponses) {
-                let one_good = false;
-                if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
-                    one_good = true;
-                    logger.info('[chaincodeInstall] org(%s): install proposal was good', org);
-                } else {
-                    logger.error('[chaincodeInstall] org(%s): install proposal was bad', org);
-                    process.exit(1);
+        .then(
+            function(results) {
+                var proposalResponses = results[0];
+                var proposal = results[1];
+                var header   = results[2];
+                var all_good = true;
+                for(var i in proposalResponses) {
+                    let one_good = false;
+                    if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
+                        one_good = true;
+                        logger.info('[chaincodeInstall] org(%s): install proposal was good', org);
+                    } else {
+                        logger.error('[chaincodeInstall] org(%s): install proposal was bad', org);
+                    }
+                    all_good = all_good & one_good;
                 }
-                all_good = all_good & one_good;
-            }
-            if (all_good) {
-                logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s:%s) and received ProposalResponse: Status - %s', channelName, orgName, proposalResponses[0].response.status));
-                evtDisconnect();
-            } else {
-                logger.error('[chaincodeInstall] Failed to send install Proposal in (%s:%s) or receive valid response. Response null or status is not 200. exiting...', channelName, orgName);
-                evtDisconnect();
-                process.exit();
-            }
+                if (all_good) {
+                    logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s:%s) and received ProposalResponse: Status - %s', channelName, orgName, proposalResponses[0].response.status));
+                    evtDisconnect();
+                } else {
+                    throw new Error('[chaincodeInstall] Failed to send install Proposal in (%s:%s) or receive valid response. Response null or status is not 200. exiting...', channelName, orgName);
+                }
 
-        }, (err) => {
-            logger.error('[chaincodeInstall] Failed to install chaincode in (%s:%s) due to error: ', channelName, orgName, err);
+            }).catch((err) => {
+                logger.error('[chaincodeInstall] Failed to install chaincode in (%s:%s) due to error: ', channelName, orgName, err);
+                evtDisconnect();
+                process.exit(1);
+
+            });
+        }catch(err){
+            logger.error(err)
             evtDisconnect();
-            process.exit();
-
-        });
+            process.exit(1);
+        }
 }
 
 function buildChaincodeProposal(client, the_user, type, upgrade, transientMap) {
-        let tx_id = client.newTransactionID();
+    let tx_id = client.newTransactionID();
 
-        // send proposal to endorser
-        getCCID();
-        var request = {
-                chaincodePath: chaincodePath,
-                chaincodeId: chaincode_id,
-                chaincodeVersion: chaincode_ver,
-                fcn: ccDfnPtr.deploy.fcn,
-                args: testDeployArgs,
-                chainId: channelName,
-                chaincodeType: type,
-                'endorsement-policy': ccDfnPtr.deploy.endorsement,
-                'collections-config': collectionsConfigPath,
-                txId: tx_id
-        };
+    // send proposal to endorser
+    getCCID();
+    var request = {
+        chaincodePath: chaincodePath,
+        chaincodeId: chaincode_id,
+        chaincodeVersion: chaincode_ver,
+        fcn: ccDfnPtr.deploy.fcn,
+        args: testDeployArgs,
+        chainId: channelName,
+        chaincodeType: type,
+        'endorsement-policy': ccDfnPtr.deploy.endorsement,
+        'collections-config': collectionsConfigPath,
+        txId: tx_id
+    };
 
-        if(upgrade) {
-                // use this call to test the transient map support during chaincode instantiation
-                request.transientMap = transientMap;
-        }
+    if(upgrade) {
+        // use this call to test the transient map support during chaincode instantiation
+        request.transientMap = transientMap;
+    }
 
-        return request;
+    return request;
 }
 
 //instantiate chaincode
 async function chaincodeInstantiate(channel, client, org) {
-        var eventHubs = [];
-        var cryptoSuite = hfc.newCryptoSuite();
-        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
-        client.setCryptoSuite(cryptoSuite);
+    try{
+    var eventHubs = [];
+    var cryptoSuite = hfc.newCryptoSuite();
+    cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
+    client.setCryptoSuite(cryptoSuite);
 
-        logger.info('[chaincodeInstantiate] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
+    logger.info('[chaincodeInstantiate] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
 
-        // get client key
-        if ( TLS == testUtil.TLSCLIENTAUTH ) {
-            await testUtil.tlsEnroll(client, org, svcFile);
-            logger.info('[chaincodeInstantiate] get user private key: org= %s', org);
-        }
-        chainAddOrderer(channel, client, org);
+    // get client key
+    if ( TLS == testUtil.TLSCLIENTAUTH ) {
+        await testUtil.tlsEnroll(client, org, svcFile);
+        logger.info('[chaincodeInstantiate] get user private key: org= %s', org);
+    }
+    chainAddOrderer(channel, client, org);
 
-        var ivar=0
-        for (ivar=0; ivar<channelOrgName.length; ivar++ ) {
-            var orgInstantiate = channelOrgName[ivar];
-            channelAddPeer1(channel, client, orgInstantiate, eventHubs);
-        }
+    var ivar=0
+    for (ivar=0; ivar<channelOrgName.length; ivar++ ) {
+        var orgInstantiate = channelOrgName[ivar];
+        channelAddPeer1(channel, client, orgInstantiate, eventHubs);
+    }
 
-        logger.info('[chaincodeInstantiate:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
+    logger.info('[chaincodeInstantiate:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
 
-        channel.initialize()
+    channel.initialize()
         .then((success) => {
             logger.info('[chaincodeInstantiate:Nid=%d] Successfully initialize channel[%s]', Nid, channel.getName());
             var upgrade = false;
@@ -635,140 +641,131 @@ async function chaincodeInstantiate(channel, client, org) {
             // sendInstantiateProposal
             //logger.info('request_instantiate: ', request);
             return channel.sendInstantiateProposal(request, cfgTimeout);
-        },
-        function(err) {
-            logger.error('[chaincodeInstantiate:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);
-            evtDisconnect();
-            process.exit(1);
         })
-    .then(
-        function(results) {
-            var proposalResponses = results[0];
-            var proposal = results[1];
-            var header   = results[2];
-            var all_good = true;
-            for(var i in proposalResponses) {
-                let one_good = false;
-                if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
-                    one_good = true;
-                    logger.info('[chaincodeInstantiate:Nid=%d] channel(%s) chaincode instantiation was good', Nid, channelName);
-                } else {
-                    logger.error('[chaincodeInstantiate:Nid=%d] channel(%s) chaincode instantiation was bad: results= %j', Nid, channelName, results);
+        .then(
+            function(results) {
+                var proposalResponses = results[0];
+                var proposal = results[1];
+                var header   = results[2];
+                var all_good = true;
+                for(var i in proposalResponses) {
+                    let one_good = false;
+                    if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
+                        one_good = true;
+                        logger.info('[chaincodeInstantiate:Nid=%d] channel(%s) chaincode instantiation was good', Nid, channelName);
+                    } else {
+                        logger.error('[chaincodeInstantiate:Nid=%d] channel(%s) chaincode instantiation was bad: results= %j', Nid, channelName, results);
+                    }
+                    all_good = all_good & one_good;
                 }
-                all_good = all_good & one_good;
-            }
-            if (all_good) {
-                logger.info(util.format('[chaincodeInstantiate] Successfully sent chaincode instantiation Proposal and received ProposalResponse: Status - %s', proposalResponses[0].response.status));
+                if (all_good) {
+                    logger.info(util.format('[chaincodeInstantiate] Successfully sent chaincode instantiation Proposal and received ProposalResponse: Status - %s', proposalResponses[0].response.status));
 
 
-                var request = {
-                    proposalResponses: proposalResponses,
-                    proposal: proposal,
-                    header: header
-                };
+                    var request = {
+                        proposalResponses: proposalResponses,
+                        proposal: proposal,
+                        header: header
+                    };
 
-                var deployId = tx_id.getTransactionID();
-                var eventPromises = [];
-                eventPromises.push(channel.sendTransaction(request));
-                eventHubs.forEach((eh) => {
-                    let txPromise = new Promise((resolve, reject) => {
-                        let handle = setTimeout(reject, cfgTimeout);
+                    var deployId = tx_id.getTransactionID();
+                    var eventPromises = [];
+                    eventPromises.push(channel.sendTransaction(request));
+                    eventHubs.forEach((eh) => {
+                        let txPromise = new Promise((resolve, reject) => {
+                            let handle = setTimeout(reject, cfgTimeout);
 
-                        eh.registerTxEvent(deployId.toString(), (tx, code) => {
-                            var tCurr1=new Date().getTime();
-                            clearTimeout(handle);
-                            eh.unregisterTxEvent(deployId);
+                            eh.registerTxEvent(deployId.toString(), (tx, code) => {
+                                var tCurr1=new Date().getTime();
+                                clearTimeout(handle);
+                                eh.unregisterTxEvent(deployId);
 
-                            if (code !== 'VALID') {
-                                logger.error('[chaincodeInstantiate] The chaincode instantiate transaction was invalid, code = ' + code);
+                                if (code !== 'VALID') {
+                                    logger.error('[chaincodeInstantiate] The chaincode instantiate transaction was invalid, code = ' + code);
+                                    reject();
+                                } else {
+                                    logger.info('[chaincodeInstantiate] The chaincode instantiate transaction was valid.');
+                                    resolve();
+                                }
+                            }, (err) => {
+                                clearTimeout(handle);
                                 reject();
-                            } else {
-                                logger.info('[chaincodeInstantiate] The chaincode instantiate transaction was valid.');
-                                resolve();
-                            }
-                        }, (err) => {
-                            clearTimeout(handle);
-                            reject();
-                        }, {
-                            disconnect: true
+                            }, {
+                                    disconnect: true
+                                });
+                            eh.connect();
                         });
-                        eh.connect();
+                        logger.info('[chaincodeInstantiate] register eventhub %s with tx=%s', eh.getPeerAddr(),deployId);
+                        eventPromises.push(txPromise);
                     });
-                    logger.info('[chaincodeInstantiate] register eventhub %s with tx=%s', eh.getPeerAddr(),deployId);
-                    eventPromises.push(txPromise);
-                });
 
-                var tCurr=new Date().getTime();
-                logger.info('[chaincodeInstantiate] Promise.all tCurr=%d', tCurr);
-                return Promise.all(eventPromises)
+                    var tCurr=new Date().getTime();
+                    logger.info('[chaincodeInstantiate] Promise.all tCurr=%d', tCurr);
+                    return Promise.all(eventPromises)
 
-                .then((results) => {
+                        .then((results) => {
 
-                    logger.info('[chaincodeInstantiate] Event promise all complete and testing complete');
-                    return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
-                }).catch((err) => {
-                    var tCurr1=new Date().getTime();
-                    logger.error('[chaincodeInstantiate] failed to send instantiate transaction: tCurr=%d, elapse time=%d', tCurr, tCurr1-tCurr);
-                    //logger.error('Failed to send instantiate transaction and get notifications within the timeout period.');
+                            logger.info('[chaincodeInstantiate] Event promise all complete and testing complete');
+                            return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
+                        }).catch((err) => {
+                            var tCurr1=new Date().getTime();
+                            logger.error('[chaincodeInstantiate] failed to send instantiate transaction: tCurr=%d, elapse time=%d', tCurr, tCurr1-tCurr);
+                            //logger.error('Failed to send instantiate transaction and get notifications within the timeout period.');
+                            evtDisconnect();
+                            process.exit(1)
+                        });
+                } else {
+                    logger.error('[chaincodeInstantiate] Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
                     evtDisconnect();
-                    throw new Error('Failed to send instantiate transaction and get notifications within the timeout period.');
-
-                });
-            } else {
-                logger.error('[chaincodeInstantiate] Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
-                evtDisconnect();
-                throw new Error('Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
-            }
-        },
-        function(err) {
-
-                logger.error('Failed to send instantiate proposal due to error: ' + err.stack ? err.stack : err);
-                evtDisconnect();
-                throw new Error('Failed to send instantiate proposal due to error: ' + err.stack ? err.stack : err);
-        })
-    .then((response) => {
+                    throw new Error('Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
+                }
+            })
+        .then((response) => {
             if (response.status === 'SUCCESS') {
                 logger.info('[chaincodeInstantiate(Nid=%d)] Successfully instantiate transaction on %s. ', Nid, channelName);
                 evtDisconnect();
                 return;
             } else {
-                logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error code: ', Nid, channelName, response.status);
-                evtDisconnect();
-                return;
+                throw new Error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error code: ', Nid, channelName, response.status);
             }
-
-        }, (err) => {
+        }).catch((err) => {
             logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s due to error: ', Nid, channelName, err.stack ? err.stack : err);
             evtDisconnect();
-            return;
+            process.exit(1)
         }
-    );
+        );
+    }catch(err){
+        logger.error(err)
+        evtDisconnect();
+        process.exit(1)
+    }
 }
 
 //Upgrade chaincode
 async function chaincodeUpgrade(channel, client, org) {
-        var eventHubs = [];
-        var cryptoSuite = hfc.newCryptoSuite();
-        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
-        client.setCryptoSuite(cryptoSuite);
-        logger.info('[chaincodeUpgrade] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
+    try{
+    var eventHubs = [];
+    var cryptoSuite = hfc.newCryptoSuite();
+    cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
+    client.setCryptoSuite(cryptoSuite);
+    logger.info('[chaincodeUpgrade] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
 
-        // get client key
-        if ( TLS == testUtil.TLSCLIENTAUTH ) {
-            await testUtil.tlsEnroll(client, org, svcFile);
-            logger.info('[chaincodeUpgrade] get user private key: org= %s', org);
-        }
-        chainAddOrderer(channel, client, org);
+    // get client key
+    if ( TLS == testUtil.TLSCLIENTAUTH ) {
+        await testUtil.tlsEnroll(client, org, svcFile);
+        logger.info('[chaincodeUpgrade] get user private key: org= %s', org);
+    }
+    chainAddOrderer(channel, client, org);
 
-        var ivar=0
-        for (ivar=0; ivar<channelOrgName.length; ivar++ ) {
-            var orgInstantiate = channelOrgName[ivar];
-            channelAddPeer1(channel, client, orgInstantiate, eventHubs);
-        }
+    var ivar=0
+    for (ivar=0; ivar<channelOrgName.length; ivar++ ) {
+        var orgInstantiate = channelOrgName[ivar];
+        channelAddPeer1(channel, client, orgInstantiate, eventHubs);
+    }
 
-        logger.info('[chaincodeUpgrade:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
+    logger.info('[chaincodeUpgrade:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
 
-        channel.initialize()
+    channel.initialize()
         .then((success) => {
             logger.info('[chaincodeUpgrade:Nid=%d] Successfully initialize channel[%s]', Nid, channel.getName());
             var upgrade = true;
@@ -779,97 +776,85 @@ async function chaincodeUpgrade(channel, client, org) {
             tx_id = request.txId;
 
             return channel.sendUpgradeProposal(request, cfgTimeout);
-        },
-        function(err) {
-            logger.error('[chaincodeUpgrade:Nid=%d] Failed to initialize channel[%s] due to error: ', Nid,  channelName, err.stack ? err.stack : err);
-            evtDisconnect();
-            process.exit();
         })
-    .then(
-        function(results) {
-            var proposalResponses = results[0];
-            var proposal = results[1];
-            var header   = results[2];
-            var all_good = true;
-            for(var i in proposalResponses) {
-                let one_good = false;
-                if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
-                    one_good = true;
-                    logger.info('[chaincodeUpgrade:Nid=%d] channel(%s) chaincode upgrade was good', Nid, channelName);
-                } else {
-                    logger.error('[chaincodeUpgrade:Nid=%d] channel(%s) chaincode upgrade was bad: results= %j', Nid, channelName, results);
+        .then(
+            function(results) {
+                var proposalResponses = results[0];
+                var proposal = results[1];
+                var header   = results[2];
+                var all_good = true;
+                for(var i in proposalResponses) {
+                    let one_good = false;
+                    if (proposalResponses && proposalResponses[i].response && proposalResponses[i].response.status === 200) {
+                        one_good = true;
+                        logger.info('[chaincodeUpgrade:Nid=%d] channel(%s) chaincode upgrade was good', Nid, channelName);
+                    } else {
+                        logger.error('[chaincodeUpgrade:Nid=%d] channel(%s) chaincode upgrade was bad: results= %j', Nid, channelName, results);
+                        process.exit(1)
+                    }
+                    all_good = all_good & one_good;
                 }
-                all_good = all_good & one_good;
-            }
-            if (all_good) {
-                logger.info(util.format('[chaincodeUpgrade] Successfully sent chaincode upgrade Proposal and received ProposalResponse: Status - %s', proposalResponses[0].response.status));
+                if (all_good) {
+                    logger.info(util.format('[chaincodeUpgrade] Successfully sent chaincode upgrade Proposal and received ProposalResponse: Status - %s', proposalResponses[0].response.status));
 
 
-                var request = {
-                    proposalResponses: proposalResponses,
-                    proposal: proposal,
-                    header: header
-                };
+                    var request = {
+                        proposalResponses: proposalResponses,
+                        proposal: proposal,
+                        header: header
+                    };
 
-                var deployId = tx_id.getTransactionID();
-                var eventPromises = [];
-                eventPromises.push(channel.sendTransaction(request));
-                eventHubs.forEach((eh) => {
-                    let txPromise = new Promise((resolve, reject) => {
-                        let handle = setTimeout(reject, cfgTimeout);
+                    var deployId = tx_id.getTransactionID();
+                    var eventPromises = [];
+                    eventPromises.push(channel.sendTransaction(request));
+                    eventHubs.forEach((eh) => {
+                        let txPromise = new Promise((resolve, reject) => {
+                            let handle = setTimeout(reject, cfgTimeout);
 
-                        eh.registerTxEvent(deployId.toString(), (tx, code) => {
-                            var tCurr1=new Date().getTime();
-                            clearTimeout(handle);
-                            eh.unregisterTxEvent(deployId);
+                            eh.registerTxEvent(deployId.toString(), (tx, code) => {
+                                var tCurr1=new Date().getTime();
+                                clearTimeout(handle);
+                                eh.unregisterTxEvent(deployId);
 
-                            if (code !== 'VALID') {
-                                logger.error('[chaincodeUpgrade] The chaincode upgrade transaction was invalid, code = ' + code);
+                                if (code !== 'VALID') {
+                                    logger.error('[chaincodeUpgrade] The chaincode upgrade transaction was invalid, code = ' + code);
+                                    reject();
+                                } else {
+                                    logger.info('[chaincodeUpgrade] The chaincode upgrade transaction was valid.');
+                                    resolve();
+                                }
+                            }, (err) => {
+                                clearTimeout(handle);
                                 reject();
-                            } else {
-                                logger.info('[chaincodeUpgrade] The chaincode upgrade transaction was valid.');
-                                resolve();
-                            }
-                        }, (err) => {
-                            clearTimeout(handle);
-                            reject();
-                        }, {
-                            disconnect: true
+                            }, {
+                                    disconnect: true
+                                });
+                            eh.connect();
                         });
-                        eh.connect();
+                        logger.info('[chaincodeUpgrade] register eventhub %s with tx=%s', eh.getPeerAddr(),deployId);
+                        eventPromises.push(txPromise);
                     });
-                    logger.info('[chaincodeUpgrade] register eventhub %s with tx=%s', eh.getPeerAddr(),deployId);
-                    eventPromises.push(txPromise);
-                });
 
-                var tCurr=new Date().getTime();
-                logger.info('[chaincodeUpgrade] Promise.all tCurr=%d', tCurr);
-                return Promise.all(eventPromises)
+                    var tCurr=new Date().getTime();
+                    logger.info('[chaincodeUpgrade] Promise.all tCurr=%d', tCurr);
+                    return Promise.all(eventPromises)
 
-                .then((results) => {
+                        .then((results) => {
 
-                    logger.info('[chaincodeUpgrade] Event promise all complete and testing complete');
-                    return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
-                }).catch((err) => {
-                    var tCurr1=new Date().getTime();
-                    logger.error('[chaincodeUpgrade] failed to send upgrade transaction: tCurr=%d, elapse time=%d', tCurr, tCurr1-tCurr);
+                            logger.info('[chaincodeUpgrade] Event promise all complete and testing complete');
+                            return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
+                        }).catch((err) => {
+                            var tCurr1=new Date().getTime();
+                            logger.error('[chaincodeUpgrade] failed to send upgrade transaction: tCurr=%d, elapse time=%d', tCurr, tCurr1-tCurr);
+                            evtDisconnect();
+                            process.exit(1)
+                        });
+                } else {
                     evtDisconnect();
-                    throw new Error('Failed to send upgrade transaction and get notifications within the timeout period.');
-
-                });
-            } else {
-                logger.error('[chaincodeUpgrade] Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
-                evtDisconnect();
-                throw new Error('Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
-            }
-        },
-        function(err) {
-
-                logger.error('Failed to send Upgrade proposal due to error: ' + err.stack ? err.stack : err);
-                evtDisconnect();
-                throw new Error('Failed to send Upgrade proposal due to error: ' + err.stack ? err.stack : err);
-        })
-    .then((response) => {
+                    throw new Error('Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
+                }
+            })
+        .then((response) => {
             if (response.status === 'SUCCESS') {
                 logger.info('[chaincodeUpgrade(Nid=%d)] Successfully Upgrade transaction on %s. ', Nid, channelName);
                 evtDisconnect();
@@ -877,32 +862,37 @@ async function chaincodeUpgrade(channel, client, org) {
             } else {
                 logger.error('[chaincodeUpgrade(Nid=%d)] Failed to Upgrade transaction on %s. Error code: ', Nid, channelName, response.status);
                 evtDisconnect();
-                return;
+                process.exit(1)
             }
 
-        }, (err) => {
+        }).catch((err) => {
             logger.error('[chaincodeUpgrade(Nid=%d)] Failed to upgrade transaction on %s due to error: ', Nid, channelName, err.stack ? err.stack : err);
             evtDisconnect();
-            return;
+            process.exit(1)
         }
-    );
-}
+        );
 
+    }catch(err){
+        logger.error(err)
+        evtDisconnect();
+        process.exit(1);
+    }
+}
 function readAllFiles(dir) {
-        var files = fs.readdirSync(dir);
-        var certs = [];
-        files.forEach((file_name) => {
-                let file_path = path.resolve(dir,file_name);
-                logger.info('[readAllFiles] looking at file ::'+file_path);
-                let data = fs.readFileSync(file_path);
-                certs.push(data);
-        });
-        return certs;
+    var files = fs.readdirSync(dir);
+    var certs = [];
+    files.forEach((file_name) => {
+        let file_path = path.resolve(dir,file_name);
+        logger.info('[readAllFiles] looking at file ::'+file_path);
+        let data = fs.readFileSync(file_path);
+        certs.push(data);
+    });
+    return certs;
 }
 
 //create or update channel
 async function createOrUpdateOneChannel(client, channelOrgName) {
-
+ try{
     var config;
     var envelope_bytes;
     var signatures = [];
@@ -958,166 +948,166 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
         // all the orgs
         return Promise.all(submitePromises);
     })
-    .then((results) => {
-        results.forEach(function(result){
+        .then((results) => {
+            results.forEach(function(result){
+                var signature = client.signChannelConfig(config);
+                logger.info('[createOrUpdateOneChannel] Successfully signed config update for one organization ');
+                // collect signature from org admin
+                signatures.push(signature);
+            });
+            return signatures;
+        }).then((sigs) =>{
+            client._userContext = null;
+            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], svcFile);
+        }).then((admin) => {
+            the_user = admin;
+            logger.info('[createOrUpdateOneChannel] Successfully enrolled user \'admin\' for', "orderer");
             var signature = client.signChannelConfig(config);
-            logger.info('[createOrUpdateOneChannel] Successfully signed config update for one organization ');
+            logger.info('[createOrUpdateOneChannel] Successfully signed config update: ', "orderer");
             // collect signature from org admin
             signatures.push(signature);
-        });
-        return signatures;
-    }).then((sigs) =>{
-        client._userContext = null;
-        return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], svcFile);
-    }).then((admin) => {
-        the_user = admin;
-        logger.info('[createOrUpdateOneChannel] Successfully enrolled user \'admin\' for', "orderer");
-        var signature = client.signChannelConfig(config);
-        logger.info('[createOrUpdateOneChannel] Successfully signed config update: ', "orderer");
-        // collect signature from org admin
-        signatures.push(signature);
 
-        logger.info('[createOrUpdateOneChannel] done signing: %s', channelName);
-	// add new orderer
-        clientNewOrderer(client, channelOrgName[0]);
-        // build up the create request
-        let tx_id = client.newTransactionID();
-        let nonce = tx_id.getNonce();
-        var request = {
-            config: config,
-            signatures : signatures,
-            name : channelName,
-            orderer : orderer,
-            txId  : tx_id,
-            nonce : nonce
-        };
-        //logger.info('request: ',request);
-        if (channelOpt.action.toUpperCase() == 'CREATE') {
+            logger.info('[createOrUpdateOneChannel] done signing: %s', channelName);
+            // add new orderer
+            clientNewOrderer(client, channelOrgName[0]);
+            // build up the create request
+            let tx_id = client.newTransactionID();
+            let nonce = tx_id.getNonce();
+            var request = {
+                config: config,
+                signatures : signatures,
+                name : channelName,
+                orderer : orderer,
+                txId  : tx_id,
+                nonce : nonce
+            };
+            //logger.info('request: ',request);
+            if (channelOpt.action.toUpperCase() == 'CREATE') {
                 return client.createChannel(request);
-        } else if (channelOpt.action.toUpperCase() == 'UPDATE') {
+            } else if (channelOpt.action.toUpperCase() == 'UPDATE') {
                 return client.updateChannel(request);
-        }
-    }, (err) => {
-        logger.error('Failed to enroll user \'admin\'. ' + err);
-        evtDisconnect();
-        process.exit();
-    }).then((result) => {
-        logger.info('[createOrUpdateOneChannel] Successfully created/updated the channel (%s).', channelName);
-        evtDisconnect();
-        process.exit();
-    }, (err) => {
-        logger.error('Failed to create/update the channel (%s) ', channelName);
-        logger.error('Failed to create/update the channel:: %j '+ err.stack ? err.stack : err);
-        evtDisconnect();
-        process.exit();
-    })
-    .then((nothing) => {
-        logger.info('Successfully waited to make sure new channel was created/updated.');
-        evtDisconnect();
-        process.exit();
-    }, (err) => {
-        logger.error('Failed due to error: ' + err.stack ? err.stack : err);
-        evtDisconnect();
-        process.exit();
-    });
+            }
+        }).then((result) => {
+            logger.info('[createOrUpdateOneChannel] Successfully created/updated the channel (%s).', channelName);
+            evtDisconnect();
+            process.exit();
+        })
+        .then((nothing) => {
+            logger.info('Successfully waited to make sure new channel was created/updated.');
+            evtDisconnect();
+            process.exit();
+        }).catch((err) => {
+            logger.error('Failed due to error: ' + err.stack ? err.stack : err);
+            evtDisconnect();
+            process.exit(1);
+        });
+    }catch(err){
+        logger.error(err)
+        evtDisconnect()
+        process.exit(1)
+    }
 }
 
 // join channel
 async function joinChannel(channel, client, org) {
-        var orgName = ORGS[org].name;
-        logger.info('[joinChannel] Calling peers in organization (%s) to join the channel (%s)', orgName, channelName);
-        var username = ORGS[org].username;
-        var secret = ORGS[org].secret;
-        logger.info('[joinChannel] user=%s, secret=%s', username, secret);
-        var genesis_block = null;
-        var eventHubs = [];
-        var blockCallbacks = [];
+    try{
+    var orgName = ORGS[org].name;
+    logger.info('[joinChannel] Calling peers in organization (%s) to join the channel (%s)', orgName, channelName);
+    var username = ORGS[org].username;
+    var secret = ORGS[org].secret;
+    logger.info('[joinChannel] user=%s, secret=%s', username, secret);
+    var genesis_block = null;
+    var eventHubs = [];
+    var blockCallbacks = [];
 
-        // get client key
-        if ( TLS == testUtil.TLSCLIENTAUTH ) {
-            await testUtil.tlsEnroll(client, org, svcFile);
-            logger.info('[joinChannel] get user private key: org= %s', org);
-        }
+    // get client key
+    if ( TLS == testUtil.TLSCLIENTAUTH ) {
+        await testUtil.tlsEnroll(client, org, svcFile);
+        logger.info('[joinChannel] get user private key: org= %s', org);
+    }
 
-        //printChainInfo(channel);
+    //printChainInfo(channel);
 
-        return hfc.newDefaultKeyValueStore({
-                path: testUtil.storePathForOrg(Nid, orgName)
-        }).then((store) => {
-                client.setStateStore(store);
-                client._userContext = null;
-                return testUtil.getOrderAdminSubmitter(client, org, svcFile)
-        }).then((admin) => {
-                logger.info('[joinChannel:%s] Successfully enrolled orderer \'admin\'', org);
-                the_user = admin;
-                logger.debug('[joinChannel] orderer admin: ', admin);
+    return hfc.newDefaultKeyValueStore({
+        path: testUtil.storePathForOrg(Nid, orgName)
+    }).then((store) => {
+        client.setStateStore(store);
+        client._userContext = null;
+        return testUtil.getOrderAdminSubmitter(client, org, svcFile)
+    }).then((admin) => {
+        logger.info('[joinChannel:%s] Successfully enrolled orderer \'admin\'', org);
+        the_user = admin;
+        logger.debug('[joinChannel] orderer admin: ', admin);
 
-        	// add orderers
-	        chainAddOrderer(channel, client, org);
+        // add orderers
+        chainAddOrderer(channel, client, org);
 
-                tx_id = client.newTransactionID();
-                var request = {
-                    txId :  tx_id
-                };
-                return channel.getGenesisBlock(request);
-        }).then((block) =>{
-                logger.info('[joinChannel:org=%s:%s] Successfully got the genesis block', channelName, org);
-                genesis_block = block;
+        tx_id = client.newTransactionID();
+        var request = {
+            txId :  tx_id
+        };
+        return channel.getGenesisBlock(request);
+    }).then((block) =>{
+        logger.info('[joinChannel:org=%s:%s] Successfully got the genesis block', channelName, org);
+        genesis_block = block;
 
-                client._userContext = null;
-                return testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile);
-        }).then((admin) => {
-                logger.info('[joinChannel] Successfully enrolled org:' + org + ' \'admin\'');
-                the_user = admin;
-                logger.debug('[joinChannel] org admin: ', admin);
+        client._userContext = null;
+        return testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile);
+    }).then((admin) => {
+        logger.info('[joinChannel] Successfully enrolled org:' + org + ' \'admin\'');
+        the_user = admin;
+        logger.debug('[joinChannel] org admin: ', admin);
 
-                // add peers and events
-                var targeteh = channelAddPeerEventJoin(channel, client, org);
-                eventHubs = targeteh.eventHubs;
-                var targets = targeteh.targets;
+        // add peers and events
+        var targeteh = channelAddPeerEventJoin(channel, client, org);
+        eventHubs = targeteh.eventHubs;
+        var targets = targeteh.targets;
 
-                var eventPromises = [];
+        var eventPromises = [];
 
-                tx_id = client.newTransactionID();
-                let request = {
-                        targets : targets,
-                        block : genesis_block,
-                        txId :  tx_id
-                };
+        tx_id = client.newTransactionID();
+        let request = {
+            targets : targets,
+            block : genesis_block,
+            txId :  tx_id
+        };
 
-                return channel.joinChannel(request);
-        })
+        return channel.joinChannel(request);
+    })
         .then((results) => {
-                logger.info(util.format('[joinChannel:%s] join Channel R E S P O N S E : %j', org, results));
+            logger.info(util.format('[joinChannel:%s] join Channel R E S P O N S E : %j', org, results));
 
-                if(results[0] && results[0].response && results[0].response.status == 200) {
-                        logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
-                        evtDisconnect(eventHubs, blockCallbacks);
-                } else {
-                        logger.error('[joinChannel] Failed to join peers in (%s:%s)', channelName, orgName);
-                        evtDisconnect(eventHubs, blockCallbacks);
-                        throw new Error('[joinChannel] Failed to join channel');
-                }
-        }, (err) => {
-                logger.error('[joinChannel] --- Failed to join channel due to error: ' + err.stack ? err.stack : err);
+            if(results[0] && results[0].response && results[0].response.status == 200) {
+                logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
                 evtDisconnect(eventHubs, blockCallbacks);
+            } else {
+                evtDisconnect(eventHubs, blockCallbacks);
+                throw new Error('[joinChannel] Failed to join channel');
+            }
+        }).catch((err) => {
+            logger.error('[joinChannel] --- Failed to join channel due to error: ' + err.stack ? err.stack : err);
+            evtDisconnect(eventHubs, blockCallbacks);
+            process.exit(1)
         });
+    }catch(err){
+        logger.error(err)
+        evtDisconnect()
+        process.exit(1)
+    }
 }
 
-function joinOneChannel(channel, client, org) {
-        logger.info('[joinOneChannel] org: ', org);
 
-        joinChannel(channel, client, org)
+function joinOneChannel(channel, client, org) {
+    logger.info('[joinOneChannel] org: ', org);
+
+    joinChannel(channel, client, org)
         .then(() => {
-                logger.info('[joinOneChannel] Successfully joined peers in organization %s to join the channel %s', ORGS[org].name, channelName);
-                process.exit();
-        }, (err) => {
-                logger.error(util.format('[joinOneChannel] Failed to join peers in organization "%s" to the channel', ORGS[org].name));
-                process.exit();
+            logger.info('[joinOneChannel] Successfully joined peers in organization %s to join the channel %s', ORGS[org].name, channelName);
+            process.exit();
         })
         .catch(function(err) {
-                logger.error('[joinOneChannel] Failed to join channel: ' + err);
-                process.exit();
+            logger.error('[joinOneChannel] Failed to join channel: ' + err);
+            process.exit(1);
         });
 
 }
@@ -1125,6 +1115,7 @@ function joinOneChannel(channel, client, org) {
 
 var totalLength=0;
 async function execQueryBlock(channel, sB, eB) {
+    try{
     var qBlks = [];
     for (i = sB; i <= eB; i++) {
         qBlks.push(parseInt(i));
@@ -1148,28 +1139,39 @@ async function execQueryBlock(channel, sB, eB) {
         logger.info('[execQueryBlock] blocks= %d:%d, totalLength= %j', sBlock, eB, totalLength);
 
     }).catch((err) => {
-            throw new Error(err.stack ? err.stack : err);
+        logger.error(err.stack ? err.stack : err);
+        evtDisconnect()
+        process.exit(1)
     });
-
+    }catch(err){
+        logger.error(err)
+        evtDisconnect()
+        process.exit(1)
+    }
 }
-async function preQueryBlock(channel, sB, eB) {
-    logger.info('[preQueryBlock] sB:eB= %d:%d', sB, eB);
-    while ( eBlock >= sB ) {
-        var tB = eBlock - sB;
-        if ( tB > 100 ) {
-            eB = parseInt(sB) + 100 - 1;
-        } else {
-            eB=eBlock;
-        }
 
-        logger.info('[preQueryBlock] starting Block:ending Block= %d:%d', sB, eB);
-        await execQueryBlock(channel, sB, eB);
-        sB=eB+1;
+async function preQueryBlock(channel, sB, eB) {
+    try {
+        logger.info('[preQueryBlock] sB:eB= %d:%d', sB, eB);
+        while ( eBlock >= sB ) {
+            var tB = eBlock - sB;
+            if ( tB > 100 ) {
+                eB = parseInt(sB) + 100 - 1;
+            } else {
+                eB=eBlock;
+            }
+
+            logger.info('[preQueryBlock] starting Block:ending Block= %d:%d', sB, eB);
+            await execQueryBlock(channel, sB, eB);
+            sB=eB+1;
+        }
+    } catch (err) {
+        throw new Error(err.stack ? err.stack : err);
     }
 }
 
 async function queryBlockchainInfo(channel, client, org) {
-
+try{
     logger.info('[queryBlockchainInfo] channel (%s)', channelName);
     var username = ORGS[org].username;
     var secret = ORGS[org].secret;
@@ -1190,36 +1192,43 @@ async function queryBlockchainInfo(channel, client, org) {
     channelAddQIPeer(channel, client, qOrg, qPeer);
 
     return hfc.newDefaultKeyValueStore({
-            path: testUtil.storePathForOrg(orgName)
+        path: testUtil.storePathForOrg(orgName)
     }).then( function (store) {
-            client.setStateStore(store);
-            return testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile);
+        client.setStateStore(store);
+        return testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile);
     }).then((admin) => {
-            logger.info('[queryBlockchainInfo] Successfully enrolled user \'admin\'');
-            the_user = admin;
+        logger.info('[queryBlockchainInfo] Successfully enrolled user \'admin\'');
+        the_user = admin;
 
-            return channel.initialize();
+        return channel.initialize();
     }).then((success) => {
-            logger.info('[queryBlockchainInfo] Successfully initialized channel');
-            return channel.queryInfo();
+        logger.info('[queryBlockchainInfo] Successfully initialized channel');
+        return channel.queryInfo();
     }).then((blockchainInfo) => {
-            var blockHeight = blockchainInfo.height - 1;
-            logger.info('[queryBlockchainInfo] Channel queryInfo() returned block height='+blockchainInfo.height);
-            if ( eBlock > blockHeight ) {
-                 logger.info('[queryBlockchainInfo] eBlock:block height = %d:%d', eBlock, blockHeight);
-                 logger.info('[queryBlockchainInfo] reset eBlock to block height');
-                 eBlock = blockHeight;
-            }
+        var blockHeight = blockchainInfo.height - 1;
+        logger.info('[queryBlockchainInfo] Channel queryInfo() returned block height=' + blockchainInfo.height);
+        if ( eBlock > blockHeight ) {
+            logger.info('[queryBlockchainInfo] eBlock:block height = %d:%d', eBlock, blockHeight);
+            logger.info('[queryBlockchainInfo] reset eBlock to block height');
+            eBlock = blockHeight;
+        }
 
-            preQueryBlock(channel, sBlock, eBlock);
+        preQueryBlock(channel, sBlock, eBlock);
 
     }).catch((err) => {
-            throw new Error(err.stack ? err.stack : err);
+        logger.error(err.stack ? err.stack : err);
+        evtDisconnect()
+        process.exit(1)
     });
-
+    }catch(err){
+        logger.error(err)
+        evtDisconnect()
+        process.exit(1)
+    }
 }
 
 async function performance_main() {
+    try{
     var channelConfigDone = 0;
     // set timeout for create/join/update channel and install/instantiate chaincode
     hfc.setConfigSetting('request-timeout', cfgTimeout);
@@ -1239,27 +1248,26 @@ async function performance_main() {
             hfc.newDefaultKeyValueStore({
                 path: testUtil.storePathForOrg(Nid, orgName)
             })
-            .then((store) => {
-                client.setStateStore(store);
-                testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
-                .then(
-                    function(admin) {
-                        logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
-                        the_user = admin;
-                        var channel = client.newChannel(channelName);
-                        chaincodeInstall(channel, client, org);
-                    },
-                    function(err) {
-                        logger.error('[Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);
-                        evtDisconnect();
-
-                        return;
-                    }
-                );
-            }, (err) => {
-                logger.error('[Nid=%d] Failed to install chaincode on org(%s) to error: ', Nid, org, err.stack ? err.stack : err);
-                evtDisconnect();
-            });
+                .then((store) => {
+                    client.setStateStore(store);
+                    testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
+                        .then(
+                            function(admin) {
+                                logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
+                                the_user = admin;
+                                var channel = client.newChannel(channelName);
+                                chaincodeInstall(channel, client, org);
+                            }).catch((err)=>{
+                                logger.error('[Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err)
+                                evtDisconnect();
+                                process.exit(1)
+                            }
+                        );
+                }).catch((err) => {
+                    logger.error('[Nid=%d] Failed to install chaincode on org(%s) to error: ', Nid, org, err.stack ? err.stack : err);
+                    evtDisconnect();
+                    process.exit(1)
+                });
         } else if ( transType == 'INSTANTIATE' ) {
             initDeploy();
             var username = ORGS[org].username;
@@ -1269,24 +1277,26 @@ async function performance_main() {
             hfc.newDefaultKeyValueStore({
                 path: testUtil.storePathForOrg(Nid, orgName)
             })
-            .then((store) => {
-                client.setStateStore(store);
-                testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
-                .then(
-                    function(admin) {
-                        logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
-                        the_user = admin;
-                        var channel = client.newChannel(channelName);
-                        chaincodeInstantiate(channel, client, org);
-                    },
-                    function(err) {
-                        logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);
-                        evtDisconnect();
-
-                        return;
-                    }
-                );
-            });
+                .then((store) => {
+                    client.setStateStore(store);
+                    testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
+                        .then(
+                            function(admin) {
+                                logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
+                                the_user = admin;
+                                var channel = client.newChannel(channelName);
+                                chaincodeInstantiate(channel, client, org);
+                            }).catch((err)=>{
+                                logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err)
+                                evtDisconnect();
+                                process.exit(1)
+                            }
+                        );
+                }).catch((err)=>{
+                    logger.error(err)
+                    evtDisconnect();
+                    process.exit(1)
+                });
             break;
 
         } else if ( transType == 'UPGRADE' ) {
@@ -1298,24 +1308,26 @@ async function performance_main() {
             hfc.newDefaultKeyValueStore({
                 path: testUtil.storePathForOrg(Nid, orgName)
             })
-            .then((store) => {
-                client.setStateStore(store);
-                testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
-                .then(
-                    function(admin) {
-                        logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
-                        the_user = admin;
-                        var channel = client.newChannel(channelName);
-                        chaincodeUpgrade(channel, client, org);
-                    },
-                    function(err) {
-                        logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err);
-                        evtDisconnect();
-
-                        return;
-                    }
-                );
-            });
+                .then((store) => {
+                    client.setStateStore(store);
+                    testUtil.getSubmitter(username, secret, client, true, Nid, org, svcFile)
+                        .then(
+                            function(admin) {
+                                logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
+                                the_user = admin;
+                                var channel = client.newChannel(channelName);
+                                chaincodeUpgrade(channel, client, org);
+                            }).catch((err)=>{
+                                logger.error('[performance_main:Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err)
+                                evtDisconnect();
+                                process.exit(1)
+                            }
+                        );
+                }).catch((err)=>{
+                    logger.error(err)
+                    evtDisconnect();
+                    process.exit(1)
+                });;
             break;
         } else if ( transType == 'CHANNEL' ) {
             if ((channelOpt.action.toUpperCase() == 'CREATE') || (channelOpt.action.toUpperCase() == 'UPDATE')) {
@@ -1684,22 +1696,27 @@ async function performance_main() {
         }
 
     }
+    }catch(err){
+        logger.error(err)
+        evtDisconnect()
+        process.exit(1)
+    }
 }
 
 function readFile(path) {
-        return new Promise(function(resolve, reject) {
-                fs.readFile(path, function(err, data) {
-                        if (err) {
-                                reject(err);
-                        } else {
-                                resolve(data);
-                        }
-                });
+    return new Promise(function(resolve, reject) {
+        fs.readFile(path, function(err, data) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(data);
+            }
         });
+    });
 }
 
 function sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 function evtDisconnect(eventHubs, blockCallbacks) {
