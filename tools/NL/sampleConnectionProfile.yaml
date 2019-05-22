@@ -1,0 +1,154 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+version: 1.0
+name: My network
+description: Connection Profile for an IBM Blockchain Platform Network
+gopath: GOPATH
+
+# clients
+client:
+  organization: org1
+  connection:
+    timeout:
+      peer:
+        endorser: 300
+        eventHub: 600
+        eventReg: 300
+      orderer: 300
+
+# channels
+channels:
+  testorgschannel1:
+    orderers:
+      orderer0
+      orderer1
+      orderer2
+    peers:
+      peer0org1examplecom:
+      peer1org1examplecom:
+      peer0org2examplecom:
+      peer1org2examplecom:
+    chaincodes: []
+
+# organizations
+organizations:
+  org1:
+    name: PeerOrg1
+    mspid: PeerOrg1
+    peers:
+    - peer0org1examplecom
+    - peer1org1examplecom
+    certificateAuthorities:
+    - ca0
+    # adminPrivateKey and signedCert can be either the path to the private key or the PEM content of the key
+    #   path: <path>
+    #   pem: -----BEGIN PRIVATE KEY----- <etc>
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts
+  org2:
+    name: PeerOrg2
+    mspid: PeerOrg2
+    peers:
+    - peer0org2examplecom
+    - peer1org2examplecom
+    certificateAuthorities:
+    - ca1
+    # adminPrivateKey and signedCert can be the path to the private key or directly the PEM content of the key
+    adminPrivateKey:
+      pem: -----BEGIN PRIVATE KEY----- <etc>
+    signedCert:
+      pem: -----BEGIN CERTIFICATE----- <etc>
+
+# orderers
+orderers:
+  orderer0:
+    mspid: OrdererOrg0
+    url: grpcs://localhost:5005
+    grpcOptions:
+      ssl-target-name-override: orderer0.example.com
+    # tlsCACerts can be either the path to the private key or the PEM content of the key
+    #   path: <path>
+    #   pem: -----BEGIN CERTIFICATE----- <etc>
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
+  orderer1:
+    mspid: OrdererOrg1
+    url: grpcs://localhost:5006
+    grpcOptions:
+      ssl-target-name-override: orderer1.example.com
+    tlsCACerts:
+      pem: -----BEGIN CERTIFICATE----- <etc>
+
+  orderer2:
+    mspid: OrdererOrg2
+    url: grpcs://localhost:5007
+    grpcOptions:
+      ssl-target-name-override: orderer2.example.com
+    tlsCACerts:
+      pem: -----BEGIN CERTIFICATE----- <etc>
+
+
+# peers
+peers:
+  peer0org1examplecom:
+    url: grpcs://localhost:7061
+    grpcOptions:
+      ssl-target-name-override: peer0.org1.example.com
+    # tlsCACerts can be the path to the private key or directly the PEM content of the key
+    #   path: <path>
+    #   pem: -----BEGIN CERTIFICATE----- <etc>
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+  peer1org1examplecom:
+    url: grpcs://localhost:7062
+    grpcOptions:
+      ssl-target-name-override: peer1.org1.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+  peer0org2examplecom:
+    url: grpcs://localhost:7063
+    grpcOptions:
+      ssl-target-name-override: peer0.org2.example.com
+    tlsCACerts:
+      pem: -----BEGIN CERTIFICATE----- <etc>
+
+  peer1org2examplecom:
+    url: grpcs://localhost:7064
+    grpcOptions:
+      ssl-target-name-override: peer1.org2.example.com
+    tlsCACerts:
+      pem: -----BEGIN CERTIFICATE----- <etc>
+
+
+# certificateAuthorities
+certificateAuthorities:
+  ca0:
+    url: https://localhost:7054
+    caName: ca0
+    # tlsCACerts can be the path to the private key or directly the PEM content of the key
+    #   path: <path>
+    #   pem: -----BEGIN CERTIFICATE----- <etc>
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+  ca1:
+    url: https://localhost:7055
+    caName: ca1
+    tlsCACerts:
+      pem: -----BEGIN CERTIFICATE----- <etc>
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
