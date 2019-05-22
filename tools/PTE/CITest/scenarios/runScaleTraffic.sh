@@ -29,6 +29,9 @@ usage () {
     echo
     echo -e "\t-h, --help\tView this help message"
     echo
+    echo -e "\t--tls\tTLS setting [disabled|serverauth|clientauth]"
+    echo -e "\t\t(Default: serverauth)"
+    echo
     echo -e "\t--scdir\tservica credential directory, relative path to PTE dir"
     echo -e "\t\tDefault: PTEScaleTest-SC"
     echo
@@ -101,7 +104,7 @@ printVars() {
     echo ""
     echo "input parameters: TESTCASE=$TESTCASE"
     echo "input parameters: NETWORK=$NETWORK, chaincode=$chaincode, PRECONFIG=$PRECONFIG"
-    echo "input parameters: NCHAN=$NCHAN, CHAN0=$CHAN0, NORG=$NORG, LSCDIR=$LSCDir"
+    echo "input parameters: NCHAN=$NCHAN, CHAN0=$CHAN0, NORG=$NORG, LSCDIR=$LSCDir, TLS=$TLS"
     echo "input parameters: TXMODE=$TXMODE, NPROC=$NPROC"
     echo "input parameters: targetpeers=$targetpeers, targetorderers=$targetorderers, norderers=$norderers"
     echo "input parameters: NREQ=$NREQ, RUNDUR=$RUNDUR, FREQ=$FREQ, key0=$key0"
@@ -115,6 +118,7 @@ TESTCASE="PTEScaleTest"
 
 # default vars
 NETWORK="none"
+TLS="serverauth"
 LSCDir="PTEScaleTest-SC"
 chaincode="samplecc"
 PRECONFIG="none"
@@ -152,6 +156,12 @@ while [[ $# -gt 0 ]]; do
       -h | --help)
           usage                    # displays usage info
           exit 0                   # exit cleanly, since the use just asked for help/usage info
+          ;;
+
+      --tls)
+          shift
+          TLS=$1                   # TLS enabled
+          shift
           ;;
 
       --scdir)
@@ -310,7 +320,7 @@ function PTEexec() {
     fi
 
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
+    ./gen_cfgInputs.sh -d $LSCDir --tls $TLS --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
     CMDResult="$?"
     set +x
     if [ $CMDResult -ne "0" ]; then
@@ -377,7 +387,7 @@ if [ $PRECONFIG != "none" ]; then
     timestamp=`date`
     echo "[$0 $timestamp] create/join channel, install/instantiate chaincode started"
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir -c -i --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode
+    ./gen_cfgInputs.sh -d $LSCDir --tls $TLS -c -i --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode
     set +x
     timestamp=`date`
     echo "[$0 $timestamp] create/join channel, install/instantiate chaincode completed"
