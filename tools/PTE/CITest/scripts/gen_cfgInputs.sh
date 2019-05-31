@@ -19,6 +19,9 @@ usage () {
     echo
     echo -e "-h, --help\tView this help message"
 
+    echo -e "--tls \tTLS setting [disabled|serverauth|clientauth]"
+    echo -e "\t\t(Default: serverauth)"
+
     echo -e "-n, --name\tblank-separated list of channels"
     echo -e "\t\t(Default: defaultchannel. Note: cannot be used with --nchan)"
 
@@ -127,6 +130,9 @@ echo "*********************************************************"
 echo "***                                                      "
 echo "***                   input parameters                   "
 echo "***                                                      "
+echo "***  blockchain network                                  "
+echo "***      TLS: $TLS                                       "
+echo "***                                                      "
 echo "***  service credential file directory                   "
 echo "***      SCDIR: $SCDIR                                   "
 echo "***                                                      "
@@ -195,6 +201,7 @@ PTEDIR=$PWD
 TEMPLATEDIR=$PTEDIR/CITest/scripts/cfgTemplates
 runDir=$PTEDIR/runPTE
 
+TLS="serverauth"
 CHANNEL="defaultchannel"       # channel name
 ChanProc="NO"
 CCProc="NO"
@@ -318,6 +325,8 @@ PreCFGProc() {
     else
         cc=""
     fi
+        sed -i -e "s/_TLS_/$TLS/g" $cfgName
+        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
         sed -i -e "s/_CHANNELNAME_/$chnl/g" $cfgName
         sed -i -e "s/_CHANNELID_/$chnl/g" $cfgName
         sed -i -e "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
@@ -344,6 +353,7 @@ PreTXProc() {
     cfgTX=${1}
     invokeType=${2}
 
+        sed -i -e "s/_TLS_/$TLS/g" $cfgTX
         sed -i -e "s/_INVOKETYPE_/$invokeType/g" $cfgTX
         sed -i -e "s/_NPROC_/$NPROC/g" $cfgTX
         sed -i -e "s/_FREQ_/$FREQ/g" $cfgTX
@@ -522,6 +532,13 @@ while [[ $# -gt 0 ]]; do
 
       -h | --help)
           usage        # displays usage info; exits
+          ;;
+
+      --tls)
+          shift
+          TLS=$1       # TLS
+          echo -e "\t- Specify TLS: $TLS\n"
+          shift
           ;;
 
       -d | --scdir)
