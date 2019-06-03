@@ -1187,6 +1187,12 @@ try{
     cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
     client.setCryptoSuite(cryptoSuite);
 
+    // get client key
+    if ( TLS == testUtil.TLSCLIENTAUTH ) {
+        await testUtil.tlsEnroll(client, org, svcFile);
+        logger.info('[queryBlockchainInfo] got user private key: org= %s', org);
+    }
+
     chainAddOrderer(channel, client, org);
 
     channelAddQIPeer(channel, client, qOrg, qPeer);
