@@ -31,7 +31,5 @@
                       },
         "args": []
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

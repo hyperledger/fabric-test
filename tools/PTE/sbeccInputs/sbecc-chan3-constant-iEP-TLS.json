@@ -77,7 +77,5 @@
             "args": ["key","PeerOrg5"]
         }
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

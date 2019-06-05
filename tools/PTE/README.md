@@ -43,34 +43,22 @@ In brief, PTE has the following features:
      - [Output](#output)
  - [Reference](#reference)
     - [User Input File](#user-input-file)
-    - [Service Credentials File](#service-credentials-file)
+    - [Connection Profile](#connection-profile)
     - [Creating a Local Fabric Network](#creating-a-local-fabric-network)
     - [CI Test](#ci-test)
     - [Remote PTE](#remote-pte)
 
 ---
-### Code Base for v1.1.0
-- Fabric commit level: dce23777837545f2c63b75e5a26786131bf05132
-- fabric-sdk-node commit level: 34731570af3645a235e50e4023212d35b1da1429
-- fabric-ca commit level: 71974f53ab08fd8765b0016d76ad2cff71e5b668
-- fabric-test commit level: 2f355b12251e4b87ca6ccd8c17e570a7bdec8a12
-
-### Code Base for v1.0.0
-- Fabric commit level: e4b47043270f2293daabf7d24984dd46901e04e7
-- fabric-sdk-node commit level: 974bafcb1059c4cb8dda54a9e9d0afc6d87854c5
-- fabric-ca commit level: 74f8f4d4c29e45a79a8849efb057dbd8de3ae8d0
-- fabric-test commit level: 359dbfb39f507a737ad52129ac0e4fac9cc03c0b
-
 
 ## Prerequisites
 To build and test the following prerequisites must be installed first:
 
 - node and npm
-    - `node`: >=`v8.9.4` AND <`v9.0`
-    - `npm`: >=`v5.6.0` AND <`v6.0`
+    - `node`: >=`v8.9` AND <=`v10.0`
+    - `npm`: >=`v5.6.0`
 - gulp command
     - `npm install -g gulp`
-- go (v1.7 or later)
+- go (v1.11 or later)
     - refer to [Go - Getting Started](https://golang.org/doc/install)
 - others:
     - in Ubuntu: `apt install -y build-essential python libltdl-dev`
@@ -119,36 +107,44 @@ Optionally, you may choose to skip this step of obtaining `fabric` and `fabric-c
         * `git checkout v1.0.0`
         * `make docker`
 
-4. Install PTE
-    - Stable (with latest fabric sdk)
+4. Install SDK-Node
+    - Stable (with latest fabric sdk-node)
         - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `rm package-lock.json`
+        - `rm -rf node_modules`
         - `npm install fabric-client`
         - `npm install fabric-ca-client`
-    - Stable (with specific version of fabric sdk)
+    - Stable (with specific version of fabric sdk-node)
         - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `rm package-lock.json`
+        - `rm -rf node_modules`
         - `npm install fabric-client@version`, for example to install version `1.0.2`, `npm install fabric-client@1.0.2`
         - `npm install fabric-ca-client@version`, for example to install version `1.0.2`, `npm install fabric-ca-client@1.0.2`
-    - Unstable (with development version of fabric sdk)
+    - Unstable (with development version of fabric sdk-node)
         - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+        - `rm package-lock.json`
+        - `rm -rf node_modules`
         - `npm install`
-    or
-        - `cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
-        - `npm install fabric-client@unstable`
-        - `npm install fabric-ca-client@unstable`
+
 
 
 Once installed, the following steps are required.
-1. Create Service Credentials file(s) for your Fabric network:
-    - See the examples in `SCFiles` and change the address to your own Fabric addresses and credentials. Add a block for each organization and peer, ensuring correctness.
+
+1. Create Connection profile(s) for your Fabric network:
+    - Create your own version of connection profile, see the example in **PTE/ConnProfiles/test-network/config.yaml** and change the address to your own Fabric addresses and credentials. The connection profile can be in either yaml or json format. Add a block for each channel, organization, orderer, peer, and certificateAuthorities, ensuring correctness.
+
+    **Note that the service credential file is supported in fabric-test commit level `f923d548c00ee1f7336bbc8812ee0d2058489785` and older.**
 
 2. Specify run scenarios:
-    - Create your own version of PTEMgr.txt (if use pte_mgr.sh), runCases.txt and User Input json files, according to the test requirements. Use the desired chaincode name, channel name, organizations, etc. Using the information in your own network profiles, remember to "create" all channels, "join" channel, and "install"  and "instantiate"/"upgrade" chaincode for each org, to ensure all peers are set up correctly. Additional information can be found below.
+   - Create your own version of PTEMgr.txt (if use pte_mgr.sh), runCases.txt and User Input json files, according to the test requirements. Use the desired chaincode name, channel name, organizations, etc. Using the information in your own network profiles, remember to "create" all channels, "join" channel, and "install"  and "instantiate"/"upgrade" chaincode for each org, to ensure all peers are set up correctly. Additional information can be found below.
 
 ## Running PTE
 
 Before attempting to run PTE please ensure
+
 1. your network is running!
 2. you are in the correct directory `$GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE`
+
 If you do not have access to a Fabric network, please see the section on [Creating a local Fabric network](#creating-a-local-fabric-network).
 
 ### Usage
@@ -253,33 +249,11 @@ A single test case is described by a user input file. User input files define al
         },
 
 ### Custom Organization Names and MSP IDs
-If you started a network using [Network Launcher](../NL/) and specified an organization map JSON (using the `-M` parameter) to create organizations with custom names and MSPs with custom IDs, you will need to create Service Credential files and test case files with the appropriate organization names.
+If you started a network using [Network Launcher](../NL/) and specified an organization map JSON (using the `-M` parameter) to create organizations with custom names and MSPs with custom IDs, you will need to create connection profile and test case files with the appropriate organization names.
 
-If you are running PTE using one of the sample chaincodes and test case files already configured here, let's say `samplecc`, you will need to update the pre-configured SC and test case files.
-For example, if your organization map is as follows:
-```
-{
-    "org1": "myfirstorg",
-    "org3": "mythirdorg",
-    "PeerOrg2": "SecondOrgMSP",
-    "PeerOrg3": "ThirdOrgMSP"
-}
-```
-You can update the SC files as follows:
-```
-sed -i "s/org1/myfirstorg/g" SCFiles/*.*
-sed -i "s/org3/mythirdorg/g" SCFiles/*.*
-sed -i "s/PeerOrg2/SecondOrgMSP/g" SCFiles/*.*
-sed -i "s/PeerOrg3/ThirdOrgMSP/g" SCFiles/*.*
-```
-You can update the test cases for `samplecc` as follows:
-```
-sed -i "s/org1/myfirstorg/g" sampleccInputs/*.*
-sed -i "s/org3/mythirdorg/g" sampleccInputs/*.*
-sed -i "s/PeerOrg2/SecondOrgMSP/g" sampleccInputs/*.*
-sed -i "s/PeerOrg3/ThirdOrgMSP/g" sampleccInputs/*.*
-```
+You can use `PTE/ConnProfiles/test-network/config.yaml` as an example to create your own connection profile. See [Connection Profile](#connection-profile) for detail of the connection profile.
 
+You can refer to `PTE/sampleccInputs` as an example to create your testcase. See [User Input File](#user-input-file) for detail of the testcase
 
 ### Sample Use Cases
 * ### Latency
@@ -840,9 +814,7 @@ The user input file contains configuration parameters including chaincode defini
                 "args": ["put", "a", "string-msg"]
             }
         },
-        "SCFile": [
-            {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
-        ]
+        "ConnProfilePath": "ConnProfiles/test-network"
     }
 
 
@@ -864,9 +836,7 @@ The user input file contains configuration parameters including chaincode defini
                 "org1"
             ]
         },
-        "SCFile": [
-            {"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
-        ]
+        "ConnProfilePath": "ConnProfiles/test-network"
     }
 
 
@@ -1109,7 +1079,7 @@ where:
 * **invoke** invoke transaction contents
     * **query**: query content
     * **move**: move content
-* **SCFile**: the service credentials file, supported file type: json and yaml, see PTE/SCFiles for example of both formats
+* **ConnProfilePath**: path to the connection profiles, all connection profiles listed in this directory will be used by PTE. supported file type: json and yaml, see PTE/ConnProfiles/test-network/config.yaml for example
 
 
 ### Notes on Statistical Distributions
@@ -1162,93 +1132,117 @@ For example input files to run Poisson-based traffic, see:
 * `sampleccInputs/txCfgOpt-poisson.json`
 
 
-## Service Credentials file
-The service credentials contain the information of the network and are stored in the `SCFiles` directory. The following is a sample of the service credentials json file:
+## Connection Profile
+The connection profile contains the information of the network and are stored in subdirectories of `PTE/ConnProfiles`. The following is a sample of the connection profile yaml file:
 
-    {
-        "test-network": {
-            "gopath": "GOPATH",
-            "orderer": {
-                 "orderer0": {
-                    "name": "OrdererMSP",
-                    "mspid": "OrdererMSP",
-                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config",
-                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp",
-                    "comName": "example.com",
-                    "url": "grpcs://localhost:5005",
-                    "server-hostname": "orderer0.example.com",
-                    "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
-                }
-            },
-            "org1": {
-                    "name": "Org1MSP",
-                    "mspid": "Org1MSP",
-                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config",
-                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp",
-                    "comName": "example.com",
-                    "ordererID": "orderer0",
-                    "ca": {
-                         "url":"https://localhost:7054",
-                         "name": "ca0"
-                    },
-                    "username": "admin",
-                    "secret": "adminpw",
-                    "peer1": {
-                            "requests": "grpc://localhost:7061",
-                            "events": "grpc://localhost:7051",
-                            "server-hostname": "peer0.org1.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
-                    },
-                    "peer2": {
-                            "requests": "grpc://localhost:7062",
-                            "events": "grpc://localhost:7052",
-                            "server-hostname": "peer1.org1.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem"
-                    }
-            },
-            "org2": {
-                    "name": "Org2MSP",
-                    "mspid": "Org2MSP",
-                    "mspPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config",
-                    "adminPath": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp",
-                    "comName": "example.com",
-                    "ordererID": "orderer0",
-                    "ca": {
-                         "url":"https://localhost:8054",
-                         "name": "ca1"
-                    },
-                    "username": "admin",
-                    "secret": "adminpw",
-                    "peer1": {
-                            "requests": "grpcs://localhost:7063",
-                            "events": "grpcs://localhost:7053",
-                            "server-hostname": "peer0.org2.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
-                    },
-                    "peer2": {
-                            "requests": "grpcs://localhost:7064",
-                            "events": "grpcs://localhost:7054",
-                            "server-hostname": "peer1.org2.example.com",
-                            "tls_cacerts": "src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem"
-                    }
-            }
-        }
-    }
+
+    ---
+    version: 1.0
+    name: My network
+    description: Connection Profile for a Blockchain Network
+    gopath: GOPATH
+
+    # client
+    client:
+      organization: org1
+      connection:
+        timeout:
+          peer:
+            endorser: 300
+            eventHub: 600
+            eventReg: 300
+          orderer: 300
+
+    # channels
+    channels:
+      testorgschannel1:
+        orderers:
+          orderer0
+          orderer1
+          orderer2
+        peers:
+          peer0org1examplecom:
+          peer1org1examplecom:
+          peer0org2examplecom:
+          peer1org2examplecom:
+        chaincodes: []
+
+    # organizations
+    organizations:
+      org1:
+        name: PeerOrg1
+        mspid: PeerOrg1
+        peers:
+        - peer0org1examplecom
+        - peer1org1examplecom
+        certificateAuthorities:
+        - ca0
+        adminPrivateKey:
+          path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+        signedCert:
+          path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+        ordererID: orderer0
+
+    # orderers
+    orderers:
+      orderer0:
+        mspid: OrdererOrg
+        url: grpcs://localhost:5005
+        grpcOptions:
+          ssl-target-name-override: orderer0.example.com
+        tlsCACerts:
+          path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+        adminPath: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp
+
+    # peers
+    peers:
+      peer0org1examplecom:
+        url: grpcs://localhost:7061
+        grpcOptions:
+          ssl-target-name-override: peer0.org1.example.com
+        tlsCACerts:
+          path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+      peer1org1examplecom:
+        url: grpcs://localhost:7062
+        grpcOptions:
+          ssl-target-name-override: peer1.org1.example.com
+        tlsCACerts:
+          path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+    # certificateAuthorities
+    certificateAuthorities:
+      ca0:
+        url: https://localhost:7054
+        caName: ca0
+        tlsCACerts:
+          path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+        httpOptions:
+          verify: false
+        registrar:
+          enrollId: admin
+          enrollSecret: adminpw
+
+
 
 Note that
 
 1. Key **gopath** is the GOPATH used by PTE. Set to `GOPATH` to use the environment variable `GOPATH`.
 
-2. Key **ordererID** is the orderer that the org will communicate.  This orderer will be used for transactions only if the ordererOpt method is **UserDefined**, see ordererOpt in the User Input file for detail usage.
+2. Key **ordererID** is the orderer that the org will communicate.  This orderer will be used for transactions only if the ordererOpt method is **UserDefined**, see ordererOpt in the User Input file for detail usage. If this key is absent, then the first orderer in the orderer group is used.
 
 3. User can opt to use the same `tls_cert` for all orderers and peers by setting `tls_cert` at the same level as the **orderer**.  If the `tls_cert` is set, then the file defined in `tls_cacerts` is ignored. This can simplify the setting of tls_cert for a network with large number of peers and orderers.
 
 4. User can opt to include `admin_cert` in the json by setting `admin_cert` within each **org** section.  If the `admin_cert` is set, then the files specified in `adminPath` are ignored.  This allows the certificate to be included in the config json file rather than copy it in multiple locations.
 
-5. Key **tls_cacerts** for orderer or org can be the path to the tls_cacerts or the certificate.
+5. Keys **adminPrivateKey, signedCert, and tls_cacerts** for orderer or org can be either the path to the key by using subkey `path` or the pem content of the key by using subkey `pem`:
+
+    * path: `<path>`
+    * pem: `-----BEGIN PRIVATE KEY----- <etc>`
+
 
 ## Creating a local Fabric network
-Prequisite: If you do not yet have the Fabric docker images in your local docker registry, please either build them from Fabric source or download them from dockerhub.
+Prerequisite: If you do not yet have the Fabric docker images in your local docker registry, please either build them from Fabric source or download them from dockerhub.
 Create a local netork using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL) tool:
     - `cd $GOPATH/src/github.com/hyperledger/`
     - `git clone https://github.com/hyperledger/fabric-test`

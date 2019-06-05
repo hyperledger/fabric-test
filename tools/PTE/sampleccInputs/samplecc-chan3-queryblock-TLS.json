@@ -61,7 +61,3 @@
             "args": ["put", "a1","1"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
-	]
-}

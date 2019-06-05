@@ -9,7 +9,5 @@
             "org3"
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }
