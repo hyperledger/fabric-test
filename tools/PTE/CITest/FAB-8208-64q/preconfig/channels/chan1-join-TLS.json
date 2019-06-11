@@ -16,7 +16,5 @@
             "org4"
         ]
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/mh-chan1-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/mh-config"
 }

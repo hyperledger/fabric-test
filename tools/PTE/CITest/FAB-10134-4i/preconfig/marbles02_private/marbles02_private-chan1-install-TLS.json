@@ -18,7 +18,5 @@
         "fcn": "init",
         "args": []
     },
-    "SCFile": [
-        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-org1-TLS.json"}
-    ]
+    "ConnProfilePath": "CITest/CIConnProfiles/FAB-10134"
 }

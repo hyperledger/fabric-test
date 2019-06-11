@@ -63,7 +63,5 @@
             "args": ["marble", "white","35","jerry"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/test-network"
 }

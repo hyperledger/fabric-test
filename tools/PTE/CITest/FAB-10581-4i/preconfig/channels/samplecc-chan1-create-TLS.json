@@ -59,7 +59,5 @@
             "args": ["put", "a1","1"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/test-network"
 }

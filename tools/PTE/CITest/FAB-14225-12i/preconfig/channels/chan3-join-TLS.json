@@ -13,7 +13,5 @@
             "org2"
         ]
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/FAB-14225-12i/CISCFiles/config-chan3-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/FAB-14225-12i/CIConnProfiles"
 }

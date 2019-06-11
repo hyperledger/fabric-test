@@ -18,7 +18,5 @@
         "fcn": "init",
         "args": []
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan1-10peers-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/10peers"
 }
