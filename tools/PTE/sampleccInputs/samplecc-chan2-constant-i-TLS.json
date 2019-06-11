@@ -1,6 +1,6 @@
 {
-    "txCfgPtr": "sampleccInputs/txCfgOpt.json",
-    "ccDfnPtr": "sampleccInputs/ccDfnOpt.json",
+    "txCfgPtr": "sampleccInputs/txCfgOpt.yaml",
+    "ccDfnPtr": "sampleccInputs/ccDfnOpt.yaml",
     "channelID": "_ch2",
     "chaincodeID": "sample_cc",
     "chaincodeVer": "v0",
@@ -11,7 +11,5 @@
             "org4"
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

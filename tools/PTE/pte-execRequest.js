@@ -215,20 +215,41 @@ chaincode_id = uiContent.chaincodeID+channelID;
 chaincode_ver = uiContent.chaincodeVer;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] chaincode_id: %s', Nid, channel.getName(), org, pid, chaincode_id );
 
-var svcFile = uiContent.SCFile[0].ServiceCredentials;
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] svcFile: %s, org: %s', Nid, channel.getName(), org, pid, svcFile, org);
-var ORGS = testUtil.readConfigFileSubmitter(svcFile, 'test-network');
+//get connection profiles
+var cpFile;
+var cpList = [];
+var cpPath = uiContent.ConnProfilePath;
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpPath: ', Nid, channel.getName(), org, pid, cpPath);
+fs.readdirSync(cpPath).forEach(file => {
+  console.log(file);
+  var cpf=path.join(cpPath, file);
+  cpList.push(cpf);
+});
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
+cpFile = cpList[0];
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpFile: %s, org: %s', Nid, channel.getName(), org, pid, cpFile, org);
+
+var CPFile = testUtil.readConfigFileSubmitter(cpFile, 'test-network');
 var goPath;
-if ( typeof(ORGS.gopath) === 'undefined' ) {
+if ( typeof(CPFile.gopath) === 'undefined' ) {
     goPath = '';
-} else if ( ORGS.gopath == 'GOPATH' ) {
+} else if ( CPFile.gopath == 'GOPATH' ) {
     goPath = process.env['GOPATH'];
 } else {
-    goPath = ORGS.gopath;
+    goPath = CPFile.gopath;
 }
 logger.info('goPath: ', goPath);
 
-var orgName = ORGS[org].name;
+// get connection profile sub pointers
+var cpClient = CPFile['client'];
+var cpChannels = CPFile['channels'];
+var cpOrgs = CPFile['organizations'];
+var cpOrderers = CPFile['orderers'];
+var cpPeers = CPFile['peers'];
+var cpCAs = CPFile['certificateAuthorities'];
+
+var orgName = cpOrgs[org].name;
+
 var users =  hfc.getConfigSetting('users');
 
 //user parameters
@@ -259,8 +280,8 @@ var peerList = [];
 var currPeerId = 0;
 var ordererList = [];
 var currOrdererId = 0;
-var peerFO=new Boolean(0);
-var ordererFO=new Boolean(0);
+var peerFO = new Boolean(0);
+var ordererFO = new Boolean(0);
 var peerFOList = 'TARGETPEERS';
 var peerFOMethod = 'ROUNDROBIN';
 
@@ -501,25 +522,26 @@ function assignPeerListFromList(channel, client, org) {
     var listOpt=txCfgPtr.listOpt;
     var peername;
     var event_connected = false;
+
     for(var key in listOpt) {
         for (i = 0; i < listOpt[key].length; i++) {
-            if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
+            if (cpPeers.hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
-                if (ORGS[key][peername].requests) {
+                if (cpPeers[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, svcFile, svcFile);
+                        data = testUtil.getTLSCert(key, peername, cpFile);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
-                                ORGS[key][peername].requests,
+                                cpPeers[peername].url,
                                 {
                                     pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                                    'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
                                 }
                             );
                             peerList.push(peerTmp);
                         }
                     } else {
-                        peerTmp = client.newPeer(ORGS[key][peername].requests);
+                        peerTmp = client.newPeer(cpPeers[peername].url);
                         peerList.push(peerTmp);
                     }
                 }
@@ -535,24 +557,25 @@ function assignPeerList(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
-    for (let key1 in ORGS) {
-        if (ORGS.hasOwnProperty(key1)) {
-            for (let key in ORGS[key1]) {
-                if (ORGS[key1][key].requests) {
+    for (let orgtmp in cpOrgs) {
+        for (let i=0; i < cpOrgs[orgtmp]['peers'].length; i++) {
+            var key = cpOrgs[orgtmp]['peers'][i];
+            if (cpPeers.hasOwnProperty(key)) {
+                if (cpPeers[key].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key1, key, svcFile);
+                        data = testUtil.getTLSCert(orgtmp, key, cpFile);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
-                                ORGS[key1][key].requests,
+                                cpPeers[key].url,
                                 {
                                     pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                                    'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                                 }
                             );
                             peerList.push(peerTmp);
                         }
                     } else {
-                        peerTmp = client.newPeer( ORGS[key1][key].requests);
+                        peerTmp = client.newPeer( cpPeers[key].url);
                         peerList.push(peerTmp);
                     }
                 }
@@ -569,18 +592,18 @@ function assignThreadAllPeers(channel, client, org) {
     var eh;
     var data;
     var event_connected = false;
-    for (let key1 in ORGS) {
-        if (ORGS.hasOwnProperty(key1)) {
-            for (let key in ORGS[key1]) {
-            if (ORGS[key1][key].requests) {
+    for (let orgtmp in cpOrgs) {
+        for (let i=0; i < cpOrgs[orgtmp]['peers'].length; i++) {
+            var key = cpOrgs[orgtmp]['peers'][i];
+            if (cpPeers.hasOwnProperty(key)) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(key1, key, svcFile);
+                    data = testUtil.getTLSCert(orgtmp, key, cpFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[key1][key].requests,
+                            cpPeers[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                         targets.push(peerTmp);
@@ -600,7 +623,7 @@ function assignThreadAllPeers(channel, client, org) {
                         }
                     }
                 } else {
-                    peerTmp = client.newPeer( ORGS[key1][key].requests);
+                    peerTmp = client.newPeer(cpPeers[key].url);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                     if ( peerFOList == 'TARGETPEERS' ) {
@@ -615,8 +638,6 @@ function assignThreadAllPeers(channel, client, org) {
                             eh.connect(true);
                         }
                     }
-                }
-
                 }
             }
         }
@@ -631,19 +652,18 @@ function assignThreadAllAnchorPeers(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
-    var found = 0; // Indicates if we found first peer in the org, as identified in the SCFile.
-    for (let key1 in ORGS) {
-        if (ORGS.hasOwnProperty(key1)) {
-            for (let key in ORGS[key1]) {
-            if (ORGS[key1][key].requests) {
+    for (let orgtmp in cpOrgs) {
+        let key = cpOrgs[orgtmp]['peers'][0];
+        if (cpPeers.hasOwnProperty(key)) {
+            if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(key1, key, svcFile);
+                    data = testUtil.getTLSCert(orgtmp, key, cpFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[key1][key].requests,
+                            cpPeers[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key1][key]['server-hostname']
+                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                         targets.push(peerTmp);
@@ -661,10 +681,9 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                                 eh.connect(true);
                             }
                         }
-                        found = 1;
                     }
                 } else {
-                    peerTmp = client.newPeer( ORGS[key1][key].requests);
+                    peerTmp = client.newPeer( cpPeers[key].url);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                     if ( peerFOList == 'TARGETPEERS' ) {
@@ -679,15 +698,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
                             eh.connect(true);
                         }
                     }
-                    found = 1;
                 }
-                if ( found == 1 ) {
-                    // Found the first peer in this org. Break out of searching for more peers in this org.
-                    // And Now reset it, so we can find the first peer in another org.
-                    found = 0;
-                    break;
-                }
-            }
             }
         }
     }
@@ -700,17 +711,18 @@ function assignThreadOrgPeer(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
-    for (let key in ORGS[org]) {
-        if (ORGS[org].hasOwnProperty(key)) {
-            if (ORGS[org][key].requests) {
+    for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        var key = cpOrgs[org]['peers'][i];
+        if (cpPeers.hasOwnProperty(key)) {
+            if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, svcFile);
+                    data = testUtil.getTLSCert(org, key, cpFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[org][key].requests,
+                            cpPeers[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                         targets.push(peerTmp);
@@ -730,7 +742,7 @@ function assignThreadOrgPeer(channel, client, org) {
                         }
                     }
                 } else {
-                    peerTmp = client.newPeer( ORGS[org][key].requests);
+                    peerTmp = client.newPeer( cpPeers[key].url);
                     channel.addPeer(peerTmp);
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
@@ -745,7 +757,6 @@ function assignThreadOrgPeer(channel, client, org) {
                         }
                     }
                 }
-
             }
         }
     }
@@ -763,18 +774,19 @@ function assignThreadPeerList(channel, client, org) {
     var peername;
     var event_connected = false;
     for(var key in listOpt) {
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList key: %s]', Nid, channel.getName(), org, pid, key);
         for (i = 0; i < listOpt[key].length; i++) {
-            if (ORGS[key].hasOwnProperty(listOpt[key][i])) {
-                peername = listOpt[key][i];
-                if (ORGS[key][peername].requests) {
+            peername = listOpt[key][i];
+            if (cpPeers.hasOwnProperty(peername)) {
+                if (cpPeers[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, svcFile);
+                        data = testUtil.getTLSCert(key, peername, cpFile);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
-                                ORGS[key][peername].requests,
+                                cpPeers[peername].url,
                                 {
                                     pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': ORGS[key][peername]['server-hostname']
+                                    'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
                                 }
                             );
                             targets.push(peerTmp);
@@ -794,7 +806,7 @@ function assignThreadPeerList(channel, client, org) {
                             }
                         }
                     } else {
-                        peerTmp = client.newPeer(ORGS[key][peername].requests);
+                        peerTmp = client.newPeer(cpPeers[peername].url);
                         channel.addPeer(peerTmp);
                         if ( peerFOList == 'TARGETPEERS' ) {
                             peerList.push(peerTmp);
@@ -810,6 +822,8 @@ function assignThreadPeerList(channel, client, org) {
                         }
                     }
                 }
+            } else {
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] the listed peer does not exist in connection profile: %s', Nid, channelName, org, pid, peername);
             }
         }
     }
@@ -821,21 +835,21 @@ function assignThreadPeerID(channel, client, org, method) {
     var peerTmp;
     var eh;
     var data;
-    //var listOpt=txCfgPtr.listOpt;
-    var peername=testUtil.getPeerID(pid, org, txCfgPtr, svcFile, method);
+
+    var peername=testUtil.getPeerID(pid, org, txCfgPtr, cpFile, method);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID: %s]', Nid, channel.getName(), org, pid, peername);
-    //var peername;
+
     var event_connected = false;
-    if (ORGS[org].hasOwnProperty(peername)) {
-        if (ORGS[org][peername].requests) {
+    if (cpPeers.hasOwnProperty(peername)) {
+        if (cpPeers[peername].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, peername, svcFile);
+                data = testUtil.getTLSCert(org, peername, cpFile);
                 if ( data !== null ) {
                     peerTmp = client.newPeer(
-                        ORGS[org][peername].requests,
+                        cpPeers[peername].url,
                         {
                             pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': ORGS[org][peername]['server-hostname']
+                            'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
                         }
                     );
                     targets.push(peerTmp);
@@ -855,7 +869,7 @@ function assignThreadPeerID(channel, client, org, method) {
                     }
                 }
             } else {
-                peerTmp = client.newPeer(ORGS[org][peername].requests);
+                peerTmp = client.newPeer(cpPeers[peername].url);
                 channel.addPeer(peerTmp);
                 if ( peerFOList == 'TARGETPEERS' ) {
                     peerList.push(peerTmp);
@@ -880,17 +894,18 @@ function channelAddPeer(channel, client, org) {
     var data;
     var peerTmp;
     var eh;
-    for (let key in ORGS[org]) {
-        if (ORGS[org].hasOwnProperty(key)) {
-            if (ORGS[org][key].requests) {
+    for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        var key = cpOrgs[org]['peers'][i];
+        if (cpPeers.hasOwnProperty(key)) {
+            if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, svcFile);
+                    data = testUtil.getTLSCert(org, key, cpFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[org][key].requests,
+                            cpPeers[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                         targets.push(peerTmp);
@@ -907,7 +922,7 @@ function channelAddPeer(channel, client, org) {
                         }
                     }
                 } else {
-                    peerTmp = client.newPeer( ORGS[org][key].requests);
+                    peerTmp = client.newPeer( cpPeers[key].url);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                     if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
@@ -932,24 +947,25 @@ function channelAddPeerEvent(channel, client, org) {
     var data;
     var eh;
     var peerTmp;
-    for (let key in ORGS[org]) {
+    for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        var key = cpOrgs[org]['peers'][i];
         logger.info('key: ', key);
-        if (ORGS[org].hasOwnProperty(key)) {
-            if (ORGS[org][key].requests) {
+        if (cpPeers.hasOwnProperty(key)) {
+            if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, svcFile);
+                    data = testUtil.getTLSCert(org, key, cpFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[org][key].requests,
+                            cpPeers[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key]['server-hostname']
+                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                     }
                 } else {
-                    peerTmp = client.newPeer( ORGS[org][key].requests);
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] peer: ', Nid, channelName, org, pid, ORGS[org][key].requests);
+                    peerTmp = client.newPeer( cpPeers[key].url);
+                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] peer: ', Nid, channelName, org, pid, cpPeers[key].url);
                 }
                 targets.push(peerTmp);
                 channel.addPeer(peerTmp);
@@ -962,7 +978,7 @@ function channelAddPeerEvent(channel, client, org) {
                         eh.connect(true);
                     }
                 }
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] requests: %s, events: %s ', Nid, channelName, org, pid, ORGS[org][key].requests, ORGS[org][key].events);
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] requests: %s', Nid, channelName, org, pid, cpPeers[key].url);
             }
         }
     }
@@ -991,17 +1007,18 @@ function channelAdd1Peer(channel, client, org) {
     var data;
     var peerTmp;
     var eh;
-    for (let key in ORGS[org]) {
-        if (ORGS[org].hasOwnProperty(key)) {
-            if (ORGS[org][key].requests) {
+    for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        var key = cpOrgs[org]['peers'][i];
+        if (cpPeers.hasOwnProperty(key)) {
+            if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, svcFile);
+                    data = testUtil.getTLSCert(org, key, cpFile);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            ORGS[org][key].requests,
+                            cpPeers[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[org][key]['server-hostname']
+                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                         targets.push(peerTmp);
@@ -1009,7 +1026,7 @@ function channelAdd1Peer(channel, client, org) {
 
                     }
                 } else {
-                    peerTmp = client.newPeer( ORGS[org][key].requests);
+                    peerTmp = client.newPeer( cpPeers[key].url);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                 }
@@ -1085,12 +1102,12 @@ function ordererFailover(channel, client) {
 // set currOrdererId
 function setCurrOrdererId(channel, client, org) {
     // assign ordererID
-    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, svcFile, ordererMethod);
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpFile, ordererMethod);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrOrdererId] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
 
     var i;
     for (i=0; i<ordererList.length; i++) {
-        if (ordererList[i]._url === ORGS['orderer'][ordererID].url) {
+        if (ordererList[i]._url === cpOrderers[ordererID].url) {
             currOrdererId = i;
         }
     }
@@ -1102,24 +1119,24 @@ function assignOrdererList(channel, client) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] ', Nid, channelName, org, pid);
     var data;
     var ordererTmp;
-    for (let key in ORGS['orderer']) {
-        if (ORGS['orderer'][key].url) {
+    for (let key in cpOrderers) {
+        if (cpOrderers[key].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert('orderer', key, svcFile);
+                data = testUtil.getTLSCert('orderer', key, cpFile);
                 if ( data !== null ) {
                     let caroots = Buffer.from(data).toString();
 
                     ordererTmp = client.newOrderer(
-                        ORGS['orderer'][key].url,
+                        cpOrderers[key].url,
                         {
                             pem: caroots,
-                            'ssl-target-name-override': ORGS['orderer'][key]['server-hostname']
+                            'ssl-target-name-override': cpOrderers[key]['grpcOptions']['ssl-target-name-override']
                         }
                     )
                     ordererList.push(ordererTmp);
                 }
             } else {
-                ordererTmp = client.newOrderer(ORGS['orderer'][key].url);
+                ordererTmp = client.newOrderer(cpOrderers[key].url);
                 ordererList.push(ordererTmp);
             }
         }
@@ -1129,29 +1146,29 @@ function assignOrdererList(channel, client) {
 
 function channelAddOrderer(channel, client, org) {
     // assign ordererID
-    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, svcFile, ordererMethod);
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpFile, ordererMethod);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
 
     var data;
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s channelAddOrderer] ', Nid, channelName, org, pid, ordererID );
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, svcFile);
+        data = testUtil.getTLSCert('orderer', ordererID, cpFile);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
             channel.addOrderer(
                 client.newOrderer(
-                    ORGS['orderer'][ordererID].url,
+                    cpOrderers[ordererID].url,
                     {
                         'pem': caroots,
-                        'ssl-target-name-override': ORGS['orderer'][ordererID]['server-hostname']
+                        'ssl-target-name-override': cpOrderers[ordererID]['grpcOptions']['ssl-target-name-override']
                     }
                 )
             );
         }
     } else {
-        channel.addOrderer(client.newOrderer(ORGS['orderer'][ordererID].url));
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, ORGS['orderer'][ordererID].url);
+        channel.addOrderer(client.newOrderer(cpOrderers[ordererID].url));
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, cpOrderers[ordererID].url);
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %s', Nid, channelName, org, pid, channel.getOrderers());
 }
@@ -1163,46 +1180,26 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
-    var found = 0; // found first peer, as identified in the SCFile.
-    for (let key in ORGS) {
-        if ( key == org ) {
-        for ( let subkey in ORGS[key] ) {
-            if (ORGS[key][subkey].requests) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(key, subkey, svcFile);
-                    if ( data !== null ) {
-                        peerTmp = client.newPeer(
-                            ORGS[key][subkey].requests,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': ORGS[key][subkey]['server-hostname']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                        if ( peerFOList == 'TARGETPEERS' ) {
-                            peerList.push(peerTmp);
+    var found = 0; // found first peer, as identified in the ConnProfile.
+    for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        var key = cpOrgs[org]['peers'][i];
+        if (cpPeers[key].url) {
+            if (TLS > testUtil.TLSDISABLED) {
+                data = testUtil.getTLSCert(org, key, cpFile);
+                if ( data !== null ) {
+                    peerTmp = client.newPeer(
+                        cpPeers[key].url,
+                        {
+                            pem: Buffer.from(data).toString(),
+                            'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
                         }
-
-                        if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
-                            eh = channel.newChannelEventHub(peerTmp);
-                            eventHubs.push(eh);
-                            if ( evtType == 'FILTEREDBLOCK' ) {
-                                eh.connect();
-                            } else {
-                                eh.connect(true);
-                            }
-                        }
-                        found = 1;
-                    }
-                } else {
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, subkey: %s', Nid, channelName, org, pid, key, ORGS[org][subkey].requests);
-                    peerTmp = client.newPeer( ORGS[key][subkey].requests);
+                    );
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                     if ( peerFOList == 'TARGETPEERS' ) {
                         peerList.push(peerTmp);
                     }
+
                     if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
                         eh = channel.newChannelEventHub(peerTmp);
                         eventHubs.push(eh);
@@ -1214,11 +1211,28 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
                     }
                     found = 1;
                 }
-                if ( found == 1 ) {
-                    break;
+            } else {
+                logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, subkey: %s', Nid, channelName, org, pid, key, cpPeers[key].url);
+                peerTmp = client.newPeer( cpPeers[key].url);
+                targets.push(peerTmp);
+                channel.addPeer(peerTmp);
+                if ( peerFOList == 'TARGETPEERS' ) {
+                    peerList.push(peerTmp);
                 }
+                if ( ((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE') ) {
+                    eh = channel.newChannelEventHub(peerTmp);
+                    eventHubs.push(eh);
+                    if ( evtType == 'FILTEREDBLOCK' ) {
+                        eh.connect();
+                    } else {
+                        eh.connect(true);
+                    }
+                }
+                found = 1;
             }
-        }
+            if ( found == 1 ) {
+                break;
+            }
         }
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] peers: %s', Nid, channelName, org, pid, channel.getPeers());
@@ -1269,8 +1283,8 @@ function setTargetPeers(tPeers) {
  */
     execTransMode();
 
-function getSubmitterForOrg(username, secret, client, peerOrgAdmin, Nid, org, svcFile) {
-    return testUtil.getSubmitter(username, secret, client, peerOrgAdmin, Nid, org, svcFile);
+function getSubmitterForOrg(username, secret, client, peerOrgAdmin, Nid, org, cpFile) {
+    return testUtil.getSubmitter(username, secret, client, peerOrgAdmin, Nid, org, cpFile);
 }
 
 async function execTransMode() {
@@ -1279,13 +1293,13 @@ async function execTransMode() {
     inv_m = 0;
     inv_q = 0;
 
-    var username = ORGS[org].username;
-    var secret = ORGS[org].secret;
+    var username = cpOrgs[org].username;
+    var secret = cpOrgs[org].secret;
     logger.debug('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] user= %s, secret=%s', Nid, channelName, org, pid, username, secret);
 
     //var tlsInfo = null;
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, svcFile);
+        await testUtil.tlsEnroll(client, org, cpFile);
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] got user private key: org=%s', Nid, channelName, org, pid, org);
     }
 
@@ -1323,7 +1337,7 @@ async function execTransMode() {
                     if (currentIndex > 0) {
                         orgAdmins[channelOrgName[currentIndex - 1]] = admin;
                     }
-                    return currentFunction(username, secret, client, true, Nid, channelOrgName[currentIndex], svcFile);
+                    return currentFunction(username, secret, client, true, Nid, channelOrgName[currentIndex], cpFile);
                 }), Promise.resolve()
         );
     }).then(
@@ -1384,19 +1398,20 @@ async function execTransMode() {
                             execModeProposal();
                         } else {
                             // invalid transaction request
-                            throw new Error(util.format("[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error Transaction %j and/or mode %s invalid", Nid, channelName, org, pid, transType, transMode))
+                            logger.error(util.format("[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error Transaction %j and/or mode %s invalid", Nid, channelName, org, pid, transType, transMode));
+                            process.exit(1);
                         }
                     }, tSynchUp);
                 }
     ).catch((err)=>{
-        logger.error(err)
-        evtDisconnect()
-        process.exit(1)
+        logger.error(err);
+        evtDisconnect();
+        process.exit(1);
     });
   }catch(err){
-      logger.error(err)
-      evtDisconnect()
-      process.exit(1)
+      logger.error(err);
+      evtDisconnect();
+      process.exit(1);
   }
 }
 
@@ -1634,18 +1649,17 @@ function eventRegisterFilteredBlock() {
                 }
             },
             (err) => {
-                reject(err)
+                reject(err);
                 //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] inv_m:evtRcv=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
             });
         }).catch((err) => {
             //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, tx_stats[tx_evtTimeout], transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-            process.exit(1)
+            process.exit(1);
         });
     });
 }
 
 function eventRegisterBlock() {
-
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
 
@@ -1683,12 +1697,12 @@ function eventRegisterBlock() {
                     resolve();
             },
             (err) => {
-                reject(err)
+                reject(err);
                 //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] inv_m:evtRcv=%d:%d err: %j', Nid, channelName, org, pid, inv_m, eBvtRcv, err);
             });
         }).catch((err) => {
             //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, tx_stats[tx_evtTimeout], transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-            process.exit(1)
+            process.exit(1);
         });
 
     });
@@ -1696,6 +1710,7 @@ function eventRegisterBlock() {
 }
 
 function eventRegister(tx) {
+
     var deployId = tx.getTransactionID();
     eventHubs.forEach((eh) => {
         let txPromise = new Promise((resolve, reject) => {
@@ -1840,7 +1855,7 @@ function execModeLatency() {
     } else {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeLatency] invalid transType= %s', Nid, channelName, org, pid, transType);
         evtDisconnect();
-        process.exit(1)
+        process.exit(1);
     }
 }
 
@@ -1949,7 +1964,7 @@ function invoke_query_simple(freq) {
     .catch(
         function(err) {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_simple] pte-exec:completed:error %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
-            evtDisconnect()
+            evtDisconnect();
             process.exit(1);
         }
     );
@@ -1973,7 +1988,7 @@ function execModeSimple() {
     } else {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeSimple] invalid transType= %s', Nid, channelName, org, pid, transType);
         evtDisconnect();
-        process.exit(1)
+        process.exit(1);
     }
 }
 
@@ -2155,7 +2170,7 @@ function invoke_move_dist_evtBlock(backoffCalculator) {
                 } else {
                     IDoneMsg("invoke_move_dist_evtBlock");
                 }
-        })
+        });
 }
 
 function invoke_move_dist_go(t1, backoffCalculator) {
@@ -2390,7 +2405,7 @@ function execModeDistribution(backoffCalculator, delayCalculator) {
     } else {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeDistribution] pte-exec:completed:error invalid transType= %s', Nid, channelName, org, pid, transType);
         evtDisconnect();
-        process.exit(1)
+        process.exit(1);
     }
 }
 
@@ -2548,7 +2563,7 @@ function invoke_query_mix(freq) {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_mix] %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
             invoke_move_mix(freq);
             //evtDisconnect();
-            process.exit(1)
+            process.exit(1);
         }
     );
 
@@ -2581,7 +2596,7 @@ function execModeMix() {
     } else {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeMix] invalid transType= %s', Nid, channelName, org, pid, transType);
         evtDisconnect();
-        process.exit(1)
+        process.exit(1);
     }
 }
 
@@ -2611,11 +2626,11 @@ function invoke_move_proposal() {
         }).catch(err=>{
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_proposal] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err)
             evtDisconnect();
-            process.exit(1)
+            process.exit(1);
         });
 
 
-    }
+}
 
 
 function execModeProposal() {
@@ -2882,7 +2897,7 @@ function invoke_query_burst() {
         function(err) {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_burst] %s failed: ', Nid, channelName, org, pid, transType,  err.stack ? err.stack : err);
             evtDisconnect();
-            process.exit(1)
+            process.exit(1);
         }
     );
 
@@ -2938,7 +2953,7 @@ function execModeBurst() {
     } else {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeBurst] invalid transType= %s', Nid, channelName, org, pid, transType);
         evtDisconnect();
-        process.exit(1)
+        process.exit(1);
     }
 }
 

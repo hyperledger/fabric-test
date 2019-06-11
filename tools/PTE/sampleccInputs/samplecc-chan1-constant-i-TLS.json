@@ -11,7 +11,5 @@
             "org2"
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan1-TLS.yaml"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

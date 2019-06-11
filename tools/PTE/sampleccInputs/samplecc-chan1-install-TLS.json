@@ -17,7 +17,5 @@
         "fcn": "init",
         "args": []
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan1-TLS.yaml"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

@@ -1,0 +1,315 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+---
+version: 1.0
+name: My network
+description: Connection Profile for Blockchain Network
+gopath: GOPATH
+
+# clients
+client:
+  organization: org1
+  connection:
+    timeout:
+      peer:
+        endorser: 300
+        eventHub: 600
+        eventReg: 300
+      orderer: 300
+
+# channels
+channels:
+  testorgschannel1:
+    orderers:
+      orderer0
+      orderer1
+      orderer2
+    peers:
+      peer0org1examplecom:
+      peer1org1examplecom:
+      peer0org2examplecom:
+      peer1org2examplecom:
+    chaincodes: []
+  testorgschannel2:
+    orderers:
+      orderer0
+      orderer1
+      orderer2
+    peers:
+      peer0org3examplecom:
+      peer1org3examplecom:
+      peer0org4examplecom:
+      peer1org4examplecom:
+    chaincodes: []
+  testorgschannel3:
+    orderers:
+      orderer0
+      orderer1
+      orderer2
+    peers:
+      peer0org5examplecom:
+      peer1org5examplecom:
+      peer0org6examplecom:
+      peer1org6examplecom:
+    chaincodes: []
+
+# organizations
+organizations:
+  org1:
+    name: PeerOrg1
+    mspid: PeerOrg1
+    peers:
+    - peer0org1examplecom
+    - peer1org1examplecom
+    certificateAuthorities:
+    - ca0
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+  org2:
+    name: PeerOrg2
+    mspid: PeerOrg2
+    peers:
+    - peer0org2examplecom
+    - peer1org2examplecom
+    certificateAuthorities:
+    - ca1
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
+  org3:
+    name: PeerOrg3
+    mspid: PeerOrg3
+    peers:
+    - peer0org3examplecom
+    - peer1org3examplecom
+    certificateAuthorities:
+    - ca2
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
+    ordererID: orderer2
+    username: admin
+    secret: adminpw
+  org4:
+    name: PeerOrg4
+    mspid: PeerOrg4
+    peers:
+    - peer0org4examplecom
+    - peer1org4examplecom
+    certificateAuthorities:
+    - ca3
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org4.example.com/users/Admin@org4.example.com/msp
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org4.example.com/users/Admin@org4.example.com/msp
+  org5:
+    name: PeerOrg5
+    mspid: PeerOrg5
+    peers:
+    - peer0org5examplecom
+    - peer1org5examplecom
+    certificateAuthorities:
+    - ca4
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org5.example.com/users/Admin@org5.example.com/msp
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org5.example.com/users/Admin@org5.example.com/msp
+  org6:
+    name: PeerOrg6
+    mspid: PeerOrg6
+    peers:
+    - peer0org6examplecom
+    - peer1org6examplecom
+    certificateAuthorities:
+    - ca5
+    adminPrivateKey:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org6.example.com/users/Admin@org6.example.com/msp
+    signedCert:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org6.example.com/users/Admin@org6.example.com/msp
+
+# orderers
+orderers:
+  orderer0:
+    mspid: OrdererOrg
+    url: grpcs://localhost:5005
+    grpcOptions:
+      ssl-target-name-override: orderer0.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer0.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+    adminPath: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp
+
+  orderer1:
+    mspid: OrdererOrg
+    url: grpcs://localhost:5006
+    grpcOptions:
+      ssl-target-name-override: orderer1.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer1.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+    adminPath: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp
+
+  orderer2:
+    mspid: OrdererOrg
+    url: grpcs://localhost:5007
+    grpcOptions:
+      ssl-target-name-override: orderer2.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/orderers/orderer2.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+    adminPath: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp
+
+
+# peers
+peers:
+  peer0org1examplecom:
+    url: grpcs://localhost:7061
+    grpcOptions:
+      ssl-target-name-override: peer0.org1.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+  peer1org1examplecom:
+    url: grpcs://localhost:7062
+    grpcOptions:
+      ssl-target-name-override: peer1.org1.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/tlsca/tlsca.org1.example.com-cert.pem
+
+  peer0org2examplecom:
+    url: grpcs://localhost:7063
+    grpcOptions:
+      ssl-target-name-override: peer0.org2.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+
+  peer1org2examplecom:
+    url: grpcs://localhost:7064
+    grpcOptions:
+      ssl-target-name-override: peer1.org2.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/tlsca/tlsca.org2.example.com-cert.pem
+
+  peer0org3examplecom:
+    url: grpcs://localhost:7065
+    grpcOptions:
+      ssl-target-name-override: peer0.org3.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
+
+  peer1org3examplecom:
+    url: grpcs://localhost:7066
+    grpcOptions:
+      ssl-target-name-override: peer1.org3.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/tlsca/tlsca.org3.example.com-cert.pem
+
+  peer0org4examplecom:
+    url: grpcs://localhost:7067
+    grpcOptions:
+      ssl-target-name-override: peer0.org4.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org4.example.com/tlsca/tlsca.org4.example.com-cert.pem
+
+  peer1org4examplecom:
+    url: grpcs://localhost:7068
+    grpcOptions:
+      ssl-target-name-override: peer1.org4.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org4.example.com/tlsca/tlsca.org4.example.com-cert.pem
+
+  peer0org5examplecom:
+    url: grpcs://localhost:7069
+    grpcOptions:
+      ssl-target-name-override: peer0.org5.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org5.example.com/tlsca/tlsca.org5.example.com-cert.pem
+
+  peer1org5examplecom:
+    url: grpcs://localhost:7070
+    grpcOptions:
+      ssl-target-name-override: peer1.org5.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org5.example.com/tlsca/tlsca.org5.example.com-cert.pem
+
+  peer0org6examplecom:
+    url: grpcs://localhost:7071
+    grpcOptions:
+      ssl-target-name-override: peer0.org6.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org6.example.com/tlsca/tlsca.org6.example.com-cert.pem
+
+  peer1org6examplecom:
+    url: grpcs://localhost:7072
+    grpcOptions:
+      ssl-target-name-override: peer1.org6.example.com
+    tlsCACerts:
+      path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org6.example.com/tlsca/tlsca.org6.example.com-cert.pem
+
+
+
+
+# certificateAuthorities
+certificateAuthorities:
+  ca0:
+    url: https://localhost:7054
+    caName: ca0
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+  ca1:
+    url: https://localhost:7055
+    caName: ca1
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
+    httpOptions:
+      verify: false
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+  ca2:
+    url: https://localhost:7056
+    caName: ca2
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org3.example.com/ca/ca.org3.example.com-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+  ca3:
+    url: https://localhost:7057
+    caName: ca3
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org4.example.com/ca/ca.org4.example.com-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+  ca4:
+    url: https://localhost:7058
+    caName: ca4
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org5.example.com/ca/ca.org5.example.com-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
+  ca5:
+    url: https://localhost:7059
+    caName: ca5
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org6.example.com/ca/ca.org6.example.com-cert.pem
+    registrar:
+      enrollId: admin
+      enrollSecret: adminpw
