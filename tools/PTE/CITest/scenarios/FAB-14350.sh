@@ -8,8 +8,8 @@
 
 # Requirements:
 # The script assumes that a network with 3 org and 1 peer per org is operational, 500 channels are created and peers are joined, a chaincode
-# is installed and instantiated.  The corresponding PTE service credential json is placed in a directory under PTE.  The default directory is
-# PTEScaleTest-SC. If the user chooses not to use the default directory, then he needs to change mySCDir below to the name of the directory.
+# is installed and instantiated.  The corresponding PTE connection profile is placed in a directory under PTE.  The default directory is
+# PTEScaleTest-CP. If the user chooses not to use the default directory, then he needs to change myCPDir below to the name of the directory.
 # The script only executes traffic on first 100 channels.  To complete the test, five remote hosts are needed to execute traffic on all 500
 # channels.  The value of chan0 needs to be set to 1, 101, 201, 301, and 401 on each host respectively.  Script runRemoteScenarios.sh can
 # be used to execute this script on mutiple remote hosts.  The usage of runRemoteScenarios.sh is given in PTE/CITest/README.
@@ -25,7 +25,7 @@
 source PTECIutils.sh
 
 myTESTCASE="FAB-14350"
-mySCDir="PTEScaleTest-SC"
+myCPDir="PTEScaleTest-CP"
 
 myCC="samplecc"
 myTXMODE="Constant"
@@ -55,6 +55,6 @@ if [ -e $CIpteReport ]; then
 fi
 
 # execute PTE
-optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --chan0 $chan0 --norg $myNORG --nreq $myNREQ --targetorderers UserDefined --txmode $myTXMODE -i"
+optString="--testcase $myTESTCASE --cpdir $myCPDir -a $myCC --chan0 $chan0 --norg $myNORG --nreq $myNREQ --targetorderers UserDefined --txmode $myTXMODE -i"
 echo "[$myTESTCASE] optString=$optString"
 PTEExecLoop $myMinChan $myMaxChan $myChanIncr $myMinTh $myMaxTh $myThIncr $myKey0 $myKeyIncr "${optString[@]}"

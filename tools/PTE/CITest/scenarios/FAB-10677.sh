@@ -17,8 +17,8 @@ CWD=$PWD
 FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
 NLDir=$FabricTestDir"/tools/NL"
 PTEDir=$FabricTestDir"/tools/PTE"
-LSCDir=$TESTCASE"-SC"
-SCDir=$PTEDir/$LSCDir
+LCPDir=$TESTCASE"-CP"
+CPDir=$PTEDir/$LCPDir
 LOGDir=$PTEDir"/CITest/Logs"
 CMDDir=$PTEDir"/CITest/scripts"
 CIpteReport=$LOGDir"/"$TESTCASE"-pteReport.log"
@@ -32,12 +32,12 @@ fi
 for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     timestamp=`date`
     echo "[$0] $TESTCASE with $NTHREAD threads x $NREQ transactions start at $timestamp"
-    if [ -e $SCDir ]; then
-        echo "[$0] clean up $SCDir"
-        rm -rf $SCDir
+    if [ -e $CPDir ]; then
+        echo "[$0] clean up $CPDir"
+        rm -rf $CPDir
     fi
-    echo "[$0] mkdir $SCDir"
-    mkdir $SCDir
+    echo "[$0] mkdir $CPDir"
+    mkdir $CPDir
 
     cd $NLDir
     rm -f config-chan*
@@ -50,7 +50,7 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     echo "[$0] bring up network"
     ./networkLauncher.sh -o 1 -x 1 -r 1 -p 1 -n 1 -f test -w localhost -S enabled -c 2s -l INFO -B 500
 
-    cp config-chan*-TLS.json $SCDir
+    cp config-chan*-TLS.json $CPDir
 
     # PTE
     echo ""
@@ -62,8 +62,8 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     cd $CMDDir
 
     # PTE: create/join channel, install/instantiate chaincode
-    echo "./gen_cfgInputs.sh -d $LSCDir -c -i -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD"
-          ./gen_cfgInputs.sh -d $LSCDir -c -i -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD
+    echo "./gen_cfgInputs.sh -d $LCPDir -c -i -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD"
+          ./gen_cfgInputs.sh -d $LCPDir -c -i -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD
     sleep 30
 
     # PTE: invokes
@@ -75,8 +75,8 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     if [ -e $pteReport ]; then
        rm -f $pteReport
     fi
-    echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG"
-          ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG
+    echo "./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG"
+          ./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t move >& $IPTELOG
     sleep 30
     echo "node get_pteReport.js $pteReport"
     node get_pteReport.js $pteReport
@@ -89,8 +89,8 @@ for (( NTHREAD = 4; NTHREAD <= 52; NTHREAD+=4 )); do
     if [ -e $pteReport ]; then
        rm -f $pteReport
     fi
-    echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t query >& $QPTELOG"
-          ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t query >& $QPTELOG
+    echo "./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t query >& $QPTELOG"
+          ./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a samplecc --nreq $NREQ --nproc $NTHREAD -t query >& $QPTELOG
 
     echo "node get_pteReport.js $pteReport"
     node get_pteReport.js $pteReport

@@ -17,7 +17,7 @@
 source PTECIutils.sh
 
 myTESTCASE="FAB-13641"
-mySCDir="PTEScaleTest-SC"
+myCPDir="PTEScaleTest-CP"
 
 myCC="samplecc"
 myTXMODE="Constant"
@@ -46,7 +46,7 @@ if [ -e $CIpteReport ]; then
 fi
 
 # execute PTE
-optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --norg $myNORG --nreq $myNREQ --txmode $myTXMODE -i"
+optString="--testcase $myTESTCASE --cpdir $myCPDir -a $myCC --norg $myNORG --nreq $myNREQ --txmode $myTXMODE -i"
 echo "[$myTESTCASE] optString=$optString"
 PTEExecLoop $myMinChan $myMaxChan $myChanIncr $myMinTh $myMaxTh $myThIncr $myKey0 $myKeyIncr "${optString[@]}"
 

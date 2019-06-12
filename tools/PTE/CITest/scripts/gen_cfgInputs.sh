@@ -14,7 +14,7 @@
 #           Displays usage command line options; examples; exits.
 usage () {
     echo -e "\nUSAGE:\t./gen_cfgInputs.sh -d <serv_cred_dir> [options] [values]"
-    echo -e "requirement: a directory contains all service credential files in PTE dir"
+    echo -e "requirement: a directory contains all connection profiles in PTE dir"
     echo -e "             this directory is to be specified with -d option"
     echo
     echo -e "-h, --help\tView this help message"
@@ -52,7 +52,7 @@ usage () {
     echo -e "-a, --app\tblank-separated list of chaincodes, [samplecc|samplejs|samplejava|marbles02]"
     echo -e "\t\t(Default: None)"
 
-    echo -e "-d, --scdir\tservice credential files directory"
+    echo -e "-d, --cpdir\tconnection profiles directory"
     echo -e "\t\t(Default: None. This parameter is required.)"
 
     echo -e "-p, --prime\texecute query to sych-up ledger, [YES|NO]"
@@ -107,15 +107,15 @@ usage () {
     echo -e "\t\t(Default: 30000)"
 
     echo -e "examples:"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
-    echo -e "./gen_cfgInputs.sh -d SCDir --nchan 3 --chanprefix testorgschannel --org org1 org2 -a samplecc -c -i"
-    echo -e "./gen_cfgInputs.sh -d SCDir --nchan 3 --chanprefix testorgschannel --norg 2 -a marbles02 samplecc -i"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 --orgprefix testorg -a samplecc samplejs marbles02 -p -t Move -i"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a samplejava -i -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 --orgprefix org -a samplejava samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc --freq 10 --nreq 1000 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
-    echo -e "./gen_cfgInputs.sh -d SCDir --nchan 3 --chanprefix testorgschannel --norg 2 -a samplecc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --targetorderers RoundRobin --chkpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --org org1 org2 -a samplecc -c -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a marbles02 samplecc -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 --orgprefix testorg -a samplecc samplejs marbles02 -p -t Move -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 testorgschannel2 --norg 2 -a samplejava -i -t Move"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 --orgprefix org -a samplejava samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 -a samplecc --freq 10 --nreq 1000 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a samplecc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --targetorderers RoundRobin --chkpeers ORGANCHOR -t move"
     echo
     exit
 }
@@ -133,8 +133,8 @@ echo "***                                                      "
 echo "***  blockchain network                                  "
 echo "***      TLS: $TLS                                       "
 echo "***                                                      "
-echo "***  service credential file directory                   "
-echo "***      SCDIR: $SCDIR                                   "
+echo "***  connection profile directory                        "
+echo "***      CPDIR: $CPDIR                                   "
 echo "***                                                      "
 echo "***  chaincodes                                          "
 echo "***      number: ${#Chaincode[@]}                        "
@@ -208,7 +208,7 @@ CCProc="NO"
 PrimeProc="NO"
 TXType=""
 Chaincode=""
-SCDIR=""
+CPDIR=""
 setOrgName="no"
 setOrgNum="no"
 ORGS=""
@@ -310,27 +310,30 @@ InsertOrgs() {
 
 # create PTE input json: create/join channel and install/instantiate chaincode
 # $1: config file name
-# $2: SC file
+# $2: connection profile path
 # $3: channel
 # $4: chaincode (optional)
 PreCFGProc() {
 
     cfgName=$1
-    sc=$2
+    cppath=$2
     chnl=$3
-    echo -e " $0: sfile=$sc $chnl=$chnl"
+    echo -e " [PreCFGProc]: cppath=$cppath $chnl=$chnl"
     if [ $# -eq 4 ]; then
         cc=$4
-        echo -e " $0: chaincode=$cc"
+        echo -e " [PreCFGProc]: chaincode=$cc"
     else
         cc=""
     fi
+
+    newbs="\\\\\/"
+    cpdir=`echo $cppath | sed "s/\//$newbs/g"`
+    echo "[PreCFGProc] cpdir=$cpdir"
+
         sed -i -e "s/_TLS_/$TLS/g" $cfgName
-        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
         sed -i -e "s/_CHANNELNAME_/$chnl/g" $cfgName
         sed -i -e "s/_CHANNELID_/$chnl/g" $cfgName
-        sed -i -e "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
-        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
+        sed -i -e "s/_CPDIRECTORY_/$cpdir/g" $cfgName
         sed -i -e "s/_CHAINCODEPATH_/$CCPath/g" $cfgName
         sed -i -e "s/_CHAINCODEID_/$cc/g" $cfgName
         sed -i -e "s/_LANGUAGE_/$LANGUAGE/g" $cfgName
@@ -377,15 +380,15 @@ ChannelProc() {
     # loop on channel list
     for chan in "${CHANNEL[@]}"; do
         # loop on network list
-        for scfile in "${NWName[@]}"; do
-            fname=$scfile"_"$chan
+        for cppath in "${CPDIR[@]}"; do
+            fname=$chan
             cd $runDir
-            echo "process cc $scfile channel $chan"
+            echo "process cc $cppath channel $chan"
 
             cfgCREATE=create-$fname".json"
             cp $TEMPLATEDIR/template-create.json $cfgCREATE
 
-            PreCFGProc $cfgCREATE $scfile.json $chan
+            PreCFGProc $cfgCREATE $cppath $chan
 
             # create channel
             runCaseCreate=runCases-create-$fname".txt"
@@ -393,7 +396,7 @@ ChannelProc() {
             echo "sdk=node $tmp" >> $runCaseCreate
 
             cd $PTEDIR
-            echo "create channel on $scfile"
+            echo "create channel on $cppath"
             ./pte_driver.sh $runDir/$runCaseCreate
 
             sleep 15
@@ -403,14 +406,14 @@ ChannelProc() {
             cfgJOIN=join-$fname".json"
             cp $TEMPLATEDIR/template-join.json $cfgJOIN
 
-            PreCFGProc $cfgJOIN $scfile.json $chan
+            PreCFGProc $cfgJOIN $cppath $chan
 
             runCaseJoin=runCases-join-$fname".txt"
             tmp=$runDir/$cfgJOIN
             echo "sdk=node $tmp" >> $runCaseJoin
 
             cd $PTEDIR
-            echo "join channel on $scfile"
+            echo "join channel on $cppath"
             ./pte_driver.sh $runDir/$runCaseJoin
             cd $runDir
         done     # end loop on network list
@@ -424,20 +427,18 @@ ChaincodeProc() {
         getCCPath $chaincode
 
         # loop on network list
-        for scfile in "${NWName[@]}"; do
+        for cppath in "${CPDIR[@]}"; do
             # loop on channel list
             for chan in "${CHANNEL[@]}"; do
                 cd $runDir
-                echo "[$0] process cc $scfile"
+                echo "[$0] process cc $cppath"
                 echo "[$0] CCPath $CCPath"
-                sc=$scfile".json"
-                echo "[$0] sc $sc"
 
-                fname=$scfile"_"$chan"-"$chaincode
+                fname=$chan"-"$chaincode
                 cfgINSTALL=install-$fname".json"
                 cp $TEMPLATEDIR/template-install.json $cfgINSTALL
 
-                PreCFGProc $cfgINSTALL $scfile.json $chan $chaincode
+                PreCFGProc $cfgINSTALL $cppath $chan $chaincode
 
                 # install chaincode
                 runCaseinstall=runCases-install-$fname".txt"
@@ -449,18 +450,18 @@ ChaincodeProc() {
                 cfgINSTAN=instantiate-$fname".json"
                 cp $TEMPLATEDIR/template-instantiate.json $cfgINSTAN
 
-                PreCFGProc $cfgINSTAN $scfile.json $chan $chaincode
+                PreCFGProc $cfgINSTAN $cppath $chan $chaincode
 
                 runCaseinstantiate=runCases-instantiate-$fname".txt"
                 tmp=$runDir/$cfgINSTAN
                 echo "sdk=node $tmp" >> $runCaseinstantiate
 
                 cd $PTEDIR
-                echo "install chaincode on $scfile"
+                echo "install chaincode on $cppath"
                 echo "./pte_driver.sh $runDir/$runCaseinstall"
                 ./pte_driver.sh $runDir/$runCaseinstall
 
-                echo "instantiate chaincode on $scfile"
+                echo "instantiate chaincode on $cppath"
                 echo "./pte_driver.sh $runDir/$runCaseinstantiate"
                 ./pte_driver.sh $runDir/$runCaseinstantiate
                 cd $runDir
@@ -482,12 +483,12 @@ TransactionProc() {
     for chaincode in "${Chaincode[@]}"; do
         getCCPath $chaincode
         # loop on network list
-        for scfile in "${NWName[@]}"; do
+        for cppath in "${CPDIR[@]}"; do
             # loop on channel list
             for chan in "${CHANNEL[@]}"; do
 
-                echo "process $chaincode tx on $scfile"
-                fname=$scfile"_"$chan"-"$chaincode
+                echo "process $chaincode tx on $cppath"
+                fname=$chan"-"$chaincode
                 cd $runDir
 
                 pteCfgTX="TX-"$fname".json"
@@ -503,7 +504,7 @@ TransactionProc() {
                 fi
 
                 # create PTE transaction configuration input json
-                PreCFGProc $pteCfgTX $scfile.json $chan $chaincode
+                PreCFGProc $pteCfgTX $cppath $chan $chaincode
                 PreTXProc $pteTXopt $INVOKETYPE
 
                 runCaseTX=runCasesTX-$fname".txt"
@@ -521,6 +522,7 @@ TransactionProc() {
     ./pte_mgr.sh $PTEMgr
 
 }
+
 
 
 # GET CUSTOM OPTIONS
@@ -541,24 +543,18 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
-      -d | --scdir)
+      -d | --cpdir)
           shift
-          SCDIR=$1     # service credential directory
-          echo -e "\t- Specify SCDIR: $SCDIR\n"
-          TT=`ls $SCDIR`
           i=0
-          for nw in $TT; do
-              fext=`echo "$nw" | cut -d'.' -f2`
-              if [ $fext == 'json' ]; then
-                 SCFILES[$i]=$nw
-                 NWName[$i]=`echo "$nw" | cut -d'.' -f1`
-                 i=$[ i + 1]
-              fi
-          done
-          echo -e "\t- Specify SCFILES: ${SCFILES[@]}"
-          echo -e "\t- Specify SCFILES: ${NWName[@]}"
-
+          CPDIR[$i]=$1  # CPDIR
           shift
+          until [[ $(eval "echo \$1") =~ ^-.* ]] || [ -z $(eval "echo \$1") ]; do
+              i=$[ i + 1]
+              CPDIR[$i]=$1
+              shift
+          done
+          echo -e "\t- Specify connection profile path: ${CPDIR[@]}"
+          echo -e ""
           ;;
 
       -n | --name)
@@ -815,12 +811,13 @@ fi
 
 printVars
 
-    # sanity check: SCDIR
-if [ "$SCDIR" == "" ]; then
-    echo "SCDIR is required. Use option -d to specify."
+    # sanity check: CPDIR
+echo "CPDIR length: ${#CPDIR[@]}"
+if [ ${#CPDIR[@]} == 0 ]; then
+    echo "CPDIR is required. Use option -d to specify."
     exit
-elif [ ! -e $PTEDIR/$SCDIR ]; then
-    echo "SCDIR does not exist: $PTEDIR/$SCDIR"
+elif [ ! -e $PTEDIR/$CPDIR ]; then
+    echo "CPDIR does not exist: $PTEDIR/$CPDIR"
     exit
 fi
 

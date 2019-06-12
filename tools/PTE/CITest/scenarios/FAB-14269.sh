@@ -8,8 +8,8 @@
 
 # Requirements:
 # The script assumes that a network with 3 org and 1 peer per org is operational, 27 channel are created and peers are joined, a chaincode
-# is installed and instantiated.  The corresponding PTE service credential json is placed in a directory under PTE.  The default directory
-# is PTEScaleTest-SC. If the user chooses not to use the default directory, then he needs to change mySCDir below to the name of the
+# is installed and instantiated.  The corresponding PTE connection profile is placed in a directory under PTE.  The default directory
+# is PTEScaleTest-CP. If the user chooses not to use the default directory, then he needs to change myCPDir below to the name of the
 # directory.  The script only executes 18 threads traffic on 9 channels.  To complete the test, three (3) remote hosts are needed.
 # The value of chan0 needs to be set to 10 and 19 in the 2nd and 3rd host respectively in order to execute 18 threads of traffic on the
 # sencond set of 9 channels on host 2 and the third set of 9 channels on host 3. Script runRemoteScenarios.sh can be used to execute this
@@ -29,7 +29,7 @@
 source PTECIutils.sh
 
 myTESTCASE="FAB-14269"
-mySCDir="PTEScaleTest-SC"
+myCPDir="PTEScaleTest-CP"
 
 myCC="samplecc"
 myTXMODE="Constant"
@@ -60,6 +60,6 @@ if [ -e $CIpteReport ]; then
 fi
 
 # execute PTE
-optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --chan0 $chan0 --norg $myNORG --nreq $myNREQ --txmode $myTXMODE --freq $myFreq -i"
+optString="--testcase $myTESTCASE --cpdir $myCPDir -a $myCC --chan0 $chan0 --norg $myNORG --nreq $myNREQ --txmode $myTXMODE --freq $myFreq -i"
 echo "[$myTESTCASE] optString=$optString"
 PTEExecLoop $myMinChan $myMaxChan $myChanIncr $myMinTh $myMaxTh $myThIncr $myKey0 $myKeyIncr "${optString[@]}"

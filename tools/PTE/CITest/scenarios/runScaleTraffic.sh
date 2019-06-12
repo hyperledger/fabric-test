@@ -15,10 +15,10 @@ printSummary() {
     echo "number of thread, number of transactions, target peers, and target orderer etc."
 
     echo "Pre-requisite:"
-    echo "The test requires a PTE service credential json file which contains the information of"
+    echo "The test requires a PTE connection profile which contains the information of"
     echo "the network, such as certificates and endpoints of orderers, peers etc."
-    echo "This PTE service credential json file must be placed in a subdirectory under PTE."
-    echo "The default directory of this service credential json file is PTE/PTEScaleTest-SC."
+    echo "This PTE connection profile must be placed in a subdirectory under PTE."
+    echo "The default directory of this connection profile is PTE/PTEScaleTest-CP."
 
 }
 
@@ -32,8 +32,8 @@ usage () {
     echo -e "\t--tls\tTLS setting [disabled|serverauth|clientauth]"
     echo -e "\t\t(Default: serverauth)"
     echo
-    echo -e "\t--scdir\tservica credential directory, relative path to PTE dir"
-    echo -e "\t\tDefault: PTEScaleTest-SC"
+    echo -e "\t--cpdir\tservica credential directory, relative path to PTE dir"
+    echo -e "\t\tDefault: PTEScaleTest-CP"
     echo
     echo -e "\t--chaincode\tchaincode [samplecc|samplejs|marblecc]"
     echo -e "\t\tDefault: samplecc"
@@ -104,7 +104,7 @@ printVars() {
     echo ""
     echo "input parameters: TESTCASE=$TESTCASE"
     echo "input parameters: NETWORK=$NETWORK, chaincode=$chaincode, PRECONFIG=$PRECONFIG"
-    echo "input parameters: NCHAN=$NCHAN, CHAN0=$CHAN0, NORG=$NORG, LSCDIR=$LSCDir, TLS=$TLS"
+    echo "input parameters: NCHAN=$NCHAN, CHAN0=$CHAN0, NORG=$NORG, LCPDIR=$LCPDir, TLS=$TLS"
     echo "input parameters: TXMODE=$TXMODE, NPROC=$NPROC"
     echo "input parameters: targetpeers=$targetpeers, targetorderers=$targetorderers, norderers=$norderers"
     echo "input parameters: NREQ=$NREQ, RUNDUR=$RUNDUR, FREQ=$FREQ, key0=$key0"
@@ -119,7 +119,7 @@ TESTCASE="PTEScaleTest"
 # default vars
 NETWORK="none"
 TLS="serverauth"
-LSCDir="PTEScaleTest-SC"
+LCPDir="PTEScaleTest-CP"
 chaincode="samplecc"
 PRECONFIG="none"
 PRIME="none"
@@ -164,9 +164,9 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
-      --scdir)
+      --cpdir)
           shift
-          LSCDir=$1                # service credential directory
+          LCPDir=$1                # connection profile directory
           shift
           ;;
 
@@ -320,7 +320,7 @@ function PTEexec() {
     fi
 
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir --tls $TLS --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
+    ./gen_cfgInputs.sh -d $LCPDir --tls $TLS --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode --nreq $NREQ --rundur $RUNDUR --freq $FREQ --keystart $key0 --targetpeers $targetpeers --targetorderers $targetorderers --norderers $norderers --nproc $NTHREAD --txmode $TXMODE -t $invoke >& $PTELOG
     CMDResult="$?"
     set +x
     if [ $CMDResult -ne "0" ]; then
@@ -346,14 +346,14 @@ function PTEexec() {
 
 ### bring up network
 if [ $NETWORK != "none" ]; then
-    SCDir=$PTEDir/$LSCDir
+    CPDir=$PTEDir/$LCPDir
 
-    if [ -e $SCDir ]; then
-        echo "[$0] clean up $SCDir"
-        rm -rf $SCDir
+    if [ -e $CPDir ]; then
+        echo "[$0] clean up $CPDir"
+        rm -rf $CPDir
     fi
-    echo "[$0] mkdir $SCDir"
-    mkdir -p $SCDir
+    echo "[$0] mkdir $CPDir"
+    mkdir -p $CPDir
 
     cd $NLDir
     rm -f config-chan*
@@ -374,8 +374,8 @@ if [ $NETWORK != "none" ]; then
         exit 1
     fi
 
-    echo "[$0] cp config-chan*-TLS.json $SCDir"
-    cp config-chan*-TLS.json $SCDir
+    echo "[$0] cp config-chan*-TLS.json $CPDir"
+    cp config-chan*-TLS.json $CPDir
     sleep 60
 fi
 
@@ -387,7 +387,7 @@ if [ $PRECONFIG != "none" ]; then
     timestamp=`date`
     echo "[$0 $timestamp] create/join channel, install/instantiate chaincode started"
     set -x
-    ./gen_cfgInputs.sh -d $LSCDir --tls $TLS -c -i --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode
+    ./gen_cfgInputs.sh -d $LCPDir --tls $TLS -c -i --nchan $NCHAN --chan0 $CHAN0 --chanprefix $CHANPREFIX --norg $NORG -a $chaincode
     set +x
     timestamp=`date`
     echo "[$0 $timestamp] create/join channel, install/instantiate chaincode completed"

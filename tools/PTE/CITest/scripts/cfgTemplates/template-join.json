@@ -7,7 +7,5 @@
         "orgName": [
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
-    ]
+    "ConnProfilePath": "_CPDIRECTORY_"
 }

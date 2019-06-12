@@ -15,7 +15,7 @@
 # Usage:
 #    ./FAB-11638.sh [network]
 #        network: script uses NL to bring up the bare bones network, create/join channel and install/instantiate cc
-#        else if omitted (default) then user first establishes own network and places their PTE network json files in PTE/FAB-11638-SC/
+#        else if omitted (default) then user first establishes own network and places their PTE network json files in PTE/FAB-11638-CP/
 
 
 # testcase
@@ -40,8 +40,8 @@ CWD=$PWD
 fabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
 NLDir=$fabricTestDir"/tools/NL"
 PTEDir=$fabricTestDir"/tools/PTE"
-LSCDir=$TESTCASE"-SC"
-SCDir=$PTEDir"/"$LSCDir
+LCPDir=$TESTCASE"-CP"
+CPDir=$PTEDir"/"$LCPDir
 logDir=$PTEDir"/CITest/Logs"
 mkdir -p $logDir
 
@@ -66,8 +66,8 @@ procTX() {
     cd ../scripts
     tCurr=`date +%m%d%H%M%S`
     IPTELOG=$logDir"/"$TESTCASE"-"$invokeType"-"$tCurr".log"
-    echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg $NORG --keystart $keyStart --targetpeers $tPeers --chkpeers $chkPeers --chktx $chktx -a samplecc --nreq $NREQ --nproc $NTHREAD -t $invokeType >& $IPTELOG"
-          ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg $NORG --keystart $keyStart --targetpeers $tPeers --chkpeers $chkPeers --chktx $chktx -a samplecc --nreq $NREQ --nproc $NTHREAD -t $invokeType >& $IPTELOG
+    echo "./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg $NORG --keystart $keyStart --targetpeers $tPeers --chkpeers $chkPeers --chktx $chktx -a samplecc --nreq $NREQ --nproc $NTHREAD -t $invokeType >& $IPTELOG"
+          ./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg $NORG --keystart $keyStart --targetpeers $tPeers --chkpeers $chkPeers --chktx $chktx -a samplecc --nreq $NREQ --nproc $NTHREAD -t $invokeType >& $IPTELOG
 
     # calculate overall TPS
     echo ""
@@ -88,12 +88,12 @@ procTX() {
     #### network and pre-config
     if [ $NetworkOpt == "network" ]; then
 
-        if [ -e $SCDir ]; then
-            echo "[$TESTCASE] clean up $SCDir"
-            rm -rf $SCDir
+        if [ -e $CPDir ]; then
+            echo "[$TESTCASE] clean up $CPDir"
+            rm -rf $CPDir
         fi
-        echo "[$TESTCASE] mkdir $SCDir"
-        mkdir $SCDir
+        echo "[$TESTCASE] mkdir $CPDir"
+        mkdir $CPDir
 
         ### launch network
         cd $NLDir
@@ -105,7 +105,7 @@ procTX() {
         echo "[$TESTCASE] launch network"
         ./networkLauncher.sh -o 3 -x 2 -r $NORG -p 2 -k 4 -z 3 -n 1 -e 3 -f test -w localhost -S serverauth -c 2s -l INFO -B 500
 
-        cp config-chan*-TLS.json $SCDir
+        cp config-chan*-TLS.json $CPDir
         sleep 30
 
         cd $CWD
@@ -119,13 +119,13 @@ procTX() {
         echo ""
 
         # PTE: create/join channel
-        echo "./gen_cfgInputs.sh -d $LSCDir -c -n testorgschannel1 --norg $NORG -a samplecc"
-              ./gen_cfgInputs.sh -d $LSCDir -c -n testorgschannel1 --norg $NORG -a samplecc
+        echo "./gen_cfgInputs.sh -d $LCPDir -c -n testorgschannel1 --norg $NORG -a samplecc"
+              ./gen_cfgInputs.sh -d $LCPDir -c -n testorgschannel1 --norg $NORG -a samplecc
         sleep 30
 
         # PTE: install/instantiate chaincode
-        echo "./gen_cfgInputs.sh -d $LSCDir -i -n testorgschannel1 --norg $NORG -a samplecc"
-              ./gen_cfgInputs.sh -d $LSCDir -i -n testorgschannel1 --norg $NORG -a samplecc
+        echo "./gen_cfgInputs.sh -d $LCPDir -i -n testorgschannel1 --norg $NORG -a samplecc"
+              ./gen_cfgInputs.sh -d $LCPDir -i -n testorgschannel1 --norg $NORG -a samplecc
         sleep 30
     fi
 

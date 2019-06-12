@@ -8,8 +8,8 @@
 
 # Requirements:
 # The script assumes that a network with 3 org and 1 peer per org is operational, a channel is created and peers are joined, a chaincode
-# is installed and instantiated.  The corresponding PTE service credential json is placed in a directory under PTE.  The default directory
-# is PTEScaleTest-SC. If the user chooses not to use the default directory, then he needs to change mySCDir below to the name of the
+# is installed and instantiated.  The corresponding PTE connection profile is placed in a directory under PTE.  The default directory
+# is PTEScaleTest-CP. If the user chooses not to use the default directory, then he needs to change myCPDir below to the name of the
 # directory.  The script only executes 1 set of traffic from one host.  To complete FAB-14230, just rerun this multiple times with a
 # network configured with different number of orderers (3, 9, 27, 54, 108).
 
@@ -26,7 +26,7 @@
 source PTECIutils.sh
 
 myTESTCASE="FAB-14230"
-mySCDir="PTEScaleTest-SC"
+myCPDir="PTEScaleTest-CP"
 
 myCC="samplecc"
 myTXMODE="Constant"
@@ -56,6 +56,6 @@ if [ -e $CIpteReport ]; then
 fi
 
 # execute PTE
-optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --norg $myNORG --nreq $myNREQ --txmode $myTXMODE --freq $myFreq -i"
+optString="--testcase $myTESTCASE --cpdir $myCPDir -a $myCC --norg $myNORG --nreq $myNREQ --txmode $myTXMODE --freq $myFreq -i"
 echo "[$myTESTCASE] optString=$optString"
 PTEExecLoop $myMinChan $myMaxChan $myChanIncr $myMinTh $myMaxTh $myThIncr $myKey0 $myKeyIncr "${optString[@]}"

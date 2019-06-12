@@ -14,7 +14,7 @@
 # Usage:
 #    ./FAB-12055.sh [network]
 #        network: script uses NL to bring up the bare bones network, create/join channel and install/instantiate cc
-#        else if omitted (default) then user first establishes own network and places their PTE network json files in PTE/FAB-12055-SC/
+#        else if omitted (default) then user first establishes own network and places their PTE network json files in PTE/FAB-12055-CP/
 
 # testcase
 TESTCASE=$0
@@ -35,8 +35,8 @@ CWD=$PWD
 FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
 NLDir=$FabricTestDir"/tools/NL"
 PTEDir=$FabricTestDir"/tools/PTE"
-LSCDir=$TESTCASE"-SC"
-SCDir=$PTEDir"/"$LSCDir
+LCPDir=$TESTCASE"-CP"
+CPDir=$PTEDir"/"$LCPDir
 
 LOGDIR="../Logs"
 mkdir -p $LOGDIR
@@ -58,12 +58,12 @@ do
 
     #### network and pre-config
     if [ $NetworkOpt == "network" ]; then
-        if [ -e $SCDir ]; then
-            echo "[$0] clean up $SCDir"
-            rm -rf $SCDir
+        if [ -e $CPDir ]; then
+            echo "[$0] clean up $CPDir"
+            rm -rf $CPDir
         fi
-        echo "[$0] mkdir $SCDir"
-        mkdir $SCDir
+        echo "[$0] mkdir $CPDir"
+        mkdir $CPDir
 
         # NL brting up network
         echo ""
@@ -83,7 +83,7 @@ do
         echo "[$0] bring up network"
         ./networkLauncher.sh -o 1 -x 1 -r 1 -p 1 -n 1 -f test -w localhost -S enabled -c 2s -l INFO -B 500
 
-        cp config-chan*-TLS.json $SCDir
+        cp config-chan*-TLS.json $CPDir
 
         # PTE pre-configuration: create/join channel and install/instantiate chaincode
         echo ""
@@ -95,8 +95,8 @@ do
         cd $CWD
         cd ../scripts
         # PTE: create/join channel, install/instantiate chaincode
-        echo "./gen_cfgInputs.sh -d $LSCDir -c -i -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD"
-              ./gen_cfgInputs.sh -d $LSCDir -c -i -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD
+        echo "./gen_cfgInputs.sh -d $LCPDir -c -i -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD"
+              ./gen_cfgInputs.sh -d $LCPDir -c -i -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD
         sleep 30
     fi
 
@@ -129,8 +129,8 @@ do
             mkdir ../Logs
         fi
         IPTELOG="../Logs/"$TESTCASE"-"$NTHREAD"i-"$tCurr".log"
-        echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t move >& $IPTELOG"
-              ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t move >& $IPTELOG
+        echo "./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t move >& $IPTELOG"
+              ./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t move >& $IPTELOG
         sleep 30
 
         #### calculate overall invoke TPS from pteReport
@@ -146,8 +146,8 @@ do
         echo ""
         tCurr=`date +%m%d%H%M%S`
         QPTELOG="../Logs/"$TESTCASE"-"$NTHREAD"q-"$tCurr".log"
-        echo "./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t query >& $QPTELOG"
-              ./gen_cfgInputs.sh -d $LSCDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t query >& $QPTELOG
+        echo "./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t query >& $QPTELOG"
+              ./gen_cfgInputs.sh -d $LCPDir -n testorgschannel1 --norg 1 -a $applcc --nreq $NREQ --nproc $NTHREAD --keystart $KEYSTART -t query >& $QPTELOG
 
         #### calculate overall invoke TPS from pteReport
         node get_pteReport.js $pteReport

@@ -8,8 +8,8 @@
 
 # Requirements:
 # The script assumes that a network with 1 org with 1 peer is operational, a channel is created and the peer is joined, a chaincode is
-# installed and instantiated.  The corresponding PTE service credential json is placed in a directory under PTE.  The default directory
-# is PTEScaleTest-SC.  If the user chooses not to use the default directory, then he needs to change mySCDir below to the name of the
+# installed and instantiated.  The corresponding PTE connection profile is placed in a directory under PTE.  The default directory
+# is PTEScaleTest-CP.  If the user chooses not to use the default directory, then he needs to change myCPDir below to the name of the
 # directory.  For a specific transaction payload size, set payLoadMin and payLoadMax in ../scripts/cfgTemplates/sampleccDfnOpt.json to
 # the same value.  For example, set to 1048576 for 1MB payload and 50331648 for 48 MB payload. The payload size used is for the endorsement
 # request. Note the broadcast transaction will be bigger in most cases because the response will typically contain a RWset and signatures.
@@ -27,7 +27,7 @@
 source PTECIutils.sh
 
 myTESTCASE="FAB-14922"
-mySCDir="PTEScaleTest-SC"
+myCPDir="PTEScaleTest-CP"
 
 myCC="samplecc"
 myTXMODE="Constant"
@@ -58,6 +58,6 @@ if [ -e $CIpteReport ]; then
 fi
 
 # execute PTE
-optString="--testcase $myTESTCASE --scdir $mySCDir -a $myCC --chan0 $chan0 --norg $myNORG --nreq $myNREQ --txmode $myTXMODE --freq $myFreq -i"
+optString="--testcase $myTESTCASE --cpdir $myCPDir -a $myCC --chan0 $chan0 --norg $myNORG --nreq $myNREQ --txmode $myTXMODE --freq $myFreq -i"
 echo "[$myTESTCASE] optString=$optString"
 PTEExecLoop $myMinChan $myMaxChan $myChanIncr $myMinTh $myMaxTh $myThIncr $myKey0 $myKeyIncr "${optString[@]}"
