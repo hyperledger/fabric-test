@@ -47,7 +47,6 @@ health checks and sanity tests to load, stress, and performance tests.
 The `runPTE.sh` provides many valuable functions to ensure successful execution such as:
 
 * npm install fabric-client and fabric-ca-client
-* convert connection profiles to PTE service credential json
 * install and instantiate chaincode
 * execute selected PTE testcases
 
@@ -67,7 +66,7 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
 
         --no-npm        skip npm re-install fabric-client packages
 
-        --dir           absolute path or relative path from .../fabric-test/tools/networktest/ to the directory that contains the network connection profile to be converted
+        --dir           absolute path or relative path from .../fabric-test/tools/networktest/ to the directory that contains the network connection profile
                         (Default: ./connectionprofile/)
 
         --channel <channel name>

@@ -109,7 +109,6 @@ Channel=""
 Organization=""
 TestCases="FAB-3808-2i"
 Chaincodes=""
-CProfConv="yes"
 CCProc="yes"
 CHANNEL="defaultchannel"
 CCVER="v0"
@@ -149,31 +148,6 @@ npmProc() {
     npm list | grep fabric
 }
 
-
-
-### generate connection profile and convert to PTE SC file
-cProfConversion() {
-
-    echo
-    echo -e "          *****************************************************************************"
-    echo -e "          *                       connection profile conversion                       *"
-    echo -e "          *****************************************************************************"
-    echo
-
-    # convert to PTE service credential json
-    cd $CWD
-    node $PTEDir/cprof-convert/convert.js $ConnProfDir
-    if [ "$?" -ne "0" ]; then
-        errMsg "cProfConversion" "node convert.js"
-    fi
-
-    cd $PTEDir
-    rm -rf CITest/CISCFiles/*.json
-    cp cprof-convert/pte-config.json CITest/CISCFiles/config-chan1-TLS.json
-    if [ "$?" -ne "0" ]; then
-        errMsg "cProfConversion" "cp"
-    fi
-}
 
 
 # set PTE transaction configuration key with new value in testcase
@@ -234,6 +208,15 @@ testPreProc() {
 
     cd $PTEDir
 
+    # prepare ConnProfilePath
+    tmpCPDir=$CWD/$ConnProfDir
+    newbs="\\\\\/"
+    cpdir=`echo $tmpCPDir | sed "s/\//$newbs/g"`
+    currcp="ConnProfilePath"
+    sp4="    "
+    newcp="\"ConnProfilePath\": \"$cpdir\""
+    echo "newcp=$newcp"
+
     # channel
     for (( idx=0; idx<${#Channel[@]}; idx++ ))
     do
@@ -244,8 +227,15 @@ testPreProc() {
             sed -i -e "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
         fi
         sed -i -e "s/testorgschannel$idx1/${Channel[$idx]}/g" CITest/$tcase/$tcc/*
+
+        sed -i -e "/$currcp/c ${newcp}" CITest/$tcase/preconfig/channels/*
+        sed -i -e "s/\"ConnProfilePath\"/${sp4}\"ConnProfilePath\"/g" CITest/$tcase/preconfig/channels/*
+        sed -i -e "/$currcp/c ${newcp}" CITest/$tcase/preconfig/$tcc/*
+        sed -i -e "s/\"ConnProfilePath\"/${sp4}\"ConnProfilePath\"/g" CITest/$tcase/preconfig/$tcc/*
+
         rm -f CITest/$tcase/preconfig/channels/*-e CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     done
+
 
     # chaincode version and prefix
     if [ $CCVERUPD == "yes" ]; then
@@ -281,6 +271,9 @@ testPreProc() {
             sed -i -e "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/preconfig/$tcc/*
         fi
         sed -i -e "s/org$idx1/${Organization[$idx]}/g" CITest/$tcase/$tcc/*
+        sed -i -e "/$currcp/c${newcp}" CITest/$tcase/$tcc/*
+        sed -i -e "s/\"ConnProfilePath\"/${sp4}\"ConnProfilePath\"/g" CITest/$tcase/$tcc/*
+
         rm -f CITest/$tcase/preconfig/channels/*-e CITest/$tcase/preconfig/$tcc/*-e CITest/$tcase/$tcc/*-e
     done
 
@@ -462,7 +455,6 @@ while [[ $# -gt 0 ]]; do
 
       --dir)
           shift
-          CProfConv="yes"     # connection profile conversion
           ConnProfDir=$1
           echo -e "\t- Specify ConnProfDir: $ConnProfDir\n"
           shift
@@ -548,14 +540,14 @@ while [[ $# -gt 0 ]]; do
       -s | --sanity)
           CCProc="yes"         # install/instantiate chaincode
           TestCases=("FAB-3808-2i" "FAB-3811-2q")  # testcases
-          echo -e "\t- Specify CProfConv: $CProfConv\n"
+          echo -e "\t- Specify TestCases: ${TestCases[@]}"
           shift
           ;;
 
       -a | --all)
           CCProc="yes"         # install/instantiate chaincode
           TestCases=("FAB-3808-2i" "FAB-3811-2q" "FAB-3807-4i" "FAB-3835-4q" "FAB-4038-2i" "FAB-4036-2q" "FAB-7329-4i" "FAB-7333-4i")  # testcases
-          echo -e "\t- Specify CProfConv: $CProfConv\n"
+          echo -e "\t- Specify TestCases: ${TestCases[@]}"
           shift
           ;;
 
@@ -602,8 +594,8 @@ elif [ ! -e $ConnProfDir ]; then
     usage
     exit 1
 else
-    jsonCnt=`ls $ConnProfDir/*.json | wc -l`
-    if [ $jsonCnt == 0 ]; then
+    cpCnt=`ls $ConnProfDir/* | wc -l`
+    if [ $cpCnt == 0 ]; then
         echo -e "[$0] Error: no connection profile found in $ConnProfDir"
         usage
         exit 1
@@ -626,11 +618,6 @@ echo -e "Organizations: ${Organization[@]}"
 # npm install fabric packages
 if [ $NPMInstall != "none" ]; then
     npmProc
-fi
-
-# connection profile conversion
-if [ $CProfConv != "none" ]; then
-    cProfConversion
 fi
 
 echo "CCVER: $CCVER, CCNAMEUPD: $CCNAMEUPD, CCUPGRADE: $CCUPGRADE"
