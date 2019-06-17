@@ -344,6 +344,30 @@ function getOrdererAdmin(client, userOrg, cpFile) {
             logger.info('[getOrdererAdmin] %s local orderer admin_cert and priv defined', userOrg);
             keyPEM = cpOrderers[ordererID].priv;
             certPEM = cpOrderers[ordererID].admin_cert;
+        } else if ((typeof cpOrderers[ordererID].adminPrivateKey !== 'undefined') &&
+                   (typeof cpOrderers[ordererID].signedCert !== 'undefined')) {
+            getgoPath();
+            logger.info('[getOrdererAdmin] %s adminPrivateKey and signedCert defined', ordererID);
+            if ( typeof cpOrderers[ordererID].adminPrivateKey.path !== 'undefined') {
+                keyPath = path.resolve(goPath, cpOrderers[ordererID].adminPrivateKey.path, 'keystore');
+                keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
+                logger.info('[getOrdererAdmin] %s keyPath: %s', ordererID, keyPath);
+            } else if (typeof cpOrderers[ordererID].adminPrivateKey.pem !== 'undefined') {
+                keyPEM = cpOrderers[ordererID].adminPrivateKey.pem;
+            } else {
+                logger.error('[getOrdererAdmin] %s error: adminPrivateKey invalid', ordererID);
+                return null;
+            }
+            if ( typeof cpOrderers[ordererID].signedCert.path !== 'undefined') {
+                certPath =  path.resolve(goPath, cpOrderers[ordererID].signedCert.path, 'signcerts');
+                certPEM = Buffer.from(readAllFiles(certPath)[0]).toString();
+                logger.info('[getOrdererAdmin] %s certPath: %s', ordererID, certPath);
+            } else if (typeof cpOrderers[ordererID].signedCert.pem !== 'undefined') {
+                certPEM = cpOrderers[ordererID].signedCert.pem;
+            } else {
+                logger.error('[getOrdererAdmin] %s error: signedCert invalid', ordererID);
+                return null;
+            }
         } else if (typeof cpOrderers.adminPath !== 'undefined') {
             getgoPath();
             logger.info('[getOrdererAdmin] %s global orderer adminPath defined', userOrg);
