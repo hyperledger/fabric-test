@@ -221,9 +221,12 @@ var cpList = [];
 var cpPath = uiContent.ConnProfilePath;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpPath: ', Nid, channel.getName(), org, pid, cpPath);
 fs.readdirSync(cpPath).forEach(file => {
-  console.log(file);
-  var cpf=path.join(cpPath, file);
-  cpList.push(cpf);
+  logger.info('[Nid=%d pte-main] file', Nid, file);
+  var file_ext = path.extname(file);
+  if ((/(yml|yaml|json)$/i).test(file_ext)) {
+      var cpf=path.join(cpPath, file);
+      cpList.push(cpf);
+  }
 });
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
 cpFile = cpList[0];

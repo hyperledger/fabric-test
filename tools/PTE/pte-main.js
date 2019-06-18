@@ -101,9 +101,12 @@ var cpList = [];
 var cpPath = uiContent.ConnProfilePath;
 logger.info('[Nid=%d pte-main] cpPath: ', Nid, cpPath);
 fs.readdirSync(cpPath).forEach(file => {
-  console.log(file);
-  var cpf=path.join(cpPath, file);
-  cpList.push(cpf);
+  logger.info('[Nid=%d pte-main] file', Nid, file);
+  var file_ext = path.extname(file);
+  if ((/(yml|yaml|json)$/i).test(file_ext)) {
+      var cpf=path.join(cpPath, file);
+      cpList.push(cpf);
+  }
 });
 logger.info('[Nid=%d pte-main] cpList; ', Nid, cpList);
 cpFile = cpList[0];
