@@ -136,7 +136,7 @@ certificateAuthorities:
     #   path: <path>
     #   pem: -----BEGIN CERTIFICATE----- <etc>
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
     httpOptions:
       verify: false
     registrar:

@@ -92,9 +92,6 @@ organizations:
       path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
     signedCert:
       path: src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/users/Admin@org3.example.com/msp
-    ordererID: orderer2
-    username: admin
-    secret: adminpw
   org4:
     name: PeerOrg4
     mspid: PeerOrg4
@@ -257,7 +254,7 @@ certificateAuthorities:
     url: https://localhost:7054
     caName: ca0
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem
     httpOptions:
       verify: false
     registrar:
@@ -267,7 +264,7 @@ certificateAuthorities:
     url: https://localhost:7055
     caName: ca1
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem
     httpOptions:
       verify: false
     registrar:
@@ -279,7 +276,7 @@ certificateAuthorities:
     httpOptions:
       verify: false
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org3.example.com/ca/ca.org3.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org3.example.com/ca/ca.org3.example.com-cert.pem
     registrar:
       enrollId: admin
       enrollSecret: adminpw
@@ -289,7 +286,7 @@ certificateAuthorities:
     httpOptions:
       verify: false
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org4.example.com/ca/ca.org4.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org4.example.com/ca/ca.org4.example.com-cert.pem
     registrar:
       enrollId: admin
       enrollSecret: adminpw
@@ -299,7 +296,7 @@ certificateAuthorities:
     httpOptions:
       verify: false
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org5.example.com/ca/ca.org5.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org5.example.com/ca/ca.org5.example.com-cert.pem
     registrar:
       enrollId: admin
       enrollSecret: adminpw
@@ -309,7 +306,7 @@ certificateAuthorities:
     httpOptions:
       verify: false
     tlsCACerts:
-      path: ../../fabric/common/tools/cryptogen/crypto-config/peerOrganizations/org6.example.com/ca/ca.org6.example.com-cert.pem
+      path: ../../fabric/internal/cryptogen/crypto-config/peerOrganizations/org6.example.com/ca/ca.org6.example.com-cert.pem
     registrar:
       enrollId: admin
       enrollSecret: adminpw
