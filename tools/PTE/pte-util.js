@@ -216,14 +216,15 @@ function getMember(username, password, client, nid, userOrg, cpFile) {
                         if (!cryptoSuite) {
 			    cryptoSuite = hfc.newCryptoSuite();
 			    if (userOrg) {
-				cryptoSuite.setCryptoKeyStore(Client.newCryptoKeyStore({path: module.exports.storePathForOrg(nid, ORGS[userOrg].name)}));
+				cryptoSuite.setCryptoKeyStore(Client.newCryptoKeyStore({path: module.exports.storePathForOrg(nid, cpOrgs[userOrg].name)}));
 				client.setCryptoSuite(cryptoSuite);
 			    }
 			}
 			member.setCryptoSuite(cryptoSuite);
 
 			// need to enroll it with CA server
-			var cop = new copService(caUrl, tlsOptions, ORGS[userOrg].ca.name, cryptoSuite);
+			var orgCA=cpOrgs[userOrg].certificateAuthorities[0];
+			var cop = new copService(caUrl, tlsOptions, cpCAs[orgCA].caName, cryptoSuite);
 
 			return cop.enroll({
 				enrollmentID: username,
@@ -231,7 +232,7 @@ function getMember(username, password, client, nid, userOrg, cpFile) {
 			}).then((enrollment) => {
 				logger.info('[getMember] Successfully enrolled user \'' + username + '\'');
 
-				return member.setEnrollment(enrollment.key, enrollment.certificate, ORGS[userOrg].mspid);
+				return member.setEnrollment(enrollment.key, enrollment.certificate, cpOrgs[userOrg].mspid);
 			}).then(() => {
                                 var skipPersistence = false;
                                 if (!client.getStateStore()) {
@@ -292,7 +293,7 @@ function getAdmin(client, nid, userOrg, cpFile) {
         } else if (typeof cpOrgs[userOrg].adminPath !== 'undefined') {
             getgoPath();
             logger.info('[getAdmin] %s adminPath defined', userOrg);
-            keyPath =  path.resolve(goPath, cpOrgs[userOrg].adminPath , 'keystore');
+            keyPath =  path.resolve(goPath, cpOrgs[userOrg].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
             certPath = path.resolve(goPath, cpOrgs[userOrg].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
@@ -537,19 +538,21 @@ module.exports.getTLSCert = getTLSCert;
 
 module.exports.tlsEnroll = async function(client, orgName, cpFile) {
   try {
-    var orgs = readConfigFile(cpFile, 'test-network');
+    ORGS = readConfigFile(cpFile, 'test-network');
+    getCPsubPtr(ORGS);
     logger.info('[tlsEnroll] CA tls enroll: %s, cpFile: %s', orgName, cpFile);
     return new Promise(function (resolve, reject) {
-        if (!orgs[orgName]) {
+        if (!cpOrgs[orgName]) {
             throw new Error('Invalid org name: ' + orgName);
         }
-        let fabricCAEndpoint = orgs[orgName].ca.url;
+        var orgCA=cpOrgs[orgName].certificateAuthorities[0];
+        let fabricCAEndpoint = cpCAs[orgCA].url;
         let tlsOptions = {
             trustedRoots: [],
             verify: false
         };
-        let caService = new FabricCAServices(fabricCAEndpoint, tlsOptions, orgs[orgName].ca.name);
-        logger.info('[tlsEnroll] CA tls enroll ca name: %j', orgs[orgName].ca.name);
+        let caService = new FabricCAServices(fabricCAEndpoint, tlsOptions, cpCAs[orgCA].caName);
+        logger.info('[tlsEnroll] CA tls enroll ca name: %j', cpCAs[orgCA].caName);
         let req = {
             enrollmentID: 'admin',
             enrollmentSecret: 'adminpw',
