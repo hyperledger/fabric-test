@@ -34,6 +34,9 @@ usage () {
     echo -e "--chan0\tthe starting channel number [integer] used for this test"
     echo -e "\t\t(Default: 1)"
 
+    echo -e "--chantxpath\tchannel tx path"
+    echo -e "\t\t(Default: github.com/hyperledger/fabric-test/fabric/internal/cryptogen/ordererOrganizations)"
+
     echo -e "-c, --channel\tcreate/join channel"
     echo -e "\t\t(Default: No)"
 
@@ -151,6 +154,7 @@ echo "***      CHANNEL set name: $setChanName                  "
 echo "***      CHANNEL set num: $setChanNum                    "
 echo "***      NCHAN: $NCHAN                                   "
 echo "***      CHANPREFIX: $CHANPREFIX                         "
+echo "***      CHANNEL TX PATH: $CHANNELTXPATH                 "
 echo "***      CHANNEL length: ${#CHANNEL[@]}                  "
 echo "***      CHANNEL: ${CHANNEL[@]}                          "
 echo "***                                                      "
@@ -203,6 +207,8 @@ runDir=$PTEDIR/runPTE
 
 TLS="serverauth"
 CHANNEL="defaultchannel"       # channel name
+CHANNELTXPATH="github.com/hyperledger/fabric-test/fabric/internal/cryptogen/ordererOrganizations"    # default channel path
+CHANNELTX=""
 ChanProc="NO"
 CCProc="NO"
 PrimeProc="NO"
@@ -330,7 +336,11 @@ PreCFGProc() {
     cpdir=`echo $cppath | sed "s/\//$newbs/g"`
     echo "[PreCFGProc] cpdir=$cpdir"
 
+    channeltxpath=`echo $CHANNELTXPATH | sed "s/\//$newbs/g"`
+    echo "[PreCFGProc] channeltxpath=$channeltxpath"
+
         sed -i -e "s/_TLS_/$TLS/g" $cfgName
+        sed -i -e "s/_CHANNELTXPATH_/$channeltxpath/g" $cfgName
         sed -i -e "s/_CHANNELNAME_/$chnl/g" $cfgName
         sed -i -e "s/_CHANNELID_/$chnl/g" $cfgName
         sed -i -e "s/_CPDIRECTORY_/$cpdir/g" $cfgName
@@ -592,6 +602,13 @@ while [[ $# -gt 0 ]]; do
           shift
           CHANPREFIX=$1      # channel name prefix
           echo -e "\t- Specify channel name prefix: $CHANPREFIX\n"
+          shift
+          ;;
+
+      --chantxpath)
+          shift
+          CHANNELTXPATH=$1     # channel tx path
+          echo -e "\t- Specify channel tx path: $CHANNELTXPATH\n"
           shift
           ;;
 
