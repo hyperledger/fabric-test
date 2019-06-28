@@ -1,0 +1,122 @@
+#! Copyright IBM Corp. All Rights Reserved.
+#!
+#! SPDX-License-Identifier: Apache-2.0
+
+#@ load("@ytt:data", "data")
+#@ for i in range(0, len(data.values.peer_organizations)):
+#@ organization = data.values.peer_organizations[i]
+#@ for j in range(0, organization.num_ca):
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: #@ "ca{}-{}".format(j, organization.name)
+  name: #@ "ca{}-{}".format(j, organization.name)
+spec:
+  selector:
+    k8s-app: #@ "ca{}-{}".format(j, organization.name)
+  type: #@ data.values.k8s.service_type
+  ports:
+    - name: port1
+      port: 7054
+  #@ end
+  #@ for j in range(0, organization.num_peers):
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: #@ "peer{}-{}".format(j, organization.name)
+  name: #@ "peer{}-{}".format(j, organization.name)
+spec:
+  selector:
+    k8s-app: #@ "peer{}-{}".format(j, organization.name)
+  type: #@ data.values.k8s.service_type
+  ports:
+    - name: port1
+      port: 7051
+   #@ if data.values.metrics == True:
+    - name: port2
+      port: 9443
+  #@ end
+  #@ end
+#@ end
+#@ for i in range(0, len(data.values.orderer_organizations)):
+#@ organization = data.values.orderer_organizations[i]
+  #@ for j in range(0, organization.num_ca):
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: #@ "ca{}-{}".format(i, organization.name)
+  name: #@ "ca{}-{}".format(i, organization.name)
+spec:
+  selector:
+    k8s-app: #@ "ca{}-{}".format(i, organization.name)
+  type: #@ data.values.k8s.service_type
+  ports:
+    - name: port1
+      port: 7054
+  #@ end
+  #@ for j in range(0, organization.num_orderers):
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: #@ "orderer{}-{}".format(j, organization.name)
+  name: #@ "orderer{}-{}".format(j, organization.name)
+spec:
+  selector:
+    k8s-app: #@ "orderer{}-{}".format(j, organization.name)
+  type: #@ data.values.k8s.service_type
+  ports:
+    - name: port1
+      port: 7050
+  #@ if data.values.metrics == True:
+    - name: port2
+      port: 8443
+  #@ end
+  #@ end
+#@ end
+
+#@ if data.values.orderer.orderertype == "kafka":
+  #@ for i in range(0, data.values.kafka.num_kafka):
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: #@ "kafka{}".format(i)
+  name: #@ "kafka{}".format(i)
+spec:
+  selector:
+    k8s-app: #@ "kafka{}".format(i)
+  ports:
+    - name: port1
+      port: 9092
+    - name: port2
+      port: 9093
+  #@ end
+  #@ for j in range(0, data.values.kafka.num_zookeepers):
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: #@ "zookeeper{}".format(j)
+  name: #@ "zookeeper{}".format(j)
+spec:
+  selector:
+    k8s-app: #@ "zookeeper{}".format(j)
+  ports:
+    - name: port1
+      port: 2888
+    - name: port2
+      port: 3888
+    - name: port3
+      port: 2181
+  #@ end
+#@ end

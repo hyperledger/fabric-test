@@ -1,0 +1,121 @@
+#! Copyright IBM Corp. All Rights Reserved.
+#!
+#! SPDX-License-Identifier: Apache-2.0
+
+#@ load("@ytt:data", "data")
+#@ def orgPolicies(mspId, type):
+#@   output = {}
+#@   readers = {}
+#@   writers = {}
+#@   admins = {"Type": "Signature", "Rule": "OR('{}.admin')".format(mspId)}
+#@   if type.startswith("orderer"):
+#@     readers = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
+#@     writers = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
+#@   else:
+#@     readers = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.peer')".format(mspId, mspId)}
+#@     writers = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.client')".format(mspId, mspId)}
+#@   end
+#@   output = {"Readers": readers, "Writers": writers, "Admins": admins}
+#@   return output
+#@ end
+#@ def organizations(input, type):
+#@   output = []
+#@   certs_location = input.certs_location
+#@   if certs_location.endswith("/") == False:
+#@     certs_location = certs_location + "/"
+#@   end
+#@   if(type.startswith("peer") == False):
+#@   for i in range(0, len(input.orderer_organizations)):
+#@     output.append({"Name": input.orderer_organizations[i].name, "ID": input.orderer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
+#@   end
+#@   end
+#@   if(type.startswith("orderer") == False):
+#@     for i in range(0, len(input.peer_organizations)):
+#@       output.append({"Name": input.peer_organizations[i].name, "ID": input.peer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
+#@     end
+#@   end
+#@   return output
+#@ end
+#@ def policies(type):
+#@   readers = {"Type": "ImplicitMeta", "Rule": "ANY Readers"}
+#@   writers = {"Type": "ImplicitMeta", "Rule": "ANY Writers"}
+#@   admins = {"Type": "ImplicitMeta", "Rule": "ANY Admins"}
+#@   output = {}
+#@   if type.startswith("orderer"):
+#@     blockValidation = {"Type": "ImplicitMeta", "Rule": "ANY Writers"}
+#@     output = {"Readers":readers, "Writers": writers, "Admins": admins, "BlockValidation": blockValidation}
+#@   else:
+#@     output = {"Readers":readers, "Writers": writers, "Admins": admins}
+#@   end
+#@   return output
+#@ end
+#@ def ordererHosts(input):
+#@   result = []
+#@   for i in range(0, len(input.orderer_organizations)):
+#@     ordererOrg = input.orderer_organizations[i]
+#@     for j in range(0, ordererOrg.num_orderers):
+#@       result.append("orderer"+str(j)+"-"+ordererOrg.name+":7050")
+#@     end
+#@   end
+#@   return result
+#@ end
+#@ def orderer(input):
+#@   result = {}
+#@   batch_size_options = input.orderer.batchsize
+#@   certs_location = input.certs_location
+#@   if certs_location.endswith("/") == False:
+#@     certs_location = certs_location + "/"
+#@   end
+#@   batchSize = {"MaxMessageCount": batch_size_options.maxmessagecount, "AbsoluteMaxBytes": batch_size_options.absolutemaxbytes, "PreferredMaxBytes": batch_size_options.preferredmaxbytes}
+#@   if(input.orderer.orderertype=="etcdraft"):
+#@     consenters = []
+#@     etcd_options = input.orderer.etcdraft_options
+#@     for i in range(0, len(input.orderer_organizations)):
+#@       for j in range(0, input.orderer_organizations[i].num_orderers):
+#@       ordererOrg = input.orderer_organizations[i]
+#@       certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(certs_location, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
+#@       consenters.append({"Host":"orderer{}-{}".format(j, ordererOrg.name), "Port": 7050, "ClientTLSCert": certs, "ServerTLSCert": certs})
+#@       end
+#@     end
+#@     options = {"TickInterval": etcd_options.TickInterval, "ElectionTick": etcd_options.ElectionTick, "HeartbeatTick": etcd_options.HeartbeatTick, "MaxInflightBlocks": etcd_options.MaxInflightBlocks, "SnapshotIntervalSize": etcd_options.SnapshotIntervalSize}
+#@     result = {"OrdererType": input.orderer.orderertype, "Addresses": ordererHosts(input), "BatchTimeout": input.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(input, "orderer"), "Policies": policies("orderer"), "Capabilities": input.orderer_capabilities, "EtcdRaft":{"Consenters":consenters, "Options":options}}
+#@   elif (input.orderer.orderertype == "kafka"):
+#@     brokersList = []
+#@     kafka = {}
+#@     for i in range(0, input.kafka.num_kafka):
+#@       brokersList.append("kafka{}:9092".format(i))
+#@     end
+#@     kafka = {"Brokers": brokersList}
+#@     result = {"OrdererType": input.orderer.orderertype, "Addresses": ordererHosts(input), "BatchTimeout": input.orderer.batchtimeout, "BatchSize": batchSize, "kafka": kafka, "Organizations": organizations(input, "orderer"),"Policies": policies("orderer"),"Capabilities": input.orderer_capabilities}
+#@   else:
+#@     result = {"OrdererType": input.orderer.orderertype, "Addresses": ordererHosts(input), "BatchTimeout": input.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(input, "orderer"), "Policies": policies("orderer"), "Capabilities": input.orderer_capabilities}
+#@   end
+#@   return result
+#@ end
+Organizations: #@ organizations(data.values, "")
+
+Orderer: #@ orderer(data.values)
+Application:
+  Organizations: #@ organizations(data.values, "peer")
+  Policies: #@ policies("peer")
+  Capabilities: #@ data.values.application_capabilities
+Channel:
+  Policies: #@ policies("channel")
+  Capabilities: #@ data.values.channel_capabilities
+Profiles:
+  testorgschannel:
+    Policies: #@ policies("channel")
+    Capabilities: #@ data.values.channel_capabilities
+    Consortium: FabricConsortium
+    Application:
+      Organizations: #@ organizations(data.values, "peer")
+      Policies: #@ policies("peer")
+      Capabilities:  #@ data.values.application_capabilities
+    Orderer: #@ orderer(data.values)
+  testOrgsOrdererGenesis:
+    Policies: #@ policies("channel")
+    Capabilities: #@ data.values.channel_capabilities
+    Orderer: #@ orderer(data.values)
+    Consortiums:
+      FabricConsortium:
+        Organizations: #@ organizations(data.values, "peer")
