@@ -7,7 +7,7 @@ Feature: Gossip Service
     As a user I expect the gossip component work correctly
 
 #@daily
-Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down by <takeDownType>, comes back up and catches up eventually.
+Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] <takeDownType> and <bringUpType> non-leader peer, catches up
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -55,7 +55,7 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] A non-leader peer goes down b
     | disconnect   | connect     |
 
 #@daily
-Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <takeDownType>, comes back up *after* another leader is elected, catches up.
+Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] <takeDownType> leader peer, <bringUpType> *after* another leader elected
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -105,7 +105,7 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] A leader peer goes down by <t
     | disconnect   | connect     |
 
 #@daily
-Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <takeDownType>, comes back up *before* another leader is elected, catches up.
+Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] <takeDownType> leader peer, <bringUpType> *before* another leader elected
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election,peer.gossip=DEBUG
   And I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -139,7 +139,7 @@ Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] A leader peer goes down by <t
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization go down via <takeDownType>, then catch up after <bringUpType>".
+Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] <takeDownType> and <bringUpType> all peers in an organization
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -190,7 +190,7 @@ Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] "All peers in an organization
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a non-leader peer goes down by <takeDownType>, comes back up and catches up eventually.
+Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] With leaders assigned, <takeDownType> and <bringUpType> non-leader peer
   # Select Peer0 of both org as leader and turn leader election off
 
   Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
@@ -251,7 +251,7 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] In leader-selection setup, a 
     | disconnect   | connect     |
 
 @daily
-Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, leader peer goes down by <takeDownType> for at least <minDownDuration> seconds, comes back up and catches up eventually.
+Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] With leaders assigned, <takeDownType> leader peer for <minDownDuration> secs
 
   # Select Peer0 of both org as leader and turn leader election off
   Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
@@ -313,7 +313,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
 
 
 @daily
-  Scenario: [FAB-4666] A non-leader peer, that joins an already-active channel--is expected to have all the blocks eventually.
+  Scenario: [FAB-4666] A non-leader peer joins an already-active channel and catches up
 
   Given the FABRIC_LOGGING_SPEC environment variable is gossip=DEBUG
   And I have a bootstrapped fabric network of type kafka
@@ -328,7 +328,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   And an admin makes peer "peer1.org1.example.com" join the channel
 
   # the following wait is for Gossip leadership states to be stabilized
-  And I wait "30" seconds
+  And I wait "60" seconds
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   ## Now do 3 invoke-queries in leader peer
@@ -348,6 +348,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   #Join the rest of the peers
   When an admin fetches genesis information using peer "peer1.org2.example.com"
   And an admin makes peer "peer1.org2.example.com" join the channel
+  And I wait "60" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"
   Then a user receives a success response of 940 from "peer1.org2.example.com"
@@ -358,7 +359,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
 
 
 @daily
-  Scenario: [FAB-4682] In leader-selection, a non-leader peer, that joins an already-active channel--is expected to have all the blocks eventually.
+  Scenario: [FAB-4682] With leaders assigned, a non-leader peer joins an already-active channel and catches up
 
   # Select Peer0 of both org as leader and turn leader election off
   Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
@@ -382,7 +383,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   And an admin makes peer "peer1.org1.example.com" join the channel
 
   # the following wait is for Gossip leadership states to be stabilized
-  And I wait "30" seconds
+  And I wait "60" seconds
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "5" seconds
   ## Now do 3 invoke-queries in leader peer
@@ -402,6 +403,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] In leader-selection setup, le
   #Join the rest of the peers
   When an admin fetches genesis information using peer "peer1.org2.example.com"
   And an admin makes peer "peer1.org2.example.com" join the channel
+  And I wait "60" seconds
 
   When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"
   Then a user receives a success response of 940 from "peer1.org2.example.com"

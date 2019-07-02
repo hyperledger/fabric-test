@@ -9,7 +9,7 @@ Feature: Peer Service
 
 #@doNotDecompose
 @daily
-Scenario Outline: FAB-3505: Test chaincode example02 deploy, invoke, and query, with <type> orderer
+Scenario Outline: FAB-3505: chaincode example02 deploy, invoke, and query, with <type> orderer
     Given I have a bootstrapped fabric network of type <type> <security>
     And I use the <interface> interface
     When an admin sets up a channel
@@ -36,7 +36,7 @@ Examples:
 
 
 @daily
-Scenario Outline: FAB-1440, FAB-3861: Basic Chaincode Execution - <type> orderer type, using <database>, <security>
+Scenario Outline: FAB-1440, FAB-3861: Chaincode Basics - <type> orderer, <database>, <security>
     Given I have a bootstrapped fabric network of type <type> using state-database <database> <security>
     When an admin sets up a channel
     And an admin deploys chaincode
@@ -125,7 +125,7 @@ Examples:
     | solo  |
     | kafka |
 
-Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up, is able to resume regular operation
+Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up OK
   Given I have a bootstrapped fabric network of type solo
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
@@ -166,7 +166,7 @@ Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up, 
 
 
 @daily
-Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Test Mutual TLS/ClientAuth <security> with <type> based-orderer using <interface> interface
+Scenario Outline: FAB-7150/FAB-7153/FAB-7759: Mutual TLS/ClientAuth, <type> orderer, <interface> interface
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And I have a bootstrapped fabric network of type <type> <security>
@@ -199,10 +199,7 @@ Examples:
     | solo  |   with tls  | NodeJS SDK |
     #  | kafka |   with tls  |     CLI    |
     #  | solo  |   with tls  |     CLI    |
-    # Delete the below test-case and uncomment the above to run with tls and CLI as interface
-    | solo  | without tls |     CLI    |
-    | kafka | without tls |     CLI    |
-    | solo  | without tls | NodeJS SDK |
+    # Uncomment the above to run with tls and CLI as interface, after fixing the TLS problem with CLI and javasdk
 
 @daily
 Scenario: FAB-3855: Empty Payload Messages

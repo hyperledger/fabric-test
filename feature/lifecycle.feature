@@ -312,12 +312,12 @@ Scenario: FAB-13959: An admin from an org does not install chaincode package
   Then a user receives a success response of 1000
   When a user queries on the chaincode with args ["query","a"] from "peer0.org2.example.com"
   Then a user receives a response containing "Error: endorsement failure during query. response: status:500" from "peer0.org2.example.com"
-  Then a user receives a response containing 'make sure the chaincode helloNurse has been successfully instantiated and try again' from "peer0.org2.example.com"
+  Then a user receives a response containing 'make sure the chaincode helloNurse has been successfully defined on channel behavesystest and try again' from "peer0.org2.example.com"
   Then a user receives a response containing "chaincode definition for 'helloNurse' exists, but chaincode is not installed" from "peer0.org2.example.com"
 
 
 @daily
-Scenario: FAB-13968: Upgrade chaincode for different orgs, but committing the chaincode definition with older version of chaincode
+Scenario: FAB-13968: Upgrade chaincode for different orgs, but commit older version of chaincode
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
   And I want to use the new chaincode lifecycle
@@ -568,7 +568,7 @@ Scenario: FAB-13970: 2 Different org admins perform the commit
   # The error here should denote the possibility that someone else has already committed this definition.
   Then a user receives a response containing 'requested sequence is 1, but new definition must be sequence 2' from "peer0.org2.example.com"
 
-
+#@doNotDecompose
 @daily
 Scenario: FAB-13974: An org admin should be able to recover after sending a wrong approval
   Given I changed the "Application" capability to version "V2_0"
@@ -628,7 +628,8 @@ Scenario: FAB-13974: An org admin should be able to recover after sending a wron
   Then a user receives a success response of 980 from "peer0.org3.example.com"
 
   When a user queries on the chaincode with args ["query","a"]
-  Then a user receives a response containing 'Error: endorsement failure during query. response: status:500 message:"make sure the chaincode mycc has been successfully instantiated and try again' from "peer0.org1.example.com"
+  Then a user receives a response containing "Error: endorsement failure during query. response: status:500" from "peer0.org1.example.com"
+  Then a user receives a response containing "chaincode definition for 'mycc' at sequence 2 on channel 'behavesystest' has not yet been approved by this org" from "peer0.org1.example.com"
 
   # All 3 orgs need to re-approve of the chaincode definition
   When each organization admin approves the upgraded chaincode package with policy "OutOf(1,'org1.example.com.member','org2.example.com.member','org3.example.com.member')"

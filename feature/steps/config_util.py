@@ -414,8 +414,10 @@ def getCurrentConfig(context, channel):
     updated_env = updateEnviron(context)
     block = "{}.block".format(channel)
 
-    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", block, "--type", "common.Block"], cwd=testConfigs , env=updated_env)
-    config = json.loads(configStr)
+    subprocess.check_output(["configtxlator", "proto_decode", "--input", block, "--type", "common.Block", "--output", "configStrCurrentConfig.pb"], cwd=testConfigs , env=updated_env)
+    with open("{0}/configStrCurrentConfig.pb".format(testConfigs), "r") as fd:
+        config = json.loads(fd.read())
+
     with open("{0}/config.json".format(testConfigs), "w") as fd:
         fd.write(json.dumps(config["data"]["data"][0]["payload"]["data"]["config"], indent=4))
     return config
@@ -549,10 +551,11 @@ def configUpdate(context, config, group, channel):
                                         env=updated_env)
 
     # configtxlator proto_decode --input update.pb --type common.ConfigUpdate | jq . > org3_update.json
-    configStr = subprocess.check_output(["configtxlator", "proto_decode", "--input", "update.pb", "--type", "common.ConfigUpdate"],
-                                        cwd=testConfigs,
-                                        env=updated_env)
-    config = json.loads(configStr)
+    subprocess.check_output(["configtxlator", "proto_decode", "--input", "update.pb", "--type", "common.ConfigUpdate", "--output", "configStrForUpdate.pb"],
+                            cwd=testConfigs,
+                            env=updated_env)
+    with open("{0}/configStrForUpdate.pb".format(testConfigs), "r") as fd:
+        config = json.loads(fd.read())
 
     # echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":'$(cat org3_update.json)'}}}' | jq . > org3_update_in_envelope.json
     updatedconfig = {"payload": {"header": {"channel_header": {"channel_id": channel,

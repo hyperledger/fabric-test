@@ -10,7 +10,7 @@ Feature: Fabric-CA Service
 #@doNotDecompose
 @interop
 @daily
-Scenario Outline: FAB-6489: Interoperability Test using <type> based orderer with a <database> db using the <interface> with <language> chaincode
+Scenario Outline: FAB-6489: Interop using <type> orderer, <database>, <interface>, <language> chaincode
     # We should be able to turn TLS on for these tests once CLI certificates and JavaSDK TLS is working correctly - FAB-15018
     #Given I have a bootstrapped fabric network of type <type> using state-database <database> with tls
     Given I have a bootstrapped fabric network of type <type> using state-database <database>

@@ -6,8 +6,8 @@
 
 Feature: Testing Fabric CouchDB indexing
 
-  @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using marbles chaincode using <language> with 1 channels and 1 index with 1 selector
+@daily
+Scenario Outline: <jira_num>: CouchDB Indexing, <language> with 1 channels and 1 index with 1 selector
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "size" to the chaincode at path "<index_path>"
 
@@ -33,7 +33,7 @@ Examples:
 
 
 @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using marbles chaincode using <language> with 3 channels and 1 index with 3 selectors
+Scenario Outline: <jira_num>: CouchDB Indexing, <language> with 3 channels and 1 index with 3 selectors
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
@@ -73,7 +73,7 @@ Examples:
 
 
 @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using marbles chaincode using <language> with 3 channels and 3 index with 1 selector
+Scenario Outline: <jira_num>: CouchDB Indexing, <language> with 3 channels and 3 index with 1 selector
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test_1 with design document name "indexdoc_behave_test_1" containing the fields "owner" to the chaincode at path "<index_path>"
     And a user defines a couchDB index named index_behave_test_2 with design document name "indexdoc_behave_test_2" containing the fields "docType" to the chaincode at path "<index_path>"
@@ -139,7 +139,7 @@ Examples:
     | ../../fabric-samples/chaincode/marbles02/node                  | ../fabric-samples/chaincode/marbles02/node                   | NODE      |  FAB-7256   |
 
 
-  Scenario Outline: <jira_num>: Test CouchDB indexing using CC upgrade with marbles chaincode using <language> with 1 channel
+Scenario Outline: <jira_num>: CouchDB Indexing, CC upgrade, <language> with 1 channel
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
@@ -173,8 +173,8 @@ Examples:
     | ../../fabric-samples/chaincode/marbles02/node                  | ../fabric-samples/chaincode/marbles02/node                   | NODE      |  FAB-7268   |
 
 
-  @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using CC upgrade with marbles chaincode using <language> with 3 channels and 1 upgrade
+@daily
+Scenario Outline: <jira_num>: CouchDB Indexing, CC upgrade, <language> with 3 channels and 1 upgrade
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
@@ -239,7 +239,7 @@ Examples:
 
 
 @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using CC upgrade with marbles chaincode using <language> with 3 channels and 3 upgrade
+Scenario Outline: <jira_num>: CouchDB Indexing, CC upgrade, <language> with 3 channels and 3 upgrade
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
 
@@ -305,7 +305,7 @@ Examples:
 
 
 @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using install-after-instantiate with marbles chaincode using <language> with 3 channels and 1 index
+Scenario Outline: <jira_num>: CouchDB Indexing, install-after-instantiate, <language> with 3 channels and 1 index
 
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test with design document name "indexdoc_behave_test" containing the fields "owner,docType,color" to the chaincode at path "<index_path>"
@@ -365,9 +365,9 @@ Examples:
 
 
 @daily
-  Scenario Outline: <jira_num>: Test CouchDB indexing using install-after-instantiate with marbles chaincode using <language> with 3 channels and 3 indexes
+Scenario Outline: <jira_num>: CouchDB Indexing, install-after-instantiate, <language> with 3 channels and 3 indexes
 
-    Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
+    Given I have a bootstrapped fabric network of type solo using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test_owner with design document name "indexdoc_behave_test" containing the fields "owner" to the chaincode at path "<index_path>"
     When a user defines a couchDB index named index_behave_test_docType with design document name "indexdoc_behave_test" containing the fields "docType" to the chaincode at path "<index_path>"
     When a user defines a couchDB index named index_behave_test_color with design document name "indexdoc_behave_test" containing the fields "color" to the chaincode at path "<index_path>"
@@ -403,6 +403,7 @@ Examples:
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc1" to "peer1.org1.example.com"
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc2" to "peer1.org1.example.com"
     And an admin installs chaincode at path "<cc_path>" of language "<language>" as version "0" with args [""] with name "mycc3" to "peer1.org1.example.com"
+    And I wait "60" seconds
 
     # Do sanity-check rich query in 4th peer
     When a user queries on the channel "mychannel1" using chaincode named "mycc1" with args ["queryMarbles", "{\\"selector\\":{\\"owner\\":\\"matt\\"}, \\"use_index\\":[\\"_design/indexdoc_behave_test\\", \\"index_behave_test_owner\\"]}"] on "peer1.org1.example.com"

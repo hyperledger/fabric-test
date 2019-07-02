@@ -9,7 +9,7 @@ Feature: Chaincodes Testing
 
 
 @daily
-Scenario Outline: FAB-5797: Test chaincode fabric-test/chaincodes/example02/go/cmd deploy, invoke, and query with chaincode install name in all lowercase/uppercase/mixedcase chars, for <type> orderer
+Scenario Outline: FAB-5797: Test chaincode basic ops with cc name in mixedcases chars, for <type> orderer
     Given I have a bootstrapped fabric network of type <type>
     When an admin sets up a channel
     And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "<ccName>"
@@ -61,7 +61,7 @@ Scenario: FAB-4703: FAB-5663, Test chaincode calling chaincode - fabric-test/cha
 
 @shimAPI
 @daily
-Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel name as a third argument to chaincode_ex05 when cc_05 and cc_02 are on different channels
+Scenario: FAB-4717: FAB-5663, chaincode ex05 to ex02 on different channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example05/go/cmd" with args ["init","sum","0"] with name "myex05"
@@ -74,7 +74,7 @@ Scenario: FAB-4717: FAB-5663, chaincode-to-chaincode testing passing in channel 
 
 
 @daily
-Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty string for channel_name when cc_05 and cc_02 are on the same channel
+Scenario: FAB-4718: FAB-5663, chaincode ex05 to ex02, on same channel, pass empty string for channel_name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example05/go/cmd" with args ["init","sum","0"] with name "myex05"
@@ -86,7 +86,7 @@ Scenario: FAB-4718: FAB-5663, chaincode-to-chaincode testing passing an empty st
 
 
 @daily
-Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case passing an incorrect or non-existing channnel name when cc_ex02 and cc_ex05 installed on same channels
+Scenario: FAB-4720: FAB-5663, chaincode ex05 to ex02, on same channel, pass bad channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example05/go/cmd" with args ["init","sum","0"] with name "myex05"
@@ -99,7 +99,7 @@ Scenario: FAB-4720: FAB-5663, Test chaincode calling chaincode -ve test case pas
 
 
 @daily
-Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase passing an incorrect ot non-existing string for channelname when cc_ex02 and cc_ex05 installed on different channels
+Scenario: FAB-4721: FAB-5663, chaincode ex05 to ex02, on diff channels, pass bad channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example05/go/cmd" with args ["init","sum","0"] with name "myex05"
@@ -114,7 +114,7 @@ Scenario: FAB-4721: FAB-5663, Test chaincode calling chaincode -ve testcase pass
 
 #This scenario failed due to kafka containers are not ready in the allotted time 
 @daily
-Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase passing an empty string for channelname when cc_ex02 and cc_ex05 installed on different channels
+Scenario: FAB-4722: FAB-5663, chaincode ex05 to ex02, on diff channels, pass empty string for channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example05/go/cmd" with args ["init","sum","0"] with name "myex05"
@@ -127,7 +127,7 @@ Scenario: FAB-4722: FAB-5663, Test chaincode calling chaincode -ve testcase pass
   And a user receives an error response of chaincode myex02_b not found
 
 @daily
-Scenario: FAB-5384: FAB-5663, Test chaincode calling chaincode with two args cc_ex02 and cc_ex05 installed on same channels
+Scenario: FAB-5384: FAB-5663, chaincode ex05 to ex02, on same channel, with two args
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
   And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example05/go/cmd" with args ["init","sum","0"] with name "myex05"
@@ -217,7 +217,7 @@ Examples:
 
 @shimAPI
 ##@daily
-Scenario Outline: FAB-6256: Test support of rich queries in SHIM API: queryMarbles and queryMarblesByOwner using marbles chaincode on couchdb 
+Scenario Outline: FAB-6256: Test support of rich queries in SHIM API: queryMarbles and queryMarblesByOwner
     Given I have a bootstrapped fabric network of type solo using state-database couchdb with tls
     When an admin sets up a channel
     And an admin deploys chaincode at path "<path>" with args [""] with language "<language>"
@@ -284,7 +284,7 @@ Examples:
     |   github.com/hyperledger/fabric-test/chaincodes/marbles/node    |  NODE    |
 
 @daily
-Scenario Outline: FAB-6439: Test chaincode enccc_example.go which uses encshim library extensions for <type> orderer
+Scenario Outline: FAB-6439: Encryption enccc_example.go uses encshim library extensions for <type> orderer
     #To generate good keys, we followed instructions as in the README.md under "github.com/hyperledger/fabric-test/chaincodes/enccc_example" folder
     # ENCKEY=`openssl rand 32 -base64`
     # IV=`openssl rand 16 -base64`
@@ -335,7 +335,7 @@ Examples:
 
 
 @daily
-Scenario Outline: FAB-6650: Test chaincode enccc_example.go negative scenario, passing in bad ENCRYPTION(ENC), IV, and SIGNATURE(SIG) KEYS
+Scenario Outline: FAB-6650: Encryption enccc_example.go, passing bad ENCRYPTION(ENC), IV, and SIGNATURE(SIG) KEYS
   #To generate good keys, we followed instructions as in the README.md under "github.com/hyperledger/fabric-test/chaincodes/enccc_example" folder
   # ENCKEY=`openssl rand 32 -base64`
   # IV=`openssl rand 16 -base64`
@@ -376,7 +376,7 @@ Examples:
 
 @shimAPI
 ##@daily
-Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimApiDriver chaincodes for <type> orderer <database> db <language> lang
+Scenario Outline: FAB-5791: SHIM API, marbles02 and shimApiDriver chaincodes, <type> orderer <database> db <language> lang
 # |  shim API in fabric/core/shim/chaincode.go	|   Covered in marbles02  chaincode                     |
 # |        for chaincode invocation
 # |        Init	                                |                init                                   |
