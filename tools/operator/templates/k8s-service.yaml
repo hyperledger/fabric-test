@@ -4,8 +4,8 @@
 
 #@ load("@ytt:data", "data")
 #@ for i in range(0, len(data.values.peer_organizations)):
-#@ organization = data.values.peer_organizations[i]
-#@ for j in range(0, organization.num_ca):
+#@   organization = data.values.peer_organizations[i]
+#@   for j in range(0, organization.num_ca):
 ---
 kind: Service
 apiVersion: v1
@@ -20,8 +20,8 @@ spec:
   ports:
     - name: port1
       port: 7054
-  #@ end
-  #@ for j in range(0, organization.num_peers):
+#@   end
+#@   for j in range(0, organization.num_peers):
 ---
 kind: Service
 apiVersion: v1
@@ -36,15 +36,17 @@ spec:
   ports:
     - name: port1
       port: 7051
-   #@ if data.values.metrics == True:
+#@   if data.values.metrics == True:
     - name: port2
       port: 9443
-  #@ end
-  #@ end
+#@   end
 #@ end
-#@ for i in range(0, len(data.values.orderer_organizations)):
-#@ organization = data.values.orderer_organizations[i]
-  #@ for j in range(0, organization.num_ca):
+#@ end
+#@ num_ordererOrgs = len(data.values.orderer_organizations)
+#@ for i in range(0, num_ordererOrgs):
+#@   organization = data.values.orderer_organizations[i]
+#@   num_orderers = organization.num_orderers
+#@ for j in range(0, organization.num_ca):
 ---
 kind: Service
 apiVersion: v1
@@ -59,8 +61,8 @@ spec:
   ports:
     - name: port1
       port: 7054
-  #@ end
-  #@ for j in range(0, organization.num_orderers):
+#@ end
+#@ for j in range(0, num_orderers):
 ---
 kind: Service
 apiVersion: v1
@@ -75,15 +77,15 @@ spec:
   ports:
     - name: port1
       port: 7050
-  #@ if data.values.metrics == True:
+#@   if data.values.metrics == True:
     - name: port2
       port: 8443
-  #@ end
-  #@ end
+#@   end
+#@ end
 #@ end
 
 #@ if data.values.orderer.orderertype == "kafka":
-  #@ for i in range(0, data.values.kafka.num_kafka):
+#@   for i in range(0, data.values.kafka.num_kafka):
 ---
 kind: Service
 apiVersion: v1
@@ -99,8 +101,8 @@ spec:
       port: 9092
     - name: port2
       port: 9093
-  #@ end
-  #@ for j in range(0, data.values.kafka.num_zookeepers):
+#@   end
+#@   for j in range(0, data.values.kafka.num_zookeepers):
 ---
 kind: Service
 apiVersion: v1
@@ -118,5 +120,5 @@ spec:
       port: 3888
     - name: port3
       port: 2181
-  #@ end
+#@   end
 #@ end

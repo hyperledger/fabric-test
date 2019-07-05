@@ -3,7 +3,7 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
-#@ def zkContainers(input, id, zklist):
+#@ def zkContainers(input, id, zklist, networkSpec):
 #@   id = id + 1
 #@   env = [{ "name": "ZOO_MY_ID", "value": "{}".format(id)}]
 #@   env.append({"name": "ZOO_SERVERS", "value": "{}".format(zklist)})
@@ -11,11 +11,16 @@
 #@   env.append({"name": "ZOO_INIT_LIMIT", "value": "10"})
 #@   env.append({"name": "ZOO_SYNC_LIMIT", "value": "2"})
 #@   resources = {"limits":{"cpu": "0.2", "memory": "0.4Gi"}, "requests":{"cpu":"0.2", "memory":"0.4Gi"}}
-#@   output = [{"name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@   output = []
+#@   if networkSpec.k8s.data_persistence == True:
+#@     output = [{"volumeMounts":[{"mountPath": "/data", "name": "zookeeper-data-storage"}],"name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@   else:
+#@     output = [{"name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@   end
 #@   return output
 #@ end
 
-#@ def kafkaContainers(input, id, replicas, zklist):
+#@ def kafkaContainers(input, id, replicas, zklist, networkSpec):
 #@   id = id + 1
 #@   env = [{ "name": "KAFKA_BROKER_ID", "value": "{}".format(id)}]
 #@   env.append({"name": "KAFKA_ZOOKEEPER_CONNECT", "value": "{}".format(zklist)})
@@ -23,10 +28,16 @@
 #@   env.append({"name": "KAFKA_MAX_REQUEST_SIZE", "value": "104857600"})
 #@   env.append({"name": "KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE", "value": "true"})
 #@   env.append({"name": "KAFKA_MIN_INSYNC_REPLICAS", "value": "2"})
+#@   env.append({"name": "KAFKA_LOG_DIRS", "value": "/opt/kafka/data" })
 #@   env.append({"name": "KAFKA_MESSAGE_MAX_BYTES", "value": "103809024"})
 #@   env.append({"name": "KAFKA_REPLICA_FETCH_MAX_BYTES", "value": "103809024"})
 #@   resources = {"limits":{"cpu": "0.2", "memory": "0.5Gi"}, "requests":{"cpu":"0.2", "memory":"0.5Gi"}}
-#@   output = [{"name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@   output = []
+#@   if networkSpec.k8s.data_persistence == True:
+#@     output = [{"volumeMounts":[{"mountPath": "/opt/kafka/data", "name": "kafka-data-storage"}],"name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@   else:
+#@     output = [{"name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@   end
 #@   return output
 #@ end
 
@@ -172,17 +183,27 @@
 #@   return output
 #@ end
 
-#@ def kafkaSpec(input, id, replicas, type, numZK):
+#@ def kafkaSpec(input, id, replicas, type, numZK, networkSpec):
 #@   type = {}
 #@   specData = {}
 #@   if input.startswith("zookeeper"):
 #@     type = "zookeeper"
-#@     specData = {"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["zookeeper"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
-#@              "containers": zkContainers(input, id, zkList(numZK, type))}
+#@     if networkSpec.k8s.data_persistence == True:
+#@       specData = {"volumes": [{"name":"zookeeper-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}}],"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["zookeeper"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@              "containers": zkContainers(input, id, zkList(numZK, type), networkSpec)}
+#@     else:
+#@       specData = {"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["zookeeper"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@              "containers": zkContainers(input, id, zkList(numZK, type), networkSpec)}
+#@     end
 #@   elif input.startswith("kafka"):
 #@     type = "kafka"
-#@     specData = {"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["kafka"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
-#@              "containers": kafkaContainers(input, id, replicas, zkList(numZK, type))}
+#@     if networkSpec.k8s.data_persistence == True:
+#@     specData = {"volumes": [{"name":"kafka-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}}],"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["kafka"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@              "containers": kafkaContainers(input, id, replicas, zkList(numZK, type), networkSpec)}
+#@     else:
+#@       specData = {"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["kafka"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@              "containers": kafkaContainers(input, id, replicas, zkList(numZK, type), networkSpec)}
+#@     end
 #@   end
 #@   output= specData
 #@   return output
@@ -247,7 +268,7 @@
 #@ end
 
 #@ if data.values.orderer.orderertype == "kafka":
-#@ for i in range(0, data.values.kafka.num_zookeepers):
+#@   for i in range(0, data.values.kafka.num_zookeepers):
 ---
 apiVersion: v1
 kind: Pod
@@ -256,9 +277,9 @@ metadata:
   labels:
     k8s-app: #@ "zookeeper{}".format(i)
     type: zookeeper
-spec: #@ kafkaSpec("zookeeper{}".format(i), i, 0, "zookeeper", data.values.kafka.num_zookeepers)
-#@ end
-#@ for j in range(0, data.values.kafka.num_kafka):
+spec: #@ kafkaSpec("zookeeper{}".format(i), i, 0, "zookeeper", data.values.kafka.num_zookeepers, data.values)
+#@   end
+#@   for j in range(0, data.values.kafka.num_kafka):
 ---
 apiVersion: v1
 kind: Pod
@@ -267,46 +288,48 @@ metadata:
   labels:
     k8s-app: #@ "kafka{}".format(j)
     type: kafka
-spec: #@ kafkaSpec("kafka{}".format(j), j, data.values.kafka.num_kafka_replications, "kafka", data.values.kafka.num_zookeepers)
-#@ end
+spec: #@ kafkaSpec("kafka{}".format(j), j, data.values.kafka.num_kafka_replications, "kafka", data.values.kafka.num_zookeepers, data.values)
+#@   end
 #@ end
 
 #@ for i in range(0, len(data.values.peer_organizations)):
-#@ organization = data.values.peer_organizations[i]
-#@ for j in range(0, organization.num_ca):
+#@   organization = data.values.peer_organizations[i]
+#@   for j in range(0, organization.num_ca):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
 spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "peer", data.values, organization.msp_id)
-#@ end
-#@ for j in range(0, organization.num_peers):
+#@   end
+#@   for j in range(0, organization.num_peers):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "peer{}-{}".format(j, organization.name)
 spec: #@ spec("peer{}-{}".format(j, organization.name), organization.name, "peer", data.values, organization.msp_id)
-#@ end
+#@   end
 #@ end
 
-#@ for i in range(0, len(data.values.orderer_organizations)):
-#@ organization = data.values.orderer_organizations[i]
-#@ for j in range(0, organization.num_ca):
+#@ num_organizations = len(data.values.orderer_organizations)
+#@ for i in range(0, num_organizations):
+#@   organization = data.values.orderer_organizations[i]
+#@   for j in range(0, organization.num_ca):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
 spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "orderer", data.values, organization.msp_id)
-#@ end
-#@ for j in range(0, organization.num_orderers):
+#@   end
+#@   num_orderers = organization.num_orderers
+#@   for j in range(0, num_orderers):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "orderer{}-{}".format(j, organization.name)
 spec: #@ spec("orderer{}-{}".format(j, organization.name), organization.name, "orderer", data.values, organization.msp_id)
-#@ end
+#@   end
 #@ end

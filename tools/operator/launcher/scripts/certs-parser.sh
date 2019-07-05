@@ -18,23 +18,23 @@ set -e
 echo "#####Creating MSP directory structure#####"
 mkdir -p $MSPDIR/msp/admincerts $MSPDIR/msp/cacerts $MSPDIR/msp/signcerts $MSPDIR/msp/tlscacerts $MSPDIR/msp/keystore $MSPDIR/tls $MSPDIR/ca $MSPDIR/tlsca
 
-ADMINCERT=$(eval echo $(cat $MSPSECRET | jq '.msp.admin_certs.admin_pem'))
+ADMINCERT=$(eval echo $(cat $MSPSECRET | jq '.msp.admin_pem'))
 echo -e $ADMINCERT > $MSPDIR/msp/admincerts/cert.pem
 truncate -s -1 $MSPDIR/msp/admincerts/cert.pem
 
-CACERT=$(eval echo $(cat $MSPSECRET | jq '.msp.ca_certs.ca_pem'))
+CACERT=$(eval echo $(cat $MSPSECRET | jq '.msp.ca_pem'))
 echo -e $CACERT > $MSPDIR/msp/cacerts/ca-cert.pem
 truncate -s -1 $MSPDIR/msp/cacerts/ca-cert.pem
 
-SIGNCERT=$(eval echo $(cat $MSPSECRET | jq '.msp.sign_certs.pem'))
+SIGNCERT=$(eval echo $(cat $MSPSECRET | jq '.msp.pem'))
 echo -e $SIGNCERT > $MSPDIR/msp/signcerts/cert.pem
 truncate -s -1 $MSPDIR/msp/signcerts/cert.pem
 
-TLSCACERT=$(eval echo $(cat $MSPSECRET | jq '.msp.tls_ca.tls_pem'))
+TLSCACERT=$(eval echo $(cat $MSPSECRET | jq '.msp.tls_pem'))
 echo -e $TLSCACERT > $MSPDIR/msp/tlscacerts/tlsca-cert.pem
 truncate -s -1 $MSPDIR/msp/tlscacerts/tlsca-cert.pem
 
-PRIVKEY=$(eval echo $(cat $MSPSECRET | jq '.msp.key_store.private_key'))
+PRIVKEY=$(eval echo $(cat $MSPSECRET | jq '.msp.private_key'))
 echo -e $PRIVKEY > $MSPDIR/msp/keystore/cert.key
 truncate -s -1 $MSPDIR/msp/keystore/cert.key
 

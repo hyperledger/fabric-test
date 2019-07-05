@@ -32,18 +32,19 @@
 #@ end
 #@ def organizations(input, type):
 #@   output = []
-#@   certs_location = input.certs_location
-#@   if certs_location.endswith("/") == False:
-#@     certs_location = certs_location + "/"
+#@   artifacts_location = input.artifacts_location
+#@   if artifacts_location.endswith("/") == False:
+#@     artifacts_location = artifacts_location + "/"
 #@   end
 #@   if type == "orderer":
-#@     for i in range(0, len(input.orderer_organizations)):
-#@       output.append({"Name": input.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(input.orderer_organizations[i]), "ID": input.orderer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
+#@     num_organizations = len(input.orderer_organizations)
+#@     for i in range(0, num_organizations):
+#@       output.append({"Name": input.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(input.orderer_organizations[i]), "ID": input.orderer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
 #@     end
 #@   end
 #@   if type == "peer":
 #@     for i in range(0, len(input.peer_organizations)):
-#@       output.append({"Name": input.peer_organizations[i].name, "AnchorPeers": anchorPeers(input.peer_organizations[i].name),"ID": input.peer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
+#@       output.append({"Name": input.peer_organizations[i].name, "AnchorPeers": anchorPeers(input.peer_organizations[i].name),"ID": input.peer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
 #@     end
 #@   end
 #@   return output
@@ -63,9 +64,11 @@
 #@ end
 #@ def ordererHosts(input):
 #@   result = []
-#@   for i in range(0, len(input.orderer_organizations)):
+#@   num_organizations = len(input.orderer_organizations)
+#@   for i in range(0, num_organizations):
 #@     ordererOrg = input.orderer_organizations[i]
-#@     for j in range(0, ordererOrg.num_orderers):
+#@     num_orderers = ordererOrg.num_orderers
+#@     for j in range(0, num_orderers):
 #@       result.append("orderer"+str(j)+"-"+ordererOrg.name+":7050")
 #@     end
 #@   end
@@ -74,9 +77,9 @@
 #@ def orderer(input):
 #@   result = {}
 #@   batch_size_options = input.orderer.batchsize
-#@   certs_location = input.certs_location
-#@   if certs_location.endswith("/") == False:
-#@     certs_location = certs_location + "/"
+#@   artifacts_location = input.artifacts_location
+#@   if artifacts_location.endswith("/") == False:
+#@     artifacts_location = artifacts_location + "/"
 #@   end
 #@   batchSize = {"MaxMessageCount": batch_size_options.maxmessagecount, "AbsoluteMaxBytes": batch_size_options.absolutemaxbytes, "PreferredMaxBytes": batch_size_options.preferredmaxbytes}
 #@   if(input.orderer.orderertype=="etcdraft"):
@@ -85,7 +88,7 @@
 #@     for i in range(0, len(input.orderer_organizations)):
 #@       for j in range(0, input.orderer_organizations[i].num_orderers):
 #@       ordererOrg = input.orderer_organizations[i]
-#@       certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(certs_location, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
+#@       certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(artifacts_location, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
 #@       consenters.append({"Host":"orderer{}-{}".format(j, ordererOrg.name), "Port": 7050, "ClientTLSCert": certs, "ServerTLSCert": certs})
 #@       end
 #@     end
