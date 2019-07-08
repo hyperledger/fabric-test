@@ -39,7 +39,11 @@
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_NAME", "value": "{}".format(input)})
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/ca/ca_private.key"})
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/ca/ca-cert.pem"})
-#@   env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
+#@   if networkSpec.tls == "mutual":
+#@     env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "true"})
+#@   else:
+#@     env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
+#@   end
 #@   env.append({"name": "FABRIC_CA_SERVER_TLS_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca/tlsca_private.key"})
 #@   env.append({"name": "FABRIC_CA_SERVER_TLS_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca/tlsca-cert.pem"})
 #@   resources = {"limits":{"cpu": "0.2", "memory": "0.5Gi"}, "requests":{"cpu":"0.2", "memory":"0.5Gi"}}
@@ -49,14 +53,44 @@
 #@   return output
 #@ end
 
+#@ def mutualTLS(networkSpec, type):
+#@   output = []
+#@   for i in range(0, len(data.values.peer_organizations)):
+#@     organization = data.values.peer_organizations[i]
+#@     if type == "clientrootca":
+#@       output.append("/etc/hyperledger/fabric/artifacts/{}/ca.{}-cert.pem".format(organization.name, organization.name))
+#@     elif type == "volumeMounts":
+#@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca-secret".format(organization.name)})
+#@     elif type == "volumes":
+#@       output.append({"name":"{}-clientrootca-secret".format(organization.name), "secret":{"secretName":"{}-clientrootca-secret".format(organization.name)}})
+#@     end
+#@   end
+#@   for j in range(0, len(data.values.orderer_organizations)):
+#@     organization = data.values.orderer_organizations[j]
+#@     if type == "clientrootca":
+#@       output.append("/etc/hyperledger/fabric/artifacts/{}/ca.{}-cert.pem".format(organization.name, organization.name))
+#@     elif type == "volumeMounts":
+#@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca-secret".format(organization.name)})
+#@     elif type == "volumes":
+#@       output.append({"name":"{}-clientrootca-secret".format(organization.name), "secret":{"secretName":"{}-clientrootca-secret".format(organization.name)}})
+#@     end
+#@   end
+#@   return output
+#@ end
 
 #@ def peerContainers(input, value, networkSpec, mspId):
-#@   env = [{"name": "CORE_VM_ENDPOINT", "value": "http://localhost:2375"}]
+#@   env = [{"name": "CORE_VM_ENDPOINT", "value": "localhost:2375"}]
 #@   env.append({"name": "CORE_PEER_GOSSIP_USELEADERELECTION", "value": "True"})
 #@   env.append({"name": "CORE_PEER_GOSSIP_ORGLEADER", "value": "false"})
 #@   env.append({"name": "CORE_PEER_LISTENADDRESS", "value": "0.0.0.0:7051"})
 #@   env.append({"name": "CORE_PEER_CHAINCODELISTENADDRESS", "value": "0.0.0.0:7052"})
-#@   env.append({"name": "CORE_PEER_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
+#@   if networkSpec.tls == "mutual":
+#@     env.append({"name": "CORE_PEER_TLS_CLIENTROOTCAS_FILES", "value": " ".join(mutualTLS(networkSpec, "clientrootca")) })
+#@     env.append({"name": "CORE_PEER_TLS_CLIENTAUTHREQUIRED", "value": "true"})
+#@     env.append({"name": "CORE_PEER_TLS_ENABLED", "value": "true"})
+#@   else:
+#@     env.append({"name": "CORE_PEER_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
+#@   end
 #@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": networkSpec.peer_fabric_logging_spec})
 #@   env.append({"name": "CORE_PEER_TLS_CERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.crt"})
 #@   env.append({"name": "CORE_PEER_TLS_KEY_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.key"})
@@ -68,8 +102,13 @@
 #@   env.append({"name": "CORE_PEER_LOCALMSPID", "value": "{}".format(mspId)})
 #@   env.append({"name": "CORE_PEER_MSPCONFIGPATH", "value": "/etc/hyperledger/fabric/artifacts/msp"})
 #@   env.append({"name": "CORE_PEER_FILESYSTEMPATH", "value": "/shared/data"})
+#@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
+#@   env.append({"name": "CORE_PEER_GOSSIP_BOOTSTRAP", "value": "{}:7051".format(input)})
 #@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
+#@   if networkSpec.tls == "mutual":
+#@     volumeMounts += mutualTLS(networkSpec, "volumeMounts")
+#@   end
 #@   if networkSpec.k8s.data_persistance == True:
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "peer-data-storage"})
 #@   end
@@ -84,9 +123,9 @@
 #@     env.append({"name": "CORE_LEDGER_STATE_STATEDATABASE", "value": "CouchDB"})
 #@     env.append({"name": "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS", "value": "localhost:5984"})
 #@     container = {"name":"couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "securityContext":{"privileged":True}, "resources":{"limits":{"cpu": "0.1", "memory": "1Gi"}, "requests":{"cpu": "0.1", "memory": "1Gi"}}}
-#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}}, {"name":input, "image": peer_image, "imagePullPolicy": "Always", "securityContext" : { "privileged": True }, "env": env, "volumeMounts":volumeMounts, "command": ["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && peer node start".format(input)], "resources": resources}, container]
+#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": resources}, {"name":input, "image": peer_image, "imagePullPolicy": "Always", "securityContext" : { "privileged": True }, "env": env, "volumeMounts":volumeMounts, "command": ["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && peer node start".format(input)], "resources": resources}, container]
 #@   else:
-#@      output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}}, {"name":input, "image": peer_image, "imagePullPolicy": "Always", "securityContext" : { "privileged": True }, "env": env, "volumeMounts":volumeMounts, "command": ["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && peer node start".format(input)], "resources": resources}]
+#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": resources}, {"name":input, "image": peer_image, "imagePullPolicy": "Always", "securityContext" : { "privileged": True }, "env": env, "volumeMounts":volumeMounts, "command": ["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && peer node start".format(input)], "resources": resources}]
 #@   end
 #@   return output
 #@ end
@@ -96,7 +135,13 @@
 #@   env = [{"name": "ORDERER_GENERAL_LISTENADDRESS", "value": "0.0.0.0"}]
 #@   env.append({"name": "ORDERER_GENERAL_GENESISMETHOD", "value": "file"})
 #@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": networkSpec.orderer_fabric_logging_spec})
-#@   env.append({"name": "ORDERER_GENERAL_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
+#@   if networkSpec.tls == "mutual":
+#@     env.append({"name": "ORDERER_GENERAL_TLS_CLIENTROOTCAS", "value": "[{}]".format(", ".join(mutualTLS(networkSpec, "clientrootca"))) })
+#@     env.append({"name": "ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED", "value": "true"})
+#@     env.append({"name": "ORDERER_GENERAL_TLS_ENABLED", "value": "true"})
+#@   else:
+#@     env.append({"name": "ORDERER_GENERAL_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
+#@   end
 #@   env.append({"name": "ORDERER_GENERAL_GENESISFILE", "value": "/etc/hyperledger/fabric/genesisblock/genesis.block"})
 #@   env.append({"name": "ORDERER_GENERAL_LOCALMSPID", "value": "{}".format(mspId)})
 #@   env.append({"name": "ORDERER_GENERAL_LOCALMSPDIR", "value": "/etc/hyperledger/fabric/artifacts/msp"})
@@ -112,6 +157,9 @@
 #@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/genesisblock", "name": "genesisblock"})
+#@   if networkSpec.tls == "mutual":
+#@     volumeMounts += mutualTLS(networkSpec, "volumeMounts")
+#@   end
 #@   if networkSpec.k8s.data_persistance == True:
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "orderer-data-storage"})
 #@   end
@@ -154,6 +202,9 @@
 #@     if networkSpec.k8s.data_persistance == True:
 #@        volumes.append({"name":"orderer-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}})
 #@     end
+#@     if networkSpec.tls == "mutual":
+#@        volumes += mutualTLS(networkSpec, "volumes")
+#@     end
 #@     specData = {"volumes": volumes, "affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1, "podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type", "operator": "In", "values":["{}".format(value)]}]}, "topologyKey":"kubernetes.io/hostname"}}]}},
 #@              "containers": ordererContainers(input, orgName, networkSpec, mspId)}
 #@   else:
@@ -161,6 +212,9 @@
 #@     volumes = [{"name":"certsparser", "configMap":{"name":"certsparser"}}, {"name":"mspsecret", "secret":{"secretName":"{}".format(input)}}]
 #@     if networkSpec.k8s.data_persistance == True:
 #@        volumes.append({"name":"peer-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}})
+#@     end
+#@     if networkSpec.tls == "mutual":
+#@        volumes += mutualTLS(networkSpec, "volumes")
 #@     end
 #@     specData = {"volumes": volumes, "affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1, "podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type", "operator": "In", "values":["{}".format(value)]}]}, "topologyKey":"kubernetes.io/hostname"}}]}},
 #@              "containers": peerContainers(input, orgName, networkSpec, mspId)}

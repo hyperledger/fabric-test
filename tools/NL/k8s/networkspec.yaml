@@ -13,7 +13,7 @@ db_type: couchdb
 peer_fabric_logging_spec: error
 # This parameter is used to define fabric logging spec in orderers
 orderer_fabric_logging_spec: error
-# tls in the network (true, false or client(mutualtls))
+# tls in the network (true, false or mutual(mutualtls))
 tls: true
 # fabric metrics with prometheus (true/false)
 metrics: false

@@ -22,6 +22,7 @@ type Config struct {
 	OrdererOrganizations []OrdererOrganizations `yaml:"orderer_organizations,omitempty"`
 	PeerOrganizations    []PeerOrganizations    `yaml:"peer_organizations,omitempty"`
 	NumChannels          int                    `yaml:"num_channels,omitempty"`
+	TLS                  string                 `yaml:"tls,omitempty"`
 	K8s                  struct {
 		DataPersistance bool `yaml:"data_persistance,omitempty"`
 	} `yaml:"k8s,omitempty"`
@@ -233,6 +234,12 @@ func createMspSecret(networkSpec Config, kubeConfigPath string) error {
 			caPath := filepath.Join(networkSpec.ArtifactsLocation, "crypto-config/ordererOrganizations", networkSpec.OrdererOrganizations[i].Name)
 			_ = createMspJson(networkSpec, "", caPath, caName, kubeConfigPath)
 		}
+		if networkSpec.TLS == "mutual" {
+			err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "create", "secret", "generic", fmt.Sprintf("%v-clientrootca-secret", networkSpec.OrdererOrganizations[i].Name), fmt.Sprintf("--from-file=%v/crypto-config/ordererOrganizations/%v/ca/ca.%v-cert.pem", networkSpec.ArtifactsLocation, networkSpec.OrdererOrganizations[i].Name, networkSpec.OrdererOrganizations[i].Name)})
+	        if err != nil {
+		    	return err
+	        }
+		}
 	}
 
 	for i := 0; i < len(networkSpec.PeerOrganizations); i++ {
@@ -246,6 +253,12 @@ func createMspSecret(networkSpec Config, kubeConfigPath string) error {
 			caName := fmt.Sprintf("ca%s-%s", fmt.Sprintf("%v", j), networkSpec.PeerOrganizations[i].Name)
 			caPath := filepath.Join(networkSpec.ArtifactsLocation, "crypto-config/peerOrganizations", networkSpec.PeerOrganizations[i].Name)
 			_ = createMspJson(networkSpec, "", caPath, caName, kubeConfigPath)
+		}
+		if networkSpec.TLS == "mutual" {
+			err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "create", "secret", "generic", fmt.Sprintf("%v-clientrootca-secret", networkSpec.PeerOrganizations[i].Name), fmt.Sprintf("--from-file=%v/crypto-config/peerOrganizations/%v/ca/ca.%v-cert.pem", networkSpec.ArtifactsLocation, networkSpec.PeerOrganizations[i].Name, networkSpec.PeerOrganizations[i].Name)})
+	        if err != nil {
+		        return err
+	        }
 		}
 	}
 	return nil
@@ -346,6 +359,12 @@ func networkCleanUp(networkSpec Config, kubeConfigPath string) error {
 				fmt.Println(err.Error())
 			}
 		}
+		if networkSpec.TLS == "mutual" {
+			err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "secrets", fmt.Sprintf("%v-clientrootca-secret", networkSpec.OrdererOrganizations[i].Name)})
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}
 	}
 
 	for i := 0; i < len(networkSpec.PeerOrganizations); i++ {
@@ -359,6 +378,12 @@ func networkCleanUp(networkSpec Config, kubeConfigPath string) error {
 		for j := 0; j < networkSpec.PeerOrganizations[i].NumCa; j++ {
 			caName := fmt.Sprintf("ca%v-%v", j, networkSpec.PeerOrganizations[i].Name)
 			err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "secrets", caName})
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		}
+		if networkSpec.TLS == "mutual" {
+			err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "secrets", fmt.Sprintf("%v-clientrootca-secret", networkSpec.PeerOrganizations[i].Name)})
 			if err != nil {
 				fmt.Println(err.Error())
 			}
