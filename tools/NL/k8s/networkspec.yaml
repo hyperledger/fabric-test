@@ -82,7 +82,13 @@ num_channels: 10
 
 k8s:
   service_type: NodePort
-  data_persistance: true
+  # data_persistence is used to store the data from fabric containers
+  # It can take values of true, false and local
+  # When true is used, it uses storage_class and storage_capacity to create
+  # persistent volumes. When false is used, backup will not be configured.
+  # When local is used, hostPath will be used to store the data from fabric containers
+  # to worker nodes on which pods are running.
+  data_persistence: true
   storage_class: default
   storage_capacity: 20Gi
 

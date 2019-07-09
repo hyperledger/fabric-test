@@ -24,7 +24,7 @@ type Config struct {
 	NumChannels          int                    `yaml:"num_channels,omitempty"`
 	TLS                  string                 `yaml:"tls,omitempty"`
 	K8s                  struct {
-		DataPersistance bool `yaml:"data_persistance,omitempty"`
+		DataPersistence string `yaml:"data_persistence,omitempty"`
 	} `yaml:"k8s,omitempty"`
 }
 
@@ -391,6 +391,9 @@ func networkCleanUp(networkSpec Config, kubeConfigPath string) error {
 	}
 	err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "secrets", "genesisblock"})
 	err = executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "-f", "./configFiles/fabric-k8s-pods.yaml"})
+	if networkSpec.K8s.DataPersistence == "local" {
+		err = executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "apply", "-f", "./scripts/alpine.yaml"})
+	}
 	err = executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "-f", "./configFiles/k8s-service.yaml"})
 	err = executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "-f", "./configFiles/fabric-pvc.yaml"})
 	err = executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "configmaps", "certsparser"})
@@ -411,6 +414,9 @@ func networkCleanUp(networkSpec Config, kubeConfigPath string) error {
 	err = os.RemoveAll(path)
 	path = filepath.Join(networkSpec.ArtifactsLocation, "crypto-config")
 	err = os.RemoveAll(path)
+	if networkSpec.K8s.DataPersistence == "local" {
+		err = executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "delete", "-f", "./scripts/alpine.yaml"})
+	}
 	if err != nil {
 		return err
 	}
@@ -491,7 +497,7 @@ func modeAction(mode string, input Config, kubeConfigPath string) {
 				log.Fatalf("Failed to create cert parser configmap; err = %v", err)
 			}
 
-			if input.K8s.DataPersistance == true {
+			if input.K8s.DataPersistence == "true" {
 				err = createPvcs(kubeConfigPath)
 				if err != nil {
 					log.Fatalf("Failed to create pvcs; err = %v", err)
