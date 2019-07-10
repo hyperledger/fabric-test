@@ -8,7 +8,7 @@
 #@   readers = {}
 #@   writers = {}
 #@   admins = {"Type": "Signature", "Rule": "OR('{}.admin')".format(mspId)}
-#@   if type.startswith("orderer"):
+#@   if type == "orderer":
 #@     readers = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
 #@     writers = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
 #@   else:
@@ -17,6 +17,13 @@
 #@   end
 #@   output = {"Readers": readers, "Writers": writers, "Admins": admins}
 #@   return output
+#@ end
+#@ def orgOrderers(ordererOrg):
+#@  orderers = []
+#@  for i in range(0, ordererOrg.num_orderers):
+#@    orderers.append("orderer{}-{}:7050".format(i, ordererOrg.name))
+#@  end
+#@  return orderers
 #@ end
 #@ def anchorPeers(orgName):
 #@  anchorpeers = []
@@ -29,12 +36,12 @@
 #@   if certs_location.endswith("/") == False:
 #@     certs_location = certs_location + "/"
 #@   end
-#@   if(type.startswith("peer") == False):
+#@   if type == "peer":
 #@   for i in range(0, len(input.orderer_organizations)):
-#@     output.append({"Name": input.orderer_organizations[i].name, "ID": input.orderer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
+#@     output.append({"Name": input.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(input.orderer_organizations[i]), "ID": input.orderer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
 #@   end
 #@   end
-#@   if(type.startswith("orderer") == False):
+#@   if type == "orderer":
 #@     for i in range(0, len(input.peer_organizations)):
 #@       output.append({"Name": input.peer_organizations[i].name, "AnchorPeers": anchorPeers(input.peer_organizations[i].name),"ID": input.peer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
 #@     end
@@ -46,7 +53,7 @@
 #@   writers = {"Type": "ImplicitMeta", "Rule": "ANY Writers"}
 #@   admins = {"Type": "ImplicitMeta", "Rule": "ANY Admins"}
 #@   output = {}
-#@   if type.startswith("orderer"):
+#@   if type == "orderer":
 #@     blockValidation = {"Type": "ImplicitMeta", "Rule": "ANY Writers"}
 #@     output = {"Readers":readers, "Writers": writers, "Admins": admins, "BlockValidation": blockValidation}
 #@   else:
