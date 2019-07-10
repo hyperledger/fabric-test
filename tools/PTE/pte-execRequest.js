@@ -1261,7 +1261,7 @@ function setTargetPeers(tPeers) {
             var discoveryOpt = txCfgPtr.discoveryOpt;
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d setTargetPeers] discoveryOpt: %j', Nid, channelName, org, pid, discoveryOpt);
             if ((typeof( discoveryOpt.localHost ) !== 'undefined')) {
-                if (  discoveryOpt.localHost ) {
+                if (  discoveryOpt.localHost == 'TRUE' ) {
                     localHost = true;
                 }
             }
