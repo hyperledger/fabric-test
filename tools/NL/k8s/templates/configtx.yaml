@@ -18,6 +18,11 @@
 #@   output = {"Readers": readers, "Writers": writers, "Admins": admins}
 #@   return output
 #@ end
+#@ def anchorPeers(orgName):
+#@  anchorpeers = []
+#@  anchorpeers.append({"Host": "peer0-{}".format(orgName), "Port": "7051"})
+#@  return anchorpeers
+#@ end
 #@ def organizations(input, type):
 #@   output = []
 #@   certs_location = input.certs_location
@@ -31,7 +36,7 @@
 #@   end
 #@   if(type.startswith("orderer") == False):
 #@     for i in range(0, len(input.peer_organizations)):
-#@       output.append({"Name": input.peer_organizations[i].name, "ID": input.peer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
+#@       output.append({"Name": input.peer_organizations[i].name, "AnchorPeers": anchorPeers(input.peer_organizations[i].name),"ID": input.peer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
 #@     end
 #@   end
 #@   return output

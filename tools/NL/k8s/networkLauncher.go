@@ -292,6 +292,12 @@ func generateChannelTransaction(networkSpec Config) error {
 		if err != nil {
 			return err
 		}
+		for j := 0; j < len(networkSpec.PeerOrganizations); j++ {
+			err := executeCommand("configtxgen", []string{"-profile", "testorgschannel", "-outputAnchorPeersUpdate", fmt.Sprintf("%v/%vanchor.tx", path, networkSpec.PeerOrganizations[j].MspID), "-asOrg", fmt.Sprintf("%v", networkSpec.PeerOrganizations[j].Name), "-channelID", fmt.Sprintf("testorgschannel%v", i), "-configPath=./configFiles/"})
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
