@@ -3,7 +3,7 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
-#@ if data.values.k8s.data_persistence == "true":
+#@ if data.values.k8s.data_persistence == True:
 #@ for i in range(0, len(data.values.peer_organizations)):
 #@ organization = data.values.peer_organizations[i]
   #@ for j in range(0, organization.num_peers):

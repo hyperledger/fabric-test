@@ -36,12 +36,12 @@
 #@   if certs_location.endswith("/") == False:
 #@     certs_location = certs_location + "/"
 #@   end
-#@   if type == "peer":
-#@   for i in range(0, len(input.orderer_organizations)):
-#@     output.append({"Name": input.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(input.orderer_organizations[i]), "ID": input.orderer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
-#@   end
-#@   end
 #@   if type == "orderer":
+#@     for i in range(0, len(input.orderer_organizations)):
+#@       output.append({"Name": input.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(input.orderer_organizations[i]), "ID": input.orderer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/ordererOrganizations/"+input.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(input.orderer_organizations[i].msp_id, "orderer")})
+#@     end
+#@   end
+#@   if type == "peer":
 #@     for i in range(0, len(input.peer_organizations)):
 #@       output.append({"Name": input.peer_organizations[i].name, "AnchorPeers": anchorPeers(input.peer_organizations[i].name),"ID": input.peer_organizations[i].msp_id, "MSPDir": certs_location+"crypto-config/peerOrganizations/"+input.peer_organizations[i].name+"/msp", "Policies": orgPolicies(input.peer_organizations[i].msp_id, "peer")})
 #@     end
@@ -104,7 +104,7 @@
 #@   end
 #@   return result
 #@ end
-Organizations: #@ organizations(data.values, "")
+Organizations: #@ organizations(data.values, "orderer") + organizations(data.values, "peer")
 
 Orderer: #@ orderer(data.values)
 Application:
