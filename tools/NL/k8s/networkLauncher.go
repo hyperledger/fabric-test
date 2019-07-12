@@ -237,7 +237,7 @@ func createMspSecret(networkSpec Config, kubeConfigPath string) error {
 		if networkSpec.TLS == "mutual" {
 			err := executeCommand("kubectl", []string{fmt.Sprintf("--kubeconfig=%v", kubeConfigPath), "create", "secret", "generic", fmt.Sprintf("%v-clientrootca-secret", networkSpec.OrdererOrganizations[i].Name), fmt.Sprintf("--from-file=%v/crypto-config/ordererOrganizations/%v/ca/ca.%v-cert.pem", networkSpec.ArtifactsLocation, networkSpec.OrdererOrganizations[i].Name, networkSpec.OrdererOrganizations[i].Name)})
 	        if err != nil {
-		    	return err
+			return err
 	        }
 		}
 	}
@@ -288,12 +288,12 @@ func generateChannelTransaction(networkSpec Config) error {
 	_ = os.Mkdir(path, 0755)
 
 	for i := 0; i < networkSpec.NumChannels; i++ {
-		err := executeCommand("configtxgen", []string{"-profile", "testorgschannel", "-channelCreateTxBaseProfile", "testOrgsOrdererGenesis", "-channelID", fmt.Sprintf("testorgschannel%v", i), "-outputCreateChannelTx", fmt.Sprintf("%v/testorgschannel%v.tx", path, i), "-configPath=./configFiles/"})
+		err := executeCommand("configtxgen", []string{"-profile", "testorgschannel", "-channelID", fmt.Sprintf("testorgschannel%v", i), "-outputCreateChannelTx", fmt.Sprintf("%v/testorgschannel%v.tx", path, i), "-configPath=./configFiles/"})
 		if err != nil {
 			return err
 		}
 		for j := 0; j < len(networkSpec.PeerOrganizations); j++ {
-			err := executeCommand("configtxgen", []string{"-profile", "testorgschannel", "-outputAnchorPeersUpdate", fmt.Sprintf("%v/%vanchor.tx", path, networkSpec.PeerOrganizations[j].MspID), "-asOrg", fmt.Sprintf("%v", networkSpec.PeerOrganizations[j].Name), "-channelID", fmt.Sprintf("testorgschannel%v", i), "-configPath=./configFiles/"})
+			err := executeCommand("configtxgen", []string{"-profile", "testorgschannel", "-outputAnchorPeersUpdate", fmt.Sprintf("%v/testorgschannel%v%vanchor.tx", path, i, networkSpec.PeerOrganizations[j].MspID), "-asOrg", fmt.Sprintf("%v", networkSpec.PeerOrganizations[j].Name), "-channelID", fmt.Sprintf("testorgschannel%v", i), "-configPath=./configFiles/"})
 			if err != nil {
 				return err
 			}
