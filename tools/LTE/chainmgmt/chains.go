@@ -121,7 +121,12 @@ func (c *Chain) startBlockPollingAndCommit() {
 			if block == nil {
 				break
 			}
-			benchcommon.PanicOnError(c.PeerLedger.CommitWithPvtData(&ledger.BlockAndPvtData{Block: block}))
+			benchcommon.PanicOnError(
+				c.PeerLedger.CommitWithPvtData(
+					&ledger.BlockAndPvtData{Block: block},
+					&ledger.CommitOptions{},
+				),
+			)
 		}
 	}()
 }
