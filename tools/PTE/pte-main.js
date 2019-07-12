@@ -1050,9 +1050,15 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
                 return client.updateChannel(request);
             }
         }).then((result) => {
-            logger.info('[createOrUpdateOneChannel] Successfully created/updated the channel (%s).', channelName);
-            evtDisconnect();
-            process.exit();
+            if ( result.status == 'SUCCESS' ) {
+                logger.info('[createOrUpdateOneChannel] Successfully created/updated the channel (%s) with result: %j', channelName, result);
+                evtDisconnect();
+                process.exit();
+            } else {
+                logger.error('[createOrUpdateOneChannel] Failed to created/updated the channel (%s) with result: %j', channelName, result);
+                evtDisconnect();
+                process.exit(1);
+            }
         })
         .then((nothing) => {
             logger.info('Successfully waited to make sure new channel was created/updated.');
