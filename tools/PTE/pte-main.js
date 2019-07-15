@@ -1200,9 +1200,9 @@ async function execQueryBlock(channel, sB, eB) {
         block.forEach(function(block){
 
             totalLength = totalLength + block.data.data.length;
-            logger.info('[execQueryBlock] block:Length:accu length= %d:%d:%d', block.header.number, block.data.data.length, totalLength);
+            logger.info('[execQueryBlock] channel(%s) block:Length:accu length= %d:%d:%d', channelName, block.header.number, block.data.data.length, totalLength);
         });
-        logger.info('[execQueryBlock] blocks= %d:%d, totalLength= %j', sBlock, eB, totalLength);
+        logger.info('[execQueryBlock] channel(%s) blocks= %d:%d, totalLength= %j', channelName, sBlock, eB, totalLength);
 
     }).catch((err) => {
         logger.error(err.stack ? err.stack : err);
@@ -1227,7 +1227,7 @@ async function preQueryBlock(channel, sB, eB) {
                 eB=eBlock;
             }
 
-            logger.info('[preQueryBlock] starting Block:ending Block= %d:%d', sB, eB);
+            logger.info('[preQueryBlock] channel(%s) starting Block:ending Block= %d:%d', channelName, sB, eB);
             await execQueryBlock(channel, sB, eB);
             sB=eB+1;
         }
@@ -1278,10 +1278,10 @@ try{
         return channel.queryInfo();
     }).then((blockchainInfo) => {
         var blockHeight = blockchainInfo.height - 1;
-        logger.info('[queryBlockchainInfo] Channel queryInfo() returned block height=' + blockchainInfo.height);
+        logger.info('[queryBlockchainInfo] channel(%s) block height= %d', channelName, blockchainInfo.height);
         if ( eBlock > blockHeight ) {
-            logger.info('[queryBlockchainInfo] eBlock:block height = %d:%d', eBlock, blockHeight);
-            logger.info('[queryBlockchainInfo] reset eBlock to block height');
+            logger.info('[queryBlockchainInfo] channel (%s) eBlock:block height = %d:%d', channelName, eBlock, blockHeight);
+            logger.info('[queryBlockchainInfo] channel(%s) reset eBlock to block height', channelName);
             eBlock = blockHeight;
         }
 
