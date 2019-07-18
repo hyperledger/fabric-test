@@ -123,11 +123,11 @@ usage () {
     echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 --orgprefix org -a sample_java sample_js --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
     echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 -a sample_cc --freq 10 --nreq 1000 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
     echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a sample_cc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --targetorderers RoundRobin --chkpeers ORGANCHOR -t move"
-    echo "Create channels testorgschannel_ch0 through testorgschannel_ch8 using these options: [--chan0 0] --chanprefix testorgschannel --nchan 9"
-    echo "Create channels testorgschannel_ch5 through testorgschannel_ch13, using options: --chan0 5 --chanprefix testorgschannel --nchan 9"
-    echo "Create 1 channel testorgschannel_ch5: --chan0 5 --chanprefix testorgschannel --nchan 1"
-    echo "To select testorgschannel_ch5 for traffic, the -n option will not work anymore. Instead, do this for using only chan5: --chan0 5 --chanprefix testorgschannel --nchan 1"
-    echo "To select testorgschannel_ch5 for traffic, the -n option will not work anymore. Instead, do this for using chan5-chan7: --chan0 5 --chanprefix testorgschannel --nchan 3"
+    echo -e "Create channels testorgschannel_ch0 through testorgschannel_ch8 using these options: [--chan0 0] --chanprefix testorgschannel --nchan 9"
+    echo -e "Create channels testorgschannel_ch5 through testorgschannel_ch13, using options: --chan0 5 --chanprefix testorgschannel --nchan 9"
+    echo -e "Create 1 channel testorgschannel_ch5: --chan0 5 --chanprefix testorgschannel --nchan 1"
+    echo -e "To select testorgschannel_ch5 for traffic, the -n option will not work anymore. Instead, do this for using only chan5: --chan0 5 --chanprefix testorgschannel --nchan 1"
+    echo -e "To select testorgschannel_ch5 for traffic, the -n option will not work anymore. Instead, do this for using chan5-chan7: --chan0 5 --chanprefix testorgschannel --nchan 3"
     exit
 }
 
@@ -516,8 +516,8 @@ TransactionProc() {
         for cppath in "${CPDIR[@]}"; do
             # loop on channel list
             for ((j=0; j<${#CHANNEL[@]}; j++)); do
-                channelName=${CHANNEL[$i]}
-                channelID=${CHANNELID[$i]}
+                channelName=${CHANNEL[$j]}
+                channelID=${CHANNELID[$j]}
                 echo "process $chaincode tx on $cppath"
                 fname=$channelName"-"$chaincode
                 echo "fname" $fname
@@ -536,7 +536,7 @@ TransactionProc() {
                 fi
 
                 # create PTE transaction configuration input json
-                PreCFGProc $pteCfgTX $cppath $channelName $chaincode $channelID
+                PreCFGProc $pteCfgTX $cppath $channelName $channelID $chaincode
                 PreTXProc $pteTXopt $INVOKETYPE
 
                 runCaseTX=runCasesTX-$fname".txt"

@@ -35,3 +35,9 @@ bin/
 .vscode
 #node_modules
 feature/node_modules/*
+tools/PTE/node_modules
+tools/operator/configFiles
+tools/operator/launcher/ytt
+tools/operator/templates/input.yaml
+regression/systemtest/results_systest_pte.xml
+tools/PTE/runPTE/

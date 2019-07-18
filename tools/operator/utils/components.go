@@ -19,7 +19,7 @@ func ChannelArtifactsDir(artifactsLocation string) string {
 
 //ConnectionProfilesDir --
 func ConnectionProfilesDir(artifactsLocation string) string {
-	return componentPath(artifactsLocation, "conenction-profile")
+	return componentPath(artifactsLocation, "connection-profile")
 }
 
 //OrdererOrgsDir --
