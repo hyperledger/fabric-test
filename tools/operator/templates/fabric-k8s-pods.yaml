@@ -115,6 +115,11 @@
 #@   env.append({"name": "CORE_PEER_FILESYSTEMPATH", "value": "/shared/data"})
 #@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
 #@   env.append({"name": "CORE_PEER_GOSSIP_BOOTSTRAP", "value": "{}:7051".format(input)})
+#@   if networkSpec.metrics == True:
+#@     env.append({"name": "CORE_OPERATIONS_LISTENADDRESS", "value": ":9443"})
+#@     env.append({"name": "CORE_OPERATIONS_TLS_ENABLED", "value": "false" })
+#@     env.append({"name": "CORE_METRICS_PROVIDER", "value": "prometheus" })
+#@   end
 #@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
 #@   if networkSpec.tls == "mutual":
@@ -165,6 +170,11 @@
 #@   env.append({"name": "ORDERER_FILELEDGER_LOCATION", "value": "/shared/data"})
 #@   env.append({"name": "ORDERER_CONSENSUS_WALDIR", "value": "/shared/data/etcdraft/wal"})
 #@   env.append({"name": "ORDERER_CONSENSUS_SNAPDIR", "value": "/shared/data/etcdraft/snapshot"})
+#@   if networkSpec.metrics == True:
+#@     env.append({"name": "ORDERER_OPERATIONS_LISTENADDRESS", "value": ":8443"})
+#@     env.append({"name": "ORDERER_OPERATIONS_TLS_ENABLED", "value": "false" })
+#@     env.append({"name": "ORDERER_METRICS_PROVIDER", "value": "prometheus" })
+#@   end
 #@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/genesisblock", "name": "genesisblock"})
@@ -212,6 +222,7 @@
 #@ def spec(input, orgName, value, networkSpec, mspId):
 #@   type = {}
 #@   specData = {}
+#@   metadata = {}
 #@   if input.startswith("ca"):
 #@     type = "ca"
 #@     specData = {"volumes":[{"name":"certsparser", "configMap":{"name":"certsparser"}}, {"name":"mspsecret", "secret":{"secretName":"{}".format(input)}}],
@@ -245,7 +256,17 @@
 #@              "containers": peerContainers(input, orgName, networkSpec, mspId)}
 #@   end
 #@   selector = {"matchLabels":{"k8s-app": input, "type": type}}
-#@   metadata = {"labels":{"k8s-app": input, "type":type}}
+#@   if networkSpec.metrics == True:
+#@     if type == "orderer":
+#@       metadata = {"labels":{"k8s-app": input, "type":type}, "annotations":{"prometheus.io/scrape": "true", "prometheus.io/path": "/metrics", "prometheus.io/port": "8443", "prometheus.io/scheme": "http"}}
+#@     elif type == "peer":
+#@       metadata = {"labels":{"k8s-app": input, "type":type}, "annotations":{"prometheus.io/scrape": "true", "prometheus.io/path": "/metrics", "prometheus.io/port": "9443", "prometheus.io/scheme": "http"}}
+#@     else:
+#@       metadata = {"labels":{"k8s-app": input, "type":type}}
+#@     end
+#@   else:
+#@     metadata = {"labels":{"k8s-app": input, "type":type}}
+#@   end
 #@   template = {"metadata":metadata, "spec":specData}
 #@   output = {"selector":selector, "serviceName": input, "replicas": 1, "template": template}
 #@   return output
