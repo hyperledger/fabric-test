@@ -215,43 +215,37 @@ chaincode_id = uiContent.chaincodeID+channelID;
 chaincode_ver = uiContent.chaincodeVer;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] chaincode_id: %s', Nid, channel.getName(), org, pid, chaincode_id );
 
-//get connection profiles
-var cpFile;
+// find all connection profiles
 var cpList = [];
 var cpPath = uiContent.ConnProfilePath;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpPath: ', Nid, channel.getName(), org, pid, cpPath);
 fs.readdirSync(cpPath).forEach(file => {
-  logger.info('[Nid=%d pte-main] file', Nid, file);
+  logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] file', Nid, channel.getName(), org, pid, file);
   var file_ext = path.extname(file);
   if ((/(yml|yaml|json)$/i).test(file_ext)) {
       var cpf=path.join(cpPath, file);
       cpList.push(cpf);
   }
 });
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
-cpFile = cpList[0];
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpFile: %s, org: %s', Nid, channel.getName(), org, pid, cpFile, org);
-
-var CPFile = testUtil.readConfigFileSubmitter(cpFile, 'test-network');
-var goPath;
-if ( typeof(CPFile.gopath) === 'undefined' ) {
-    goPath = '';
-} else if ( CPFile.gopath == 'GOPATH' ) {
-    goPath = process.env['GOPATH'];
-} else {
-    goPath = CPFile.gopath;
+if ( cpList.length === 0 ) {
+    logger.error('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] error: invalid connection profile path or no connection profiles found in the connection profile path', Nid, channel.getName(), org, pid);
+    process.exit(1);
 }
-logger.info('goPath: ', goPath);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
 
-// get connection profile sub pointers
-var cpClient = CPFile['client'];
-var cpChannels = CPFile['channels'];
-var cpOrgs = CPFile['organizations'];
-var cpOrderers = CPFile['orderers'];
-var cpPeers = CPFile['peers'];
-var cpCAs = CPFile['certificateAuthorities'];
-
-var orgName = cpOrgs[org].name;
+// set org connection profile
+var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] no orderer found in the connection profile', Nid, channel.getName(), org, pid);
+    process.exit(1);
+}
+if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] no peer found in the connection profile', Nid, channel.getName(), org, pid);
+    process.exit(1);
+}
+var cpOrgs = cpf['organizations'];
+var cpOrderers = cpf['orderers'];
+var cpPeers = cpf['peers'];
 
 var users =  hfc.getConfigSetting('users');
 
@@ -369,6 +363,11 @@ if (ccFuncInst.getAccessControlPolicyMap) {		// Load access control policy for c
     ccFunctionAccessPolicy = ccFuncInst.getAccessControlPolicyMap();
 }
 var orgAdmins = {};		// Map org names to client handles
+
+/*
+ *   transactions begin ....
+ */
+    execTransMode();
 
 //construct invoke request
 var request_invoke;
@@ -532,7 +531,7 @@ function assignPeerListFromList(channel, client, org) {
                 peername = listOpt[key][i];
                 if (cpPeers[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpFile);
+                        data = testUtil.getTLSCert(key, peername, cpf);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeers[peername].url,
@@ -560,13 +559,14 @@ function assignPeerList(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
+
     for (let orgtmp in cpOrgs) {
         for (let i=0; i < cpOrgs[orgtmp]['peers'].length; i++) {
             var key = cpOrgs[orgtmp]['peers'][i];
             if (cpPeers.hasOwnProperty(key)) {
                 if (cpPeers[key].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(orgtmp, key, cpFile);
+                        data = testUtil.getTLSCert(orgtmp, key, cpf);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeers[key].url,
@@ -595,18 +595,30 @@ function assignThreadAllPeers(channel, client, org) {
     var eh;
     var data;
     var event_connected = false;
-    for (let orgtmp in cpOrgs) {
-        for (let i=0; i < cpOrgs[orgtmp]['peers'].length; i++) {
-            var key = cpOrgs[orgtmp]['peers'][i];
-            if (cpPeers.hasOwnProperty(key)) {
+
+    for (var i=0; i<channelOrgName.length; i++ ) {
+        let orgtmp = channelOrgName[i];
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] org (%s)', Nid, channel.getName(), org, pid, orgtmp);
+        // find the connection profile of the specified org
+        var cpfTmp=testUtil.findOrgConnProfileSubmitter(cpList, orgtmp);
+        if ( 0 === getConnProfilePropCnt(cpf, 'peers') ) {
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
+            continue;
+        }
+        var cpOrgsTmp = cpfTmp['organizations'];
+        var cpPeersTmp = cpfTmp['peers'];
+
+        for (let i=0; i < cpOrgsTmp[orgtmp]['peers'].length; i++) {
+            var key = cpOrgsTmp[orgtmp]['peers'][i];
+            if (cpPeersTmp.hasOwnProperty(key)) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(orgtmp, key, cpFile);
+                    data = testUtil.getTLSCert(orgtmp, key, cpfTmp);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
-                            cpPeers[key].url,
+                            cpPeersTmp[key].url,
                             {
                                 pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
+                                'ssl-target-name-override': cpPeersTmp[key]['grpcOptions']['ssl-target-name-override']
                             }
                         );
                         targets.push(peerTmp);
@@ -626,7 +638,7 @@ function assignThreadAllPeers(channel, client, org) {
                         }
                     }
                 } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
+                    peerTmp = client.newPeer(cpPeersTmp[key].url);
                     targets.push(peerTmp);
                     channel.addPeer(peerTmp);
                     if ( peerFOList == 'TARGETPEERS' ) {
@@ -655,12 +667,13 @@ function assignThreadAllAnchorPeers(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
+
     for (let orgtmp in cpOrgs) {
         let key = cpOrgs[orgtmp]['peers'][0];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(orgtmp, key, cpFile);
+                    data = testUtil.getTLSCert(orgtmp, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -714,12 +727,13 @@ function assignThreadOrgPeer(channel, client, org) {
     var peerTmp;
     var eh;
     var data;
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key = cpOrgs[org]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpFile);
+                    data = testUtil.getTLSCert(org, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -776,20 +790,29 @@ function assignThreadPeerList(channel, client, org) {
     var listOpt=txCfgPtr.listOpt;
     var peername;
     var event_connected = false;
+
     for(var key in listOpt) {
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList key: %s]', Nid, channel.getName(), org, pid, key);
+        // find the connection profile of the specified org
+        var cpfTmp=testUtil.findOrgConnProfileSubmitter(cpList, key);
+        if ( 0 === getConnProfilePropCnt(cpf, 'peers') ) {
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
+            continue;
+        }
+        var cpOrgsTmp = cpfTmp['organizations'];
+        var cpPeersTmp = cpfTmp['peers'];
         for (i = 0; i < listOpt[key].length; i++) {
             peername = listOpt[key][i];
-            if (cpPeers.hasOwnProperty(peername)) {
-                if (cpPeers[peername].url) {
+            if (cpPeersTmp.hasOwnProperty(peername)) {
+                if (cpPeersTmp[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpFile);
+                        data = testUtil.getTLSCert(key, peername, cpfTmp);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
-                                cpPeers[peername].url,
+                                cpPeersTmp[peername].url,
                                 {
                                     pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
+                                    'ssl-target-name-override': cpPeersTmp[peername]['grpcOptions']['ssl-target-name-override']
                                 }
                             );
                             targets.push(peerTmp);
@@ -809,7 +832,7 @@ function assignThreadPeerList(channel, client, org) {
                             }
                         }
                     } else {
-                        peerTmp = client.newPeer(cpPeers[peername].url);
+                        peerTmp = client.newPeer(cpPeersTmp[peername].url);
                         channel.addPeer(peerTmp);
                         if ( peerFOList == 'TARGETPEERS' ) {
                             peerList.push(peerTmp);
@@ -839,14 +862,14 @@ function assignThreadPeerID(channel, client, org, method) {
     var eh;
     var data;
 
-    var peername=testUtil.getPeerID(pid, org, txCfgPtr, cpFile, method);
+    var peername=testUtil.getPeerID(pid, org, txCfgPtr, cpf, method);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID: %s]', Nid, channel.getName(), org, pid, peername);
 
     var event_connected = false;
     if (cpPeers.hasOwnProperty(peername)) {
         if (cpPeers[peername].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, peername, cpFile);
+                data = testUtil.getTLSCert(org, peername, cpf);
                 if ( data !== null ) {
                     peerTmp = client.newPeer(
                         cpPeers[peername].url,
@@ -897,12 +920,13 @@ function channelAddPeer(channel, client, org) {
     var data;
     var peerTmp;
     var eh;
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key = cpOrgs[org]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpFile);
+                    data = testUtil.getTLSCert(org, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -950,13 +974,14 @@ function channelAddPeerEvent(channel, client, org) {
     var data;
     var eh;
     var peerTmp;
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key = cpOrgs[org]['peers'][i];
         logger.info('key: ', key);
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpFile);
+                    data = testUtil.getTLSCert(org, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -1010,12 +1035,13 @@ function channelAdd1Peer(channel, client, org) {
     var data;
     var peerTmp;
     var eh;
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key = cpOrgs[org]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpFile);
+                    data = testUtil.getTLSCert(org, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -1104,8 +1130,9 @@ function ordererFailover(channel, client) {
 
 // set currOrdererId
 function setCurrOrdererId(channel, client, org) {
+
     // assign ordererID
-    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpFile, ordererMethod);
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrOrdererId] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
 
     var i;
@@ -1122,10 +1149,11 @@ function assignOrdererList(channel, client) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] ', Nid, channelName, org, pid);
     var data;
     var ordererTmp;
+
     for (let key in cpOrderers) {
         if (cpOrderers[key].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert('orderer', key, cpFile);
+                data = testUtil.getTLSCert('orderer', key, cpf);
                 if ( data !== null ) {
                     let caroots = Buffer.from(data).toString();
 
@@ -1148,14 +1176,15 @@ function assignOrdererList(channel, client) {
 }
 
 function channelAddOrderer(channel, client, org) {
+
     // assign ordererID
-    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpFile, ordererMethod);
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
 
     var data;
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s channelAddOrderer] ', Nid, channelName, org, pid, ordererID );
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpFile);
+        data = testUtil.getTLSCert('orderer', ordererID, cpf);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
@@ -1184,11 +1213,12 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
     var eh;
     var data;
     var found = 0; // found first peer, as identified in the ConnProfile.
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key = cpOrgs[org]['peers'][i];
         if (cpPeers[key].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, key, cpFile);
+                data = testUtil.getTLSCert(org, key, cpf);
                 if ( data !== null ) {
                     peerTmp = client.newPeer(
                         cpPeers[key].url,
@@ -1272,22 +1302,19 @@ function setTargetPeers(tPeers) {
 
         channelAdd1Peer(channel, client, org);       // add one peer to channel to perform service discovery
         if ( (tPeers == 'DISCOVERY') || (transType == 'DISCOVERY') ) {
-            logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] execTransMode: serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
+            logger.info('[Nid:chan:org:id=%d:%s:%s:%d setTargetPeers] serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
             initDiscovery();
         }
     } else {
-        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, tPeers);
+        logger.error('[Nid:chan:org:id=%d:%s:%s:%d setTargetPeers] pte-exec:completed:error targetPeers= %s', Nid, channelName, org, pid, tPeers);
         process.exit(1);
     }
 
 }
-/*
- *   transactions begin ....
- */
-    execTransMode();
 
-function getSubmitterForOrg(username, secret, client, peerOrgAdmin, Nid, org, cpFile) {
-    return testUtil.getSubmitter(username, secret, client, peerOrgAdmin, Nid, org, cpFile);
+function getSubmitterForOrg(username, secret, client, peerOrgAdmin, Nid, org) {
+    var cpf1=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    return testUtil.getSubmitter(username, secret, client, peerOrgAdmin, Nid, org, cpf1);
 }
 
 async function execTransMode() {
@@ -1296,13 +1323,13 @@ async function execTransMode() {
     inv_m = 0;
     inv_q = 0;
 
-    var username = cpOrgs[org].username;
-    var secret = cpOrgs[org].secret;
+    var username = testUtil.getOrgEnrollIdSubmitter(cpf, org);
+    var secret = testUtil.getOrgEnrollSecretSubmitter(cpf, org);
     logger.debug('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] user= %s, secret=%s', Nid, channelName, org, pid, username, secret);
 
     //var tlsInfo = null;
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, cpFile);
+        await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execTransMode] got user private key: org=%s', Nid, channelName, org, pid, org);
     }
 
@@ -1310,7 +1337,7 @@ async function execTransMode() {
 //    var useStore = false;
     var useStore = true;
     if (useStore) {
-        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid,orgName)}));
+        cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, cpOrgs[org].name)}));
         client.setCryptoSuite(cryptoSuite);
     }
 
@@ -1320,7 +1347,7 @@ async function execTransMode() {
     hfc.setConfigSetting('request-timeout', reqTimeout);
     if (useStore) {
         promise = hfc.newDefaultKeyValueStore({
-                  path: testUtil.storePathForOrg(Nid, orgName)});
+                  path: testUtil.storePathForOrg(Nid,  cpOrgs[org].name)});
     } else {
         promise = Promise.resolve(useStore);
     }
@@ -1340,7 +1367,7 @@ async function execTransMode() {
                     if (currentIndex > 0) {
                         orgAdmins[channelOrgName[currentIndex - 1]] = admin;
                     }
-                    return currentFunction(username, secret, client, true, Nid, channelOrgName[currentIndex], cpFile);
+                    return currentFunction(username, secret, client, true, Nid, channelOrgName[currentIndex], cpf);
                 }), Promise.resolve()
         );
     }).then(

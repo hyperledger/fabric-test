@@ -95,8 +95,7 @@ for (i=0; i<channelOpt.orgName.length; i++) {
 logger.info('[Nid=%d pte-main] channelName: %s', Nid, channelName);
 logger.info('[Nid=%d pte-main] channelOrgName.length: %d, channelOrgName: %s', Nid, channelOrgName.length, channelOrgName);
 
-// get connection profiles
-var cpFile;
+// find all connection profiles
 var cpList = [];
 var cpPath = uiContent.ConnProfilePath;
 logger.info('[Nid=%d pte-main] cpPath: ', Nid, cpPath);
@@ -108,48 +107,13 @@ fs.readdirSync(cpPath).forEach(file => {
       cpList.push(cpf);
   }
 });
-logger.info('[Nid=%d pte-main] cpList; ', Nid, cpList);
-cpFile = cpList[0];
-logger.info('[Nid=%d pte-main] cpFile; ', Nid, cpFile);
-
-var CPFile = testUtil.readConfigFileSubmitter(cpFile, 'test-network');
-var goPath=process.env.GOPATH;
-if ( typeof(CPFile.gopath) === 'undefined' ) {
-    goPath = '';
-} else if ( CPFile.gopath == 'GOPATH') {
-    goPath = process.env['GOPATH'];
-} else {
-    goPath = CPFile.gopath;
-}
-logger.info('[Nid=%d pte-main] GOPATH: ', Nid, goPath);
-
-// get connection profile sub pointers
-var cpClient = CPFile['client'];
-var cpChannels = CPFile['channels'];
-var cpOrgs = CPFile['organizations'];
-var cpOrderers = CPFile['orderers'];
-var cpPeers = CPFile['peers'];
-var cpCAs = CPFile['certificateAuthorities'];
-logger.info('[Nid=%d pte-main] input cpClient: %j', Nid, cpClient);
-logger.info('[Nid=%d pte-main] input cpChannels: %j', Nid, cpChannels);
-logger.info('[Nid=%d pte-main] input cpOrgs: %j', Nid, cpOrgs);
-logger.info('[Nid=%d pte-main] input cpOrderers: %j', Nid, cpOrderers);
-logger.info('[Nid=%d pte-main] input cpPeers: %j', Nid, cpPeers);
-logger.info('[Nid=%d pte-main] input cpCAs: %j', Nid, cpCAs);
-
-var ordererName = [];
-for ( var key in cpOrderers) {
-    ordererName.push(key);
-    logger.info('[Nid=%d pte-main] cpOrderers key: ', Nid, key);
-}
-logger.info('[Nid=%d pte-main] cpOrderers length: %d, name: ', Nid, ordererName.length, ordererName);
-if ( ordererName.length == 0 ) {
-    logger.error('[Nid=%d pte-main] no orderer found in the connection profile: %s', cpFile);
+if ( cpList.length === 0 ) {
+    logger.error('[Nid=%d pte-main] error: invalid connection profile path or no connection profiles found in the connection profile path', Nid);
     process.exit(1);
 }
+logger.info('[Nid=%d pte-main] cpList; ', Nid, cpList);
 
 var users =  hfc.getConfigSetting('users');
-
 
 var transType = txCfgPtr.transType.toUpperCase();
 var tCurr;
@@ -177,7 +141,7 @@ var testDeployArgs = [];
 var chaincodePath;
 var metadataPath;
 var collectionsConfigPath;
-function initDeploy() {
+function initDeploy(org) {
     if ((typeof( ccDfnPtr.deploy.language ) !== 'undefined')) {
         language=ccDfnPtr.deploy.language.toLowerCase();
     }
@@ -185,6 +149,13 @@ function initDeploy() {
     for (i=0; i<ccDfnPtr.deploy.args.length; i++) {
         testDeployArgs.push(ccDfnPtr.deploy.args[i]);
     }
+
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( cpf === null ) {
+         logger.error('[initDeploy] no connection profile is found for org (%s)', org);
+         process.exit(1);
+    }
+    var goPath = testUtil.getGoPathSubmitter(cpf);
 
     // If language is golang, then user specifies path relative to gopath.  Note: since SDK prepends
     // GOPATH/src to any golang chaincodePath, PTE will use it as defined in the json file.
@@ -244,10 +215,19 @@ var testSummaryArray=[];
 function getOrgOrdererID(org) {
     var ordererID;
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
+        logger.info('[getOrgOrdererID] org: %s, no orderer found in the connection profile', org);
+        process.exit(1);
+    }
+
+    var cpOrgs = cpf['organizations'];
+    var cpOrderers = cpf['orderers'];
+
     if ( typeof cpOrgs[org].ordererID !== 'undefined' ) {
         ordererID = cpOrgs[org].ordererID;
     } else {
-        ordererID = ordererName[0];
+        ordererID = Object.getOwnPropertyNames(cpOrderers)[0];
     }
     return ordererID;
 }
@@ -255,11 +235,19 @@ function getOrgOrdererID(org) {
 function clientNewOrderer(client, org) {
     var data;
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
+        logger.info('[clientNewOrderer] org: %s, no orderer found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpOrderers = cpf['orderers'];
+
     var ordererID = getOrgOrdererID(org);
 
     logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpFile);
+        data = testUtil.getTLSCert('orderer', ordererID, cpf);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
@@ -281,10 +269,17 @@ function chainAddOrderer(channel, client, org) {
     logger.info('[chainAddOrderer] channel name: ', channel.getName());
 
     var data;
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
+        logger.info('[chainAddOrderer] org: %s, no orderer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpOrderers = cpf['orderers'];
     var ordererID = getOrgOrdererID(org);
 
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpFile);
+        data = testUtil.getTLSCert('orderer', ordererID, cpf);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
@@ -312,12 +307,20 @@ function channelAddPeer(channel, client, org) {
     var peerTmp;
     var targets = [];
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+        logger.info('[channelAddPeer] org: %s, no peer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpPeers = cpf['peers'];
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key=cpOrgs[org]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpFile);
+                    data = testUtil.getTLSCert(org, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -350,13 +353,22 @@ function channelAddListedPeer(channel, client, org) {
     var listOpt=txCfgPtr.listOpt;
     var peername;
     var targets = [];
+
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+        logger.info('[channelAddListedPeer] org: %s, no peer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpPeers = cpf['peers'];
+
     for(var key in listOpt) {
         for (i = 0; i < listOpt[key].length; i++) {
             if (cpPeers.hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
                 if (cpPeers[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpFile);
+                        data = testUtil.getTLSCert(key, peername, cpf);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeers[peername].url,
@@ -394,12 +406,20 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
     var peerTmp;
     var targets = [];
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+        logger.info('[channelAddQIPeer] org: %s, no peer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpPeers = cpf['peers'];
+
     for (let i=0; i < cpOrgs[qorg]['peers'].length; i++) {
         var key=cpOrgs[qorg]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(qorg, key, cpFile);
+                    data = testUtil.getTLSCert(qorg, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -430,12 +450,20 @@ function channelAddPeer1(channel, client, org, eventHubs) {
     var peerTmp;
     var targets = [];
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+        logger.info('[channelAddPeer1] org: %s, no peer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpPeers = cpf['peers'];
+
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
         var key=cpOrgs[org]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpFile);
+                    data = testUtil.getTLSCert(org, key, cpf);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -472,12 +500,20 @@ function channelAddPeerEventJoin(channel, client, org) {
             var targets = [];
             var eventHubs = [];
 
+            var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+            if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+                logger.info('[channelAddPeerEventJoin] org: %s, no peer is found in the connection profile', org);
+                process.exit(1);
+            }
+            var cpOrgs = cpf['organizations'];
+            var cpPeers = cpf['peers'];
+
             for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
                 var key=cpOrgs[org]['peers'][i];
                 if (cpPeers.hasOwnProperty(key)) {
                     if (cpPeers[key].url) {
                         if (TLS > testUtil.TLSDISABLED) {
-                            data = testUtil.getTLSCert(org, key, cpFile);
+                            data = testUtil.getTLSCert(org, key, cpf);
                             if ( data !== null ) {
                                 targets.push(
                                     client.newPeer(
@@ -546,22 +582,19 @@ function update_latency_array(lat_new, rawText) {
 
 }
 
-function getOrgEnrollId(org) {
-    var orgCA=cpOrgs[org].certificateAuthorities[0];
-    return cpCAs[orgCA].registrar.enrollId;
-}
-
-function getOrgEnrollSecret(org) {
-    var orgCA=cpOrgs[org].certificateAuthorities[0];
-    return cpCAs[orgCA].registrar.enrollSecret;
-}
-
 // test begins ....
 performance_main();
 
 // install chaincode
 async function chaincodeInstall(channel, client, org) {
     try{
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( null === cpf ) {
+        logger.info('[chaincodeInstall] no connection profile is found for org(%s)', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+
     var orgName = cpOrgs[org].name;
     logger.info('[chaincodeInstall] org: %s, org Name: %s, channel name: %s', org, orgName, channel.getName());
 
@@ -571,7 +604,7 @@ async function chaincodeInstall(channel, client, org) {
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, cpFile);
+        await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[chaincodeInstall] got user private key: org= %s', org);
     }
     chainAddOrderer(channel, client, org);
@@ -671,11 +704,18 @@ async function chaincodeInstantiate(channel, client, org) {
     cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
     client.setCryptoSuite(cryptoSuite);
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( null === cpf ) {
+        logger.info('[chaincodeInstantiate] no connection profile is found for org(%s)', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+
     logger.info('[chaincodeInstantiate] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, cpFile);
+        await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[chaincodeInstantiate] get user private key: org= %s', org);
     }
     chainAddOrderer(channel, client, org);
@@ -810,9 +850,15 @@ async function chaincodeUpgrade(channel, client, org) {
     client.setCryptoSuite(cryptoSuite);
     logger.info('[chaincodeUpgrade] org= %s, org name=%s, channel name=%s', org, orgName, channel.getName());
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( null === cpf ) {
+        logger.info('[chaincodeUpgrade] no connection profile is found for org(%s)', org);
+        process.exit(1);
+    }
+
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, cpFile);
+        await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[chaincodeUpgrade] get user private key: org= %s', org);
     }
     chainAddOrderer(channel, client, org);
@@ -959,15 +1005,23 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
     var signatures = [];
     var key;
 
-    var username ;
+    var username;
     var secret;
     var submitter = null;
 
     hfc.setConfigSetting('key-value-store', 'fabric-common/lib/impl/FileKeyValueStore.js');
 
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, channelOrgName[0]);
+    if ( null === cpf ) {
+        logger.info('[createOrUpdateOneChannel] no connection profile is found for org(%s)', org);
+        process.exit(1);
+    }
+
     // If user defines goPath, then they must also specify path relative to gopath in the input json file.
     // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the channelTX exactly as
     // specified (user should specify an absolute path) in the input json file.
+    var goPath = testUtil.getGoPathSubmitter(cpf);
+    logger.info('[createOrUpdateOneChannel] org(%s) go path: %s', channelOrgName[0], goPath);
     var channelTX=channelOpt.channelTX;
     if ( goPath !== '' ) {
         channelTX = path.join(goPath, 'src', channelOpt.channelTX);
@@ -979,7 +1033,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, channelOrgName[0], cpFile);
+        await testUtil.tlsEnroll(client, channelOrgName[0], cpf);
         logger.info('[createOrUpdateOneChannel] get user private key: org= %s', channelOrgName[0]);
     }
     //clientNewOrderer(client, channelOrgName[0]);
@@ -997,13 +1051,15 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
         var submitePromises= [];
         channelOrgName.forEach((org) => {
             submitter = new Promise(function (resolve,reject) {
-                username=getOrgEnrollId(org);
-                secret=getOrgEnrollSecret(org);
+                var cpOrgs = cpf['organizations'];
+
+                username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
+                secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
                 orgName = cpOrgs[org].name;
                 logger.info('[createOrUpdateOneChannel] org= %s, org name= %s', org, orgName);
                 logger.info('[createOrUpdateOneChannel] org= %s, org name= %s, username= %s, secret= %s', org, orgName, username, secret);
                 client._userContext = null;
-                resolve(testUtil.getSubmitter(username, secret, client, true, Nid, org, cpFile));
+                resolve(testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf));
             });
             submitePromises.push(submitter);
         });
@@ -1020,7 +1076,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             return signatures;
         }).then((sigs) =>{
             client._userContext = null;
-            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], cpFile);
+            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], cpf);
         }).then((admin) => {
             the_user = admin;
             logger.info('[createOrUpdateOneChannel] Successfully enrolled user \'admin\' for', "orderer");
@@ -1079,10 +1135,17 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
 // join channel
 async function joinChannel(channel, client, org) {
     try{
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( null === cpf ) {
+        logger.info('[joinChannel] no connection profile is found for org(%s)', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+
     var orgName = cpOrgs[org].name;
     logger.info('[joinChannel] Calling peers in organization (%s) to join the channel (%s)', orgName, channelName);
-    var username = getOrgEnrollId(org);
-    var secret = getOrgEnrollSecret(org);
+    var username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
+    var secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
     logger.info('[joinChannel] user=%s, secret=%s', username, secret);
     var genesis_block = null;
     var eventHubs = [];
@@ -1090,7 +1153,7 @@ async function joinChannel(channel, client, org) {
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, cpFile);
+        await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[joinChannel] get user private key: org= %s', org);
     }
 
@@ -1100,7 +1163,7 @@ async function joinChannel(channel, client, org) {
     }).then((store) => {
         client.setStateStore(store);
         client._userContext = null;
-        return testUtil.getOrderAdminSubmitter(client, org, cpFile)
+        return testUtil.getOrderAdminSubmitter(client, org, cpf)
     }).then((admin) => {
         logger.info('[joinChannel:%s] Successfully enrolled orderer \'admin\'', org);
         the_user = admin;
@@ -1119,7 +1182,7 @@ async function joinChannel(channel, client, org) {
         genesis_block = block;
 
         client._userContext = null;
-        return testUtil.getSubmitter(username, secret, client, true, Nid, org, cpFile);
+        return testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf);
     }).then((admin) => {
         logger.info('[joinChannel] Successfully enrolled org:' + org + ' \'admin\'');
         the_user = admin;
@@ -1142,7 +1205,7 @@ async function joinChannel(channel, client, org) {
         return channel.joinChannel(request);
     })
         .then((results) => {
-            logger.info(util.format('[joinChannel:%s] join Channel R E S P O N S E : %j', org, results));
+            logger.info(util.format('[joinChannel:%s] join Channel (%s) R E S P O N S E : %j', org, channelName, results));
 
             if(results[0] && results[0].response && results[0].response.status == 200) {
                 logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
@@ -1168,7 +1231,7 @@ function joinOneChannel(channel, client, org) {
 
     joinChannel(channel, client, org)
         .then(() => {
-            logger.info('[joinOneChannel] Successfully joined peers in organization %s to join the channel %s', cpOrgs[org].name, channelName);
+            logger.info('[joinOneChannel] Successfully joined peers in organization %s to join the channel %s', org, channelName);
             process.exit();
         })
         .catch(function(err) {
@@ -1239,9 +1302,15 @@ async function preQueryBlock(channel, sB, eB) {
 async function queryBlockchainInfo(channel, client, org) {
 try{
     logger.info('[queryBlockchainInfo] channel (%s)', channelName);
-    var username = getOrgEnrollId(org);
-    var secret = getOrgEnrollSecret(org);
-    //logger.info('[queryBlockchainInfo] user=%s, secret=%s', username, secret);
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, channelOrgName[0]);
+    if ( null === cpf ) {
+        logger.info('[queryBlockchainInfo] no connection profile is found for org(%s)', org);
+        process.exit(1);
+    }
+
+    var username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
+    var secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
+
     sBlock = txCfgPtr.queryBlockOpt.startBlock;
     eBlock = txCfgPtr.queryBlockOpt.endBlock;
     qOrg = txCfgPtr.queryBlockOpt.org;
@@ -1255,7 +1324,7 @@ try{
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
-        await testUtil.tlsEnroll(client, org, cpFile);
+        await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[queryBlockchainInfo] got user private key: org= %s', org);
     }
 
@@ -1267,7 +1336,7 @@ try{
         path: testUtil.storePathForOrg(orgName)
     }).then( function (store) {
         client.setStateStore(store);
-        return testUtil.getSubmitter(username, secret, client, true, Nid, org, cpFile);
+        return testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf);
     }).then((admin) => {
         logger.info('[queryBlockchainInfo] Successfully enrolled user \'admin\'');
         the_user = admin;
@@ -1307,14 +1376,21 @@ async function performance_main() {
     // send proposal to endorser
     for (var i=0; i<channelOrgName.length; i++ ) {
         let org = channelOrgName[i];
+        var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+        if ( null === cpf ) {
+            logger.info('[performance_main] no connection profile is found for org(%s)', org);
+            process.exit(1);
+        }
+        var cpOrgs = cpf['organizations'];
+
         let orgName=cpOrgs[org].name;
         logger.info('[performance_main] org= %s, org Name= %s', org, orgName);
         let client = new hfc();
 
         if ( transType == 'INSTALL' ) {
-            initDeploy();
-            let username = getOrgEnrollId(org);
-            let secret = getOrgEnrollSecret(org);
+            initDeploy(org);
+            let username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
+            let secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
             logger.info('[performance_main] Deploy: user= %s, secret= %s', username, secret);
 
             hfc.newDefaultKeyValueStore({
@@ -1322,7 +1398,12 @@ async function performance_main() {
             })
                 .then((store) => {
                     client.setStateStore(store);
-                    testUtil.getSubmitter(username, secret, client, true, Nid, org, cpFile)
+                    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+                    if ( null === cpf ) {
+                        logger.info('[performance_main] no connection profile is found for org(%s)', org);
+                        process.exit(1);
+                    }
+                    testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf)
                         .then(
                             function(admin) {
                                 logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
@@ -1341,9 +1422,9 @@ async function performance_main() {
                     process.exit(1);
                 });
         } else if ( transType == 'INSTANTIATE' ) {
-            initDeploy();
-            let username = getOrgEnrollId(org);
-            let secret = getOrgEnrollSecret(org);
+            initDeploy(org);
+            let username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
+            let secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
             logger.info('[performance_main] instantiate: user= %s, secret= %s', username, secret);
 
             hfc.newDefaultKeyValueStore({
@@ -1351,7 +1432,7 @@ async function performance_main() {
             })
                 .then((store) => {
                     client.setStateStore(store);
-                    testUtil.getSubmitter(username, secret, client, true, Nid, org, cpFile)
+                    testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf)
                         .then(
                             function(admin) {
                                 logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
@@ -1372,9 +1453,9 @@ async function performance_main() {
             break;
 
         } else if ( transType == 'UPGRADE' ) {
-            initDeploy();
-            var username=getOrgEnrollId(org);
-            var secret=getOrgEnrollSecret(org);
+            initDeploy(org);
+            let username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
+            let secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
             logger.info('[performance_main] upgrade: user= %s, secret= %s', username, secret);
 
             hfc.newDefaultKeyValueStore({
@@ -1382,7 +1463,7 @@ async function performance_main() {
             })
                 .then((store) => {
                     client.setStateStore(store);
-                    testUtil.getSubmitter(username, secret, client, true, Nid, org, cpFile)
+                    testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf)
                         .then(
                             function(admin) {
                                 logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
