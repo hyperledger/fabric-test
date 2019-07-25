@@ -58,14 +58,22 @@ func GenerateCryptoCerts(input networkspec.Config, kubeConfigPath string) error 
 	if kubeConfigPath == "" {
 		for i := 0; i < len(input.OrdererOrganizations); i++ {
 			org := input.OrdererOrganizations[i]
-			err = changeKeyName(input.ArtifactsLocation, "orderer", org.Name, org.NumCA)
+			err = changeKeyName(input.ArtifactsLocation, "orderer", org.Name, "ca", org.NumCA)
+			if err != nil {
+				return err
+			}
+			err = changeKeyName(input.ArtifactsLocation, "orderer", org.Name, "tlsca", org.NumCA)
 			if err != nil {
 				return err
 			}
 		}
 		for i := 0; i < len(input.PeerOrganizations); i++ {
 			org := input.PeerOrganizations[i]
-			err = changeKeyName(input.ArtifactsLocation, "peer", org.Name, org.NumCA)
+			err = changeKeyName(input.ArtifactsLocation, "peer", org.Name, "ca", org.NumCA)
+			if err != nil {
+				return err
+			}
+			err = changeKeyName(input.ArtifactsLocation, "peer", org.Name, "tlsca", org.NumCA)
 			if err != nil {
 				return err
 			}
@@ -130,9 +138,9 @@ func LaunchLocalNetwork() error {
 	return nil
 }
 
-func changeKeyName(artifactsLocation, orgType, orgName string, numCA int) error {
+func changeKeyName(artifactsLocation, orgType, orgName, caType string, numCA int) error {
 
-	path := filepath.Join(artifactsLocation, fmt.Sprintf("crypto-config/%vOrganizations/%v/ca", orgType, orgName))
+	path := filepath.Join(artifactsLocation, fmt.Sprintf("crypto-config/%vOrganizations/%v/%v", orgType, orgName, caType))
 	for j := 0; j < numCA; j++ {
 		files, err := ioutil.ReadDir(path)
 		if err != nil {

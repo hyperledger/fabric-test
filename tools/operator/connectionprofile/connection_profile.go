@@ -13,6 +13,7 @@ import (
     "reflect"
     "strings"
     "time"
+    "log"
 
     "github.com/hyperledger/fabric-test/tools/operator/networkspec"
     yaml "gopkg.in/yaml.v2"
@@ -58,6 +59,9 @@ func getK8sServicePort(kubeconfigPath, serviceName string) string {
             fmt.Println("Failed to get the port number for service %v; err: %v", serviceName, err)
         }
         port = string(stdoutStderr)
+        if len(port) == 0{
+            log.Fatalf("Failed to create connection profile, err: Unable to get the %v port number", serviceName)
+        }
         port = port[len(port)-6 : len(port)-1]
     }
     return port
