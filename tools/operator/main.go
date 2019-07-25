@@ -6,9 +6,9 @@ import (
 	"io/ioutil"
 	"log"
 
-	"fabric-test/tools/operator/launcher/nl"
-	"fabric-test/tools/operator/client"
-	"fabric-test/tools/operator/networkspec"
+	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
+	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
 func readArguments() (string, string, string) {
