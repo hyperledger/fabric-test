@@ -10,10 +10,11 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
-	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
-	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	"github.com/hyperledger/fabric-test/tools/operator/utils"
+	"fabric-test/tools/operator/client"
+	"fabric-test/tools/operator/launcher/nl"
+	"fabric-test/tools/operator/networkspec"
+	"fabric-test/tools/operator/utils"
+	"fabric-test/tools/operator/connectionprofile"
 )
 
 func readArguments() (string, string, string) {
@@ -63,7 +64,7 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 			log.Fatalf("Failed to launch k8s components; err = %v", err)
 		}
 
-		err = nl.CreateConnectionProfile(input, kubeConfigPath)
+		err = connectionprofile.CreateConnectionProfile(input, kubeConfigPath)
 		if err != nil {
 			log.Fatalf("Failed to launch k8s components; err = %v", err)
 		}
