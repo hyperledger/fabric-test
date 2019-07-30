@@ -37,6 +37,7 @@ var PTEid = parseInt(process.argv[5]);
 var loggerMsg='PTE ' + PTEid + ' util';
 var logger = new PTELogger({"prefix":loggerMsg, "level":"info"});
 
+
 module.exports.CHAINCODE_PATH = 'github.com/example_cc';
 module.exports.CHAINCODE_UPGRADE_PATH = 'github.com/example_cc1';
 module.exports.CHAINCODE_MARBLES_PATH = 'github.com/marbles_cc';
@@ -95,13 +96,68 @@ module.exports.existsSync = function(absolutePath /*string*/) {
 
 module.exports.readFile = readFile;
 
-var ORGS;
-var goPath;
-
 var tlsOptions = {
     trustedRoots: [],
     verify: false
 };
+
+
+// is an object empty?
+function isEmpty(obj) {
+    for (var key in obj) {
+        if (obj.hasOwnProperty(key))
+             return false;
+    }
+
+    return true;
+
+}
+
+// get Connection Profile property counts
+function getConnProfilePropCnt(cpf, prop) {
+
+    if ( cpf === null ) {
+       logger.error('[getConnProfilePropCnt] the connection profile is invalid: null');
+       return 0;
+    }
+
+    if ( ! cpf.hasOwnProperty(prop) ) {
+       logger.error('[getConnProfilePropCnt] prop (%s) is not found in connectino profile', prop);
+       return 0;
+    }
+
+    if ( true === isEmpty(cpf[prop]) ) {
+       logger.error('[getConnProfilePropCnt] prop (%s) is empty in connectino profile', prop);
+       return 0;
+    }
+
+    let cnt = Object.getOwnPropertyNames(cpf[prop]).length;
+    logger.info('[getConnProfilePropCnt] prop (%s) cnt: %d', prop, cnt);
+
+    return cnt;
+
+}
+module.exports.getConnProfilePropCntSubmitter=function(cpf, key) {
+    return getConnProfilePropCnt(cpf, key);
+}
+
+// find Connection Profile for an org
+function findOrgConnProfile(fileList, orgname) {
+    logger.info('[findOrgConnProfile] orgname(%s), input File list: ', orgname, fileList);
+    for (i=0; i<fileList.length; i++) {
+        var cpf = fileList[i];
+        var temp = readConfigFile(cpf, 'test-network');
+        if ( temp['organizations'] && temp['organizations'][orgname] ) {
+            logger.info('[findOrgConnProfile] orgname(%s) found File: ', orgname, cpf);
+            return temp;
+        }
+    }
+    return null;
+}
+
+module.exports.findOrgConnProfileSubmitter=function(fileList, orgname) {
+    return findOrgConnProfile(fileList, orgname);
+}
 
 // set pointer to the keyreq in the input File
 // if key is missing or invalid, set the pointer to the beginning of the File
@@ -129,76 +185,92 @@ module.exports.readConfigFileSubmitter=function(inFile, keyreq) {
     return readConfigFile(inFile, keyreq);
 }
 
-var cpClient;
-var cpChannels;
-var cpOrgs;
-var cpOrderers;
-var cpPeers;
-var cpCAs;
 
-// get connection sub pointers
-function getCPsubPtr(inPtr) {
-
-    cpClient = inPtr['client'];
-    cpChannels = inPtr['channels'];
-    cpOrgs = inPtr['organizations'];
-    cpOrderers = inPtr['orderers'];
-    cpPeers = inPtr['peers'];
-    cpCAs = inPtr['certificateAuthorities'];
-
-}
-
-function getOrgName(inFile, org) {
-    var inPtr = readConfigFile(inFile);
-    getCPsubPtr(inPtr);
-    var orgCA=cpOrgs[org].certificateAuthorities[0];
-    return cpCAs[orgCA].registrar.enrollId;
-}
-module.exports.getOrgNameSubmitter=function(inFile, org) {
-    return getOrgName(inFile, org);
-}
-
-function getOrgSecret(org) {
-    var inPtr = readConfigFile(inFile);
-    getCPsubPtr(inPtr);
-    var orgCA=cpOrgs[org].certificateAuthorities[0];
-    return cpCAs[orgCA].registrar.enrollSecret;
-}
-module.exports.getOrgSecretSubmitter=function(inFile, org) {
-    return getOrgSecret(inFile, org);
-}
-
-var ordererName = [];
-function getOrdererName() {
-    for ( var key in cpOrderers) {
-        ordererName.push(key);
-        logger.info('[getOrdererName] cpOrderers key: ', key);
+// find org CA
+function findOrgCA(inPtr, org) {
+    var cpOrgs = inPtr['organizations'];
+    if ( 0 === getConnProfilePropCnt(inPtr, 'certificateAuthorities') ) {
+        logger.info('[findOrgCA] no certificateAuthority is found in the connection profile');
+        process.exit(1);
     }
-    logger.info('[getOrdererName] cpOrderers length: %d, name: ', ordererName.length, ordererName);
+    var cpCAs = inPtr['certificateAuthorities'];
+    var orgCA;
+    if ( cpOrgs[org].hasOwnProperty('certificateAuthorities') ) {
+        orgCA=cpOrgs[org].certificateAuthorities[0];
+    } else {
+        orgCA=Object.getOwnPropertyNames(cpCAs)[0];
+    }
+    return orgCA;
+
 }
 
-function getgoPath() {
+// get enroll ID
+function getOrgEnrollId(inPtr, org) {
+    var cpOrgs = inPtr['organizations'];
+    if ( 0 === getConnProfilePropCnt(inPtr, 'certificateAuthorities') ) {
+        logger.info('[getOrgEnrollId] no certificateAuthority is found in the connection profile');
+        process.exit(1);
+    }
+    var cpCAs = inPtr['certificateAuthorities'];
+    var orgCA = findOrgCA(inPtr, org);
 
-    if ( typeof(ORGS.gopath) === 'undefined' ) {
+    if ( cpCAs[orgCA].hasOwnProperty('registrar') && cpCAs[orgCA].registrar.hasOwnProperty('enrollId') ) {
+        return cpCAs[orgCA].registrar.enrollId;
+    } else {
+        return 'admin';
+    }
+
+}
+module.exports.getOrgEnrollIdSubmitter=function(inPtr, org) {
+    return getOrgEnrollId(inPtr, org);
+}
+
+// get enroll secret
+function getOrgEnrollSecret(inPtr, org) {
+    var cpOrgs = inPtr['organizations'];
+    if ( 0 === getConnProfilePropCnt(inPtr, 'certificateAuthorities') ) {
+        logger.info('[getOrgEnrollSecret] no certificateAuthority is found in the connection profile');
+        process.exit(1);
+    }
+    var cpCAs = inPtr['certificateAuthorities'];
+    var orgCA = findOrgCA(inPtr, org);
+
+    if ( cpCAs[orgCA].hasOwnProperty('registrar') && cpCAs[orgCA].registrar.hasOwnProperty('enrollSecret') ) {
+        return cpCAs[orgCA].registrar.enrollSecret;
+    } else {
+        return 'adminpw';
+    }
+}
+module.exports.getOrgEnrollSecretSubmitter=function(inPtr, org) {
+    return getOrgEnrollSecret(inPtr, org);
+}
+
+function getGoPath(inPtr) {
+
+    var goPath;
+    if ( typeof(inPtr.gopath) === 'undefined' ) {
         goPath = '';
-    } else if ( ORGS.gopath == 'GOPATH' ) {
+    } else if ( inPtr.gopath == 'GOPATH' ) {
         goPath = process.env['GOPATH'];
     } else {
-        goPath = ORGS.gopath;
+        goPath = inPtr.gopath;
     }
+    return goPath;
+}
+module.exports.getGoPathSubmitter=function(inPtr) {
+    return getGoPath(inPtr);
 }
 
-function getCAUrl(org) {
+function getMember(username, password, client, nid, userOrg, cpf) {
+    var cpOrgs = cpf['organizations'];
+    if ( 0 === getConnProfilePropCnt(cpf, 'certificateAuthorities') ) {
+        logger.info('[getMember] no certificateAuthority is found in the connection profile');
+        process.exit(1);
+    }
+    var cpCAs = cpf['certificateAuthorities'];
+    var orgCA = findOrgCA(cpf, userOrg);
 
-    var ca = cpOrgs[Org]['certificateAuthorities'];
-    return cpOrgs[userOrg][ca].url;
-}
-
-function getMember(username, password, client, nid, userOrg, cpFile) {
-    ORGS = readConfigFile(cpFile, 'test-network');
-    getCPsubPtr(ORGS);
-
-    var caUrl = getCAUrl(userOrg);
+    var caUrl = cpCAs[orgCA].url;
     logger.info('[getMember] getMember, name: org %s ca url: %s', userOrg, caUrl);
 
     logger.info('[getMember] getMember, name: '+username+', client.getUserContext('+username+', true)');
@@ -252,11 +324,9 @@ function getMember(username, password, client, nid, userOrg, cpFile) {
         });
 }
 
-function getAdmin(client, nid, userOrg, cpFile) {
-        logger.info('[getAdmin] cpFile=%j', cpFile);
-        ORGS = readConfigFile(cpFile, 'test-network');
-        getCPsubPtr(ORGS);
+function getAdmin(client, nid, userOrg, cpf) {
 
+        var cpOrgs = cpf['organizations'];
         var keyPath;
         var keyPEM;
         var certPath;
@@ -268,7 +338,7 @@ function getAdmin(client, nid, userOrg, cpFile) {
             certPEM = cpOrgs[userOrg].admin_cert;
         } else if ((typeof cpOrgs[userOrg].adminPrivateKey !== 'undefined') &&
                    (typeof cpOrgs[userOrg].signedCert !== 'undefined')) {
-            getgoPath();
+            var goPath = getGoPath(cpf);
             logger.info('[getAdmin] %s adminPrivateKey and signedCert defined', userOrg);
             if ( typeof cpOrgs[userOrg].adminPrivateKey.path !== 'undefined') {
                 keyPath = path.resolve(goPath, cpOrgs[userOrg].adminPrivateKey.path, 'keystore');
@@ -291,7 +361,7 @@ function getAdmin(client, nid, userOrg, cpFile) {
                 return null;
             }
         } else if (typeof cpOrgs[userOrg].adminPath !== 'undefined') {
-            getgoPath();
+            var goPath = getGoPath(cpf);
             logger.info('[getAdmin] %s adminPath defined', userOrg);
             keyPath =  path.resolve(goPath, cpOrgs[userOrg].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
@@ -317,10 +387,15 @@ function getAdmin(client, nid, userOrg, cpFile) {
         }));
 }
 
-function getOrdererAdmin(client, userOrg, cpFile) {
-        ORGS = readConfigFile(cpFile, 'test-network');
-        getCPsubPtr(ORGS);
-        getOrdererName();
+function getOrdererAdmin(client, userOrg, cpf) {
+
+        var cpOrgs = cpf['organizations'];
+        if ( getConnProfilePropCnt(cpf, 'orderers') === 0 ) {
+            logger.error('[getOrdererAdmin] org(%s): no orderer is found in the connection profile', userOrg);
+            process.exit(1);
+        }
+        var cpOrderers = cpf['orderers'];
+
         var keyPath;
         var keyPEM;
         var certPath;
@@ -331,7 +406,7 @@ function getOrdererAdmin(client, userOrg, cpFile) {
         if ( typeof cpOrgs[userOrg].ordererID !== 'undefined' ) {
             ordererID = cpOrgs[userOrg].ordererID;
         } else {
-            ordererID = ordererName[0];
+            ordererID = Object.getOwnPropertyNames(cpOrderers)[0];
         }
         logger.info('[getOrdererAdmin] orderer ID= %s', ordererID);
 
@@ -347,7 +422,7 @@ function getOrdererAdmin(client, userOrg, cpFile) {
             certPEM = cpOrderers[ordererID].admin_cert;
         } else if ((typeof cpOrderers[ordererID].adminPrivateKey !== 'undefined') &&
                    (typeof cpOrderers[ordererID].signedCert !== 'undefined')) {
-            getgoPath();
+            var goPath = getGoPath(cpf);
             logger.info('[getOrdererAdmin] %s adminPrivateKey and signedCert defined', ordererID);
             if ( typeof cpOrderers[ordererID].adminPrivateKey.path !== 'undefined') {
                 keyPath = path.resolve(goPath, cpOrderers[ordererID].adminPrivateKey.path, 'keystore');
@@ -370,7 +445,7 @@ function getOrdererAdmin(client, userOrg, cpFile) {
                 return null;
             }
         } else if (typeof cpOrderers.adminPath !== 'undefined') {
-            getgoPath();
+            var goPath = getGoPath(cpf);
             logger.info('[getOrdererAdmin] %s global orderer adminPath defined', userOrg);
             keyPath = path.resolve(goPath, cpOrderers.adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
@@ -379,7 +454,7 @@ function getOrdererAdmin(client, userOrg, cpFile) {
             logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
             logger.debug('[getOrdererAdmin] certPath: %s', certPath);
         } else if (typeof cpOrderers[ordererID].adminPath !== 'undefined') {
-            getgoPath();
+            var goPath = getGoPath(cpf);
             logger.info('[getOrdererAdmin] %s local orderer adminPath defined', userOrg);
             keyPath = path.resolve(goPath, cpOrderers[ordererID].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
@@ -422,11 +497,11 @@ function readAllFiles(dir) {
     return certs;
 }
 
-module.exports.getOrderAdminSubmitter = function(client, userOrg, cpFile) {
-    return getOrdererAdmin(client, userOrg, cpFile);
+module.exports.getOrderAdminSubmitter = function(client, userOrg, cpf) {
+    return getOrdererAdmin(client, userOrg, cpf);
 };
 
-module.exports.getSubmitter = function(username, secret, client, peerOrgAdmin, nid, org, cpFile) {
+module.exports.getSubmitter = function(username, secret, client, peerOrgAdmin, nid, org, cpf) {
     if (arguments.length < 2) throw new Error('"client" and "test" are both required parameters');
 
     var peerAdmin, userOrg;
@@ -449,9 +524,9 @@ module.exports.getSubmitter = function(username, secret, client, peerOrgAdmin, n
 
     if (peerAdmin) {
         logger.info(' >>>> getting the org admin');
-        return getAdmin(client, nid, userOrg, cpFile);
+        return getAdmin(client, nid, userOrg, cpf);
     } else {
-        return getMember(username, secret, client, nid, userOrg, cpFile);
+        return getMember(username, secret, client, nid, userOrg, cpf);
     }
 };
 
@@ -492,18 +567,27 @@ function PTELogger(opts) {
 }
 module.exports.PTELogger = PTELogger;
 
-function getTLSCert(key, subkey, cpFile) {
+function getTLSCert(key, subkey, cpf) {
 
     var data;
     logger.info('[getTLSCert] key: %s, subkey: %s', key, subkey);
-    ORGS = readConfigFile(cpFile, 'test-network');
-    getCPsubPtr(ORGS);
-    getgoPath();
+    if ( getConnProfilePropCnt(cpf, 'peers') === 0 ) {
+        logger.error('[getTLSCert] no peers is found in the connection profile');
+        process.exit(1);
+    }
+    if ( getConnProfilePropCnt(cpf, 'orderers') === 0 ) {
+        logger.error('[getTLSCert] no orderer is found in the connection profile');
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpOrderers = cpf['orderers'];
+    var cpPeers = cpf['peers'];
+    var goPath = getGoPath(cpf);
 
     var cpPtr;
-    if ( cpPeers[subkey] ) {
+    if ( cpPeers.hasOwnProperty(subkey) ) {
         cpPtr = cpPeers;
-    } else if ( cpOrderers[subkey] ) {
+    } else if ( cpOrderers.hasOwnProperty(subkey) ) {
         cpPtr = cpOrderers;
     } else {
         logger.info('[getTLSCert] key: not found');
@@ -511,8 +595,8 @@ function getTLSCert(key, subkey, cpFile) {
     }
     logger.info('[getTLSCert] key found: %j', cpPtr[subkey]);
 
-    if ( typeof(ORGS.tls_cert) !== 'undefined' ) {
-        data = ORGS.tls_cert;
+    if ( typeof(cpf.tls_cert) !== 'undefined' ) {
+        data = cpf.tls_cert;
     } else {
         if ( typeof(cpPtr[subkey].tlsCACerts.pem) != 'undefined' ) {
             //tlscerts is a cert
@@ -536,11 +620,16 @@ function getTLSCert(key, subkey, cpFile) {
 }
 module.exports.getTLSCert = getTLSCert;
 
-module.exports.tlsEnroll = async function(client, orgName, cpFile) {
+module.exports.tlsEnroll = async function(client, orgName, cpf) {
   try {
-    ORGS = readConfigFile(cpFile, 'test-network');
-    getCPsubPtr(ORGS);
-    logger.info('[tlsEnroll] CA tls enroll: %s, cpFile: %s', orgName, cpFile);
+    var cpOrgs = cpf['organizations'];
+    if ( getConnProfilePropCnt(cpf, 'certificateAuthorities') === 0 ) {
+        logger.error('[tlsEnroll] no certificateAuthority is found in the connection profile');
+        process.exit(1);
+    }
+    var cpCAs = cpf['certificateAuthorities'];
+    var orgCA=cpOrgs[org].certificateAuthorities[0];
+    logger.info('[tlsEnroll] CA tls enroll: %s, cpf: %s', orgName, cpf);
     return new Promise(function (resolve, reject) {
         if (!cpOrgs[orgName]) {
             throw new Error('Invalid org name: ' + orgName);
@@ -600,12 +689,19 @@ module.exports.setTLS=function(txCfgPtr) {
 }
 
 // get ordererID for transactions
-module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, cpFile, method) {
-    ORGS = readConfigFile(cpFile, 'test-network');
-    getCPsubPtr(ORGS);
-    getOrdererName();
+module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, cpf, method) {
+    var cpOrgs = cpf['organizations'];
+    if ( getConnProfilePropCnt(cpf, 'orderers') === 0 ) {
+        logger.error('[getOrdererID] no orderer is found in the connection profile');
+        process.exit(1);
+    }
+    var cpOrderers = cpf['orderers'];
     var ordererID;
 
+    if ( Object.getOwnPropertyNames(cpOrderers).length === 0 ) {
+        logger.error('[org:id=%s:%d getOrdererID] no orderer found', org, pid);
+        process.exit(1);
+    }
     logger.info('[org:id=%s:%d getOrdererID] orderer method: %s', org, pid, method);
     // find ordererID
     if ( method == 'ROUNDROBIN' ) {
@@ -614,7 +710,6 @@ module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, cpFile, method
         var orgNameLen=orgName.length;
         var orgIdx=orgName.indexOf(org);
         var SCordList=Object.keys(cpOrderers);
-        //var SCordList=Object.keys(ordererName);
         logger.info('[org:id=%s:%d getOrdererID] SC orderer list: %j', org, pid, SCordList);
         var ordLen=SCordList.length;
 
@@ -636,7 +731,7 @@ module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, cpFile, method
         if ( typeof cpOrgs[org].ordererID !== 'undefined' ) {
             ordererID = cpOrgs[org].ordererID;
         } else {
-            ordererID = ordererName[0];
+            ordererID = Object.getOwnPropertyNames(cpOrderers)[0];
         }
     }
 
@@ -646,12 +741,20 @@ module.exports.getOrdererID=function(pid, orgName, org, txCfgPtr, cpFile, method
 }
 
 // get peerID for transactions
-module.exports.getPeerID=function(pid, org, txCfgPtr, cpFile, method) {
-    ORGS = readConfigFile(cpFile, 'test-network');
-        getCPsubPtr(ORGS);
+module.exports.getPeerID=function(pid, org, txCfgPtr, cpf, method) {
+    var cpOrgs = cpf['organizations'];
+    if ( getConnProfilePropCnt(cpf, 'peers') === 0 ) {
+        logger.error('[getPeerID] no peer is found in the connection profile');
+        process.exit(1);
+    }
+    var cpPeers = cpf['peers'];
     var peerID="UNKNOWN";
 
     logger.info('[org:id=%s:%d getPeerID] peer method: %s', org, pid, method);
+    if ( Object.getOwnPropertyNames(cpPeers).length === 0 ) {
+        logger.error('[org:id=%s:%d getPeerID] no peer found', org, pid);
+        process.exit(1);
+    }
     // find peerID
     if ( method == 'ROUNDROBIN' ) {
         // Round Robin
