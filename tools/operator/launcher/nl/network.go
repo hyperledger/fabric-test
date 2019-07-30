@@ -111,13 +111,13 @@ func LaunchK8sComponents(kubeConfigPath string, isDataPersistence string) error 
 		return err
 	}
 
-	err = client.ExecuteK8sCommand(kubeConfigPath, "apply", "-f", "./../configFiles/k8s-service.yaml", "-f", "./../configFiles/fabric-k8s-pods.yaml")
+	err = client.ExecuteK8sCommand(kubeConfigPath, "apply", "-f", "./../configFiles/fabric-k8s-service.yaml", "-f", "./../configFiles/fabric-k8s-pods.yaml")
 	if err != nil {
 		return err
 	}
 
 	if isDataPersistence == "true" {
-		err = client.ExecuteK8sCommand(kubeConfigPath, "apply", "-f", "./../configFiles/fabric-pvc.yaml")
+		err = client.ExecuteK8sCommand(kubeConfigPath, "apply", "-f", "./../configFiles/fabric-k8s-pvc.yaml")
 		if err != nil {
 			return err
 		}

@@ -34,8 +34,8 @@ func NetworkCleanUp(input networkspec.Config, kubeConfigPath string) error {
         if input.K8s.DataPersistence == "local" {
             err = client.ExecuteK8sCommand(kubeConfigPath, "apply", "-f", "./scripts/alpine.yaml")
         }
-        err = client.ExecuteK8sCommand(kubeConfigPath, "delete", "-f", "./../configFiles/k8s-service.yaml")
-        err = client.ExecuteK8sCommand(kubeConfigPath, "delete", "-f", "./../configFiles/fabric-pvc.yaml")
+        err = client.ExecuteK8sCommand(kubeConfigPath, "delete", "-f", "./../configFiles/fabric-k8s-service.yaml")
+        err = client.ExecuteK8sCommand(kubeConfigPath, "delete", "-f", "./../configFiles/fabric-k8s-pvc.yaml")
         err = client.ExecuteK8sCommand(kubeConfigPath, "delete", "configmaps", "certsparser")
     } else {
         err = client.ExecuteCommand("docker-compose", "-f", "./../configFiles/docker-compose.yaml", "down")
