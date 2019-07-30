@@ -628,7 +628,7 @@ module.exports.tlsEnroll = async function(client, orgName, cpf) {
         process.exit(1);
     }
     var cpCAs = cpf['certificateAuthorities'];
-    var orgCA=cpOrgs[org].certificateAuthorities[0];
+    var orgCA=cpOrgs[orgName].certificateAuthorities[0];
     logger.info('[tlsEnroll] CA tls enroll: %s, cpf: %s', orgName, cpf);
     return new Promise(function (resolve, reject) {
         if (!cpOrgs[orgName]) {
