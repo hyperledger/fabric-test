@@ -218,20 +218,16 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] chaincode_id: %s', Ni
 // find all connection profiles
 var cpList = [];
 var cpPath = uiContent.ConnProfilePath;
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpPath: ', Nid, channel.getName(), org, pid, cpPath);
-fs.readdirSync(cpPath).forEach(file => {
-  logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] file', Nid, channel.getName(), org, pid, file);
-  var file_ext = path.extname(file);
-  if ((/(yml|yaml|json)$/i).test(file_ext)) {
-      var cpf=path.join(cpPath, file);
-      cpList.push(cpf);
-  }
-});
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] connection profile path: ', Nid, channel.getName(), org, pid, cpPath);
+cpList = testUtil.getConnProfileListSubmitter(cpPath);
 if ( cpList.length === 0 ) {
-    logger.error('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] error: invalid connection profile path or no connection profiles found in the connection profile path', Nid, channel.getName(), org, pid);
+    logger.error('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] error: invalid connection profile path or no connection profiles found in the connection profile path: %s', Nid, channel.getName(), org, pid, cpPath);
     process.exit(1);
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
+
+var orderersCPFList = {};
+orderersCPFList = testUtil.getNodetypeFromConnProfilesSubmitter(cpList, 'orderers');
 
 // set org connection profile
 var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
@@ -244,7 +240,6 @@ if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
     process.exit(1);
 }
 var cpOrgs = cpf['organizations'];
-var cpOrderers = cpf['orderers'];
 var cpPeers = cpf['peers'];
 
 var users =  hfc.getConfigSetting('users');
@@ -531,7 +526,7 @@ function assignPeerListFromList(channel, client, org) {
                 peername = listOpt[key][i];
                 if (cpPeers[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpf);
+                        data = testUtil.getTLSCert(key, peername, cpf, cpPath);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeers[peername].url,
@@ -566,7 +561,7 @@ function assignPeerList(channel, client, org) {
             if (cpPeers.hasOwnProperty(key)) {
                 if (cpPeers[key].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(orgtmp, key, cpf);
+                        data = testUtil.getTLSCert(orgtmp, key, cpf, cpPath);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeers[key].url,
@@ -612,7 +607,7 @@ function assignThreadAllPeers(channel, client, org) {
             var key = cpOrgsTmp[orgtmp]['peers'][i];
             if (cpPeersTmp.hasOwnProperty(key)) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(orgtmp, key, cpfTmp);
+                    data = testUtil.getTLSCert(orgtmp, key, cpfTmp, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeersTmp[key].url,
@@ -673,7 +668,7 @@ function assignThreadAllAnchorPeers(channel, client, org) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(orgtmp, key, cpf);
+                    data = testUtil.getTLSCert(orgtmp, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -733,7 +728,7 @@ function assignThreadOrgPeer(channel, client, org) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf);
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -806,7 +801,7 @@ function assignThreadPeerList(channel, client, org) {
             if (cpPeersTmp.hasOwnProperty(peername)) {
                 if (cpPeersTmp[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpfTmp);
+                        data = testUtil.getTLSCert(key, peername, cpfTmp, cpPath);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeersTmp[peername].url,
@@ -869,7 +864,7 @@ function assignThreadPeerID(channel, client, org, method) {
     if (cpPeers.hasOwnProperty(peername)) {
         if (cpPeers[peername].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, peername, cpf);
+                data = testUtil.getTLSCert(org, peername, cpf, cpPath);
                 if ( data !== null ) {
                     peerTmp = client.newPeer(
                         cpPeers[peername].url,
@@ -926,7 +921,7 @@ function channelAddPeer(channel, client, org) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf);
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -981,7 +976,7 @@ function channelAddPeerEvent(channel, client, org) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf);
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -1041,7 +1036,7 @@ function channelAdd1Peer(channel, client, org) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf);
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -1132,12 +1127,12 @@ function ordererFailover(channel, client) {
 function setCurrOrdererId(channel, client, org) {
 
     // assign ordererID
-    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod);
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod, cpPath);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d setCurrOrdererId] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
 
     var i;
     for (i=0; i<ordererList.length; i++) {
-        if (ordererList[i]._url === cpOrderers[ordererID].url) {
+        if (ordererList[i]._url === orderersCPFList[ordererID].url) {
             currOrdererId = i;
         }
     }
@@ -1150,24 +1145,24 @@ function assignOrdererList(channel, client) {
     var data;
     var ordererTmp;
 
-    for (let key in cpOrderers) {
-        if (cpOrderers[key].url) {
+    for (let key in orderersCPFList) {
+        if (orderersCPFList[key].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert('orderer', key, cpf);
+                data = testUtil.getTLSCert('orderer', key, cpf, cpPath);
                 if ( data !== null ) {
                     let caroots = Buffer.from(data).toString();
 
                     ordererTmp = client.newOrderer(
-                        cpOrderers[key].url,
+                        orderersCPFList[key].url,
                         {
                             pem: caroots,
-                            'ssl-target-name-override': cpOrderers[key]['grpcOptions']['ssl-target-name-override']
+                            'ssl-target-name-override': orderersCPFList[key]['grpcOptions']['ssl-target-name-override']
                         }
                     )
                     ordererList.push(ordererTmp);
                 }
             } else {
-                ordererTmp = client.newOrderer(cpOrderers[key].url);
+                ordererTmp = client.newOrderer(orderersCPFList[key].url);
                 ordererList.push(ordererTmp);
             }
         }
@@ -1178,29 +1173,29 @@ function assignOrdererList(channel, client) {
 function channelAddOrderer(channel, client, org) {
 
     // assign ordererID
-    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod);
+    var ordererID=testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod, cpPath);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
 
     var data;
     logger.info('[Nid:chan:org:id:ordererID=%d:%s:%s:%d:%s channelAddOrderer] ', Nid, channelName, org, pid, ordererID );
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpf);
+        data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
             channel.addOrderer(
                 client.newOrderer(
-                    cpOrderers[ordererID].url,
+                    orderersCPFList[ordererID].url,
                     {
                         'pem': caroots,
-                        'ssl-target-name-override': cpOrderers[ordererID]['grpcOptions']['ssl-target-name-override']
+                        'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
                     }
                 )
             );
         }
     } else {
-        channel.addOrderer(client.newOrderer(cpOrderers[ordererID].url));
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, cpOrderers[ordererID].url);
+        channel.addOrderer(client.newOrderer(orderersCPFList[ordererID].url));
+        logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, orderersCPFList[ordererID].url);
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %s', Nid, channelName, org, pid, channel.getOrderers());
 }
@@ -1218,7 +1213,7 @@ function assignThreadOrgAnchorPeer(channel, client, org) {
         var key = cpOrgs[org]['peers'][i];
         if (cpPeers[key].url) {
             if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, key, cpf);
+                data = testUtil.getTLSCert(org, key, cpf, cpPath);
                 if ( data !== null ) {
                     peerTmp = client.newPeer(
                         cpPeers[key].url,

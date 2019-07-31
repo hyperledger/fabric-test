@@ -98,20 +98,16 @@ logger.info('[Nid=%d pte-main] channelOrgName.length: %d, channelOrgName: %s', N
 // find all connection profiles
 var cpList = [];
 var cpPath = uiContent.ConnProfilePath;
-logger.info('[Nid=%d pte-main] cpPath: ', Nid, cpPath);
-fs.readdirSync(cpPath).forEach(file => {
-  logger.info('[Nid=%d pte-main] file', Nid, file);
-  var file_ext = path.extname(file);
-  if ((/(yml|yaml|json)$/i).test(file_ext)) {
-      var cpf=path.join(cpPath, file);
-      cpList.push(cpf);
-  }
-});
+logger.info('[Nid=%d pte-main] connection profile path: ', Nid, cpPath);
+cpList = testUtil.getConnProfileListSubmitter(cpPath);
 if ( cpList.length === 0 ) {
-    logger.error('[Nid=%d pte-main] error: invalid connection profile path or no connection profiles found in the connection profile path', Nid);
+    logger.error('[Nid=%d pte-main] error: invalid connection profile path or no connection profiles found in the connection profile path: %s', Nid, cpPath);
     process.exit(1);
 }
 logger.info('[Nid=%d pte-main] cpList; ', Nid, cpList);
+
+var orderersCPFList = {};
+orderersCPFList = testUtil.getNodetypeFromConnProfilesSubmitter(cpList, 'orderers');
 
 var users =  hfc.getConfigSetting('users');
 
@@ -222,12 +218,11 @@ function getOrgOrdererID(org) {
     }
 
     var cpOrgs = cpf['organizations'];
-    var cpOrderers = cpf['orderers'];
 
     if ( typeof cpOrgs[org].ordererID !== 'undefined' ) {
         ordererID = cpOrgs[org].ordererID;
     } else {
-        ordererID = Object.getOwnPropertyNames(cpOrderers)[0];
+        ordererID = Object.getOwnPropertyNames(orderersCPFList)[0];
     }
     return ordererID;
 }
@@ -241,28 +236,27 @@ function clientNewOrderer(client, org) {
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
-    var cpOrderers = cpf['orderers'];
 
     var ordererID = getOrgOrdererID(org);
 
     logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpf);
+        data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
             orderer = client.newOrderer(
-                cpOrderers[ordererID].url,
+                orderersCPFList[ordererID].url,
                 {
                     'pem': caroots,
-                    'ssl-target-name-override': cpOrderers[ordererID]['grpcOptions']['ssl-target-name-override']
+                    'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
                 }
             );
         }
     } else {
-        orderer = client.newOrderer(cpOrderers[ordererID].url);
+        orderer = client.newOrderer(orderersCPFList[ordererID].url);
     }
-    logger.info('[clientNewOrderer] orderer: %s', cpOrderers[ordererID].url);
+    logger.info('[clientNewOrderer] orderer: %s', orderersCPFList[ordererID].url);
 }
 
 function chainAddOrderer(channel, client, org) {
@@ -275,27 +269,26 @@ function chainAddOrderer(channel, client, org) {
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
-    var cpOrderers = cpf['orderers'];
     var ordererID = getOrgOrdererID(org);
 
     if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpf);
+        data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
         if ( data !== null ) {
             let caroots = Buffer.from(data).toString();
 
             channel.addOrderer(
                 client.newOrderer(
-                    cpOrderers[ordererID].url,
+                    orderersCPFList[ordererID].url,
                     {
                         'pem': caroots,
-                        'ssl-target-name-override': cpOrderers[ordererID]['grpcOptions']['ssl-target-name-override']
+                        'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
                     }
                 )
             );
         }
     } else {
         channel.addOrderer(
-            client.newOrderer(cpOrderers[ordererID].url)
+            client.newOrderer(orderersCPFList[ordererID].url)
         );
     }
     logger.info('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
@@ -320,7 +313,7 @@ function channelAddPeer(channel, client, org) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf);
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -368,7 +361,7 @@ function channelAddListedPeer(channel, client, org) {
                 peername = listOpt[key][i];
                 if (cpPeers[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpf);
+                        data = testUtil.getTLSCert(key, peername, cpf, cpPath);
                         if ( data !== null ) {
                             peerTmp = client.newPeer(
                                 cpPeers[peername].url,
@@ -419,7 +412,7 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
         if (cpPeers.hasOwnProperty(key)) {
             if (key.indexOf(qpeer) === 0) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(qorg, key, cpf);
+                    data = testUtil.getTLSCert(qorg, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -463,7 +456,7 @@ function channelAddPeer1(channel, client, org, eventHubs) {
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
                 if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf);
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
                     if ( data !== null ) {
                         peerTmp = client.newPeer(
                             cpPeers[key].url,
@@ -513,7 +506,7 @@ function channelAddPeerEventJoin(channel, client, org) {
                 if (cpPeers.hasOwnProperty(key)) {
                     if (cpPeers[key].url) {
                         if (TLS > testUtil.TLSDISABLED) {
-                            data = testUtil.getTLSCert(org, key, cpf);
+                            data = testUtil.getTLSCert(org, key, cpf, cpPath);
                             if ( data !== null ) {
                                 targets.push(
                                     client.newPeer(
@@ -1076,7 +1069,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             return signatures;
         }).then((sigs) =>{
             client._userContext = null;
-            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], cpf);
+            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], cpf, cpPath);
         }).then((admin) => {
             the_user = admin;
             logger.info('[createOrUpdateOneChannel] Successfully enrolled user \'admin\' for', "orderer");
@@ -1163,7 +1156,7 @@ async function joinChannel(channel, client, org) {
     }).then((store) => {
         client.setStateStore(store);
         client._userContext = null;
-        return testUtil.getOrderAdminSubmitter(client, org, cpf)
+        return testUtil.getOrderAdminSubmitter(client, org, cpf, cpPath)
     }).then((admin) => {
         logger.info('[joinChannel:%s] Successfully enrolled orderer \'admin\'', org);
         the_user = admin;
