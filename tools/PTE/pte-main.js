@@ -406,9 +406,9 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
     var peerTmp;
     var targets = [];
 
-    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, qorg);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
-        logger.info('[channelAddQIPeer] org: %s, no peer is found in the connection profile', org);
+        logger.info('[channelAddQIPeer] org: %s, no peer is found in the connection profile', qorg);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
