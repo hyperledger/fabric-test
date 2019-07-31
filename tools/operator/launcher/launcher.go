@@ -25,7 +25,7 @@ func readArguments() (string, string, string) {
 	flag.Parse()
 
 	if fmt.Sprintf("%s", *kubeConfigPath) == "" {
-		fmt.Printf("Kube config file not provided, proceeding with local environment")
+		fmt.Println("Kube config file not provided, proceeding with local environment")
 	} else if fmt.Sprintf("%s", *networkSpecPath) == "" {
 		log.Fatalf("Input file not provided")
 	}
@@ -107,7 +107,10 @@ func main() {
 
 	networkSpecPath, kubeConfigPath, action := readArguments()
 	utils.DownloadYtt()
-	contents, _ := ioutil.ReadFile(networkSpecPath)
+	contents, err := ioutil.ReadFile(networkSpecPath)
+	if err != nil{
+		log.Fatalf("In-correct input file path; err:%v", err)
+	}
 	contents = append([]byte("#@data/values \n"), contents...)
 	ioutil.WriteFile("./../templates/input.yaml", contents, 0644)
 	inputPath := "./../templates/input.yaml"

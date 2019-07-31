@@ -13,62 +13,62 @@ import (
     "reflect"
     "strings"
     "time"
-    "log"
 
     "github.com/hyperledger/fabric-test/tools/operator/networkspec"
     yaml "gopkg.in/yaml.v2"
 )
 
-func getK8sExternalIP(kubeconfigPath string, input networkspec.Config, serviceName string) string {
+func getK8sExternalIP(kubeconfigPath string, input networkspec.Config, serviceName string) (string, error) {
 
     var IPAddress string
     if kubeconfigPath != "" {
         if input.K8s.ServiceType == "NodePort" {
             stdoutStderr, err := exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%v", kubeconfigPath), "get", "nodes", "-o", `jsonpath='{ $.items[*].status.addresses[?(@.type=="ExternalIP")].address }'`).CombinedOutput()
             if err != nil {
-                fmt.Println("Failed to get the external IP for k8s using NodePort; err: %v", string(stdoutStderr))
+                return "", fmt.Errorf("Failed to get the external IP for k8s using NodePort; err: %v", string(stdoutStderr))
             }
             IPAddressList := strings.Split(string(stdoutStderr)[1:], " ")
             IPAddress = IPAddressList[0]
         } else if input.K8s.ServiceType == "LoadBalancer" {
             stdoutStderr, err := exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%v", kubeconfigPath), "get", "-o", `jsonpath="{.status.loadBalancer.ingress[0].ip}"`, "services", serviceName).CombinedOutput()
             if err != nil {
-                fmt.Println("Failed to get the external IP for k8s using LoadBalancer; err: %v", string(stdoutStderr))
+                return "", fmt.Errorf("Failed to get the external IP for k8s using NodePort; err: %v", string(stdoutStderr))
             }
             IPAddress = string(stdoutStderr)[1 : len(string(stdoutStderr))-1]
         }
     } else {
         IPAddress = "localhost"
     }
-    return IPAddress
+    return IPAddress, nil
 }
 
-func getK8sServicePort(kubeconfigPath, serviceName string) string {
+func getK8sServicePort(kubeconfigPath, serviceName string) (string, error) {
 
     var port string
     if kubeconfigPath != "" {
         stdoutStderr, err := exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%v", kubeconfigPath), "get", "-o", `jsonpath="{.spec.ports[0].nodePort}"`, "services", serviceName).CombinedOutput()
         if err != nil {
-            fmt.Println("Failed to get the port number for service %v; err: %v", serviceName, err)
+            return "", fmt.Errorf("Failed to get the port number for service %v; err: %v", serviceName, err)
         }
         port = string(stdoutStderr)
         port = port[1 : len(port)-1]
     } else {
         stdoutStderr, err := exec.Command("docker", "port", serviceName).CombinedOutput()
         if err != nil {
-            fmt.Println("Failed to get the port number for service %v; err: %v", serviceName, err)
+            return "", fmt.Errorf("Failed to get the port number for service %v; err: %v", serviceName, err)
         }
         port = string(stdoutStderr)
         if len(port) == 0{
-            log.Fatalf("Failed to create connection profile, err: Unable to get the %v port number", serviceName)
+            return "", fmt.Errorf("Unable to get the port number for service %v", serviceName)
         }
         port = port[len(port)-6 : len(port)-1]
     }
-    return port
+    return port, nil
 }
 
-func ordererOrganizations(input networkspec.Config, kubeconfigPath string) map[string]networkspec.Orderer {
+func ordererOrganizations(input networkspec.Config, kubeconfigPath string) (map[string]networkspec.Orderer, error) {
     orderers := make(map[string]networkspec.Orderer)
+    var err error
     numOrdererOrganizations := len(input.OrdererOrganizations)
     if input.Orderer.OrdererType == "solo" || input.Orderer.OrdererType == "kafka" {
         numOrdererOrganizations = 1
@@ -87,15 +87,30 @@ func ordererOrganizations(input networkspec.Config, kubeconfigPath string) map[s
             var portNumber, NodeIP, protocol string
             if kubeconfigPath != "" {
                 if input.K8s.ServiceType == "NodePort" {
-                    portNumber = getK8sServicePort(kubeconfigPath, ordererName)
-                    NodeIP = getK8sExternalIP(kubeconfigPath, input, "")
+                    portNumber, err = getK8sServicePort(kubeconfigPath, ordererName)
+                    if err != nil{
+                        return orderers, fmt.Errorf("%v", err)
+                    }
+                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, "")
+                    if err != nil{
+                        return orderers, fmt.Errorf("%v", err)
+                    }
                 } else {
                     portNumber = "7050"
-                    NodeIP = getK8sExternalIP(kubeconfigPath, input, ordererName)
+                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, ordererName)
+                    if err != nil{
+                        return orderers, fmt.Errorf("%v", err)
+                    }
                 }
             } else {
-                portNumber = getK8sServicePort(kubeconfigPath, ordererName)
-                NodeIP = getK8sExternalIP(kubeconfigPath, input, ordererName)
+                portNumber, err = getK8sServicePort(kubeconfigPath, ordererName)
+                if err != nil{
+                    return orderers, fmt.Errorf("%v", err)
+                }
+                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, ordererName)
+                if err != nil{
+                    return orderers, fmt.Errorf("%v", err)
+                }
             }
             protocol = "grpc"
             if input.TLS == "true" || input.TLS == "mutual" {
@@ -107,11 +122,12 @@ func ordererOrganizations(input networkspec.Config, kubeconfigPath string) map[s
             orderers[ordererName] = orderer
         }
     }
-    return orderers
+    return orderers, nil
 }
 
-func certificateAuthorities(peerOrg networkspec.PeerOrganizations, kubeconfigPath string, input networkspec.Config) map[string]networkspec.CertificateAuthority {
+func certificateAuthorities(peerOrg networkspec.PeerOrganizations, kubeconfigPath string, input networkspec.Config) (map[string]networkspec.CertificateAuthority, error) {
     CAs := make(map[string]networkspec.CertificateAuthority)
+    var err error
     artifactsLocation := input.ArtifactsLocation
     for i := 0; i < peerOrg.NumCA; i++ {
         var CA networkspec.CertificateAuthority
@@ -120,15 +136,30 @@ func certificateAuthorities(peerOrg networkspec.PeerOrganizations, kubeconfigPat
         caName := fmt.Sprintf("ca%v-%v", i, orgName)
         if kubeconfigPath != "" {
             if input.K8s.ServiceType == "NodePort" {
-                portNumber = getK8sServicePort(kubeconfigPath, caName)
-                NodeIP = getK8sExternalIP(kubeconfigPath, input, "")
+                portNumber, err = getK8sServicePort(kubeconfigPath, caName)
+                if err != nil{
+                    return CAs, fmt.Errorf("%v", err)
+                }
+                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, "")
+                if err != nil{
+                    return CAs, fmt.Errorf("%v", err)
+                }
             } else {
                 portNumber = "7054"
-                NodeIP = getK8sExternalIP(kubeconfigPath, input, caName)
+                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, caName)
+                if err != nil{
+                    return CAs, fmt.Errorf("%v", err)
+                }
             }
         } else {
-            portNumber = getK8sServicePort(kubeconfigPath, caName)
-            NodeIP = getK8sExternalIP(kubeconfigPath, input, caName)
+            portNumber, err = getK8sServicePort(kubeconfigPath, caName)
+            if err != nil{
+                return CAs, fmt.Errorf("%v", err)
+            }
+            NodeIP, err = getK8sExternalIP(kubeconfigPath, input, caName)
+            if err != nil{
+                return CAs, fmt.Errorf("%v", err)
+            }
         }
         protocol = "http"
         if input.TLS == "true" || input.TLS == "mutual" {
@@ -141,7 +172,7 @@ func certificateAuthorities(peerOrg networkspec.PeerOrganizations, kubeconfigPat
         CA.Registrar.EnrollSecret = "adminpw"
         CAs[fmt.Sprintf("ca%v", i)] = CA
     }
-    return CAs
+    return CAs, nil
 }
 
 func getKeysFromMap(newMap interface{}) []string {
@@ -160,6 +191,10 @@ func getKeysFromMap(newMap interface{}) []string {
 
 func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
 
+    orderersMap, err := ordererOrganizations(input, kubeconfigPath)
+    if err != nil {
+        return fmt.Errorf("%v", err)
+    }
     for org := 0; org < len(input.PeerOrganizations); org++ {
         peers := make(map[string]networkspec.Peer)
         organizations := make(map[string]networkspec.Organization)
@@ -172,15 +207,30 @@ func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
             var portNumber, NodeIP, protocol string
             if kubeconfigPath != "" {
                 if input.K8s.ServiceType == "NodePort" {
-                    portNumber = getK8sServicePort(kubeconfigPath, peerName)
-                    NodeIP = getK8sExternalIP(kubeconfigPath, input, "")
+                    portNumber, err = getK8sServicePort(kubeconfigPath, peerName)
+                    if err != nil{
+                        return fmt.Errorf("%v", err)
+                    }
+                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, "")
+                    if err != nil{
+                        return fmt.Errorf("%v", err)
+                    }
                 } else {
                     portNumber = "7051"
-                    NodeIP = getK8sExternalIP(kubeconfigPath, input, peerName)
+                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, peerName)
+                    if err != nil{
+                        return fmt.Errorf("%v", err)
+                    }
                 }
             } else {
-                portNumber = getK8sServicePort(kubeconfigPath, peerName)
-                NodeIP = getK8sExternalIP(kubeconfigPath, input, peerName)
+                portNumber, err = getK8sServicePort(kubeconfigPath, peerName)
+                if err != nil{
+                    return fmt.Errorf("%v", err)
+                }
+                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, peerName)
+                if err != nil{
+                    return fmt.Errorf("%v", err)
+                }
             }
             protocol = "grpc"
             if input.TLS == "true" || input.TLS == "mutual" {
@@ -196,7 +246,10 @@ func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
         path := filepath.Join(input.ArtifactsLocation, fmt.Sprintf("/crypto-config/peerOrganizations/%v/users/Admin@%v/msp", peerorg.Name, peerorg.Name))
         organization.AdminPrivateKey.Path = path
         organization.SignedCert.Path = path
-        ca := certificateAuthorities(peerorg, kubeconfigPath, input)
+        ca, err := certificateAuthorities(peerorg, kubeconfigPath, input)
+        if err != nil{
+            return fmt.Errorf("%v", err)
+        }
         caList := make([]string, 0, len(ca))
         for k := range ca {
             caList = append(caList, k)
@@ -205,7 +258,7 @@ func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
         organization.Peers = append(organization.Peers, peersList...)
         organizations[peerorg.Name] = organization
 
-        err := generateConnectionProfileFile(kubeconfigPath, peerorg.Name, input, peers, organizations, ca)
+        err = generateConnectionProfileFile(kubeconfigPath, peerorg.Name, input, peers, organizations, ca, orderersMap)
         if err != nil {
             return fmt.Errorf("Failed to generate connection profile; err: %v", err)
         }
@@ -213,14 +266,17 @@ func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
     return nil
 }
 
-func generateConnectionProfileFile(kubeconfigPath, orgName string, input networkspec.Config, peerOrganizations map[string]networkspec.Peer, organizations map[string]networkspec.Organization, certificateAuthorities map[string]networkspec.CertificateAuthority) error {
-
+func generateConnectionProfileFile(kubeconfigPath, orgName string, input networkspec.Config, peerOrganizations map[string]networkspec.Peer, organizations map[string]networkspec.Organization, certificateAuthorities map[string]networkspec.CertificateAuthority, orderersMap map[string]networkspec.Orderer) error {
+    
+    var err error
     path := filepath.Join(input.ArtifactsLocation, "connection-profile")
     _ = os.Mkdir(path, 0755)
 
     fileName := filepath.Join(path, fmt.Sprintf("connection_profile_%v.yaml", orgName))
     channels := make(map[string]networkspec.Channel)
-    orderersMap := ordererOrganizations(input, kubeconfigPath)
+    if err != nil{
+        return fmt.Errorf("%v", err)
+    }
     for i := 0; i < input.NumChannels; i++ {
         var channel networkspec.Channel
         orderersList := getKeysFromMap(orderersMap)
