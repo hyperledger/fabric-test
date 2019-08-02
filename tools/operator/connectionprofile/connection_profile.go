@@ -18,7 +18,7 @@ import (
     yaml "gopkg.in/yaml.v2"
 )
 
-func getK8sExternalIP(kubeconfigPath string, input networkspec.Config, serviceName string) (string, error) {
+func GetK8sExternalIP(kubeconfigPath string, input networkspec.Config, serviceName string) (string, error) {
 
     var IPAddress string
     if kubeconfigPath != "" {
@@ -42,11 +42,14 @@ func getK8sExternalIP(kubeconfigPath string, input networkspec.Config, serviceNa
     return IPAddress, nil
 }
 
-func getK8sServicePort(kubeconfigPath, serviceName string) (string, error) {
+func GetK8sServicePort(kubeconfigPath, serviceName string, forHealth bool) (string, error) {
 
     var port string
     if kubeconfigPath != "" {
         stdoutStderr, err := exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%v", kubeconfigPath), "get", "-o", `jsonpath="{.spec.ports[0].nodePort}"`, "services", serviceName).CombinedOutput()
+        if forHealth {
+            stdoutStderr, err = exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%v", kubeconfigPath), "get", "-o", `jsonpath="{.spec.ports[1].nodePort}"`, "services", serviceName).CombinedOutput()
+        }
         if err != nil {
             return "", fmt.Errorf("Failed to get the port number for service %v; err: %v", serviceName, err)
         }
@@ -57,11 +60,29 @@ func getK8sServicePort(kubeconfigPath, serviceName string) (string, error) {
         if err != nil {
             return "", fmt.Errorf("Failed to get the port number for service %v; err: %v", serviceName, err)
         }
-        port = string(stdoutStderr)
-        if len(port) == 0{
+        ports := strings.Split(string(stdoutStderr), "\n")
+        if len(ports) == 0{
             return "", fmt.Errorf("Unable to get the port number for service %v", serviceName)
         }
-        port = port[len(port)-6 : len(port)-1]
+        if forHealth{
+            for i:=0; i<len(ports); i++{
+                if (strings.Contains(ports[i], "9443")) || (strings.Contains(ports[i], "8443")){
+                    port = ports[i]
+                    port = port[len(port)-5 : len(port)]
+                    return port, nil
+                }
+            }
+        } else{
+            for i:=0; i<len(ports); i++{
+                if !(strings.Contains(ports[i], "9443")){
+                    if !(strings.Contains(ports[i], "8443")){
+                        port = ports[i]
+                        port = port[len(port)-5 : len(port)]
+                        return port, nil
+                    }
+                }
+            }
+        }
     }
     return port, nil
 }
@@ -87,27 +108,27 @@ func ordererOrganizations(input networkspec.Config, kubeconfigPath string) (map[
             var portNumber, NodeIP, protocol string
             if kubeconfigPath != "" {
                 if input.K8s.ServiceType == "NodePort" {
-                    portNumber, err = getK8sServicePort(kubeconfigPath, ordererName)
+                    portNumber, err = GetK8sServicePort(kubeconfigPath, ordererName, false)
                     if err != nil{
                         return orderers, fmt.Errorf("%v", err)
                     }
-                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, "")
+                    NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, "")
                     if err != nil{
                         return orderers, fmt.Errorf("%v", err)
                     }
                 } else {
                     portNumber = "7050"
-                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, ordererName)
+                    NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, ordererName)
                     if err != nil{
                         return orderers, fmt.Errorf("%v", err)
                     }
                 }
             } else {
-                portNumber, err = getK8sServicePort(kubeconfigPath, ordererName)
+                portNumber, err = GetK8sServicePort(kubeconfigPath, ordererName, false)
                 if err != nil{
                     return orderers, fmt.Errorf("%v", err)
                 }
-                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, ordererName)
+                NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, ordererName)
                 if err != nil{
                     return orderers, fmt.Errorf("%v", err)
                 }
@@ -136,27 +157,27 @@ func certificateAuthorities(peerOrg networkspec.PeerOrganizations, kubeconfigPat
         caName := fmt.Sprintf("ca%v-%v", i, orgName)
         if kubeconfigPath != "" {
             if input.K8s.ServiceType == "NodePort" {
-                portNumber, err = getK8sServicePort(kubeconfigPath, caName)
+                portNumber, err = GetK8sServicePort(kubeconfigPath, caName, false)
                 if err != nil{
                     return CAs, fmt.Errorf("%v", err)
                 }
-                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, "")
+                NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, "")
                 if err != nil{
                     return CAs, fmt.Errorf("%v", err)
                 }
             } else {
                 portNumber = "7054"
-                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, caName)
+                NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, caName)
                 if err != nil{
                     return CAs, fmt.Errorf("%v", err)
                 }
             }
         } else {
-            portNumber, err = getK8sServicePort(kubeconfigPath, caName)
+            portNumber, err = GetK8sServicePort(kubeconfigPath, caName, false)
             if err != nil{
                 return CAs, fmt.Errorf("%v", err)
             }
-            NodeIP, err = getK8sExternalIP(kubeconfigPath, input, caName)
+            NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, caName)
             if err != nil{
                 return CAs, fmt.Errorf("%v", err)
             }
@@ -207,27 +228,27 @@ func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
             var portNumber, NodeIP, protocol string
             if kubeconfigPath != "" {
                 if input.K8s.ServiceType == "NodePort" {
-                    portNumber, err = getK8sServicePort(kubeconfigPath, peerName)
+                    portNumber, err = GetK8sServicePort(kubeconfigPath, peerName, false)
                     if err != nil{
                         return fmt.Errorf("%v", err)
                     }
-                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, "")
+                    NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, "")
                     if err != nil{
                         return fmt.Errorf("%v", err)
                     }
                 } else {
                     portNumber = "7051"
-                    NodeIP, err = getK8sExternalIP(kubeconfigPath, input, peerName)
+                    NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, peerName)
                     if err != nil{
                         return fmt.Errorf("%v", err)
                     }
                 }
             } else {
-                portNumber, err = getK8sServicePort(kubeconfigPath, peerName)
+                portNumber, err = GetK8sServicePort(kubeconfigPath, peerName, false)
                 if err != nil{
                     return fmt.Errorf("%v", err)
                 }
-                NodeIP, err = getK8sExternalIP(kubeconfigPath, input, peerName)
+                NodeIP, err = GetK8sExternalIP(kubeconfigPath, input, peerName)
                 if err != nil{
                     return fmt.Errorf("%v", err)
                 }
@@ -267,7 +288,7 @@ func peerOrganizations(input networkspec.Config, kubeconfigPath string) error {
 }
 
 func generateConnectionProfileFile(kubeconfigPath, orgName string, input networkspec.Config, peerOrganizations map[string]networkspec.Peer, organizations map[string]networkspec.Organization, certificateAuthorities map[string]networkspec.CertificateAuthority, orderersMap map[string]networkspec.Orderer) error {
-    
+
     var err error
     path := filepath.Join(input.ArtifactsLocation, "connection-profile")
     _ = os.Mkdir(path, 0755)
