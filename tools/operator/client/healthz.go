@@ -1,16 +1,17 @@
 package client
 
 import (
+	"errors"
 	"fmt"
-	"net/http"
-	"time"
-	"strings"
-	"os/exec"
 	"io/ioutil"
-	"log"
+	"net/http"
+	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
+	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	// k8s "k8s.io/client-go/kubernetes"
 )
 
@@ -19,18 +20,18 @@ func CheckComponentsHealth(componentName, kubeconfigPath string, input networksp
 
 	var err error
 	time.Sleep(15 * time.Second)
-	if componentName != ""{
+	if componentName != "" {
 		err = checkHealth(componentName, kubeconfigPath, input)
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	} else {
 		for i := 0; i < len(input.OrdererOrganizations); i++ {
 			org := input.OrdererOrganizations[i]
 			for j := 0; j < org.NumOrderers; j++ {
-				ordererName := fmt.Sprintf("orderer%v-%v", j, org.Name)
+				ordererName := fmt.Sprintf("orderer%d-%s", j, org.Name)
 				err = checkHealth(ordererName, kubeconfigPath, input)
-				if err != nil{
+				if err != nil {
 					return err
 				}
 			}
@@ -39,9 +40,9 @@ func CheckComponentsHealth(componentName, kubeconfigPath string, input networksp
 		for i := 0; i < len(input.PeerOrganizations); i++ {
 			org := input.PeerOrganizations[i]
 			for j := 0; j < org.NumPeers; j++ {
-				peerName := fmt.Sprintf("peer%v-%v", j, org.Name)
+				peerName := fmt.Sprintf("peer%d-%s", j, org.Name)
 				err = checkHealth(peerName, kubeconfigPath, input)
-				if err != nil{
+				if err != nil {
 					return err
 				}
 			}
@@ -51,115 +52,139 @@ func CheckComponentsHealth(componentName, kubeconfigPath string, input networksp
 	return nil
 }
 
-func checkHealth(componentName, kubeconfigPath string, input networkspec.Config) error{
+func checkHealth(componentName, kubeconfigPath string, input networkspec.Config) error {
 
-	fmt.Println("Checking health for", componentName)
+	utils.PrintLogs(fmt.Sprintf("Checking health for %s", componentName))
 	var NodeIP string
 	portNumber, err := connectionprofile.GetK8sServicePort(kubeconfigPath, componentName, true)
 	if err != nil {
-		return fmt.Errorf("Failed to get the port for %v; err: %v", componentName, err)
+		utils.PrintLogs(fmt.Sprintf("Failed to get the port for %s", componentName))
+		return err
 	}
-	if kubeconfigPath != ""{
+	if kubeconfigPath != "" {
 		NodeIP, err = connectionprofile.GetK8sExternalIP(kubeconfigPath, input, componentName)
 		if err != nil {
-			return fmt.Errorf("Failed to get the IP address for %v; err: %v", componentName, err)
+			utils.PrintLogs(fmt.Sprintf("Failed to get the IP address for %s", componentName))
+			return err
 		}
-	} else{
-		stdoutStderr, err := exec.Command("curl", "api.ipify.org").CombinedOutput()
-		if err != nil{
-			return fmt.Errorf("Error occured while retrieving the local IP; err: %v", stdoutStderr)
+	} else {
+		NodeIP, err = getIPAddress()
+		if err != nil {
+			return err
 		}
-		IPArr := strings.Split(string(stdoutStderr), "\n")
-		NodeIP = IPArr[len(IPArr)-1]
 	}
 
-	url := fmt.Sprintf("http://%v:%v/healthz", NodeIP, portNumber)
+	url := fmt.Sprintf("http://%s:%s/healthz", NodeIP, portNumber)
 	resp, err := http.Get(url)
 	if err != nil {
-		return fmt.Errorf("Error while hitting the endpoint, err: %v", err)
+		utils.PrintLogs(fmt.Sprintf("Error while hitting the endpoint; err: %s", err))
+		return err
 	}
 	defer resp.Body.Close()
-	var healthStatus string
-	if resp.StatusCode == 200 || resp.StatusCode == 503 {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		healthStatus = string(bodyBytes)
-	} else{
-		return fmt.Errorf("Response status: %s, response body: %s", resp.StatusCode, resp.Body)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
 	}
-	fmt.Println("Status of", componentName, " health: ", healthStatus)
+	healthStatus := string(bodyBytes)
+	utils.PrintLogs("Response status: %s, response body: %s", resp.StatusCode, healthStatus)
+	if resp.StatusCode == http.StatusOK {
+		utils.PrintLogs("Health check passed")
+		return nil
+	} else {
+		return fmt.Errorf("Health check failed; Respose status = %s", resp.StatusCode)
+	}
 	return nil
 }
 
 //CheckContainersState -- Checks whether the pod is running or not
-func CheckContainersState(kubeconfigPath string) error{
+func VerifyContainersAreRunning(kubeconfigPath string) error {
 
-	fmt.Println("Checking the state of all the containers")
+	utils.PrintLogs("Checking the state of all the containers")
 	var err error
-	if kubeconfigPath != ""{
+	if kubeconfigPath != "" {
 		err = checkK8sContainerState(kubeconfigPath)
-		if err != nil{
+		if err != nil {
 			return err
 		}
-	}else {
+	} else {
 		err = checkDockerContainerState()
-		if err != nil{
+		if err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func checkK8sContainerState(kubeconfigPath string) error{
+func checkK8sContainerState(kubeconfigPath string) error {
 
 	var status string
-	for i:=0; i<10; i++{
-		if status == "No resources found."{
+	for i := 0; i < 10; i++ {
+		if status == "No resources found." {
 			return nil
 		}
-		stdoutStderr, err := exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%v", kubeconfigPath), "get", "pods", "--field-selector=status.phase!=Running").CombinedOutput()
-		if err != nil{
-			return fmt.Errorf("Error occured while getting the number of containers in running state; err: %v", stdoutStderr)
+		stdoutStderr, err := exec.Command("kubectl", fmt.Sprintf("--kubeconfig=%s", kubeconfigPath), "get", "pods", "--field-selector=status.phase!=Running").CombinedOutput()
+		if err != nil {
+			utils.PrintLogs("Error occured while getting the number of containers in running state")
+			return err
 		}
 		status = strings.TrimSpace(string(stdoutStderr))
-		if status=="No resources found."{
-			fmt.Println("All pods are up and running")
+		if status == "No resources found." {
+			utils.PrintLogs("All pods are up and running")
 			return nil
 		}
-		fmt.Println("Waiting up to 10 minutes for pods to be up and running; minute =", i)
+		utils.PrintLogs(fmt.Sprintf("Waiting up to 10 minutes for pods to be up and running; minute = %d", i))
 		time.Sleep(60 * time.Second)
 	}
-	return fmt.Errorf("Waiting time exceeded")
+	return errors.New("Waiting time exceeded")
 }
 
-func checkDockerContainerState() error{
+func checkDockerContainerState() error {
 
 	stdoutStderr, err := exec.Command("docker", "ps", "-a").CombinedOutput()
-	if err != nil{
-		return fmt.Errorf("Error occured while listing all the containers; err: %v", stdoutStderr)
+	if err != nil {
+		utils.PrintLogs("Error occured while listing all the containers")
+		return err
 	}
-	numContainers := fmt.Sprintf("%v", len(strings.Split(string(stdoutStderr), "\n")))
-	for i:=0; i<6; i++{
+	numContainers := len(strings.Split(string(stdoutStderr), "\n"))
+	for i := 0; i < 6; i++ {
 		stdoutStderr, err = exec.Command("docker", "ps", "-af", "status=running").CombinedOutput()
-		if err != nil{
-			return fmt.Errorf("Error occured while listing the running containers; err: %v", stdoutStderr)
+		if err != nil {
+			utils.PrintLogs("Error occured while listing the running containers")
+			return err
 		}
-		runningContainers := fmt.Sprintf("%v", len(strings.Split(string(stdoutStderr), "\n")))
-		if numContainers == runningContainers{
-			fmt.Println("All the containers are up and running")
+		runningContainers := len(strings.Split(string(stdoutStderr), "\n"))
+		if numContainers == runningContainers {
+			utils.PrintLogs("All the containers are up and running")
 			return nil
 		}
 		stdoutStderr, err = exec.Command("docker", "ps", "-af", "status=exited").CombinedOutput()
-		if err != nil{
-			fmt.Println("Error occured while listing the exited containers \n", string(stdoutStderr))
+		if err != nil {
+			utils.PrintLogs("Error occured while listing the exited containers")
+			return err
 		}
 		exitedContainers := len(strings.Split(strings.TrimSpace(string(stdoutStderr)), "\n"))
-		if exitedContainers > 1{
-			return fmt.Errorf("Containers exited")
+		if exitedContainers > 1 {
+			return errors.New("Containers exited")
 		}
 		time.Sleep(10 * time.Second)
 	}
-	return fmt.Errorf("Waiting time to bring up containers exceeded 1 minute")
+	return errors.New("Waiting time to bring up containers exceeded 1 minute")
+}
+
+func getIPAddress() (string, error) {
+
+	var IP string
+	var err error
+	resp, err := http.Get("http://api.ipify.org")
+	if err != nil {
+		return IP, err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return IP, err
+	}
+	IP = string(bodyBytes)
+	return IP, err
 }

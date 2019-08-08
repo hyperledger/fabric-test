@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	"github.com/hyperledger/fabric-test/tools/operator/client"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
@@ -31,12 +32,12 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 		dir := path
 		for _, f := range files {
 			if f.Name() == "msp" {
-				mspDir, _ := ioutil.ReadDir(fmt.Sprintf("%v/msp", dir))
+				mspDir, _ := ioutil.ReadDir(fmt.Sprintf("%s/msp", dir))
 				var mspArr []string
 				for _, sf := range mspDir {
-					mspSubDir, _ := ioutil.ReadDir(fmt.Sprintf("%v/msp/%v", dir, sf.Name()))
+					mspSubDir, _ := ioutil.ReadDir(fmt.Sprintf("%s/msp/%s", dir, sf.Name()))
 					for _, j := range mspSubDir {
-						data, _ := ioutil.ReadFile(fmt.Sprintf("%v/msp/%v/%v", dir, sf.Name(), j.Name()))
+						data, _ := ioutil.ReadFile(fmt.Sprintf("%s/msp/%s/%s", dir, sf.Name(), j.Name()))
 						mspArr = append(mspArr, string(data))
 					}
 				}
@@ -46,9 +47,9 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 				msp.Pem = mspArr[3]
 				msp.TLSPem = mspArr[4]
 			} else {
-				tlsDir, _ := ioutil.ReadDir(fmt.Sprintf("%v/tls", dir))
+				tlsDir, _ := ioutil.ReadDir(fmt.Sprintf("%s/tls", dir))
 				for _, sf := range tlsDir {
-					data, _ := ioutil.ReadFile(fmt.Sprintf("%v/tls/%v", dir, sf.Name()))
+					data, _ := ioutil.ReadFile(fmt.Sprintf("%s/tls/%s", dir, sf.Name()))
 					tlsArr = append(tlsArr, string(data))
 				}
 				tls.CACert = tlsArr[0]
@@ -66,12 +67,12 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 	}
 
 	for _, f := range files {
-		dir := fmt.Sprintf("%v/%v", caPath, f.Name())
+		dir := fmt.Sprintf("%s/%s", caPath, f.Name())
 		if f.Name() == "ca" {
-			caDir, _ := ioutil.ReadDir(fmt.Sprintf("%v/", dir))
+			caDir, _ := ioutil.ReadDir(fmt.Sprintf("%s/", dir))
 			caCerts := make(map[string]string)
 			for _, file := range caDir {
-				data, _ := ioutil.ReadFile(fmt.Sprintf("%v/%v", dir, file.Name()))
+				data, _ := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 				if strings.HasSuffix(file.Name(), "pem") {
 					caCerts["pem"] = string(data)
 				} else {
@@ -81,10 +82,10 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 			ca.PrivateKey = caCerts["private_key"]
 			ca.Pem = caCerts["pem"]
 		} else if f.Name() == "tlsca" {
-			tlsCaDir, _ := ioutil.ReadDir(fmt.Sprintf("%v/", dir))
+			tlsCaDir, _ := ioutil.ReadDir(fmt.Sprintf("%s/", dir))
 			tlsCaCerts := make(map[string]string)
 			for _, file := range tlsCaDir {
-				data, _ := ioutil.ReadFile(fmt.Sprintf("%v/%v", dir, file.Name()))
+				data, _ := ioutil.ReadFile(fmt.Sprintf("%s/%s", dir, file.Name()))
 				if strings.HasSuffix(file.Name(), "pem") {
 					tlsCaCerts["pem"] = string(data)
 				} else {
@@ -99,9 +100,9 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 	component.CA = ca
 	component.TLSCa = tlsCa
 	b, _ := json.MarshalIndent(component, "", "  ")
-	_ = ioutil.WriteFile(fmt.Sprintf("./../configFiles/%v.json", componentName), b, 0644)
+	_ = ioutil.WriteFile(fmt.Sprintf("./../configFiles/%s.json", componentName), b, 0644)
 
-	err = client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", fmt.Sprintf("%v", componentName), fmt.Sprintf("--from-file=./../configFiles/%v.json", componentName))
+	err = client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", fmt.Sprintf("%s", componentName), fmt.Sprintf("--from-file=./../configFiles/%s.json", componentName))
 	if err != nil {
 		return err
 	}
@@ -109,8 +110,9 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 }
 
 //CreateMspSecret - to create msp secret for peers, orderers and CA
-func CreateMspSecret(input networkspec.Config, kubeConfigPath string) {
+func CreateMspSecret(input networkspec.Config, kubeConfigPath string) error{
 
+	var err error
 	numOrdererOrganizations := len(input.OrdererOrganizations)
 	if input.Orderer.OrdererType == "solo" || input.Orderer.OrdererType == "kafka" {
 		numOrdererOrganizations = 1
@@ -121,36 +123,53 @@ func CreateMspSecret(input networkspec.Config, kubeConfigPath string) {
 		if input.Orderer.OrdererType == "solo" {
 			numOrderers = 1
 		}
-		launchMspSecret(numOrderers, false, "orderer", organization.Name, kubeConfigPath, input)
-		launchMspSecret(organization.NumCA, true, "orderer", organization.Name, kubeConfigPath, input)
+		err = launchMspSecret(numOrderers, false, "orderer", organization.Name, kubeConfigPath, input)
+		if err != nil{
+			return err
+		}
+		err = launchMspSecret(organization.NumCA, true, "orderer", organization.Name, kubeConfigPath, input)
+		if err != nil{
+			return err
+		}
 	}
 
 	for i := 0; i < len(input.PeerOrganizations); i++ {
 		organization := input.PeerOrganizations[i]
-		launchMspSecret(organization.NumPeers, false, "peer", organization.Name, kubeConfigPath, input)
-		launchMspSecret(organization.NumCA, true, "peer", organization.Name, kubeConfigPath, input)
+		err = launchMspSecret(organization.NumPeers, false, "peer", organization.Name, kubeConfigPath, input)
+		if err != nil{
+			return err
+		}
+		err = launchMspSecret(organization.NumCA, true, "peer", organization.Name, kubeConfigPath, input)
+		if err != nil{
+			return err
+		}
 	}
+	
+	return nil
 }
 
-func launchMspSecret(numComponents int, isCA bool, componentType, orgName, kubeConfigPath string, input networkspec.Config) {
+func launchMspSecret(numComponents int, isCA bool, componentType, orgName, kubeConfigPath string, input networkspec.Config) error{
 
 	var path, caPath, componentName string
 	for j := 0; j < numComponents; j++ {
-		componentName = fmt.Sprintf("ca%v-%v", j, orgName)
+		componentName = fmt.Sprintf("ca%d-%s", j, orgName)
 		if isCA != true {
-			componentName = fmt.Sprintf("%v%v-%v", componentType, j, orgName)
-			path = filepath.Join(input.ArtifactsLocation, fmt.Sprintf("crypto-config/%vOrganizations/%v/%vs/%v.%v", componentType, orgName, componentType, componentName, orgName))
+			componentName = fmt.Sprintf("%s%d-%s", componentType, j, orgName)
+			path = filepath.Join(input.ArtifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
 		}
-		caPath = filepath.Join(input.ArtifactsLocation, fmt.Sprintf("crypto-config/%vOrganizations/%v", componentType, orgName))
+		caPath = filepath.Join(input.ArtifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s", componentType, orgName))
 		err := createMspJSON(input, path, caPath, componentName, kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to create msp secret for %v; err: %v", componentName, err)
+			utils.PrintLogs(fmt.Sprintf("Failed to create msp secret for %s", componentName))
+			return err
 		}
 	}
 	if isCA == false && input.TLS == "mutual" {
-		err := client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", fmt.Sprintf("%v-clientrootca-secret", orgName), fmt.Sprintf("--from-file=%v/crypto-config/%vOrganizations/%v/ca/ca.%v-cert.pem", input.ArtifactsLocation, componentType, orgName, orgName))
+		err := client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", fmt.Sprintf("%s-clientrootca-secret", orgName), fmt.Sprintf("--from-file=%s/crypto-config/%sOrganizations/%s/ca/ca.%s-cert.pem", input.ArtifactsLocation, componentType, orgName, orgName))
 		if err != nil {
-			log.Fatalf("Failed to create msp secret with client root CA for %v; err: %v", componentName, err)
+			utils.PrintLogs(fmt.Sprintf("Failed to create msp secret with client root CA for %s", componentName))
+			return err
 		}
 	}
+	return nil
 }

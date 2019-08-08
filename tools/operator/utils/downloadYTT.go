@@ -9,30 +9,33 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"log"
 	"runtime"
 )
 
 //DownloadYtt - to download ytt
-func DownloadYtt() {
+func DownloadYtt() error {
 	if _, err := os.Stat("ytt"); os.IsNotExist(err) {
 		name := runtime.GOOS
-		url := fmt.Sprintf("https://github.com/k14s/ytt/releases/download/v0.13.0/ytt-%v-amd64", name)
+		url := fmt.Sprintf("https://github.com/k14s/ytt/releases/download/v0.13.0/ytt-%s-amd64", name)
 
 		resp, err := http.Get(url)
 		if err != nil {
-			log.Fatalf("Error while downloading the ytt, err: %v", err)
+			PrintLogs("Error while downloading the ytt")
+			return err
 		}
 		defer resp.Body.Close()
 		ytt, err := os.Create("ytt")
 		if err != nil {
-			log.Fatalf("Error while creating the ytt file, err: %v", err)
+			PrintLogs("Error while creating the ytt file")
+			return err
 		}
 		defer ytt.Close()
 		io.Copy(ytt, resp.Body)
 		err = os.Chmod("ytt", 0777)
 		if err != nil {
-			log.Fatalf("Failed to change permissions to ytt, err: %v", err)
+			PrintLogs("Failed to change permissions to ytt")
+			return err
 		}
 	}
+	return nil
 }

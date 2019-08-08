@@ -14,23 +14,26 @@ import (
 	"strings"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	yaml "gopkg.in/yaml.v2"
 )
 
 //GetConfigData - to read the yaml file and parse the data
-func GetConfigData(networkSpecPath string) networkspec.Config {
+func GetConfigData(networkSpecPath string) (networkspec.Config, error) {
 
 	var config networkspec.Config
 	yamlFile, err := ioutil.ReadFile(networkSpecPath)
 	if err != nil {
-		log.Fatalf("Failed to read input file; err = %v", err)
+		utils.PrintLogs("Failed to read input file")
+		return config, err
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		log.Fatalf("Failed to create config object; err = %v", err)
+		utils.PrintLogs("Failed to create config object")
+		return config, err
 	}
-	return config
+	return config, nil
 }
 
 //GenerateConfigurationFiles - to generate all the configuration files
@@ -51,7 +54,7 @@ func GenerateConfigurationFiles(kubeConfigPath string) error {
 func GenerateCryptoCerts(input networkspec.Config, kubeConfigPath string) error {
 
 	configPath := filepath.Join(input.ArtifactsLocation, "crypto-config")
-	err := client.ExecuteCommand("cryptogen", "generate", "--config=./../configFiles/crypto-config.yaml", fmt.Sprintf("--output=%v", configPath))
+	err := client.ExecuteCommand("cryptogen", "generate", "--config=./../configFiles/crypto-config.yaml", fmt.Sprintf("--output=%s", configPath))
 	if err != nil {
 		return err
 	}
@@ -88,13 +91,13 @@ func GenerateGenesisBlock(input networkspec.Config, kubeConfigPath string) error
 	path := filepath.Join(input.ArtifactsLocation, "channel-artifacts")
 	_ = os.Mkdir(path, 0755)
 
-	err := client.ExecuteCommand("configtxgen", "-profile", "testOrgsOrdererGenesis", "-channelID", "orderersystemchannel", "-outputBlock", fmt.Sprintf("%v/genesis.block", path), "-configPath=./../configFiles/")
+	err := client.ExecuteCommand("configtxgen", "-profile", "testOrgsOrdererGenesis", "-channelID", "orderersystemchannel", "-outputBlock", fmt.Sprintf("%s/genesis.block", path), "-configPath=./../configFiles/")
 	if err != nil {
 		return err
 	}
 
 	if kubeConfigPath != "" {
-		err = client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", "genesisblock", fmt.Sprintf("--from-file=%v/genesis.block", path))
+		err = client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", "genesisblock", fmt.Sprintf("--from-file=%s/genesis.block", path))
 		if err != nil {
 			return err
 		}
@@ -140,17 +143,19 @@ func LaunchLocalNetwork() error {
 
 func changeKeyName(artifactsLocation, orgType, orgName, caType string, numCA int) error {
 
-	path := filepath.Join(artifactsLocation, fmt.Sprintf("crypto-config/%vOrganizations/%v/%v", orgType, orgName, caType))
+	path := filepath.Join(artifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s/%s", orgType, orgName, caType))
 	for j := 0; j < numCA; j++ {
 		files, err := ioutil.ReadDir(path)
 		if err != nil {
-			return fmt.Errorf("Failed to read files; err:%v", err)
+			utils.PrintLogs("Failed to read files")
+			return err
 		}
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), "_sk") && file.Name() != "priv_sk" {
 				err = client.ExecuteCommand("cp", filepath.Join(path, file.Name()), filepath.Join(path, "priv_sk"))
 				if err != nil {
-					return fmt.Errorf("Failed to copy files; err:%v", err)
+					utils.PrintLogs("Failed to copy files")
+					return err
 				}
 			}
 		}

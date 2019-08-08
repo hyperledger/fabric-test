@@ -6,8 +6,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
@@ -23,9 +23,9 @@ var action = flag.String("a", "up", "Set action(up or down)")
 func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 
 	if *networkSpecPath == "" {
-		log.Fatalf("Input file not provided")
+		utils.FatalLogs("Input file not provided", nil)
 	} else if *kubeConfigPath == "" {
-		log.Println("Kube config file not provided, proceeding with local environment")
+		utils.PrintLogs("Kube config file not provided, proceeding with local environment")
 	}
 }
 
@@ -35,64 +35,67 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 	case "up":
 		err := nl.GenerateConfigurationFiles(kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to generate yaml files; err = %v", err)
+			utils.FatalLogs("Failed to generate yaml files", err)
 		}
 
 		err = nl.GenerateCryptoCerts(input, kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to generate certificates; err = %v", err)
+			utils.FatalLogs("Failed to generate certificates", err)
 		}
 
 		if kubeConfigPath != "" {
-			nl.CreateMspSecret(input, kubeConfigPath)
+			err = nl.CreateMspSecret(input, kubeConfigPath)
+			if err != nil {
+				utils.FatalLogs("", err)
+			}
 		}
 
 		err = nl.GenerateGenesisBlock(input, kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to create orderer genesis block; err = %v", err)
+			utils.FatalLogs("Failed to create orderer genesis block", err)
 		}
 
 		err = client.GenerateChannelTransaction(input, []string{}, "./../configFiles")
 		if err != nil {
-			log.Fatalf("Failed to create channel transactions; err = %v", err)
+			utils.FatalLogs("Failed to create channel transactions", err)
 		}
 
 		if kubeConfigPath != "" {
 			err = nl.LaunchK8sComponents(kubeConfigPath, input.K8s.DataPersistence)
 			if err != nil {
-				log.Fatalf("Failed to launch k8s components; err = %v", err)
+				utils.FatalLogs("Failed to launch k8s components", err)
 			}
 		} else {
 			err = nl.LaunchLocalNetwork()
 			if err != nil {
-				log.Fatalf("Failed to launch k8s components; err = %v", err)
+				utils.FatalLogs("Failed to launch k8s components", err)
 			}
 		}
 
-		err = client.CheckContainersState(kubeConfigPath)
+		err = client.VerifyContainersAreRunning(kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to check container status; err = %v", err)
+			utils.FatalLogs("Failed to check container status", err)
 		}
 
 		err = client.CheckComponentsHealth("", kubeConfigPath, input)
 		if err != nil {
-			log.Fatalf("Failed to check health of fabric components; err = %v", err)
+			utils.FatalLogs("Failed to check health of fabric components", err)
 		}
 
 		err = connectionprofile.CreateConnectionProfile(input, kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to create connection profile; err = %v", err)
+			utils.FatalLogs("Failed to create connection profile", err)
 		}
-		log.Println("Network is up and running")
+		PrintLogs("Network is up and running")
 
 	case "down":
 		err := nl.NetworkCleanUp(input, kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to clean up the network:; err = %v", err)
+			utils.FatalLogs("Failed to clean up the network", err)
 		}
 
 	default:
-		log.Fatalf("Incorrect action (%v). Use up or down for action", action)
+		utils.FatalLogs(fmt.Sprintf("Incorrect action (%s). Use up or down for action", action), nil)
 	}
 }
 
@@ -101,11 +104,11 @@ func checkConsensusType(input networkspec.Config) {
 	ordererType := input.Orderer.OrdererType
 	if ordererType == "solo" {
 		if !(len(input.OrdererOrganizations) == 1 && input.OrdererOrganizations[0].NumOrderers == 1) {
-			log.Fatalf("Consensus type solo should have only one orderer organization and one orderer")
+			utils.FatalLogs("Consensus type solo should have only one orderer organization and one orderer", nil)
 		}
 	} else if ordererType == "kafka" {
 		if len(input.OrdererOrganizations) != 1 {
-			log.Fatalf("Consensus type kafka should have only one orderer organization")
+			utils.FatalLogs("Consensus type kafka should have only one orderer organization", nil)
 		}
 	}
 }
@@ -113,16 +116,22 @@ func checkConsensusType(input networkspec.Config) {
 func main() {
 
 	flag.Parse()
-	utils.DownloadYtt()
+	err := utils.DownloadYtt()
+	if err != nil {
+		utils.FatalLogs("", err)
+	}
 	validateArguments(networkSpecPath, kubeConfigPath)
 	contents, err := ioutil.ReadFile(*networkSpecPath)
 	if err != nil {
-		log.Fatalf("In-correct input file path; err:%v", err)
+		utils.FatalLogs("In-correct input file path", err)
 	}
 	contents = append([]byte("#@data/values \n"), contents...)
 	ioutil.WriteFile("./../templates/input.yaml", contents, 0644)
 	inputPath := "./../templates/input.yaml"
-	input := nl.GetConfigData(inputPath)
+	input, err := nl.GetConfigData(inputPath)
+	if err != nil {
+		utils.FatalLogs("", err)
+	}
 	checkConsensusType(input)
 	doAction(*action, input, *kubeConfigPath)
 }

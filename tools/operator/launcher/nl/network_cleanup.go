@@ -8,7 +8,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
+    "log"
+    "github.com/hyperledger/fabric-test/tools/operator/utils"
     "github.com/hyperledger/fabric-test/tools/operator/client"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
@@ -41,7 +42,7 @@ func NetworkCleanUp(input networkspec.Config, kubeConfigPath string) error {
         err = client.ExecuteCommand("docker-compose", "-f", "./../configFiles/docker-compose.yaml", "down")
     }
     if err != nil {
-        fmt.Println(err.Error())
+        utils.PrintLogs("", err)
     }
 
     err = os.RemoveAll("../configFiles")
@@ -64,16 +65,16 @@ func NetworkCleanUp(input networkspec.Config, kubeConfigPath string) error {
 func deleteSecrets(numComponents int, componentType, orgName, kubeConfigPath, tls string) {
 
     for j := 0; j < numComponents; j++ {
-        componentName := fmt.Sprintf("%v%v-%v", componentType, j, orgName)
+        componentName := fmt.Sprintf("%s%d-%s", componentType, j, orgName)
         err := client.ExecuteK8sCommand(kubeConfigPath, "delete", "secrets", componentName)
         if err != nil {
-            fmt.Println(err.Error())
+            utils.PrintLogs("", err)
         }
     }
     if (componentType == "peer" || componentType == "orderer") && tls == "mutual" {
-        err := client.ExecuteK8sCommand(kubeConfigPath, "delete", "secrets", fmt.Sprintf("%v-clientrootca-secret", orgName))
+        err := client.ExecuteK8sCommand(kubeConfigPath, "delete", "secrets", fmt.Sprintf("%s-clientrootca-secret", orgName))
         if err != nil {
-            fmt.Println(err.Error())
+            utils.PrintLogs("", err)
         }
     }
 }

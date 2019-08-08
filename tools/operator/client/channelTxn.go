@@ -18,14 +18,14 @@ func GenerateChannelTransaction(input networkspec.Config, channels []string, con
 	}
 
 	for i := 0; i < input.NumChannels; i++ {
-		channelName := fmt.Sprintf("testorgschannel%v", i)
-		err := ExecuteCommand("configtxgen", "-profile", "testorgschannel", "-channelID", channelName, "-outputCreateChannelTx", fmt.Sprintf("%v/%v.tx", path, channelName), fmt.Sprintf("-configPath=./%v", configtxPath))
+		channelName := fmt.Sprintf("testorgschannel%d", i)
+		err := ExecuteCommand("configtxgen", "-profile", "testorgschannel", "-channelID", channelName, "-outputCreateChannelTx", fmt.Sprintf("%s/%s.tx", path, channelName), fmt.Sprintf("-configPath=./%s", configtxPath))
 		if err != nil {
 			return err
 		}
 
 		for j := 0; j < len(input.PeerOrganizations); j++ {
-			err := ExecuteCommand("configtxgen", "-profile", "testorgschannel", "-outputAnchorPeersUpdate", fmt.Sprintf("%v/%v%vanchor.tx", path, channelName, input.PeerOrganizations[j].MSPID), "-asOrg", fmt.Sprintf("%v", input.PeerOrganizations[j].Name), "-channelID", channelName, fmt.Sprintf("-configPath=./%v", configtxPath))
+			err := ExecuteCommand("configtxgen", "-profile", "testorgschannel", "-outputAnchorPeersUpdate", fmt.Sprintf("%s/%s%sanchor.tx", path, channelName, input.PeerOrganizations[j].MSPID), "-asOrg", fmt.Sprintf("%s", input.PeerOrganizations[j].Name), "-channelID", channelName, fmt.Sprintf("-configPath=./%s", configtxPath))
 			if err != nil {
 				return err
 			}
