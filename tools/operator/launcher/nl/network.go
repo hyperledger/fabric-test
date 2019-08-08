@@ -10,7 +10,6 @@ import (
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
@@ -39,10 +38,16 @@ func GetConfigData(networkSpecPath string) (networkspec.Config, error) {
 //GenerateConfigurationFiles - to generate all the configuration files
 func GenerateConfigurationFiles(kubeConfigPath string) error {
 	var err error
+	configtxPath := helper.TemplateFilePath("configtx")
+	cryptoConfigPath := helper.TemplateFilePath("crypto-config")
+	inputFilePath := helper.TemplateFilePath("input")
+	configFilesPath := fmt.Sprintf("--output=%s", helper.ConfigFilesDir())
+	k8sDir, dockerDir := helper.TemplateFilePath("k8s"), helper.TemplateFilePath("docker")
+	ytt := helper.YTTPath()
 	if kubeConfigPath != "" {
-		err = client.ExecuteCommand("./ytt", "-f", "../templates/configtx.yaml", "-f", "../templates/crypto-config.yaml", "-f", "../templates/k8s/", "-f", "../templates/input.yaml", "--output=./../configFiles/")
+		err = client.ExecuteCommand(ytt, "-f", configtxPath, "-f", cryptoConfigPath, "-f", k8sDir, "-f", inputFilePath, configFilesPath)
 	} else {
-		err = client.ExecuteCommand("./ytt", "-f", "../templates/configtx.yaml", "-f", "../templates/crypto-config.yaml", "-f", "../templates/docker/", "-f", "../templates/input.yaml", "--output=./../configFiles/")
+		err = client.ExecuteCommand(ytt, "-f", configtxPath, "-f", cryptoConfigPath, "-f", dockerDir, "-f", inputFilePath, configFilesPath)
 	}
 	if err != nil {
 		return err
@@ -53,8 +58,9 @@ func GenerateConfigurationFiles(kubeConfigPath string) error {
 //GenerateCryptoCerts -  to generate the crypto certs
 func GenerateCryptoCerts(input networkspec.Config, kubeConfigPath string) error {
 
-	configPath := filepath.Join(input.ArtifactsLocation, "crypto-config")
-	err := client.ExecuteCommand("cryptogen", "generate", "--config=./../configFiles/crypto-config.yaml", fmt.Sprintf("--output=%s", configPath))
+	configPath := helper.CryptoConfigDir(input.ArtifactsLocation)
+	config := fmt.Sprintf("--config=%s", helper.JoinPath(helper.ConfigFilesDir(), "crypto-config.yaml"))
+	err := client.ExecuteCommand("cryptogen", "generate", config, fmt.Sprintf("--output=%s", configPath))
 	if err != nil {
 		return err
 	}
@@ -88,8 +94,7 @@ func GenerateCryptoCerts(input networkspec.Config, kubeConfigPath string) error 
 //GenerateGenesisBlock - to generate a genesis block and to create channel transactions
 func GenerateGenesisBlock(input networkspec.Config, kubeConfigPath string) error {
 
-	path := filepath.Join(input.ArtifactsLocation, "channel-artifacts")
-	_ = os.Mkdir(path, 0755)
+	path := helper.ChannelArtifactsDir(input.ArtifactsLocation)
 
 	err := client.ExecuteCommand("configtxgen", "-profile", "testOrgsOrdererGenesis", "-channelID", "orderersystemchannel", "-outputBlock", fmt.Sprintf("%s/genesis.block", path), "-configPath=./../configFiles/")
 	if err != nil {
@@ -143,7 +148,7 @@ func LaunchLocalNetwork() error {
 
 func changeKeyName(artifactsLocation, orgType, orgName, caType string, numCA int) error {
 
-	path := filepath.Join(artifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s/%s", orgType, orgName, caType))
+	path := helper.JoinPath(artifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s/%s", orgType, orgName, caType))
 	for j := 0; j < numCA; j++ {
 		files, err := ioutil.ReadDir(path)
 		if err != nil {
@@ -152,7 +157,7 @@ func changeKeyName(artifactsLocation, orgType, orgName, caType string, numCA int
 		}
 		for _, file := range files {
 			if strings.HasSuffix(file.Name(), "_sk") && file.Name() != "priv_sk" {
-				err = client.ExecuteCommand("cp", filepath.Join(path, file.Name()), filepath.Join(path, "priv_sk"))
+				err = client.ExecuteCommand("cp", helper.JoinPath(path, file.Name()), helper.JoinPath(path, "priv_sk"))
 				if err != nil {
 					utils.PrintLogs("Failed to copy files")
 					return err

@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"os"
-
+	"github.com/hyperledger/fabric-test/tools/operator/helper"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
 )
 
@@ -11,7 +11,8 @@ import (
 func CreateConfigPath() error{
 
 	var err error
-	configPath := "./configFiles"
+	configPath := helper.ConfigFilesDir()
+	configtxPath := helper.TemplateFilePath("configtx")
 	_, err = os.Stat(fmt.Sprintf("%s/configtx.yaml", configPath))
 	if os.IsNotExist(err) {
 		yttPath := "./launcher/ytt"
@@ -21,12 +22,12 @@ func CreateConfigPath() error{
 			if err != nil{
 				return err
 			}
-			err = ExecuteCommand("./ytt", "-f", "./templates/configtx.yaml", "-f", "configtx.yaml", "--output", configPath)
+			err = ExecuteCommand(helper.YTTPath(), "-f", configtxPath, "-f", "configtx.yaml", "--output", configPath)
 			if err != nil {
 				return err
 			}
 		} else {
-			err = ExecuteCommand(yttPath, "-f", "./templates/configtx.yaml", "-f", "configtx.yaml", "--output", configPath)
+			err = ExecuteCommand(yttPath, "-f", configtxPath, "-f", "configtx.yaml", "--output", configPath)
 			if err != nil {
 				return err
 			}

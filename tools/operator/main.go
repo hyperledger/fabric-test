@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/helper"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
@@ -57,7 +58,7 @@ func main() {
 	networkSpecPath, kubeConfigPath, action, componentName := readArguments()
 	contents, _ := ioutil.ReadFile(networkSpecPath)
 	contents = append([]byte("#@data/values \n"), contents...)
-	inputPath := "templates/input.yaml"
+	inputPath := helper.JoinPath(helper.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
 	client.CreateConfigPath()
 	input := nl.GetConfigData(inputPath)
