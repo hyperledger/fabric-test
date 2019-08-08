@@ -2,31 +2,26 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"log"
 
-	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
-func readArguments() (string, string, string, string) {
+var networkSpecPath = flag.String("i", "", "Network spec input file path (required)")
+var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
+var action = flag.String("a", "", "Set action (Available options createChannelTxn, migrate, healthz)")
+var component = flag.String("c", "", "Component name of a peer or orderer (Use with healthcheck action; omit to check all components)")
 
-	networkSpecPath := flag.String("i", "", "Network spec input file path (required)")
-	kubeConfigPath := flag.String("k", "", "Kube config file path (optional)")
-	action := flag.String("a", "", "Set action (Available options createChannelTxn, migrate, healthz)")
-	component := flag.String("c", "", "Component name of a peer or orderer (Use with healthcheck action; omit to check all components)")
+func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 
-	flag.Parse()
-
-	if fmt.Sprintf("%s", *kubeConfigPath) == "" {
-		fmt.Println("Kube config file not provided")
-	} else if fmt.Sprintf("%s", *networkSpecPath) == "" {
+	if *networkSpecPath == "" {
 		log.Fatalf("Input file not provided")
+	} else if *kubeConfigPath == "" {
+		log.Println("Kube config file not provided, proceeding with local environment")
 	}
-
-	return *networkSpecPath, *kubeConfigPath, *action, *component
 }
 
 func doAction(action, kubeConfigPath, componentName string, input networkspec.Config) {
@@ -56,6 +51,8 @@ func doAction(action, kubeConfigPath, componentName string, input networkspec.Co
 
 func main() {
 
+	flag.Parse()
+	validateArguments(networkSpecPath, kubeConfigPath)
 	networkSpecPath, kubeConfigPath, action, componentName := readArguments()
 	contents, _ := ioutil.ReadFile(networkSpecPath)
 	contents = append([]byte("#@data/values \n"), contents...)
