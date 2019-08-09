@@ -104,40 +104,6 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] <takeDownType> leader peer, <
     |  pause       | unpause     |
     | disconnect   | connect     |
 
-#@daily
-Scenario Outline: [FAB-4673] [FAB-4674] [FAB-4675] <takeDownType> leader peer, <bringUpType> *before* another leader elected
-  Given the FABRIC_LOGGING_SPEC environment variable is gossip.election,peer.gossip=DEBUG
-  And I have a bootstrapped fabric network of type kafka
-  When an admin sets up a channel
-  # the following wait is for Gossip leadership states to be stabilized
-  And I wait "30" seconds
-  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc" on the initial non-leader peer of "org1"
-  And I wait "5" seconds
-  And a user queries on the chaincode named "mycc" with args ["query","a"] on the initial non-leader peer of "org1"
-  Then a user receives a success response of 1000 from the initial non-leader peer of "org1"
-
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial non-leader peer of "org1"
-  And I wait "5" seconds
-  And a user queries on the chaincode named "mycc" with args ["query","a"] on the initial non-leader peer of "org1"
-  Then a user receives a success response of 990 from the initial non-leader peer of "org1"
-
-  ## take down leader, invoke in non-leader, wait 5 seconds and bring back up the initial leader
-  When the initial leader peer of "org1" is taken down by doing a <takeDownType>
-  And a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on the initial non-leader peer of "org1"
-  And I wait "3" seconds
-  Then the initial non-leader peer of "org1" has not become the leader
-  When the initial leader peer of "org1" comes back up by doing a <bringUpType>
-  And I wait "30" seconds
-
-  When a user queries on the chaincode named "mycc" with args ["query","a"] on the initial leader peer of "org1"
-  Then a user receives a success response of 980 from the initial leader peer of "org1"
-
-  Examples:
-    | takeDownType | bringUpType |
-    |  stop        | start       |
-    |  pause       | unpause     |
-    | disconnect   | connect     |
-
 @daily
 Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] <takeDownType> and <bringUpType> all peers in an organization
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
@@ -357,57 +323,3 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] With leaders assigned, <takeD
   And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"
   Then a user receives a success response of 900 from "peer1.org2.example.com"
 
-
-@daily
-  Scenario: [FAB-4682] With leaders assigned, a non-leader peer joins an already-active channel and catches up
-
-  # Select Peer0 of both org as leader and turn leader election off
-  Given the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG1 environment variable is true
-  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER0_ORG1 environment variable is false
-  And the CORE_PEER_GOSSIP_ORGLEADER_PEER0_ORG2 environment variable is true
-  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER0_ORG2 environment variable is false
-  And the CORE_PEER_GOSSIP_ORGLEADER_PEER1_ORG1 environment variable is false
-  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER1_ORG1 environment variable is false
-  And the CORE_PEER_GOSSIP_ORGLEADER_PEER1_ORG2 environment variable is false
-  And the CORE_PEER_GOSSIP_USELEADERELECTION_PEER1_ORG2 environment variable is false
-
-  And I have a bootstrapped fabric network of type kafka
-  When an admin creates a channel
-
-  #Join only three peers
-  When an admin fetches genesis information using peer "peer0.org1.example.com"
-  And an admin fetches genesis information using peer "peer0.org2.example.com"
-  And an admin fetches genesis information using peer "peer1.org1.example.com"
-  And an admin makes peer "peer0.org1.example.com" join the channel
-  And an admin makes peer "peer0.org2.example.com" join the channel
-  And an admin makes peer "peer1.org1.example.com" join the channel
-
-  # the following wait is for Gossip leadership states to be stabilized
-  And I wait "60" seconds
-  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
-  And I wait "5" seconds
-  ## Now do 3 invoke-queries in leader peer
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
-  And I wait "5" seconds
-  And a user queries on the chaincode named "mycc" with args ["query","a"]
-  Then a user receives a success response of 990
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","20"]
-  And I wait "5" seconds
-  When a user queries on the chaincode named "mycc" with args ["query","a"]
-  Then a user receives a success response of 970
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","30"]
-  And I wait "5" seconds
-  When a user queries on the chaincode named "mycc" with args ["query","a"]
-  Then a user receives a success response of 940
-
-  #Join the rest of the peers
-  When an admin fetches genesis information using peer "peer1.org2.example.com"
-  And an admin makes peer "peer1.org2.example.com" join the channel
-  And I wait "60" seconds
-
-  When a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"
-  Then a user receives a success response of 940 from "peer1.org2.example.com"
-  When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","40"] on "peer1.org2.example.com"
-  And I wait "5" seconds
-  And a user queries on the chaincode named "mycc" with args ["query","a"] on "peer1.org2.example.com"
-  Then a user receives a success response of 900 from "peer1.org2.example.com"

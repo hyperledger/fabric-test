@@ -3,11 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+### For now, remove tests by commenting out the daily tag. Soon we will remove this entire file...
 
 Feature: Lifecycle Service
     As a user I want to be able to the new chaincode lifecycle
 
-@daily
+#@daily
 Scenario Outline: FAB-13701: Test new chaincode lifecycle - Basic workflow using <interface> with <language> chaincode
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo using state-database <database>
@@ -39,7 +40,7 @@ Examples:
     #  |  leveldb | NodeJS SDK    |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
 
 
-@daily
+#@daily
 Scenario Outline: FAB-13701a: Test new chaincode lifecycle - No policy set using <interface> with <language> chaincode
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type <type> using state-database <database>
@@ -65,7 +66,7 @@ Examples:
     | solo  |  leveldb |   CLI      |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
 
 
-@daily
+#@daily
 Scenario Outline: FAB-13701b: Test new chaincode lifecycle - Upgrade using <interface> with <language> chaincode
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type <type> using state-database <database>
@@ -110,7 +111,7 @@ Examples:
     | solo  |  leveldb |   CLI      |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
 
 
-@daily
+#@daily
 Scenario: FAB-13701c: Test new chaincode lifecycle - Recover after chaincode goes down
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -144,7 +145,7 @@ Scenario: FAB-13701c: Test new chaincode lifecycle - Recover after chaincode goe
 
 
 @daily
-Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode
+Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode in diff chan
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
   And I want to use the new chaincode lifecycle
@@ -202,7 +203,7 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode
   Then a user receives a success response of 1000
 
 
-@daily
+#@daily
 Scenario: FAB-13971: Test adding new org using new chaincode lifecycle
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -293,7 +294,7 @@ Scenario: FAB-13971: Test adding new org using new chaincode lifecycle
   Then a user receives a success response of 960 from "peer0.org2.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13959: An admin from an org does not install chaincode package
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -316,7 +317,7 @@ Scenario: FAB-13959: An admin from an org does not install chaincode package
   Then a user receives a response containing "chaincode definition for 'helloNurse' exists, but chaincode is not installed" from "peer0.org2.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13968: Upgrade chaincode for different orgs, but commit older version of chaincode
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -351,7 +352,7 @@ Scenario: FAB-13968: Upgrade chaincode for different orgs, but commit older vers
   Then a user receives a success response of 1000
 
 
-@daily
+#@daily
 Scenario: FAB-13960: Using the wrong packageID in approveformyorg
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -365,7 +366,7 @@ Scenario: FAB-13960: Using the wrong packageID in approveformyorg
   Then a user receives a response containing "Error: failed to create signed transaction: ProposalResponsePayloads do not match" from "peer0.org1.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13961: install command with mismatched packages
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -377,7 +378,7 @@ Scenario: FAB-13961: install command with mismatched packages
   Then a user receives a response containing 'no such file or directory' from "peer0.org1.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13963: An admin from an org approves a different the chaincode definition
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -393,7 +394,7 @@ Scenario: FAB-13963: An admin from an org approves a different the chaincode def
   Then a user receives a response containing 'chaincode definition not agreed to by this org' from "peer0.org1.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13965: All admins from different orgs approve different the chaincode definitions
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -431,7 +432,7 @@ Scenario: FAB-13965: All admins from different orgs approve different the chainc
   Then a user receives a success response of 90
 
 
-@daily
+#@daily
 Scenario: FAB-13958: Test new chaincode lifecycle - upgrade from old to new
   Given I have a bootstrapped fabric network of type solo
   When an admin sets up a channel
@@ -466,7 +467,7 @@ Scenario: FAB-13958: Test new chaincode lifecycle - upgrade from old to new
   Then a user receives a success response of 990
 
 
-@daily
+#@daily
 Scenario: FAB-13964: Install same chaincode on different channels with different chaincode definitions
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -489,7 +490,7 @@ Scenario: FAB-13964: Install same chaincode on different channels with different
   Then a user receives a response containing 'chaincode mycc not found' from "peer0.org2.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13966: Different orgs use different version label during upgrade
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -520,7 +521,7 @@ Scenario: FAB-13966: Different orgs use different version label during upgrade
   Then a user receives a response containing 'chaincode definition not agreed to by this org' from "peer0.org1.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13969: Reuse the same sequence number
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -547,7 +548,7 @@ Scenario: FAB-13969: Reuse the same sequence number
   Then a user receives a response containing endorsement failure during invoke
 
 
-@daily
+#@daily
 Scenario: FAB-13970: 2 Different org admins perform the commit
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -569,7 +570,7 @@ Scenario: FAB-13970: 2 Different org admins perform the commit
   Then a user receives a response containing 'requested sequence is 1, but new definition must be sequence 2' from "peer0.org2.example.com"
 
 #@doNotDecompose
-@daily
+#@daily
 Scenario: FAB-13974: An org admin should be able to recover after sending a wrong approval
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -646,7 +647,7 @@ Scenario: FAB-13974: An org admin should be able to recover after sending a wron
   Then a user receives a success response of 970 from "peer0.org3.example.com"
 
 
-@daily
+#@daily
 Scenario: FAB-13975: Different chaincode label used in install and approve
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
@@ -663,7 +664,7 @@ Scenario: FAB-13975: Different chaincode label used in install and approve
   Then a user receives a response containing chaincode definition for 'test42' exists, but chaincode is not installed
 
 
-@daily
+#@daily
 Scenario: FAB-13977: Test setting of collections data in new chaincode definition
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo using state-database couchdb
@@ -738,7 +739,7 @@ Scenario: FAB-13977: Test setting of collections data in new chaincode definitio
   Then a user receives a success response of []
 
 
-@daily
+#@daily
 Scenario: FAB-13976: Test setting of collections data using old chaincode lifecycle
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type solo using state-database couchdb
@@ -805,7 +806,7 @@ Scenario: FAB-13976: Test setting of collections data using old chaincode lifecy
   Then a user receives a success response of []
 
 
-@daily
+#@daily
 Scenario: FAB-14820: Test restarting a peer using the new chaincode lifecycle
   Given I changed the "Application" capability to version "V2_0"
   And I have a bootstrapped fabric network of type solo
