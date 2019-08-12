@@ -1,6 +1,7 @@
 {
     "transType": "Channel",
     "TLS": "_TLS_",
+    "channelID": "_CHANNELID_",
     "channelOpt": {
         "name": "_CHANNELNAME_",
         "channelTX": "_CHANNELTXPATH_/_CHANNELNAME_.tx",
