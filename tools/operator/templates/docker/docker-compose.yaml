@@ -50,13 +50,13 @@
 #@   env = ["FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server"]
 #@   env.append("FABRIC_CA_SERVER_CA_NAME={}".format(container_name))
 #@   env.append("FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca/ca.{}-cert.pem".format(orgName))
-#@   env.append("FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ca/priv_sk")
+#@   env.append("FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ca/ca-priv_sk")
 #@   env.append("FABRIC_CA_SERVER_TLS_ENABLED={}".format(input.tls))
 #@   if input.tls == "mutual":
 #@     env.append("FABRIC_CA_SERVER_TLS_ENABLED=true")
 #@   end
 #@   env.append("FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/tlsca/tlsca.{}-cert.pem".format(orgName))
-#@   env.append("FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tlsca/priv_sk")
+#@   env.append("FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tlsca/tlsca-priv_sk")
 #@   ports = ["{}:{}".format(port, 7054)]
 #@   command = "sh -c 'fabric-ca-server start -b admin:adminpw -d'"
 #@   volumes = ["{}crypto-config/{}/{}/ca/:/etc/hyperledger/fabric-ca-server-config/ca".format(artifacts_location, orgType, orgName)]

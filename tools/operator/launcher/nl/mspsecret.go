@@ -8,9 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
-
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	"github.com/hyperledger/fabric-test/tools/operator/client"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -101,7 +99,7 @@ func createMspJSON(input networkspec.Config, path string, caPath string, compone
 	b, _ := json.MarshalIndent(component, "", "  ")
 	_ = ioutil.WriteFile(fmt.Sprintf("./../configFiles/%s.json", componentName), b, 0644)
 
-	err = client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", fmt.Sprintf("%s", componentName), fmt.Sprintf("--from-file=./../configFiles/%s.json", componentName))
+	err = client.ExecuteK8sCommand(kubeConfigPath,  true, "create", "secret", "generic", fmt.Sprintf("%s", componentName), fmt.Sprintf("--from-file=./../configFiles/%s.json", componentName))
 	if err != nil {
 		return err
 	}
@@ -150,14 +148,14 @@ func CreateMspSecret(input networkspec.Config, kubeConfigPath string) error{
 func launchMspSecret(numComponents int, isCA bool, componentType, orgName, kubeConfigPath string, input networkspec.Config) error{
 
 	var path, caPath, componentName string
-	cryptoConfigPath := helper.CryptoConfigDir(input.ArtifactsLocation)
+	cryptoConfigPath := utils.CryptoConfigDir(input.ArtifactsLocation)
 	for j := 0; j < numComponents; j++ {
 		componentName = fmt.Sprintf("ca%d-%s", j, orgName)
 		if isCA != true {
 			componentName = fmt.Sprintf("%s%d-%s", componentType, j, orgName)
-			path = helper.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
+			path = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
 		}
-		caPath = helper.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s", componentType, orgName))
+		caPath = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s", componentType, orgName))
 		err := createMspJSON(input, path, caPath, componentName, kubeConfigPath)
 		if err != nil {
 			utils.PrintLogs(fmt.Sprintf("Failed to create msp secret for %s", componentName))
@@ -165,7 +163,7 @@ func launchMspSecret(numComponents int, isCA bool, componentType, orgName, kubeC
 		}
 	}
 	if isCA == false && input.TLS == "mutual" {
-		err := client.ExecuteK8sCommand(kubeConfigPath, "create", "secret", "generic", fmt.Sprintf("%s-clientrootca-secret", orgName), fmt.Sprintf("--from-file=%s/%sOrganizations/%s/ca/ca.%s-cert.pem", cryptoConfigPath, componentType, orgName, orgName))
+		err := client.ExecuteK8sCommand(kubeConfigPath, true, "create", "secret", "generic", fmt.Sprintf("%s-clientrootca-secret", orgName), fmt.Sprintf("--from-file=%s/%sOrganizations/%s/ca/ca.%s-cert.pem", cryptoConfigPath, componentType, orgName, orgName))
 		if err != nil {
 			utils.PrintLogs(fmt.Sprintf("Failed to create msp secret with client root CA for %s", componentName))
 			return err

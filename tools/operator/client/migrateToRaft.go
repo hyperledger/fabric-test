@@ -2,10 +2,9 @@ package client
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 	"strings"
 
+	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
@@ -20,13 +19,11 @@ func MigrateToRaft(input networkspec.Config, kubeConfigPath string) error {
 	}
 	ordererOrg := strings.Join(ordererOrgs[:], ",")
 	numOrderers := strings.Join(numOrderersPerOrg[:], ",")
-	cmd := exec.Command("./scripts/migrateToRaft.sh", kubeConfigPath, input.OrdererOrganizations[0].MSPID, input.ArtifactsLocation, ordererOrg, numOrderers, fmt.Sprintf("%d", input.NumChannels))
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	args := []string{kubeConfigPath, input.OrdererOrganizations[0].MSPID, input.ArtifactsLocation, ordererOrg, numOrderers, fmt.Sprintf("%d", input.NumChannels)}
+	_, err := ExecuteCommand("./scripts/migrateToRaft.sh", args, true)
 	if err != nil {
 		return err
 	}
-	fmt.Println("Successfully migrated from kafka to etcdraft")
+	utils.PrintLogs("Successfully migrated from kafka to etcdraft")
 	return nil
 }
