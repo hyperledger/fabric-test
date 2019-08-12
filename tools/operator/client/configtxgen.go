@@ -27,6 +27,6 @@ func (cfg Configtxgen) AnchorPeersUpdateTxArgs(channelName, orgName string) []st
 		"-channelID", channelName,
 		"-outputAnchorPeersUpdate", cfg.OutputPath,
 		"-asOrg", orgName,
-		"-configPath=%s", cfg.Config }
+		"-configPath", cfg.Config }
 }
 

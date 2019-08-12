@@ -58,7 +58,7 @@ func GenerateCryptoCerts(input networkspec.Config, kubeConfigPath string) error 
 
 	artifactsLocation := input.ArtifactsLocation
 	outputPath := utils.CryptoConfigDir(artifactsLocation)
-	config := utils.JoinPath(utils.ConfigFilesDir(), "crypto-config.yaml")
+	config := utils.ConfigFilePath("crypto-config")
 	generate := client.Cryptogen{Config: config, Output: outputPath}
 	_, err := client.ExecuteCommand("cryptogen", generate.Args(), true)
 	if err != nil {
@@ -66,14 +66,14 @@ func GenerateCryptoCerts(input networkspec.Config, kubeConfigPath string) error 
 	}
 	for i := 0; i < len(input.OrdererOrganizations); i++ {
 		org := input.OrdererOrganizations[i]
-		err = changeKeyName(artifactsLocation, "orderer", org.Name, org.NumCA)
+		err = changeKeyName(artifactsLocation, "orderer", org.Name, org.NumOrderers)
 		if err != nil {
 			return err
 		}
 	}
 	for i := 0; i < len(input.PeerOrganizations); i++ {
 		org := input.PeerOrganizations[i]
-		err = changeKeyName(artifactsLocation, "peer", org.Name, org.NumCA)
+		err = changeKeyName(artifactsLocation, "peer", org.Name, org.NumPeers)
 		if err != nil {
 			return err
 		}
@@ -94,7 +94,9 @@ func GenerateGenesisBlock(input networkspec.Config, kubeConfigPath string) error
 		return err
 	}
 	if kubeConfigPath != "" {
-		err = client.ExecuteK8sCommand(kubeConfigPath, true, "create", "secret", "generic", "genesisblock", fmt.Sprintf("--from-file=%s/genesis.block", path))
+		inputArgs := []string{utils.JoinPath(path, "genesis.block")}
+		k8s := K8s{Action: "create", Input: inputArgs}
+		_, err = client.ExecuteK8sCommand(k8s.ConfigMapsNSecretsArgs(kubeConfigPath, "genesisblock", "secret"), true)
 		if err != nil {
 			return err
 		}
@@ -102,39 +104,47 @@ func GenerateGenesisBlock(input networkspec.Config, kubeConfigPath string) error
 	return nil
 }
 
-func changeKeyName(artifactsLocation, orgType, orgName string, numCA int) error {
+func changeKeyName(artifactsLocation, orgType, orgName string, numComponents int) error {
 
 	var path string
 	var err error
+	cryptoConfigPath := utils.CryptoConfigDir(artifactsLocation)
 	caArr := []string{"ca", "tlsca"}
 	for i := 0; i < len(caArr); i++ {
-		path = utils.JoinPath(artifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s/%s", orgType, orgName, caArr[i]))
-		err = copyKey(numCA, path, caArr[i])
+		path = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%s", orgType, orgName, caArr[i]))
+		fileName := fmt.Sprintf("%v-priv_sk", caArr[i])
+		err = moveKey(path, fileName)
 		if err != nil {
 			return err
 		}
 	}
+	for i := 0; i < numComponents; i++ {
+		componentName := fmt.Sprintf("%s%d-%s.%s", orgType, i, orgName, orgName)
+		path = utils.JoinPath(artifactsLocation, fmt.Sprintf("crypto-config/%sOrganizations/%s/%ss/%s/msp/keystore", orgType, orgName, orgType, componentName))
+		err = moveKey(path, "priv_sk")
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
-func copyKey(numCA int, path, caType string) error {
+func moveKey(path, fileName string) error {
 
 	var err error
-	fileName := fmt.Sprintf("%v-priv_sk", caType)
-	for j := 0; j < numCA; j++ {
-		files, err := ioutil.ReadDir(path)
-		if err != nil {
-			utils.PrintLogs("Failed to read files")
-			return err
-		}
-		for _, file := range files {
-			if strings.HasSuffix(file.Name(), "_sk") && file.Name() != fileName {
-				args := []string{utils.JoinPath(path, file.Name()), utils.JoinPath(path, fileName)}
-				_, err = client.ExecuteCommand("cp", args, true)
-				if err != nil {
-					utils.PrintLogs("Failed to copy files")
-					return err
-				}
+	files, err := ioutil.ReadDir(path)
+	if err != nil {
+		utils.PrintLogs("Failed to read files")
+		return err
+	}
+	for _, file := range files {
+		if strings.HasSuffix(file.Name(), "_sk") && file.Name() != fileName {
+			args := []string{utils.JoinPath(path, file.Name()), utils.JoinPath(path, fileName)}
+			_, err = client.ExecuteCommand("mv", args, true)
+			if err != nil {
+				utils.PrintLogs("Failed to copy files")
+				return err
 			}
 		}
 	}

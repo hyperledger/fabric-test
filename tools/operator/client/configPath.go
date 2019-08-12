@@ -1,10 +1,7 @@
 package client
 
 import (
-	"fmt"
 	"os"
-
-	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
 )
 
@@ -12,16 +9,16 @@ import (
 func CreateConfigPath() error {
 
 	var err error
-	configFilesPath := utils.ConfigFilesDir()
+	configFilesDir := utils.ConfigFilesDir()
 	configtxTemplatePath := utils.TemplateFilePath("configtx")
 	inputFilePath := utils.TemplateFilePath("input")
-	configtxPath := fmt.Sprintf("%s/configtx.yaml", configFilesPath)
+	configtxPath := utils.ConfigFilePath("configtx")
 	if _, err = os.Stat(configtxPath); !os.IsNotExist(err) {
 		return nil
 	} else {
 		ytt := utils.YTTPath()
 		input := []string{configtxTemplatePath}
-		yttObject := utils.YTT{InputPath: inputFilePath, OutputPath: configFilesPath}
+		yttObject := utils.YTT{InputPath: inputFilePath, OutputPath: configFilesDir}
 		if _, err = os.Stat(ytt); os.IsNotExist(err) {
 			err = utils.DownloadYtt()
 			if err != nil {

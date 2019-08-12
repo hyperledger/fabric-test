@@ -21,7 +21,7 @@ func (d DockerCompose) Args() []string {
 
 //LaunchLocalNetwork -- To launch the network in the local environment
 func LaunchLocalNetwork() error {
-	configPath := utils.JoinPath(utils.ConfigFilesDir(), "docker-compose.yaml")
+	configPath := utils.ConfigFilePath("docker")
 	dockerCompose := DockerCompose{Config: configPath, Action: []string{"up", "-d"}}
 	_, err :=  client.ExecuteCommand("docker-compose", dockerCompose.Args(), true)
 	if err != nil {
@@ -32,7 +32,7 @@ func LaunchLocalNetwork() error {
 
 //DownLocalNetwork -- To tear down the local network
 func DownLocalNetwork() error {
-	configPath := utils.JoinPath(utils.ConfigFilesDir(), "docker-compose.yaml")
+	configPath := utils.ConfigFilePath("docker")
 	dockerCompose := DockerCompose{Config: configPath, Action: []string{"down"}}
 	_, err :=  client.ExecuteCommand("docker-compose", dockerCompose.Args(), true)
 	if err != nil {
