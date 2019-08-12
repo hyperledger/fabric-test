@@ -10,10 +10,10 @@
 #@   env.append({"name": "ZOO_TICK_TIME", "value": "2000"})
 #@   env.append({"name": "ZOO_INIT_LIMIT", "value": "10"})
 #@   env.append({"name": "ZOO_SYNC_LIMIT", "value": "2"})
-#@   resources = {"limits":{"cpu": "0.2", "memory": "0.4Gi"}, "requests":{"cpu":"0.2", "memory":"0.4Gi"}}
+#@   resources = {"limits": {"cpu": "0.2", "memory": "0.4Gi"}, "requests": {"cpu": "0.2", "memory": "0.4Gi"}}
 #@   output = []
 #@   if networkSpec.k8s.data_persistence == True:
-#@     output = [{"volumeMounts":[{"mountPath": "/data", "name": "zookeeper-data-storage"}],"name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@     output = [{"volumeMounts": [{"mountPath": "/data", "name": "zookeeper-data-storage"}], "name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
 #@   else:
 #@     output = [{"name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
 #@   end
@@ -31,14 +31,29 @@
 #@   env.append({"name": "KAFKA_LOG_DIRS", "value": "/opt/kafka/data" })
 #@   env.append({"name": "KAFKA_MESSAGE_MAX_BYTES", "value": "103809024"})
 #@   env.append({"name": "KAFKA_REPLICA_FETCH_MAX_BYTES", "value": "103809024"})
-#@   resources = {"limits":{"cpu": "0.2", "memory": "0.5Gi"}, "requests":{"cpu":"0.2", "memory":"0.5Gi"}}
+#@   resources = {"limits": {"cpu": "0.2", "memory": "0.5Gi"}, "requests": {"cpu": "0.2", "memory": "0.5Gi"}}
 #@   output = []
 #@   if networkSpec.k8s.data_persistence == True:
-#@     output = [{"volumeMounts":[{"mountPath": "/opt/kafka/data", "name": "kafka-data-storage"}],"name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
+#@     output = [{"volumeMounts": [{"mountPath": "/opt/kafka/data", "name": "kafka-data-storage"}], "name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
 #@   else:
 #@     output = [{"name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
 #@   end
 #@   return output
+#@ end
+
+#@ def mounts(type):
+#@   volumeMounts = []
+#@   if type == "ca":
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/", "name": "cacerts"})
+#@   else:
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/admincerts/", "name": "admincerts"})
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/cacerts/", "name": "cacerts"})
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/signcerts/", "name": "signcerts"})
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/keystore/", "name": "keystore"})
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/", "name": "tlscacerts"})
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/tls/", "name": "tls"})
+#@   end
+#@   return volumeMounts
 #@ end
 
 #@ def caContainers(input, value, networkSpec):
@@ -48,19 +63,18 @@
 #@   end
 #@   env = [{"name": "FABRIC_CA_HOME", "value": "/etc/hyperledger/fabric-ca-server"}]
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_NAME", "value": "{}".format(input)})
-#@   env.append({"name": "FABRIC_CA_SERVER_CA_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/ca/ca_private.key"})
-#@   env.append({"name": "FABRIC_CA_SERVER_CA_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/ca/ca-cert.pem"})
+#@   env.append({"name": "FABRIC_CA_SERVER_CA_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/ca-priv_sk"})
+#@   env.append({"name": "FABRIC_CA_SERVER_CA_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/ca.{}-cert.pem".format(value)})
 #@   if networkSpec.tls == "mutual":
 #@     env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "true"})
 #@   else:
 #@     env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
 #@   end
-#@   env.append({"name": "FABRIC_CA_SERVER_TLS_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca/tlsca_private.key"})
-#@   env.append({"name": "FABRIC_CA_SERVER_TLS_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca/tlsca-cert.pem"})
-#@   resources = {"limits":{"cpu": "0.2", "memory": "0.5Gi"}, "requests":{"cpu":"0.2", "memory":"0.5Gi"}}
-#@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
-#@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
-#@   output = [{"name": input, "image": ca_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts":volumeMounts, "command":["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && fabric-ca-server start -b admin:adminpw -d" .format(input)]}]
+#@   env.append({"name": "FABRIC_CA_SERVER_TLS_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca-priv_sk"})
+#@   env.append({"name": "FABRIC_CA_SERVER_TLS_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca.{}-cert.pem".format(value)})
+#@   resources = {"limits": {"cpu": "0.1", "memory": "0.25Gi"}, "requests": {"cpu": "0.1", "memory": "0.25Gi"}}
+#@   volumeMounts = mounts("ca")
+#@   output = [{"name": input, "image": ca_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["fabric-ca-server"], "args": ["start", "-b", "admin: adminpw", "-d"]}]
 #@   return output
 #@ end
 
@@ -73,7 +87,7 @@
 #@     elif type == "volumeMounts":
 #@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca-secret".format(organization.name)})
 #@     elif type == "volumes":
-#@       output.append({"name":"{}-clientrootca-secret".format(organization.name), "secret":{"secretName":"{}-clientrootca-secret".format(organization.name)}})
+#@       output.append({"name": "{}-clientrootca-secret".format(organization.name), "secret": {"secretName": "{}-clientrootca-secret".format(organization.name)}})
 #@     end
 #@   end
 #@   for j in range(0, len(data.values.orderer_organizations)):
@@ -83,7 +97,7 @@
 #@     elif type == "volumeMounts":
 #@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca-secret".format(organization.name)})
 #@     elif type == "volumes":
-#@       output.append({"name":"{}-clientrootca-secret".format(organization.name), "secret":{"secretName":"{}-clientrootca-secret".format(organization.name)}})
+#@       output.append({"name": "{}-clientrootca-secret".format(organization.name), "secret": {"secretName": "{}-clientrootca-secret".format(organization.name)}})
 #@     end
 #@   end
 #@   return output
@@ -120,15 +134,14 @@
 #@     env.append({"name": "CORE_OPERATIONS_TLS_ENABLED", "value": "false" })
 #@     env.append({"name": "CORE_METRICS_PROVIDER", "value": "prometheus" })
 #@   end
-#@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
-#@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
+#@   volumeMounts = mounts("peer")
 #@   if networkSpec.tls == "mutual":
 #@     volumeMounts += mutualTLS(networkSpec, "volumeMounts")
 #@   end
 #@   if networkSpec.k8s.data_persistence == True or networkSpec.k8s.data_persistence == "local":
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "peer-data-storage"})
 #@   end
-#@   resources = {"limits":{"cpu": "1", "memory": "1Gi"}, "requests":{"cpu":"1", "memory":"1Gi"}}
+#@   resources = {"limits": {"cpu": "1", "memory": "1Gi"}, "requests": {"cpu": "1", "memory": "1Gi"}}
 
 #@   peer_image = "hyperledger/fabric-peer"
 #@   if networkSpec.fabric_version.endswith("-stable"):
@@ -138,14 +151,13 @@
 #@   if networkSpec.db_type == "couchdb":
 #@     env.append({"name": "CORE_LEDGER_STATE_STATEDATABASE", "value": "CouchDB"})
 #@     env.append({"name": "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS", "value": "localhost:5984"})
-#@     container = {"name":"couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "securityContext":{"privileged":True}, "resources":{"limits":{"cpu": "0.1", "memory": "1Gi"}, "requests":{"cpu": "0.1", "memory": "1Gi"}}}
-#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": resources}, {"name":input, "image": peer_image, "imagePullPolicy": "Always", "securityContext" : { "privileged": True }, "env": env, "volumeMounts":volumeMounts, "command": ["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && peer node start".format(input)], "resources": resources}, container]
+#@     container = {"name": "couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "resources": {"limits": {"cpu": "0.1", "memory": "1Gi"}, "requests": {"cpu": "0.1", "memory": "1Gi"}}}
+#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": resources}, {"name": input, "image": peer_image, "imagePullPolicy": "Always", "env": env, "volumeMounts": volumeMounts, "command": ["peer"], "args": ["node", "start"], "resources": resources}, container]
 #@   else:
-#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": resources}, {"name":input, "image": peer_image, "imagePullPolicy": "Always", "securityContext" : { "privileged": True }, "env": env, "volumeMounts":volumeMounts, "command": ["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && peer node start".format(input)], "resources": resources}]
+#@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": resources}, {"name": input, "image": peer_image, "imagePullPolicy": "Always", "env": env, "volumeMounts": volumeMounts, "command": ["peer"], "args": ["node", "start"], "resources": resources}]
 #@   end
 #@   return output
 #@ end
-
 
 #@ def ordererContainers(input, value, networkSpec, mspId):
 #@   env = [{"name": "ORDERER_GENERAL_LISTENADDRESS", "value": "0.0.0.0"}]
@@ -175,8 +187,7 @@
 #@     env.append({"name": "ORDERER_OPERATIONS_TLS_ENABLED", "value": "false" })
 #@     env.append({"name": "ORDERER_METRICS_PROVIDER", "value": "prometheus" })
 #@   end
-#@   volumeMounts = [{"mountPath": "/etc/hyperledger/fabric/certparser", "name": "certsparser"}]
-#@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/secret", "name": "mspsecret"})
+#@   volumeMounts = mounts("orderer")
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/genesisblock", "name": "genesisblock"})
 #@   if networkSpec.tls == "mutual":
 #@     volumeMounts += mutualTLS(networkSpec, "volumeMounts")
@@ -184,12 +195,12 @@
 #@   if networkSpec.k8s.data_persistence == True or networkSpec.k8s.data_persistence == "local":
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "orderer-data-storage"})
 #@   end
-#@   resources = {"limits":{"cpu": "1", "memory": "1Gi"}, "requests":{"cpu":"1", "memory":"1Gi"}}
+#@   resources = {"limits": {"cpu": "1", "memory": "1Gi"}, "requests": {"cpu": "1", "memory": "1Gi"}}
 #@   orderer_image = "hyperledger/fabric-orderer"
 #@   if networkSpec.fabric_version.endswith("-stable"):
 #@     orderer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(networkSpec.fabric_version)
 #@   end
-#@   output = [{"name": input, "image": orderer_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command":["/bin/bash"], "args":["-c", "cd /etc/hyperledger/fabric/ && cp certparser/certs-parser.sh . && chmod +x ./certs-parser.sh && ./certs-parser.sh {}.json && orderer".format(input)]}]
+#@   output = [{"name": input, "image": orderer_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["orderer"]}]
 #@   return output
 #@ end
 
@@ -199,24 +210,23 @@
 #@   if input.startswith("zookeeper"):
 #@     type = "zookeeper"
 #@     if networkSpec.k8s.data_persistence == True:
-#@       specData = {"volumes": [{"name":"zookeeper-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}}],"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["zookeeper"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@       specData = {"volumes": [{"name": "zookeeper-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}}], "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["zookeeper"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": zkContainers(input, id, zkList(numZK, type), networkSpec)}
 #@     else:
-#@       specData = {"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["zookeeper"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@       specData = {"affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["zookeeper"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": zkContainers(input, id, zkList(numZK, type), networkSpec)}
 #@     end
 #@   elif input.startswith("kafka"):
 #@     type = "kafka"
 #@     if networkSpec.k8s.data_persistence == True:
-#@     specData = {"volumes": [{"name":"kafka-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}}],"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["kafka"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@     specData = {"volumes": [{"name": "kafka-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}}], "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["kafka"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": kafkaContainers(input, id, replicas, zkList(numZK, type), networkSpec)}
 #@     else:
-#@       specData = {"affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1,"podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type","operator": "In","values":["kafka"]}]},"topologyKey":"kubernetes.io/hostname"}}]}},
+#@       specData = {"affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["kafka"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": kafkaContainers(input, id, replicas, zkList(numZK, type), networkSpec)}
 #@     end
 #@   end
-#@   output= specData
-#@   return output
+#@   return specData
 #@ end
 
 #@ def spec(input, orgName, value, networkSpec, mspId):
@@ -225,50 +235,61 @@
 #@   metadata = {}
 #@   if input.startswith("ca"):
 #@     type = "ca"
-#@     specData = {"volumes":[{"name":"certsparser", "configMap":{"name":"certsparser"}}, {"name":"mspsecret", "secret":{"secretName":"{}".format(input)}}],
-#@             "affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1, "podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type", "operator": "In", "values":["ca"]}]}, "topologyKey":"kubernetes.io/hostname"}}]}},
+#@     volumes = [{"name": "cacerts", "configMap": {"name": "{}-ca".format(orgName)}}]
+#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["ca"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": caContainers(input, orgName, networkSpec)}
 #@   elif input.startswith("orderer"):
 #@     type = "orderer"
-#@     volumes = [{"name":"certsparser", "configMap":{"name":"certsparser"}}, {"name":"mspsecret", "secret":{"secretName":"{}".format(input)}}, {"name":"genesisblock", "secret":{"secretName":"genesisblock"}}]
+#@     volumes = [{"name": "genesisblock", "secret": {"secretName": "genesisblock"}},
+#@                {"name": "admincerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "admincerts", "path": "cert.pem"}]}},
+#@                {"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca-cert.pem"}]}},
+#@                {"name": "signcerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "signcerts", "path": "cert.pem"}]}},
+#@                {"name": "tlscacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "tlscacerts", "path": "tlsca-cert.pem"}]}},
+#@                {"name": "keystore", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "keystore", "path": "priv_sk"}]}},
+#@                {"name": "tls", "configMap": {"name": "{}-tls".format(input)}}]
 #@     if networkSpec.k8s.data_persistence == True:
-#@        volumes.append({"name":"orderer-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}})
+#@        volumes.append({"name": "orderer-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}})
 #@     elif networkSpec.k8s.data_persistence == "local":
-#@        volumes.append({"name":"orderer-data-storage","hostPath":{"path":"/shared/{}-data".format(input)}})
+#@        volumes.append({"name": "orderer-data-storage", "hostPath": {"path": "/shared/{}-data".format(input)}})
 #@     end
 #@     if networkSpec.tls == "mutual":
 #@        volumes += mutualTLS(networkSpec, "volumes")
 #@     end
-#@     specData = {"volumes": volumes, "affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1, "podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type", "operator": "In", "values":["{}".format(value)]}]}, "topologyKey":"kubernetes.io/hostname"}}]}},
+#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(value)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": ordererContainers(input, orgName, networkSpec, mspId)}
 #@   else:
 #@     type = "peer"
-#@     volumes = [{"name":"certsparser", "configMap":{"name":"certsparser"}}, {"name":"mspsecret", "secret":{"secretName":"{}".format(input)}}]
+#@     volumes = [{"name": "admincerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "admincerts", "path": "cert.pem"}]}},
+#@                {"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca-cert.pem"}]}},
+#@                {"name": "signcerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "signcerts", "path": "cert.pem"}]}},
+#@                {"name": "tlscacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "tlscacerts", "path": "tlsca-cert.pem"}]}},
+#@                {"name": "keystore", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "keystore", "path": "priv_sk"}]}},
+#@                {"name": "tls", "configMap": {"name": "{}-tls".format(input)}}]
 #@     if networkSpec.k8s.data_persistence == True:
-#@        volumes.append({"name":"peer-data-storage","persistentVolumeClaim":{"claimName":"{}-data".format(input)}})
+#@        volumes.append({"name": "peer-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}})
 #@     elif networkSpec.k8s.data_persistence == "local":
-#@        volumes.append({"name":"peer-data-storage","hostPath":{"path":"/shared/{}-data".format(input)}})
+#@        volumes.append({"name": "peer-data-storage", "hostPath": {"path": "/shared/{}-data".format(input)}})
 #@     end
 #@     if networkSpec.tls == "mutual":
 #@        volumes += mutualTLS(networkSpec, "volumes")
 #@     end
-#@     specData = {"volumes": volumes, "affinity":{"podAntiAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"weight":1, "podAffinityTerm":{"labelSelector":{"matchExpressions":[{"key":"type", "operator": "In", "values":["{}".format(value)]}]}, "topologyKey":"kubernetes.io/hostname"}}]}},
+#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(value)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": peerContainers(input, orgName, networkSpec, mspId)}
 #@   end
-#@   selector = {"matchLabels":{"k8s-app": input, "type": type}}
+#@   selector = {"matchLabels": {"k8s-app": input, "type": type}}
 #@   if networkSpec.metrics == True:
 #@     if type == "orderer":
-#@       metadata = {"labels":{"k8s-app": input, "type":type}, "annotations":{"prometheus.io/scrape": "true", "prometheus.io/path": "/metrics", "prometheus.io/port": "8443", "prometheus.io/scheme": "http"}}
+#@       metadata = {"labels": {"k8s-app": input, "type": type}, "annotations": {"prometheus.io/scrape": "true", "prometheus.io/path": "/metrics", "prometheus.io/port": "8443", "prometheus.io/scheme": "http"}}
 #@     elif type == "peer":
-#@       metadata = {"labels":{"k8s-app": input, "type":type}, "annotations":{"prometheus.io/scrape": "true", "prometheus.io/path": "/metrics", "prometheus.io/port": "9443", "prometheus.io/scheme": "http"}}
+#@       metadata = {"labels": {"k8s-app": input, "type": type}, "annotations": {"prometheus.io/scrape": "true", "prometheus.io/path": "/metrics", "prometheus.io/port": "9443", "prometheus.io/scheme": "http"}}
 #@     else:
-#@       metadata = {"labels":{"k8s-app": input, "type":type}}
+#@       metadata = {"labels": {"k8s-app": input, "type": type}}
 #@     end
 #@   else:
-#@     metadata = {"labels":{"k8s-app": input, "type":type}}
+#@     metadata = {"labels": {"k8s-app": input, "type": type}}
 #@   end
-#@   template = {"metadata":metadata, "spec":specData}
-#@   output = {"selector":selector, "serviceName": input, "replicas": 1, "template": template}
+#@   template = {"metadata": metadata, "spec": specData}
+#@   output = {"selector": selector, "serviceName": input, "replicas": 1, "template": template}
 #@   return output
 #@ end
 

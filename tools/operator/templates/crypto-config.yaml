@@ -10,7 +10,7 @@ OrdererOrgs:
 #@   ordererOrg = data.values.orderer_organizations[i]
 - Domain: #@ ordererOrg.name
   Name: #@ ordererOrg.name
-  EnableNodeOUs: true
+  EnableNodeOUs: false
   Specs:
   #@ num_orderers = ordererOrg.num_orderers
   #@ for i in range(0, num_orderers):
