@@ -1,0 +1,119 @@
+tls: true
+organizations:
+  - name: org1
+  # connection profiles can be either in yaml or in json format
+    connProfilePath: $PWD/connection-profile-org1.yml
+  - name: org2
+    connProfilePath: $PWD/connection-profile-org2.json
+
+createChannel:
+# Section below is used to input each custom channel name and path to its channel config transaction
+  - channelName: testorgschannel1
+    channelTxPath: $PWD/testorgschannel1.tx
+    organizations: org1
+  - channelName: testorgschannel2
+    channelTxPath: $PWD/testorgschannel2.tx
+    organizations: org1  
+# Section below is used to loop through channel base name with number of channels and path where all channel config transactions are located
+  - channelPrefix: mychannel
+    numChannels: 10
+    channelTxPath: $PWD/
+    organizations: org1
+
+anchorPeerUpdate:
+  - channelName: testorgschannel1
+    organization: org1
+    anchorPeerUpdateTxPath: $PWD/anchorpeer-org1-testorgschannel1.tx
+  - channelName: testorgschannel1
+    organization: org2
+    anchorPeerUpdateTxPath: $PWD/anchorpeer-org2-testorgschannel1.tx
+
+  - channelPrefix: testorgschannel
+    numChannels: 10
+    organization: org2
+    anchorPeerUpdateTxPath: $PWD/
+
+joinChannel:
+# joins all peers in listed organziations to channel listed
+  - channelName: testorgschannel1
+    organizations: org1,org2
+# joins all peers in listed organziations to all channels based on channelPrefix and numChannels
+  - channelPrefix: testorgschannel
+    numChannels: 10
+    organizations: org1,org2
+
+installChaincode:
+# installs chaincode with specified name on all peers in listed organziations
+  - chaincodeName: samplecc
+    ccVersion: v1
+    chaincodePath: $PWD/samplecc
+    organizations: org1,org2
+    language: go
+    metadataPath: $PWD/txt.json
+
+  - chaincodeName: samplejs
+    ccVersion: v1
+    chaincodePath: $PWD/samplejs
+    organizations: org1,org2
+    language: node
+    metadataPath: $PWD/txt.json
+
+instantiateChaincode:
+  - channelName: testorgschannel1
+    chaincodeName: samplecc
+    ccVersion: v1
+    args: "1,2,3,4"
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: $PWD/txt.json
+
+  - channelName: testorgschannel1
+    chaincodeName: samplejs
+    ccVersion: v1
+    args: "1,2,3,4"
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: $PWD/txt.json
+
+  - channelPrefix: testorgschannel
+    numChannels: 10
+    chaincodeName: samplejs
+    ccVersion: v1
+    args: "1,2,3,4"
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: $PWD/txt.json
+
+invokes:
+  - channelName: testorgschannel1
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    txnOpts:
+      - mode: constant
+        options: "0,0"
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+    moveArgs: "put,a1,1"
+
+queries:
+  - channelName: testorgschannel1
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+    queryArgs: "get,a1"
