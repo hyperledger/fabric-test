@@ -120,7 +120,7 @@
 #@ end
 
 #@ def orderers(input):
-#@   port = 30000
+#@   (port1, port2) = (30000, 30100)
 #@   for i in range(0, len(input.orderer_organizations)):
 #@     org = input.orderer_organizations[i]
 #@     for j in range(0, org.num_orderers):
@@ -135,6 +135,7 @@
 #@       else:
 #@         env.append("ORDERER_GENERAL_TLS_ENABLED={}".format(input.tls))
 #@       end
+#@       env.append("ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443")
 #@       env.append("ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt]".format(org.name, j, org.name, org.name))
@@ -146,17 +147,19 @@
 #@       if input.fabric_version.endswith("-stable"):
 #@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(input.fabric_version)
 #@       end
-#@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":["{}:{}".format(port,7050)], "container_name":container_name}
+#@       ports = ["{}:{}".format(port1,7050), "{}:{}".format(port2,8443)]
+#@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name}
 #@       if input.orderer.orderertype == "kafka":
-#@         services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":["{}:{}".format(port,7050)], "container_name":container_name, "depends_on":kafkaList(input.kafka.num_kafka)}
+#@         services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name, "depends_on":kafkaList(input.kafka.num_kafka)}
 #@       end
-#@       port += 1
+#@       port1 += 1
+#@       port2 += 1
 #@     end
 #@   end
 #@ end
 
 #@ def peers(input):
-#@   port1 = 31000
+#@   (port1, port2) = (31000, 31100)
 #@   for i in range(0, len(input.peer_organizations)):
 #@     org = input.peer_organizations[i]
 #@     for j in range(0, org.num_peers):
@@ -169,6 +172,7 @@
 #@       env.append("CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/msp".format(org.name, j, org.name, org.name))
 #@       env.append("CORE_PEER_LOCALMSPID={}".format(org.msp_id))
 #@       env.append("CORE_PEER_ADDRESS=peer{}-{}:{}".format(j, org.name, 7051))
+#@       env.append("CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443")
 #@       env.append("CORE_PEER_CHAINCODEADDRESS=peer{}-{}:{}".format(j, org.name, 7052))
 #@       env.append("CORE_PEER_GOSSIP_EXTERNALENDPOINT=localhost:{}".format(port1))
 #@       if input.tls == "mutual":
@@ -188,13 +192,15 @@
 #@       if input.fabric_version.endswith("-stable"):
 #@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(input.fabric_version)
 #@       end
-#@       services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":["{}:{}".format(port1,7051)], "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name}
+#@       ports = ["{}:{}".format(port1,7051), "{}:{}".format(port2,9443)]
+#@       services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name}
 #@       if input.db_type == "couchdb":
 #@         env.append("CORE_LEDGER_STATE_STATEDATABASE=CouchDB")
 #@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-{}:5984".format(container_name))
-#@         services[container_name] = {"image":"hyperledger/fabric-peer", "environment":env, "volumes":volumes, "ports":["{}:{}".format(port1,7051)], "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name, "depends_on":["couchdb-{}".format(container_name)]}
+#@         services[container_name] = {"image":"hyperledger/fabric-peer", "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name, "depends_on":["couchdb-{}".format(container_name)]}
 #@       end
 #@       port1 += 1
+#@       port2 += 1
 #@     end
 #@   end
 #@ end

@@ -73,10 +73,21 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 			}
 		}
 
+		err = client.CheckContainersState(kubeConfigPath)
+		if err != nil {
+			log.Fatalf("Failed to check container status; err = %v", err)
+		}
+
+		err = client.CheckComponentsHealth("", kubeConfigPath, input)
+		if err != nil {
+			log.Fatalf("Failed to check health of fabric components; err = %v", err)
+		}
+
 		err = connectionprofile.CreateConnectionProfile(input, kubeConfigPath)
 		if err != nil {
-			log.Fatalf("Failed to launch k8s components; err = %v", err)
+			log.Fatalf("Failed to create connection profile; err = %v", err)
 		}
+		fmt.Println("Network is up and running")
 
 	case "down":
 		err := nl.NetworkCleanUp(input, kubeConfigPath)

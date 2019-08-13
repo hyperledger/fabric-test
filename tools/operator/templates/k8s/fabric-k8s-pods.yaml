@@ -115,8 +115,8 @@
 #@   env.append({"name": "CORE_PEER_FILESYSTEMPATH", "value": "/shared/data"})
 #@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
 #@   env.append({"name": "CORE_PEER_GOSSIP_BOOTSTRAP", "value": "{}:7051".format(input)})
+#@   env.append({"name": "CORE_OPERATIONS_LISTENADDRESS", "value": ":9443"})
 #@   if networkSpec.metrics == True:
-#@     env.append({"name": "CORE_OPERATIONS_LISTENADDRESS", "value": ":9443"})
 #@     env.append({"name": "CORE_OPERATIONS_TLS_ENABLED", "value": "false" })
 #@     env.append({"name": "CORE_METRICS_PROVIDER", "value": "prometheus" })
 #@   end
@@ -170,8 +170,8 @@
 #@   env.append({"name": "ORDERER_FILELEDGER_LOCATION", "value": "/shared/data"})
 #@   env.append({"name": "ORDERER_CONSENSUS_WALDIR", "value": "/shared/data/etcdraft/wal"})
 #@   env.append({"name": "ORDERER_CONSENSUS_SNAPDIR", "value": "/shared/data/etcdraft/snapshot"})
+#@   env.append({"name": "ORDERER_OPERATIONS_LISTENADDRESS", "value": ":8443"})
 #@   if networkSpec.metrics == True:
-#@     env.append({"name": "ORDERER_OPERATIONS_LISTENADDRESS", "value": ":8443"})
 #@     env.append({"name": "ORDERER_OPERATIONS_TLS_ENABLED", "value": "false" })
 #@     env.append({"name": "ORDERER_METRICS_PROVIDER", "value": "prometheus" })
 #@   end
