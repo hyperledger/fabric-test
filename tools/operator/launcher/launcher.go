@@ -10,7 +10,7 @@ import (
 	"io/ioutil"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
-	"github.com/hyperledger/fabric-test/tools/operator/helper"
+	"github.com/hyperledger/fabric-test/tools/operator/health"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -32,13 +32,13 @@ func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 
 func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 
+	configFilesPath := utils.ConfigFilesDir()
 	switch action {
 	case "up":
 		err := nl.GenerateConfigurationFiles(kubeConfigPath)
 		if err != nil {
 			utils.FatalLogs("Failed to generate yaml files", err)
 		}
-
 		err = nl.GenerateCryptoCerts(input, kubeConfigPath)
 		if err != nil {
 			utils.FatalLogs("Failed to generate certificates", err)
@@ -56,7 +56,7 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 			utils.FatalLogs("Failed to create orderer genesis block", err)
 		}
 
-		err = client.GenerateChannelTransaction(input, []string{}, "./../configFiles")
+		err = client.GenerateChannelTransaction(input, configFilesPath)
 		if err != nil {
 			utils.FatalLogs("Failed to create channel transactions", err)
 		}
@@ -78,12 +78,12 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 			utils.FatalLogs("Failed to check container status", err)
 		}
 
-		err = client.CheckComponentsHealth("", kubeConfigPath, input)
+		err = health.CheckComponentsHealth("", kubeConfigPath, input)
 		if err != nil {
 			utils.FatalLogs("Failed to check health of fabric components", err)
 		}
 
-		err = connectionprofile.CreateConnectionProfile(input, kubeConfigPath)
+		err = connectionprofile.GenerateConnectionProfiles(input, kubeConfigPath)
 		if err != nil {
 			utils.FatalLogs("Failed to create connection profile", err)
 		}
@@ -127,7 +127,7 @@ func main() {
 		utils.FatalLogs("In-correct input file path", err)
 	}
 	contents = append([]byte("#@data/values \n"), contents...)
-	inputPath := helper.JoinPath(helper.TemplatesDir(), "input.yaml")
+	inputPath := utils.JoinPath(utils.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
 	input, err := nl.GetConfigData(inputPath)
 	if err != nil {
