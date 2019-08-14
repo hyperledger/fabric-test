@@ -86,6 +86,43 @@ k8s:
   data_persistence: true
   storage_class: default
   storage_capacity: 20Gi
+  resources:
+    orderers:
+      limits:
+         cpu: "1"
+         memory: 1Gi
+      requests:
+         cpu: "0.5"
+         memory: 1Gi
+    peers:
+      limits:
+         cpu: "0.5"
+         memory: 1Gi
+      requests:
+         cpu: "0.5"
+         memory: 2Gi
+#! dind will be used to run all chaincode containers of a peer
+    dind:
+      limits:
+         cpu: "1"
+         memory: 1Gi
+      requests:
+         cpu: "1"
+         memory: 1Gi
+    couchdb:
+      limits:
+         cpu: "0.2"
+         memory: 1Gi
+      requests:
+         cpu: "0.1"
+         memory: 1Gi
+    kafka:
+      limits:
+         cpu: "0.2"
+         memory: 1Gi
+      requests:
+         cpu: "0.1"
+         memory: 1Gi
 
 #!#! TODO: future enhancement to read individual profiles for each channel creation.
 #!profiles:
