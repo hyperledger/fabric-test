@@ -1,10 +1,12 @@
 package utils
 
 import (
-	"log"
+	
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 )
 
 //CryptoConfigDir --
@@ -36,7 +38,7 @@ func PeerOrgsDir(artifactsLocation string) string {
 func YTTPath() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		log.Fatal(err)
+		logger.CRIT(err)
 	}
 	if strings.Contains(currentDir, "launcher") {
 		return componentPath(currentDir, "ytt")
@@ -48,7 +50,7 @@ func YTTPath() string {
 func TemplatesDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		log.Fatal(err)
+		logger.CRIT(err)
 	}
 	if strings.Contains(currentDir, "launcher") {
 		return componentPath(currentDir, "../templates")
@@ -66,7 +68,7 @@ func TemplateFilePath(fileName string) string {
 func ConfigFilesDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		log.Fatal(err)
+		logger.CRIT(err)
 	}
 	if strings.Contains(currentDir, "launcher") {
 		return componentPath(currentDir, "../configFiles")
@@ -121,7 +123,7 @@ func componentPath(artifactsLocation, component string) string {
 	}
 	err := createDirectory(path)
 	if err != nil {
-		log.Fatal(err)
+		logger.CRIT(err)
 	}
 	return path
 }
@@ -129,17 +131,4 @@ func componentPath(artifactsLocation, component string) string {
 //JoinPath ---
 func JoinPath(oldPath, newPath string) string {
 	return filepath.Join(oldPath, newPath)
-}
-
-//FatalLogs -- exits out of the code by printng the error
-func FatalLogs(message string, err error){
-	if err == nil{
-		log.Fatalln(message)
-	}
-	log.Fatalf("%s; err: %s", message, err)
-}
-
-//PrintLogs -- prints the logs to the console
-func PrintLogs(message string){
-	log.Printf("%s", message)
 }

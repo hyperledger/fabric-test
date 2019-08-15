@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
 	yaml "gopkg.in/yaml.v2"
@@ -82,7 +83,7 @@ func getKeysFromMap(newMap interface{}) []string {
 	var componentsList []string
 	v := reflect.ValueOf(newMap)
 	if v.Kind() != reflect.Map {
-		utils.PrintLogs("not a map!")
+		logger.ERROR("not a map!")
 		return nil
 	}
 	keys := v.MapKeys()
@@ -146,7 +147,7 @@ func GenerateConnectionProfiles(input networkspec.Config, kubeconfigPath string)
 		organizations[peerorg.Name] = org
 		err = generateConnProfilePerOrg(kubeconfigPath, peerorg.Name, input, peersMap, organizations, ca, orderersMap)
 		if err != nil {
-			utils.PrintLogs("Failed to generate connection profile")
+			logger.ERROR("Failed to generate connection profile")
 			return err
 		}
 	}
@@ -186,20 +187,20 @@ func generateConnProfilePerOrg(kubeconfigPath, orgName string, input networkspec
 	cp := networkspec.ConnectionProfile{Client: client, Channels: channels, Organizations: organizations, Orderers: orderersMap, Peers: peersMap, CA: certificateAuthorities}
 	yamlBytes, err := yaml.Marshal(cp)
 	if err != nil {
-		utils.PrintLogs("Failed to convert the connection profile struct to bytes")
+		logger.ERROR("Failed to convert the connection profile struct to bytes")
 		return err
 	}
 	_, err = os.Create(fileName)
 	if err != nil {
-		utils.PrintLogs(fmt.Sprintf("Failed to create %s file", fileName))
+		logger.ERROR("Failed to create ", fileName)
 		return err
 	}
 	yamlBytes = append([]byte("version: 1.0 \nname: My network \ndescription: Connection Profile for Blockchain Network \n"), yamlBytes...)
 	err = ioutil.WriteFile(fileName, yamlBytes, 0644)
 	if err != nil {
-		utils.PrintLogs(fmt.Sprintf("Failed to write content to %s file", fileName))
+		logger.ERROR("Failed to write content to ", fileName)
 		return err
 	}
-	utils.PrintLogs(fmt.Sprintf("Successfully created %s", fileName))
+	logger.INFO("Successfully created ", fileName)
 	return nil
 }

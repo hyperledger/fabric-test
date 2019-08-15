@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
 )
@@ -53,7 +54,7 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 		k8sComponentName = fmt.Sprintf("%s-msp", componentName)
 		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
 		if err != nil {
-			utils.PrintLogs(fmt.Sprintf("Failed to create msp configmap for %s", componentName))
+			logger.ERROR("Failed to create msp configmap for ", componentName)
 			return err
 		}
 		k8sComponentName = fmt.Sprintf("%s-tls", componentName)
@@ -61,19 +62,19 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 		// Creating tls configmap for components
 		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
 		if err != nil {
-			utils.PrintLogs(fmt.Sprintf("Failed to create tls configmap for %s", componentName))
+			logger.ERROR("Failed to create tls configmap for ", componentName)
 			return err
 		}
 	}
 
-	// Calling createCaCertsConfigmap to create ca certs configmap
+	// Calling createConfigmapsNSecrets to create ca certs configmap
 	if numCA > 0 {
 		k8sComponentName = fmt.Sprintf("%s-ca", orgName)
 		caPath := utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s", componentType, orgName))
 		inputPaths = []string{fmt.Sprintf("%s/ca/", caPath), fmt.Sprintf("%s/tlsca/", caPath)}
 		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
 		if err != nil {
-			utils.PrintLogs(fmt.Sprintf("Failed to create ca configmap for %s", componentName))
+			logger.ERROR("Failed to create ca configmap for ", componentName)
 			return err
 		}
 	}
@@ -83,7 +84,7 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 		path = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/ca/ca.%s-cert.pem", componentType, orgName, orgName))
 		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "secret", kubeConfigPath)
 		if err != nil {
-			utils.PrintLogs(fmt.Sprintf("Failed to create secret for %s client root CA", componentName))
+			logger.ERROR("Failed to create client root CA secret for ", componentName)
 			return err
 		}
 	}
