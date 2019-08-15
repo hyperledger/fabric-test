@@ -3,42 +3,43 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
-#@ if data.values.k8s.data_persistence == True:
-#@   if data.values.orderer.orderertype == "kafka":
-#@     for i in range(0, data.values.kafka.num_kafka):
+#@ config = data.values
+#@ if config.k8s.data_persistence == True:
+#@   if config.orderer.orderertype == "kafka":
+#@     for i in range(0, config.kafka.num_kafka):
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: #@ "kafka{}-data".format(i)
 spec:
-  storageClassName: #@ data.values.k8s.storage_class
+  storageClassName: #@ config.k8s.storage_class
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: #@ data.values.k8s.storage_capacity
+      storage: #@ config.k8s.storage_capacity
 #@ end
 
-#@ for i in range(0, data.values.kafka.num_zookeepers):
+#@ for i in range(0, config.kafka.num_zookeepers):
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: #@ "zookeeper{}-data".format(i)
 spec:
-  storageClassName: #@ data.values.k8s.storage_class
+  storageClassName: #@ config.k8s.storage_class
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: #@ data.values.k8s.storage_capacity
+      storage: #@ config.k8s.storage_capacity
 #@ end
 #@ end
 
 
-#@ for i in range(0, len(data.values.peer_organizations)):
-#@ organization = data.values.peer_organizations[i]
+#@ for i in range(0, len(config.peer_organizations)):
+#@ organization = config.peer_organizations[i]
 #@   for j in range(0, organization.num_peers):
 ---
 apiVersion: v1
@@ -46,31 +47,31 @@ kind: PersistentVolumeClaim
 metadata:
   name: #@ "peer{}-{}-data".format(j,organization.name)
 spec:
-  storageClassName: #@ data.values.k8s.storage_class
+  storageClassName: #@ config.k8s.storage_class
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: #@ data.values.k8s.storage_capacity
-#@     if data.values.db_type == "couchdb":
+      storage: #@ config.k8s.storage_capacity
+#@     if config.db_type == "couchdb":
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: #@ "couchdb-peer{}-{}-data".format(j,organization.name)
 spec:
-  storageClassName: #@ data.values.k8s.storage_class
+  storageClassName: #@ config.k8s.storage_class
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: #@ data.values.k8s.storage_capacity
+      storage: #@ config.k8s.storage_capacity
 #@     end
 #@ end
 #@ end
-#@ num_ordererOrgs = len(data.values.orderer_organizations)
+#@ num_ordererOrgs = len(config.orderer_organizations)
 #@ for i in range(0, num_ordererOrgs):
-#@   organization = data.values.orderer_organizations[i]
+#@   organization = config.orderer_organizations[i]
 #@   num_orderers = organization.num_orderers
 #@   for j in range(0, num_orderers):
 ---
@@ -79,12 +80,12 @@ kind: PersistentVolumeClaim
 metadata:
   name: #@ "orderer{}-{}-data".format(j,organization.name)
 spec:
-  storageClassName: #@ data.values.k8s.storage_class
+  storageClassName: #@ config.k8s.storage_class
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: #@ data.values.k8s.storage_capacity
+      storage: #@ config.k8s.storage_capacity
 #@   end
 #@ end
 #@ end

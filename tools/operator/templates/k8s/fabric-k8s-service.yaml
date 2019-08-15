@@ -3,8 +3,9 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
-#@ for i in range(0, len(data.values.peer_organizations)):
-#@   organization = data.values.peer_organizations[i]
+#@ config = data.values
+#@ for i in range(0, len(config.peer_organizations)):
+#@   organization = config.peer_organizations[i]
 #@   for j in range(0, organization.num_ca):
 ---
 kind: Service
@@ -16,7 +17,7 @@ metadata:
 spec:
   selector:
     k8s-app: #@ "ca{}-{}".format(j, organization.name)
-  type: #@ data.values.k8s.service_type
+  type: #@ config.k8s.service_type
   ports:
     - name: port1
       port: 7054
@@ -32,7 +33,7 @@ metadata:
 spec:
   selector:
     k8s-app: #@ "peer{}-{}".format(j, organization.name)
-  type: #@ data.values.k8s.service_type
+  type: #@ config.k8s.service_type
   ports:
     - name: port1
       port: 7051
@@ -40,9 +41,9 @@ spec:
       port: 9443
 #@ end
 #@ end
-#@ num_ordererOrgs = len(data.values.orderer_organizations)
+#@ num_ordererOrgs = len(config.orderer_organizations)
 #@ for i in range(0, num_ordererOrgs):
-#@   organization = data.values.orderer_organizations[i]
+#@   organization = config.orderer_organizations[i]
 #@   num_orderers = organization.num_orderers
 #@ for j in range(0, organization.num_ca):
 ---
@@ -55,7 +56,7 @@ metadata:
 spec:
   selector:
     k8s-app: #@ "ca{}-{}".format(i, organization.name)
-  type: #@ data.values.k8s.service_type
+  type: #@ config.k8s.service_type
   ports:
     - name: port1
       port: 7054
@@ -71,7 +72,7 @@ metadata:
 spec:
   selector:
     k8s-app: #@ "orderer{}-{}".format(j, organization.name)
-  type: #@ data.values.k8s.service_type
+  type: #@ config.k8s.service_type
   ports:
     - name: port1
       port: 7050
@@ -80,8 +81,8 @@ spec:
 #@ end
 #@ end
 
-#@ if data.values.orderer.orderertype == "kafka":
-#@   for i in range(0, data.values.kafka.num_kafka):
+#@ if config.orderer.orderertype == "kafka":
+#@   for i in range(0, config.kafka.num_kafka):
 ---
 kind: Service
 apiVersion: v1
@@ -98,7 +99,7 @@ spec:
     - name: port2
       port: 9093
 #@   end
-#@   for j in range(0, data.values.kafka.num_zookeepers):
+#@   for j in range(0, config.kafka.num_zookeepers):
 ---
 kind: Service
 apiVersion: v1

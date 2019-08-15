@@ -3,11 +3,11 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
-
+#@ config = data.values
 OrdererOrgs:
-#@ num_organizations = len(data.values.orderer_organizations)
+#@ num_organizations = len(config.orderer_organizations)
 #@ for i in range(0, num_organizations):
-#@   ordererOrg = data.values.orderer_organizations[i]
+#@   ordererOrg = config.orderer_organizations[i]
 - Domain: #@ ordererOrg.name
   Name: #@ ordererOrg.name
   EnableNodeOUs: true
@@ -18,8 +18,8 @@ OrdererOrgs:
   #@ end
 #@ end
 PeerOrgs:
-#@ for i in range(0, len(data.values.peer_organizations)):
-#@   peerOrg = data.values.peer_organizations[i]
+#@ for i in range(0, len(config.peer_organizations)):
+#@   peerOrg = config.peer_organizations[i]
 - Domain: #@ peerOrg.name
   Name: #@ peerOrg.name
   EnableNodeOUs: true

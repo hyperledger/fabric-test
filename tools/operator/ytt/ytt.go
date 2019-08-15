@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package utils
+package ytt
 
 import (
 	"fmt"
@@ -29,7 +29,7 @@ func (y YTT) Args(input []string) []string {
 }
 
 //DownloadYtt - to download ytt
-func DownloadYtt() error {
+func (y YTT) DownloadYtt() error {
 	if _, err := os.Stat("ytt"); os.IsNotExist(err) {
 		name := runtime.GOOS
 		url := fmt.Sprintf("https://github.com/k14s/ytt/releases/download/v0.13.0/ytt-%s-amd64", name)

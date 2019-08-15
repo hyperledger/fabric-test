@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package nl
+package k8s
 
 import (
 	"fmt"
@@ -10,24 +10,24 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/client"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	"github.com/hyperledger/fabric-test/tools/operator/utils"
+	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
 //CreateMSPConfigMaps - create msp using configmap for peers, orderers and CA
-func CreateMSPConfigMaps(input networkspec.Config, kubeConfigPath string) error {
+func (k K8s) CreateMSPConfigMaps(config networkspec.Config) error {
 
 	var err error
-	for i := 0; i < len(input.OrdererOrganizations); i++ {
-		organization := input.OrdererOrganizations[i]
-		err := createCertsConfigmap(organization.NumOrderers, organization.NumCA, "orderer", organization.Name, kubeConfigPath, input)
+	for i := 0; i < len(config.OrdererOrganizations); i++ {
+		organization := config.OrdererOrganizations[i]
+		err := k.createCertsConfigmap(organization.NumOrderers, organization.NumCA, "orderer", organization.Name, config)
 		if err != nil {
 			return err
 		}
 	}
 
-	for i := 0; i < len(input.PeerOrganizations); i++ {
-		organization := input.PeerOrganizations[i]
-		err = createCertsConfigmap(organization.NumPeers, organization.NumCA, "peer", organization.Name, kubeConfigPath, input)
+	for i := 0; i < len(config.PeerOrganizations); i++ {
+		organization := config.PeerOrganizations[i]
+		err = k.createCertsConfigmap(organization.NumPeers, organization.NumCA, "peer", organization.Name, config)
 		if err != nil {
 			return err
 		}
@@ -35,15 +35,15 @@ func CreateMSPConfigMaps(input networkspec.Config, kubeConfigPath string) error 
 	return nil
 }
 
-func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, kubeConfigPath string, input networkspec.Config) error {
+func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, orgName string, config networkspec.Config) error {
 
 	var path, componentName, k8sComponentName string
 	var err error
 	var inputPaths []string
-	cryptoConfigPath := utils.CryptoConfigDir(input.ArtifactsLocation)
+	cryptoConfigPath := paths.CryptoConfigDir(config.ArtifactsLocation)
 	for j := 0; j < numComponents; j++ {
 		componentName = fmt.Sprintf("%s%d-%s", componentType, j, orgName)
-		path = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
+		path = paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
 		inputPaths = []string{fmt.Sprintf("config=%s/../../msp/config.yaml", path),
 			fmt.Sprintf("cacerts=%s/msp/cacerts/ca.%s-cert.pem", path, orgName),
 			fmt.Sprintf("signcerts=%s/msp/signcerts/%s.%s-cert.pem", path, componentName, orgName),
@@ -52,7 +52,7 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 
 		// Creating msp configmap for components
 		k8sComponentName = fmt.Sprintf("%s-msp", componentName)
-		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
+		err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap")
 		if err != nil {
 			logger.ERROR("Failed to create msp configmap for ", componentName)
 			return err
@@ -60,17 +60,17 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 		k8sComponentName = fmt.Sprintf("%s-tls", componentName)
 		inputPaths = []string{fmt.Sprintf("%s/tls/", path)}
 		// Creating tls configmap for components
-		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
+		err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap")
 		if err != nil {
 			logger.ERROR("Failed to create tls configmap for ", componentName)
 			return err
 		}
 	}
 
-	adminCertPath := utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s/msp/admincerts/", componentType, orgName, componentType, componentName, orgName))
+	adminCertPath := paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s/msp/admincerts/", componentType, orgName, componentType, componentName, orgName))
 	inputPaths = []string{fmt.Sprintf("%s", adminCertPath)}
 	k8sComponentName = fmt.Sprintf("%s-admincerts", orgName)
-	err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
+	err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap")
 	if err != nil {
 		logger.ERROR("Failed to create admincerts configmap for ", orgName)
 		return err
@@ -79,19 +79,20 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 	// Calling createConfigmapsNSecrets to create ca certs configmap
 	if numCA > 0 {
 		k8sComponentName = fmt.Sprintf("%s-ca", orgName)
-		caPath := utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s", componentType, orgName))
+		caPath := paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s", componentType, orgName))
 		inputPaths = []string{fmt.Sprintf("%s/ca/", caPath), fmt.Sprintf("%s/tlsca/", caPath)}
-		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
+		err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap")
 		if err != nil {
 			logger.ERROR("Failed to create ca configmap for ", componentName)
 			return err
 		}
 	}
 
-	if input.TLS == "mutual" {
+	if config.TLS == "mutual" {
 		k8sComponentName = fmt.Sprintf("%s-clientrootca-secret", orgName)
-		path = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/ca/ca.%s-cert.pem", componentType, orgName, orgName))
-		err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "secret", kubeConfigPath)
+		path = paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/ca/ca.%s-cert.pem", componentType, orgName, orgName))
+		inputPaths = []string{path}
+		err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "secret")
 		if err != nil {
 			logger.ERROR("Failed to create client root CA secret for ", componentName)
 			return err
@@ -100,11 +101,10 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 	return nil
 }
 
-func createConfigmapsNSecrets(inputPaths []string, componentName, k8sType, kubeConfigPath string) error {
+func (k K8s) createConfigmapsNSecrets(inputPaths []string, componentName, k8sType string) error {
 
-	var k8s K8s
-	k8s = K8s{Action: "create", Input: inputPaths}
-	_, err := client.ExecuteK8sCommand(k8s.ConfigMapsNSecretsArgs(kubeConfigPath, componentName, k8sType), true)
+	k = K8s{Action: "create", Arguments: inputPaths, KubeConfigPath: k.KubeConfigPath}
+	_, err := client.ExecuteK8sCommand(k.ConfigMapsNSecretsArgs(componentName, k8sType), true)
 	if err != nil {
 		return err
 	}

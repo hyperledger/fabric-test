@@ -30,5 +30,5 @@ func CRIT(err error, message ...string) {
 	if err == nil {
 		crit.Fatalln(strings.Join(message, ""))
 	}
-	crit.Fatalf("%s; err: %s", strings.Join(message, ""), err)
+	crit.Fatalf("%s err: %s", strings.Join(message, ""), err)
 }
