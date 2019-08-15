@@ -10,8 +10,8 @@ import (
 	"io/ioutil"
 
 	"github.com/hyperledger/fabric-test/tools/operator/client"
-	"github.com/hyperledger/fabric-test/tools/operator/health"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
+	"github.com/hyperledger/fabric-test/tools/operator/health"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
@@ -45,9 +45,9 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 		}
 
 		if kubeConfigPath != "" {
-			err = nl.CreateMspSecret(input, kubeConfigPath)
+			err = nl.CreateMSPConfigMaps(input, kubeConfigPath)
 			if err != nil {
-				utils.FatalLogs("", err)
+				utils.FatalLogs("Failed to create msp", err)
 			}
 		}
 
@@ -69,11 +69,11 @@ func doAction(action string, input networkspec.Config, kubeConfigPath string) {
 		} else {
 			err = nl.LaunchLocalNetwork()
 			if err != nil {
-				utils.FatalLogs("Failed to launch k8s components", err)
+				utils.FatalLogs("Failed to launch docker containers", err)
 			}
 		}
 
-		err = client.VerifyContainersAreRunning(kubeConfigPath)
+		err = health.VerifyContainersAreRunning(kubeConfigPath)
 		if err != nil {
 			utils.FatalLogs("Failed to check container status", err)
 		}

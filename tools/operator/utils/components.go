@@ -34,7 +34,7 @@ func PeerOrgsDir(artifactsLocation string) string {
 
 //YTTPath --
 func YTTPath() string {
-	currentDir, err := getCurrentDir()
+	currentDir, err := GetCurrentDir()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -46,7 +46,7 @@ func YTTPath() string {
 
 //TemplatesDir --
 func TemplatesDir() string {
-	currentDir, err := getCurrentDir()
+	currentDir, err := GetCurrentDir()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -57,14 +57,14 @@ func TemplatesDir() string {
 }
 
 //TemplateFilePath --
-func TemplateFilePath(fileName string) string{
-	templateFiles := map[string]string{"crypto-config":"crypto-config.yaml", "configtx":"configtx.yaml", "k8s":"k8s", "docker":"docker", "input":"input.yaml"}
+func TemplateFilePath(fileName string) string {
+	templateFiles := map[string]string{"crypto-config": "crypto-config.yaml", "configtx": "configtx.yaml", "k8s": "k8s", "docker": "docker", "input": "input.yaml"}
 	return JoinPath(TemplatesDir(), templateFiles[fileName])
 }
 
 //ConfigFilesDir --
 func ConfigFilesDir() string {
-	currentDir, err := getCurrentDir()
+	currentDir, err := GetCurrentDir()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -74,7 +74,19 @@ func ConfigFilesDir() string {
 	return componentPath(currentDir, "configFiles")
 }
 
-func getCurrentDir() (string, error) {
+func ConfigFilePath(fileName string) string {
+	configFiles := map[string]string{
+		"crypto-config": "crypto-config.yaml",
+		"configtx": "configtx.yaml",
+		"docker":   "docker-compose.yaml",
+		"services": "fabric-k8s-service.yaml",
+		"pods":     "fabric-k8s-pods.yaml",
+		"pvc":      "fabric-k8s-pvc.yaml",
+	}
+	return JoinPath(ConfigFilesDir(), configFiles[fileName])
+}
+
+func GetCurrentDir() (string, error) {
 	path, err := os.Getwd()
 	if err != nil {
 		return path, err
