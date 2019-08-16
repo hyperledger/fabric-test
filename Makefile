@@ -12,6 +12,7 @@
 #   - svt-daily                - clones fabric, pulls the images, binaries from Nexus and runs the daily
 #                              test suite. NOT USED?
 #   - svt-smoke                - pulls the images, binaries from Nexus and runs the smoke tests. NOT USED?
+#   - k8s-sys-test             - Triggers system tests on k8s cluster
 #   - build-docker-images      - builds fabric & ca docker images.
 #   - build-fabric             - builds fabric docker images and binaries.
 #   - build-fabric-ca          - builds fabric-ca docker images and binaries.
@@ -164,6 +165,10 @@ daily-tests:
 .PHONY: interop-tests
 interop-tests:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/interop && ./runInteropTestSuite.sh
+
+.PHONY: k8s-sys-test
+k8s-sys-test:
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/systemtest && ./runk8ssystest.sh
 
 .PHONY: pull-images
 pull-images:
