@@ -1044,8 +1044,9 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
         var submitePromises= [];
         channelOrgName.forEach((org) => {
             submitter = new Promise(function (resolve,reject) {
-                var cpOrgs = cpf['organizations'];
 
+                cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+                var cpOrgs = cpf['organizations'];
                 username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
                 secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
                 orgName = cpOrgs[org].name;
@@ -1069,7 +1070,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             return signatures;
         }).then((sigs) =>{
             client._userContext = null;
-            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], cpf, cpPath);
+            return testUtil.getOrderAdminSubmitter(client, channelOrgName[0], cpPath);
         }).then((admin) => {
             the_user = admin;
             logger.info('[createOrUpdateOneChannel] Successfully enrolled user \'admin\' for', "orderer");
@@ -1156,7 +1157,7 @@ async function joinChannel(channel, client, org) {
     }).then((store) => {
         client.setStateStore(store);
         client._userContext = null;
-        return testUtil.getOrderAdminSubmitter(client, org, cpf, cpPath)
+        return testUtil.getOrderAdminSubmitter(client, org, cpPath)
     }).then((admin) => {
         logger.info('[joinChannel:%s] Successfully enrolled orderer \'admin\'', org);
         the_user = admin;

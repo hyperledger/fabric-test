@@ -445,13 +445,7 @@ function getAdmin(client, nid, userOrg, cpf) {
         }));
 }
 
-function getOrdererAdmin(client, userOrg, cpf, cpPath) {
-
-        var cpOrgs = cpf['organizations'];
-        if ( getConnProfilePropCnt(cpf, 'orderers') === 0 ) {
-            logger.error('[getOrdererAdmin] org(%s): no orderer is found in the connection profile', userOrg);
-            process.exit(1);
-        }
+function getOrdererAdmin(client, userOrg, cpPath) {
 
         var cpList = [];
         var orderersCPFList = {};
@@ -468,9 +462,11 @@ function getOrdererAdmin(client, userOrg, cpf, cpPath) {
         var certPEM;
         var ordererID;
 
+        var cpf=findOrgConnProfile(cpList, userOrg);
+        var cpOrgs = cpf['organizations'];
         // get ordererID
-        if ( typeof cpOrgs[userOrg].ordererID !== 'undefined' ) {
-            ordererID = cpOrgs[userOrg].ordererID;
+        if ( cpOrgs[userOrg].hasOwnProperty('ordererID') ) {
+            ordererID = cpOrgs[userOrg]['ordererID'];
         } else {
             ordererID = Object.getOwnPropertyNames(orderersCPFList)[0];
         }
@@ -563,8 +559,8 @@ function readAllFiles(dir) {
     return certs;
 }
 
-module.exports.getOrderAdminSubmitter = function(client, userOrg, cpf, cpPath) {
-    return getOrdererAdmin(client, userOrg, cpf, cpPath);
+module.exports.getOrderAdminSubmitter = function(client, userOrg, cpPath) {
+    return getOrdererAdmin(client, userOrg, cpPath);
 };
 
 module.exports.getSubmitter = function(username, secret, client, peerOrgAdmin, nid, org, cpf) {
