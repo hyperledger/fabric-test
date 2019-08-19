@@ -56,7 +56,7 @@ usage () {
     echo -e "-i, --install\tinstall/instantiate chaincode"
     echo -e "\t\t(Default: No)"
 
-    echo -e "-a, --app\tblank-separated list of chaincodes, [sample_cc|sample_js|sample_java|marbles02_go]"
+    echo -e "-a, --app\tblank-separated list of chaincodes, [sample_cc|sample_js|sample_java|marbles02_go|sbe_cc]"
     echo -e "\t\t(Default: None)"
 
     echo -e "-d, --cpdir\tconnection profiles directory"
@@ -116,7 +116,7 @@ usage () {
     echo -e "examples:"
     echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
     echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --org org1 org2 -a sample_cc -c -i"
-    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a marbles02_go sample_cc -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a marbles02_go sample_cc sbe_cc -i"
     echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 -a sample_cc sample_js marbles02_go -p -t Move -i"
     echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 --orgprefix testorg -a sample_cc sample_js marbles02_go -p -t Move -i"
     echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 testorgschannel2 --norg 2 -a sample_java -i -t Move"
@@ -131,6 +131,8 @@ usage () {
     exit
 }
 
+# Per FAB-16360, this script does not currently provide option for users to specify invoke fcn for the sbe chaincode. We always use updateRecordVal, which is found in the template.
+# Rather than enhancing this now, this is a reminder to add that option in the new input file for the new go version of this script.
 
 ## printVar(): print input vars
 printVars () {
@@ -255,6 +257,8 @@ GRPCTIMEOUT=30000
 # chaincode path
 CCPathsamplecc="github.com/hyperledger/fabric-test/chaincodes/samplecc/go"
 CCPathsamplecc="${CCPathsamplecc//\//\\/}"
+CCPathsbe="github.com/hyperledger/fabric-test/chaincodes/sbe"
+CCPathsbe="${CCPathsbe//\//\\/}"
 CCPathsamplejs="github.com/hyperledger/fabric-test/chaincodes/samplecc/node"
 CCPathsamplejs="${CCPathsamplejs//\//\\/}"
 CCPathsamplejava="github.com/hyperledger/fabric-test/chaincodes/samplecc/java"
@@ -273,6 +277,9 @@ getCCPath() {
     cc=$1
     if [ $cc == "sample_cc" ]; then
         CCPath=$CCPathsamplecc
+        LANGUAGE="golang"
+    elif [ $cc == "sbe_cc" ]; then
+        CCPath=$CCPathsbe
         LANGUAGE="golang"
     elif [ $cc == "sample_js" ]; then
         CCPath=$CCPathsamplejs

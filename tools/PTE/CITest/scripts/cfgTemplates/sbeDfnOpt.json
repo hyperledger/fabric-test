@@ -1,0 +1,28 @@
+{
+    "ccType": "sbecc",
+    "ccOpt": {
+	"keyIdx": [0],
+        "keyPayLoad": [2],
+        "keyStart": "_KEYSTART_",
+        "payLoadType": "Random",
+        "payLoadMin": "8",
+        "payLoadMax": "8"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+        "language": "golang",
+        "fcn": "init",
+        "args": []
+    },
+
+    "invoke": {
+        "query": {
+            "fcn": "getRecord",
+            "args": ["key"]
+        },
+        "move": {
+            "fcn": "updateRecordVal",
+            "args": ["key","100"]
+        }
+    }
+}
