@@ -172,6 +172,7 @@ func deleteConfigMaps(numComponents int, componentType, orgName, kubeConfigPath,
 		componentName = fmt.Sprintf("%s%d-%s", componentType, j, orgName)
 		componentsList = append(componentsList, []string{fmt.Sprintf("%s-tls", componentName), fmt.Sprintf("%s-msp", componentName)}...)
 	}
+	componentsList = append(componentsList, []string{fmt.Sprintf("%s-admincerts", orgName)}...)
 	input := []string{"delete", k8sType}
 	input = append(input, componentsList...)
 	k8s := K8s{Action: "", Input: input}

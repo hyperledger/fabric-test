@@ -5,17 +5,9 @@
 #@ load("@ytt:data", "data")
 #@ def orgPolicies(mspId, type):
 #@   output = {}
-#@   readers = {}
-#@   writers = {}
+#@   readwriteset = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.{}', '{}.client')".format(mspId, mspId, type, mspId)}
 #@   admins = {"Type": "Signature", "Rule": "OR('{}.admin')".format(mspId)}
-#@   if type == "orderer":
-#@     readers = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
-#@     writers = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
-#@   else:
-#@     readers = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.peer')".format(mspId, mspId)}
-#@     writers = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.client')".format(mspId, mspId)}
-#@   end
-#@   output = {"Readers": readers, "Writers": writers, "Admins": admins}
+#@   output = {"Readers": readwriteset, "Writers": readwriteset, "Admins": admins}
 #@   return output
 #@ end
 #@ def orgOrderers(ordererOrg):
@@ -109,14 +101,6 @@
 #@ end
 Organizations: #@ organizations(data.values, "orderer") + organizations(data.values, "peer")
 
-Orderer: #@ orderer(data.values)
-Application:
-  Organizations: #@ organizations(data.values, "peer")
-  Policies: #@ policies("peer")
-  Capabilities: #@ data.values.application_capabilities
-Channel:
-  Policies: #@ policies("channel")
-  Capabilities: #@ data.values.channel_capabilities
 Profiles:
   testorgschannel:
     Policies: #@ policies("channel")

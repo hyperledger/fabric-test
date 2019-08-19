@@ -44,7 +44,7 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 	for j := 0; j < numComponents; j++ {
 		componentName = fmt.Sprintf("%s%d-%s", componentType, j, orgName)
 		path = utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
-		inputPaths = []string{fmt.Sprintf("admincerts=%s/msp/admincerts/Admin@%s-cert.pem", path, orgName),
+		inputPaths = []string{fmt.Sprintf("config=%s/../../msp/config.yaml", path),
 			fmt.Sprintf("cacerts=%s/msp/cacerts/ca.%s-cert.pem", path, orgName),
 			fmt.Sprintf("signcerts=%s/msp/signcerts/%s.%s-cert.pem", path, componentName, orgName),
 			fmt.Sprintf("keystore=%s/msp/keystore/priv_sk", path),
@@ -65,6 +65,15 @@ func createCertsConfigmap(numComponents int, numCA int, componentType, orgName, 
 			logger.ERROR("Failed to create tls configmap for ", componentName)
 			return err
 		}
+	}
+
+	adminCertPath := utils.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s/msp/admincerts/", componentType, orgName, componentType, componentName, orgName))
+	inputPaths = []string{fmt.Sprintf("%s", adminCertPath)}
+	k8sComponentName = fmt.Sprintf("%s-admincerts", orgName)
+	err = createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap", kubeConfigPath)
+	if err != nil {
+		logger.ERROR("Failed to create admincerts configmap for ", orgName)
+		return err
 	}
 
 	// Calling createConfigmapsNSecrets to create ca certs configmap

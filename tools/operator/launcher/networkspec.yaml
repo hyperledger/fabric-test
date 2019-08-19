@@ -6,7 +6,7 @@
 #! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1 or 2.0.0
 #! Development stream images are pulled from
 #! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable or 2.0.0-stable
-fabric_version: 1.4.2
+fabric_version: 1.4.3
 #! peer database ledger type (couchdb, goleveldb)
 db_type: couchdb
 #! This parameter is used to define fabric logging spec in peers
@@ -19,7 +19,7 @@ tls: true
 metrics: false
 
 #! Location where crypto-config and channel-artifacts are stored
-artifacts_location: /home/ibmadmin/go/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
+artifacts_location: /home/testuser/go/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
 
 #! Orderer Config Settings
 orderer:
@@ -64,7 +64,7 @@ orderer_capabilities:
   V1_4_2: true
 
 channel_capabilities:
-  V1_4_2: true
+  V1_4_3: true
 
 application_capabilities:
   V1_4_2: true
@@ -97,7 +97,7 @@ k8s:
     peers:
       limits:
          cpu: "0.5"
-         memory: 1Gi
+         memory: 2Gi
       requests:
          cpu: "0.5"
          memory: 2Gi

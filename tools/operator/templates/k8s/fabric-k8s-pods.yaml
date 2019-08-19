@@ -51,13 +51,14 @@
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/signcerts/", "name": "signcerts"})
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/keystore/", "name": "keystore"})
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/", "name": "tlscacerts"})
+#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/", "name": "config"})
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/tls/", "name": "tls"})
 #@   end
 #@   return volumeMounts
 #@ end
 
 #@ def caContainers(input, value, networkSpec):
-#@   ca_image = "hyperledger/fabric-ca"
+#@   ca_image = "hyperledger/fabric-ca:{}".format(networkSpec.fabric_version)
 #@   if networkSpec.fabric_version.endswith("-stable"):
 #@     ca_image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(networkSpec.fabric_version)
 #@   end
@@ -143,7 +144,7 @@
 #@   end
 #@   resources = networkSpec.k8s.resources.peers
 #@   dindResources = networkSpec.k8s.resources.dind
-#@   peer_image = "hyperledger/fabric-peer"
+#@   peer_image = "hyperledger/fabric-peer:{}".format(networkSpec.fabric_version)
 #@   if networkSpec.fabric_version.endswith("-stable"):
 #@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(networkSpec.fabric_version)})
 #@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(networkSpec.fabric_version)})
@@ -200,7 +201,7 @@
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "orderer-data-storage"})
 #@   end
 #@   resources = networkSpec.k8s.resources.orderers
-#@   orderer_image = "hyperledger/fabric-orderer"
+#@   orderer_image = "hyperledger/fabric-orderer:{}".format(networkSpec.fabric_version)
 #@   if networkSpec.fabric_version.endswith("-stable"):
 #@     orderer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(networkSpec.fabric_version)
 #@   end
@@ -237,11 +238,12 @@
 #@   type = {}
 #@   specData = {}
 #@   metadata = {}
-#@   initVolumes = [{"name": "admincerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "admincerts", "path": "cert.pem"}]}},
+#@   initVolumes = [{"name": "admincerts", "configMap": {"name": "{}-admincerts".format(orgName)}},
 #@                  {"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca-cert.pem"}]}},
 #@                  {"name": "signcerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "signcerts", "path": "cert.pem"}]}},
 #@                  {"name": "tlscacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "tlscacerts", "path": "tlsca-cert.pem"}]}},
 #@                  {"name": "keystore", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "keystore", "path": "priv_sk"}]}},
+#@                  {"name": "config", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "config", "path": "config.yaml"}]}},
 #@                  {"name": "tls", "configMap": {"name": "{}-tls".format(input)}}]
 #@   if input.startswith("ca"):
 #@     type = "ca"
