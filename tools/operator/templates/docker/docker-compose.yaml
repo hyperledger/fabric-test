@@ -190,10 +190,10 @@
 #@       volumes.append("/var/run/:/host/var/run/")
 #@       image = "hyperledger/fabric-peer"
 #@       if input.fabric_version.endswith("-stable"):
-#@         env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(networkSpec.fabric_version)})
-#@         env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(networkSpec.fabric_version)})
-#@         env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(networkSpec.fabric_version)})
-#@         env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(networkSpec.fabric_version)})
+#@         env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(input.fabric_version)})
+#@         env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(input.fabric_version)})
+#@         env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(input.fabric_version)})
+#@         env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(input.fabric_version)})
 #@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(input.fabric_version)
 #@       end
 #@       ports = ["{}:{}".format(port1,7051), "{}:{}".format(port2,9443)]

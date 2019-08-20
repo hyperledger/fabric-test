@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 )
 
 type YTT struct {
@@ -19,7 +21,7 @@ type YTT struct {
 
 func (y YTT) Args(input []string) []string {
 	args := []string{}
-	for i:=0; i<len(input); i++{
+	for i := 0; i < len(input); i++ {
 		args = append(args, []string{"-f", input[i]}...)
 	}
 	args = append(args, []string{"-f", y.InputPath, y.OutputPath}...)
@@ -34,20 +36,20 @@ func DownloadYtt() error {
 
 		resp, err := http.Get(url)
 		if err != nil {
-			PrintLogs("Error while downloading the ytt")
+			logger.ERROR("Error while downloading the ytt")
 			return err
 		}
 		defer resp.Body.Close()
 		ytt, err := os.Create("ytt")
 		if err != nil {
-			PrintLogs("Error while creating the ytt file")
+			logger.ERROR("Error while creating the ytt file")
 			return err
 		}
 		defer ytt.Close()
 		io.Copy(ytt, resp.Body)
 		err = os.Chmod("ytt", 0777)
 		if err != nil {
-			PrintLogs("Failed to change permissions to ytt")
+			logger.ERROR("Failed to change permissions to ytt")
 			return err
 		}
 	}

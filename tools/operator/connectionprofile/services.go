@@ -9,8 +9,8 @@ import (
     "fmt"
     "strings"
 
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
     "github.com/hyperledger/fabric-test/tools/operator/client"
-    "github.com/hyperledger/fabric-test/tools/operator/utils"
     "github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
     "github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
@@ -29,7 +29,7 @@ func ExternalIP(kubeconfigPath string, input networkspec.Config, serviceName str
         k8s.Input = inputArgs
         output, err := client.ExecuteK8sCommand(k8s.Args(kubeconfigPath), false)
         if err != nil {
-            utils.PrintLogs("Failed to get the external IP for k8s using NodePor")
+            logger.ERROR("Failed to get the external IP for k8s using NodePor")
             return "", err
         }
         IPAddressList := strings.Split(string(output)[1:], " ")
@@ -39,7 +39,7 @@ func ExternalIP(kubeconfigPath string, input networkspec.Config, serviceName str
         k8s.Input = inputArgs
         output, err := client.ExecuteK8sCommand(k8s.Args(kubeconfigPath), false)
         if err != nil {
-            utils.PrintLogs("Failed to get the external IP for k8s using NodePort")
+            logger.ERROR("Failed to get the external IP for k8s using NodePort")
             return "", err
         }
         IPAddress = string(output)[1 : len(string(output))-1]
@@ -77,7 +77,7 @@ func k8sServicePort(kubeconfigPath, serviceName, serviceType string, forHealth b
     k8s := nl.K8s{Action:"", Input:input}
     output, err := client.ExecuteK8sCommand(k8s.Args(kubeconfigPath), false)
     if err != nil {
-        utils.PrintLogs(fmt.Sprintf("Failed to get the port number for service %s", serviceName))
+        logger.ERROR("Failed to get the port number for service ", serviceName)
         return "", err
     }
     port = string(output)
@@ -90,13 +90,13 @@ func dockerServicePort(serviceName, serviceType string, forHealth bool) (string,
     args := []string{"port", serviceName}
     output, err := client.ExecuteCommand("docker", args, false)
     if err != nil {
-        utils.PrintLogs(fmt.Sprintf("Failed to get the port number for service %s", serviceName))
+        logger.ERROR("Failed to get the port number for service ", serviceName)
         return "", err
     }
     ports := strings.Split(string(output), "\n")
     if len(ports) == 0 {
-        utils.PrintLogs(fmt.Sprintf("Unable to get the port number for service %s", serviceName))
-        return "", errors.New("Unable to get the port number")
+        logger.ERROR("Unable to get the port number for service ", serviceName)
+        return port, errors.New("Unable to get the port number")
     }
     if forHealth {
         for i := 0; i < len(ports); i++ {
