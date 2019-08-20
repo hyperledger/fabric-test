@@ -34,7 +34,6 @@
 #   - git-init                 - init git submodules.
 #   - pre-setup                - installs node, govendor and behave pre-requisites.
 #   - pte                      - builds pte docker image
-#   - test-viewer              - builds test-viewer docker image
 #   - clean                    - cleans the docker containers and images.
 #
 # ------------------------------------------------------------------
@@ -56,8 +55,7 @@ CHAINCODE-JAVA_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-java
 CHAINCODE-NODE_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-node
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/pre_setup.sh
 PTE_IMAGE = $(DOCKER_NS)/fabric-pte
-TEST_VIEWER_IMAGE = $(DOCKER_NS)/fabric-testviewer
-TARGET = pte test-viewer
+TARGET = pte
 STABLE_TAG ?= $(ARCH)-$(BRANCH)-stable
 
 .PHONY: ci-smoke
@@ -263,11 +261,6 @@ svt-smoke: fabric pre-req pull-images pull-binaries pull-thirdparty-images build
 pte:
 	docker build -t $(PTE_IMAGE) images/PTE
 	docker tag $(PTE_IMAGE) $(PTE_IMAGE):$(PROJECT_TOOL_VERSION)
-
-.PHONY: test-viewer
-test-viewer:
-	docker build -t $(TEST_VIEWER_IMAGE) tools/Testviewer
-	docker tag $(TEST_VIEWER_IMAGE) $(TEST_VIEWER_IMAGE):$(PROJECT_TOOL_VERSION)
 
 .PHONY: clean
 clean:
