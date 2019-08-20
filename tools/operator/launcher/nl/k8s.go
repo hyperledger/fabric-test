@@ -7,6 +7,7 @@ package nl
 import (
 	"fmt"
 	"strings"
+	"errors"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/client"
@@ -152,7 +153,7 @@ func dataPersistenceFilePath(input networkspec.Config) string {
 	var path string
 	currDir, err := utils.GetCurrentDir()
 	if err != nil {
-		logger.CRIT("Failed to get the current working directory")
+		logger.CRIT(errors.New("Failed to get the current working directory"))
 	}
 	switch input.K8s.DataPersistence {
 	case "local":

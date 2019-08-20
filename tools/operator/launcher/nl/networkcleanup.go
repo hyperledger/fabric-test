@@ -5,10 +5,8 @@
 package nl
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/utils"
 )
