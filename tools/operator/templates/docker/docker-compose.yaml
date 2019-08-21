@@ -43,7 +43,7 @@
 
 #@ def ca(container_name, port, type, orgName, input):
 #@   orgType = "{}Organizations".format(type)
-#@   image = "hyperledger/fabric-ca"
+#@   image = "hyperledger/fabric-ca:{}".format(input.fabric_version)
 #@   if input.fabric_version.endswith("-stable"):
 #@     image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(input.fabric_version)
 #@   end
@@ -143,7 +143,7 @@
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifacts_location)]
 #@       container_name = "orderer{}-{}".format(j,org.name)
-#@       image = "hyperledger/fabric-orderer"
+#@       image = "hyperledger/fabric-orderer:{}".format(input.fabric_version)
 #@       if input.fabric_version.endswith("-stable"):
 #@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(input.fabric_version)
 #@       end
@@ -188,12 +188,12 @@
 #@       container_name = "peer{}-{}".format(j, org.name)
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifacts_location)]
 #@       volumes.append("/var/run/:/host/var/run/")
-#@       image = "hyperledger/fabric-peer"
+#@       image = "hyperledger/fabric-peer:{}".format(input.fabric_version)
 #@       if input.fabric_version.endswith("-stable"):
-#@         env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(input.fabric_version)})
-#@         env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(input.fabric_version)})
-#@         env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(input.fabric_version)})
-#@         env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(input.fabric_version)})
+#@         env.append("CORE_CHAINCODE_BUILDER=nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(input.fabric_version))
+#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(input.fabric_version))
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(input.fabric_version))
+#@         env.append("CORE_CHAINCODE_NODE_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(input.fabric_version))
 #@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(input.fabric_version)
 #@       end
 #@       ports = ["{}:{}".format(port1,7051), "{}:{}".format(port2,9443)]
@@ -201,7 +201,7 @@
 #@       if input.db_type == "couchdb":
 #@         env.append("CORE_LEDGER_STATE_STATEDATABASE=CouchDB")
 #@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-{}:5984".format(container_name))
-#@         services[container_name] = {"image":"hyperledger/fabric-peer", "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name, "depends_on":["couchdb-{}".format(container_name)]}
+#@         services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name, "depends_on":["couchdb-{}".format(container_name)]}
 #@       end
 #@       port1 += 1
 #@       port2 += 1
