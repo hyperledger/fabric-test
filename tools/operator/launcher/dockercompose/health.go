@@ -17,6 +17,7 @@ import (
 func (d DockerCompose) VerifyContainersAreRunning() error {
 
 	logger.INFO("Verifying all the containers are running")
+	count := 0
 	args := []string{"ps", "-a"}
 	output, err := client.ExecuteCommand("docker", args, false)
 	if err != nil {
@@ -24,32 +25,41 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 		return err
 	}
 	numContainers := len(strings.Split(string(output), "\n"))
-	for i := 0; i < 6; i++ {
-		args = []string{"ps", "-af", "status=running"}
-		output, err = client.ExecuteCommand("docker", args, false)
-		if err != nil {
-			logger.ERROR("Error occured while listing the running containers")
-			return err
+	ticker := time.NewTicker(15 * time.Second)
+	defer ticker.Stop()
+	return func() error {
+		for {
+			select {
+			case <-ticker.C:
+				args = []string{"ps", "-af", "status=running"}
+				output, err = client.ExecuteCommand("docker", args, false)
+				if err != nil {
+					logger.ERROR("Error occured while listing the running containers")
+					return err
+				}
+				runningContainers := len(strings.Split(string(output), "\n"))
+				if numContainers == runningContainers {
+					logger.INFO("All the containers are up and running")
+					return nil
+				}
+				args = []string{"ps", "-af", "status=exited", "-af", "status=created", "--format", "{{.Names}}"}
+				output, err = client.ExecuteCommand("docker", args, false)
+				if err != nil {
+					logger.ERROR("Error occured while listing the exited containers")
+					return err
+				}
+				exitedContainers := strings.Split(strings.TrimSpace(string(output)), "\n")
+				if len(exitedContainers) > 0 {
+					logger.ERROR("Exited Containers: ", strings.Join(exitedContainers, ","))
+					return errors.New("Containers exited")
+				}
+				count++
+				if count >= 4{
+					return errors.New("Waiting time to bring up containers exceeded 1 minute")
+				}
+			}
 		}
-		runningContainers := len(strings.Split(string(output), "\n"))
-		if numContainers == runningContainers {
-			logger.INFO("All the containers are up and running")
-			return nil
-		}
-		args = []string{"ps", "-af", "status=exited", "-af", "status=created", "--format", "{{.Names}}"}
-		output, err = client.ExecuteCommand("docker", args, false)
-		if err != nil {
-			logger.ERROR("Error occured while listing the exited containers")
-			return err
-		}
-		exitedContainers := strings.Split(strings.TrimSpace(string(output)), "\n")
-		if len(exitedContainers) > 0 {
-			logger.ERROR("Exited Containers: ", strings.Join(exitedContainers, ","))
-			return errors.New("Containers exited")
-		}
-		time.Sleep(10 * time.Second)
-	}
-	return errors.New("Waiting time to bring up containers exceeded 1 minute")
+	}()
 }
 
 func (d DockerCompose) checkHealth(componentName string, config networkspec.Config) error {
@@ -86,7 +96,6 @@ func (d DockerCompose) checkHealth(componentName string, config networkspec.Conf
 func (d DockerCompose) CheckDockerContainersHealth(config networkspec.Config) error {
 
 	var err error
-	time.Sleep(30 * time.Second)
 	for i := 0; i < len(config.OrdererOrganizations); i++ {
 		org := config.OrdererOrganizations[i]
 		for j := 0; j < org.NumOrderers; j++ {
