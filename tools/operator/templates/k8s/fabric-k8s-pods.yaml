@@ -57,7 +57,7 @@
 #@   return volumeMounts
 #@ end
 
-#@ def caContainers(input, value, networkSpec):
+#@ def caContainers(input, orgName, networkSpec):
 #@   ca_image = "hyperledger/fabric-ca:{}".format(networkSpec.fabric_version)
 #@   if networkSpec.fabric_version.endswith("-stable"):
 #@     ca_image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(networkSpec.fabric_version)
@@ -65,14 +65,14 @@
 #@   env = [{"name": "FABRIC_CA_HOME", "value": "/etc/hyperledger/fabric-ca-server"}]
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_NAME", "value": "{}".format(input)})
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/ca-priv_sk"})
-#@   env.append({"name": "FABRIC_CA_SERVER_CA_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/ca.{}-cert.pem".format(value)})
+#@   env.append({"name": "FABRIC_CA_SERVER_CA_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/ca.{}-cert.pem".format(orgName)})
 #@   if networkSpec.tls == "mutual":
 #@     env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "true"})
 #@   else:
 #@     env.append({"name": "FABRIC_CA_SERVER_TLS_ENABLED", "value": "{}".format(networkSpec.tls)})
 #@   end
 #@   env.append({"name": "FABRIC_CA_SERVER_TLS_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca-priv_sk"})
-#@   env.append({"name": "FABRIC_CA_SERVER_TLS_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca.{}-cert.pem".format(value)})
+#@   env.append({"name": "FABRIC_CA_SERVER_TLS_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca.{}-cert.pem".format(orgName)})
 #@   resources = {"limits": {"cpu": "0.1", "memory": "0.2Gi"}, "requests": {"cpu": "0.1", "memory": "0.2Gi"}}
 #@   volumeMounts = mounts("ca")
 #@   output = [{"name": input, "image": ca_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["fabric-ca-server"], "args": ["start", "-b", "admin: adminpw", "-d"]}]
@@ -104,7 +104,7 @@
 #@   return output
 #@ end
 
-#@ def peerContainers(input, value, networkSpec, mspId):
+#@ def peerContainers(input, orgName, networkSpec, mspId):
 #@   env = [{"name": "CORE_VM_ENDPOINT", "value": "localhost:2375"}]
 #@   env.append({"name": "CORE_PEER_GOSSIP_USELEADERELECTION", "value": "True"})
 #@   env.append({"name": "CORE_PEER_GOSSIP_ORGLEADER", "value": "false"})
@@ -120,7 +120,7 @@
 #@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": networkSpec.peer_fabric_logging_spec})
 #@   env.append({"name": "CORE_PEER_TLS_CERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.crt"})
 #@   env.append({"name": "CORE_PEER_TLS_KEY_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.key"})
-#@   env.append({"name": "CORE_PEER_TLS_ROOTCERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/tlsca-cert.pem"})
+#@   env.append({"name": "CORE_PEER_TLS_ROOTCERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/tlsca.{}-cert.pem".format(orgName)})
 #@   env.append({"name": "CORE_PEER_ID", "value": "{}".format(input)})
 #@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
 #@   env.append({"name": "CORE_PEER_ADDRESS", "value": "{}:7051".format(input)})
@@ -164,7 +164,7 @@
 #@   return output
 #@ end
 
-#@ def ordererContainers(input, value, networkSpec, mspId):
+#@ def ordererContainers(input, orgName, networkSpec, mspId):
 #@   env = [{"name": "ORDERER_GENERAL_LISTENADDRESS", "value": "0.0.0.0"}]
 #@   env.append({"name": "ORDERER_GENERAL_GENESISMETHOD", "value": "file"})
 #@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": networkSpec.orderer_fabric_logging_spec})
@@ -181,7 +181,7 @@
 #@   env.append({"name": "ORDERER_GENERAL_TLS_SERVERHOSTOVERRIDE", "value": input})
 #@   env.append({"name": "ORDERER_GENERAL_TLS_PRIVATEKEY", "value": "/etc/hyperledger/fabric/artifacts/tls/server.key"})
 #@   env.append({"name": "ORDERER_GENERAL_TLS_CERTIFICATE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.crt"})
-#@   env.append({"name": "ORDERER_GENERAL_TLS_ROOTCAS", "value": "[/etc/hyperledger/fabric/artifacts/msp/tlscacerts/tlsca-cert.pem]"})
+#@   env.append({"name": "ORDERER_GENERAL_TLS_ROOTCAS", "value": "[/etc/hyperledger/fabric/artifacts/msp/tlscacerts/tlsca.{}-cert.pem]".format(orgName)})
 #@   env.append({"name": "ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY", "value": "/etc/hyperledger/fabric/artifacts/tls/server.key"})
 #@   env.append({"name": "ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.crt"})
 #@   env.append({"name": "ORDERER_FILELEDGER_LOCATION", "value": "/shared/data"})
@@ -234,24 +234,21 @@
 #@   return specData
 #@ end
 
-#@ def spec(input, orgName, value, networkSpec, mspId):
-#@   type = {}
+#@ def spec(input, orgName, type, networkSpec, mspId):
 #@   specData = {}
 #@   metadata = {}
 #@   initVolumes = [{"name": "admincerts", "configMap": {"name": "{}-admincerts".format(orgName)}},
-#@                  {"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca-cert.pem"}]}},
-#@                  {"name": "signcerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "signcerts", "path": "cert.pem"}]}},
-#@                  {"name": "tlscacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "tlscacerts", "path": "tlsca-cert.pem"}]}},
+#@                  {"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca.{}-cert.pem".format(orgName)}]}},
+#@                  {"name": "signcerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "signcerts", "path": "{}.{}-cert.pem".format(input, orgName)}]}},
+#@                  {"name": "tlscacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "tlscacerts", "path": "tlsca.{}-cert.pem".format(orgName)}]}},
 #@                  {"name": "keystore", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "keystore", "path": "priv_sk"}]}},
 #@                  {"name": "config", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "config", "path": "config.yaml"}]}},
 #@                  {"name": "tls", "configMap": {"name": "{}-tls".format(input)}}]
-#@   if input.startswith("ca"):
-#@     type = "ca"
+#@   if type == "ca":
 #@     volumes = [{"name": "cacerts", "configMap": {"name": "{}-ca".format(orgName)}}]
-#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["ca"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
+#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(type)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": caContainers(input, orgName, networkSpec)}
-#@   elif input.startswith("orderer"):
-#@     type = "orderer"
+#@   elif type == "orderer":
 #@     volumes = initVolumes
 #@     volumes.append({"name": "genesisblock", "secret": {"secretName": "genesisblock"}})
 #@     if networkSpec.k8s.data_persistence == True:
@@ -262,10 +259,9 @@
 #@     if networkSpec.tls == "mutual":
 #@        volumes += mutualTLS(networkSpec, "volumes")
 #@     end
-#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(value)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
+#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(type)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": ordererContainers(input, orgName, networkSpec, mspId)}
-#@   else:
-#@     type = "peer"
+#@   elif type == "peer":
 #@     volumes = initVolumes
 #@     if networkSpec.k8s.data_persistence == True:
 #@        volumes.append({"name": "peer-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}})
@@ -275,7 +271,7 @@
 #@     if networkSpec.tls == "mutual":
 #@        volumes += mutualTLS(networkSpec, "volumes")
 #@     end
-#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(value)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
+#@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(type)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": peerContainers(input, orgName, networkSpec, mspId)}
 #@   end
 #@   selector = {"matchLabels": {"k8s-app": input, "type": type}}
@@ -344,7 +340,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
-spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "peer", data.values, organization.msp_id)
+spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id)
 #@   end
 #@   for j in range(0, organization.num_peers):
 ---
@@ -365,7 +361,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
-spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "orderer", data.values, organization.msp_id)
+spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id)
 #@   end
 #@   num_orderers = organization.num_orderers
 #@   for j in range(0, num_orderers):
