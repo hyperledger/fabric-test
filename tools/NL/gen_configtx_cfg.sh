@@ -329,10 +329,10 @@ do
              echo "        Policies:" >> $cfgOutFile
              echo "            Readers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.admin', '$ordMSP.orderer', '$ordMSP.client')\"" >> $cfgOutFile
              echo "            Writers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.admin', '$ordMSP.orderer', '$ordMSP.client')\"" >> $cfgOutFile
              echo "            Admins:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$ordMSP.admin')\"" >> $cfgOutFile
@@ -404,7 +404,7 @@ do
              echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.peer', '$orgMSP.client')\"" >> $cfgOutFile
              echo "            Writers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.client')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$orgMSP.admin', '$orgMSP.peer', '$orgMSP.client')\"" >> $cfgOutFile
              echo "            Admins:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$orgMSP.admin')\"" >> $cfgOutFile
