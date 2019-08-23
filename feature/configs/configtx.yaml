@@ -26,7 +26,10 @@ Capabilities:
     # Channel capabilities apply to both the orderers and the peers and must be
     # supported by both.  Set the value of the capability to true to require it.
     Global: &ChannelCapabilities
-        V1_3: true
+     ### I think these recent capabilities wont work unless we update protobufs
+     ###V1_4_3: true
+     ###V1_4_2: true
+     ###V1_3: true
         # (V1_2 not defined in fabric)
         # Note: older ones are superceded, e.g. V1_3 capabilities include V1_1.
         # Thus, those like V1_1 need not be set if V1_3 or later is set true.
@@ -38,6 +41,8 @@ Capabilities:
     # manipulated without concern for upgrading peers.  Set the value of the
     # capability to true to require it.
     Orderer: &OrdererCapabilities
+     ### I think these recent capabilities wont work unless we update protobufs
+     ###V1_4_2: true
         # (V1_3 not defined in fabric)
         # (V1_2 not defined in fabric)
         V1_1: true
@@ -46,7 +51,9 @@ Capabilities:
     # manipulated without concern for upgrading orderers.  Set the value of the
     # capability to true to require it.
     Application: &ApplicationCapabilities
-        V1_3: true
+     ### I think these recent capabilities wont work unless we update protobufs
+     ###V1_4_2: true
+     ###V1_3: true
         V1_2: true
         # Note: older ones are superceded, e.g. V1_2 capabilities include V1_1.
         # Thus, older ones like V1_1 need not be set if we set V1_2 or later.
@@ -404,6 +411,7 @@ Profiles:
     # and contains a single MSP definition (the MSP sampleconfig).
     # The Consortium SampleConsortium has only a single member, SampleOrg
     SampleSingleMSPSolo:
+        <<: *ChannelDefaults
         Orderer:
             <<: *OrdererDefaults
             Organizations:
@@ -426,8 +434,7 @@ Profiles:
     # SampleEmptyInsecureChannel defines a channel with no members
     # and therefore no access control
     SampleEmptyInsecureChannel:
-        Capabilities:
-            <<: *ChannelCapabilities
+        <<: *ChannelDefaults
         Consortium: SampleConsortium
         Application:
             Organizations:
@@ -437,8 +444,7 @@ Profiles:
 
     # SysTestChannel defines a channel for use with the System Test Orgs
     SysTestChannel:
-        Capabilities:
-            <<: *ChannelCapabilities
+        <<: *ChannelDefaults
         Consortium: SampleConsortium
         Application:
             <<: *ApplicationDefaults
@@ -452,8 +458,7 @@ Profiles:
     # member.  It is designed to be used in conjunction with SampleSingleMSPSolo
     # and SampleSingleMSPKafka orderer profiles
     SampleSingleMSPChannel:
-        Capabilities:
-            <<: *ChannelCapabilities
+        <<: *ChannelDefaults
         Consortium: SampleConsortium
         Application:
             <<: *ApplicationDefaults

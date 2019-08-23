@@ -36,7 +36,7 @@
 #
 # ------------------------------------------------------------------
 
-export BASE_VERSION=1.4.3
+export BASE_VERSION=1.4.4
 export BASEIMAGE_RELEASE=0.4.15
 DOCKER_NS = hyperledger
 EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
@@ -63,7 +63,7 @@ git-latest:
 	cd $(HYPERLEDGER_DIR)/fabric-test/cello && git checkout master && git fetch origin master && git reset --hard FETCH_HEAD && git show-ref HEAD
 	cd $(HYPERLEDGER_DIR)/fabric-test/fabric && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
 	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-ca && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
-	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-samples && git checkout master && git fetch origin master && git reset --hard FETCH_HEAD && git show-ref HEAD
+	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-samples && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
 	cd $(HYPERLEDGER_DIR)/fabric-test/fabric-sdk-node && git checkout $(BRANCH) && git fetch origin $(BRANCH) && git reset --hard FETCH_HEAD && git show-ref HEAD
 
 .PHONY: git-init

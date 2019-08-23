@@ -13,6 +13,7 @@ if [ "$ARCH" = "amd64" ]; then
     ARCH=linux-amd64
 fi
 echo "Arch: $ARCH"
+echo "Pulling binaries RELEASE_VERSION: $RELEASE_VERSION"
 
 echo "Fetching binary artifacts from Nexus"
 echo "---------> REPO:" $REPO

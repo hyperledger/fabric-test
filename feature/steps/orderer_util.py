@@ -11,11 +11,11 @@ from pykafka import KafkaClient
 import endorser_util
 
 try:
-    pbFilePath = "../feature-upgrade"
+    pbFilePath = "../feature"
     sys.path.insert(0, pbFilePath)
     from common import common_pb2
 except:
-    print("ERROR! Unable to import the protobuf libraries from the ../feature-upgrade directory: {0}".format(sys.exc_info()[0]))
+    print("ERROR! Failed to import the protobuf libraries common_pb2 from the ../feature/common/ directory: {0}".format(sys.exc_info()[0]))
     sys.exit(1)
 
 def getOrdererList(context):
