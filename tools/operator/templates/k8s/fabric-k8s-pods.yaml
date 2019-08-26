@@ -154,9 +154,15 @@
 #@   end
 
 #@   if networkSpec.db_type == "couchdb":
+#@     container = {}
 #@     env.append({"name": "CORE_LEDGER_STATE_STATEDATABASE", "value": "CouchDB"})
 #@     env.append({"name": "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS", "value": "localhost:5984"})
-#@     container = {"name": "couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "resources": networkSpec.k8s.resources.couchdb}
+#@     if networkSpec.k8s.data_persistence == True or networkSpec.k8s.data_persistence == "local":
+#@       couchdbMount = [{"mountPath": "/opt/couchdb/data", "name": "couchdb-data-storage"}]
+#@       container = {"name": "couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "resources": networkSpec.k8s.resources.couchdb, "volumeMounts": couchdbMount}
+#@     else:
+#@       container = {"name": "couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "resources": networkSpec.k8s.resources.couchdb}
+#@     end
 #@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": dindResources}, {"name": input, "image": peer_image, "imagePullPolicy": "Always", "env": env, "volumeMounts": volumeMounts, "command": ["peer"], "args": ["node", "start"], "resources": resources}, container]
 #@   else:
 #@     output = [{"name": "dind", "image": "docker:dind", "securityContext": {"privileged": True}, "resources": dindResources}, {"name": input, "image": peer_image, "imagePullPolicy": "Always", "env": env, "volumeMounts": volumeMounts, "command": ["peer"], "args": ["node", "start"], "resources": resources}]
@@ -265,8 +271,14 @@
 #@     volumes = initVolumes
 #@     if networkSpec.k8s.data_persistence == True:
 #@        volumes.append({"name": "peer-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}})
+#@        if networkSpec.db_type == "couchdb":
+#@           volumes.append({"name": "couchdb-data-storage", "persistentVolumeClaim": {"claimName": "couchdb-{}-data".format(input)}})
+#@        end
 #@     elif networkSpec.k8s.data_persistence == "local":
 #@        volumes.append({"name": "peer-data-storage", "hostPath": {"path": "/shared/{}-data".format(input)}})
+#@        if networkSpec.db_type == "couchdb":
+#@           volumes.append({"name": "couchdb-data-storage", "hostPath": {"path": "/shared/couchdb-{}-data".format(input)}})
+#@        end
 #@     end
 #@     if networkSpec.tls == "mutual":
 #@        volumes += mutualTLS(networkSpec, "volumes")
