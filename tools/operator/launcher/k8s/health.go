@@ -16,7 +16,7 @@ import (
 
 func (k K8s) VerifyContainersAreRunning() error {
 
-	logger.INFO("Verifying all the pods are running")
+	logger.INFO("Check status of all the pod to verify they are running")
 	var status string
 	count := 0
 	ticker := time.NewTicker(1 * time.Minute)
@@ -28,25 +28,45 @@ func (k K8s) VerifyContainersAreRunning() error {
 				if status == "No resources found." {
 					return nil
 				}
-				k.Arguments = []string{"get", "pods", "--field-selector=status.phase!=Running"}
+				k.Arguments = []string{"get", "pods", "--template", `{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}`, "--field-selector=status.phase!=Running"}
 				output, err := client.ExecuteK8sCommand(k.Args(), false)
 				if err != nil {
-					logger.ERROR("Error occured while getting the number of containers in running state")
+					logger.ERROR("Error occured while getting the number of containers not in running state")
 					return err
 				}
-				status = strings.TrimSpace(string(output))
-				if status == "No resources found." {
+				status = strings.TrimSpace(output)
+				if status == "" {
 					logger.INFO("All pods are up and running")
 					return nil
 				}
 				count++
 				logger.INFO("Waiting up to 10 minutes for pods to be up and running; minute = ", strconv.Itoa(count))
 				if count >= 10 {
-					return errors.New("Waiting time exceeded")
+					containers := strings.Split(output, "\n")
+					err = k.getReasonsPodsNotRunning(containers)
+					logger.ERROR("Waiting time exceeded")
+					return err
 				}
 			}
 		}
 	}()
+}
+
+func (k K8s) getReasonsPodsNotRunning(containers []string) error {
+
+	var reasonsPodsNotRunning []string
+	for i := 0; i < len(containers); i++ {
+		k.Arguments = []string{"describe", "pod", containers[i]}
+		output, err := client.ExecuteK8sCommand(k.Args(), false)
+		if err != nil {
+			reasonsPodsNotRunning = append(reasonsPodsNotRunning, fmt.Sprintf("%s: Failed to get the reason for the failure; err: %s", containers[i], err))
+		}
+		if output != ""{
+			eventsArr := strings.Split(output, "Events:")
+			reasonsPodsNotRunning = append(reasonsPodsNotRunning, fmt.Sprintf("%s:%s", containers[i], eventsArr[len(eventsArr) - 1]))
+		}
+	}
+	return errors.New(strings.Join(reasonsPodsNotRunning, "\n\n"))
 }
 
 func (k K8s) checkHealth(componentName string, config networkspec.Config) error {

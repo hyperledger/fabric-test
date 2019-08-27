@@ -16,7 +16,7 @@ import (
 
 func (d DockerCompose) VerifyContainersAreRunning() error {
 
-	logger.INFO("Verifying all the containers are running")
+	logger.INFO("Check status of all the containers to verify they are running")
 	count := 0
 	args := []string{"ps", "-a"}
 	output, err := client.ExecuteCommand("docker", args, false)
