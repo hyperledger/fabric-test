@@ -1,10 +1,10 @@
 {
-    "channelID": "_ch2",
+    "channelID": "_ch4",
     "transType": "Channel",
     "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel2",
+        "name": "testorgschannel4",
         "action":  "join",
         "orgName": [
             "org3",

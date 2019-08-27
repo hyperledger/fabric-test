@@ -1,0 +1,2 @@
+sdk=node CITest/FAB-11615-2i/sbe_cc/sbecc-chan1-constant-iVal-TLS.json
+sdk=node CITest/FAB-11615-2i/sbe_cc/sbecc-chan2-constant-iVal-TLS.json

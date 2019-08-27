@@ -3,23 +3,23 @@
 #! SPDX-License-Identifier: Apache-2.0
 ---
 #! fabric_version:
-#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1 or 2.0.0
+#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.3 or 2.0.0
 #! Development stream images are pulled from
-#! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable or 2.0.0-stable
-fabric_version: 2.0.0-stable
+#! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.3-stable or 2.0.0-stable
+fabric_version: 1.4.3
 #! peer database ledger type (couchdb, goleveldb)
 db_type: couchdb
 #! This parameter is used to define fabric logging spec in peers
 peer_fabric_logging_spec: info
 #! This parameter is used to define fabric logging spec in orderers
 orderer_fabric_logging_spec: info
-#! tls in the network (true, false or mutual(mutualtls))
+#! tls in the network (true, false or mutual (for mutualtls))
 tls: true
 #! fabric metrics with prometheus (true/false)
 metrics: true
 
-#! Location where crypto-config and channel-artifacts are stored
-artifacts_location: /var/lib/jenkins/workspace/k8s_systemTest/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
+#! Location where crypto-config, connection-profiles, channel-artifacts are stored
+artifacts_location: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
 
 #! Orderer Config Settings
 orderer:
@@ -64,12 +64,22 @@ peer_organizations:
   num_peers: 2
   num_ca: 1
 
+- name: org3
+  msp_id: Org3ExampleCom
+  num_peers: 2
+  num_ca: 1
+
+- name: org4
+  msp_id: Org4ExampleCom
+  num_peers: 2
+  num_ca: 1
+
 #! Capabilites for Orderer, Channel, Application groups
 orderer_capabilities:
-  V2_0: true
+  V1_4_2: true
 
 channel_capabilities:
-  V2_0: true
+  V1_4_3: true
 
 application_capabilities:
   V1_4_2: true
@@ -78,7 +88,7 @@ application_capabilities:
 #! This used testorgschannel as the prefix and channels are used like testorgschannel0,
 #! testorgschannel1.... based on number of channels passed
 #! (note: client will need to submit the transactions to create channels)
-num_channels: 10
+num_channels: 5
 
 k8s:
   service_type: NodePort
@@ -95,18 +105,18 @@ k8s:
   resources:
     orderers:
       limits:
-         cpu: "2"
-         memory: 4Gi
+         cpu: "1"
+         memory: 2Gi
       requests:
-         cpu: "2"
-         memory: 4Gi
+         cpu: "1"
+         memory: 2Gi
     peers:
       limits:
-         cpu: "2"
-         memory: 4Gi
+         cpu: "1"
+         memory: 2Gi
       requests:
-         cpu: "2"
-         memory: 4Gi
+         cpu: "1"
+         memory: 2Gi
 #! dind will be used to run all chaincode containers of a peer
     dind:
       limits:
@@ -117,11 +127,11 @@ k8s:
          memory: 4Gi
     couchdb:
       limits:
-         cpu: "2"
-         memory: 4Gi
+         cpu: "1"
+         memory: 2Gi
       requests:
-         cpu: "2"
-         memory: 4Gi
+         cpu: "1"
+         memory: 2Gi
     kafka:
       limits:
          cpu: "2"

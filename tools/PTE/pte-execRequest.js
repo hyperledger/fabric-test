@@ -596,7 +596,7 @@ function assignThreadAllPeers(channel, client, org) {
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] org (%s)', Nid, channel.getName(), org, pid, orgtmp);
         // find the connection profile of the specified org
         var cpfTmp=testUtil.findOrgConnProfileSubmitter(cpList, orgtmp);
-        if ( 0 === getConnProfilePropCnt(cpf, 'peers') ) {
+        if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
             continue;
         }
@@ -790,7 +790,7 @@ function assignThreadPeerList(channel, client, org) {
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList key: %s]', Nid, channel.getName(), org, pid, key);
         // find the connection profile of the specified org
         var cpfTmp=testUtil.findOrgConnProfileSubmitter(cpList, key);
-        if ( 0 === getConnProfilePropCnt(cpf, 'peers') ) {
+        if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
             continue;
         }
