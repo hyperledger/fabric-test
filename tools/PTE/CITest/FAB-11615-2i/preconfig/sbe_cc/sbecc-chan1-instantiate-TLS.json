@@ -22,8 +22,8 @@
         "language": "golang",
         "endorsement": {
             "identities": [
-                { "role": { "name": "peer", "mspId": "peer0-org1" }},
-                { "role": { "name": "peer", "mspId": "peer0-org2" }}
+                { "role": { "name": "peer", "mspId": "PeerOrg1" }},
+                { "role": { "name": "peer", "mspId": "PeerOrg2" }}
             ],
             "policy": {
                 "2-of": [{ "signed-by": 0 }, { "signed-by": 1 }]

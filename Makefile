@@ -30,6 +30,7 @@
 #   - svt-daily-lte-tests      - pulls the images, runs the LTE test suite.
 #   - svt-daily-ca-tests       - pulls the images, runs the CA test suite.
 #   - svt-weekly-pte-12hr-test - pulls the images, binaries from Nexus and runs the weekly 12hr PTE test.
+#   - svt-weekly-pte-12hr-test-k8s -- Test 12hr longrun test in k8s environment.
 #   - git-latest               - init git submodules to latest available commit.
 #   - git-init                 - init git submodules.
 #   - pre-setup                - installs node, govendor and behave pre-requisites.
@@ -250,6 +251,10 @@ svt-daily-ca-tests: pre-req pull-images pull-binaries-fabric build-fabric-ca
 .PHONY: svt-weekly-pte-12hr-test
 svt-weekly-pte-12hr-test: pre-req fabric pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest.sh
+
+.PHONY: svt-weekly-pte-12hr-test-k8s
+svt-weekly-pte-12hr-test-k8s:
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest_k8s.sh
 
 .PHONY: svt-daily
 svt-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper daily-tests

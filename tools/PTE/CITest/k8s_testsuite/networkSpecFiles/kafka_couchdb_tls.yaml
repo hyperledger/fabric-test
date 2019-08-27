@@ -49,28 +49,28 @@ kafka:
 
 orderer_organizations:
 - name: ordererorg1
-  msp_id: OrdererOrgExampleCom
+  msp_id: OrdererOrg1
   num_orderers: 3
   num_ca: 1
 
 peer_organizations:
 - name: org1
-  msp_id: Org1ExampleCom
+  msp_id: PeerOrg1
   num_peers: 2
   num_ca: 1
 
 - name: org2
-  msp_id: Org2ExampleCom
+  msp_id: PeerOrg2
   num_peers: 2
   num_ca: 1
 
 - name: org3
-  msp_id: Org3ExampleCom
+  msp_id: PeerOrg3
   num_peers: 2
   num_ca: 1
 
 - name: org4
-  msp_id: Org4ExampleCom
+  msp_id: PeerOrg4
   num_peers: 2
   num_ca: 1
 
