@@ -28,8 +28,8 @@ Examples:
     | kafka |    MYCC    |
     | kafka |  MYcc_Test |
 
-@shimAPI
-@daily
+#@shimAPI
+#@daily
 Scenario: FAB-4717: FAB-5663, chaincode ex05 to ex02 on different channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -42,7 +42,7 @@ Scenario: FAB-4717: FAB-5663, chaincode ex05 to ex02 on different channels
   Then a user receives a success response of 3000
 
 
-@daily
+#@daily
 Scenario: FAB-4720: FAB-5663, chaincode ex05 to ex02, on same channel, pass bad channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -55,7 +55,7 @@ Scenario: FAB-4720: FAB-5663, chaincode ex05 to ex02, on same channel, pass bad 
   And a user receives an error response of Failed to get policy manager for channel [non-existing-channel]
 
 
-@daily
+#@daily
 Scenario: FAB-4721: FAB-5663, chaincode ex05 to ex02, on diff channels, pass bad channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
