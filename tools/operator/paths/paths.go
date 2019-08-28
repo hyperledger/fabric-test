@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
+	"github.com/hyperledger/fabric-test/tools/operator/testclient/helper"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 )
 
@@ -130,4 +130,25 @@ func componentPath(artifactsLocation, component string) string {
 //JoinPath ---
 func JoinPath(oldPath, newPath string) string {
 	return filepath.Join(oldPath, newPath)
+}
+
+//PTEPath --
+func PTEPath() string{
+	path, err := GetCurrentDir()
+	if err != nil{
+		logger.CRIT(err, "Failed to get the current working directory")
+	}
+	path = JoinPath(path, "../../PTE/pte-main.js")
+	return path
+}
+
+//GetConnProfilePathForOrg --
+func GetConnProfilePathForOrg(orgName string, organizations []helper.Organization) string {
+	var connProfilePath string
+	for i := 0; i < len(organizations); i++ {
+		if organizations[i].Name == orgName {
+			connProfilePath = organizations[i].ConnProfilePath
+		}
+	}
+	return connProfilePath
 }
