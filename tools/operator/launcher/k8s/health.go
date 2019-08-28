@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
@@ -29,7 +29,7 @@ func (k K8s) VerifyContainersAreRunning() error {
 					return nil
 				}
 				k.Arguments = []string{"get", "pods", "--template", `{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}`, "--field-selector=status.phase!=Running"}
-				output, err := client.ExecuteK8sCommand(k.Args(), false)
+				output, err := networkclient.ExecuteK8sCommand(k.Args(), false)
 				if err != nil {
 					logger.ERROR("Error occured while getting the number of containers not in running state")
 					return err
@@ -57,7 +57,7 @@ func (k K8s) getReasonsPodsNotRunning(containers []string) error {
 	var reasonsPodsNotRunning []string
 	for i := 0; i < len(containers); i++ {
 		k.Arguments = []string{"describe", "pod", containers[i]}
-		output, err := client.ExecuteK8sCommand(k.Args(), false)
+		output, err := networkclient.ExecuteK8sCommand(k.Args(), false)
 		if err != nil {
 			reasonsPodsNotRunning = append(reasonsPodsNotRunning, fmt.Sprintf("%s: Failed to get the reason for the failure; err: %s", containers[i], err))
 		}

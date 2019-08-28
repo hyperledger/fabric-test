@@ -9,7 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -48,7 +48,7 @@ func (n Network) GenerateConfigurationFiles() error {
 	yttPath := paths.YTTPath()
 	inputArgs := []string{configtxPath, cryptoConfigPath, n.TemplatesDir}
 	yttObject := ytt.YTT{InputPath: inputFilePath, OutputPath: configFilesPath}
-	_, err := client.ExecuteCommand(yttPath, yttObject.Args(inputArgs), true)
+	_, err := networkclient.ExecuteCommand(yttPath, yttObject.Args(inputArgs), true)
 	if err != nil {
 		return err
 	}
@@ -61,8 +61,8 @@ func (n Network) GenerateCryptoCerts(config networkspec.Config) error {
 	artifactsLocation := config.ArtifactsLocation
 	outputPath := paths.CryptoConfigDir(artifactsLocation)
 	cryptoConfigPath := paths.ConfigFilePath("crypto-config")
-	generate := client.Cryptogen{ConfigPath: cryptoConfigPath, Output: outputPath}
-	_, err := client.ExecuteCommand("cryptogen", generate.Args(), true)
+	generate := networkclient.Cryptogen{ConfigPath: cryptoConfigPath, Output: outputPath}
+	_, err := networkclient.ExecuteCommand("cryptogen", generate.Args(), true)
 	if err != nil {
 		return err
 	}
@@ -90,8 +90,8 @@ func (n Network) GenerateGenesisBlock(config networkspec.Config) error {
 	path := paths.ChannelArtifactsDir(artifactsLocation)
 	outputPath := paths.JoinPath(path, "genesis.block")
 	configFilesPath := paths.ConfigFilesDir()
-	configtxgen := client.Configtxgen{Config: configFilesPath, OutputPath: outputPath}
-	_, err := client.ExecuteCommand("configtxgen", configtxgen.Args(), true)
+	configtxgen := networkclient.Configtxgen{Config: configFilesPath, OutputPath: outputPath}
+	_, err := networkclient.ExecuteCommand("configtxgen", configtxgen.Args(), true)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (n Network) moveKey(path, fileName string) error {
 	for _, file := range files {
 		if strings.HasSuffix(file.Name(), "_sk") && file.Name() != fileName {
 			args := []string{paths.JoinPath(path, file.Name()), paths.JoinPath(path, fileName)}
-			_, err = client.ExecuteCommand("mv", args, true)
+			_, err = networkclient.ExecuteCommand("mv", args, true)
 			if err != nil {
 				logger.ERROR("Failed to move files")
 				return err
@@ -162,7 +162,7 @@ func (n Network) GenerateNetworkArtifacts(config networkspec.Config) error {
 		return err
 	}
 
-	err = client.GenerateChannelTransaction(config, configFilesPath)
+	err = networkclient.GenerateChannelTransaction(config, configFilesPath)
 	if err != nil {
 		logger.ERROR("Failed to create channel transaction")
 		return err

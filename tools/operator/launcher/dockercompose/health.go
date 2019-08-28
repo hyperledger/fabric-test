@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
@@ -19,7 +19,7 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 	logger.INFO("Check status of all the containers to verify they are running")
 	count := 0
 	args := []string{"ps", "-a"}
-	output, err := client.ExecuteCommand("docker", args, false)
+	output, err := networkclient.ExecuteCommand("docker", args, false)
 	if err != nil {
 		logger.ERROR("Error occured while listing all the containers")
 		return err
@@ -32,7 +32,7 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 			select {
 			case <-ticker.C:
 				args = []string{"ps", "-af", "status=running"}
-				output, err = client.ExecuteCommand("docker", args, false)
+				output, err = networkclient.ExecuteCommand("docker", args, false)
 				if err != nil {
 					logger.ERROR("Error occured while listing the running containers")
 					return err
@@ -43,7 +43,7 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 					return nil
 				}
 				args = []string{"ps", "-af", "status=exited", "-af", "status=created", "--format", "{{.Names}}"}
-				output, err = client.ExecuteCommand("docker", args, false)
+				output, err = networkclient.ExecuteCommand("docker", args, false)
 				if err != nil {
 					logger.ERROR("Error occured while listing the exited containers")
 					return err

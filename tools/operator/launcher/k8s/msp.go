@@ -7,7 +7,7 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -104,7 +104,7 @@ func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, o
 func (k K8s) createConfigmapsNSecrets(inputPaths []string, componentName, k8sType string) error {
 
 	k = K8s{Action: "create", Arguments: inputPaths, KubeConfigPath: k.KubeConfigPath}
-	_, err := client.ExecuteK8sCommand(k.ConfigMapsNSecretsArgs(componentName, k8sType), true)
+	_, err := networkclient.ExecuteK8sCommand(k.ConfigMapsNSecretsArgs(componentName, k8sType), true)
 	if err != nil {
 		return err
 	}
