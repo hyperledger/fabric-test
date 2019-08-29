@@ -1,7 +1,7 @@
 package dockercompose
 
 import (
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -37,7 +37,7 @@ func (d DockerCompose) LaunchLocalNetwork(config networkspec.Config) error {
 	d.Config = config
 	configPath := paths.ConfigFilePath("docker")
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"up", "-d"}}
-	_, err := client.ExecuteCommand("docker-compose", d.Args(), true)
+	_, err := networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	d.Config = config
 	configPath := paths.ConfigFilePath("docker")
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"down"}}
-	_, err := client.ExecuteCommand("docker-compose", d.Args(), true)
+	_, err := networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"io/ioutil"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
@@ -33,12 +33,12 @@ func doAction(action, env, kubeConfigPath, componentName string, config networks
 	switch action {
 	case "createChannelTxn":
 		configTxnPath := paths.ConfigFilesDir()
-		err = client.GenerateChannelTransaction(config, configTxnPath)
+		err = networkclient.GenerateChannelTransaction(config, configTxnPath)
 		if err != nil {
 			logger.CRIT(err, "Failed to create channel transaction")
 		}
 	case "migrate":
-		err = client.MigrateToRaft(config, kubeConfigPath)
+		err = networkclient.MigrateToRaft(config, kubeConfigPath)
 		if err != nil {
 			logger.CRIT(err, "Failed to migrate consensus to raft from", config.Orderer.OrdererType)
 		}
@@ -46,7 +46,7 @@ func doAction(action, env, kubeConfigPath, componentName string, config networks
 		switch env {
 		case "k8s":
 			k8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
-			err = k8s.CheckK8sComponentsHealth(k8s.config)
+			err = k8s.CheckK8sComponentsHealth(k8s.Config)
 		case "docker":
 			dc := dockercompose.DockerCompose{Config: config}
 			err = dc.CheckDockerContainersHealth(dc.Config)
@@ -67,11 +67,15 @@ func main() {
 	if *kubeConfigPath != "" {
 		env = "k8s"
 	}
+	var err error
 	contents, _ := ioutil.ReadFile(*networkSpecPath)
 	contents = append([]byte("#@data/values \n"), contents...)
 	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
-	client.CreateConfigPath()
+	err = networkclient.CreateConfigTxYaml()
+	if err != nil{
+		logger.CRIT(err, "Failed to create configtx.yaml")
+	}
 	var network nl.Network
 	config, err := network.GetConfigData(inputPath)
 	if err != nil {

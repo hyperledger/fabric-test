@@ -3,7 +3,7 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -72,7 +72,7 @@ func (k K8s) LaunchK8sNetwork(config networkspec.Config, kubeConfigPath string) 
 	path := paths.ChannelArtifactsDir(config.ArtifactsLocation)
 	inputArgs := []string{paths.JoinPath(path, "genesis.block")}
 	k = K8s{KubeConfigPath: kubeConfigPath, Action: "create", Arguments: inputArgs}
-	_, err := client.ExecuteK8sCommand(k.ConfigMapsNSecretsArgs("genesisblock", "secret"), true)
+	_, err := networkclient.ExecuteK8sCommand(k.ConfigMapsNSecretsArgs("genesisblock", "secret"), true)
 	if err != nil {
 		return err
 	}
@@ -84,7 +84,7 @@ func (k K8s) LaunchK8sNetwork(config networkspec.Config, kubeConfigPath string) 
 		inputPaths = append(inputPaths, k8sPvcFile)
 	}
 	k = K8s{Action: "apply", Arguments: inputPaths, KubeConfigPath: kubeConfigPath}
-	_, err = client.ExecuteK8sCommand(k.Args(), true)
+	_, err = networkclient.ExecuteK8sCommand(k.Args(), true)
 	if err != nil {
 		logger.ERROR("Failed to launch the fabric k8s components")
 		return err
@@ -131,7 +131,7 @@ func (k K8s) DownK8sNetwork(kubeConfigPath string, config networkspec.Config) er
 	if config.K8s.DataPersistence == "local" {
 		inputPaths = []string{k.dataPersistenceFilePath(config)}
 		k = K8s{KubeConfigPath: kubeConfigPath, Action: "apply", Arguments: inputPaths}
-		_, err = client.ExecuteK8sCommand(k.Args(), true)
+		_, err = networkclient.ExecuteK8sCommand(k.Args(), true)
 		if err != nil {
 			logger.ERROR("Failed to launch k8s pod")
 		}
@@ -142,7 +142,7 @@ func (k K8s) DownK8sNetwork(kubeConfigPath string, config networkspec.Config) er
 	}
 
 	k = K8s{KubeConfigPath: kubeConfigPath, Action: "delete", Arguments: inputPaths}
-	_, err = client.ExecuteK8sCommand(k.Args(), true)
+	_, err = networkclient.ExecuteK8sCommand(k.Args(), true)
 	if err != nil {
 		logger.ERROR("Failed to down k8s components")
 	}
@@ -150,7 +150,7 @@ func (k K8s) DownK8sNetwork(kubeConfigPath string, config networkspec.Config) er
 	inputArgs := []string{"delete", "secrets"}
 	inputArgs = append(inputArgs, secrets...)
 	k = K8s{KubeConfigPath: kubeConfigPath, Arguments: inputArgs}
-	_, err = client.ExecuteK8sCommand(k.Args(), true)
+	_, err = networkclient.ExecuteK8sCommand(k.Args(), true)
 	if err != nil {
 		logger.ERROR("Failed to delete secrets")
 	}
@@ -188,7 +188,7 @@ func (k K8s) deleteConfigMaps(numComponents int, componentType, orgName, tls, k8
 	input := []string{"delete", k8sType}
 	input = append(input, componentsList...)
 	k.Arguments = input
-	_, err := client.ExecuteK8sCommand(k.Args(), true)
+	_, err := networkclient.ExecuteK8sCommand(k.Args(), true)
 	if err != nil {
 		return err
 	}

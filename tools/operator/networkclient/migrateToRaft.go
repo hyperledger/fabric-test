@@ -1,4 +1,4 @@
-package client
+package networkclient
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package client
+package networkclient
 
 type Cryptogen struct {
 	ConfigPath string

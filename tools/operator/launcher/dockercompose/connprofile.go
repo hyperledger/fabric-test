@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
@@ -34,7 +34,7 @@ func (d DockerCompose) GetDockerServicePort(serviceName string, forHealth bool) 
 	var containerPorts ContainerPorts
 	var ports []string
 	args := []string{"inspect", "-f", `"{{json .NetworkSettings}}"`, serviceName}
-	output, err := client.ExecuteCommand("docker", args, false)
+	output, err := networkclient.ExecuteCommand("docker", args, false)
 	output = output[1 : len(output)-1]
 	if err != nil {
 		logger.ERROR("Failed to get the port number for service ", serviceName)
@@ -44,7 +44,7 @@ func (d DockerCompose) GetDockerServicePort(serviceName string, forHealth bool) 
 	if err != nil {
 		logger.ERROR("Failed to unmarshall containerPorts object")
 	}
-	for port = range containerPorts.Ports{
+	for port = range containerPorts.Ports {
 		ports = append(ports, port)
 	}
 	sort.Strings(ports)

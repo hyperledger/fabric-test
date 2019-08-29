@@ -1,11 +1,11 @@
 package k8s
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
-	"encoding/json"
 
-	"github.com/hyperledger/fabric-test/tools/operator/client"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -52,7 +52,7 @@ func (k K8s) GetK8sExternalIP(config networkspec.Config, serviceName string) (st
 	if config.K8s.ServiceType == "NodePort" {
 		inputArgs = []string{"get", "-o", "json", "nodes"}
 		k.Arguments = inputArgs
-		output, err := client.ExecuteK8sCommand(k.Args(), false)
+		output, err := networkclient.ExecuteK8sCommand(k.Args(), false)
 		if err != nil {
 			logger.ERROR("Failed to get the external IP for k8s using NodePort")
 			return "", err
@@ -65,7 +65,7 @@ func (k K8s) GetK8sExternalIP(config networkspec.Config, serviceName string) (st
 	} else if config.K8s.ServiceType == "LoadBalancer" {
 		inputArgs = []string{"get", "-o", "json", "services", serviceName}
 		k.Arguments = inputArgs
-		output, err := client.ExecuteK8sCommand(k.Args(), false)
+		output, err := networkclient.ExecuteK8sCommand(k.Args(), false)
 		if err != nil {
 			logger.ERROR("Failed to get the external IP for k8s using LoadBalancer")
 			return "", err
@@ -86,7 +86,7 @@ func (k K8s) GetK8sServicePort(serviceName, serviceType string, forHealth bool) 
 	var portNumber int
 	args := []string{"get", "-o", "json", "services", serviceName}
 	k.Arguments = args
-	output, err := client.ExecuteK8sCommand(k.Args(), false)
+	output, err := networkclient.ExecuteK8sCommand(k.Args(), false)
 	if err != nil {
 		logger.ERROR("Failed to get the port number for service ", serviceName)
 		return "", err
