@@ -41,7 +41,7 @@
 #@   return output
 #@ end
 
-#@ def mounts(type):
+#@ def mounts(type, nodeOUs):
 #@   volumeMounts = []
 #@   if type == "ca":
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/", "name": "cacerts"})
@@ -51,8 +51,10 @@
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/signcerts/", "name": "signcerts"})
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/keystore/", "name": "keystore"})
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/", "name": "tlscacerts"})
-#@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/", "name": "config"})
 #@     volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/tls/", "name": "tls"})
+#@     if nodeOUs:
+#@       volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/artifacts/msp/", "name": "config"})
+#@     end
 #@   end
 #@   return volumeMounts
 #@ end
@@ -74,7 +76,7 @@
 #@   env.append({"name": "FABRIC_CA_SERVER_TLS_KEYFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca-priv_sk"})
 #@   env.append({"name": "FABRIC_CA_SERVER_TLS_CERTFILE", "value": "/etc/hyperledger/fabric/artifacts/tlsca.{}-cert.pem".format(orgName)})
 #@   resources = {"limits": {"cpu": "0.1", "memory": "0.2Gi"}, "requests": {"cpu": "0.1", "memory": "0.2Gi"}}
-#@   volumeMounts = mounts("ca")
+#@   volumeMounts = mounts("ca", config.enableNodeOUs)
 #@   output = [{"name": input, "image": ca_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["fabric-ca-server"], "args": ["start", "-b", "admin: adminpw", "-d"]}]
 #@   return output
 #@ end
@@ -86,9 +88,9 @@
 #@     if type == "clientrootca":
 #@       output.append("/etc/hyperledger/fabric/artifacts/{}/ca.{}-cert.pem".format(organization.name, organization.name))
 #@     elif type == "volumeMounts":
-#@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca-secret".format(organization.name)})
+#@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca".format(organization.name)})
 #@     elif type == "volumes":
-#@       output.append({"name": "{}-clientrootca-secret".format(organization.name), "secret": {"secretName": "{}-clientrootca-secret".format(organization.name)}})
+#@       output.append({"name": "{}-clientrootca".format(organization.name), "configMap": {"name": "{}-ca".format(organization.name)}})
 #@     end
 #@   end
 #@   for j in range(0, len(config.orderer_organizations)):
@@ -96,9 +98,9 @@
 #@     if type == "clientrootca":
 #@       output.append("/etc/hyperledger/fabric/artifacts/{}/ca.{}-cert.pem".format(organization.name, organization.name))
 #@     elif type == "volumeMounts":
-#@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca-secret".format(organization.name)})
+#@       output.append({"mountPath": "/etc/hyperledger/fabric/artifacts/{}".format(organization.name), "name": "{}-clientrootca".format(organization.name)})
 #@     elif type == "volumes":
-#@       output.append({"name": "{}-clientrootca-secret".format(organization.name), "secret": {"secretName": "{}-clientrootca-secret".format(organization.name)}})
+#@       output.append({"name": "{}-clientrootca".format(organization.name), "configMap": {"name": "{}-ca".format(organization.name)}})
 #@     end
 #@   end
 #@   return output
@@ -142,7 +144,7 @@
 #@     env.append({"name": "CORE_OPERATIONS_TLS_ENABLED", "value": "false" })
 #@     env.append({"name": "CORE_METRICS_PROVIDER", "value": "prometheus" })
 #@   end
-#@   volumeMounts = mounts("peer")
+#@   volumeMounts = mounts("peer", config.enableNodeOUs)
 #@   if config.tls == "mutual":
 #@     volumeMounts += mutualTLS(config, "volumeMounts")
 #@   end
@@ -205,7 +207,7 @@
 #@     env.append({"name": "ORDERER_OPERATIONS_TLS_ENABLED", "value": "false" })
 #@     env.append({"name": "ORDERER_METRICS_PROVIDER", "value": "prometheus" })
 #@   end
-#@   volumeMounts = mounts("orderer")
+#@   volumeMounts = mounts("orderer", config.enableNodeOUs)
 #@   volumeMounts.append({"mountPath": "/etc/hyperledger/fabric/genesisblock", "name": "genesisblock"})
 #@   if config.tls == "mutual":
 #@     volumeMounts += mutualTLS(config, "volumeMounts")
@@ -250,13 +252,17 @@
 #@ def spec(input, orgName, type, config, mspId):
 #@   specData = {}
 #@   metadata = {}
-#@   initVolumes = [{"name": "admincerts", "configMap": {"name": "{}-admincerts".format(orgName)}},
-#@                  {"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca.{}-cert.pem".format(orgName)}]}},
+#@   initVolumes = [{"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca.{}-cert.pem".format(orgName)}]}},
 #@                  {"name": "signcerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "signcerts", "path": "{}.{}-cert.pem".format(input, orgName)}]}},
 #@                  {"name": "tlscacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "tlscacerts", "path": "tlsca.{}-cert.pem".format(orgName)}]}},
 #@                  {"name": "keystore", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "keystore", "path": "priv_sk"}]}},
-#@                  {"name": "config", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "config", "path": "config.yaml"}]}},
 #@                  {"name": "tls", "configMap": {"name": "{}-tls".format(input)}}]
+#@   if config.enableNodeOUs:
+#@      initVolumes.append({"name": "admincerts", "configMap": {"name": "{}-admincerts".format(orgName)}})
+#@      initVolumes.append({"name": "config", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "config", "path": "config.yaml"}]}})
+#@   else:
+#@      initVolumes.append({"name": "admincerts", "configMap": {"name": "{}-admincerts".format(orgName), "items": [{"key": "admincerts", "path": "Admin@{}-cert.pem".format(orgName)}]}})
+#@   end
 #@   if type == "ca":
 #@     volumes = [{"name": "cacerts", "configMap": {"name": "{}-ca".format(orgName)}}]
 #@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(type)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},

@@ -3,10 +3,15 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
-#@ def orgPolicies(mspId, type):
+#@ def orgPolicies(mspId, type, nodeOUs):
 #@   output = {}
-#@   readwriteset = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.{}', '{}.client')".format(mspId, mspId, type, mspId)}
-#@   admins = {"Type": "Signature", "Rule": "OR('{}.admin')".format(mspId)}
+#@   if nodeOUs:
+#@     readwriteset = {"Type": "Signature", "Rule": "OR('{}.admin', '{}.{}', '{}.client')".format(mspId, mspId, type, mspId)}
+#@     admins = {"Type": "Signature", "Rule": "OR('{}.admin')".format(mspId)}
+#@   else:
+#@     readwriteset = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId, mspId, type, mspId)}
+#@     admins = {"Type": "Signature", "Rule": "OR('{}.member')".format(mspId)}
+#@   end
 #@   output = {"Readers": readwriteset, "Writers": readwriteset, "Admins": admins}
 #@   return output
 #@ end
@@ -31,12 +36,12 @@
 #@   if type == "orderer":
 #@     num_organizations = len(config.orderer_organizations)
 #@     for i in range(0, num_organizations):
-#@       output.append({"Name": config.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(config.orderer_organizations[i]), "ID": config.orderer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/ordererOrganizations/"+config.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(config.orderer_organizations[i].msp_id, "orderer")})
+#@       output.append({"Name": config.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(config.orderer_organizations[i]), "ID": config.orderer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/ordererOrganizations/"+config.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(config.orderer_organizations[i].msp_id, "orderer", config.enableNodeOUs)})
 #@     end
 #@   end
 #@   if type == "peer":
 #@     for i in range(0, len(config.peer_organizations)):
-#@       output.append({"Name": config.peer_organizations[i].name, "AnchorPeers": anchorPeers(config.peer_organizations[i].name),"ID": config.peer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/peerOrganizations/"+config.peer_organizations[i].name+"/msp", "Policies": orgPolicies(config.peer_organizations[i].msp_id, "peer")})
+#@       output.append({"Name": config.peer_organizations[i].name, "AnchorPeers": anchorPeers(config.peer_organizations[i].name),"ID": config.peer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/peerOrganizations/"+config.peer_organizations[i].name+"/msp", "Policies": orgPolicies(config.peer_organizations[i].msp_id, "peer", config.enableNodeOUs)})
 #@     end
 #@   end
 #@   return output

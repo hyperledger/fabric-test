@@ -13,6 +13,7 @@ type Config struct {
 	} `yaml:"orderer,omitempty"`
 	NumChannels int    `yaml:"num_channels,omitempty"`
 	TLS         string `yaml:"tls,omitempty"`
+	EnableNodeOUs bool `yaml:"enableNodeOUs,omitempty"`
 	K8s         struct {
 		DataPersistence string `yaml:"data_persistence,omitempty"`
 		ServiceType     string `yaml:"service_type,omitempty"`

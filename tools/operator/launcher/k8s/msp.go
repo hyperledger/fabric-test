@@ -44,12 +44,13 @@ func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, o
 	for j := 0; j < numComponents; j++ {
 		componentName = fmt.Sprintf("%s%d-%s", componentType, j, orgName)
 		path = paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s", componentType, orgName, componentType, componentName, orgName))
-		inputPaths = []string{fmt.Sprintf("config=%s/../../msp/config.yaml", path),
-			fmt.Sprintf("cacerts=%s/msp/cacerts/ca.%s-cert.pem", path, orgName),
+		inputPaths = []string{fmt.Sprintf("cacerts=%s/msp/cacerts/ca.%s-cert.pem", path, orgName),
 			fmt.Sprintf("signcerts=%s/msp/signcerts/%s.%s-cert.pem", path, componentName, orgName),
 			fmt.Sprintf("keystore=%s/msp/keystore/priv_sk", path),
 			fmt.Sprintf("tlscacerts=%s/msp/tlscacerts/tlsca.%s-cert.pem", path, orgName)}
-
+		if config.EnableNodeOUs {
+			inputPaths = append(inputPaths, fmt.Sprintf("config=%s/../../msp/config.yaml", path))
+		}
 		// Creating msp configmap for components
 		k8sComponentName = fmt.Sprintf("%s-msp", componentName)
 		err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap")
@@ -67,8 +68,12 @@ func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, o
 		}
 	}
 
-	adminCertPath := paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s/msp/admincerts/", componentType, orgName, componentType, componentName, orgName))
-	inputPaths = []string{fmt.Sprintf("%s", adminCertPath)}
+	adminCertPath := paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s/msp/admincerts", componentType, orgName, componentType, componentName, orgName))
+	if config.EnableNodeOUs {
+		inputPaths = []string{fmt.Sprintf("%s", adminCertPath)}
+	} else {
+		inputPaths = []string{fmt.Sprintf("admincerts=%s/Admin@%s-cert.pem", adminCertPath, orgName)}
+	}
 	k8sComponentName = fmt.Sprintf("%s-admincerts", orgName)
 	err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "configmap")
 	if err != nil {
@@ -77,7 +82,7 @@ func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, o
 	}
 
 	// Calling createConfigmapsNSecrets to create ca certs configmap
-	if numCA > 0 {
+	if numCA > 0 || config.TLS == "mutual" {
 		k8sComponentName = fmt.Sprintf("%s-ca", orgName)
 		caPath := paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s", componentType, orgName))
 		inputPaths = []string{fmt.Sprintf("%s/ca/", caPath), fmt.Sprintf("%s/tlsca/", caPath)}
@@ -87,17 +92,7 @@ func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, o
 			return err
 		}
 	}
-
-	if config.TLS == "mutual" {
-		k8sComponentName = fmt.Sprintf("%s-clientrootca-secret", orgName)
-		path = paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/ca/ca.%s-cert.pem", componentType, orgName, orgName))
-		inputPaths = []string{path}
-		err = k.createConfigmapsNSecrets(inputPaths, k8sComponentName, "secret")
-		if err != nil {
-			logger.ERROR("Failed to create client root CA secret for ", componentName)
-			return err
-		}
-	}
+	
 	return nil
 }
 

@@ -10,7 +10,7 @@ OrdererOrgs:
 #@   ordererOrg = config.orderer_organizations[i]
 - Domain: #@ ordererOrg.name
   Name: #@ ordererOrg.name
-  EnableNodeOUs: true
+  EnableNodeOUs: #@ config.enableNodeOUs
   Specs:
   #@ num_orderers = ordererOrg.num_orderers
   #@ for i in range(0, num_orderers):
@@ -22,7 +22,7 @@ PeerOrgs:
 #@   peerOrg = config.peer_organizations[i]
 - Domain: #@ peerOrg.name
   Name: #@ peerOrg.name
-  EnableNodeOUs: true
+  EnableNodeOUs: #@ config.enableNodeOUs
   Specs:
   #@ for i in range(0, peerOrg.num_peers):
     - Hostname: #@ "peer{}-{}".format(i, peerOrg.name)

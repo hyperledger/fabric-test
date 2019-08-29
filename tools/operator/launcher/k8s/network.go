@@ -108,9 +108,6 @@ func (k K8s) DownK8sNetwork(kubeConfigPath string, config networkspec.Config) er
 		if err != nil {
 			logger.ERROR("Failed to delete orderer configmaps in ", ordererOrg.Name)
 		}
-		if config.TLS == "mutual" {
-			secrets = append(secrets, fmt.Sprintf("%s-clientrootca-secret", ordererOrg.Name))
-		}
 	}
 
 	for i := 0; i < len(config.PeerOrganizations); i++ {
@@ -119,9 +116,6 @@ func (k K8s) DownK8sNetwork(kubeConfigPath string, config networkspec.Config) er
 		err = k.deleteConfigMaps(numComponents, "peer", peerOrg.Name, config.TLS, "configmaps")
 		if err != nil {
 			logger.ERROR("Failed to delete peer secrets in %s", peerOrg.Name)
-		}
-		if config.TLS == "mutual" {
-			secrets = append(secrets, fmt.Sprintf("%s-clientrootca-secret", peerOrg.Name))
 		}
 	}
 	k8sServicesFile := paths.ConfigFilePath("services")
