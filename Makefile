@@ -36,7 +36,7 @@
 #
 # ------------------------------------------------------------------
 
-export BASE_VERSION=1.4.3
+export BASE_VERSION=1.4.4
 export BASEIMAGE_RELEASE=0.4.15
 DOCKER_NS = hyperledger
 EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
