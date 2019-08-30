@@ -17,11 +17,11 @@ import time
 import common_util
 
 try:
-    pbFilePath = "../feature-upgrade"
+    pbFilePath = "../feature"
     sys.path.insert(0, pbFilePath)
     from peer import chaincode_pb2
 except:
-    print("ERROR! Unable to import the protobuf libraries from the ../feature-upgrade directory: {0}".format(sys.exc_info()[0]))
+    print("ERROR! Failed to import the protobuf libraries chaincode_pb2 from the ../feature/peer/ directory: {0}".format(sys.exc_info()[0]))
     sys.exit(1)
 
 # The default channel ID
@@ -463,7 +463,7 @@ class CLIInterface(InterfaceBase):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         peerParts = peer.split('.')
         org = '.'.join(peerParts[1:])
-        setup = ["/bin/bash", "-c",
+        setup = ["sh", "-c",
                  '"CORE_PEER_MSPCONFIGPATH={0}/peerOrganizations/{2}/users/{1}@{2}/msp'.format(configDir, user, org)]
 
         if includeAll:
@@ -567,8 +567,10 @@ class CLIInterface(InterfaceBase):
     def create_channel(self, context, orderer, channelId=TEST_CHANNEL_ID, user="Admin"):
         configDir = "/var/hyperledger/configs/{0}".format(context.composition.projectName)
         setup = self.get_env_vars(context, "peer0.org1.example.com", user=user)
-        # Ideally this would NOT be a 5 minute timeout, but more like a 2 minute timeout.
-        timeout = 300 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s'))
+        # wait a bit for network to come up
+        time.sleep(30)
+        # Ideally this would NOT be a 5 or 3 minute timeout, but more like a 2 or 1 minute timeout.
+        timeout = 180 + common_util.convertToSeconds(context.composition.environ.get('CONFIGTX_ORDERER_BATCHTIMEOUT', '0s'))
         command = ["peer", "channel", "create",
                    "--file", "/var/hyperledger/configs/{0}/{1}.tx".format(context.composition.projectName, channelId),
                    "--channelID", channelId,

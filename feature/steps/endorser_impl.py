@@ -19,11 +19,11 @@ import config_util
 from endorser_util import CLIInterface, ToolInterface, SDKInterface
 
 try:
-    pbFilePath = "../feature-upgrade"
+    pbFilePath = "../feature"
     sys.path.insert(0, pbFilePath)
     from common import ledger_pb2
 except:
-    print("ERROR! Unable to import the protobuf libraries from the ../feature-upgrade directory: {0}".format(sys.exc_info()[0]))
+    print("ERROR! Failed to import the protobuf libraries ledger_pb2 from the ../feature/common/ directory: {0}".format(sys.exc_info()[0]))
     sys.exit(1)
 
 
