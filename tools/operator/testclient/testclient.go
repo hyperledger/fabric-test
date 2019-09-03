@@ -54,7 +54,7 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 		tls = "clientauth"
 	}
 	if action == "all" {
-		actions = append(actions, []string{"create", "anchorpeer", "join", "install"}...)
+		actions = append(actions, []string{"create", "anchorpeer", "join", "install", "instantiate"}...)
 	} else {
 		actions = append(actions, action)
 	}
@@ -71,6 +71,12 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 			err := installCCUIObject.InstallCC(config, tls)
 			if err != nil {
 				logger.CRIT(err, "Failed to install chaincode; testInputFilePath = ", testInputFilePath)
+			}
+		case "instantiate":
+			var instantiateCCUIObject operations.InstantiateCCUIObject
+			err := instantiateCCUIObject.InstantiateCC(config, tls)
+			if err != nil {
+				logger.CRIT(err, "Failed to instantiate chaincode")
 			}
 		default:
 			logger.CRIT(nil, "Incorrect Unknown (", action, ").Supported actions:", supportedActions)
