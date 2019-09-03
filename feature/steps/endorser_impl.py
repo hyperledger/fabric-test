@@ -167,7 +167,7 @@ def step_impl(context, path, args):
 @when(u'an admin deploys chaincode on channel "{channel}" with args {args} within {timeout:d} seconds')
 def step_impl(context, channel, args, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -177,7 +177,7 @@ def step_impl(context, channel, args, timeout):
 @when(u'an admin deploys chaincode on channel "{channel}" with args {args}')
 def step_impl(context, channel, args):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -187,7 +187,7 @@ def step_impl(context, channel, args):
 @when(u'an admin deploys chaincode on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, channel, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -197,7 +197,7 @@ def step_impl(context, channel, timeout):
 @when(u'an admin deploys chaincode on channel "{channel}"')
 def step_impl(context, channel):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -207,7 +207,7 @@ def step_impl(context, channel):
 @when(u'an admin deploys chaincode with name "{name}" on channel "{channel}" within {timeout:d} seconds')
 def step_impl(context, name, channel, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 name,
                 "GOLANG",
@@ -217,7 +217,7 @@ def step_impl(context, name, channel, timeout):
 @when(u'an admin deploys chaincode with name "{name}" on channel "{channel}"')
 def step_impl(context, name, channel):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 name,
                 "GOLANG",
@@ -227,7 +227,7 @@ def step_impl(context, name, channel):
 @when(u'an admin deploys chaincode with args {args} with policy {policy}')
 def step_impl(context, args, policy):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -238,7 +238,7 @@ def step_impl(context, args, policy):
 @when(u'an admin deploys chaincode with args {args} within {timeout:d} seconds')
 def step_impl(context, args, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -248,7 +248,7 @@ def step_impl(context, args, timeout):
 @when(u'an admin deploys chaincode with args {args}')
 def step_impl(context, args):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 args,
                 "mycc",
                 "GOLANG",
@@ -258,7 +258,7 @@ def step_impl(context, args):
 @when(u'an admin deploys chaincode within {timeout:d} seconds')
 def step_impl(context, timeout):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -268,7 +268,7 @@ def step_impl(context, timeout):
 @when(u'an admin deploys chaincode')
 def step_impl(context):
     deploy_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -323,7 +323,7 @@ def step_impl(context, path, args, name, peer):
 def step_impl(context):
     peers = context.interface.get_peers(context)
     install_impl(context,
-                "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd",
+                "../../fabric-test/chaincodes/example02/go/cmd",
                 '["init", "a", "100" , "b", "200"]',
                 "mycc",
                 "GOLANG",
@@ -968,7 +968,7 @@ def step_impl(context, path, name):
 
 @when('an admin packages a chaincode')
 def step_impl(context):
-    build_impl(context, "0", "GOLANG", "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd", "mycc", "peer0.org1.example.com")
+    build_impl(context, "0", "GOLANG", "../../fabric-test/chaincodes/example02/go/cmd", "mycc", "peer0.org1.example.com")
 
 @when('the organization admins install the chaincode package on all peers')
 def step_impl(context):

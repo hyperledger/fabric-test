@@ -16,7 +16,7 @@ Scenario: FAB-3852: Message Payloads Less than 1MB, for kafka-based orderer usin
     When an admin fetches genesis information using peer "peer0.org1.example.com"
     When an admin makes all peers join the channel
     # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]"
-    When an admin installs chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args ["init"] on all peers
+    When an admin installs chaincode at path "../../fabric-test/chaincodes/mapkeys/go" with args ["init"] on all peers
     When an admin instantiates the chaincode on "peer0.org1.example.com"
 
     # 1K
@@ -52,7 +52,7 @@ Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer u
     When an admin fetches genesis information using peer "peer0.org1.example.com"
     When an admin makes all peers join the channel
     # Following lines are equivalent to "When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]"
-    When an admin installs chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""] on all peers
+    When an admin installs chaincode at path "../../fabric-test/chaincodes/mapkeys/go" with args [""] on all peers
     When an admin instantiates the chaincode on "peer0.org1.example.com"
 
     # 1K
@@ -90,7 +90,7 @@ Scenario Outline: FAB-3851: Message Payloads of size <comment>, for <type> order
     Given I have a bootstrapped fabric network of type <type> using state-database couchdb
     And I use the NodeJS SDK interface
     When an admin sets up a channel
-    And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]
+    And an admin deploys chaincode at path "../../fabric-test/chaincodes/mapkeys/go" with args [""]
 
     When a user invokes on the chaincode named "mycc" with random args ["put","g","{random_value}"] of length <size>
     And I wait "7" seconds
@@ -124,7 +124,7 @@ Scenario Outline: FAB-3859: Kafka Network with Large Message Size <comment> with
   Given I have a bootstrapped fabric network of type kafka
   And I use the NodeJS SDK interface
   When an admin sets up a channel named "configsz"
-  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args ["init"] with name "mapIt" on channel "configsz"
+  And an admin deploys chaincode at path "../../fabric-test/chaincodes/mapkeys/go" with args ["init"] with name "mapIt" on channel "configsz"
 
   When a user invokes on the channel "configsz" using chaincode named "mapIt" with random args ["put","g","{random_value}"] of length <size>
   And I wait "10" seconds
@@ -146,7 +146,7 @@ Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb
     And I use the NodeJS SDK interface
     When an admin sets up a channel
-    When an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/mapkeys/go" with args [""]
+    When an admin deploys chaincode at path "../../fabric-test/chaincodes/mapkeys/go" with args [""]
 
     When a user invokes on the chaincode named "mycc" with args ["put","c","3F","d","76D"]
     When I wait "5" seconds
@@ -172,7 +172,7 @@ Examples:
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     When an admin sets up a channel
-    And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+    And an admin deploys chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
     And I wait "10" seconds
     And a user queries on the chaincode named "mycc" with args ["query","a"]

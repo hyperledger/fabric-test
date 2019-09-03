@@ -26,6 +26,7 @@ services:
             - CORE_PEER_TLS_CLIENTROOTCAS_FILES=/var/hyperledger/users/Admin@org1.example.com/tls/ca.crt
             - CORE_PEER_TLS_CLIENTCERT_FILE=/var/hyperledger/users/Admin@org1.example.com/tls/client.crt
             - CORE_PEER_TLS_CLIENTKEY_FILE=/var/hyperledger/users/Admin@org1.example.com/tls/client.key
+            - GOPROXY=https://proxy.golang.org
         working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
         command: sh -c 'sleep 6000000000000000000'
         volumes:

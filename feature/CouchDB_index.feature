@@ -104,7 +104,7 @@ Scenario Outline: <jira_num>: CouchDB Indexing, CC upgrade, <language> with 1 ch
     Then a user receives success response of ["views":{"index_behave_test":{"map":{"fields":{"owner":"asc","docType":"asc","color":"asc"}] from the couchDB container
 
 Examples:
-    |                             cc_path                            |                      index_path                              | language  |  jira_num   |
-    | github.com/hyperledger/fabric-samples/chaincode/marbles02/go   | github.com/hyperledger/fabric-samples/chaincode/marbles02/go | GOLANG    |  FAB-7263   |
-#   | ../../fabric-samples/chaincode/marbles02/node                  | ../fabric-samples/chaincode/marbles02/node                   | NODE      |  FAB-7268   |
+    |                      cc_path                             |                    index_path                   | language  |  jira_num   |
+    | ../../fabric-samples/chaincode/marbles02/go              | ../../fabric-samples/chaincode/marbles02/go     | GOLANG    |  FAB-7263   |
+#   | ../../fabric-samples/chaincode/marbles02/node            | ../fabric-samples/chaincode/marbles02/node      | NODE      |  FAB-7268   |
 

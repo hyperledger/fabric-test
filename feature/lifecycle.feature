@@ -31,10 +31,10 @@ Scenario Outline: FAB-13701: Test new chaincode lifecycle - Basic workflow using
   When a user queries on the chaincode with args ["query","a"]
   Then a user receives a success response of 990
 Examples:
-    | database | interface  |                          path                                     | language |
-    |  leveldb |   CLI      |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
-    |  leveldb |   CLI      |        ../../fabric-test/chaincodes/example02/node                |   NODE   |
-    |  leveldb |   CLI      |    ../../fabric-samples/chaincode/abstore/java                    |   JAVA   |
+    | database | interface  |                          path                       | language |
+    |  leveldb |   CLI      |   ../../fabric-test/chaincodes/example02/go/cmd     |  GOLANG  |
+    |  leveldb |   CLI      |   ../../fabric-test/chaincodes/example02/node       |   NODE   |
+    |  leveldb |   CLI      |   ../../fabric-samples/chaincode/abstore/java       |   JAVA   |
     # Once the FAB-13979 and FAB-13980 are complete for new lifecycle these should pass.
     #  |  leveldb |   Java SDK    |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
     #  |  leveldb | NodeJS SDK    |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
@@ -62,8 +62,8 @@ Scenario Outline: FAB-13701a: Test new chaincode lifecycle - No policy set using
   When a user queries on the chaincode with args ["query","a"]
   Then a user receives a success response of 990
 Examples:
-    | type  | database | interface  |                          path                                     | language |
-    | solo  |  leveldb |   CLI      |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
+    | type  | database | interface  |                        path                       | language |
+    | solo  |  leveldb |   CLI      |   ../../fabric-test/chaincodes/example02/go/cmd   |  GOLANG  |
 
 
 #@daily
@@ -107,8 +107,8 @@ Scenario Outline: FAB-13701b: Test new chaincode lifecycle - Upgrade using <inte
   When a user queries on the chaincode with args ["query","a"]
   Then a user receives a success response of 90
 Examples:
-    | type  | database | interface  |                          path                                     | language |
-    | solo  |  leveldb |   CLI      |   github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd  |  GOLANG  |
+    | type  | database | interface  |                        path                       | language |
+    | solo  |  leveldb |   CLI      |   ../../fabric-test/chaincodes/example02/go/cmd   |  GOLANG  |
 
 
 #@daily
@@ -151,7 +151,7 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode 
   And I want to use the new chaincode lifecycle
 
   When an admin sets up a channel named "channel2"
-  And an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with name "ex02"
+  And an admin packages chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" with name "ex02"
   And the organization admins install the built "ex02" chaincode package on all peers
   Then a packageId is received on all peers
   When each organization admin approves the "ex02" chaincode package on "channel2" with policy "OR ('org1.example.com.member','org2.example.com.member')"
@@ -161,7 +161,7 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode 
   And I wait up to "30" seconds for deploy to complete
 
   When an admin sets up a channel named "channel1"
-  And an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example04/go/cmd" with name "ex04"
+  And an admin packages chaincode at path "../../fabric-test/chaincodes/example04/go/cmd" with name "ex04"
   And the organization admins install the built "ex04" chaincode package on all peers
   Then a packageId is received on all peers
   When each organization admin approves the "ex04" chaincode package on "channel1" with policy "OR ('org1.example.com.member','org2.example.com.member')"
@@ -176,8 +176,8 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode 
   Then a user receives a success response of 1000
 
   # Now upgrade chaincode on both channels
-  Given the chaincode at location "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" is upgraded
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "2" with name "ex02_02"
+  Given the chaincode at location "../../fabric-test/chaincodes/example02/go/cmd" is upgraded
+  When an admin packages chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" as version "2" with name "ex02_02"
   And the organization admins install the built "ex02_02" chaincode package on all peers
   Then a packageId is received for chaincode "ex02_02" on all peers
   When an admin removes the previous chaincode docker containers
@@ -187,8 +187,8 @@ Scenario: FAB-13983: Test new chaincode lifecycle - Chaincode calling chaincode 
   And a user invokes on the channel "channel2" using chaincode named "ex02_02" with args ["init","a","1000","b","2000"]
   And I wait up to "30" seconds for deploy to complete
 
-  Given the chaincode at location "github.com/hyperledger/fabric-test/chaincodes/example04/go/cmd" is upgraded
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example04/go/cmd" as version "2" with name "ex04_02"
+  Given the chaincode at location "../../fabric-test/chaincodes/example04/go/cmd" is upgraded
+  When an admin packages chaincode at path "../../fabric-test/chaincodes/example04/go/cmd" as version "2" with name "ex04_02"
   And the organization admins install the built "ex04_02" chaincode package on all peers
   Then a packageId is received for chaincode "ex04_02" on all peers
 
@@ -300,7 +300,7 @@ Scenario: FAB-13959: An admin from an org does not install chaincode package
   And I have a bootstrapped fabric network of type solo
   And I want to use the new chaincode lifecycle
   When an admin sets up a channel
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "17.0.1" with name "helloNurse"
+  When an admin packages chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" as version "17.0.1" with name "helloNurse"
   And the organization admins install the built "helloNurse" chaincode package on peer "peer0.org1.example.com"
   Then a packageId is received on peer "peer0.org1.example.com"
   When the organization admins install the built "helloNurse" chaincode package on peer "peer1.org1.example.com"
@@ -335,8 +335,8 @@ Scenario: FAB-13968: Upgrade chaincode for different orgs, but commit older vers
   Then a user receives a success response of 1000
 
 
-  Given the chaincode at location "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" is upgraded
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc_02"
+  Given the chaincode at location "../../fabric-test/chaincodes/example02/go/cmd" is upgraded
+  When an admin packages chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc_02"
   And the organization admins install the built "mycc_02" chaincode package on all peers
   Then a packageId is received for chaincode "mycc_02" on all peers
   When an admin removes the previous chaincode docker containers
@@ -452,7 +452,7 @@ Scenario: FAB-13958: Test new chaincode lifecycle - upgrade from old to new
   Then the config block file is fetched from peer "peer0.org1.example.com"
   Then the updated config block contains V2_0
 
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc2"
+  When an admin packages chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc2"
   And the organization admins install the chaincode package on all peers
   Then a packageId is received on all peers
   When each organization admin approves the chaincode package with policy "OR ('org1.example.com.member','org2.example.com.member')"
@@ -509,8 +509,8 @@ Scenario: FAB-13966: Different orgs use different version label during upgrade
   When a user queries on the chaincode with args ["query","a"]
   Then a user receives a success response of 1000
 
-  Given the chaincode at location "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" is upgraded
-  When an admin packages chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc_02"
+  Given the chaincode at location "../../fabric-test/chaincodes/example02/go/cmd" is upgraded
+  When an admin packages chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" as version "2" with name "mycc_02"
   And the organization admins install the built "mycc_02" chaincode package on all peers
   Then a packageId is received for chaincode "mycc_02" on all peers
   When an admin removes the previous chaincode docker containers
@@ -745,7 +745,7 @@ Scenario: FAB-13976: Test setting of collections data using old chaincode lifecy
   And I have a bootstrapped fabric network of type solo using state-database couchdb
   When an admin sets up a channel
   And an admin generates a collections file named "marblesCollection.json" for chaincode named "marbles" at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" with policy "OR('org1.example.com.member','org2.example.com.member')"
-  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/marbles02_private" using collections config "marblesCollection.json" with args [""] with name "marbles"
+  And an admin deploys chaincode at path "../../fabric-test/chaincodes/marbles02_private" using collections config "marblesCollection.json" with args [""] with name "marbles"
   And I wait up to "30" seconds for deploy to complete
 
   When a user invokes on the chaincode named "marbles" with args ["initMarble","marble1","blue","35","tom"]

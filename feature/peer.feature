@@ -13,7 +13,7 @@ Scenario Outline: FAB-3505: chaincode example02 deploy invoke query with <type> 
     Given I have a bootstrapped fabric network of type <type> using state-database <database> <security>
     And I use the <interface> interface
     When an admin sets up a channel
-    And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+    And an admin deploys chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
     When a user queries on the chaincode named "mycc" with args ["query","a"]
     Then a user receives a success response of 1000
     When a user invokes on the chaincode named "mycc" with args ["invoke","a","b","10"]
@@ -39,7 +39,7 @@ Examples:
 Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up OK
   Given I have a bootstrapped fabric network of type solo
   When an admin sets up a channel
-  And an admin deploys chaincode at path "github.com/hyperledger/fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
+  And an admin deploys chaincode at path "../../fabric-test/chaincodes/example02/go/cmd" with args ["init","a","1000","b","2000"] with name "mycc"
   And I wait "10" seconds
 
   # do 1 set of invoke-query on peer1.org1
