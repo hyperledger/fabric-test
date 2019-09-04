@@ -49,6 +49,8 @@ func (c ConnProfile) GenerateConnProfilePerOrg(orgName string) error {
 	fileName := paths.JoinPath(path, fmt.Sprintf("connection_profile_%s.yaml", orgName))
 	channels := make(map[string]networkspec.Channel)
 	for i := 0; i < c.Config.NumChannels; i++ {
+		orderersList = []string{}
+		peersList = []string{}
 		for orderer := range c.Orderers{
 			orderersList = append(orderersList, orderer)
 		}
