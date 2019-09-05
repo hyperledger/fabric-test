@@ -159,8 +159,16 @@
 #@   for i in range(0, len(config.peer_organizations)):
 #@     org = config.peer_organizations[i]
 #@     for j in range(0, org.num_peers):
-#@       env = ["CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock", "FABRIC_LOGGING_SPEC={}".format(config.peer_fabric_logging_spec), "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=configfiles_default", "CORE_PEER_GOSSIP_USELEADERELECTION=true"]
-#@       env.append("CORE_PEER_GOSSIP_ORGLEADER=false")
+#@       env = ["CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock", "FABRIC_LOGGING_SPEC={}".format(config.peer_fabric_logging_spec), "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=configfiles_default"]
+#@       if config.gossip_enable == True:
+#@         env.append("CORE_PEER_GOSSIP_STATE_ENABLED=true")
+#@         env.append("CORE_PEER_GOSSIP_ORGLEADER=false")
+#@         env.append("CORE_PEER_GOSSIP_USELEADERELECTION=true")
+#@       else:
+#@         env.append("CORE_PEER_GOSSIP_STATE_ENABLED=false")
+#@         env.append("CORE_PEER_GOSSIP_ORGLEADER=true")
+#@         env.append("CORE_PEER_GOSSIP_USELEADERELECTION=false")
+#@       end
 #@       env.append("CORE_PEER_GOSSIP_ENDPOINT=peer{}-{}:{}".format(j, org.name, 7051))
 #@       env.append("CORE_PEER_LISTENADDRESS=0.0.0.0:{}".format(7051))
 #@       env.append("CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:{}".format(7052))

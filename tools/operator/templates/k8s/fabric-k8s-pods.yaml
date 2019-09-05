@@ -106,10 +106,17 @@
 
 #@ def peerContainers(input, orgName, config, mspId):
 #@   env = [{"name": "CORE_VM_ENDPOINT", "value": "localhost:2375"}]
-#@   env.append({"name": "CORE_PEER_GOSSIP_USELEADERELECTION", "value": "True"})
-#@   env.append({"name": "CORE_PEER_GOSSIP_ORGLEADER", "value": "false"})
 #@   env.append({"name": "CORE_PEER_LISTENADDRESS", "value": "0.0.0.0:7051"})
 #@   env.append({"name": "CORE_PEER_CHAINCODELISTENADDRESS", "value": "0.0.0.0:7052"})
+#@   if config.gossip_enable == True:
+#@     env.append({"name": "CORE_PEER_GOSSIP_STATE_ENABLED", "value": "true"})
+#@     env.append({"name": "CORE_PEER_GOSSIP_USELEADERELECTION", "value": "true"})
+#@     env.append({"name": "CORE_PEER_GOSSIP_ORGLEADER", "value": "false"})
+#@   else:
+#@     env.append({"name": "CORE_PEER_GOSSIP_STATE_ENABLED", "value": "false"})
+#@     env.append({"name": "CORE_PEER_GOSSIP_USELEADERELECTION", "value": "false"})
+#@     env.append({"name": "CORE_PEER_GOSSIP_ORGLEADER", "value": "true"})
+#@   end
 #@   if config.tls == "mutual":
 #@     env.append({"name": "CORE_PEER_TLS_CLIENTROOTCAS_FILES", "value": " ".join(mutualTLS(config, "clientrootca")) })
 #@     env.append({"name": "CORE_PEER_TLS_CLIENTAUTHREQUIRED", "value": "true"})
