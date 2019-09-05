@@ -5,8 +5,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 #
-
-while getopts ":f:a:t:p:ci" opt;
+if [ -f /tmp/nws.txt ]; then
+   nws=$(cat /tmp/nws.txt)
+fi
+while getopts ":f:a:t:pci" opt;
   do
     case $opt in
       a) # action with up/down
@@ -16,7 +18,7 @@ while getopts ":f:a:t:p:ci" opt;
         testCase="${OPTARG}"
         ;;
       p)  # install npm node modules
-        preReq="${OPTARG}"
+        preReq="y"
         ;;
       c)  # Create channel & join
         createc="y"
@@ -26,6 +28,7 @@ while getopts ":f:a:t:p:ci" opt;
         ;;
       f)  # network spec file
         nws="${OPTARG}"
+        echo "$nws" > /tmp/nws.txt
         ;;
       \?)
         echo "Error: Unrecognized command line argument:"
@@ -68,6 +71,7 @@ stopNw() {
   cd "$OperatorDir"/launcher || exit 1
   # provide networkspec 1 and kubeconfig 1 here
   go run launcher.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/$1 -k "$KUBECONFIG" -a down
+  rm -f /tmp/nws.txt
   cd -
 }
 
@@ -83,7 +87,7 @@ createJoinChannel() {
   cd "$PTEDir/CITest/scripts" || exit 1
   echo "-------> Create & Join Channel"
   export hfc_logging='{"debug":"console"}'
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 5 --chan0 0 --chantxpath "$Chantxpath" --chanprefix testorgschannel --norg 4 -c > "$PTEDir"/createChannel.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 5 --chan0 0 --chantxpath "$Chantxpath" --tls "$1" --chanprefix testorgschannel --norg 4 -c > "$PTEDir"/"$2"_createChannel.log
   sleep 60
 }
 
@@ -93,7 +97,7 @@ installInstantiate() {
   # Install and Instantiate chaincode
   echo "-------> Install & Instantiate Chaincode"
   export hfc_logging='{"debug":"console"}'
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 5 --chan0 0 --chantxpath "$Chantxpath" --chanprefix testorgschannel --norg 4 -a sample_cc sample_js -i > "$PTEDir"/installInstantiate.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 5 --chan0 0 --chantxpath "$Chantxpath" --chanprefix testorgschannel --norg 4 --tls "$1" -a sample_cc sample_js -i > "$PTEDir"/"$2"_installInstantiate.log
   sleep 60
 }
 
@@ -103,14 +107,14 @@ samplecc_go_2chan() {
   cd "$PTEDir"/CITest/scripts || exit 1
   echo "-------> Execute Invoke"
   export hfc_logging='{"debug":"console"}'
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chanprefix testorgschannel --chantxpath "$Chantxpath" -a sample_cc --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t move > "$PTEDir"/samplecc_go_2chan_i.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chanprefix testorgschannel --chantxpath "$Chantxpath" --tls "$1" -a sample_cc --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t move > "$PTEDir"/"$2"_samplecc_go_2chan_i.log
   sleep 60
   cp -r "$PTEDir"/pteReport.txt samplecc_go_2chan_i_pteReport.txt
   node get_pteReport.js samplecc_go_2chan_i_pteReport.txt
   rm -rf "$PTEDir"/pteReport.txt
   echo "-------> Execute Query"
   export hfc_logging='{"debug":"console"}'
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chanprefix testorgschannel --chantxpath "$Chantxpath" -a sample_cc --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t query > "$PTEDir"/samplecc_go_2chan_q.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chanprefix testorgschannel --chantxpath "$Chantxpath" --tls "$1" -a sample_cc --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t query > "$PTEDir"/"$2"_samplecc_go_2chan_q.log
   sleep 60
   cp -r "$PTEDir"/pteReport.txt samplecc_go_2chan_q_pteReport.txt
   # Convert Test Report into Aggregate summary
@@ -123,7 +127,7 @@ samplecc_go_2chan() {
 samplejs_node_2chan() {
   cd "$PTEDir"/CITest/scripts || exit 1
   echo "-------> Execute Invoke"
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chantxpath "$Chantxpath" --chanprefix testorgschannel -a sample_js --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t move > "$PTEDir"/samplejs_node_2chan_i.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chantxpath "$Chantxpath" --chanprefix testorgschannel --tls "$1" -a sample_js --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t move > "$PTEDir"/"$2"_samplejs_node_2chan_i.log
     cp -r "$PTEDir"/pteReport.txt samplejs_node_2chan_i_pteReport.txt
   # Convert Test Report into Aggregate summary
   node get_pteReport.js samplejs_node_2chan_i_pteReport.txt
@@ -131,7 +135,7 @@ samplejs_node_2chan() {
   rm -rf "$PTEDir"/pteReport.txt
   sleep 60
   echo "-------> Execute Query"
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chantxpath "$Chantxpath" --chanprefix testorgschannel -a sample_js --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t query > "$PTEDir"/samplejs_node_2chan_q.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chantxpath "$Chantxpath" --chanprefix testorgschannel --tls "$1" -a sample_js --freq 100 --nreq 1000  --nproc 2 --targetpeers ORGANCHOR -t query > "$PTEDir"/"$2"_samplejs_node_2chan_q.log
   cp -r "$PTEDir"/pteReport.txt samplejs_node_2chan_q_pteReport.txt
   # Convert Test Report into Aggregate summary
   node get_pteReport.js samplejs_node_2chan_q_pteReport.txt
@@ -145,17 +149,17 @@ sbe_go_2chan_endorse() {
 
   cd "$PTEDir" || exit 1
   echo "-------> Install SBE chaincode"
-  ./pte_driver.sh CITest/FAB-11615-2i/preconfig/sbe_cc/runCases-chan-install-TLS.txt >& "$PTEDir"/sbeinstall.log
+  ./pte_driver.sh CITest/FAB-11615-2i/preconfig/sbe_cc/runCases-chan-install-TLS.txt >& "$PTEDir"/"$2"_sbeinstall.log
   sleep 30
   echo "-------> Instantiate SBE chaincode"
-  ./pte_driver.sh CITest/FAB-11615-2i/preconfig/sbe_cc/runCases-chan-instantiate-TLS.txt >& "$PTEDir"/sbeInstantiate.log
+  ./pte_driver.sh CITest/FAB-11615-2i/preconfig/sbe_cc/runCases-chan-instantiate-TLS.txt >& "$PTEDir"/"$2"_sbeInstantiate.log
   sleep 90
   echo "-------> Invoke"
-  ./pte_driver.sh CITest/FAB-11615-2i/sbe_cc/runCases-constant-iVal-TLS.txt >& "$PTEDir"/sbecc_go_2chan_endorse_i.log
-  cp -r "$PTEDir"/pteReport.txt CITest/scripts/sbe_go_2chan_endorse_2chan_i_pteReport.txt
+  ./pte_driver.sh CITest/FAB-11615-2i/sbe_cc/runCases-constant-iVal-TLS.txt >& "$PTEDir"/"$2"_sbecc_go_2chan_endorse_i.log
+  cp -r "$PTEDir"/pteReport.txt CITest/scripts/"$2"_sbe_go_2chan_endorse_2chan_i_pteReport.txt
   cd CITest/scripts
   # Convert Test Report into Aggregate summary
-  node get_pteReport.js sbe_go_2chan_endorse_2chan_i_pteReport.txt
+  node get_pteReport.js "$2"_sbe_go_2chan_endorse_2chan_i_pteReport.txt
   # remove PTE Report
   rm -rf "$PTEDir"/pteReport.txt
 }
@@ -164,11 +168,11 @@ sbe_go_2chan_endorse() {
 samplecc_go_12hr() {
   cd "$PTEDir"/CITest/scripts || exit 1
   echo "-------> Execute Invoke"
-  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chanprefix testorgschannel --chantxpath "$Chantxpath" -a sample_cc --freq 100 --rundur 43200 --nproc 2 --targetpeers ORGANCHOR -t move > "$PTEDir"/samplecc_go_2chan_12hr_i.log
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 2 --chan0 0 --norg 2 --chanprefix testorgschannel --chantxpath "$Chantxpath" --tls "$1" -a sample_cc --freq 100 --rundur 43200 --nproc 2 --targetpeers ORGANCHOR -t move > "$PTEDir"/"$2"_samplecc_go_2chan_12hr_i.log
   sleep 60
-  cp -r "$PTEDir"/pteReport.txt samplecc_go_2chan_12hr_i_pteReport.txt
+  cp -r "$PTEDir"/pteReport.txt "$2"_samplecc_go_2chan_12hr_i_pteReport.txt
   # Convert Test Report into Aggregate summary
-  node get_pteReport.js samplecc_go_2chan_12hr_i_pteReport.txt
+  node get_pteReport.js "$2"_samplecc_go_2chan_12hr_i_pteReport.txt
   # remove PTE Report
   rm -rf "$PTEDir"/pteReport.txt
 }
@@ -177,25 +181,44 @@ samplecc_go_12hr() {
 if [ "$preReq" == "y" ]; then
   npmInstall
 fi
+# tls value from the networkspec file
+tls=$(cat "$nws" | grep tls: | awk '{print $2}')
+# strip off the .yaml file extension
+nwspecfile=$(cat /tmp/nws.txt | cut -d "/" -f3 | cut -d "." -f1)
 case "$action" in
   up)
     echo "Start Network"
-    startNw $nws
+    startNw "$nws"
     exit
     ;;
   down)
     echo "Down Network"
-    stopNw $nws
+    stopNw "$nws"
     exit
     ;;
 esac
+case "$tls" in
+  true)
+    echo "tls mode: $tls"
+    tls_mode=serverauth
+    ;;
+  mutual)
+    echo "tls mode: $tls"
+    tls_mode=clientauth
+    ;;
+  false)
+    echo "tls mode: $tls"
+    tls_mode=disabled
+    ;;
+esac
+
 if [ "$createc" == "y" ]; then
-  createJoinChannel
+  createJoinChannel "$tls_mode" "$nwspecfile"
 fi
 if [ "$insta" == "y" ]; then
-  installInstantiate
+  installInstantiate "$tls_mode" "$nwspecfile"
 fi
 # Execute Input testcase
 if [ ! -z "$testCase" ]; then
-  $testCase
+  $testCase "$tls_mode" "$nwspecfile"
 fi
