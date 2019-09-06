@@ -86,6 +86,12 @@ usage () {
     echo -e "--keystart\ttransaction starting key [integer]"
     echo -e "\t\t(Default: 0)"
 
+    echo -e "--payloadmin\ttransaction min payload size [integer]"
+    echo -e "\t\t(Default: 8)"
+
+    echo -e "--payloadmax\ttransaction max payload size [integer]"
+    echo -e "\t\t(Default: payloadmin)"
+
     echo -e "--targetpeers\ttransaction target peers [ORGANCHOR|ALLANCHORS|ORGPEERS|ALLPEERS|DISCOVERY]"
     echo -e "\t\t(Default: ORGANCHOR)"
 
@@ -187,6 +193,8 @@ echo "***      TARGETORDERERS: $TARGETORDERERS                 "
 echo "***      NORDERERS: $NORDERERS                           "
 echo "***      RUNDUR: $RUNDUR sec                             "
 echo "***      KEYSTART: $KEYSTART                             "
+echo "***      PAYLOADMIN: $PAYLOADMIN                         "
+echo "***      PAYLOADMAX: $PAYLOADMAX                         "
 echo "***      EVENT TIMEOUT: $EVTTIMEOUT ms                   "
 echo "***      REQUEST TIMEOUT: $REQTIMEOUT ms                 "
 echo "***      GRPC WAIT TIMEOUT: $GRPCTIMEOUT ms              "
@@ -244,6 +252,8 @@ FREQ=0
 NREQ=1000
 RUNDUR=0
 KEYSTART=0
+PAYLOADMIN=8
+PAYLOADMAX=$PAYLOADMIN
 TARGETPEERS="ORGANCHOR"
 CHKPEERS="ORGANCHOR"
 CHKTX="LAST"
@@ -539,6 +549,8 @@ TransactionProc() {
                     echo -e "copy $chaincode DfnOpt.json"
                     cp $TEMPLATEDIR/$chaincode"DfnOpt.json" $runDir
                     sed -i -e "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
+                    sed -i -e "s/_PAYLOADMIN_/$PAYLOADMIN/g" $chaincode"DfnOpt.json"
+                    sed -i -e "s/_PAYLOADMAX_/$PAYLOADMAX/g" $chaincode"DfnOpt.json"
                     rm -f $chaincode"DfnOpt.json-e"
                 fi
 
@@ -765,6 +777,20 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --payloadmin)
+          shift
+          PAYLOADMIN=$1
+          echo -e "\t- Specify transaction min payload size: $PAYLOADMIN\n"
+          shift
+          ;;
+
+      --payloadmax)
+          shift
+          PAYLOADMAX=$1
+          echo -e "\t- Specify transaction max payload size: $PAYLOADMAX\n"
+          shift
+          ;;
+
       --targetpeers)
           shift
           TARGETPEERS=$1
@@ -854,6 +880,12 @@ if [ $NORG -gt 0 ]; then
         j=$((i + 1))
         ORGS[$i]=$ORGPREFIX$j
     done
+fi
+
+    # set payloadmax if needed
+if [ "$PAYLOADMIN" -ge "$PAYLOADMAX" ]; then
+    echo "set payloadmax from $PAYLOADMAX to $PAYLOADMIN"
+    PAYLOADMAX=$PAYLOADMIN
 fi
 
 printVars
