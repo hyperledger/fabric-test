@@ -63,6 +63,7 @@ type TimeOutOptions struct {
 //InvokeQuery --
 type InvokeQuery struct {
 	ChannelName   string               `yaml:"channelName,omitempty"`
+	ChaincodeName string               `yaml:"chaincodeName,omitempty"`
 	TargetPeers   string               `yaml:"targetPeers,omitempty"`
 	NProcPerOrg   int                  `yaml:"nProcPerOrg,omitempty"`
 	NRequest      int                  `yaml:"nRequest,omitempty"`
@@ -72,7 +73,7 @@ type InvokeQuery struct {
 	QueryCheck    int                  `yaml:"queryCheck,omitempty"`
 	EventOptions  EventOptions         `yaml:"eventOpt,omitempty"`
 	CCOptions     CCOptions            `yaml:"ccOpt,omitempty"`
-	MoveArgs      string               `yaml:"moveArgs,omitempty"`
+	Args          string               `yaml:"args,omitempty"`
 }
 
 //TransactionOptions --

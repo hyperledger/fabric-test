@@ -104,6 +104,7 @@ upgradeChaincode:
 
 invokes:
   - channelName: testorgschannel1
+    chaincodeName: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000
@@ -128,6 +129,7 @@ invokes:
 
 queries:
   - channelName: testorgschannel1
+    chaincodeName: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000
@@ -136,4 +138,9 @@ queries:
     ccOpt:
       ccType: ccchecker
       keyStart: 0
+    txnOpt:
+      - mode: constant
+        options: 
+          constFreq: 0
+          devFreq: 0
     args: "get,a1"
