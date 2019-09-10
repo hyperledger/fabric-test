@@ -6,7 +6,7 @@
 import unittest
 import subprocess
 
-logs_directory = '../../tools/PTE/CITest/scripts'
+logs_directory = '../../tools/PTE/Logs'
 operator_directory = '../../tools/operator'
 k8s_testsuite = '../../tools/PTE/CITest/k8s_testsuite/scripts'
 

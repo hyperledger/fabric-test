@@ -6,7 +6,7 @@
 #! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1 or 2.0.0
 #! Development stream images are pulled from
 #! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable or 2.0.0-stable
-fabric_version: 1.4.3
+fabric_version: 2.0.0-stable
 #! peer database ledger type (couchdb, goleveldb)
 db_type: couchdb
 #! This parameter is used to define fabric logging spec in peers
@@ -20,6 +20,8 @@ metrics: true
 #! true - enable gossip and dynamic leader election
 #! false - disable gossip and set all peers as org leaders
 gossip_enable: true
+#! enable node ou's in fabric network (true/false)
+enableNodeOUs: false
 
 #! Location where crypto-config and channel-artifacts are stored
 artifacts_location: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
@@ -29,9 +31,9 @@ orderer:
 #! Consensus type
   orderertype: etcdraft
   batchsize:
-    maxmessagecount: 500
-    absolutemaxbytes: 10 MB
-    preferredmaxbytes: 2 MB
+    maxmessagecount: 100
+    absolutemaxbytes: 99 MB
+    preferredmaxbytes: 10 MB
   batchtimeout: 2s
 #! Etcd raft options and this will be used when orderertype is
 #! selected as etcdraft
@@ -71,10 +73,10 @@ peer_organizations:
 
 #! Capabilites for Orderer, Channel, Application groups
 orderer_capabilities:
-  V1_4_2: true
+  V2_0: true
 
 channel_capabilities:
-  V1_4_3: true
+  V2_0: true
 
 application_capabilities:
   V1_4_2: true
@@ -108,7 +110,7 @@ k8s:
     peers:
       limits:
          cpu: "1"
-         memory: 2Gi
+         memory: 4Gi
       requests:
          cpu: "1"
          memory: 2Gi
