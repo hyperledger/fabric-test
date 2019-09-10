@@ -34,6 +34,7 @@ var User = require('fabric-common/lib/User.js');
 // var logger = require('fabric-common/lib/Utils.js').getLogger('PTE util');
 
 var PTEid = parseInt(process.argv[5]);
+PTEid = PTEid ? PTEid : 0
 var loggerMsg='PTE ' + PTEid + ' util';
 var logger = new PTELogger({"prefix":loggerMsg, "level":"info"});
 

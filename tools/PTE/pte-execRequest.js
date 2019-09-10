@@ -106,7 +106,22 @@ var Nid = parseInt(process.argv[3]);
 var uiFile = process.argv[4];
 var tStart = parseInt(process.argv[5]);
 var org=process.argv[6];
-var uiContent = testUtil.readConfigFileSubmitter(uiFile);
+var uiContent;
+var txCfgPtr;
+var txCfgTmp;
+if (fs.existsSync(uiFile)) {
+    uiContent = testUtil.readConfigFileSubmitter(uiFile);
+    if ( typeof(uiContent.txCfgPtr) === 'undefined' ) {
+        txCfgTmp = uiFile;
+    } else {
+        txCfgTmp = uiContent.txCfgPtr;
+    }
+    txCfgPtr = testUtil.readConfigFileSubmitter(txCfgTmp);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input txCfgPtr[%s]: %j', Nid, channelName, org, pid, txCfgTmp, txCfgPtr);
+} else {
+    uiContent = JSON.parse(uiFile)
+    txCfgPtr = uiContent
+}
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input uiContent[%s]: %j', Nid, channelName, org, pid, uiFile, uiContent);
 
 var channelOpt=uiContent.channelOpt;
@@ -116,15 +131,6 @@ for (i=0; i<channelOpt.orgName.length; i++) {
     channelOrgName.push(channelOpt.orgName[i]);
 }
 
-var txCfgPtr;
-var txCfgTmp;
-if ( typeof(uiContent.txCfgPtr) === 'undefined' ) {
-    txCfgTmp = uiFile;
-} else {
-    txCfgTmp = uiContent.txCfgPtr;
-}
-txCfgPtr = testUtil.readConfigFileSubmitter(txCfgTmp);
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input txCfgPtr[%s]: %j', Nid, channelName, org, pid, txCfgTmp, txCfgPtr);
 
 var distOpt = txCfgPtr.constantOpt;		// Assume the default distribution is 'Constant'
 
@@ -135,7 +141,10 @@ if ( typeof(uiContent.ccDfnPtr) === 'undefined' ) {
 } else {
     ccDfntmp = uiContent.ccDfnPtr;
 }
-ccDfnPtr = testUtil.readConfigFileSubmitter(ccDfntmp);
+ccDfnPtr = uiContent
+if (fs.existsSync(uiFile)) {
+    ccDfnPtr = testUtil.readConfigFileSubmitter(ccDfntmp);
+}
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input ccDfnPtr[%s]: %j', Nid, channelName, org, pid, ccDfntmp, ccDfnPtr);
 
 var ccType = ccDfnPtr.ccType;
