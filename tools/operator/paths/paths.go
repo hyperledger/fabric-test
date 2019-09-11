@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/hyperledger/fabric-test/tools/operator/testclient/helper"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 )
 
@@ -143,7 +143,7 @@ func PTEPath() string{
 }
 
 //GetConnProfilePathForOrg --
-func GetConnProfilePathForOrg(orgName string, organizations []helper.Organization) string {
+func GetConnProfilePathForOrg(orgName string, organizations []inputStructs.Organization) string {
 	var connProfilePath string
 	for i := 0; i < len(organizations); i++ {
 		if organizations[i].Name == orgName {

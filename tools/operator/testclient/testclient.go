@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
-	"github.com/hyperledger/fabric-test/tools/operator/testclient/helper"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/operations"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -24,9 +24,9 @@ func validateArguments(testInputFilePath *string) {
 }
 
 //GetInputData -- Read in the input data and parse the objects
-func GetInputData(inputFilePath string) (helper.Config, error) {
+func GetInputData(inputFilePath string) (inputStructs.Config, error) {
 
-	var config helper.Config
+	var config inputStructs.Config
 	yamlFile, err := ioutil.ReadFile(inputFilePath)
 	if err != nil {
 		logger.ERROR("Failed to read input file")
@@ -40,7 +40,7 @@ func GetInputData(inputFilePath string) (helper.Config, error) {
 	return config, nil
 }
 
-func doAction(action string, config helper.Config) {
+func doAction(action string, config inputStructs.Config) {
 
 	var actions []string
 	supportedActions := "create|join|install|instantiate|anchorpeer|upgrade|invoke|query"
@@ -54,17 +54,17 @@ func doAction(action string, config helper.Config) {
 		tls = "clientauth"
 	}
 	if action == "all" {
-		actions = append(actions, []string{"create"}...)
+		actions = append(actions, []string{"create", "anchorpeer", "join"}...)
 	} else {
 		actions = append(actions, action)
 	}
 	for i := 0; i < len(actions); i++ {
 		switch actions[i] {
-		case "create":
-			var create operations.CreateChannelObject
-			err := create.CreateChannels(config, tls)
+		case "create", "join", "anchorpeer":
+			var channelUIObject operations.ChannelUIObject
+			err := channelUIObject.ChannelConfigs(config, tls, action)
 			if err != nil {
-				logger.CRIT(err, "Failed to create channels")
+				logger.CRIT(err, "Failed to perform ", action, "action on channels")
 			}
 		default:
 			logger.CRIT(nil, "Incorrect Unknown (", action, ").Supported actions:", supportedActions)

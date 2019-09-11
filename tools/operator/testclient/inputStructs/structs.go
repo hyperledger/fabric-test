@@ -1,11 +1,11 @@
-package helper
+package inputStructs
 
 //Config --
 type Config struct {
 	TLS               string             `yaml:"tls,omitempty"`
 	Organizations     []Organization     `yaml:"organizations,omitempty"`
 	CreateChannel     []Channel          `yaml:"createChannel,omitempty"`
-	AnchorPeerUpdate  []AnchorPeerUpdate `yaml:"anchorPeerUpdate,omitempty"`
+	AnchorPeerUpdate  []Channel `yaml:"anchorPeerUpdate,omitempty"`
 	JoinChannel       []Channel          `yaml:"joinChannel,omitempty"`
 	InstallCC         []InstallCC        `yaml:"installChaincode,omitempty"`
 	InstantiateCC     []InstantiateCC    `yaml:"instantiateChaincode,omitempty"`
@@ -18,16 +18,8 @@ type Channel struct {
 	ChannelName   string `yaml:"channelName,omitempty"`
 	Organizations string `yaml:"organizations,omitempty"`
 	ChannelPrefix string `yaml:"channelPrefix,omitempty"`
-	NumChannels   int    `yaml:"numChannels,omitempty"`
-}
-
-//AnchorPeerUpdate --
-type AnchorPeerUpdate struct {
 	AnchorPeerTxPath string `yaml:"anchorPeerUpdateTxPath,omitempty"`
-	ChannelName      string `yaml:"channelName,omitempty"`
-	Organizations    string `yaml:"organizations,omitempty"`
-	ChannelPrefix    string `yaml:"channelPrefix,omitempty"`
-	NumChannels      int    `yaml:"numChannels,omitempty"`
+	NumChannels   int    `yaml:"numChannels,omitempty"`
 }
 
 //Organization --

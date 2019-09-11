@@ -23,7 +23,7 @@ func GenerateChannelTransaction(config networkspec.Config, configtxPath string) 
 		}
 
 		for j := 0; j < len(config.PeerOrganizations); j++ {
-			outputPath = paths.JoinPath(artifactsLocation, fmt.Sprintf("%s%sanchor.tx", channelName, config.PeerOrganizations[j].MSPID))
+			outputPath = paths.JoinPath(artifactsLocation, fmt.Sprintf("%s%sanchor.tx", channelName, config.PeerOrganizations[j].Name))
 			configtxgen.OutputPath = outputPath
 			_, err := ExecuteCommand("configtxgen", configtxgen.AnchorPeersUpdateTxArgs(channelName, config.PeerOrganizations[j].Name), true)
 			if err != nil {
