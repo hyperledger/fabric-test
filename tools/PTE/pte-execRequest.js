@@ -76,7 +76,7 @@ var initFreq=0;     // init discovery freq default = 0
 var initDiscTimer;
 var serviceDiscovery=false;
 var localHost=false;
-var ARGS_DIR = './ccArgumentsGenerators';
+var ARGS_DIR = path.join(__dirname, 'ccArgumentsGenerators');
 
 var requestQueue = [];
 var maxRequestQueueLength = 100;
@@ -220,7 +220,10 @@ if ( typeof( txCfgPtr.invokeCheck ) !== 'undefined' ) {
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] invokeCheck: %j', Nid, channel.getName(), org, pid, invokeCheck);
 
 var channelID = uiContent.channelID;
-chaincode_id = uiContent.chaincodeID+channelID;
+chaincode_id = uiContent.chaincodeID
+if (channelID){
+    chaincode_id = uiContent.chaincodeID+channelID;
+}
 chaincode_ver = uiContent.chaincodeVer;
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] chaincode_id: %s', Nid, channel.getName(), org, pid, chaincode_id );
 

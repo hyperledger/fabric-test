@@ -1523,7 +1523,8 @@ async function performance_main() {
             var invokeType = txCfgPtr.invokeType.toUpperCase();
             logger.info('nProcPerOrg ', nProcPerOrg);
             for (var j = 0; j < nProcPerOrg; j++) {
-                var workerProcess = child_process.spawn('node', ['./pte-execRequest.js', j, Nid, uiFile, tStart, org, PTEid]);
+                const pteExecPath = path.join(__dirname, 'pte-execRequest.js')
+                var workerProcess = child_process.spawn('node', [pteExecPath, j, Nid, uiFile, tStart, org, PTEid]);
 
                 workerProcess.stdout.on('data', function (data) {
                     logger.info('stdout: ' + data);
