@@ -66,10 +66,15 @@ class System_Tests_Kafka_Couchdb_TLS_12hr(unittest.TestCase):
         returncode = subprocess.call("./operator.sh -t samplecc_go_12hr", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
+        # First check if the test finished and created the report file; then check it for accurate counts
+        logfilelist = subprocess.check_output("ls", cwd=logs_directory, shell=True)
+        self.assertIn("samplecc_go_2chan_12hr_i_pteReport.txt", logfilelist, msg="Test did not finish; samplecc_go_2chan_12hr_i_pteReport.txt log file not found")
+
         count = subprocess.check_output(
                 "grep \"CONSTANT INVOKE Overall failures: proposal 0 transactions 0\" samplecc_go_2chan_12hr_i_pteReport.txt | wc -l",
                 cwd=logs_directory, shell=True)
-        self.assertEqual(int(count.strip()), 1, msg=invokeSendFailure)
+        self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
+
 
     def test_6tearDownNetwork(self):
         '''

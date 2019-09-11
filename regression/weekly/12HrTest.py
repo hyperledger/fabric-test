@@ -25,29 +25,49 @@ class TimedRun_12Hr(unittest.TestCase):
 
         returncode = subprocess.call("./networkLauncher.sh -a down", cwd=nl_directory, shell=True)
 
+        # We should see a logfile created
+        returncode = subprocess.call("ls FAB-7204-4i_*.log", cwd=logs_directory, shell=True)
+        self.assertEqual(returncode, 0, msg="Test Failed to run; cannot find log file fabric-test/tools/PTE/CITest/Logs/FAB-7204-4i_*.log")
+
         # We should see "pte-main:completed" in the PTE output log
         # exactly once for each test driver that completes successfully.
         # For this testcase, there are two drivers, as defined in
         # PTE/CITest/FAB-7204-4i/samplejs/PTEMgr-FAB-7204-4i-TLS.txt
         # Thus we must assert 2.
-        allThreadsCompleted = subprocess.check_output(
-                "grep \"pte-main:completed:\" FAB-7204-4i*.log | wc -l",
+        mainCompleted = subprocess.check_output(
+                "grep \"pte-main:completed:\" FAB-7204-4i_*.log | wc -l",
                 cwd=logs_directory, shell=True)
-        self.assertEqual(int(allThreadsCompleted.strip()), 2)
+        self.assertEqual(int(mainCompleted.strip()), 2)
 
-        # Since all threads completed, we know the output logfile must contain a line
-        # for each thread, containing "pte-exec:completed". (There could actually
-        # be many lines with pte-exec:completed, more than one per thread.) We
-        # can determine if the test PASSED (which is better than merely completed)
-        # if we received a notification event for every transaction sent); this
-        # means there can be no errors or timeouts. We know the test passed if
-        # there is NO trailing colon with suffix string, such as:
-        #     pte-exec:completed:error
-        #     pte-exec:completed:timeout
-        threadsWithProblems = subprocess.check_output(
-                "grep \"pte-exec:completed:\" FAB-7204-4i*.log | wc -l",
+        # We should also see "pte-exec:completed" for each thread.
+        # (There could actually be more than one per thread.)
+        # Ensure we can grep at least one as a sanity check.
+
+        returncode = subprocess.call(
+                "grep \"pte-exec:completed\" FAB-7204-4i_*.log",
                 cwd=logs_directory, shell=True)
-        self.assertEqual(int(threadsWithProblems.strip()), 0)
+        self.assertEqual(returncode, 0, msg="Test Failed; threads did not complete; check for errors in fabric-test/tools/PTE/CITest/Logs/FAB-7204-4i_*.log")
+
+        # check if the test finished and created the report file; then check it for accurate counts
+        logfilelist = subprocess.check_output("ls", cwd=logs_directory, shell=True)
+        self.assertIn("FAB-7204-4i-pteReport.log", logfilelist, msg="Test did not finish; fabric-test/tools/PTE/CITest/Logs/FAB-7204-4i-pteReport.log file not found")
+
+        # ensure the summary report lines were generated, including the line listing the invoke failures
+        returncode = subprocess.call(
+                "grep \"INVOKE Overall failures:\" FAB-7204-4i-pteReport.log",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(returncode, 0, msg="Test Failed; pteReport does not contain expected output summary lines; check for errors in fabric-test/tools/PTE/CITest/Logs/FAB-7204-4i*.log")
+
+        # ensure there were no failures with the proposals (responses from peers) or the transactions (responses from orderers)
+        count = subprocess.check_output(
+                "grep \"CONSTANT INVOKE Overall failures: proposal 0 transactions 0\" FAB-7204-4i-pteReport.log | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg="Test Failed: INVOKE failures; refer to fabric-test/tools/PTE/CITest/Logs/FAB-7204-4i*.log for details")
+
+        count = subprocess.check_output(
+                "grep \"CONSTANT INVOKE Overall TEST RESULTS PASSED\" FAB-7204-4i-pteReport.log | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg="TEST RESULTS FAILED; refer to fabric-test/tools/PTE/CITest/Logs/FAB-7204-4i*.log for details")
 
         # Note: grep command returns exit code 1 whenever the grepped count is
         # zero, which would cause a CallProcessError and prevent us from
@@ -62,5 +82,5 @@ class TimedRun_12Hr(unittest.TestCase):
         # testcases) to verify exact transaction totals, since we cannot know
         # exactly how many to expect. The only additional thing a tester
         # could do is to manually look for reasonable numbers in the
-        # Test Summary Report in the output file, result_FAB-7204-4i.log.
+        # Test Summary Report in the output file, FAB-7204-4i-pteReport.log.
         # Note: we do expect each thread to send SIMILAR numbers of TXs.
