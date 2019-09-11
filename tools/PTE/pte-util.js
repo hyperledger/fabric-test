@@ -114,7 +114,7 @@ function isEmpty(obj) {
 
 }
 
-// get connection profiles from directory cpPath
+// get connection profiles from directory cpPath or a single connection profile file
 function getConnProfileList(cpPath) {
 
     var cpList = [];
