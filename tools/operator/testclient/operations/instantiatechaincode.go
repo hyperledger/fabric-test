@@ -67,12 +67,16 @@ type GetMSPID struct {
 	} `yaml:"organizations,omitempty"`
 }
 
-//InstantiateCC -- To instantiate chaincode with the objects created
-func (i InstantiateCCUIObject) InstantiateCC(config inputStructs.Config, tls string) error {
+//InstantiateCC -- To instantiate/upgrade chaincode with the objects created
+func (i InstantiateCCUIObject) InstantiateCC(config inputStructs.Config, tls, action string) error {
 
 	var instantiateCCObjects []InstantiateCCUIObject
-	for index := 0; index < len(config.InstantiateCC); index++ {
-		ccObjects, err := i.generateInstantiateCCObjects(config.InstantiateCC[index], config.Organizations, tls)
+	configObject := config.InstantiateCC
+	if action == "upgrade"{
+		configObject = config.UpgradeCC
+	}
+	for index := 0; index < len(configObject); index++ {
+		ccObjects, err := i.generateInstantiateCCObjects(configObject[index], config.Organizations, tls, action)
 		if err != nil {
 			return err
 		}
@@ -85,34 +89,34 @@ func (i InstantiateCCUIObject) InstantiateCC(config inputStructs.Config, tls str
 	return nil
 }
 
-//generateInstantiateCCObjects -- To generate chaincode objects for instantiation
-func (i InstantiateCCUIObject) generateInstantiateCCObjects(ccObject inputStructs.InstantiateCC, organizations []inputStructs.Organization, tls string) ([]InstantiateCCUIObject, error) {
+//generateInstantiateCCObjects -- To generate chaincode objects for instantiation/upgrade
+func (i InstantiateCCUIObject) generateInstantiateCCObjects(ccObject inputStructs.InstantiateCC, organizations []inputStructs.Organization, tls, action string) ([]InstantiateCCUIObject, error) {
 
 	var instantiateCCObjects []InstantiateCCUIObject
 	var err error
 	if ccObject.ChannelPrefix != "" && ccObject.NumChannels > 0 {
-		instantiateCCObjects, err = i.createInstantiateCCObjectIfChanPrefix(ccObject, organizations, tls)
+		instantiateCCObjects, err = i.createInstantiateCCObjectIfChanPrefix(ccObject, organizations, tls, action)
 		if err != nil {
 			return instantiateCCObjects, err
 		}
 		return instantiateCCObjects, nil
 	}
 	orgNames := strings.Split(ccObject.Organizations, ",")
-	instantiateCCObjects, err = i.createInstantiateCCObjects(orgNames, ccObject.ChannelName, tls, organizations, ccObject)
+	instantiateCCObjects, err = i.createInstantiateCCObjects(orgNames, ccObject.ChannelName, tls, action, organizations, ccObject)
 	if err != nil {
 		return instantiateCCObjects, err
 	}
 	return instantiateCCObjects, nil
 }
 
-//createInstantiateCCObjects -- To create chaincode objects for instantiation per channel
-func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, channelName, tls string, organizations []inputStructs.Organization, ccObject inputStructs.InstantiateCC) ([]InstantiateCCUIObject, error) {
+//createInstantiateCCObjects -- To create chaincode objects for instantiation/upgrade per channel
+func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, channelName, tls, action string, organizations []inputStructs.Organization, ccObject inputStructs.InstantiateCC) ([]InstantiateCCUIObject, error) {
 
 	var instantiateCCObjects []InstantiateCCUIObject
 	for _, orgName := range orgNames {
 		orgName = strings.TrimSpace(orgName)
-		i = InstantiateCCUIObject{TransType: "instantiate", TLS: tls, ConnProfilePath: paths.GetConnProfilePathForOrg(orgName, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
-		i.ChannelOpt = ChannelOptions{Name: channelName, Action: "create", OrgName: []string{orgName}}
+		i = InstantiateCCUIObject{TransType: action, TLS: tls, ConnProfilePath: paths.GetConnProfilePathForOrg(orgName, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
+		i.ChannelOpt = ChannelOptions{Name: channelName, OrgName: []string{orgName}}
 		i.DeployOpt = InstantiateDeployOptions{Function: "init", Arguments: strings.Split(ccObject.CCFcnArgs, ",")}
 		i.TimeOutOpt = TimeOutOptions{PreConfig: ccObject.TimeOutOpt.PreConfig, Request: ccObject.TimeOutOpt.Request}
 		if ccObject.TimeOutOpt.PreConfig == "" {
@@ -135,14 +139,14 @@ func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, cha
 }
 
 //createInstantiateCCObjectIfChanPrefix -- To create chaincode objects if channel prefix and number of channels are given
-func (i InstantiateCCUIObject) createInstantiateCCObjectIfChanPrefix(ccObject inputStructs.InstantiateCC, organizations []inputStructs.Organization, tls string) ([]InstantiateCCUIObject, error) {
+func (i InstantiateCCUIObject) createInstantiateCCObjectIfChanPrefix(ccObject inputStructs.InstantiateCC, organizations []inputStructs.Organization, tls, action string) ([]InstantiateCCUIObject, error) {
 
 	var instantiateCCObjects []InstantiateCCUIObject
 	var channelName string
 	for j := 0; j < ccObject.NumChannels; j++ {
 		channelName = fmt.Sprintf("%s%s", ccObject.ChannelPrefix, strconv.Itoa(j))
 		orgNames := strings.Split(ccObject.Organizations, ",")
-		ccObjects, err := i.createInstantiateCCObjects(orgNames, channelName, tls, organizations, ccObject)
+		ccObjects, err := i.createInstantiateCCObjects(orgNames, channelName, tls, action, organizations, ccObject)
 		if err != nil {
 			return instantiateCCObjects, err
 		}

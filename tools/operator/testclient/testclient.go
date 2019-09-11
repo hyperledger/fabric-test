@@ -72,11 +72,11 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 			if err != nil {
 				logger.CRIT(err, "Failed to install chaincode; testInputFilePath = ", testInputFilePath)
 			}
-		case "instantiate":
+		case "instantiate", "upgrade":
 			var instantiateCCUIObject operations.InstantiateCCUIObject
-			err := instantiateCCUIObject.InstantiateCC(config, tls)
+			err := instantiateCCUIObject.InstantiateCC(config, tls, action)
 			if err != nil {
-				logger.CRIT(err, "Failed to instantiate chaincode")
+				logger.CRIT(err, "Failed to ", action, "chaincode")
 			}
 		default:
 			logger.CRIT(nil, "Incorrect Unknown (", action, ").Supported actions:", supportedActions)
