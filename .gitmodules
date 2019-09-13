@@ -1,18 +1,18 @@
 [submodule "fabric"]
 	path = fabric
-	url = https://gerrit.hyperledger.org/r/fabric
+	url = https://github.com/hyperledger/fabric
 [submodule "fabric-ca"]
 	path = fabric-ca
-	url = https://gerrit.hyperledger.org/r/fabric-ca
+	url = https://github.com/hyperledger/fabric-ca
 [submodule "cello"]
 	path = cello
-	url = https://gerrit.hyperledger.org/r/cello
+	url = https://github.com/hyperledger/cello
 [submodule "fabric-sdk-node"]
 	path = fabric-sdk-node
-	url = https://gerrit.hyperledger.org/r/fabric-sdk-node
+	url = https://github.com/hyperledger/fabric-sdk-node
 [submodule "fabric-samples"]
 	path = fabric-samples
-	url = https://gerrit.hyperledger.org/r/fabric-samples
+	url = https://github.com/hyperledger/fabric-samples
 [submodule "fabric-sdk-java"]
 	path = fabric-sdk-java
-	url = https://gerrit.hyperledger.org/r/fabric-sdk-java
+	url = https://github.com/hyperledger/fabric-sdk-java
