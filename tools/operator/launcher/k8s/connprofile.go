@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
@@ -112,6 +112,7 @@ func (k K8s) ordererOrganizations(config networkspec.Config) (map[string]network
 	ordererOrgsPath := paths.OrdererOrgsDir(artifactsLocation)
 	var err error
 	var orderer networkspec.Orderer
+	var connProfile connectionprofile.ConnProfile
 	var portNumber, nodeIP string
 	protocol := "grpc"
 	if config.TLS == "true" || config.TLS == "mutual" {
@@ -130,9 +131,26 @@ func (k K8s) ordererOrganizations(config networkspec.Config) (map[string]network
 			if err != nil {
 				return orderers, err
 			}
-			orderer = networkspec.Orderer{MSPID: ordererOrg.MSPID, URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber), AdminPath: paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/users/Admin@%s/msp", orgName, orgName))}
+			orderer = networkspec.Orderer{MSPID: ordererOrg.MSPID, URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber)}
 			orderer.GrpcOptions.SslTarget = ordererName
-			orderer.TLSCACerts.Path = paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/orderers/%s.%s/msp/tlscacerts/tlsca.%s-cert.pem", orgName, ordererName, orgName, orgName))
+			tlscaCertPath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/orderers/%s.%s/msp/tlscacerts/tlsca.%s-cert.pem", orgName, ordererName, orgName, orgName))
+			cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
+			if err != nil {
+				return orderers, err
+			}
+			orderer.TLSCACerts.Pem = cert
+			adminCertPath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/users/Admin@%s/msp/signcerts/Admin@%s-cert.pem", orgName, orgName, orgName))
+			cert, err = connProfile.GetCertificateFromFile(adminCertPath)
+			if err != nil {
+				return orderers, err
+			}
+			orderer.AdminCert = cert
+			privKeyPath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/users/Admin@%s/msp/keystore/priv_sk", orgName, orgName))
+			cert, err = connProfile.GetCertificateFromFile(privKeyPath)
+			if err != nil {
+				return orderers, err
+			}
+			orderer.PrivateKey = cert
 			orderers[ordererName] = orderer
 		}
 	}
@@ -143,6 +161,7 @@ func (k K8s) certificateAuthorities(peerOrg networkspec.PeerOrganizations, confi
 
 	CAs := make(map[string]networkspec.CertificateAuthority)
 	var err error
+	var connProfile connectionprofile.ConnProfile
 	var CA networkspec.CertificateAuthority
 	var portNumber, nodeIP string
 	protocol := "http"
@@ -162,7 +181,12 @@ func (k K8s) certificateAuthorities(peerOrg networkspec.PeerOrganizations, confi
 			return CAs, err
 		}
 		CA = networkspec.CertificateAuthority{URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber), CAName: caName}
-		CA.TLSCACerts.Path = paths.JoinPath(paths.PeerOrgsDir(artifactsLocation), fmt.Sprintf("%s/ca/ca.%s-cert.pem", orgName, orgName))
+		tlscaCertPath := paths.JoinPath(paths.PeerOrgsDir(artifactsLocation), fmt.Sprintf("%s/ca/ca.%s-cert.pem", orgName, orgName))
+		cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
+		if err != nil {
+			return CAs, err
+		}
+		CA.TLSCACerts.Pem = cert
 		CA.HTTPOptions.Verify = false
 		CA.Registrar.EnrollID, CA.Registrar.EnrollSecret = "admin", "adminpw"
 		CAs[fmt.Sprintf("ca%d", i)] = CA
@@ -175,6 +199,7 @@ func (k K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, config 
 	var err error
 	var peer networkspec.Peer
 	var portNumber, nodeIP string
+	var connProfile connectionprofile.ConnProfile
 	peers := make(map[string]networkspec.Peer)
 	protocol := "grpc"
 	peerOrgsLocation := paths.PeerOrgsDir(config.ArtifactsLocation)
@@ -193,7 +218,12 @@ func (k K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, config 
 		}
 		peer = networkspec.Peer{URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber)}
 		peer.GrpcOptions.SslTarget = peerName
-		peer.TLSCACerts.Path = paths.JoinPath(peerOrgsLocation, fmt.Sprintf("%s/tlsca/tlsca.%s-cert.pem", peerorg.Name, peerorg.Name))
+		tlscaCertPath := paths.JoinPath(peerOrgsLocation, fmt.Sprintf("%s/tlsca/tlsca.%s-cert.pem", peerorg.Name, peerorg.Name))
+		cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
+		if err != nil {
+			return peers, err
+		}
+		peer.TLSCACerts.Pem = cert
 		peers[peerName] = peer
 	}
 	return peers, nil
@@ -224,7 +254,11 @@ func (k K8s) GenerateConnectionProfiles(config networkspec.Config) error {
 		for k := range ca {
 			caList = append(caList, k)
 		}
-		org := connProfile.Organization(peerorg, caList)
+		org, err := connProfile.Organization(peerorg, caList)
+		if err != nil {
+			logger.ERROR("Failed to get the organization details")
+			return err
+		}
 		organizations[peerorg.Name] = org
 		connProfile.Organizations = organizations
 		err = connProfile.GenerateConnProfilePerOrg(peerorg.Name)
