@@ -26,7 +26,6 @@
 #   - nodeenv                  - clone the fabric-chaincode-node repository and build the nodeenv image.
 #   - svt-daily-behave-tests   - pulls the images, binaries from Nexus and runs the Behave feature tests.
 #   - svt-daily-pte-tests      - pulls the images, binaries from Nexus and runs the PTE Performance tests.
-#   - svt-daily-ote-tests      - clones fabric, pulls the images, runs the OTE test suite.
 #   - svt-daily-lte-tests      - pulls the images, runs the LTE test suite.
 #   - svt-daily-ca-tests       - pulls the images, runs the CA test suite.
 #   - svt-weekly-pte-12hr-test - pulls the images, binaries from Nexus and runs the weekly 12hr PTE test.
@@ -159,7 +158,7 @@ smoke-tests:
 
 .PHONY: daily-tests
 daily-tests:
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh; ./runPteTestSuite.sh; ./runOteTestSuite.sh; ./runLteTestSuite.sh; ./runCATestSuite.sh
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh; ./runPteTestSuite.sh; ./runLteTestSuite.sh; ./runCATestSuite.sh
 
 .PHONY: interop-tests
 interop-tests:
@@ -234,10 +233,6 @@ svt-daily-behave-tests: pre-req fabric pull-images pull-binaries pull-thirdparty
 .PHONY: svt-daily-pte-tests
 svt-daily-pte-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
-
-.PHONY: svt-daily-ote-tests
-svt-daily-ote-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runOteTestSuite.sh
 
 .PHONY: svt-daily-lte-tests
 svt-daily-lte-tests: pre-req fabric pull-binaries pull-thirdparty-images

@@ -1,3 +1,0 @@
-{% for ch in channelnum if ((item|int - 1) * 4) < ch|int <= (item|int * 4) %}
-sdk=node CITest/{{ testcase }}/preconfig/channels/chan{{ ch }}-create-TLS.json
-{% endfor %}
