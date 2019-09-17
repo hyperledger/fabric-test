@@ -7,8 +7,10 @@
 #
 
 # default directories
-FabricDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric"
-MSPDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+FabricDir="$FabricTestDir/fabric"
+MSPDir="$FabricTestDir/fabric/internal/cryptogen"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
@@ -71,7 +73,7 @@ nChannel=1
 HostIP1="0.0.0.0"
 comName="example.com"
 networkAction="up"
-BuildDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin
+BuildDir=$FabricTestDir/fabric/.build/bin
 peerLogLevel="ERROR"
 ordererLogLevel="ERROR"
 batchTimeOut="2s"
@@ -258,7 +260,6 @@ ORG_PROFILE=$PROFILE_STRING"orgschannel"
 
 CWD=$PWD
 echo "current working directory: $CWD"
-echo "GOPATH=$GOPATH"
 
 if [ ! -z "$orgMap" ]
 then

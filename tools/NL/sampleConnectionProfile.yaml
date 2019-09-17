@@ -5,7 +5,6 @@
 version: 1.0
 name: My network
 description: Connection Profile for an IBM Blockchain Platform Network
-gopath: GOPATH
 
 # clients
 client:

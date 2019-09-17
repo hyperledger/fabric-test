@@ -122,15 +122,6 @@ done
 
 
 echo "nOrderer=$nOrderer, nPeersPerOrg=$nPeersPerOrg, nOrg=$nOrg, nChannel=$nChannel, nCA=$nCA"
-echo "GOPATH: $GOPATH"
-if echo "$MSPBaseDir" | grep -q "$GOPATH"; then
-    echo "remove gopath from MSPBaseDir"
-    prelength=${#GOPATH}
-    len1=$[prelength+2]
-    len2=${#MSPBaseDir}
-    MM=$(echo $MSPBaseDir | cut -c $len1-$len2)
-    MSPBaseDir=$MM"/crypto-config"
-fi
 echo "MSPBaseDir=$MSPBaseDir"
 nOrgPerChannel=$nOrg
 echo "nOrgPerChannel: $nOrgPerChannel"
@@ -337,8 +328,6 @@ do
     tmp="{"
     echo "$tmp" >> $scOfile
     tmp="    \"test-network\": {" >> $scOfile
-    echo "$tmp" >> $scOfile
-    tmp="        \"gopath\": \"GOPATH\"," >> $scOfile
     echo "$tmp" >> $scOfile
 
     ## orderers

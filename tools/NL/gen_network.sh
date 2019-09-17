@@ -54,7 +54,9 @@ nPeerPerOrg=1
 nOrg=1
 nOrderer=1
 nCA=0
-MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+MSPDIR=$FabricTestDir"/fabric/internal/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 TLSEnabled="disabled"
 MutualTLSEnabled="disabled"
@@ -238,7 +240,6 @@ node json2yml.js $jsonFILE $nPeerPerOrg $nOrderer $nBroker $nZoo $nOrg $dbType $
 #fix CA _sk in docker-compose.yml
 CWD=$PWD
 echo $CWD
-echo "GOPATH: $GOPATH"
 
 myOS=`uname -s`
 if [ "$myOS" == 'Darwin' ]; then

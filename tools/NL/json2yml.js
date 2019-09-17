@@ -6,19 +6,16 @@
 
 
 var fs = require('fs');
+var path = require('path')
 
 var cfgFile = process.argv[2];
 //var cfgFile = __dirname + "/" + "network-cfg.json";
 var dFile = __dirname + "/" + "docker-compose.yml";
 fs.createWriteStream(dFile);
 
-if ( process.env.GOPATH != null ) {
-    console.log(' GOPATH= ', process.env.GOPATH);
-    GOPATHDir=process.env.GOPATH;
-}
-
+var FabricTestDir=path.join(__dirname, "../../")
 var srcMSPDir='/opt/hyperledger/fabric/msp/crypto-config';
-var MSPDir=GOPATHDir+'/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config';
+var MSPDir=path.join(FabricTestDir, 'fabric/internal/cryptogen/crypto-config');
 var CADir='/etc/hyperledger/fabric-ca-server-config';
 var CA=0;
 var CDB=0;
