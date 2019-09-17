@@ -167,40 +167,16 @@ function initDeploy(org, transType) {
          logger.error('[initDeploy] no connection profile is found for org (%s)', org);
          process.exit(1);
     }
-    var goPath = testUtil.getGoPathSubmitter(cpf);
 
-    // If language is golang, then user specifies path relative to gopath.  Note: since SDK prepends
-    // GOPATH/src to any golang chaincodePath, PTE will use it as defined in the json file.
-    // And for other chaincode languages, if user defines goPath, then they will also specify path
-    // relative to gopath.  In that case, the PTE will prepend GOPATH/src here.  Otherwise (not golang
-    // and no gopath defined) PTE uses the chaincodepath exactly as specified (user should specify an
-    // absolute path in the input json file).
-    if (language == 'golang') {
-        chaincodePath = ccDfnPtr.deploy.chaincodePath;
-    } else if (goPath !== '') {
-        chaincodePath = path.join(goPath, 'src', ccDfnPtr.deploy.chaincodePath);
-    } else {
-        chaincodePath = ccDfnPtr.deploy.chaincodePath;
-    }
+    chaincodePath = ccDfnPtr.deploy.chaincodePath;
     logger.info('chaincode language: %s, path: %s', language, chaincodePath);
 
-    // If user defines goPath, then they must also specify path relative to gopath in the input json file.
-    // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the metadataPath and
-    // collectionsConfigPath exactly as specified (user should specify an absolute path) in the input json file.
     if ((typeof( ccDfnPtr.deploy.metadataPath ) !== 'undefined')) {
-        if (goPath !== '') {
-            metadataPath = path.join(goPath, 'src', ccDfnPtr.deploy.metadataPath);
-        } else {
-            metadataPath=ccDfnPtr.deploy.metadataPath;
-        }
+        metadataPath=ccDfnPtr.deploy.metadataPath;
         logger.info('metadataPath: %s', metadataPath);
     }
     if ((typeof( ccDfnPtr.deploy.collectionsConfigPath ) !== 'undefined')) {
-        if (goPath !== '') {
-            collectionsConfigPath = path.join(goPath, 'src', ccDfnPtr.deploy.collectionsConfigPath);
-        } else {
-            collectionsConfigPath=ccDfnPtr.deploy.collectionsConfigPath;
-        }
+        collectionsConfigPath=ccDfnPtr.deploy.collectionsConfigPath;
         logger.info('collectionsConfigPath: %s', collectionsConfigPath);
     }
 }
@@ -1029,14 +1005,12 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
         process.exit(1);
     }
 
-    // If user defines goPath, then they must also specify path relative to gopath in the input json file.
-    // In that case, the PTE must prepend GOPATH/src here.  Otherwise PTE uses the channelTX exactly as
-    // specified (user should specify an absolute path) in the input json file.
-    var goPath = testUtil.getGoPathSubmitter(cpf);
-    logger.info('[createOrUpdateOneChannel] org(%s) go path: %s', channelOrgName[0], goPath);
+    logger.info('[createOrUpdateOneChannel] org(%s) go path: %s', channelOrgName[0]);
     var channelTX=channelOpt.channelTX;
-    if ( goPath !== '' ) {
-        channelTX = path.join(goPath, 'src', channelOpt.channelTX);
+    if (!fs.existsSync(channelTX)){
+        let currentPath = __dirname
+        let homeDirecotry = currentPath.split("github.com/")[0]
+        channelTX = path.join(homeDirecotry, channelTX)
     }
     logger.info('[createOrUpdateOneChannel] channelTX: ', channelTX);
     envelope_bytes = fs.readFileSync(channelTX);

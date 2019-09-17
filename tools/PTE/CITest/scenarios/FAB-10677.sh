@@ -14,7 +14,8 @@ TESTCASE="FAB-10677"
 NREQ=10000
 
 CWD=$PWD
-FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 NLDir=$FabricTestDir"/tools/NL"
 PTEDir=$FabricTestDir"/tools/PTE"
 LCPDir=$TESTCASE"-CP"

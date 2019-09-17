@@ -44,7 +44,6 @@ if (cpJsons.length === 0)
 
 var pteJson = {
   'test-network': {
-    'gopath':'GOPATH',
     'orderer': {}
   }
 };

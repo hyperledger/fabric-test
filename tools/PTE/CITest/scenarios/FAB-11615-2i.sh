@@ -30,7 +30,9 @@ PREFIX="result"   # result log prefix
 cd ../scripts
 
 #Prerequisite: This chaincode requires packages not provided by the Go standard library and hence needs vendoring
-cd $GOPATH/src/github.com/hyperledger/fabric-test
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+cd $FabricTestDir
 make pre-setup
 cd chaincodes/sbe
 govendor init

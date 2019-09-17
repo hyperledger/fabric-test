@@ -9,7 +9,8 @@ set -euo pipefail
 ########## CI test utilits ##########
 
 # common test directories
-FabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 NLDir=$FabricTestDir"/tools/NL"
 PTEDir=$FabricTestDir"/tools/PTE"
 CMDDir=$PTEDir"/CITest/scripts"

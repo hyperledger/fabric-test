@@ -37,9 +37,10 @@ NTHREAD=1
 
 # directory
 CWD=$PWD
-fabricTestDir=$GOPATH"/src/github.com/hyperledger/fabric-test"
-NLDir=$fabricTestDir"/tools/NL"
-PTEDir=$fabricTestDir"/tools/PTE"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+NLDir=$FabricTestDir"/tools/NL"
+PTEDir=$FabricTestDir"/tools/PTE"
 LCPDir=$TESTCASE"-CP"
 CPDir=$PTEDir"/"$LCPDir
 logDir=$PTEDir"/CITest/Logs"

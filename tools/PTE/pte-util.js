@@ -118,14 +118,18 @@ function isEmpty(obj) {
 function getConnProfileList(cpPath) {
 
     var cpList = [];
-    fs.readdirSync(cpPath).forEach(file => {
-        logger.info('[getConnProfileList] file', file);
-        var file_ext = path.extname(file);
-        if ((/(yml|yaml|json)$/i).test(file_ext)) {
-            var cpf=path.join(cpPath, file);
-            cpList.push(cpf);
-        }
-    });
+    if ((/(yml|yaml|json)$/i).test(cpPath)) {
+        cpList.push(cpPath)
+    } else {
+        fs.readdirSync(cpPath).forEach(file => {
+            logger.info('[getConnProfileList] file', file);
+            var file_ext = path.extname(file);
+            if ((/(yml|yaml|json)$/i).test(file_ext)) {
+                var cpf = path.join(cpPath, file);
+                cpList.push(cpf);
+            }
+        });
+    }
     logger.info('[getConnProfileList] file:', cpList);
 
     return cpList;
@@ -304,22 +308,6 @@ module.exports.getOrgEnrollSecretSubmitter=function(inPtr, org) {
     return getOrgEnrollSecret(inPtr, org);
 }
 
-function getGoPath(inPtr) {
-
-    var goPath;
-    if ( typeof(inPtr.gopath) === 'undefined' ) {
-        goPath = '';
-    } else if ( inPtr.gopath == 'GOPATH' ) {
-        goPath = process.env['GOPATH'];
-    } else {
-        goPath = inPtr.gopath;
-    }
-    return goPath;
-}
-module.exports.getGoPathSubmitter=function(inPtr) {
-    return getGoPath(inPtr);
-}
-
 function getMember(username, password, client, nid, userOrg, cpf) {
     var cpOrgs = cpf['organizations'];
     if ( 0 === getConnProfilePropCnt(cpf, 'certificateAuthorities') ) {
@@ -397,10 +385,9 @@ function getAdmin(client, nid, userOrg, cpf) {
             certPEM = cpOrgs[userOrg].admin_cert;
         } else if ((typeof cpOrgs[userOrg].adminPrivateKey !== 'undefined') &&
                    (typeof cpOrgs[userOrg].signedCert !== 'undefined')) {
-            var goPath = getGoPath(cpf);
             logger.info('[getAdmin] %s adminPrivateKey and signedCert defined', userOrg);
             if ( typeof cpOrgs[userOrg].adminPrivateKey.path !== 'undefined') {
-                keyPath = path.resolve(goPath, cpOrgs[userOrg].adminPrivateKey.path, 'keystore');
+                keyPath = path.resolve(cpOrgs[userOrg].adminPrivateKey.path, 'keystore');
                 keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
                 logger.info('[getAdmin] keyPath: %s', keyPath);
             } else if (typeof cpOrgs[userOrg].adminPrivateKey.pem !== 'undefined') {
@@ -410,7 +397,7 @@ function getAdmin(client, nid, userOrg, cpf) {
                 return null;
             }
             if ( typeof cpOrgs[userOrg].signedCert.path !== 'undefined') {
-                certPath =  path.resolve(goPath, cpOrgs[userOrg].signedCert.path, 'signcerts');
+                certPath =  path.resolve(cpOrgs[userOrg].signedCert.path, 'signcerts');
                 certPEM = Buffer.from(readAllFiles(certPath)[0]).toString();
                 logger.info('[getAdmin] certPath: %s', certPath);
             } else if (typeof cpOrgs[userOrg].signedCert.pem !== 'undefined') {
@@ -420,11 +407,10 @@ function getAdmin(client, nid, userOrg, cpf) {
                 return null;
             }
         } else if (typeof cpOrgs[userOrg].adminPath !== 'undefined') {
-            var goPath = getGoPath(cpf);
             logger.info('[getAdmin] %s adminPath defined', userOrg);
-            keyPath =  path.resolve(goPath, cpOrgs[userOrg].adminPath, 'keystore');
+            keyPath =  path.resolve(cpOrgs[userOrg].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = path.resolve(goPath, cpOrgs[userOrg].adminPath, 'signcerts');
+            certPath = path.resolve(cpOrgs[userOrg].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getAdmin] keyPath: %s', keyPath);
             logger.debug('[getAdmin] certPath: %s', certPath);
@@ -485,10 +471,9 @@ function getOrdererAdmin(client, userOrg, cpPath) {
             certPEM = orderersCPFList[ordererID].admin_cert;
         } else if ((typeof orderersCPFList[ordererID].adminPrivateKey !== 'undefined') &&
                    (typeof orderersCPFList[ordererID].signedCert !== 'undefined')) {
-            var goPath = getGoPath(cpf);
             logger.info('[getOrdererAdmin] %s adminPrivateKey and signedCert defined', ordererID);
             if ( typeof orderersCPFList[ordererID].adminPrivateKey.path !== 'undefined') {
-                keyPath = path.resolve(goPath, orderersCPFList[ordererID].adminPrivateKey.path, 'keystore');
+                keyPath = path.resolve(orderersCPFList[ordererID].adminPrivateKey.path, 'keystore');
                 keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
                 logger.info('[getOrdererAdmin] %s keyPath: %s', ordererID, keyPath);
             } else if (typeof orderersCPFList[ordererID].adminPrivateKey.pem !== 'undefined') {
@@ -498,7 +483,7 @@ function getOrdererAdmin(client, userOrg, cpPath) {
                 return null;
             }
             if ( typeof orderersCPFList[ordererID].signedCert.path !== 'undefined') {
-                certPath =  path.resolve(goPath, orderersCPFList[ordererID].signedCert.path, 'signcerts');
+                certPath =  path.resolve(orderersCPFList[ordererID].signedCert.path, 'signcerts');
                 certPEM = Buffer.from(readAllFiles(certPath)[0]).toString();
                 logger.info('[getOrdererAdmin] %s certPath: %s', ordererID, certPath);
             } else if (typeof orderersCPFList[ordererID].signedCert.pem !== 'undefined') {
@@ -508,20 +493,18 @@ function getOrdererAdmin(client, userOrg, cpPath) {
                 return null;
             }
         } else if (typeof orderersCPFList.adminPath !== 'undefined') {
-            var goPath = getGoPath(cpf);
             logger.info('[getOrdererAdmin] %s global orderer adminPath defined', userOrg);
-            keyPath = path.resolve(goPath, orderersCPFList.adminPath, 'keystore');
+            keyPath = path.resolve(orderersCPFList.adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = path.resolve(goPath, orderersCPFList.adminPath, 'signcerts');
+            certPath = path.resolve(orderersCPFList.adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
             logger.debug('[getOrdererAdmin] certPath: %s', certPath);
         } else if (typeof orderersCPFList[ordererID].adminPath !== 'undefined') {
-            var goPath = getGoPath(cpf);
             logger.info('[getOrdererAdmin] %s local orderer adminPath defined', userOrg);
-            keyPath = path.resolve(goPath, orderersCPFList[ordererID].adminPath, 'keystore');
+            keyPath = path.resolve(orderersCPFList[ordererID].adminPath, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
-            certPath = path.resolve(goPath, orderersCPFList[ordererID].adminPath, 'signcerts');
+            certPath = path.resolve(orderersCPFList[ordererID].adminPath, 'signcerts');
             certPEM = readAllFiles(certPath)[0];
             logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
             logger.debug('[getOrdererAdmin] certPath: %s', certPath);
@@ -549,6 +532,11 @@ function readFile(path) {
 }
 
 function readAllFiles(dir) {
+
+    var currentDirectory = __dirname
+    var homeDirectory = currentDirectory.split("src/github.com")[0]
+    dir = dir.split("PTE/")[1]
+    dir = path.join(homeDirectory, dir)
     var files = fs.readdirSync(dir);
     var certs = [];
     files.forEach((file_name) => {
@@ -648,8 +636,8 @@ function getTLSCert(key, subkey, cpf, cpPath) {
     }
     var cpOrgs = cpf['organizations'];
     var cpPeers = cpf['peers'];
-    var goPath = getGoPath(cpf);
-
+    var currentDirectory = __dirname
+    var homeDirectory = currentDirectory.split("src/github.com")[0]
     var cpPtr;
     if ( cpPeers.hasOwnProperty(subkey) ) {
         cpPtr = cpPeers;
@@ -669,7 +657,7 @@ function getTLSCert(key, subkey, cpf, cpPath) {
             data = cpPtr[subkey].tlsCACerts['pem'];
         } else if ( typeof(cpPtr[subkey].tlsCACerts.path) != 'undefined' ) {
             //tlscerts is a path
-            var caRootsPath = path.resolve(goPath, cpPtr[subkey].tlsCACerts['path']);
+            var caRootsPath = path.join(homeDirectory, cpPtr[subkey].tlsCACerts['path']);
             if (fs.existsSync(caRootsPath)) {
                 //caRootsPath is a cert path
                 data = fs.readFileSync(caRootsPath);

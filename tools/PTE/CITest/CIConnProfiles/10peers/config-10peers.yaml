@@ -5,7 +5,6 @@
 version: 1.0
 name: My network
 description: Connection Profile used by CI tests for a blockchain network with 4 orderers, 2 peer org with 10 peers each
-gopath: GOPATH
 
 # clients
 client:
