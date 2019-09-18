@@ -15,8 +15,7 @@ import (
 
 var networkSpecPath = flag.String("i", "", "Network spec input file path (required)")
 var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
-var action = flag.String("a", "", "Set action (Available options createChannelTxn, migrate, healthz)")
-var componentName = flag.String("c", "", "Component name of a peer or orderer (Use with healthcheck action; omit to check all components)")
+var action = flag.String("a", "", "Set action (Available options createChannelTxn, migrate, health)")
 
 func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 
@@ -27,7 +26,7 @@ func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 	}
 }
 
-func doAction(action, env, kubeConfigPath, componentName string, config networkspec.Config) {
+func doAction(action, env, kubeConfigPath string, config networkspec.Config) {
 
 	var err error
 	switch action {
@@ -81,5 +80,5 @@ func main() {
 	if err != nil {
 		logger.CRIT(err)
 	}
-	doAction(*action, env, *kubeConfigPath, *componentName, config)
+	doAction(*action, env, *kubeConfigPath, config)
 }
