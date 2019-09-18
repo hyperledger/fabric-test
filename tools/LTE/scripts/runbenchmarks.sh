@@ -5,17 +5,20 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric"
 ## check if fabric directory is available
-if [ ! -d "$GOPATH/src/github.com/hyperledger/fabric" ]; then
-    printf "Error: fabric directory not available in \$GOAPTH/src/github.com/hyperledger/fabric.\nPlease clone fabric repository in \$GOPATH before running LTE.\n"
+if [ ! -d $FabricDir ]; then
+    printf "Error: \$FabricDir directory not available.\nPlease clone fabric repository before running LTE.\n"
     exit 1
   fi
 echo "found fabric repo...."
+
 ## Copy this folder under fabric/test/tools
-rm -r $GOPATH/src/github.com/hyperledger/fabric/test/tools/LTE
-mkdir -p $GOPATH/src/github.com/hyperledger/fabric/test/tools
-cp -R ../../LTE $GOPATH/src/github.com/hyperledger/fabric/test/tools
-cd $GOPATH/src/github.com/hyperledger/fabric/test/tools/LTE/scripts
+rm -r $FabricDir/test/tools/LTE
+mkdir -p $FabricDir/test/tools
+cp -R ../../LTE $FabricDir/test/tools
+cd $FabricDir/test/tools/LTE/scripts
 
 source ./benchmarks.sh
 

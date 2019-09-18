@@ -4,7 +4,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-OUTPUT_DIR_ROOT="$GOPATH/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+OUTPUT_DIR_ROOT=$FabricTestDir"/tools/LTE/TestResults"
 DataDir="/tmp/fabric/test/tools/LTE/data"
 UseJSONFormat="false"
 NumChains=10
