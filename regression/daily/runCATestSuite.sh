@@ -4,7 +4,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-DAILYDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/daily"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+DAILYDIR="$FabricTestDir/regression/daily"
 cd $DAILYDIR
 
 archiveCA() {
@@ -13,7 +15,7 @@ if [ ! -z $GERRIT_BRANCH ] && [ ! -z $WORKSPACE ]; then
     echo "------> Archiving generated logs"
     rm -rf $WORKSPACE/archives
     mkdir -p $WORKSPACE/archives/CA_Test_XML
-    cp -r $GOPATH/src/github.com/hyperledger/fabric-test/regression/daily/*.xml $WORKSPACE/archives/CA_Test_XML/
+    cp -r $FabricTestDir/regression/daily/*.xml $WORKSPACE/archives/CA_Test_XML/
 fi
 }
 

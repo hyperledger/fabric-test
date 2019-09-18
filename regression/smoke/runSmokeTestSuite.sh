@@ -4,7 +4,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-SMOKEDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/smoke"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+SMOKEDIR="$FabricTestDir/regression/smoke"
 cd $SMOKEDIR
 
 echo "======== Behave feature and system tests ========"
@@ -16,7 +18,7 @@ echo "======== Ledger component performance tests using LTE ========"
 py.test -v --junitxml results_ledger_lte_smoke.xml ledger_lte_smoke.py
 
 echo "======== Performance Test using PTE and NL tools ========"
-cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE
+cd $FabricTestDir/tools/PTE
 npm config set prefix ~/npm
 npm install
 if [ $? != 0 ]; then

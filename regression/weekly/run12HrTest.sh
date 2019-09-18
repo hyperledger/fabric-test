@@ -9,11 +9,13 @@
 ######################################################################
 ### Run one group of the tests in weekly test suite.
 
-WEEKLYDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/weekly"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+WEEKLYDIR="$FabricTestDir/regression/weekly"
 cd $WEEKLYDIR
 
 echo "========== System Test Performance tests using PTE and NL tools..."
-cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE
+cd $FabricTestDir/tools/PTE
 npm install
   if [ $? != 0 ]; then
      echo "------> Failed to install npm. Cannot run pte test suite."

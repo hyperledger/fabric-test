@@ -4,7 +4,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-DAILYDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/daily"
+
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+DAILYDIR="$FabricTestDir/regression/daily"
 cd $DAILYDIR
 
 archiveLTE() {
@@ -15,11 +18,11 @@ if [ ! -z $GERRIT_BRANCH ] && [ ! -z $WORKSPACE ]; then
     rm -rf $WORKSPACE/archives
     mkdir -p $WORKSPACE/archives/LTE_Test_Logs $WORKSPACE/archives/LTE_Test_XML $WORKSPACE/archives/LTE_Test_Results/experiments/BenchmarkReadWriteTxs
     # copy all the output_Vary*.log files
-    tar cvf $WORKSPACE/archives/LTE_Test_Logs/daily.zip $GOPATH/src/github.com/hyperledger/fabric-test/regression/daily/*.log
+    tar cvf $WORKSPACE/archives/LTE_Test_Logs/daily.zip $FabricTestDir/regression/daily/*.log
     # copy the results_ledger_lte.xml file
-    cp $GOPATH/src/github.com/hyperledger/fabric-test/regression/daily/*.xml $WORKSPACE/archives/LTE_Test_XML/
+    cp $FabricTestDir/regression/daily/*.xml $WORKSPACE/archives/LTE_Test_XML/
     # copy the files of the ReadWriteTxs experiment: output_LTE.log and results.csv
-    cp $GOPATH/src/github.com/hyperledger/fabric-test/tools/LTE/TestResults/experiments/BenchmarkReadWriteTxs/* $WORKSPACE/archives/LTE_Test_Results/experiments/BenchmarkReadWriteTxs/
+    cp $FabricTestDir/tools/LTE/TestResults/experiments/BenchmarkReadWriteTxs/* $WORKSPACE/archives/LTE_Test_Results/experiments/BenchmarkReadWriteTxs/
 fi
 }
 

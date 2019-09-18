@@ -4,7 +4,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-INTEROPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/interop"
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+INTEROPDIR="$FabricTestDir/regression/interop"
 cd $INTEROPDIR
 
 echo "======== Interoperability tests... ========"
