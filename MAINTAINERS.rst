@@ -12,7 +12,7 @@ This repository is part of the Fabric project.
 +---------------------------+---------------------+------------------+----------------+-------------------------------------+
 | Latitia Haskins           | latitiah            | lhaskins         | latitiah       | latitia.haskins@gmail.com           |
 +---------------------------+---------------------+------------------+----------------+-------------------------------------+
-| Adnan Choudhury           | adnanchoudhury      |                  | adnanc         | adnan.choudhury@itpeoplecorp.com    |
+| Adnan Choudhury           | adnanchoudhury      | adnan-c          | adnanc         | adnan.choudhury@itpeoplecorp.com    |
 +---------------------------+---------------------+------------------+----------------+-------------------------------------+
 | Dongming Hwang            | dongming            | dongmingh        | dongming       | dongming@ibm.com                    |
 +---------------------------+---------------------+------------------+----------------+-------------------------------------+
