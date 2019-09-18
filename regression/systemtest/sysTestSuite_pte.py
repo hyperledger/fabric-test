@@ -18,13 +18,11 @@ queryCountFailure =     "Error: incorrect number of QUERY transactions sent or r
 
 class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
 
-
     def test_01downNetwork(self):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
-
 
     def test_02launchNetwork(self):
 
@@ -76,7 +74,6 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=queryCountFailure)
 
-
     def test_07sbecc_go_2chan_endorse(self):
 
         # Run the test scenario: Execute invokes and query tests.
@@ -101,7 +98,33 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
 
-    def test_09downNetwork(self):
+        # migrate from kafka to etcdraft network
+        # Migrate all channels specified in the networkspec file
+    def test_09raftMigration(self):
+
+        # Migrate the network from kafka to raft
+        returncode = subprocess.call("./operator.sh -t migrate", cwd=k8s_testsuite, shell=True)
+        self.assertEqual(returncode, 0, msg=testScriptFailed)
+
+    # Send transactions after migrate from kafka to etcdraft network
+    def test_10samplecc_orgAnchor_2chan(self):
+
+        # Run the test scenario: Execute invokes and query tests.
+        returncode = subprocess.call("./operator.sh -t samplecc_go_2chan", cwd=k8s_testsuite, shell=True)
+        self.assertEqual(returncode, 0, msg=testScriptFailed)
+
+        # check the counts
+        count = subprocess.check_output(
+                "grep \"CONSTANT INVOKE Overall transactions: sent 8000 received 8000\" samplecc_go_2chan_i_pteReport.txt | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
+
+        count = subprocess.check_output(
+                "grep \"CONSTANT QUERY Overall transactions: sent 8000 received 8000 failures 0\" samplecc_go_2chan_q_pteReport.txt | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg=queryCountFailure)
+
+    def test_11downNetwork(self):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
@@ -109,14 +132,11 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
 
 class System_Tests_Raft_Couchdb_Mutual(unittest.TestCase):
 
-
     def test_01downNetwork(self):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/raft_couchdb_mutualtls_servdisc.yaml", cwd=k8s_testsuite, shell=True)
-        
         self.assertEqual(returncode, 0, msg=testScriptFailed)
-
 
     def test_02launchNetwork(self):
 
@@ -184,19 +204,15 @@ class System_Tests_Raft_Couchdb_Mutual(unittest.TestCase):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/raft_couchdb_mutualtls_servdisc.yaml", cwd=k8s_testsuite, shell=True)
-
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
 class System_Tests_Kafka_Leveldb_NOTLS(unittest.TestCase):
-
 
     def test_01downNetwork(self):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_leveldb_notls.yaml", cwd=k8s_testsuite, shell=True)
-        
         self.assertEqual(returncode, 0, msg=testScriptFailed)
-
 
     def test_02launchNetwork(self):
 
@@ -264,5 +280,4 @@ class System_Tests_Kafka_Leveldb_NOTLS(unittest.TestCase):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_leveldb_notls.yaml", cwd=k8s_testsuite, shell=True)
-
         self.assertEqual(returncode, 0, msg=testScriptFailed)

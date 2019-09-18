@@ -218,6 +218,12 @@ samplecc_go_98MB_TX() {
   rm -f "$PTEDir"/pteReport.txt
 }
 
+migrate() {
+  cd "$FabricTestDir"/tools/operator || exit 1
+  echo "-------> kafka to etcdraft migration"
+  go run main.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$3" -k "$KUBECONFIG" -a migrate > "$LogsDir"/"$2"_kafka_2_raft_migrate.log
+  }
+
 # Install npm
 if [ "$preReq" == "y" ]; then
   npmInstall
@@ -261,5 +267,5 @@ if [ "$insta" == "y" ]; then
 fi
 # Execute Input testcase
 if [ ! -z "$testCase" ]; then
-  $testCase "$tls_mode" "$nwspec_name"
+  $testCase "$tls_mode" "$nwspec_name" "$nws"
 fi

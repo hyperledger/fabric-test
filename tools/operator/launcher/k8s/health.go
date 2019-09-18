@@ -19,6 +19,7 @@ func (k K8s) VerifyContainersAreRunning() error {
 	logger.INFO("Check status of all the pod to verify they are running")
 	var status string
 	count := 0
+	timeout := 15
 	ticker := time.NewTicker(1 * time.Minute)
 	defer ticker.Stop()
 	return func() error {
@@ -40,8 +41,8 @@ func (k K8s) VerifyContainersAreRunning() error {
 					return nil
 				}
 				count++
-				logger.INFO("Waiting up to 10 minutes for pods to be up and running; minute = ", strconv.Itoa(count))
-				if count >= 10 {
+				logger.INFO("Waiting up to ",strconv.Itoa(timeout)," minutes for pods to be up and running; minute =", strconv.Itoa(count))
+				if count >= timeout {
 					containers := strings.Split(output, "\n")
 					err = k.getReasonsPodsNotRunning(containers)
 					logger.ERROR("Waiting time exceeded")

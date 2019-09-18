@@ -103,8 +103,8 @@ k8s:
   #! persistent volumes. When false is used, backup will not be configured.
   #! When local is used, hostPath will be used to store the data from fabric containers
   #! to worker nodes on which pods are running.
-  data_persistence: false
-  storage_class: default
+  data_persistence: true
+  storage_class: ibmc-file-gold
   storage_capacity: 20Gi
 
   resources:

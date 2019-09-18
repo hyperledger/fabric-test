@@ -46,7 +46,7 @@ NODEPORT=$(kubectl --kubeconfig=$KUBECONFIG get -o jsonpath="{.spec.ports[0].nod
 NODEIP=$(kubectl --kubeconfig=$KUBECONFIG get nodes -o jsonpath='{ $.items[*].status.addresses[?(@.type=="ExternalIP")].address }' | cut -d' ' -f1)
 export CORE_PEER_ADDRESS=$NODEIP:$NODEPORT
 
-export FABRIC_CFG_PATH=$PWD/../../../../../../../../../ibmadmin/config/
+export FABRIC_CFG_PATH=$PWD/../../fabric/.build/config/
 
 rm -rf config
 mkdir config
@@ -82,7 +82,7 @@ do
   kubectl --kubeconfig=$KUBECONFIG delete statefulsets $i
 done
 
-kubectl --kubeconfig=$KUBECONFIG apply -f $PWD/../launcher/configFiles/fabric-k8s-pods.yaml
+kubectl --kubeconfig=$KUBECONFIG apply -f $PWD/../configFiles/fabric-k8s-pods.yaml
 
 sleep 120
 
