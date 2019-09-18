@@ -2,7 +2,8 @@
 
 REPO=$1
 # Set the working directory
-WD=$GOPATH/src/github.com/hyperledger/fabric-test
+CurrentDirectory=$(cd `dirname $0` && pwd)
+WD=$CurrentDirectory/..
 cd "$WD"
 
 RELEASE_VERSION=${RELEASE_VERSION:=latest}
@@ -80,9 +81,9 @@ echo
 echo "$PATH"
 
 # Copy new binaries to the exported PATH bin dir
-mkdir -p "$GOPATH"/src/github.com/hyperledger/fabric/.build/bin
-cp -r "$WD"/bin/* "$GOPATH"/src/github.com/hyperledger/fabric/.build/bin/
+mkdir -p "$WD"/../fabric/.build/bin
+cp -r "$WD"/bin/* "$WD"/../fabric/.build/bin/
 
 # PTE looks for binaries in fabric submodule dir
-mkdir -p "$GOPATH"/src/github.com/hyperledger/fabric-test/fabric/.build/bin
-cp -r "$WD"/bin/* "$GOPATH"/src/github.com/hyperledger/fabric-test/fabric/.build/bin/
+mkdir -p "$WD"/fabric/.build/bin
+cp -r "$WD"/bin/* "$WD"/fabric/.build/bin/
