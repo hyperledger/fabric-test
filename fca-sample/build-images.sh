@@ -34,21 +34,23 @@ if [ "$chaincodeImages" != "" ]; then
    docker rmi $chaincodeImages > /dev/null
 fi
 
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 # Perform docker clean for fabric-ca
 log "Cleaning fabric-ca docker images ..."
-cd $GOPATH/src/github.com/hyperledger/fabric-ca
+cd $FabricTestDir/../fabric-ca
 assertOnMasterBranch
 make docker-clean
 
 # Perform docker clean for fabric and rebuild
 log "Cleaning and rebuilding fabric docker images ..."
-cd $GOPATH/src/github.com/hyperledger/fabric
+cd $FabricTestDir/../fabric
 assertOnMasterBranch
 make docker-clean docker
 
 # Perform docker clean for fabric and rebuild against latest fabric images just built
 log "Rebuilding fabric-ca docker images ..."
-cd $GOPATH/src/github.com/hyperledger/fabric-ca
+cd $FabricTestDir/../fabric-ca
 FABRIC_TAG=latest make docker
 
 log "Setup completed successfully.  You may run the tests multiple times by running start.sh."

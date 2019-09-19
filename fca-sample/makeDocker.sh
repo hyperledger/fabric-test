@@ -134,7 +134,8 @@ function writeRunFabric {
    # Set samples directory relative to this script
    SAMPLES_DIR=$(dirname $(cd ${SDIR} && pwd))
    # Set fabric directory relative to GOPATH
-   FABRIC_DIR=${GOPATH}/src/github.com/hyperledger/fabric
+   CurrentDirectory=$(cd `dirname $0` && pwd)
+   FABRIC_DIR="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric"
    echo "  run:
     container_name: run
     image: hyperledger/fabric-ca-tools
