@@ -1,6 +1,8 @@
 #!/bin/bash -e
 
-WD=$GOPATH/src/github.com/hyperledger/fabric-test/feature/sdk/java
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+WD=$FabricTestDir/feature/sdk/java
 cd $WD
 
 echo "======== Build Java SDK wrapper ======"
