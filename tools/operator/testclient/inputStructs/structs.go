@@ -1,32 +1,26 @@
-package helper
+package inputStructs
 
 //Config --
 type Config struct {
-	TLS               string             `yaml:"tls,omitempty"`
-	Organizations     []Organization     `yaml:"organizations,omitempty"`
-	CreateChannel     []Channel          `yaml:"createChannel,omitempty"`
-	AnchorPeerUpdate  []AnchorPeerUpdate `yaml:"anchorPeerUpdate,omitempty"`
-	JoinChannel       []Channel          `yaml:"joinChannel,omitempty"`
-	InstallCC         []InstallCC        `yaml:"installChaincode,omitempty"`
-	InstantiateCC     []InstantiateCC    `yaml:"instantiateChaincode,omitempty"`
-	InvokeQuery       []InvokeQuery      `yaml:"invokes,omitempty"`
+	TLS              string          `yaml:"tls,omitempty"`
+	Organizations    []Organization  `yaml:"organizations,omitempty"`
+	CreateChannel    []Channel       `yaml:"createChannel,omitempty"`
+	AnchorPeerUpdate []Channel       `yaml:"anchorPeerUpdate,omitempty"`
+	JoinChannel      []Channel       `yaml:"joinChannel,omitempty"`
+	InstallCC        []InstallCC     `yaml:"installChaincode,omitempty"`
+	InstantiateCC    []InstantiateCC `yaml:"instantiateChaincode,omitempty"`
+	UpgradeCC        []InstantiateCC `yaml:"upgradeChaincode,omitempty"`
+	Invoke           []InvokeQuery   `yaml:"invokes,omitempty"`
+	Query            []InvokeQuery   `yaml:"queries,omitempty"`
 }
 
 //Channel --
 type Channel struct {
-	ChannelTxPath string `yaml:"channelTxPath,omitempty"`
-	ChannelName   string `yaml:"channelName,omitempty"`
-	Organizations string `yaml:"organizations,omitempty"`
-	ChannelPrefix string `yaml:"channelPrefix,omitempty"`
-	NumChannels   int    `yaml:"numChannels,omitempty"`
-}
-
-//AnchorPeerUpdate --
-type AnchorPeerUpdate struct {
-	AnchorPeerTxPath string `yaml:"anchorPeerUpdateTxPath,omitempty"`
+	ChannelTxPath    string `yaml:"channelTxPath,omitempty"`
 	ChannelName      string `yaml:"channelName,omitempty"`
 	Organizations    string `yaml:"organizations,omitempty"`
 	ChannelPrefix    string `yaml:"channelPrefix,omitempty"`
+	AnchorPeerTxPath string `yaml:"anchorPeerUpdateTxPath,omitempty"`
 	NumChannels      int    `yaml:"numChannels,omitempty"`
 }
 
@@ -69,6 +63,7 @@ type TimeOutOptions struct {
 //InvokeQuery --
 type InvokeQuery struct {
 	ChannelName   string               `yaml:"channelName,omitempty"`
+	ChaincodeName string               `yaml:"chaincodeName,omitempty"`
 	TargetPeers   string               `yaml:"targetPeers,omitempty"`
 	NProcPerOrg   int                  `yaml:"nProcPerOrg,omitempty"`
 	NRequest      int                  `yaml:"nRequest,omitempty"`
@@ -78,7 +73,7 @@ type InvokeQuery struct {
 	QueryCheck    int                  `yaml:"queryCheck,omitempty"`
 	EventOptions  EventOptions         `yaml:"eventOpt,omitempty"`
 	CCOptions     CCOptions            `yaml:"ccOpt,omitempty"`
-	MoveArgs      string               `yaml:"moveArgs,omitempty"`
+	Args          string               `yaml:"args,omitempty"`
 }
 
 //TransactionOptions --

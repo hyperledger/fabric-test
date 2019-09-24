@@ -13,7 +13,7 @@ createChannel:
     organizations: org1
   - channelName: testorgschannel2
     channelTxPath: $PWD/testorgschannel2.tx
-    organizations: org1  
+    organizations: org1
 # Section below is used to loop through channel base name with number of channels and path where all channel config transactions are located
   - channelPrefix: mychannel
     numChannels: 10
@@ -84,8 +84,27 @@ instantiateChaincode:
     endorsementPolicy: 2of(org1,org2)
     collectionPath: $PWD/txt.json
 
+upgradeChaincode:
+  - channelName: testorgschannel1
+    chaincodeName: samplecc
+    ccVersion: v2
+    args: "1,2,3,4"
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: $PWD/txt.json
+
+  - channelPrefix: testorgschannel
+    numChannels: 10
+    chaincodeName: samplejs
+    ccVersion: v2
+    args: "1,2,3,4"
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: $PWD/txt.json
+
 invokes:
   - channelName: testorgschannel1
+    chaincodeName: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000
@@ -93,7 +112,7 @@ invokes:
     organizations: org1,org2
     txnOpt:
       - mode: constant
-        options: 
+        options:
           constFreq: 0
           devFreq: 0
     queryCheck: 100
@@ -110,6 +129,7 @@ invokes:
 
 queries:
   - channelName: testorgschannel1
+    chaincodeName: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000
@@ -118,4 +138,9 @@ queries:
     ccOpt:
       ccType: ccchecker
       keyStart: 0
+    txnOpt:
+      - mode: constant
+        options: 
+          constFreq: 0
+          devFreq: 0
     args: "get,a1"
