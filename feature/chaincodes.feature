@@ -8,7 +8,7 @@
 Feature: Chaincodes Testing
 
 
-@daily
+#@daily
 Scenario Outline: FAB-5797: Test chaincode basic ops with cc name in mixedcases chars, for <type> orderer
     Given I have a bootstrapped fabric network of type <type>
     When an admin sets up a channel
@@ -29,7 +29,7 @@ Examples:
     | kafka |  MYcc_Test |
 
 #@shimAPI
-#@daily
+##@daily
 Scenario: FAB-4717: FAB-5663, chaincode ex05 to ex02 on different channels
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -42,7 +42,7 @@ Scenario: FAB-4717: FAB-5663, chaincode ex05 to ex02 on different channels
   Then a user receives a success response of 3000
 
 
-#@daily
+##@daily
 Scenario: FAB-4720: FAB-5663, chaincode ex05 to ex02, on same channel, pass bad channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -55,7 +55,7 @@ Scenario: FAB-4720: FAB-5663, chaincode ex05 to ex02, on same channel, pass bad 
   And a user receives an error response of Failed to get policy manager for channel [non-existing-channel]
 
 
-#@daily
+##@daily
 Scenario: FAB-4721: FAB-5663, chaincode ex05 to ex02, on diff channels, pass bad channnel name
   Given I have a bootstrapped fabric network of type kafka
   When an admin sets up a channel
@@ -84,7 +84,7 @@ Scenario: FAB-6211: Test example02 chaincode written using NODE without tls
     Then a user receives a success response of 2010
 
 
-@daily
+#@daily
 Scenario Outline: FAB-6211: Test example02 chaincode written using <language> <security>
     Given I have a bootstrapped fabric network of type solo <security>
     When an admin sets up a channel

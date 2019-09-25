@@ -9,7 +9,7 @@ Feature: Fabric-CA Service
 
 #@doNotDecompose
 @interop
-@daily
+#@daily
 Scenario Outline: FAB-6489: Interop using <type> orderer, <database>, <interface>, <language> chaincode
     # We should be able to turn TLS on for these tests once CLI certificates and JavaSDK TLS is working correctly - FAB-15018
     #Given I have a bootstrapped fabric network of type <type> using state-database <database> with tls
@@ -67,11 +67,11 @@ Scenario Outline: FAB-11621: JavaSDK interoperability Test using <language> chai
     Then a user receives a success response of 980
 Examples:
     |                          path                      | language |
-    |   ../../fabric-test/chaincodes/example02/go/cmd    |  GOLANG  |
-    |   ../../fabric-test/chaincodes/example02/node      |   NODE   |
+  #  |   ../../fabric-test/chaincodes/example02/go/cmd    |  GOLANG  |
+  #  |   ../../fabric-test/chaincodes/example02/node      |   NODE   |
     |   ../../fabric-samples/chaincode/abstore/java      |   JAVA   |
 
-#@daily
+##@daily
 Scenario Outline: FAB-11728: Identity Mixer Test Happy Path
     Given an admin creates an idemix MSP for organization "org1.example.com"
     Given I have a bootstrapped fabric network with tls

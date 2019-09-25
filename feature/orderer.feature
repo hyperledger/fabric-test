@@ -43,7 +43,7 @@ Scenario: FAB-3852: Message Payloads Less than 1MB, for kafka-based orderer usin
     And a user receives a response with the random value
 
 
-@daily
+#@daily
 Scenario Outline: FAB-3852: Message Payloads Less than 1MB, for <type> orderer using the <interface> interface
     Given I have a bootstrapped fabric network of type <type>
     And I use the <interface> interface
@@ -85,7 +85,7 @@ Examples:
     | kafka | NodeJS SDK |
 
 
-@daily
+#@daily
 Scenario Outline: FAB-3851: Message Payloads of size <comment>, for <type> orderer
     Given I have a bootstrapped fabric network of type <type> using state-database couchdb
     And I use the NodeJS SDK interface
@@ -114,7 +114,7 @@ Examples:
     #| kafka | 1000012 |   1MB   |
 
 
-@daily
+#@daily
 Scenario Outline: FAB-3859: Kafka Network with Large Message Size <comment> with Configuration Tweaks
   Given the ORDERER_ABSOLUTEMAXBYTES environment variable is <absoluteMaxBytes>
   And the ORDERER_PREFERREDMAXBYTES environment variable is <preferredMaxBytes>
@@ -141,7 +141,7 @@ Examples:
     |     16 MB        |     16 MB         |    16 MB        |       16 MB          |           20 MB              |  4194304 |   4MB   |
     |     11 MB        |      2 MB         |    22 MB        |       11 MB          |           20 MB              | 10485760 |   10MB  |
 
-@daily
+#@daily
 Scenario Outline: FAB-3857: <count> key/value pairs in Payloads of size <size>
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb
     And I use the NodeJS SDK interface
@@ -168,7 +168,7 @@ Examples:
     |   64   |   256   |                                                  |
 
 
-@daily
+#@daily
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     When an admin sets up a channel

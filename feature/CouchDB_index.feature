@@ -8,7 +8,7 @@ Feature: Testing Fabric CouchDB indexing
 
 
 #This fails as of Aug 23. Refer to FAB-16468. It is being replaced, so we are just removing from daily suite.
-#@daily
+##@daily
 Scenario Outline: <jira_num>: CouchDB Indexing, <language> with 3 channels and 3 index with 1 selector
     Given I have a bootstrapped fabric network of type kafka using state-database couchdb without tls
     When a user defines a couchDB index named index_behave_test_1 with design document name "indexdoc_behave_test_1" containing the fields "owner" to the chaincode at path "<index_path>"

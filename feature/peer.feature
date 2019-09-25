@@ -8,7 +8,7 @@ Feature: Peer Service
     As a user I want to be able have channels and chaincodes to execute
 
 #@doNotDecompose
-@daily
+#@daily
 Scenario Outline: FAB-3505: chaincode example02 deploy invoke query with <type> orderer <database> db <security>
     Given I have a bootstrapped fabric network of type <type> using state-database <database> <security>
     And I use the <interface> interface
@@ -76,7 +76,7 @@ Scenario: FAB-6333: A peer with chaincode container disconnects, comes back up O
   Then a user receives a success response of 900 from "peer1.org1.example.com"
 
 
-##@daily
+###@daily
 Scenario: FAB-8380: Test MSP Identity - Malicious Peer
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
@@ -96,7 +96,7 @@ Scenario: FAB-8380: Test MSP Identity - Malicious Peer
   Then a user receives a success response of 1000
 
 
-##@daily
+###@daily
 Scenario: FAB-8381: Test MSP Identity - Malicious Peer (Clients set as writers in policy)
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
@@ -120,7 +120,7 @@ Scenario: FAB-8381: Test MSP Identity - Malicious Peer (Clients set as writers i
   Then a user receives a success response of 1000
 
 
-##@daily
+###@daily
 Scenario: FAB-8382: Test MSP Identity with inconsistencies
   Given the CORE_PEER_TLS_CLIENTAUTHREQUIRED environment variable is "true"
   And the ORDERER_TLS_CLIENTAUTHREQUIRED environment variable is "true"

@@ -6,7 +6,7 @@
 Feature: Gossip Service
     As a user I expect the gossip component work correctly
 
-#@daily
+##@daily
 Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] <takeDownType> and <bringUpType> non-leader peer, catches up
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
@@ -54,7 +54,7 @@ Scenario Outline: [FAB-4663] [FAB-4664] [FAB-4665] <takeDownType> and <bringUpTy
     |  pause       | unpause     |
     | disconnect   | connect     |
 
-#@daily
+##@daily
 Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] <takeDownType> leader peer, <bringUpType> *after* another leader elected
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
@@ -104,7 +104,7 @@ Scenario Outline: [FAB-4667] [FAB-4671] [FAB-4672] <takeDownType> leader peer, <
     |  pause       | unpause     |
     | disconnect   | connect     |
 
-@daily
+#@daily
 Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] <takeDownType> and <bringUpType> all peers in an organization
   Given the FABRIC_LOGGING_SPEC environment variable is gossip.election=DEBUG
   And I have a bootstrapped fabric network of type kafka
@@ -155,7 +155,7 @@ Scenario Outline: [FAB-4676] [FAB-4677] [FAB-4678] <takeDownType> and <bringUpTy
     |  pause       | unpause     |
     | disconnect   | connect     |
 
-@daily
+#@daily
 Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] With leaders assigned, <takeDownType> and <bringUpType> non-leader peer
   # Select Peer0 of both org as leader and turn leader election off
 
@@ -216,7 +216,7 @@ Scenario Outline: [FAB-4679] [FAB-4680] [FAB-4681] With leaders assigned, <takeD
     |  pause       | unpause     |
     | disconnect   | connect     |
 
-@daily
+#@daily
 Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] With leaders assigned, <takeDownType> leader peer for <minDownDuration> secs
 
   # Select Peer0 of both org as leader and turn leader election off
@@ -278,7 +278,7 @@ Scenario Outline: [FAB-4683] [FAB-4684] [FAB-4685] With leaders assigned, <takeD
     | disconnect   | connect       |    90        |
 
 
-@daily
+#@daily
   Scenario: [FAB-4666] A non-leader peer joins an already-active channel and catches up
 
   Given the FABRIC_LOGGING_SPEC environment variable is gossip=DEBUG
