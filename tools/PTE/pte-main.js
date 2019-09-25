@@ -161,7 +161,6 @@ function initDeploy(org, transType) {
             testDeployArgs.push(ccDfnPtr.deploy.args[i]);
         }
     }
-
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( cpf === null ) {
          logger.error('[initDeploy] no connection profile is found for org (%s)', org);
@@ -169,13 +168,19 @@ function initDeploy(org, transType) {
     }
 
     if ((typeof(ccDfnPtr.deploy.chaincodePath) !== 'undefined')){
-        chaincodePath = getRelativePath(ccDfnPtr.deploy.chaincodePath);
+        if (language == "golang"){
+            chaincodePath = getRelativePath(ccDfnPtr.deploy.chaincodePath);
+        }else{
+            chaincodePath = verifyIfPathExists(ccDfnPtr.deploy.chaincodePath);
+        }
         logger.info('chaincode language: %s, path: %s', language, chaincodePath);
     }
+
     if ((typeof( ccDfnPtr.deploy.metadataPath ) !== 'undefined')) {
         metadataPath = getRelativePath(ccDfnPtr.deploy.metadataPath);
         logger.info('metadataPath: %s', metadataPath);
     }
+
     if ((typeof( ccDfnPtr.deploy.collectionsConfigPath ) !== 'undefined')) {
         collectionsConfigPath = getRelativePath(ccDfnPtr.deploy.collectionsConfigPath);
         logger.info('collectionsConfigPath: %s', collectionsConfigPath);
@@ -185,6 +190,15 @@ function initDeploy(org, transType) {
 function getRelativePath(inputPath){
     if (fs.existsSync(inputPath)){
         inputPath = inputPath.substring(inputPath.indexOf("github.com/hyperledger"), inputPath.length)
+    }
+    return inputPath
+}
+
+function verifyIfPathExists(inputPath){
+    if (!fs.existsSync(inputPath)){
+        let currentDirectory = __dirname
+        let homeDirectory = currentDirectory.split("/github.com")[0]
+        inputPath = path.join(homeDirectory, inputPath)
     }
     return inputPath
 }
