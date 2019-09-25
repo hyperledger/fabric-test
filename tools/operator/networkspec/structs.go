@@ -11,10 +11,10 @@ type Config struct {
 	Orderer              struct {
 		OrdererType string `yaml:"orderertype,omitempty"`
 	} `yaml:"orderer,omitempty"`
-	NumChannels int    `yaml:"num_channels,omitempty"`
-	TLS         string `yaml:"tls,omitempty"`
-	EnableNodeOUs bool `yaml:"enableNodeOUs,omitempty"`
-	K8s         struct {
+	NumChannels   int    `yaml:"num_channels,omitempty"`
+	TLS           string `yaml:"tls,omitempty"`
+	EnableNodeOUs bool   `yaml:"enableNodeOUs,omitempty"`
+	K8s           struct {
 		DataPersistence string `yaml:"data_persistence,omitempty"`
 		ServiceType     string `yaml:"service_type,omitempty"`
 	} `yaml:"k8s,omitempty"`
@@ -73,9 +73,10 @@ type Orderer struct {
 		SslTarget string `yaml:"ssl-target-name-override"`
 	} `yaml:"grpcOptions"`
 	TLSCACerts struct {
-		Path string `yaml:"path"`
+		Pem string `yaml:"pem"`
 	} `yaml:"tlsCACerts"`
-	AdminPath string `yaml:"adminPath"`
+	AdminCert  string `yaml:"admin_cert"`
+	PrivateKey string `yaml:"priv"`
 }
 
 type Peer struct {
@@ -84,7 +85,7 @@ type Peer struct {
 		SslTarget string `yaml:"ssl-target-name-override"`
 	} `yaml:"grpcOptions"`
 	TLSCACerts struct {
-		Path string `yaml:"path"`
+		Pem string `yaml:"pem"`
 	} `yaml:"tlsCACerts"`
 }
 
@@ -92,7 +93,7 @@ type CertificateAuthority struct {
 	URL        string `yaml:"url"`
 	CAName     string `yaml:"caName"`
 	TLSCACerts struct {
-		Path string `yaml:"path"`
+		Pem string `yaml:"pem"`
 	} `yaml:"tlsCACerts"`
 	HTTPOptions struct {
 		Verify bool `yaml:'verify'`
@@ -109,11 +110,13 @@ type Organization struct {
 	Peers                  []string `yaml:"peers"`
 	CertificateAuthorities []string `yaml:"certificateAuthorities"`
 	AdminPrivateKey        struct {
-		Path string `yaml:"path"`
+		Pem string `yaml:"pem"`
 	} `yaml:"adminPrivateKey"`
 	SignedCert struct {
-		Path string `yaml:"path"`
+		Pem string `yaml:"pem"`
 	} `yaml:"signedCert"`
+	AdminCert  string `yaml:"admin_cert"`
+	PrivateKey string `yaml:"priv"`
 }
 
 type Channel struct {
