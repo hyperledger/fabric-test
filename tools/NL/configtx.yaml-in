@@ -33,25 +33,19 @@ Capabilities:
     # Users should leave this flag set to true.
     #
     Global: &ChannelCapabilities
-        V1_3: true
-        # V1_2 skipped; it was not defined in fabric
-        V1_1: true
+        V2_0: true
 
     # Orderer capabilities apply only to the orderers, and may be safely
     # manipulated without concern for upgrading peers.  Set the value of the
     # capability to true to require it.
     Orderer: &OrdererCapabilities
-        # V1_3 skipped; it was not defined in fabric
-        # V1_2 skipped; it was not defined in fabric
-        V1_1: true
+        V2_0: true
 
     # Application capabilities apply only to the peer network, and may be safely
     # manipulated without concern for upgrading orderers.  Set the value of the
     # capability to true to require it.
     Application: &ApplicationCapabilities
-        V1_3: true
-        V1_2: true
-        V1_1: true
+        V1_4_2: true
 
 ################################################################################
 #

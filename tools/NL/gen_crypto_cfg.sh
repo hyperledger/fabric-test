@@ -94,6 +94,7 @@ rm -f $cfgOutFile
               echo "    - Name: Orderer" >> $cfgOutFile
               tt=$comName
               echo "      Domain: $tt" >> $cfgOutFile
+              echo "      EnableNodeOUs: false" >> $cfgOutFile
               echo "      Template:" >> $cfgOutFile
               echo "        Count: $nOrderer" >> $cfgOutFile
           #done

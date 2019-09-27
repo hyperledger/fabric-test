@@ -374,16 +374,13 @@ do
              echo "        Policies:" >> $cfgOutFile
              echo "            Readers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.admin', '$ordMSP.orderer', '$ordMSP.client', '$ordMSP.member')\"" >> $cfgOutFile
              echo "            Writers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.admin', '$ordMSP.client', '$ordMSP.member')\"" >> $cfgOutFile
              echo "            Admins:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$ordMSP.admin')\"" >> $cfgOutFile
-             echo "            Endorsement:" >> $cfgOutFile
-             echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$ordMSP.member')\"" >> $cfgOutFile
 
              echo "" >> $cfgOutFile
 #             echo "        BCCSP:" >> $cfgOutFile
