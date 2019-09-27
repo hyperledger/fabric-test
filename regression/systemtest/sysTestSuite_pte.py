@@ -200,7 +200,19 @@ class System_Tests_Raft_Couchdb_Mutual(unittest.TestCase):
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
 
-    def test_08downNetwork(self):
+    def test_08samplecc_go_50MB_TX(self):
+
+        # Run the test scenario: Execute invokes and query tests.
+        returncode = subprocess.call("./operator.sh -t samplecc_go_50MB_TX", cwd=k8s_testsuite, shell=True)
+        self.assertEqual(returncode, 0, msg=testScriptFailed)
+
+        # check the counts
+        count = subprocess.check_output(
+                "grep \"CONSTANT INVOKE Overall transactions: sent 2 received 2\" samplecc_go_50MB_i_pteReport.txt | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
+
+    def test_09downNetwork(self):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/raft_couchdb_mutualtls_servdisc.yaml", cwd=k8s_testsuite, shell=True)
@@ -276,7 +288,19 @@ class System_Tests_Kafka_Leveldb_NOTLS(unittest.TestCase):
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
 
-    def test_08downNetwork(self):
+    def test_08samplecc_go_50MB_TX(self):
+
+        # Run the test scenario: Execute invokes and query tests.
+        returncode = subprocess.call("./operator.sh -t samplecc_go_50MB_TX", cwd=k8s_testsuite, shell=True)
+        self.assertEqual(returncode, 0, msg=testScriptFailed)
+
+        # check the counts
+        count = subprocess.check_output(
+                "grep \"CONSTANT INVOKE Overall transactions: sent 2 received 2\" samplecc_go_50MB_i_pteReport.txt | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg=invokeFailure)
+
+    def test_09downNetwork(self):
 
         # Teardown the network
         returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_leveldb_notls.yaml", cwd=k8s_testsuite, shell=True)

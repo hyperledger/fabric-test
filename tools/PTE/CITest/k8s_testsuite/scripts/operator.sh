@@ -218,6 +218,20 @@ samplecc_go_98MB_TX() {
   rm -f "$PTEDir"/pteReport.txt
 }
 
+# Execute samplecc(go) chaincode 1 channel with 1 thread on 50MB TX size
+# Note: the TX is about double the size of the proposal payload because the TX includes the proposal payload PLUS the proposal response which itself contains the ReadWriteSet (including a copy of the original payload).
+samplecc_go_50MB_TX() {
+  cd "$PTEDir"/CITest/scripts || exit 1
+  echo "-------> Execute Invoke"
+  ./gen_cfgInputs.sh -d "$ConnProfile" --nchan 1 --chan0 0 --norg 1 --chanprefix testorgschannel --chantxpath "$Chantxpath" --tls "$1" --payloadmin 26214400 --payloadmax 26214400 -a sample_cc --freq 60000 --nreq 2 --nproc 1 --targetpeers ORGANCHOR -t move > "$LogsDir"/"$2"_samplecc_go_50MB_i.log
+  sleep 60
+  cp -r "$PTEDir"/pteReport.txt "$LogsDir"/samplecc_go_50MB_i_pteReport.txt
+  # Convert Test Report into Aggregate summary
+  node get_pteReport.js "$LogsDir"/samplecc_go_50MB_i_pteReport.txt
+  # remove PTE Report
+  rm -f "$PTEDir"/pteReport.txt
+}
+
 migrate() {
   cd "$FabricTestDir"/tools/operator || exit 1
   echo "-------> kafka to etcdraft migration"
