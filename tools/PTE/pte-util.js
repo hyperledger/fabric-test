@@ -122,7 +122,7 @@ function getConnProfileList(cpPath) {
         cpList.push(cpPath)
     } else {
         fs.readdirSync(cpPath).forEach(file => {
-            logger.info('[getConnProfileList] file', file);
+            logger.debug('[getConnProfileList] file', file);
             var file_ext = path.extname(file);
             if ((/(yml|yaml|json)$/i).test(file_ext)) {
                 var cpf = path.join(cpPath, file);
@@ -130,7 +130,7 @@ function getConnProfileList(cpPath) {
             }
         });
     }
-    logger.info('[getConnProfileList] file:', cpList);
+    logger.debug('[getConnProfileList] file:', cpList);
 
     return cpList;
 
@@ -143,7 +143,7 @@ module.exports.getConnProfileListSubmitter=function(fileList) {
 function getNodetypeFromConnProfiles(fileList, nodeType) {
     var nodeTypeList = {};
 
-    logger.info('[getNodetypeFromConnProfiles] input nodeType (%s), File list: ', nodeType, fileList);
+    logger.debug('[getNodetypeFromConnProfiles] input nodeType (%s), File list: ', nodeType, fileList);
     for (i=0; i<fileList.length; i++) {
         var cpf = fileList[i];
         var ntwk = readConfigFile(cpf, 'test-network');
@@ -167,7 +167,7 @@ function getNodetypeFromConnProfiles(fileList, nodeType) {
         logger.warn('[getNodetypeFromConnProfiles] no %s found in all connection profiles', nodeType);
     }
 
-    logger.info('[getNodetypeFromConnProfiles] %s List: %j', nodeType, nodeTypeList);
+    logger.debug('[getNodetypeFromConnProfiles] %s List: %j', nodeType, nodeTypeList);
     return nodeTypeList;
 
 }
@@ -194,7 +194,7 @@ function getConnProfilePropCnt(cpf, prop) {
     }
 
     let cnt = Object.getOwnPropertyNames(cpf[prop]).length;
-    logger.info('[getConnProfilePropCnt] prop (%s) cnt: %d', prop, cnt);
+    logger.debug('[getConnProfilePropCnt] prop (%s) cnt: %d', prop, cnt);
 
     return cnt;
 
@@ -206,12 +206,12 @@ module.exports.getConnProfilePropCntSubmitter=function(cpf, key) {
 
 // find Connection Profile for an org
 function findOrgConnProfile(fileList, orgname) {
-    logger.info('[findOrgConnProfile] orgname(%s), input File list: ', orgname, fileList);
+    logger.debug('[findOrgConnProfile] orgname(%s), input File list: ', orgname, fileList);
     for (i=0; i<fileList.length; i++) {
         var cpf = fileList[i];
         var temp = readConfigFile(cpf, 'test-network');
         if ( temp['organizations'] && temp['organizations'][orgname] ) {
-            logger.info('[findOrgConnProfile] orgname(%s) found File: ', orgname, cpf);
+            logger.debug('[findOrgConnProfile] orgname(%s) found File: ', orgname, cpf);
             return temp;
         }
     }
@@ -227,7 +227,7 @@ module.exports.findOrgConnProfileSubmitter=function(fileList, orgname) {
 function readConfigFile(inFile, keyreq) {
     var temp;
     var file_ext = path.extname(inFile);
-    logger.info('[readConfigFile] input File: ', inFile);
+    logger.debug('[readConfigFile] input File: ', inFile);
     if ((/(yml|yaml)$/i).test(file_ext)) {
         temp = yaml.safeLoad(fs.readFileSync(inFile, 'utf8'));
     } else {
@@ -235,10 +235,10 @@ function readConfigFile(inFile, keyreq) {
     }
 
     if ( temp[keyreq] ) {
-        logger.info('[readConfigFile] set pointer to %s[%s] ', inFile, keyreq);
+        logger.debug('[readConfigFile] set pointer to %s[%s] ', inFile, keyreq);
         return temp[keyreq];
     } else {
-        logger.info('[readConfigFile] set pointer to %s', inFile);
+        logger.debug('[readConfigFile] set pointer to %s', inFile);
         return temp;
     }
 
