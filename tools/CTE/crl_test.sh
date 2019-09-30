@@ -1,8 +1,7 @@
 #!/bin/bash
 
 : ${TESTCASE:=gencrl}
-CurrentDirectory=$(cd `dirname $0` && pwd)
-FABRIC_CA="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-ca"
+FABRIC_CA="/opt/gopath/src/github.com/hyperledger/fabric-ca"
 SCRIPTDIR="$FABRIC_CA/scripts/fvt"
 CA_CFG_PATH="/tmp/$TESTCASE"
 CONFIGFILE="$CA_CFG_PATH/runFabricCaFvt.yaml"
