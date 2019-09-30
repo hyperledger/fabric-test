@@ -6,7 +6,7 @@
 #
 
 CurrentDirectory=$(cd `dirname $0` && pwd)
-FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric/' '{print $1}')/fabric-test"
 OUTPUT_DIR_ROOT=$FabricTestDir"/tools/LTE/TestResults"
 export useCouchDB="yes"
 UseJSONFormat="false"
