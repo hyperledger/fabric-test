@@ -55,9 +55,8 @@ func (i InstallCCUIObject) createInstallCCObjects(ccObject inputStructs.InstallC
 	orgNames := strings.Split(ccObject.Organizations, ",")
 	for _, orgName := range orgNames {
 		orgName = strings.TrimSpace(orgName)
-		channelOpt = ChannelOptions{OrgName: []string{orgName}, Name: "dummychannel"}
-		chainCodePath := paths.JoinPath(ccObject.ChainCodePath, ccObject.Language)
-		deployOpt = InstallCCDeployOpt{ChainCodePath: chainCodePath, Language: ccObject.Language}
+		channelOpt = ChannelOptions{OrgName: []string{orgName}}
+		deployOpt = InstallCCDeployOpt{ChainCodePath: ccObject.ChainCodePath, Language: ccObject.Language}
 		deployOpt.MetadataPath = ccObject.MetadataPath
 		i.DeployOpt = deployOpt
 		i.ChannelOpt = channelOpt

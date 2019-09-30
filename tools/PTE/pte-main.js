@@ -287,7 +287,11 @@ function chainAddOrderer(channel, client, org) {
 }
 
 function channelAddPeer(channel, client, org) {
-    logger.info('[channelAddPeer] channel name: ', channel.getName());
+    let channelName
+    if (channel){
+        channelName = channel.getName()
+    }
+    logger.info('[channelAddPeer] channel name: ', channelName);
     var data;
     var peerTmp;
     var targets = [];
@@ -301,6 +305,7 @@ function channelAddPeer(channel, client, org) {
     var cpPeers = cpf['peers'];
 
     for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        peerTmp = null
         var key=cpOrgs[org]['peers'][i];
         if (cpPeers.hasOwnProperty(key)) {
             if (cpPeers[key].url) {
@@ -315,25 +320,32 @@ function channelAddPeer(channel, client, org) {
                             }
                         );
                         targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
                     }
                 } else {
                     peerTmp = client.newPeer( cpPeers[key].url);
                     targets.push(peerTmp);
+                }
+                if(channel && peerTmp){
                     channel.addPeer(peerTmp);
                 }
             }
         }
     }
-    logger.info('[channelAddPeer] channel peers: %s', channel.getPeers());
+    if(channel){
+        logger.info('[channelAddPeer] channel peers: %s', channel.getPeers());
+    }
 
     return targets;
 }
 
 function channelAddListedPeer(channel, client, org) {
-    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] listOpt: %j', Nid, channel.getName(), org, txCfgPtr.listOpt);
     var peerTmp;
     var eh;
+    let channelName
+    if (channel){
+        channelName = channel.getName()
+    }
+    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] listOpt: %j', Nid, channelName, org, txCfgPtr.listOpt);
     var data;
     var listOpt=txCfgPtr.listOpt;
     var peername;
@@ -349,6 +361,7 @@ function channelAddListedPeer(channel, client, org) {
 
     for(var key in listOpt) {
         for (i = 0; i < listOpt[key].length; i++) {
+            peerTmp = null
             if (cpPeers.hasOwnProperty(listOpt[key][i])) {
                 peername = listOpt[key][i];
                 if (cpPeers[peername].url) {
@@ -363,24 +376,24 @@ function channelAddListedPeer(channel, client, org) {
                                 }
                             );
                             targets.push(peerTmp);
-                            channel.addPeer(peerTmp);
                         }
                     } else {
                         peerTmp = client.newPeer(cpPeers[peername].url);
+                    }
+                    if (channel && peerTmp){
                         channel.addPeer(peerTmp);
                     }
                 } else {
-                    logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) incorrect peer name', Nid, channel.getName(), org, key, listOpt[key][i]);
+                    logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) incorrect peer name', Nid, channelName, org, key, listOpt[key][i]);
                     process.exit(1);
                 }
             } else {
-                logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) does not exist', Nid, channel.getName(), org, key, listOpt[key][i]);
+                logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) does not exist', Nid, channelName, org, key, listOpt[key][i]);
                 process.exit(1);
             }
         }
     }
     logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: %s', Nid, channelName, org, channel.getPeers());
-
     return targets;
 }
 
@@ -574,9 +587,10 @@ function update_latency_array(lat_new, rawText) {
 performance_main();
 
 // install chaincode
-async function chaincodeInstall(channel, client, org) {
+async function chaincodeInstall(client, org) {
     try{
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    var channel
     if ( null === cpf ) {
         logger.info('[chaincodeInstall] no connection profile is found for org(%s)', org);
         process.exit(1);
@@ -584,7 +598,7 @@ async function chaincodeInstall(channel, client, org) {
     var cpOrgs = cpf['organizations'];
 
     var orgName = cpOrgs[org].name;
-    logger.info('[chaincodeInstall] org: %s, org Name: %s, channel name: %s', org, orgName, channel.getName());
+    logger.info('[chaincodeInstall] org: %s, org Name: %s', org, orgName);
 
     var cryptoSuite = hfc.newCryptoSuite();
     cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({path: testUtil.storePathForOrg(Nid, orgName)}));
@@ -595,12 +609,11 @@ async function chaincodeInstall(channel, client, org) {
         await testUtil.tlsEnroll(client, org, cpf);
         logger.info('[chaincodeInstall] got user private key: org= %s', org);
     }
-    chainAddOrderer(channel, client, org);
 
     var targets;
     if ( (typeof(txCfgPtr.targetPeers) !== 'undefined') && (txCfgPtr.targetPeers.toUpperCase() == 'LIST') ) {
         if ( typeof(txCfgPtr.listOpt) == 'undefined' ) {
-            logger.error('[Nid:chan:org=%d:%s:%s chaincodeInstall] listOpt undefined', Nid, channel.getName(), org);
+            logger.error('[Nid:org=%d::%s chaincodeInstall] listOpt undefined', Nid, org);
             process.exit(1);
         }
         targets = channelAddListedPeer(channel, client, org);
@@ -619,7 +632,7 @@ async function chaincodeInstall(channel, client, org) {
         chaincodeVersion: chaincode_ver
     };
 
-    //logger.info('request_install: %j', request_install);
+    logger.info('request_install: %j', request_install.targets);
 
     client.installChaincode(request_install)
         .then(
@@ -639,14 +652,14 @@ async function chaincodeInstall(channel, client, org) {
                     all_good = all_good & one_good;
                 }
                 if (all_good) {
-                    logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s:%s) and received ProposalResponse: Status - %s', channelName, orgName, proposalResponses[0].response.status));
+                    logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s) and received ProposalResponse: Status - %s', orgName, proposalResponses[0].response.status));
                     evtDisconnect();
                 } else {
-                    throw new Error('[chaincodeInstall] Failed to send install Proposal in (%s:%s) or receive valid response. Response null or status is not 200. exiting...', channelName, orgName);
+                    throw new Error('[chaincodeInstall] Failed to send install Proposal in (%s) or receive valid response. Response null or status is not 200. exiting...', orgName);
                 }
 
             }).catch((err) => {
-                logger.error('[chaincodeInstall] Failed to install chaincode in (%s:%s) due to error: ', channelName, orgName, err);
+                logger.error('[chaincodeInstall] Failed to install chaincode in (%s) due to error: ', orgName, err);
                 evtDisconnect();
                 process.exit(1);
 
@@ -1395,8 +1408,7 @@ async function performance_main() {
                             function(admin) {
                                 logger.info('[performance_main:Nid=%d] Successfully enrolled user \'admin\'', Nid);
                                 the_user = admin;
-                                var channel = client.newChannel(channelName);
-                                chaincodeInstall(channel, client, org);
+                                chaincodeInstall(client, org);
                             }).catch((err)=>{
                                 logger.error('[Nid=%d] Failed to wait due to error: ', Nid, err.stack ? err.stack : err)
                                 evtDisconnect();

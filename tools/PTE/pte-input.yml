@@ -46,9 +46,9 @@ installChaincode:
 # installs chaincode with specified name on all peers in listed organziations
   - chaincodeName: samplecc
     ccVersion: v1
-    chaincodePath: $PWD/samplecc
+    chaincodePath: $PWD/samplecc/go
     organizations: org1,org2
-    language: go
+    language: golang
     metadataPath: $PWD/txt.json
 
   - chaincodeName: samplejs

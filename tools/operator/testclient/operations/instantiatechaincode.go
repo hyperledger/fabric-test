@@ -205,7 +205,6 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 func (i InstantiateCCUIObject) getMSPIDForOrg(connProfilePath, orgName string) (string, error) {
 	var config GetMSPID
 	var mspID string
-	connProfilePath = paths.JoinPath(connProfilePath, fmt.Sprintf("connection_profile_%s.yaml", orgName))
 	yamlFile, err := ioutil.ReadFile(connProfilePath)
 	if err != nil {
 		logger.ERROR("Failed to read connectionprofile to get MSPID ")
