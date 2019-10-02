@@ -168,17 +168,25 @@ function initDeploy(org, transType) {
          process.exit(1);
     }
 
-    chaincodePath = ccDfnPtr.deploy.chaincodePath;
-    logger.info('chaincode language: %s, path: %s', language, chaincodePath);
-
+    if ((typeof(ccDfnPtr.deploy.chaincodePath) !== 'undefined')){
+        chaincodePath = getRelativePath(ccDfnPtr.deploy.chaincodePath);
+        logger.info('chaincode language: %s, path: %s', language, chaincodePath);
+    }
     if ((typeof( ccDfnPtr.deploy.metadataPath ) !== 'undefined')) {
-        metadataPath=ccDfnPtr.deploy.metadataPath;
+        metadataPath = getRelativePath(ccDfnPtr.deploy.metadataPath);
         logger.info('metadataPath: %s', metadataPath);
     }
     if ((typeof( ccDfnPtr.deploy.collectionsConfigPath ) !== 'undefined')) {
-        collectionsConfigPath=ccDfnPtr.deploy.collectionsConfigPath;
+        collectionsConfigPath = getRelativePath(ccDfnPtr.deploy.collectionsConfigPath);
         logger.info('collectionsConfigPath: %s', collectionsConfigPath);
     }
+}
+
+function getRelativePath(inputPath){
+    if (fs.existsSync(inputPath)){
+        inputPath = inputPath.substring(inputPath.indexOf("github.com/hyperledger"), inputPath.length)
+    }
+    return inputPath
 }
 
 var tx_id = null;
@@ -623,14 +631,17 @@ async function chaincodeInstall(client, org) {
 
     //sendInstallProposal
     getCCID();
+    let baseDir = __dirname.split("/github.com/hyperledger/")[0]
+    baseDir = baseDir.endsWith("src") ? baseDir.substring(0, baseDir.length - 3) : baseDir
     var request_install = {
         targets: targets,
         chaincodePath: chaincodePath,
         metadataPath: metadataPath,
         chaincodeId: chaincode_id,
         chaincodeType: language,
-        chaincodeVersion: chaincode_ver
-    };
+        chaincodeVersion: chaincode_ver,
+        baseDir: baseDir
+    }; 
 
     logger.info('request_install: %j', request_install.targets);
 
