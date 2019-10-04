@@ -315,8 +315,8 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
     If installing chaincode on CouchDB with indexing, then inside the `deploy` section we should also add `metadataPath` for the location of the index definition files. Note: if `gopath` is defined in the service credential json, then specify the relative path from `$GOPATH/src/` (as is done in this example); otherwise use a fully specified absolute path.
 
         "deploy": {
-            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go",
-            "metadataPath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go/META-INF",
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go",
+            "metadataPath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go/META-INF",
             "fcn": "init",
             "args": []
         },
@@ -455,10 +455,10 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
-* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc` when using this chaincode.  This chaincode ignores payload size, such as payLoadMin and payLoadMax. See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go`.  Set the deploy.chaincodePath to this directory in the user input file.
+* **marbles_cc**: [Marbles02 chaincode](https://github.com/hyperledger/fabric-test/chaincodes/marbles02/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc` when using this chaincode.  This chaincode ignores payload size, such as payLoadMin and payLoadMax. See directory `marblesccInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/marbles02/go`.  Set the deploy.chaincodePath to this directory in the user input file.
 
         "deploy": {
-            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go",
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go",
             "fcn": "init",
             "args": []
         },

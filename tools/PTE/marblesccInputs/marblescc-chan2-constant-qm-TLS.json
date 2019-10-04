@@ -49,7 +49,7 @@
         "payLoadMax": "1024"
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go",
         "fcn": "init",
         "args": []
     },

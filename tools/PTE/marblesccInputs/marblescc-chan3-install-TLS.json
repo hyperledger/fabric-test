@@ -13,8 +13,8 @@
         ]
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go",
-        "metadataPath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go/META-INF",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go",
+        "metadataPath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go/META-INF",
         "fcn": "init",
         "args": []
     },

@@ -14,7 +14,7 @@ cd ../scripts
 
 #### move the old index files and put the new index file in the chaincode installation folder
 #### purpose is to restore the index directory as it was, once the test is done
-indexDir="../../../../fabric-samples/chaincode/marbles02/go/META-INF/statedb/couchdb/indexes"
+indexDir="../../../../chaincodes/marbles02/go/META-INF/statedb/couchdb/indexes"
 backupDir=backup_"$(date +"%T-%d-%m-%Y")"
 mkdir $backupDir
 mv $indexDir/*.* $backupDir/
