@@ -77,7 +77,7 @@ def step_impl(context, path, args, name, language, peer, channel, timeout):
     deploy_impl(context, path, args, name, language, peer, channel, timeout=timeout)
 
 @when(u'an admin deploys chaincode at path "{path}" with version "{version}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}" within {timeout:d} seconds')
-def deploy_impl(context, path, args, name, language, peer, channel, version=0, timeout=60, username="Admin", policy=None, collections=None):
+def deploy_impl(context, path, args, name, language, peer, channel, version=0, timeout=120, username="Admin", policy=None, collections=None):
     context.interface.deploy_chaincode(context, path, args, name, language, peer, username, timeout, channel, version, policy=policy, collections=collections)
 
 @when(u'an admin deploys chaincode at path "{path}" with version "{version}" with args {args} with name "{name}" with language "{language}" to "{peer}" on channel "{channel}"')

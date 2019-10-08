@@ -32,7 +32,7 @@ Scenario Outline: FAB-6489: Interop using <type> orderer, <database>, <interface
     When a user "scott" queries on the chaincode with args ["query","a"] from "peer0.org2.example.com"
     Then a user receives a success response of 990 from "peer0.org2.example.com"
     When a user "scott" invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
-    And I wait "5" seconds
+    And I wait "15" seconds
     When a user "latitia" queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 980
 Examples:
@@ -62,7 +62,7 @@ Scenario Outline: FAB-11621: JavaSDK interoperability Test using <language> chai
     When a user "scott" queries on the chaincode with args ["query","a"] from "peer0.org2.example.com"
     Then a user receives a success response of 990 from "peer0.org2.example.com"
     When a user "scott" invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
-    And I wait "5" seconds
+    And I wait "15" seconds
     When a user "latitia" queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 980
 Examples:
