@@ -3,7 +3,7 @@
     "chaincodeID": "_CHAINCODEID_",
     "chaincodeVer": "v0",
     "transType": "install",
-    "TLS": "enabled",
+    "TLS": "_TLS_",
     "channelOpt": {
         "name":  "_CHANNELNAME_",
         "action":  "create",

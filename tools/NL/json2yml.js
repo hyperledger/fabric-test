@@ -18,7 +18,7 @@ if ( process.env.GOPATH != null ) {
 }
 
 var srcMSPDir='/opt/hyperledger/fabric/msp/crypto-config';
-var MSPDir=GOPATHDir+'/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config';
+var MSPDir=GOPATHDir+'/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config';
 var CADir='/etc/hyperledger/fabric-ca-server-config';
 var CA=0;
 var CDB=0;
@@ -78,23 +78,27 @@ if ( process.env.CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT != null ) {
     ord_env_name.push('CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_BATCHSIZE_MAXMESSAGECOUNT);
 }
+
+var ORDERERTYPE='solo';
 if ( process.env.CONFIGTX_ORDERER_ORDERERTYPE != null ) {
     console.log(' CONFIGTX_ORDERER_ORDERERTYPE= ', process.env.CONFIGTX_ORDERER_ORDERERTYPE);
     ord_env_name.push('CONFIGTX_ORDERER_ORDERERTYPE');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_ORDERERTYPE);
+    ORDERERTYPE=process.env.CONFIGTX_ORDERER_ORDERERTYPE;
     if ( process.env.CONFIGTX_ORDERER_ORDERERTYPE == 'kafka' ) {
        KAFKA=1;
     }
 }
+console.log('ORDERERTYPE: ', ORDERERTYPE);
 if ( process.env.CONFIGTX_ORDERER_BATCHTIMEOUT != null ) {
     console.log(' CONFIGTX_ORDERER_BATCHTIMEOUT= ', process.env.CONFIGTX_ORDERER_BATCHTIMEOUT);
     ord_env_name.push('CONFIGTX_ORDERER_BATCHTIMEOUT');
     ord_env_val.push(process.env.CONFIGTX_ORDERER_BATCHTIMEOUT);
 }
-if ( process.env.ORDERER_GENERAL_LOGLEVEL != null ) {
-    console.log(' ORDERER_GENERAL_LOGLEVEL= ', process.env.ORDERER_GENERAL_LOGLEVEL);
-    ord_env_name.push('ORDERER_GENERAL_LOGLEVEL');
-    ord_env_val.push(process.env.ORDERER_GENERAL_LOGLEVEL);
+if ( process.env.ORDERER_FABRIC_LOGGING_SPEC != null ) {
+    console.log(' FABRIC_LOGGING_SPEC= ', process.env.ORDERER_FABRIC_LOGGING_SPEC);
+    ord_env_name.push('FABRIC_LOGGING_SPEC');
+    ord_env_val.push(process.env.ORDERER_FABRIC_LOGGING_SPEC);
 }
 console.log('ord_env_name: ', ord_env_name.length, ord_env_name);
 console.log('ord_env_val: ', ord_env_val.length, ord_env_val);
@@ -109,10 +113,10 @@ console.log('HOSTCONFIG_NETWORKMODE: ', HOSTCONFIG_NETWORKMODE);
 // Peer environment var
 var peer_env_name=[];
 var peer_env_val=[];
-if ( process.env.FABRIC_LOGGING_SPEC != null ) {
-    console.log(' FABRIC_LOGGING_SPEC= ', process.env.FABRIC_LOGGING_SPEC);
+if ( process.env.PEER_FABRIC_LOGGING_SPEC != null ) {
+    console.log(' FABRIC_LOGGING_SPEC= ', process.env.PEER_FABRIC_LOGGING_SPEC);
     peer_env_name.push('FABRIC_LOGGING_SPEC');
-    peer_env_val.push(process.env.FABRIC_LOGGING_SPEC);
+    peer_env_val.push(process.env.PEER_FABRIC_LOGGING_SPEC);
 }
 if ( process.env.CORE_PEER_BCCSP_SW_SECURITY != null ) {
     console.log(' CORE_PEER_BCCSP_SW_SECURITY= ', process.env.CORE_PEER_BCCSP_SW_SECURITY);
@@ -466,6 +470,21 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                              buff = buff + ', ' + peerCA;
                                         }
                                         buff = buff + ']'+'\n';
+                                        fs.appendFileSync(dFile, buff);
+                                    }
+
+                                    // RAFT orderering service
+                                    if ( ORDERERTYPE.toUpperCase() == 'ETCDRAFT' ) {
+                                        var serv=OrdTLSDir+'/server.key';
+                                        buff = '  ' + '    - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY='+serv+'\n';
+                                        fs.appendFileSync(dFile, buff);
+
+                                        serv=OrdTLSDir+'/server.crt';
+                                        buff = '  ' + '    - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE='+serv+'\n';
+                                        fs.appendFileSync(dFile, buff);
+
+                                        serv=OrdTLSDir+'/ca.crt';
+                                        buff = '  ' + '    - ORDERER_GENERAL_CLUSTER_ROOTCAS='+serv+'\n';
                                         fs.appendFileSync(dFile, buff);
                                     }
                                 }

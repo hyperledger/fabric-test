@@ -65,7 +65,5 @@
             "args": ["yellow", "tom", "jerry"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan3-TLS.json"}
-	]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

@@ -8,7 +8,7 @@
 
 # default directories
 FabricDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric"
-MSPDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen"
+MSPDir="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen"
 SRCMSPDir="/opt/hyperledger/fabric/msp/crypto-config"
 
 function printHelp {
@@ -28,13 +28,13 @@ function printHelp {
    echo "    -p: number of peers per organization, default=1"
    echo "    -r: number of organizations, default=1"
    echo "    -s: security type, default=256"
-   echo "    -t: ledger orderer service type [solo|kafka], default=solo"
+   echo "    -t: ledger orderer service type [solo|kafka|etcdraft], default=solo"
    echo "    -w: host ip, default=0.0.0.0"
-   echo "    -l: core logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
+   echo "    -l: peer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
    echo "    -q: orderer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR"
    echo "    -c: batch timeout, default=2s"
    echo "    -B: batch size, default=10"
-   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/"
+   echo "    -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/"
    echo "    -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "    -S: TLS enablement [disabled|serverauth|clientauth], default=disabled"
    echo "    -C: company name, default=example.com "
@@ -48,6 +48,7 @@ function printHelp {
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S serverauth "
    echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -k 3 -z 3 -n 3 -t kafka -f test -w localhost -S clientauth -l INFO -q DEBUG"
    echo " ./networkLauncher.sh -o 1 -x 5 -r 5 -p 1 -k 1 -z 1 -n 1 -C trade.com -M sampleOrgMap.json -t kafka -f test -w localhost -S enabled"
+   echo " ./networkLauncher.sh -o 3 -x 6 -r 6 -p 2 -n 3 -t etcdraft -f test -w localhost -S serverauth "
    exit
 }
 
@@ -71,7 +72,7 @@ HostIP1="0.0.0.0"
 comName="example.com"
 networkAction="up"
 BuildDir=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/.build/bin
-coreLogLevel="ERROR"
+peerLogLevel="ERROR"
 ordererLogLevel="ERROR"
 batchTimeOut="2s"
 batchSize=10
@@ -82,8 +83,7 @@ while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:M:" opt; do
   case $opt in
     # peer environment options
     a)
-      tt=$OPTARG
-      networkAction=$(echo $tt | awk '{print tolower($tt)}')
+      networkAction="$OPTARG"
       echo "network action: $networkAction"
       ;;
     x)
@@ -160,8 +160,8 @@ while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:M:" opt; do
       ;;
 
     l)
-      coreLogLevel=$OPTARG
-      echo "coreLogLevel:  $coreLogLevel"
+      peerLogLevel=$OPTARG
+      echo "peerLogLevel:  $peerLogLevel"
       ;;
 
     q)
@@ -216,34 +216,40 @@ while getopts ":a:z:x:d:f:h:k:e:n:o:p:r:t:s:w:l:q:c:B:F:G:S:C:M:" opt; do
 done
 
 #first handle network action: up|down
-if [ $networkAction == "down" ]; then
+if [ "$networkAction" == "down" ]; then
     ./cleanNetwork.sh $comName
-    exit;
-elif [ $networkAction != "up" ]; then
+    exit
+elif [ "$networkAction" != "up" ]; then
     echo "invalid network action option: $networkAction"
     printHelp
-    exit;
+    exit 1
 fi
 
-if [ $TLSEnabled == "clientauth" ]; then
+if [ "$TLSEnabled" == "clientauth" ]; then
     TLSEnabled="enabled"
     MutualTLSEnabled="enabled"
 fi
-if [ $TLSEnabled == "serverauth" ]; then
+if [ "$TLSEnabled" == "serverauth" ]; then
     TLSEnabled="enabled"
 fi
 
 echo "TLSEnabled $TLSEnabled, MutualTLSEnabled $MutualTLSEnabled"
-#if [ $nCA -eq 0 ]; then
-#   nCA=$nOrg
-#fi
 
-if [ $nReplica -eq 0 ]; then
+if [ "$ordServType" != "kafka" ]; then
+    nKafka=0
+    nZoo=0
+fi
+
+if [ "$nReplica" -eq 0 ]; then
     nReplica=$nKafka
 fi
 
-# sanity check
-echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer, nZoo=$nZoo"
+# input vars
+if [ "$ordServType" == "etcdraft" ]; then
+    echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nOrderer=$nOrderer"
+else
+    echo " PROFILE_STRING=$PROFILE_STRING, ordServType=$ordServType, nKafka=$nKafka, nOrderer=$nOrderer, nZoo=$nZoo"
+fi
 echo " nOrg=$nOrg, nPeersPerOrg=$nPeersPerOrg, ledgerDB=$ledgerDB, hashType=$hashType, secType=$secType, comName=$comName"
 
 CHAN_PROFILE=$PROFILE_STRING"Channel"
@@ -254,7 +260,7 @@ CWD=$PWD
 echo "current working directory: $CWD"
 echo "GOPATH=$GOPATH"
 
-if [ ! -z $orgMap ]
+if [ ! -z "$orgMap" ]
 then
 	orgMapParam="-M "$orgMap
 fi
@@ -279,7 +285,7 @@ cd $MSPDir
 # remove existing crypto-config
 rm -rf crypto-config
 echo "current working directory: $PWD"
-if [ ! -f $CRYPTOEXE ]; then
+if [ ! -f "$CRYPTOEXE" ]; then
 echo "build $CRYPTOEXE "
     cd $FabricDir
     echo "current working directory: $PWD"
@@ -312,7 +318,7 @@ CFGEXE=$BuildDir/configtxgen
 ordererDir=$MSPDir/crypto-config/ordererOrganizations
 #cp configtx.yaml $FabricDir"/common/configtx/tool"
 #cd $CFGGenDir
-if [ ! -f $CFGEXE ]; then
+if [ ! -f "$CFGEXE" ]; then
     cd $FabricDir
     make configtxgen
 fi
@@ -348,18 +354,18 @@ do
     for (( i=1; i<=$nOrg; i++ ))
     do
         orgMSP="PeerOrg"$i
-        if [ ! -z $orgMap ] && [ -f $orgMap ]
+        if [ ! -z "$orgMap" ] && [ -f "$orgMap" ]
         then
             tmpVal=$(jq .$orgMSP $orgMap)
-            if [ ! -z $tmpVal ] && [ $tmpVal != "null" ]
+            if [ ! -z "$tmpVal" ] && [ "$tmpVal" != "null" ]
             then
                 # Strip quotes from tmpVal if they are present
-                if [ ${tmpVal:0:1} == "\"" ]
+                if [ "${tmpVal:0:1}" == "\"" ]
                 then
                     tmpVal=${tmpVal:1}
                 fi
                 let "tmpLen = ${#tmpVal} - 1"
-                if [ ${tmpVal:$tmpLen:1} == "\"" ]
+                if [ "${tmpVal:$tmpLen:1}" == "\"" ]
                 then
                     tmpVal=${tmpVal:0:$tmpLen}
                 fi
@@ -381,8 +387,8 @@ echo "generate docker-compose.yml ..."
 echo "current working directory: $PWD"
 nPeers=$[ nPeersPerOrg * nOrg ]
 echo "number of peers: $nPeers"
-echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $coreLogLevel -q $ordererLogLevel $orgMapParam"
-./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $coreLogLevel -q $ordererLogLevel $orgMapParam
+echo "./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -l $peerLogLevel -q $ordererLogLevel $orgMapParam"
+./gen_network.sh -a create -x $nCA -p $nPeersPerOrg -r $nOrg -o $nOrderer -k $nKafka -e $nReplica -z $nZoo -t $ordServType -d $ledgerDB -F $MSPDir/crypto-config -G $SRCMSPDir -S $TLSEnabled -m $MutualTLSEnabled -C $comName -l $peerLogLevel -q $ordererLogLevel $orgMapParam
 
 echo " "
 echo "        ####################################################### "

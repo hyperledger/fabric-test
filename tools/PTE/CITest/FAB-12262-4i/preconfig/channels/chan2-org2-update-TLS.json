@@ -3,13 +3,11 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel2",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel2PeerOrg2anchors.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel2PeerOrg2anchors.tx",
         "action":  "update",
         "orgName": [
             "org2"
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-TLS.json"}
-    ]
+    "ConnProfilePath": "CITest/CIConnProfiles/test-network"
 }

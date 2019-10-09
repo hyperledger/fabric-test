@@ -16,7 +16,7 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel2",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
         "action":  "create",
         "orgName": [
             "org3"
@@ -57,7 +57,5 @@
             "args": ["put", "a1","1"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/test-network"
 }

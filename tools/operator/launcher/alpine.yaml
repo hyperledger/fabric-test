@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: cleanup
+spec:
+  selector:
+    matchLabels:
+      name: cleanup
+  template:
+    metadata:
+      labels:
+        name: cleanup
+    spec:
+      containers:
+      - name: cleanup
+        image: alpine
+        command:
+        - /bin/sh
+        args:
+        - -c
+        - rm -rf /opt/*-data
+        volumeMounts:
+        - name: data
+          mountPath: /opt/
+      terminationGracePeriodSeconds: 60
+      volumes:
+      - name: data
+        hostPath:
+          path: /shared/

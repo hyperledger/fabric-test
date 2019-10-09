@@ -14,7 +14,7 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel3",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel3.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel3.tx",
         "action":  "create",
         "orgName": [
             "org9"
@@ -40,7 +40,5 @@
         "payLoadMin": "1024",
         "payLoadMax": "1024"
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/mh-chan3-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/mh-config"
 }

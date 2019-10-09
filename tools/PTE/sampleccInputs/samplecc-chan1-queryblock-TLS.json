@@ -14,7 +14,7 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel1",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel1.tx",
         "action":  "create",
         "orgName": [
             "org1"
@@ -22,9 +22,9 @@
     },
     "queryBlockOpt": {
         "org":  "org1",
-        "peer":  "peer2",
-        "startBlock":  "6598",
-        "endBlock":  "6800"
+        "peer":  "peer0org1examplecom",
+        "startBlock":  "0",
+        "endBlock":  "10"
     },
     "burstOpt": {
         "burstFreq": ["500", "200", "300", "100"],
@@ -61,7 +61,5 @@
             "args": ["put", "a1","1"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"SCFiles/config-chan1-TLS.json"}
-	]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

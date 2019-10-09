@@ -10,7 +10,7 @@
     "nProcPerOrg": "_NPROC_",
     "nRequest": "_NREQ_",
     "runDur": "_RUNDUR_",
-    "TLS": "enabled",
+    "TLS": "_TLS_",
     "burstOpt": {
         "burstFreq": ["500", "200", "300", "100"],
         "burstDur":  ["3000", "2000", "3000", "1000"]

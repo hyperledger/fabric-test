@@ -9,7 +9,5 @@
             "org2"
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"CITest/CISCFiles/config-chan1-10orderers-TLS.json"}
-    ]
+    "ConnProfilePath": "CITest/CIConnProfiles/10orderers"
 }

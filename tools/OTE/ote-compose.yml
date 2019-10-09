@@ -24,6 +24,8 @@ services:
     volumes:
       - ../.:/opt/gopath/src/github.com/hyperledger/fabric
       - ../../fabric-test/tools/NL/configtx.yaml:/etc/hyperledger/fabric/configtx.yaml
-      - ../../fabric-test/fabric/common/tools/cryptogen/crypto-config:/etc/hyperledger/fabric/artifacts
+      - ../../fabric-test/fabric/internal/cryptogen/crypto-config:/etc/hyperledger/fabric/artifacts
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/OTE
     command: sh -c 'sleep 40 && ./script.sh'
+
+    

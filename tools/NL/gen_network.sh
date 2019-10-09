@@ -25,22 +25,22 @@ function printHelp {
    echo "       -S: TLS enablement [enabled|disabled], default=disabled "
    echo "       -m: Mutual TLS enablement [enabled|disabled], default=disabled "
    echo "       -x: number of ca, default=0"
-   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+   echo "       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
    echo "       -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config"
    echo "       -C: company name, default=example.com"
    echo "       -M: JSON file containing organization and MSP name mappings (optional) "
    echo " "
    echo "    peer environment variables"
-   echo "       -l: core logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
-   echo "       -d: core ledger state DB [goleveldb|couchdb], default=goleveldb"
+   echo "       -l: peer logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
+   echo "       -d: peer ledger state DB [goleveldb|couchdb], default=goleveldb"
    echo " "
    echo "    orderer environment variables"
-   echo "       -t: orderer type [solo|kafka] "
+   echo "       -t: orderer type [solo|kafka|etcdraft] "
    echo "       -q: orderer logging level [(default = not set)|CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG]"
    echo " "
    echo "Example:"
-   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
-   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S enabled "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config "
+   echo "   ./gen_network.sh -a create -x 2 -p 2 -r 2 -o 1 -k 1 -z 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config -S enabled "
    echo " "
    exit
 }
@@ -54,13 +54,15 @@ nPeerPerOrg=1
 nOrg=1
 nOrderer=1
 nCA=0
-MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+MSPDIR="$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
 SRCMSPDIR="/opt/hyperledger/fabric/msp/crypto-config"
 TLSEnabled="disabled"
 MutualTLSEnabled="disabled"
 db="goleveldb"
 comName="example.com"
 orgMap=
+PEER_FABRIC_LOGGING_SPEC=ERROR
+ORDERER_FABRIC_LOGGING_SPEC=ERROR
 
 while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:M:" opt; do
   case $opt in
@@ -80,9 +82,9 @@ while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:M:" opt; do
       echo "number of CA: $nCA"
       ;;
     l)
-      FABRIC_LOGGING_SPEC=$OPTARG
-      export FABRIC_LOGGING_SPEC=$FABRIC_LOGGING_SPEC
-      echo "FABRIC_LOGGING_SPEC: $FABRIC_LOGGING_SPEC"
+      PEER_FABRIC_LOGGING_SPEC=$OPTARG
+      export PEER_FABRIC_LOGGING_SPEC=$PEER_FABRIC_LOGGING_SPEC
+      echo "Peer FABRIC_LOGGING_SPEC=$PEER_FABRIC_LOGGING_SPEC"
       ;;
     d)
       db=$OPTARG
@@ -110,9 +112,9 @@ while getopts ":x:z:l:q:d:t:a:o:k:e:p:r:F:G:S:m:C:M:" opt; do
       fi
       ;;
     q)
-      ORDERER_GENERAL_LOGLEVEL=$OPTARG
-      export ORDERER_GENERAL_LOGLEVEL=$ORDERER_GENERAL_LOGLEVEL
-      echo "ORDERER_GENERAL_LOGLEVEL: $ORDERER_GENERAL_LOGLEVEL"
+      ORDERER_FABRIC_LOGGING_SPEC=$OPTARG
+      export ORDERER_FABRIC_LOGGING_SPEC=$ORDERER_FABRIC_LOGGING_SPEC
+      echo "Orderer FABRIC_LOGGING_SPEC=$ORDERER_FABRIC_LOGGING_SPEC"
       ;;
 
     # network options
@@ -179,17 +181,22 @@ if [ $nReplica -le 0 ]; then
     nReplica=$nBroker
 fi
 
-#OS
-##OSName=`uname`
-##echo "Operating System: $OSName"
+myOS=`uname -s`
+echo "Operating System: $myOS"
 
 # get current dir for CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE
 CWD=${PWD##*/}
-HOSTCONFIG_NETWORKMODE=$(echo $CWD | awk '{print tolower($CWD)}')
+HOSTCONFIG_NETWORKMODE="$CWD"
+dbType="$db"
+
+if [ "$myOS" != 'Darwin' ]; then
+    # macOS cannot run awk, but on Linux we can do better to convert to lowercase
+    dbType=`echo "$db" | awk '{print tolower($0)}'`
+    HOSTCONFIG_NETWORKMODE=$(echo $CWD | awk '{print tolower($CWD)}')
+fi
 export HOSTCONFIG_NETWORKMODE=$HOSTCONFIG_NETWORKMODE
 echo "HOSTCONFIG_NETWORKMODE: $HOSTCONFIG_NETWORKMODE"
 
-dbType=`echo "$db" | awk '{print tolower($0)}'`
 echo "action=$Req nPeerPerOrg=$nPeerPerOrg nBroker=$nBroker nReplica=$nReplica nOrderer=$nOrderer dbType=$dbType"
 VP=`docker ps -a | grep 'peer node start' | wc -l`
 echo "existing peers: $VP"
@@ -295,8 +302,6 @@ do
     sed $sedOpt "s/$simpleOrgMSP/$orgMSP/g" docker-compose.yml
 
 done
-
-
 
 ## sed 's/-x86_64/TEST/g' docker-compose.yml > ss.yml
 ## cp ss.yml docker-compose.yml

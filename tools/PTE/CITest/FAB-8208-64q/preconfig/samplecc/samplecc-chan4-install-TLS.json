@@ -21,7 +21,5 @@
         "fcn": "init",
         "args": []
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/mh-chan4-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/mh-config"
 }

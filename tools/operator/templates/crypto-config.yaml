@@ -1,0 +1,30 @@
+#! Copyright IBM Corp. All Rights Reserved.
+#!
+#! SPDX-License-Identifier: Apache-2.0
+
+#@ load("@ytt:data", "data")
+#@ config = data.values
+OrdererOrgs:
+#@ num_organizations = len(config.orderer_organizations)
+#@ for i in range(0, num_organizations):
+#@   ordererOrg = config.orderer_organizations[i]
+- Domain: #@ ordererOrg.name
+  Name: #@ ordererOrg.name
+  EnableNodeOUs: #@ config.enableNodeOUs
+  Specs:
+  #@ num_orderers = ordererOrg.num_orderers
+  #@ for i in range(0, num_orderers):
+    - Hostname: #@ "orderer{}-{}".format(i, ordererOrg.name)
+  #@ end
+#@ end
+PeerOrgs:
+#@ for i in range(0, len(config.peer_organizations)):
+#@   peerOrg = config.peer_organizations[i]
+- Domain: #@ peerOrg.name
+  Name: #@ peerOrg.name
+  EnableNodeOUs: #@ config.enableNodeOUs
+  Specs:
+  #@ for i in range(0, peerOrg.num_peers):
+    - Hostname: #@ "peer{}-{}".format(i, peerOrg.name)
+  #@ end
+#@ end

@@ -19,6 +19,15 @@ usage () {
     echo
     echo -e "-h, --help\tView this help message"
 
+    echo -e "--tls \tTLS setting [disabled|serverauth|clientauth]"
+    echo -e "\t\t(Default: serverauth)"
+
+    echo -e "-n, --name\tblank-separated list of channels"
+    echo -e "\t\t(Default: defaultchannel. Note: cannot be used with --nchan)"
+
+    echo -e "--nchan \tnumber of channels"
+    echo -e "\t\t(Default: 0. Note: cannot be used with -n nor --name)"
+
     echo -e "-n, --name\tblank-separated list of channels"
     echo -e "\t\t(Default: defaultchannel)"
 
@@ -88,6 +97,70 @@ usage () {
 }
 
 
+## printVar(): print input vars
+printVars () {
+
+echo
+echo
+echo "*********************************************************"
+echo "***                                                      "
+echo "***                   input parameters                   "
+echo "***                                                      "
+echo "***  blockchain network                                  "
+echo "***      TLS: $TLS                                       "
+echo "***                                                      "
+echo "***  service credential file directory                   "
+echo "***      SCDIR: $SCDIR                                   "
+echo "***                                                      "
+echo "***  chaincodes                                          "
+echo "***      number: ${#Chaincode[@]}                        "
+echo "***      Chaincode: ${Chaincode[@]}                      "
+echo "***                                                      "
+echo "***  processes parameters                                "
+echo "***      TXProc: $TXType                                 "
+echo "***      PrimeProc: $PrimeProc                           "
+echo "***      CCProc: $CCProc                                 "
+echo "***      ChanProc: $ChanProc                             "
+echo "***                                                      "
+echo "***  network parameters                                  "
+echo "***      CHANNEL set name: $setChanName                  "
+echo "***      CHANNEL set num: $setChanNum                    "
+echo "***      NCHAN: $NCHAN                                   "
+echo "***      CHANPREFIX: $CHANPREFIX                         "
+echo "***      CHANNEL length: ${#CHANNEL[@]}                  "
+echo "***      CHANNEL: ${CHANNEL[@]}                          "
+echo "***                                                      "
+echo "***      ORGS set name: $setOrgName                      "
+echo "***      ORGS set num: $setOrgNum                        "
+echo "***      NORG: $NORG                                     "
+echo "***      ORGPREFIX: $ORGPREFIX                           "
+echo "***      ORGS length: ${#ORGS[@]}                        "
+echo "***      ORGS: ${ORGS[@]}                                "
+echo "***                                                      "
+echo "***  transaction parameters                              "
+echo "***      NPROC: $NPROC                                   "
+echo "***      NREQ: $NREQ                                     "
+echo "***      TXType: $TXType                                 "
+echo "***      TXMODE: $TXMODE                                 "
+echo "***      FREQ: $FREQ ms                                  "
+echo "***      TARGETPEERS: $TARGETPEERS                       "
+echo "***      TARGETORDERERS: $TARGETORDERERS                 "
+echo "***      NORDERERS: $NORDERERS                           "
+echo "***      RUNDUR: $RUNDUR sec                             "
+echo "***      KEYSTART: $KEYSTART                             "
+echo "***      EVENT TIMEOUT: $EVTTIMEOUT ms                   "
+echo "***      REQUEST TIMEOUT: $REQTIMEOUT ms                 "
+echo "***      GRPC WAIT TIMEOUT: $GRPCTIMEOUT ms              "
+echo "***                                                      "
+echo "***  validation parameters                               "
+echo "***      CHKPEERS: $CHKPEERS                             "
+echo "***      CHKTX: $CHKTX                                   "
+echo "***      CHKTXNUM: $CHKTXNUM                             "
+echo "***                                                      "
+echo "*********************************************************"
+
+}
+
 # FUNCTION: error
 #           Displays error message; exits.
 #     ARGS: 1: error message
@@ -104,7 +177,8 @@ PTEDIR=$PWD
 TEMPLATEDIR=$PTEDIR/CITest/scripts/cfgTemplates
 runDir=$PTEDIR/runPTE
 
-CHANNEL="defaultchannel"   # channel name
+TLS="serverauth"
+CHANNEL="defaultchannel"       # channel name
 ChanProc="NO"
 CCProc="NO"
 PrimeProc="NO"
@@ -214,6 +288,8 @@ PreCFGProc() {
     else
         cc=""
     fi
+        sed -i -e "s/_TLS_/$TLS/g" $cfgName
+        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
         sed -i -e "s/_CHANNELNAME_/$chnl/g" $cfgName
         sed -i -e "s/_CHANNELID_/$chnl/g" $cfgName
         sed -i -e "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
@@ -245,16 +321,8 @@ PreTXProc() {
 
     cfgTX=${1}
     invokeType=${2}
-    nproc=${3}
-    freq=${4}
-    nreq=${5}
-    rundur=${6}
-    transmode=${7}
-    targetpeers=${8}
-    chkpeers=${9}
-    chktx=${10}
-    chktxnum=${11}
 
+        sed -i -e "s/_TLS_/$TLS/g" $cfgTX
         sed -i -e "s/_INVOKETYPE_/$invokeType/g" $cfgTX
         sed -i -e "s/_NPROC_/$nproc/g" $cfgTX
         sed -i -e "s/_FREQ_/$freq/g" $cfgTX
@@ -428,6 +496,13 @@ while [[ $# -gt 0 ]]; do
 
       -h | --help)
           usage        # displays usage info; exits
+          ;;
+
+      --tls)
+          shift
+          TLS=$1       # TLS
+          echo -e "\t- Specify TLS: $TLS\n"
+          shift
           ;;
 
       -d | --scdir)

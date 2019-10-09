@@ -1,6 +1,6 @@
 {
     "transType": "Channel",
-    "TLS": "enabled",
+    "TLS": "_TLS_",
     "channelOpt": {
         "name": "_CHANNELNAME_",
         "action":  "join",

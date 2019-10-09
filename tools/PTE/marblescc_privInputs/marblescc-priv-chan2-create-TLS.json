@@ -3,13 +3,11 @@
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel2",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
         "action":  "create",
         "orgName": [
             "org3"
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"SCFiles/config-chan2-TLS.json"}
-    ]
+    "ConnProfilePath": "ConnProfiles/test-network"
 }

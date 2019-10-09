@@ -46,6 +46,10 @@
         "listener": "Block",
         "timeout": "240000"
     },
+    "ordererOpt": {
+        "method": "RoundRobin",
+        "nOrderers": "0"
+    },
     "ccType": "ccchecker",
     "ccOpt": {
         "keyIdx": [1],
@@ -64,7 +68,5 @@
             "args": ["put", "a1","1"]
         }
     },
-    "SCFile": [
-		{"ServiceCredentials":"CITest/CISCFiles/mh-chan1-TLS.json"}
-	]
+    "ConnProfilePath": "CITest/CIConnProfiles/mh-config"
 }

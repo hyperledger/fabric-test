@@ -25,7 +25,7 @@ function printHelp {
    echo "    -r: number of organizations, default=1"
    echo "    -n: number of channels, default=1"
    echo "    -x: number of ca, default=1"
-   echo "    -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+   echo "    -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
    echo "    -w: host ip, default=localhost"
    echo "    -C: company name, default=example.com"
    echo "    -M: JSON file containing organization and MSP name mappings (optional) "
@@ -45,7 +45,7 @@ nCA=1
 nPeersPerOrg=1
 nChannel=1
 nOrgPerChannel=1
-MSPBaseDir="src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config"
+MSPBaseDir="src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config"
 ordererBaseDir=$MSPBaseDir"/ordererOrganizations"
 peerBaseDir=$MSPBaseDir"/peerOrganizations"
 comName="example.com"
@@ -132,12 +132,8 @@ if echo "$MSPBaseDir" | grep -q "$GOPATH"; then
     MSPBaseDir=$MM"/crypto-config"
 fi
 echo "MSPBaseDir=$MSPBaseDir"
-nOrgPerChannel=$(( nOrg/nChannel ))
+nOrgPerChannel=$nOrg
 echo "nOrgPerChannel: $nOrgPerChannel"
-if [ $nOrgPerChannel -eq 0 ]; then
-    echo "Warning: unable to create PTE configuration json for configuration: $nOrg org and $nChannel channels"
-    exit
-fi
 
 
 function outOrderer {
@@ -180,7 +176,11 @@ function outOrderer {
         else
             tmp="            }" >> $scOfile
             echo "$tmp" >> $scOfile
-            tmp="        }," >> $scOfile
+            if [ $nOrgPerChannel -eq 0 ]; then
+                tmp="        }" >> $scOfile
+            else
+                tmp="        }," >> $scOfile
+            fi
             echo "$tmp" >> $scOfile
         fi
     done
@@ -188,11 +188,11 @@ function outOrderer {
 
 function outOrg {
     # org/peer
-    ordID=$(( (n-1)*nOrgPerChannel ))
-    caID=$(( (n-1)*nOrgPerChannel ))
+    ordID=0
+    caID=0
     for (( i=1; i<=$nOrgPerChannel; i++ ))
     do
-        peerid=$(( (n-1)*nOrgPerChannel+i ))
+        peerid=$i
 
         orgid="org"$peerid
         if [ ! -z $orgMap ] && [ -f $orgMap ]
@@ -251,18 +251,20 @@ function outOrg {
         tmp="                \"ordererID\": \"orderer$ordID\"," >> $scOfile
         echo "$tmp" >> $scOfile
 
-        tmp="                \"ca\": {" >> $scOfile
-        echo "$tmp" >> $scOfile
-        caID=$(( (n-1) % nCA ))
-        capid=$(( CAPort + caID ))
-        caPort="https://"$HostIP":"$capid
-        tmp="                    \"url\": \"$caPort\"," >> $scOfile
-        echo "$tmp" >> $scOfile
-        caName="ca"$caID
-        tmp="                    \"name\": \"$caName\"" >> $scOfile
-        echo "$tmp" >> $scOfile
-        tmp="                }," >> $scOfile
-        echo "$tmp" >> $scOfile
+        if [ $nCA -gt 0 ]; then
+            tmp="                \"ca\": {" >> $scOfile
+            echo "$tmp" >> $scOfile
+            caID=$(( caID % nCA ))
+            capid=$(( CAPort + caID ))
+            caPort="https://"$HostIP":"$capid
+            tmp="                    \"url\": \"$caPort\"," >> $scOfile
+            echo "$tmp" >> $scOfile
+            caName="ca"$caID
+            caID=$(( caID + 1 ))
+            tmp="                    \"name\": \"$caName\"" >> $scOfile
+            echo "$tmp" >> $scOfile
+            tmp="                }," >> $scOfile
+            echo "$tmp" >> $scOfile
 
         tmp="                \"username\": \"admin\"," >> $scOfile
         echo "$tmp" >> $scOfile
@@ -280,11 +282,11 @@ function outOrg {
             peerID="peer"$j
             tmp="                \"$peerID\": {" >> $scOfile
             echo "$tmp" >> $scOfile
-            peerIP=$(( ( (n-1)*nOrgPerChannel+(i-1) )*nPeersPerOrg + j0 + peerBasePort ))
+            peerIP=$(( (i-1)*nPeersPerOrg + j0 + peerBasePort ))
             peerTmp="grpcs://"$HostIP":"$peerIP
             tmp="                    \"requests\": \"$peerTmp\"," >> $scOfile
             echo "$tmp" >> $scOfile
-            eventIP=$(( ( (n-1)*nOrgPerChannel+(i-1) )*nPeersPerOrg + j0 + peerEventBasePort ))
+            eventIP=$(( (i-1)*nPeersPerOrg + j0 + peerEventBasePort ))
             eventTmp="grpcs://"$HostIP":"$eventIP
             tmp="                    \"events\": \"$eventTmp\"," >> $scOfile
             echo "$tmp" >> $scOfile
@@ -341,7 +343,12 @@ do
     outOrderer
 
     ## orgs with peers
-    outOrg
+    if [ $nOrgPerChannel -eq 0 ]; then
+        tmp="    }" >> $scOfile
+        echo "$tmp" >> $scOfile
+    else
+        outOrg
+    fi
 
     tmp="}" >> $scOfile
     echo "$tmp" >> $scOfile

@@ -50,7 +50,7 @@ This is the main script to execute all tasks.
          -q: orderer logging level [CRITICAL|ERROR|WARNING|NOTICE|INFO|DEBUG], default=ERROR
          -c: batch timeout, default=2s
          -B: batch size, default=10
-         -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen
+         -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen
          -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
          -S: TLS enablement [disabled|serverauth|clientauth], default=disabled
          -C: company name, default=example.com
@@ -106,9 +106,9 @@ The script is used to clean a network.
 
 # cryptogen
 
-The executable is in $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen and is used to create crypto
+The executable is in $GOPATH/src/github.com/hyperledger/fabric/internal/cryptogen and is used to create crypto
 
-    cd $GOPATH/src/github.com/hyperledger/fabric/common/tools/cryptogen
+    cd $GOPATH/src/github.com/hyperledger/fabric/internal/cryptogen
     apt-get install libltdl-dev
     go build
 
@@ -134,7 +134,7 @@ The script is used to create configtx.yaml.
        -s: security service type, default=256
        -t: orderer service [solo|kafka], default=solo
        -f: profile name, default=test
-       -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
+       -b: MSP directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config
        -w: host ip 1, default=0.0.0.0
        -c: batch timeout, default=2s
        -B: batch size, default=10
@@ -145,7 +145,7 @@ The script is used to create configtx.yaml.
 
 ## Example:
 
-    ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -w 10.120.223.35
+    ./gen_configtx_cfg.sh -o 1 -k 1 -p 2 -r 6 -h SHA2 -s 256 -t kafka -b /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -w 10.120.223.35
 
 
 
@@ -179,7 +179,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
        -S: TLS enablement [enabled|disabled], default=disabled
        -m: Mutual TLS enablement [enabled|disabled], default=disabled
        -x: number of ca
-       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
+       -F: local MSP base directory, default=$GOPATH/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config
        -G: src MSP base directory, default=/opt/hyperledger/fabric/msp/crypto-config
        -C: company name, default=example.com
        -M: JSON file containing organization and MSP name mappings (optional)
@@ -195,7 +195,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
 ## Example
 
-    ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
+    ./gen_network.sh -a create -z 2 -p 2 -r 2 -o 1 -k 1 -t kafka -d goleveldb -F /root/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config -G /opt/hyperledger/fabric/msp/crypto-config
 
 
 # gen_PTEcfg.sh
@@ -212,7 +212,7 @@ The script generates the service credential json files of a network to be used a
        -r: number of organizations, default=1
        -n: number of channels, default=1
        -x: number of ca, default=1
-       -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config
+       -b: MSP directory, default=src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config
        -w: host ip, default=localhost
        -C: company name, default=example.com
        -M: JSON file containing organization and MSP name mappings (optional) "

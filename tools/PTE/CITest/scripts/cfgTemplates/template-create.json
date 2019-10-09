@@ -1,9 +1,9 @@
 {
     "transType": "Channel",
-    "TLS": "enabled",
+    "TLS": "_TLS_",
     "channelOpt": {
         "name": "_CHANNELNAME_",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/common/tools/cryptogen/crypto-config/ordererOrganizations/_CHANNELNAME_.tx",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/_CHANNELNAME_.tx",
         "action":  "create",
         "orgName": [
         ]

@@ -76,7 +76,5 @@
             "args": ["key","PeerOrg3", "PeerOrg4"]
         }
     },
-    "SCFile": [
-        {"ServiceCredentials":"CITest/CISCFiles/config-chan2-TLS.json"}
-    ]
+    "ConnProfilePath": "CITest/CIConnProfiles/test-network"
 }
