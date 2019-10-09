@@ -1,0 +1,45 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
+trigger:
+- master
+- release-1.4
+pr:
+- master
+- release-1.4
+
+variables:
+  GOPATH: $(Agent.BuildDirectory)/go
+  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  GOVER: 1.12.5
+  NODE_VER: 8.14.0
+  PYTHON_VER: 2.7
+
+jobs:
+- job: VerifyBuild
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - template: install_deps.yml
+  - checkout: self
+    path: 'go/src/github.com/hyperledger/fabric-test'
+    displayName: Checkout Fabric Test Code
+  - script: make ci-smoke
+    displayName: Run Smoke Tests
+  - script: |
+      mkdir -p logs
+      ls logs
+      cp tools/PTE/CITest/Logs/*.* logs
+      cp tools/LTE/TestResults/experiments/*/*.* logs
+    displayName: Copy Logs
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: 'logs'
+      artifactName: 'Logs'
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: 'regression/smoke/results*.xml'
