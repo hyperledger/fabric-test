@@ -5,12 +5,12 @@
         "keyPayLoad": [2],
         "keyStart": "_KEYSTART_",
         "payLoadType": "Random",
-        "payLoadMin": "1024",
-        "payLoadMax": "1024"
+        "payLoadMin": "_PAYLOADMIN_",
+        "payLoadMax": "_PAYLOADMAX_"
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/java",
-        "language": "java",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/node",
+        "language": "node",
         "fcn": "init",
         "args": []
     },

@@ -1,14 +1,13 @@
 {
     "transType": "Channel",
     "TLS": "_TLS_",
+    "channelID": "_CHANNELID_",
     "channelOpt": {
         "name": "_CHANNELNAME_",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/_CHANNELNAME_.tx",
+        "channelTX": "_CHANNELTXPATH_/_CHANNELNAME_.tx",
         "action":  "create",
         "orgName": [
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
-    ]
+    "ConnProfilePath": "_CPDIRECTORY_"
 }
