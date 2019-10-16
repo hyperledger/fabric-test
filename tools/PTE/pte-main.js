@@ -1534,7 +1534,9 @@ async function performance_main() {
             var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
             var invokeType = txCfgPtr.invokeType.toUpperCase();
             logger.info('nProcPerOrg ', nProcPerOrg);
+            let output = {}
             for (var j = 0; j < nProcPerOrg; j++) {
+                output = {}
                 const pteExecPath = path.join(__dirname, 'pte-execRequest.js')
                 var workerProcess = child_process.spawn('node', [pteExecPath, j, Nid, uiFile, tStart, org, PTEid]);
 
@@ -1741,29 +1743,43 @@ async function performance_main() {
 
                             // transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE transaction stats\n";
+                            output["INVOKE transactions type"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalInvokeTrans + "  received "+totalInvokeTransRcvd+"\n";
+                            const transactions = {"sent": totalInvokeTrans, "received": totalInvokeTransRcvd}
+                            output["Total transactions"] = transactions
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tfailures: proposal "+totalInvokePeerFailures + "  transactions "+totalInvokeOrdererFailures+"\n";
+                            const failures = {"proposal": totalInvokePeerFailures, "transactions": totalInvokeOrdererFailures}
+                            output["failures"]= failures
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tevent: received "+totalInvokeTransRcvd + "  timeout "+totalInvokeEventTimeout+ "  unreceived "+ totalInvokeEventUnreceived+"\n";
+                            const events = {"received": totalInvokeTransRcvd, "timeout": totalInvokeEventTimeout, "unreceived": totalInvokeEventUnreceived}
+                            output["event"] = events
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur+" ms"
                             fs.appendFileSync(rptFile, buff);
 
                             if ( transMode === 'LATENCY' ) {
                                 var iTPS=dur/totalInvokeTransRcvd;
                                 buff = "("+channelName+":"+chaincode_id+"):\tLatency "+iTPS.toFixed(2)+" ms \n";
+                                output["Latency"] = iTPS.toFixed(2)+" ms"
                                 fs.appendFileSync(rptFile, buff);
                             } else {
                                 var iTPS=1000*totalInvokeTransRcvd/dur;
                                 buff = "("+channelName+":"+chaincode_id+"):\tTPS "+iTPS.toFixed(2)+ "\n";
+                                output["TPS"] = iTPS.toFixed(2)
                                 fs.appendFileSync(rptFile, buff);
                             }
 
@@ -1771,31 +1787,46 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"): peer latency stats (endorsement)\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_peer[0] +"  total time: "+ latency_peer[1] +" ms \n";
+                            let peerLatencyStats = {"total transactions": latency_peer[0], "total time": latency_peer[1] +" ms"}
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_peer[0] > 0 ) {
                                 buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_peer[2] +" ms  max: "+ latency_peer[3] +" ms  avg: "+ (latency_peer[1]/latency_peer[0]).toFixed(2) +" ms \n";
+                                peerLatencyStats["min"] = latency_peer[2] +" ms"
+                                peerLatencyStats["max"] = latency_peer[3] +" ms"
+                                peerLatencyStats["avg"] = (latency_peer[1]/latency_peer[0]).toFixed(2) +" ms"
                                 fs.appendFileSync(rptFile, buff);
                             }
-
+                            output["peer latency stats (endorsement)"] = peerLatencyStats
                             // orderer latency output (transaction ack)
                             buff = "("+channelName+":"+chaincode_id+"): orderer latency stats (transaction ack)\n";
+                            let ordererLatencyStats = {}
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_orderer[0] +"  total time: "+ latency_orderer[1] +" ms \n";
+                            ordererLatencyStats = {"total transactions": latency_orderer[0], "total time": latency_orderer[1] +" ms"}
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_orderer[0] > 0 ) {
                                 buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_orderer[2] +" ms  max: "+ latency_orderer[3] +" ms  avg: "+ (latency_orderer[1]/latency_orderer[0]).toFixed(2) +" ms \n";
+                                ordererLatencyStats["min"] = latency_orderer[2] +" ms"
+                                ordererLatencyStats["max"] = latency_orderer[3] +" ms"
+                                ordererLatencyStats["avg"] = (latency_orderer[1]/latency_orderer[0]).toFixed(2) +" ms"
                                 fs.appendFileSync(rptFile, buff);
                             }
-
+                            output["orderer latency stats (submit tx ack/nack)"] = ordererLatencyStats
                             // event latency output (end-to-end)
                             buff = "("+channelName+":"+chaincode_id+"): event latency stats (end-to-end)\n";
+                            let eventLatencyStats = {}
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_event[0] +"  total time: "+ latency_event[1] +" ms \n";
+                            eventLatencyStats = {"total transactions": latency_event[0], "total time": latency_event[1] +" ms"}
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_event[0] > 0 ) {
                                 buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_event[2] +" ms  max: "+ latency_event[3] +" ms  avg: "+ (latency_event[1]/latency_event[0]).toFixed(2) +" ms \n\n";
+                                eventLatencyStats["min"] = latency_event[2] +" ms"
+                                eventLatencyStats["max"] = latency_event[3] +" ms"
+                                eventLatencyStats["avg"] = (latency_event[1]/latency_event[0]).toFixed(2) +" ms"
                                 fs.appendFileSync(rptFile, buff);
                             }
+                            output["event latency stats (end to end)"] = eventLatencyStats
                         }
                         if (totalQueryTrans>0) {
                             var dur=etmp-stmp;
@@ -1804,20 +1835,29 @@ async function performance_main() {
 
                             // query transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " QUERY transaction stats\n";
+                            output["QUERY transaction stats"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalQueryTrans + "  received "+totalQueryReceived+"\n";
+                            const totalTransactions = {"sent": totalQueryTrans, "received": totalQueryReceived}
+                            output["Total transactions"] = totalTransactions
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tfailures: query transactions "+totalQueryFailed+"\n";
                             fs.appendFileSync(rptFile, buff);
-
+                            output["query transactions failed"] = totalQueryFailed
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur+" ms"
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+qTPS.toFixed(2)+ "\n\n";
+                            output["TPS"] = qTPS.toFixed(2)
                             fs.appendFileSync(rptFile, buff);
                         }
                         if (totalMixedTPS) {
@@ -1828,17 +1868,26 @@ async function performance_main() {
 
                             // mix transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE/QUERY transaction stats\n";
+                            output["INVOKE/QUERY transaction mode"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+mixTotal+" INVOKE "+totalMixedInvoke+"  QUERY "+ totalMixedQuery + "\n";
+                            const totalTransactions = {"sent": mixTotal, "INVOKE": totalMixedInvoke, "QUERY": totalMixedQuery}
+                            output["Total transactions"] = totalTransactions
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur+" ms"
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+mTPS.toFixed(2)+ "\n\n";
+                            output["TPS"] = mTPS.toFixed(2)
                             fs.appendFileSync(rptFile, buff);
                         }
                         if (totalDiscoveryTrans>0) {
@@ -1849,22 +1898,39 @@ async function performance_main() {
 
                             // service discovery transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+transMode+" "+transType+" transaction stats\n";
+                            output[transType+" transaction mode"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             var totalDiscoveryTransReceived = totalDiscoveryTrans - totalDiscoveryTransFailures;
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalDiscoveryTrans + "  received "+totalDiscoveryTransReceived+"\n";
+                            const totalTransactions = {"sent": totalDiscoveryTrans, "received": totalDiscoveryTransReceived}
+                            output["Total transactions"] = totalTransactions
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+sdTPS.toFixed(2)+ "\n\n";
+                            output["TPS"] = sdTPS.toFixed(2)
                             fs.appendFileSync(rptFile, buff);
                         }
+                        output["channel name"] = channelName
+                        output["chaincode ID"] = chaincode_id
                         logger.info('[performance_main] pte-main:completed:');
+                        if(output["Total transactions"]["sent"] == output["Total transactions"]["received"]){
+                            output["Test Result"] = "PASS"
+                        } else{
+                            output["Test Result"] = "FAIL"
+                        }
 
+                        logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
                     }
 
                 });
