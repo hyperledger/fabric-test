@@ -9,13 +9,15 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/launcher"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
-var networkSpecPath = flag.String("i", "", "Network spec input file path (required)")
+var inputFilePath = flag.String("i", "", "Input file path (required)")
 var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
-var action = flag.String("a", "", "Set action (Available options createChannelTxn, migrate, health)")
+var action = flag.String("a", "", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
 
 func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 
@@ -26,10 +28,81 @@ func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
 	}
 }
 
-func doAction(action, env, kubeConfigPath string, config networkspec.Config) {
+func contains(s []string, e string) bool {
+    for _, a := range s {
+        if a == e {
+            return true
+        }
+    }
+    return false
+}
+
+func doAction(action, env, kubeConfigPath, inputFilePath string) {
 
 	var err error
+	var inputPath string
+	var config networkspec.Config
+	actions := []string{"up", "down", "createChannelTxn", "migrate", "health"}
+	if contains(actions, action) {
+		contents, _ := ioutil.ReadFile(inputFilePath)
+		contents = append([]byte("#@data/values \n"), contents...)
+		inputPath = paths.JoinPath(paths.TemplatesDir(), "input.yaml")
+		ioutil.WriteFile(inputPath, contents, 0644)
+
+		var network nl.Network
+		config, err = network.GetConfigData(inputPath)
+
+		if err != nil {
+			logger.CRIT(err)
+		}
+	}
+
 	switch action {
+	case "up":
+		err = launcher.Launcher("up", env, kubeConfigPath, inputPath)
+		if err != nil {
+			logger.CRIT(err, "Failed to launch network")
+		}
+	case "down":
+		err = launcher.Launcher("down", env, kubeConfigPath, inputPath)
+		if err != nil {
+			logger.CRIT(err, "Failed to delete network")
+		}
+	case "create":
+		err = testclient.Testclient("create", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to create channel in network")
+		}
+	case "join":
+		err = testclient.Testclient("join", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to join peers to channel in network")
+		}
+	case "install":
+		err = testclient.Testclient("install", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to install chaincode")
+		}
+	case "instantiate":
+		err = testclient.Testclient("instantiate", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to instantiate chaincode")
+		}
+	case "upgrade":
+		err = testclient.Testclient("upgrade", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to upgrade chaincode")
+		}
+	case "invoke":
+		err = testclient.Testclient("invoke", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to send invokes")
+		}
+	case "query":
+		err = testclient.Testclient("query", inputFilePath)
+		if err != nil {
+			logger.CRIT(err, "Failed to send queries")
+		}
 	case "createChannelTxn":
 		configTxnPath := paths.ConfigFilesDir()
 		err = networkclient.GenerateChannelTransaction(config, configTxnPath)
@@ -61,24 +134,10 @@ func doAction(action, env, kubeConfigPath string, config networkspec.Config) {
 func main() {
 
 	flag.Parse()
-	validateArguments(networkSpecPath, kubeConfigPath)
+	validateArguments(inputFilePath, kubeConfigPath)
 	env := "docker"
 	if *kubeConfigPath != "" {
 		env = "k8s"
 	}
-	var err error
-	contents, _ := ioutil.ReadFile(*networkSpecPath)
-	contents = append([]byte("#@data/values \n"), contents...)
-	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")
-	ioutil.WriteFile(inputPath, contents, 0644)
-	err = networkclient.CreateConfigTxYaml()
-	if err != nil{
-		logger.CRIT(err, "Failed to create configtx.yaml")
-	}
-	var network nl.Network
-	config, err := network.GetConfigData(inputPath)
-	if err != nil {
-		logger.CRIT(err)
-	}
-	doAction(*action, env, *kubeConfigPath, config)
+	doAction(*action, env, *kubeConfigPath, *inputFilePath)
 }

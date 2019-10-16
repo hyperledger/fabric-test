@@ -1,4 +1,4 @@
-package main
+package testclient
 
 import (
 	"flag"
@@ -14,9 +14,9 @@ import (
 var testInputFilePath = flag.String("i", "", "Input file for pte (Required)")
 var action = flag.String("a", "", "Action to perform")
 
-func validateArguments(testInputFilePath *string) {
+func validateArguments(testInputFilePath string) {
 
-	if *testInputFilePath == "" {
+	if testInputFilePath == "" {
 		logger.CRIT(nil, "Input file not provided")
 	}
 	if *action == "" {
@@ -41,7 +41,7 @@ func GetInputData(inputFilePath string) (inputStructs.Config, error) {
 	return config, nil
 }
 
-func doAction(action string, config inputStructs.Config, testInputFilePath string) {
+func doAction(action string, config inputStructs.Config, testInputFilePath string) error {
 
 	var actions []string
 	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query"
@@ -89,15 +89,20 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 			logger.CRIT(nil, "Incorrect Unknown (", action, ").Supported actions:", supportedActions)
 		}
 	}
+	return nil
 }
 
-func main() {
+func Testclient(action, testInputFilePath string) error {
 
 	flag.Parse()
 	validateArguments(testInputFilePath)
-	config, err := GetInputData(*testInputFilePath)
+	config, err := GetInputData(testInputFilePath)
 	if err != nil {
 		logger.CRIT(err)
 	}
-	doAction(*action, config, *testInputFilePath)
+	err = doAction(action, config, testInputFilePath)
+	if err != nil {
+		return err
+	}
+	return nil
 }

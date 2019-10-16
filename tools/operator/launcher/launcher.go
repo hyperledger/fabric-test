@@ -2,10 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-package main
+package launcher
 
 import (
-	"flag"
+	//"flag"
 	"io/ioutil"
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
@@ -13,24 +13,24 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/ytt"
+	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
-var networkSpecPath = flag.String("i", "", "Network spec input file path (Required)")
-var kubeConfigPath = flag.String("k", "", "Kube config file path (Optional for local network)")
-var action = flag.String("a", "up", "Set action(up or down) (default is up)")
+// var networkSpecPath = flag.String("i", "", "Network spec input file path (Required)")
+// var kubeConfigPath = flag.String("k", "", "Kube config file path (Optional for local network)")
+// var action = flag.String("a", "up", "Set action(up or down) (default is up)")
 
-func validateArguments(networkSpecPath *string, kubeConfigPath *string) {
+func validateArguments(networkSpecPath string, kubeConfigPath string) {
 
-	if *networkSpecPath == "" {
+	if networkSpecPath == "" {
 		logger.CRIT(nil, "Config file not provided")
-	} else if *kubeConfigPath == "" {
+	} else if kubeConfigPath == "" {
 		logger.INFO("Kube config file not provided, proceeding with local environment")
 	}
 }
 
-func doAction(action, env, kubeConfigPath string, config networkspec.Config) {
+func doAction(action, env, kubeConfigPath string, config networkspec.Config) error {
 
 	var err error
 	switch env {
@@ -44,6 +44,7 @@ func doAction(action, env, kubeConfigPath string, config networkspec.Config) {
 	if err != nil {
 		logger.CRIT(err)
 	}
+	return nil
 }
 
 func validateBasicConsensusConfig(config networkspec.Config) {
@@ -60,31 +61,30 @@ func validateBasicConsensusConfig(config networkspec.Config) {
 	}
 }
 
-func main() {
+func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 
-	flag.Parse()
 	var yttObject ytt.YTT
 	err := yttObject.DownloadYtt()
 	if err != nil {
 		logger.CRIT(err)
 	}
 	validateArguments(networkSpecPath, kubeConfigPath)
-	env := "docker"
-	if *kubeConfigPath != "" {
-		env = "k8s"
-	}
-	contents, err := ioutil.ReadFile(*networkSpecPath)
-	if err != nil {
-		logger.CRIT(err, "Incorrect input file path")
-	}
+	contents, _ := ioutil.ReadFile(networkSpecPath)
 	contents = append([]byte("#@data/values \n"), contents...)
 	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
+
 	var network nl.Network
 	config, err := network.GetConfigData(inputPath)
+
 	if err != nil {
 		logger.CRIT(err)
 	}
+
 	validateBasicConsensusConfig(config)
-	doAction(*action, env, *kubeConfigPath, config)
+	err = doAction(action, env, kubeConfigPath, config)
+	if err != nil {
+		return err
+	}
+	return nil
 }
