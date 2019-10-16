@@ -51,8 +51,8 @@ func TemplatesDir() string {
 	if err != nil {
 		logger.CRIT(err)
 	}
-	if strings.Contains(currentDir, "launcher") {
-		return componentPath(currentDir, "../templates")
+	if strings.Contains(currentDir, "regression") {
+		return componentPath(currentDir, "../../tools/operator/templates")
 	}
 	return componentPath(currentDir, "templates")
 }
@@ -69,8 +69,8 @@ func ConfigFilesDir() string {
 	if err != nil {
 		logger.CRIT(err)
 	}
-	if strings.Contains(currentDir, "launcher") {
-		return componentPath(currentDir, "../configFiles")
+	if strings.Contains(currentDir, "regression") {
+		return componentPath(currentDir, "../../tools/operator/configFiles")
 	}
 	return componentPath(currentDir, "configFiles")
 }
@@ -138,7 +138,10 @@ func PTEPath() string{
 	if err != nil{
 		logger.CRIT(err, "Failed to get the current working directory")
 	}
-	path = JoinPath(path, "../../PTE/pte-main.js")
+	if strings.Contains(path, "regression") {
+		return JoinPath(path, "../../tools/PTE/pte-main.js")
+	}
+	path = JoinPath(path, "../PTE/pte-main.js")
 	return path
 }
 
