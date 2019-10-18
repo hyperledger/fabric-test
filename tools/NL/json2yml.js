@@ -829,6 +829,9 @@ for ( i0=0; i0<top_key.length; i0++ ) {
                                     buff = '  ' + '    - CORE_PEER_TLS_ROOTCERT_FILE='+peerTLSDir+'/ca.crt'+'\n';
                                     fs.appendFileSync(dFile, buff);
 
+                                    buff = '  ' + '    - CORE_CHAINCODE_EXECUTETIMEOUT=1500s'+'\n';
+                                    fs.appendFileSync(dFile, buff);
+
                                     // mutual TLS
                                     if ( MutualTLS.toUpperCase() == 'ENABLED' ) {
                                         buff = '  ' + '    - CORE_PEER_TLS_CLIENTAUTHREQUIRED=true'+'\n';
