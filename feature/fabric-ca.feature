@@ -20,12 +20,12 @@ Scenario Outline: FAB-6489: Interoperability Test using <type> based orderer wit
          |   adnan   | org1.example.com |  wh@tsup | member |   x509   |
     When an admin sets up a channel
     And an admin deploys chaincode at path "<path>" with args ["init","a","1000","b","2000"] with name "mycc" with language "<language>"
-    And I wait "5" seconds
+    And I wait "10" seconds
     When a user "adnan" queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 1000
     And I wait "5" seconds
     When a user "adnan" invokes on the chaincode with args ["invoke","a","b","10"]
-    And I wait "5" seconds
+    And I wait "10" seconds
     When a user "scott" queries on the chaincode with args ["query","a"] from "peer0.org2.example.com"
     Then a user receives a success response of 990 from "peer0.org2.example.com"
     When a user "scott" invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
@@ -52,12 +52,12 @@ Scenario Outline: FAB-11621: JavaSDK interoperability Test using <language> chai
          |   adnan   | org1.example.com |  wh@tsup | member |
     When an admin sets up a channel
     And an admin deploys chaincode at path "<path>" with args ["init","a","1000","b","2000"] with name "mycc" with language "<language>"
-    And I wait "5" seconds
+    And I wait "10" seconds
     When a user "adnan" queries on the chaincode with args ["query","a"]
     Then a user receives a success response of 1000
     And I wait "5" seconds
     When a user "adnan" invokes on the chaincode with args ["invoke","a","b","10"]
-    And I wait "5" seconds
+    And I wait "10" seconds
     When a user "scott" queries on the chaincode with args ["query","a"] from "peer0.org2.example.com"
     Then a user receives a success response of 990 from "peer0.org2.example.com"
     When a user "scott" invokes on the chaincode named "mycc" with args ["invoke","a","b","10"] on "peer0.org2.example.com"
