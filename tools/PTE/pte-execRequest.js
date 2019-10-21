@@ -1550,12 +1550,7 @@ function isExecDone(trType){
 function IDoneMsg(caller) {
     tCurr = new Date().getTime();
     var remain = Object.keys(txidList).length;
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d %s] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, caller, inv_m, tx_stats[tx_evtTimeout], remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-    if ( remain > 0 ) {
-        logger.error('[Nid:chan:org:id=%d:%s:%s:%d %s] unreceived events(%d), txidList - %s', Nid, channelName, org, pid, caller, remain, txidList);
-        process.exit(1);
-    }
-
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d %s IDoneMsg] completed %d, evtTimoutCnt %d, unreceived events %d, %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, caller, inv_m, tx_stats[tx_evtTimeout], remain, transType, invokeType, tCurr-tLocal, tLocal, tCurr);
 }
 
 // invoke validation
