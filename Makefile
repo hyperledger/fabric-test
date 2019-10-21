@@ -37,14 +37,14 @@
 # ------------------------------------------------------------------
 
 export BASE_VERSION=1.4.4
-export BASEIMAGE_RELEASE=0.4.15
+export BASEIMAGE_RELEASE=0.4.16
 DOCKER_NS = hyperledger
 EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
 PROJECT_VERSION = $(BASE_VERSION)-$(EXTRA_VERSION)
 BRANCH = release-1.4
-FABRIC = https://gerrit.hyperledger.org/r/fabric
-FABRIC_CA = https://gerrit.hyperledger.org/r/fabric-ca
-FABRIC-CHAINCODE-JAVA = https://gerrit.hyperledger.org/r/fabric-chaincode-java
+FABRIC = https://github.com/hyperledger/fabric
+FABRIC_CA = https://github.com/hyperledger/fabric-ca
+FABRIC-CHAINCODE-JAVA = https://github.com/hyperledger/fabric-chaincode-java
 HYPERLEDGER_DIR = $(GOPATH)/src/github.com/hyperledger
 INSTALL_BEHAVE_DEPS = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/install_behave.sh
 FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
