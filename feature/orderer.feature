@@ -168,7 +168,7 @@ Examples:
     |   64   |   256   |                                                  |
 
 
-@daily
+#@daily
 Scenario: FAB-4686: Test taking down all kafka brokers and bringing back last 3
     Given I have a bootstrapped fabric network of type kafka
     When an admin sets up a channel
