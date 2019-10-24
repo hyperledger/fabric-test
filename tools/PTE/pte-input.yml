@@ -1,4 +1,5 @@
 tls: true
+ordererSystemChannel: orderersystemchannel
 organizations:
   - name: org1
   # connection profiles can be either in yaml or in json format
