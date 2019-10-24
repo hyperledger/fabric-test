@@ -100,6 +100,10 @@ func (c ConnProfile) updateConnectionProfilesIfChanPrefix(organizations []inputS
 func (c ConnProfile) updateConnectionProfile(inputArgs ...string) error {
 
 	connProfileFilePath, channelName, componentType := inputArgs[0], inputArgs[1], inputArgs[2]
+	if !(strings.HasPrefix(connProfileFilePath, "/")) {
+		currentDir, _ := paths.GetCurrentDir()
+		connProfileFilePath = paths.JoinPath(currentDir, connProfileFilePath)
+	}
 	componentsList, connProfileObject, err := c.getComponentsListFromConnProfile(connProfileFilePath, componentType)
 	if err != nil {
 		logger.ERROR("Failed to get the components list from the connection profile file")

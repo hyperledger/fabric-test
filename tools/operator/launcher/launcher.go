@@ -6,15 +6,17 @@ package launcher
 
 import (
 	//"flag"
+	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	"github.com/hyperledger/fabric-test/tools/operator/ytt"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	"github.com/hyperledger/fabric-test/tools/operator/ytt"
 )
 
 // var networkSpecPath = flag.String("i", "", "Network spec input file path (Required)")
@@ -70,12 +72,28 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 	}
 	validateArguments(networkSpecPath, kubeConfigPath)
 	contents, _ := ioutil.ReadFile(networkSpecPath)
+	stringContents := strings.Split(string(contents), "artifacts_location")
+	finalContents := stringContents[0] + "orderer: \n" + strings.Split(stringContents[1], "orderer:")[1]
+	var network nl.Network
+	config, err := network.GetConfigData(networkSpecPath)
+	if err != nil {
+		logger.ERROR("Launcher: Failed to read the input file", networkSpecPath)
+		return (err)
+	}
+	if !(strings.HasPrefix(config.ArtifactsLocation, "/")) {
+		currentDir, err := paths.GetCurrentDir()
+		if err != nil {
+			logger.ERROR("Launcher: GetCurrentDir failed; unable to join with ArtifactsLocation", config.ArtifactsLocation)
+			return (err)
+		}
+		config.ArtifactsLocation = paths.JoinPath(currentDir, config.ArtifactsLocation)
+	}
+	finalContents = finalContents + fmt.Sprintf("artifacts_location: %s\n", config.ArtifactsLocation)
+	contents = []byte(finalContents)
 	contents = append([]byte("#@data/values \n"), contents...)
 	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
-
-	var network nl.Network
-	config, err := network.GetConfigData(inputPath)
+	config, err = network.GetConfigData(inputPath)
 
 	if err != nil {
 		logger.CRIT(err)

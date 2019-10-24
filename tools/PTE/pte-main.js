@@ -111,7 +111,7 @@ logger.info('[Nid=%d pte-main] channelOrgName.length: %d, channelOrgName: %s', N
 
 // find all connection profiles
 var cpList = [];
-var cpPath = uiContent.ConnProfilePath;
+var cpPath = verifyIfPathExists(uiContent.ConnProfilePath);
 logger.info('[Nid=%d pte-main] connection profile path: ', Nid, cpPath);
 cpList = testUtil.getConnProfileListSubmitter(cpPath);
 if (cpList.length === 0) {
