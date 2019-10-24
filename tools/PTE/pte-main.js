@@ -1104,7 +1104,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             }).then(async (admin) => {
                 the_user = admin;
                 logger.info('[createOrUpdateOneChannel] Successfully enrolled user \'admin\' for', "orderer");
-                var channelName = "orderersystemchannel";
+                var channelName = uiContent.ordererSystemChannel ? uiContent.ordererSystemChannel : "orderersystemchannel"
                 var sysChannel = client.newChannel(channelName);
 
                 chainAddOrderer(sysChannel, client, channelOrgName[0]);
