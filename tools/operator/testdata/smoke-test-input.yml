@@ -1,24 +1,26 @@
 tls: true
 organizations:
   - name: org1
-  # connection profiles can be either in yaml or in json format
-    connProfilePath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/regression/smoke/connection-profile/connection_profile_org1.yaml
+#! For smoke test suite, connection-profile are read from smoke directory
+    connProfilePath: ./connection-profile/connection_profile_org1.yaml
   - name: org2
-    connProfilePath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/regression/smoke/connection-profile/connection_profile_org2.yaml
+    connProfilePath: ./connection-profile/connection_profile_org2.yaml
 
 createChannel:
   - channelPrefix: testorgschannel
     numChannels: 1
-    channelTxPath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/regression/smoke/channel-artifacts/
+#! For smoke test suite, channel-artifacts are read from smoke directory
+    channelTxPath: ./channel-artifacts/
     organizations: org1
 
 anchorPeerUpdate:
   - channelName: testorgschannel0
     organizations: org1
-    anchorPeerUpdateTxPath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/regression/smoke/channel-artifacts/testorgschannel0org1anchor.tx
+#! For smoke test suite, channel-artifacts are read from smoke directory
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org1anchor.tx
   - channelName: testorgschannel0
     organizations: org2
-    anchorPeerUpdateTxPath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/regression/smoke/channel-artifacts/testorgschannel0org2anchor.tx
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org2anchor.tx
 
 joinChannel:
 # joins all peers in listed organziations to all channels based on channelPrefix and numChannels
@@ -30,14 +32,14 @@ installChaincode:
 # installs chaincode with specified name on all peers in listed organziations
   - chaincodeName: samplecc
     ccVersion: v1
-    chaincodePath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
     organizations: org1,org2
     language: golang
     metadataPath: ""
 
   - chaincodeName: samplecc
     ccVersion: v2
-    chaincodePath: /home/testuser/gopath/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
     organizations: org1,org2
     language: golang
     metadataPath: ""

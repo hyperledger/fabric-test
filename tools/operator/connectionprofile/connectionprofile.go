@@ -36,7 +36,6 @@ func (c ConnProfile) Organization(peerorg networkspec.PeerOrganizations, caList 
 		return organization, err
 	}
 	organization = networkspec.Organization{Name: orgName, MSPID: peerorg.MSPID}
-	organization.AdminPrivateKey.Pem = cert
 	organization.SignedCert.Pem = cert
 	organization.CertificateAuthorities = append(organization.CertificateAuthorities, caList...)
 	for peer := range c.Peers {
@@ -54,6 +53,7 @@ func (c ConnProfile) Organization(peerorg networkspec.PeerOrganizations, caList 
 		return organization, err
 	}
 	organization.PrivateKey = cert
+	organization.AdminPrivateKey.Pem = cert
 	organization.Peers = append(organization.Peers, peerList...)
 	return organization, err
 }

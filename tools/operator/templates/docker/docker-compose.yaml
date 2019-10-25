@@ -172,6 +172,7 @@
 #@       env.append("CORE_PEER_GOSSIP_ENDPOINT=peer{}-{}:{}".format(j, org.name, 7051))
 #@       env.append("CORE_PEER_LISTENADDRESS=0.0.0.0:{}".format(7051))
 #@       env.append("CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:{}".format(7052))
+#@       env.append("CORE_CHAINCODE_EXECUTETIMEOUT=1500s")
 #@       env.append("CORE_PEER_ID=peer{}-{}".format(j, org.name))
 #@       env.append("CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/msp".format(org.name, j, org.name, org.name))
 #@       env.append("CORE_PEER_LOCALMSPID={}".format(org.msp_id))
