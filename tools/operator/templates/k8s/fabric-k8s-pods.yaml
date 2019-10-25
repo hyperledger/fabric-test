@@ -134,6 +134,7 @@
 #@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
 #@   env.append({"name": "CORE_PEER_ADDRESS", "value": "{}:7051".format(input)})
 #@   env.append({"name": "CORE_PEER_CHAINCODEADDRESS", "value": "localhost:7052"})
+#@   env.append({"name": "CORE_CHAINCODE_EXECUTETIMEOUT", "value": "1500s"})
 #@   env.append({"name": "CORE_PEER_LOCALMSPID", "value": "{}".format(mspId)})
 #@   env.append({"name": "CORE_PEER_MSPCONFIGPATH", "value": "/etc/hyperledger/fabric/artifacts/msp"})
 #@   env.append({"name": "CORE_PEER_FILESYSTEMPATH", "value": "/shared/data"})

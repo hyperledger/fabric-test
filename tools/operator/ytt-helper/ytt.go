@@ -12,6 +12,7 @@ import (
 	"runtime"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
 type YTT struct {
@@ -30,7 +31,8 @@ func (y YTT) Args(input []string) []string {
 
 //DownloadYtt - to download ytt
 func (y YTT) DownloadYtt() error {
-	if _, err := os.Stat("ytt"); os.IsNotExist(err) {
+	yttPath := paths.YTTPath()
+	if _, err := os.Stat(fmt.Sprintf("%s/ytt", yttPath)); os.IsNotExist(err) {
 		name := runtime.GOOS
 		url := fmt.Sprintf("https://github.com/k14s/ytt/releases/download/v0.13.0/ytt-%s-amd64", name)
 
@@ -40,14 +42,14 @@ func (y YTT) DownloadYtt() error {
 			return err
 		}
 		defer resp.Body.Close()
-		ytt, err := os.Create("ytt")
+		ytt, err := os.Create(fmt.Sprintf("%s/ytt", yttPath))
 		if err != nil {
 			logger.ERROR("Error while creating the ytt file")
 			return err
 		}
 		defer ytt.Close()
 		io.Copy(ytt, resp.Body)
-		err = os.Chmod("ytt", 0777)
+		err = os.Chmod(fmt.Sprintf("%s/ytt", yttPath), 0777)
 		if err != nil {
 			logger.ERROR("Failed to change permissions to ytt")
 			return err

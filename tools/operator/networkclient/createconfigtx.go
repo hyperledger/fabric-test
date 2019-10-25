@@ -2,9 +2,10 @@ package networkclient
 
 import (
 	"os"
+	"fmt"
 
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-	"github.com/hyperledger/fabric-test/tools/operator/ytt"
+	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
 )
 
 //CreateConfigTxYaml - to check if the configtx.yaml exists and generates one if not exists
@@ -18,7 +19,7 @@ func CreateConfigTxYaml() error {
 	if _, err = os.Stat(configtxPath); !os.IsNotExist(err) {
 		return nil
 	}
-	yttPath := paths.YTTPath()
+	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
 	input := []string{configtxTemplatePath}
 	yttObject := ytt.YTT{InputPath: inputFilePath, OutputPath: configFilesDir}
 	if _, err = os.Stat(yttPath); os.IsNotExist(err) {

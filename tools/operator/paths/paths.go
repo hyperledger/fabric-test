@@ -37,10 +37,10 @@ func PeerOrgsDir(artifactsLocation string) string {
 func YTTPath() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.CRIT(err)
+		logger.ERROR("YTTPath function is failed in getting current directory")
 	}
-	if strings.Contains(currentDir, "launcher") {
-		return componentPath(currentDir, "ytt")
+	if strings.Contains(currentDir, "regression") {
+		return componentPath(currentDir, "../../tools/operator/ytt")
 	}
 	return componentPath(currentDir, "ytt")
 }
@@ -49,7 +49,7 @@ func YTTPath() string {
 func TemplatesDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.CRIT(err)
+		logger.ERROR("TemplateDir function is failed in getting current directory")
 	}
 	if strings.Contains(currentDir, "regression") {
 		return componentPath(currentDir, "../../tools/operator/templates")
@@ -67,7 +67,7 @@ func TemplateFilePath(fileName string) string {
 func ConfigFilesDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.CRIT(err)
+		logger.ERROR("ConfigFilesDir function is failed in getting current directory")
 	}
 	if strings.Contains(currentDir, "regression") {
 		return componentPath(currentDir, "../../tools/operator/configFiles")
@@ -114,7 +114,7 @@ func createDirectory(dirPath string) error {
 	return nil
 }
 
-func componentPath(artifactsLocation, component string) string {
+func componentPath(artifactsLocation, component string) (string) {
 	path := JoinPath(artifactsLocation, component)
 	isExists, _ := dirExists(path)
 	if isExists {
@@ -122,7 +122,7 @@ func componentPath(artifactsLocation, component string) string {
 	}
 	err := createDirectory(path)
 	if err != nil {
-		logger.CRIT(err)
+		logger.ERROR("componentPath function is failed in creating new directory")
 	}
 	return path
 }
@@ -135,8 +135,8 @@ func JoinPath(oldPath, newPath string) string {
 //PTEPath --
 func PTEPath() string{
 	path, err := GetCurrentDir()
-	if err != nil{
-		logger.CRIT(err, "Failed to get the current working directory")
+	if err != nil {
+		logger.ERROR("PTEPath function is failed in getting current directory")
 	}
 	if strings.Contains(path, "regression") {
 		return JoinPath(path, "../../tools/PTE/pte-main.js")
