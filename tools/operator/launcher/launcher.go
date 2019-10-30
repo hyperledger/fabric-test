@@ -96,6 +96,12 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 	finalContents = finalContents + fmt.Sprintf("artifacts_location: %s\n", config.ArtifactsLocation)
 	contents = []byte(finalContents)
 	contents = append([]byte("#@data/values \n"), contents...)
+	nodeportIP := ""
+	if kubeConfigPath != "" && config.K8s.ServiceType == "NodePort" {
+		K8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
+		nodeportIP, _ = K8s.GetK8sExternalIP(config, "")
+	}
+	contents = append(contents, []byte(fmt.Sprintf("nodeportIP: %s\n", nodeportIP))...)
 	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
 
@@ -107,7 +113,7 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 
 	err = validateBasicConsensusConfig(config)
 	if err != nil {
-		logger.ERROR("Launcher: Failed to validate consensus configuration in netwokr input file ", networkSpecPath)
+		logger.ERROR("Launcher: Failed to validate consensus configuration in network input file ", networkSpecPath)
 		return err
 	}
 
