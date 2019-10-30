@@ -35,6 +35,7 @@
 #   - pre-setup                - installs node, govendor and behave pre-requisites.
 #   - pte                      - builds pte docker image
 #   - clean                    - cleans the docker containers and images.
+#   - gotools                  - installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
 #
 # ------------------------------------------------------------------
 
@@ -58,6 +59,8 @@ PTE_IMAGE = $(DOCKER_NS)/fabric-pte
 TARGET = pte
 STABLE_TAG ?= $(ARCH)-$(BRANCH)-stable
 
+include gotools.mk
+
 .PHONY: ci-smoke
 ci-smoke: fabric ca pre-req pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca smoke-tests
 
@@ -71,7 +74,7 @@ git-init:
 	@git submodule update --init --recursive
 
 .PHONY: pre-setup
-pre-setup:
+pre-setup: gotools
 	@bash $(PRE_SETUP)
 #	@bash $(INSTALL_BEHAVE_DEPS)
 
@@ -111,7 +114,7 @@ build-sdk-wrapper:
 	cd $(HYPERLEDGER_DIR)/fabric-test/feature/sdk/java && ./package.sh
 
 .PHONY: pull-thirdparty-images
-pull-thirdparty-images:
+pull-thirdparty-images: gotools
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh third-party
 
 .PHONY: ca
@@ -153,7 +156,7 @@ nodeenv: fabric-chaincode-node
 	@cd $(CHAINCODE-NODE_DIR) && npm install && npm install gulp -g && gulp docker-image-build
 
 .PHONY: smoke-tests
-smoke-tests:
+smoke-tests: gotools
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/smoke && ./runSmokeTestSuite.sh
 
 .PHONY: daily-tests

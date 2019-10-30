@@ -3,11 +3,17 @@
 REPO=$1
 VERSION=2.0.0
 
-###################
-# Install govender
-###################
-echo "Install govendor"
-go get -u github.com/kardianos/govendor
+echo "======== VERIFYING WHETHER GOVENDOR IS INSTALLED ========"
+OUTPUT="$(which govendor)"
+if [ -z "$OUTPUT" ]; then
+  echo "Error: govendor is not installed. Please install it by executing the following steps:"
+  echo "cd to the fabric-test directory"
+  echo "make gotools"
+  echo 'export PATH=$PATH:$GOPATH/bin'
+  exit 1
+else
+  echo $OUTPUT
+fi
 
 echo "======== PULL DOCKER IMAGES ========"
 ##########################################################

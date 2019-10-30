@@ -19,12 +19,6 @@ npm -v
 echo "node version =======>"
 node -v
 
-###################
-# Install govender
-###################
-echo "Install govendor"
-go get -u github.com/kardianos/govendor
-
 ###########################
 # Install interrupting cow
 ###########################
