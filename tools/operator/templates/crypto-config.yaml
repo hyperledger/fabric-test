@@ -15,6 +15,10 @@ OrdererOrgs:
   #@ num_orderers = ordererOrg.num_orderers
   #@ for i in range(0, num_orderers):
     - Hostname: #@ "orderer{}-{}".format(i, ordererOrg.name)
+    #@ if config.nodeportIP != "":
+      SANS:
+        - #@ config.nodeportIP
+    #@ end
   #@ end
 #@ end
 PeerOrgs:
