@@ -3,12 +3,6 @@ set -o pipefail
 
 REPO=$1
 
-###################
-# Install govender
-###################
-echo "Install govendor"
-go get -u github.com/kardianos/govendor
-
 echo "======== PULL DOCKER IMAGES ========"
 ##########################################################
 # Pull and Tag the fabric and fabric-ca images from Nexus

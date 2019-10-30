@@ -11,15 +11,19 @@ echo "======== Ledger component performance tests using LTE ========"
 py.test -v --junitxml results_ledger_lte_smoke.xml ledger_lte_smoke.py
 
 echo "======== Performance Test using PTE and NL tools ========"
-cd $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE
-npm config set prefix ~/npm
-npm install
-if [ $? != 0 ]; then
+cd $SMOKEDIR/../../tools/PTE
+if [ ! -d "node_modules" ];then
+  npm config set prefix ~/npm
+  npm install
+  if [ $? != 0 ]; then
     echo "FAILED: Failed to install npm. Cannot run pte test suite."
     # Don't exit.. Continue with tests, to show the PTE failure results
-else
+  else
     echo "Successfully installed npm."
+  fi
 fi
 cd $SMOKEDIR && py.test -v --junitxml results_systest_pte.xml systest_pte.py
 
+echo "======== Smoke Test Suite using ginkgo and operator tools ========"
+cd $SMOKEDIR && GO111MODULE=on ginkgo -v
 
