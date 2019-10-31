@@ -1,13 +1,12 @@
 {
     "transType": "Channel",
     "TLS": "_TLS_",
+    "channelID": "_CHANNELID_",
     "channelOpt": {
         "name": "_CHANNELNAME_",
         "action":  "join",
         "orgName": [
         ]
     },
-    "SCFile": [
-        {"ServiceCredentials":"_SCDIRECTORY_/_SCFILENAME_"}
-    ]
+    "ConnProfilePath": "_CPDIRECTORY_"
 }

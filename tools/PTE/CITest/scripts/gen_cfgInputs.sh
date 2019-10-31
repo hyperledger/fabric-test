@@ -14,7 +14,7 @@
 #           Displays usage command line options; examples; exits.
 usage () {
     echo -e "\nUSAGE:\t./gen_cfgInputs.sh -d <serv_cred_dir> [options] [values]"
-    echo -e "requirement: a directory contains all service credential files in PTE dir"
+    echo -e "requirement: a directory contains all connection profiles in PTE dir"
     echo -e "             this directory is to be specified with -d option"
     echo
     echo -e "-h, --help\tView this help message"
@@ -25,34 +25,47 @@ usage () {
     echo -e "-n, --name\tblank-separated list of channels"
     echo -e "\t\t(Default: defaultchannel. Note: cannot be used with --nchan)"
 
+    echo -e "\t\tDo not interchange in one network the use of -n/--name"
+    echo -e "\t\tand other options like --chan0 and --chanprefix and --nchan."
+    echo -e "\t\tDo not create channels using --name and then send invokes on channel3 using --chan0 testorgschannel3."
+
     echo -e "--nchan \tnumber of channels"
     echo -e "\t\t(Default: 0. Note: cannot be used with -n nor --name)"
 
-    echo -e "-n, --name\tblank-separated list of channels"
+    echo -e "--chanprefix\tchannel name prefix, used with option --nchan"
     echo -e "\t\t(Default: defaultchannel)"
+
+    echo -e "--chan0\tthe starting channel number [integer] used for this test"
+    echo -e "\t\t(Default: 1)"
+
+    echo -e "--chantxpath\tchannel tx path"
+    echo -e "\t\t(Default: github.com/hyperledger/fabric-test/fabric/internal/cryptogen/ordererOrganizations)"
 
     echo -e "-c, --channel\tcreate/join channel"
     echo -e "\t\t(Default: No)"
 
     echo -e "-o, --org\tblank-separated list of organizations"
-    echo -e "\t\t(Default: None)"
+    echo -e "\t\t(Default: None. Note: cannot be used with --norg)"
 
-    echo -e "--norg\tnumber of organization"
-    echo -e "\t\t(Default: 0)"
+    echo -e "--norg  \tnumber of organization"
+    echo -e "\t\t(Default: 0. Note: cannot be used with -o nor --org)"
+
+    echo -e "--orgprefix\torg name prefix"
+    echo -e "\t\t(Default: org. Note: used with option --norg)"
 
     echo -e "-i, --install\tinstall/instantiate chaincode"
     echo -e "\t\t(Default: No)"
 
-    echo -e "-a, --app\tblank-separated list of chaincodes, [samplecc|samplejs|samplejava|marbles02]"
+    echo -e "-a, --app\tblank-separated list of chaincodes, [sample_cc|sample_js|sample_java|marbles02_go|sbe_cc]"
     echo -e "\t\t(Default: None)"
 
-    echo -e "-d, --scdir\tservice credential files directory"
+    echo -e "-d, --cpdir\tconnection profiles directory"
     echo -e "\t\t(Default: None. This parameter is required.)"
 
     echo -e "-p, --prime\texecute query to sych-up ledger, [YES|NO]"
     echo -e "\t\t(Default: No)"
 
-    echo -e "--txmode\ttransaction mode, [Constant|Mix|Burst]"
+    echo -e "--txmode\ttransaction mode, [Latency|Constant|Mix]"
     echo -e "\t\t(Default: Constant)"
 
     echo -e "-t, --tx\ttransaction type, [MOVE|QUERY]"
@@ -67,11 +80,17 @@ usage () {
     echo -e "--freq  \ttransaction frequency [unit: ms]"
     echo -e "\t\t(Default: 0)"
 
-    echo -e "--rundur\tduration of execution [integer]"
+    echo -e "--rundur\tduration of execution [unit: sec]"
     echo -e "\t\t(Default: 0)"
 
     echo -e "--keystart\ttransaction starting key [integer]"
     echo -e "\t\t(Default: 0)"
+
+    echo -e "--payloadmin\ttransaction min payload size [integer]"
+    echo -e "\t\t(Default: 8)"
+
+    echo -e "--payloadmax\ttransaction max payload size [integer]"
+    echo -e "\t\t(Default: payloadmin)"
 
     echo -e "--targetpeers\ttransaction target peers [ORGANCHOR|ALLANCHORS|ORGPEERS|ALLPEERS|DISCOVERY]"
     echo -e "\t\t(Default: ORGANCHOR)"
@@ -79,23 +98,47 @@ usage () {
     echo -e "--chkpeers\tinvoke check target peers [ORGANCHOR|ALLANCHORS|ORGPEERS|ALLPEERS|DISCOVERY]"
     echo -e "\t\t(Default: ORGANCHOR)"
 
-    echo -e "--chktx\tinvoke check transaction [LAST|ALL]"
+    echo -e "--chktx \tinvoke check transaction [LAST|ALL]"
     echo -e "\t\t(Default: LAST)"
 
     echo -e "--chktxnum\tinvoke check transactions number [integer]"
     echo -e "\t\t(Default: 1)"
 
+    echo -e "--targetorderers\ttransaction target orderer [UserDefined|RoundRobin]"
+    echo -e "\t\t(Default: UserDefined)"
+
+    echo -e "--norderers\tnumber of ingress orderers to which transactions will be sent [integer]"
+    echo -e "\t\t(Default: 0 (all orderers particiapte))"
+
+    echo -e "--evttimeout \ttimeout waiting for event (writing TX to ledger) [unit: ms]"
+    echo -e "\t\t(Default: 3600000)"
+
+    echo -e "--reqtimeout \ttimeout waiting for response from orderer for a broadcast TX request [unit: ms]"
+    echo -e "\t\t(Default: 45000)"
+
+    echo -e "--grpctimeout \ttimeout waiting for set up grpc connection from PTE client to peer or to orderer [unit: ms]"
+    echo -e "\t\t(Default: 30000)"
+
     echo -e "examples:"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a marbles02 samplecc -i"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc samplejs marbles02 -p -t Move -i"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 testorgschannel2 --norg 2 -a samplejava -i -t Move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplejava samplejs --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
-    echo -e "./gen_cfgInputs.sh -d SCDir -n testorgschannel1 --norg 2 -a samplecc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
-    echo
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 testorgschannel2 --org org1 org2 -c"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --org org1 org2 -a sample_cc -c -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a marbles02_go sample_cc sbe_cc -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 -a sample_cc sample_js marbles02_go -p -t Move -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 --orgprefix testorg -a sample_cc sample_js marbles02_go -p -t Move -i"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 testorgschannel2 --norg 2 -a sample_java -i -t Move"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 --orgprefix org -a sample_java sample_js --freq 10 --rundur 50 --nproc 2 --keystart 100 --targetpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d CPDir -n testorgschannel1 --norg 2 -a sample_cc --freq 10 --nreq 1000 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --chkpeers ORGANCHOR -t move"
+    echo -e "./gen_cfgInputs.sh -d CPDir --nchan 3 --chanprefix testorgschannel --norg 2 -a sample_cc --freq 10 --rundur 50 --nproc 1 --keystart 100 --targetpeers ORGANCHOR --targetorderers RoundRobin --chkpeers ORGANCHOR -t move"
+    echo -e "Create channels testorgschannel_ch0 through testorgschannel_ch8 using these options: [--chan0 0] --chanprefix testorgschannel --nchan 9"
+    echo -e "Create channels testorgschannel_ch5 through testorgschannel_ch13, using options: --chan0 5 --chanprefix testorgschannel --nchan 9"
+    echo -e "Create 1 channel testorgschannel_ch5: --chan0 5 --chanprefix testorgschannel --nchan 1"
+    echo -e "To select testorgschannel_ch5 for traffic, the -n option will not work anymore. Instead, do this for using only chan5: --chan0 5 --chanprefix testorgschannel --nchan 1"
+    echo -e "To select testorgschannel_ch5 for traffic, the -n option will not work anymore. Instead, do this for using chan5-chan7: --chan0 5 --chanprefix testorgschannel --nchan 3"
     exit
 }
 
+# Per FAB-16360, this script does not currently provide option for users to specify invoke fcn for the sbe chaincode. We always use updateRecordVal, which is found in the template.
+# Rather than enhancing this now, this is a reminder to add that option in the new input file for the new go version of this script.
 
 ## printVar(): print input vars
 printVars () {
@@ -109,8 +152,8 @@ echo "***                                                      "
 echo "***  blockchain network                                  "
 echo "***      TLS: $TLS                                       "
 echo "***                                                      "
-echo "***  service credential file directory                   "
-echo "***      SCDIR: $SCDIR                                   "
+echo "***  connection profile directory                        "
+echo "***      CPDIR: $CPDIR                                   "
 echo "***                                                      "
 echo "***  chaincodes                                          "
 echo "***      number: ${#Chaincode[@]}                        "
@@ -127,8 +170,10 @@ echo "***      CHANNEL set name: $setChanName                  "
 echo "***      CHANNEL set num: $setChanNum                    "
 echo "***      NCHAN: $NCHAN                                   "
 echo "***      CHANPREFIX: $CHANPREFIX                         "
+echo "***      CHANNEL TX PATH: $CHANNELTXPATH                 "
 echo "***      CHANNEL length: ${#CHANNEL[@]}                  "
 echo "***      CHANNEL: ${CHANNEL[@]}                          "
+echo "***      CHAN0: ${CHAN0}                                 "
 echo "***                                                      "
 echo "***      ORGS set name: $setOrgName                      "
 echo "***      ORGS set num: $setOrgNum                        "
@@ -148,6 +193,8 @@ echo "***      TARGETORDERERS: $TARGETORDERERS                 "
 echo "***      NORDERERS: $NORDERERS                           "
 echo "***      RUNDUR: $RUNDUR sec                             "
 echo "***      KEYSTART: $KEYSTART                             "
+echo "***      PAYLOADMIN: $PAYLOADMIN                         "
+echo "***      PAYLOADMAX: $PAYLOADMAX                         "
 echo "***      EVENT TIMEOUT: $EVTTIMEOUT ms                   "
 echo "***      REQUEST TIMEOUT: $REQTIMEOUT ms                 "
 echo "***      GRPC WAIT TIMEOUT: $GRPCTIMEOUT ms              "
@@ -179,14 +226,25 @@ runDir=$PTEDIR/runPTE
 
 TLS="serverauth"
 CHANNEL="defaultchannel"       # channel name
+CHANNELTXPATH="github.com/hyperledger/fabric-test/fabric/internal/cryptogen/ordererOrganizations"    # default channel path
+CHANNELTX=""
 ChanProc="NO"
 CCProc="NO"
 PrimeProc="NO"
 TXType=""
 Chaincode=""
-SCDIR=""
+CPDIR=""
+setOrgName="no"
+setOrgNum="no"
 ORGS=""
+ORGPREFIX="org"                # default org name
 
+setChanName="no"
+setChanNum="no"
+CHANPREFIX="defaultchannel"    # default channel name
+CHAN0=0                        # default first channel
+NCHAN=0
+CHANNELID="_ch0"
 NORG=0
 TXMODE="Constant"
 NPROC=1
@@ -194,21 +252,30 @@ FREQ=0
 NREQ=1000
 RUNDUR=0
 KEYSTART=0
+PAYLOADMIN=8
+PAYLOADMAX=$PAYLOADMIN
 TARGETPEERS="ORGANCHOR"
 CHKPEERS="ORGANCHOR"
 CHKTX="LAST"
 CHKTXNUM=1
+TARGETORDERERS="UserDefined"
+NORDERERS=0
+EVTTIMEOUT=3600000
+REQTIMEOUT=45000
+GRPCTIMEOUT=30000
 
 # chaincode path
 CCPathsamplecc="github.com/hyperledger/fabric-test/chaincodes/samplecc/go"
 CCPathsamplecc="${CCPathsamplecc//\//\\/}"
+CCPathsbe="github.com/hyperledger/fabric-test/chaincodes/sbe"
+CCPathsbe="${CCPathsbe//\//\\/}"
 CCPathsamplejs="github.com/hyperledger/fabric-test/chaincodes/samplecc/node"
 CCPathsamplejs="${CCPathsamplejs//\//\\/}"
 CCPathsamplejava="github.com/hyperledger/fabric-test/chaincodes/samplecc/java"
 CCPathsamplejava="${CCPathsamplejava//\//\\/}"
-CCPathmarbles02="github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02"
+CCPathmarbles02="github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go"
 CCPathmarbles02="${CCPathmarbles02//\//\\/}"
-MatadataPath="github.com/hyperledger/fabric-test/fabric/examples/chaincode/go/marbles02/META-INF"
+MatadataPath="github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02/go/META-INF"
 MatadataPath="${MatadataPath//\//\\/}"
 LANGUAGE="golang"
 CCPath=""
@@ -218,16 +285,19 @@ MDPath=""
 # $1: chaincode
 getCCPath() {
     cc=$1
-    if [ $cc == "samplecc" ]; then
+    if [ $cc == "sample_cc" ]; then
         CCPath=$CCPathsamplecc
         LANGUAGE="golang"
-    elif [ $cc == "samplejs" ]; then
+    elif [ $cc == "sbe_cc" ]; then
+        CCPath=$CCPathsbe
+        LANGUAGE="golang"
+    elif [ $cc == "sample_js" ]; then
         CCPath=$CCPathsamplejs
         LANGUAGE="node"
-    elif [ $cc == "samplejava" ]; then
+    elif [ $cc == "sample_java" ]; then
         CCPath=$CCPathsamplejava
         LANGUAGE="java"
-    elif [ $cc == "marbles02" ]; then
+    elif [ $cc == "marbles02_go" ]; then
         CCPath=$CCPathmarbles02
         MDPath=$MatadataPath
         LANGUAGE="golang"
@@ -273,27 +343,36 @@ InsertOrgs() {
 
 # create PTE input json: create/join channel and install/instantiate chaincode
 # $1: config file name
-# $2: SC file
+# $2: connection profile path
 # $3: channel
-# $4: chaincode (optional)
+# $4: channelID
+# $5: chaincode (optional)
 PreCFGProc() {
 
     cfgName=$1
-    sc=$2
+    cppath=$2
     chnl=$3
-    echo -e " $0: sfile=$sc $chnl=$chnl"
-    if [ $# -eq 4 ]; then
-        cc=$4
-        echo -e " $0: chaincode=$cc"
+    chnid=$4
+    if [ $# -eq 5 ]; then
+        cc=$5
+        echo -e " [PreCFGProc]: chaincode=$cc"
     else
         cc=""
     fi
+
+    echo -e " [PreCFGProc]: cppath=$cppath chnl=$chnl chnid=$chnid chainid=$cc"
+    newbs="\\\\\/"
+    cpdir=`echo $cppath | sed "s/\//$newbs/g"`
+    echo "[PreCFGProc] cpdir=$cpdir"
+
+    channeltxpath=`echo $CHANNELTXPATH | sed "s/\//$newbs/g"`
+    echo "[PreCFGProc] channeltxpath=$channeltxpath"
+
         sed -i -e "s/_TLS_/$TLS/g" $cfgName
-        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
+        sed -i -e "s/_CHANNELTXPATH_/$channeltxpath/g" $cfgName
         sed -i -e "s/_CHANNELNAME_/$chnl/g" $cfgName
-        sed -i -e "s/_CHANNELID_/$chnl/g" $cfgName
-        sed -i -e "s/_SCDIRECTORY_/$SCDIR/g" $cfgName
-        sed -i -e "s/_SCFILENAME_/$sc/g" $cfgName
+        sed -i -e "s/_CHANNELID_/$chnid/g" $cfgName
+        sed -i -e "s/_CPDIRECTORY_/$cpdir/g" $cfgName
         sed -i -e "s/_CHAINCODEPATH_/$CCPath/g" $cfgName
         sed -i -e "s/_CHAINCODEID_/$cc/g" $cfgName
         sed -i -e "s/_LANGUAGE_/$LANGUAGE/g" $cfgName
@@ -311,12 +390,6 @@ PreCFGProc() {
 # create PTE input json: transaction
 # $1: cfg json
 # $2: invoke type
-# $3: number of proc
-# $4: transaction frequency
-# $5: number of transaction request
-# $6: run duration
-# $7: transaction mode
-# $8: target peers
 PreTXProc() {
 
     cfgTX=${1}
@@ -324,58 +397,67 @@ PreTXProc() {
 
         sed -i -e "s/_TLS_/$TLS/g" $cfgTX
         sed -i -e "s/_INVOKETYPE_/$invokeType/g" $cfgTX
-        sed -i -e "s/_NPROC_/$nproc/g" $cfgTX
-        sed -i -e "s/_FREQ_/$freq/g" $cfgTX
-        sed -i -e "s/_NREQ_/$nreq/g" $cfgTX
-        sed -i -e "s/_RUNDUR_/$rundur/g" $cfgTX
-        sed -i -e "s/_TRANSMODE_/$transmode/g" $cfgTX
-        sed -i -e "s/_TARGETPEERS_/$targetpeers/g" $cfgTX
-        sed -i -e "s/_CHKPEERS_/$chkpeers/g" $cfgTX
-        sed -i -e "s/_CHKTX_/$chktx/g" $cfgTX
-        sed -i -e "s/_CHKTXNUM_/$chktxnum/g" $cfgTX
+        sed -i -e "s/_NPROC_/$NPROC/g" $cfgTX
+        sed -i -e "s/_FREQ_/$FREQ/g" $cfgTX
+        sed -i -e "s/_NREQ_/$NREQ/g" $cfgTX
+        sed -i -e "s/_RUNDUR_/$RUNDUR/g" $cfgTX
+        sed -i -e "s/_TRANSMODE_/$TXMODE/g" $cfgTX
+        sed -i -e "s/_TARGETPEERS_/$TARGETPEERS/g" $cfgTX
+        sed -i -e "s/_CHKPEERS_/$CHKPEERS/g" $cfgTX
+        sed -i -e "s/_CHKTX_/$CHKTX/g" $cfgTX
+        sed -i -e "s/_CHKTXNUM_/$CHKTXNUM/g" $cfgTX
+        sed -i -e "s/_TARGETORDERERS_/$TARGETORDERERS/g" $cfgTX
+        sed -i -e "s/_NORDERERS_/$NORDERERS/g" $cfgTX
+        sed -i -e "s/_EVTTIMEOUT_/$EVTTIMEOUT/g" $cfgTX
+        sed -i -e "s/_REQTIMEOUT_/$REQTIMEOUT/g" $cfgTX
+        sed -i -e "s/_GRPCTIMEOUT_/$GRPCTIMEOUT/g" $cfgTX
         rm -f $cfgTX"-e"
 }
 
 # channel process: create and join
 ChannelProc() {
     # loop on channel list
-    for chan in "${CHANNEL[@]}"; do
+      echo "CHAN0" $CHAN0
+      echo "Channel list" ${CHANNEL[@]}
+    for ((j=0; j<${#CHANNEL[@]}; j++))
+       do
+        echo "CHANNEL"$j ${CHANNEL[$j]}
         # loop on network list
-        for scfile in "${NWName[@]}"; do
-            fname=$scfile"_"$chan
+        for cppath in "${CPDIR[@]}"; do
+            channelName=${CHANNEL[$j]}
+            channelID=${CHANNELID[$j]}
             cd $runDir
-            echo "process cc $scfile channel $chan"
+            echo "process cc $cppath channel $chan"
+            echo "CHANNELID" $channelID
 
-            cfgCREATE=create-$fname".json"
+            cfgCREATE=create-$channelName".json"
             cp $TEMPLATEDIR/template-create.json $cfgCREATE
 
-            PreCFGProc $cfgCREATE $scfile.json $chan
+            PreCFGProc $cfgCREATE $cppath $channelName $channelID
 
             # create channel
-            runCaseCreate=runCases-create-$fname".txt"
+            runCaseCreate=runCases-create-$channelName".txt"
             tmp=$runDir/$cfgCREATE
             echo "sdk=node $tmp" >> $runCaseCreate
-
             cd $PTEDIR
-            echo "create channel on $scfile"
+            echo "create channel on $cppath"
             ./pte_driver.sh $runDir/$runCaseCreate
-
-            sleep 15
+            sleep 60
             # join channel
             cd $runDir
 
-            cfgJOIN=join-$fname".json"
+            cfgJOIN=join-$channelName".json"
             cp $TEMPLATEDIR/template-join.json $cfgJOIN
 
-            PreCFGProc $cfgJOIN $scfile.json $chan
-
-            runCaseJoin=runCases-join-$fname".txt"
+            PreCFGProc $cfgJOIN $cppath $channelName $channelID
+            runCaseJoin=runCases-join-$channelName".txt"
             tmp=$runDir/$cfgJOIN
             echo "sdk=node $tmp" >> $runCaseJoin
 
             cd $PTEDIR
-            echo "join channel on $scfile"
+            echo "join channel on $cppath"
             ./pte_driver.sh $runDir/$runCaseJoin
+
             cd $runDir
         done     # end loop on network list
     done         # end loop on channel list
@@ -388,20 +470,22 @@ ChaincodeProc() {
         getCCPath $chaincode
 
         # loop on network list
-        for scfile in "${NWName[@]}"; do
+        for cppath in "${CPDIR[@]}"; do
             # loop on channel list
-            for chan in "${CHANNEL[@]}"; do
+            for ((j=0; j<${#CHANNEL[@]}; j++)); do
+            channelName=${CHANNEL[$j]}
+            channelID=${CHANNELID[$j]}
                 cd $runDir
-                echo "[$0] process cc $scfile"
+                echo "[$0] process cc $cppath"
                 echo "[$0] CCPath $CCPath"
-                sc=$scfile".json"
-                echo "[$0] sc $sc"
+            echo "chaincode" $chaincode
 
-                fname=$scfile"_"$chan"-"$chaincode
+                fname=$channelName"-"$chaincode
+           echo "fname" $fname
                 cfgINSTALL=install-$fname".json"
                 cp $TEMPLATEDIR/template-install.json $cfgINSTALL
 
-                PreCFGProc $cfgINSTALL $scfile.json $chan $chaincode
+                PreCFGProc $cfgINSTALL $cppath $channelName $channelID $chaincode
 
                 # install chaincode
                 runCaseinstall=runCases-install-$fname".txt"
@@ -413,18 +497,18 @@ ChaincodeProc() {
                 cfgINSTAN=instantiate-$fname".json"
                 cp $TEMPLATEDIR/template-instantiate.json $cfgINSTAN
 
-                PreCFGProc $cfgINSTAN $scfile.json $chan $chaincode
+                PreCFGProc $cfgINSTAN $cppath $channelName $channelID $chaincode
 
                 runCaseinstantiate=runCases-instantiate-$fname".txt"
                 tmp=$runDir/$cfgINSTAN
                 echo "sdk=node $tmp" >> $runCaseinstantiate
 
                 cd $PTEDIR
-                echo "install chaincode on $scfile"
+                echo "install chaincode on $cppath"
                 echo "./pte_driver.sh $runDir/$runCaseinstall"
                 ./pte_driver.sh $runDir/$runCaseinstall
 
-                echo "instantiate chaincode on $scfile"
+                echo "instantiate chaincode on $cppath"
                 echo "./pte_driver.sh $runDir/$runCaseinstantiate"
                 ./pte_driver.sh $runDir/$runCaseinstantiate
                 cd $runDir
@@ -446,12 +530,14 @@ TransactionProc() {
     for chaincode in "${Chaincode[@]}"; do
         getCCPath $chaincode
         # loop on network list
-        for scfile in "${NWName[@]}"; do
+        for cppath in "${CPDIR[@]}"; do
             # loop on channel list
-            for chan in "${CHANNEL[@]}"; do
-
-                echo "process $chaincode tx on $scfile"
-                fname=$scfile"_"$chan"-"$chaincode
+            for ((j=0; j<${#CHANNEL[@]}; j++)); do
+                channelName=${CHANNEL[$j]}
+                channelID=${CHANNELID[$j]}
+                echo "process $chaincode tx on $cppath"
+                fname=$channelName"-"$chaincode
+                echo "fname" $fname
                 cd $runDir
 
                 pteCfgTX="TX-"$fname".json"
@@ -463,12 +549,14 @@ TransactionProc() {
                     echo -e "copy $chaincode DfnOpt.json"
                     cp $TEMPLATEDIR/$chaincode"DfnOpt.json" $runDir
                     sed -i -e "s/_KEYSTART_/$KEYSTART/g" $chaincode"DfnOpt.json"
+                    sed -i -e "s/_PAYLOADMIN_/$PAYLOADMIN/g" $chaincode"DfnOpt.json"
+                    sed -i -e "s/_PAYLOADMAX_/$PAYLOADMAX/g" $chaincode"DfnOpt.json"
                     rm -f $chaincode"DfnOpt.json-e"
                 fi
 
                 # create PTE transaction configuration input json
-                PreCFGProc $pteCfgTX $scfile.json $chan $chaincode
-                PreTXProc $pteTXopt $INVOKETYPE $NPROC $FREQ $NREQ $RUNDUR $TXMODE $TARGETPEERS $CHKPEERS $CHKTX $CHKTXNUM
+                PreCFGProc $pteCfgTX $cppath $channelName $channelID $chaincode
+                PreTXProc $pteTXopt $INVOKETYPE
 
                 runCaseTX=runCasesTX-$fname".txt"
                 tmp=$runDir/$pteCfgTX
@@ -485,7 +573,6 @@ TransactionProc() {
     ./pte_mgr.sh $PTEMgr
 
 }
-
 
 # GET CUSTOM OPTIONS
 echo -e "\nAny optional arguments chosen:\n"
@@ -505,27 +592,26 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
-      -d | --scdir)
+      -d | --cpdir)
           shift
-          SCDIR=$1     # service credential directory
-          echo -e "\t- Specify SCDIR: $SCDIR\n"
-          TT=`ls $SCDIR`
           i=0
-          for nw in $TT; do
-              fext=`echo "$nw" | cut -d'.' -f2`
-              if [ $fext == 'json' ]; then
-                 SCFILES[$i]=$nw
-                 NWName[$i]=`echo "$nw" | cut -d'.' -f1`
-                 i=$[ i + 1]
-              fi
-          done
-          echo -e "\t- Specify SCFILES: ${SCFILES[@]}"
-          echo -e "\t- Specify SCFILES: ${NWName[@]}"
-
+          CPDIR[$i]=$1  # CPDIR
           shift
+          until [[ $(eval "echo \$1") =~ ^-.* ]] || [ -z $(eval "echo \$1") ]; do
+              i=$[ i + 1]
+              CPDIR[$i]=$1
+              shift
+          done
+          echo -e "\t- Specify connection profile path: ${CPDIR[@]}"
+          echo -e ""
           ;;
 
       -n | --name)
+          if [ $setChanNum == "yes" ]; then
+              echo "Error: cannot use option $1 with option --nchan"
+              usage
+          fi
+          setChanName="yes"
           shift
           i=0
           CHANNEL[$i]=$1  # Channels
@@ -539,7 +625,45 @@ while [[ $# -gt 0 ]]; do
           echo -e ""
           ;;
 
+      --nchan)
+          if [ $setChanName == "yes" ]; then
+              echo "Error: cannot use option $1 with option -n or --name"
+              usage
+          fi
+          setChanNum="yes"
+          shift
+          NCHAN=$1           # number of channels
+          echo -e "\t- Specify number of channels: $NCHAN\n"
+          shift
+          ;;
+
+      --chanprefix)
+          shift
+          CHANPREFIX=$1      # channel name prefix
+          echo -e "\t- Specify channel name prefix: $CHANPREFIX\n"
+          shift
+          ;;
+
+      --chantxpath)
+          shift
+          CHANNELTXPATH=$1     # channel tx path
+          echo -e "\t- Specify channel tx path: $CHANNELTXPATH\n"
+          shift
+          ;;
+
+      --chan0)
+          shift
+          CHAN0=$1           # first channel
+          echo -e "\t- Specify first channel: $CHAN0\n"
+          shift
+          ;;
+
       -o | --org)
+          if [ $setOrgNum == "yes" ]; then
+              echo "Error: cannot use option $1 with option --norg"
+              usage
+          fi
+          setOrgName="yes"
           shift
           i=0
           ORGS[$i]=$1  # organization
@@ -554,9 +678,21 @@ while [[ $# -gt 0 ]]; do
           ;;
 
       --norg)
+          if [ $setOrgName == "yes" ]; then
+              echo "Error: cannot use option $1 with option -o or --org"
+              usage
+          fi
+          setOrgNum="yes"
           shift
           NORG=$1           # number of organization
           echo -e "\t- Specify number of org: $NORG\n"
+          shift
+          ;;
+
+      --orgprefix)
+          shift
+          ORGPREFIX=$1      # org name prefix
+          echo -e "\t- Specify org name prefix: $ORGPREFIX\n"
           shift
           ;;
 
@@ -641,6 +777,20 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --payloadmin)
+          shift
+          PAYLOADMIN=$1
+          echo -e "\t- Specify transaction min payload size: $PAYLOADMIN\n"
+          shift
+          ;;
+
+      --payloadmax)
+          shift
+          PAYLOADMAX=$1
+          echo -e "\t- Specify transaction max payload size: $PAYLOADMAX\n"
+          shift
+          ;;
+
       --targetpeers)
           shift
           TARGETPEERS=$1
@@ -669,6 +819,41 @@ while [[ $# -gt 0 ]]; do
           shift
           ;;
 
+      --targetorderers)
+          shift
+          TARGETORDERERS=$1
+          echo -e "\t- Specify ordererOpt method: $TARGETORDERERS\n"
+          shift
+          ;;
+
+      --norderers)
+          shift
+          NORDERERS=$1
+          echo -e "\t- Specify number of orderers participate in transaction: $NORDERERS\n"
+          shift
+          ;;
+
+      --evttimeout)
+          shift
+          EVTTIMEOUT=$1
+          echo -e "\t- Specify event timeout: $EVTTIMEOUT\n"
+          shift
+          ;;
+
+      --reqtimeout)
+          shift
+          REQTIMEOUT=$1
+          echo -e "\t- Specify request timeout: $REQTIMEOUT\n"
+          shift
+          ;;
+
+      --grpctimeout)
+          shift
+          GRPCTIMEOUT=$1
+          echo -e "\t- Specify GRPC timeout: $GRPCTIMEOUT\n"
+          shift
+          ;;
+
       *)
           echo "Unrecognized command line argument: $1"
           usage
@@ -676,22 +861,42 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo " TXProc=$TXType"
-echo " PrimeProc=$PrimeProc"
-echo " CCProc=$CCProc"
-echo " ChanProc=$ChanProc"
+    # setup CHANNEL & ChannelID
+if [ $NCHAN -gt 0 ]; then
+    for (( i=0; i < $NCHAN; i++ ))
+    do
+        CHANNEL[$i]=$CHANPREFIX$CHAN0
+        # setup ChannelID to match CITest json files
+        # see an example https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/CITest/FAB-12262-4q/marbles02/marbles02-chan1-FAB-12262-4q-TLS.json#L2
+        CHANNELID[$i]=_ch$CHAN0
+        CHAN0=$((CHAN0 + 1))
+    done
+fi
 
-echo " ORGS length: ${#ORGS[@]}"
-echo " ORGS=${ORGS[@]}"
-echo " NORG=$NORG"
-echo " TARGETPEERS=$TARGETPEERS"
+    # setup ORGS
+if [ $NORG -gt 0 ]; then
+    for (( i=0; i < $NORG; i++ ))
+    do
+        j=$((i + 1))
+        ORGS[$i]=$ORGPREFIX$j
+    done
+fi
 
-    # sanity check: SCDIR
-if [ "$SCDIR" == "" ]; then
-    echo "SCDIR is required. Use option -d to specify."
+    # set payloadmax if needed
+if [ "$PAYLOADMIN" -ge "$PAYLOADMAX" ]; then
+    echo "set payloadmax from $PAYLOADMAX to $PAYLOADMIN"
+    PAYLOADMAX=$PAYLOADMIN
+fi
+
+printVars
+
+    # sanity check: CPDIR
+echo "CPDIR length: ${#CPDIR[@]}"
+if [ ${#CPDIR[@]} == 0 ]; then
+    echo "CPDIR is required. Use option -d to specify."
     exit
-elif [ ! -e $PTEDIR/$SCDIR ]; then
-    echo "SCDIR does not exist: $PTEDIR/$SCDIR"
+elif [ ! -e $PTEDIR/$CPDIR ]; then
+    echo "CPDIR does not exist: $PTEDIR/$CPDIR"
     exit
 fi
 

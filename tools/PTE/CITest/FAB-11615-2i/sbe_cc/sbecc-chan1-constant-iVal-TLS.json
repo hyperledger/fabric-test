@@ -1,5 +1,5 @@
 {
-    "channelID": "_ch1",
+    "channelID": "_ch3",
     "chaincodeID": "sbe_cc",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
@@ -11,11 +11,11 @@
     "peerFailover": "TRUE",
     "ordererFailover": "TRUE",
     "nProcPerOrg": "1",
-    "nRequest": "50000",
-    "runDur": "600",
+    "nRequest": "4000",
+    "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel1",
+        "name": "testorgschannel3",
         "orgName": [
             "org1"
         ]
@@ -34,8 +34,8 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
+        "org1": ["peer1-org1"],
+        "org2": ["peer1-org2"]
     },
     "eventOpt": {
         "type": "FilteredBlock",
