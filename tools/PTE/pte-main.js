@@ -1035,7 +1035,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
         var secret;
         var submitter = null;
 
-        hfc.setConfigSetting('key-value-store', 'fabric-common/lib/impl/FileKeyValueStore.js');
+        hfc.setConfigSetting('key-value-store', 'fabric-client/lib/impl/FileKeyValueStore.js');
 
         var cpf = testUtil.findOrgConnProfileSubmitter(cpList, channelOrgName[0]);
         if (null === cpf) {
@@ -1396,7 +1396,7 @@ async function queryBlockchainInfo(channel, client, org) {
         qPeer = txCfgPtr.queryBlockOpt.peer;
         logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%s:%d:%d', qOrg, qPeer, sBlock, eBlock);
 
-        hfc.setConfigSetting('key-value-store', 'fabric-common/lib/impl/FileKeyValueStore.js');
+        hfc.setConfigSetting('key-value-store', 'fabric-client/lib/impl/FileKeyValueStore.js');
         var cryptoSuite = hfc.newCryptoSuite();
         cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({ path: testUtil.storePathForOrg(Nid, orgName) }));
         client.setCryptoSuite(cryptoSuite);
