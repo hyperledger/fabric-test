@@ -1,11 +1,11 @@
 {
-    "channelID": "_ch2",
+    "channelID": "_ch4",
     "transType": "Channel",
     "nProcPerOrg": "1",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel2",
-        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel2.tx",
+        "name": "testorgschannel4",
+        "channelTX": "github.com/hyperledger/fabric-test/fabric/internal/cryptogen/crypto-config/ordererOrganizations/testorgschannel4.tx",
         "action":  "create",
         "orgName": [
             "org3"

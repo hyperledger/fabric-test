@@ -1,11 +1,11 @@
 {
-    "channelID": "_ch2",
+    "channelID": "_ch4",
     "chaincodeID": "sbe_cc",
     "chaincodeVer": "v0",
     "transType": "install",
     "TLS": "enabled",
     "channelOpt": {
-        "name":  "testorgschannel2",
+        "name":  "testorgschannel4",
         "action":  "create",
         "orgName": [
             "org3",
