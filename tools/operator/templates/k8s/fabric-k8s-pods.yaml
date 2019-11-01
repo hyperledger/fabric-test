@@ -158,8 +158,8 @@
 #@   if config.fabric_version.endswith("-stable"):
 #@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabric_version)})
 #@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(config.fabric_version)})
-#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-0.4.16"})
-#@     env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseimage:amd64-0.4.16"})
+#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-0.4.18"})
+#@     env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseimage:amd64-0.4.18"})
 #@     peer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(config.fabric_version)
 #@   end
 
