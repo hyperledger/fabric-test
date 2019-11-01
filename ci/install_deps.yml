@@ -1,0 +1,29 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+steps:
+  - script: sudo apt-get clean
+    displayName: Run APT Clean
+  - script: sudo apt-get update
+    displayName: Run APT Update
+  - script: sudo apt-get install -y gcc haveged libtool make
+    displayName: Install Dependencies
+  - task: GoTool@0
+    inputs:
+      version: $(GOVER)
+      goPath:  $(GOPATH)
+    displayName: Install GoLang
+
+  - task: NodeTool@0
+    inputs:
+      versionSpec: $(NODE_VER)
+    displayName: Install Node.js
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: $(PYTHON_VER)
+    displayName: Install Python
+
+  - script: python -m pip install --upgrade pip setuptools pytest
+    displayName: 'Install tools'
