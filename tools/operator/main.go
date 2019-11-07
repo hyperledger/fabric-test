@@ -72,10 +72,22 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			logger.ERROR("Failed to delete network")
 			return err
 		}
+	// case "upgradeNetwork":
+	// 	err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
+	// 	if err != nil {
+	// 		logger.ERROR("Failed to upgrade network")
+	// 		return err
+	// 	}
 	case "create":
 		err = testclient.Testclient("create", inputFilePath)
 		if err != nil {
 			logger.ERROR("Failed to create channel in network")
+			return err
+		}
+	case "anchorpeer":
+		err = testclient.Testclient("anchorpeer", inputFilePath)
+		if err != nil {
+			logger.ERROR("Failed to add anchor peers to channel in network")
 			return err
 		}
 	case "join":
@@ -141,7 +153,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			return err
 		}
 	default:
-		logger.ERROR("Incorrect action (%s). Use createChannelTxn or migrate or health for action ", action)
+		logger.ERROR("Incorrect action ", action ," . Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health for action ", action)
 		return err
 	}
 	return nil
