@@ -75,6 +75,7 @@ type InvokeQuery struct {
 	EventOptions     EventOptions         `yaml:"eventOpt,omitempty"`
 	CCOptions        CCOptions            `yaml:"ccOpt,omitempty"`
 	DiscoveryOptions DiscoveryOptions     `yaml:"discoveryOpt,omitempty"`
+	Fcn              string               `yaml:"fcn,omitempty"`
 	Args             string               `yaml:"args,omitempty"`
 }
 
