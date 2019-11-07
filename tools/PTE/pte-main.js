@@ -72,7 +72,7 @@ var ccDfnTmp;
 var uiContent;
 if (uiFile.endsWith(".json") || uiFile.endsWith(".yaml")  || uiFile.endsWith(".yml")) {
     uiContent = testUtil.readConfigFileSubmitter(uiFile);
-    logger.info('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent);
+    logger.debug('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent);
 
     if (typeof (uiContent.txCfgPtr) === 'undefined') {
         txCfgTmp = uiFile;
@@ -90,12 +90,12 @@ if (uiFile.endsWith(".json") || uiFile.endsWith(".yaml")  || uiFile.endsWith(".y
 }
 else {
     uiContent = JSON.parse(uiFile)
-    logger.info('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent.deploy);
+    logger.debug('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent.deploy);
     txCfgPtr = uiContent
     ccDfnPtr = uiContent
 }
-logger.info('input parameters: Nid=%d, uiFile=%s, tStart=%d PTEid=%d', Nid, uiFile, tStart, PTEid);
-logger.info('[Nid=%d pte-main] input ccDfnPtr[%s]: %j input txCfgPtr: %j', Nid, ccDfnTmp, ccDfnPtr, txCfgPtr);
+logger.debug('input parameters: Nid=%d, uiFile=%s, tStart=%d PTEid=%d', Nid, uiFile, tStart, PTEid);
+logger.debug('[Nid=%d pte-main] input ccDfnPtr[%s]: %j input txCfgPtr: %j', Nid, ccDfnTmp, ccDfnPtr, txCfgPtr);
 
 var TLS=testUtil.setTLS(txCfgPtr);
 logger.info('[Nid=%d pte-main] TLS= %d', Nid, TLS);
@@ -228,7 +228,7 @@ function getOrgOrdererID(org) {
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
-        logger.info('[getOrgOrdererID] org: %s, no orderer found in the connection profile', org);
+        logger.error('[getOrgOrdererID] org: %s, no orderer found in the connection profile', org);
         process.exit(1);
     }
 
@@ -247,14 +247,14 @@ function clientNewOrderer(client, org) {
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
-        logger.info('[clientNewOrderer] org: %s, no orderer found in the connection profile', org);
+        logger.error('[clientNewOrderer] org: %s, no orderer found in the connection profile', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
 
     var ordererID = getOrgOrdererID(org);
 
-    logger.info('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
+    logger.debug('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
     if (TLS > testUtil.TLSDISABLED) {
         data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
         if ( data !== null ) {
@@ -271,16 +271,16 @@ function clientNewOrderer(client, org) {
     } else {
         orderer = client.newOrderer(orderersCPFList[ordererID].url);
     }
-    logger.info('[clientNewOrderer] orderer: %s', orderersCPFList[ordererID].url);
+    logger.debug('[clientNewOrderer] orderer: %s', orderersCPFList[ordererID].url);
 }
 
 function chainAddOrderer(channel, client, org) {
-    logger.info('[chainAddOrderer] channel name: ', channel.getName());
+    logger.debug('[chainAddOrderer] channel name: ', channel.getName());
 
     var data;
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers') ) {
-        logger.info('[chainAddOrderer] org: %s, no orderer is found in the connection profile', org);
+        logger.error('[chainAddOrderer] org: %s, no orderer is found in the connection profile', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -306,7 +306,7 @@ function chainAddOrderer(channel, client, org) {
             client.newOrderer(orderersCPFList[ordererID].url)
         );
     }
-    logger.info('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
+    logger.debug('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
 }
 
 function channelAddPeer(channel, client, org) {
@@ -314,14 +314,14 @@ function channelAddPeer(channel, client, org) {
     if (channel){
         channelName = channel.getName()
     }
-    logger.info('[channelAddPeer] channel name: ', channelName);
+    logger.debug('[channelAddPeer] channel name: ', channelName);
     var data;
     var peerTmp;
     var targets = [];
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
-        logger.info('[channelAddPeer] org: %s, no peer is found in the connection profile', org);
+        logger.error('[channelAddPeer] org: %s, no peer is found in the connection profile', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -355,7 +355,7 @@ function channelAddPeer(channel, client, org) {
         }
     }
     if(channel){
-        logger.info('[channelAddPeer] channel peers: %s', channel.getPeers());
+        logger.debug('[channelAddPeer] channel peers: %s', channel.getPeers());
     }
 
     return targets;
@@ -368,7 +368,7 @@ function channelAddListedPeer(channel, client, org) {
     if (channel){
         channelName = channel.getName()
     }
-    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] listOpt: %j', Nid, channelName, org, txCfgPtr.listOpt);
+    logger.debug('[Nid:chan:org=%d:%s:%s channelAddListedPeer] listOpt: %j', Nid, channelName, org, txCfgPtr.listOpt);
     var data;
     var listOpt=txCfgPtr.listOpt;
     var peername;
@@ -376,7 +376,7 @@ function channelAddListedPeer(channel, client, org) {
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
-        logger.info('[channelAddListedPeer] org: %s, no peer is found in the connection profile', org);
+        logger.error('[channelAddListedPeer] org: %s, no peer is found in the connection profile', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -416,20 +416,20 @@ function channelAddListedPeer(channel, client, org) {
             }
         }
     }
-    logger.info('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: %s', Nid, channelName, org, channel.getPeers());
+    logger.debug('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: %s', Nid, channelName, org, channel.getPeers());
     return targets;
 }
 
 function channelAddQIPeer(channel, client, qorg, qpeer) {
-    logger.info('[channelAddQIPeer] channel name: ', channel.getName());
-    logger.info('[channelAddQIPeer] qorg %s qpeer: ', qorg,qpeer);
+    logger.debug('[channelAddQIPeer] channel name: ', channel.getName());
+    logger.debug('[channelAddQIPeer] qorg %s qpeer: ', qorg,qpeer);
     var data;
     var peerTmp;
     var targets = [];
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, qorg);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
-        logger.info('[channelAddQIPeer] org: %s, no peer is found in the connection profile', qorg);
+        logger.error('[channelAddQIPeer] org: %s, no peer is found in the connection profile', qorg);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -460,20 +460,20 @@ function channelAddQIPeer(channel, client, qorg, qpeer) {
             }
         }
     }
-    logger.info('[channelAddQIPeer] channel peers: %s', channel.getPeers());
+    logger.debug('[channelAddQIPeer] channel peers: %s', channel.getPeers());
 
     return targets;
 }
 
 function channelAddPeer1(channel, client, org, eventHubs) {
-    logger.info('[channelAddPeer1] channel name: %s, org: %s', channel.getName(), org);
+    logger.debug('[channelAddPeer1] channel name: %s, org: %s', channel.getName(), org);
     var data;
     var peerTmp;
     var targets = [];
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
-        logger.info('[channelAddPeer1] org: %s, no peer is found in the connection profile', org);
+        logger.error('[channelAddPeer1] org: %s, no peer is found in the connection profile', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -513,50 +513,50 @@ function channelAddPeer1(channel, client, org, eventHubs) {
 }
 
 function channelAddPeerEventJoin(channel, client, org) {
-    logger.info('[channelAddPeerEventJoin] channel name: ', channel.getName());
-            var data;
-            var eh;
-            var peerTmp;
+    logger.debug('[channelAddPeerEventJoin] channel name: ', channel.getName());
+    var data;
+    var eh;
+    var peerTmp;
 
-            var targets = [];
-            var eventHubs = [];
+    var targets = [];
+    var eventHubs = [];
 
-            var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
-            if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
-                logger.info('[channelAddPeerEventJoin] org: %s, no peer is found in the connection profile', org);
-                process.exit(1);
-            }
-            var cpOrgs = cpf['organizations'];
-            var cpPeers = cpf['peers'];
+    var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
+    if ( 0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers') ) {
+        logger.error('[channelAddPeerEventJoin] org: %s, no peer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var cpOrgs = cpf['organizations'];
+    var cpPeers = cpf['peers'];
 
-            for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
-                var key=cpOrgs[org]['peers'][i];
-                if (cpPeers.hasOwnProperty(key)) {
-                    if (cpPeers[key].url) {
-                        if (TLS > testUtil.TLSDISABLED) {
-                            data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                            if ( data !== null ) {
-                                targets.push(
-                                    client.newPeer(
-                                        cpPeers[key].url,
-                                        {
-                                            pem: Buffer.from(data).toString(),
-                                            'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                                        }
-                                    )
-                                );
-                            }
-                        } else {
-                            targets.push(
-                                client.newPeer(
-                                    cpPeers[key].url
-                                )
-                            );
-                            logger.info('[channelAddPeerEventJoin] peer: ', cpPeers[key].url);
-                        }
+    for (let i=0; i < cpOrgs[org]['peers'].length; i++) {
+        var key=cpOrgs[org]['peers'][i];
+        if (cpPeers.hasOwnProperty(key)) {
+            if (cpPeers[key].url) {
+                if (TLS > testUtil.TLSDISABLED) {
+                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
+                    if ( data !== null ) {
+                        targets.push(
+                            client.newPeer(
+                                cpPeers[key].url,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
+                                }
+                            )
+                        );
                     }
+                } else {
+                    targets.push(
+                        client.newPeer(
+                            cpPeers[key].url
+                        )
+                    );
+                    logger.debug('[channelAddPeerEventJoin] peer: ', cpPeers[key].url);
                 }
             }
+        }
+    }
 
     allEventhubs = allEventhubs.concat(eventHubs);
     return { targets: targets, eventHubs: eventHubs };
@@ -572,7 +572,7 @@ function getCCID() {
         chaincode_id = uiContent.chaincodeID+channelID;
     }
     chaincode_ver = uiContent.chaincodeVer;
-    logger.info('[getCCID] Nid: %d, chaincode_id: %s, chaincode_ver: %s', Nid, chaincode_id, chaincode_ver);
+    logger.debug('[getCCID] Nid: %d, chaincode_id: %s, chaincode_ver: %s', Nid, chaincode_id, chaincode_ver);
 }
 
 
@@ -615,7 +615,7 @@ async function chaincodeInstall(client, org) {
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     var channel
     if ( null === cpf ) {
-        logger.info('[chaincodeInstall] no connection profile is found for org(%s)', org);
+        logger.error('[chaincodeInstall] no connection profile is found for org(%s)', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -630,7 +630,7 @@ async function chaincodeInstall(client, org) {
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
         await testUtil.tlsEnroll(client, org, cpf);
-        logger.info('[chaincodeInstall] got user private key: org= %s', org);
+        logger.debug('[chaincodeInstall] got user private key: org= %s', org);
     }
 
     var targets;
@@ -658,7 +658,7 @@ async function chaincodeInstall(client, org) {
         goPath: baseDir
     }; 
 
-    logger.info('request_install: %j', request_install.targets);
+    logger.debug('request_install: %j', request_install.targets);
 
     client.installChaincode(request_install)
         .then(
@@ -671,7 +671,7 @@ async function chaincodeInstall(client, org) {
                     let one_good = false;
                     if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
                         one_good = true;
-                        logger.info('[chaincodeInstall] org(%s): install proposal was good', org);
+                        logger.debug('[chaincodeInstall] org(%s): install proposal was good', org);
                     } else {
                         logger.error('[chaincodeInstall] org(%s): install proposal was bad', org);
                     }
@@ -733,7 +733,7 @@ async function chaincodeInstantiate(channel, client, org) {
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( null === cpf ) {
-        logger.info('[chaincodeInstantiate] no connection profile is found for org(%s)', org);
+        logger.error('[chaincodeInstantiate] no connection profile is found for org(%s)', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -743,7 +743,7 @@ async function chaincodeInstantiate(channel, client, org) {
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
         await testUtil.tlsEnroll(client, org, cpf);
-        logger.info('[chaincodeInstantiate] get user private key: org= %s', org);
+        logger.debug('[chaincodeInstantiate] get user private key: org= %s', org);
     }
     chainAddOrderer(channel, client, org);
 
@@ -757,7 +757,7 @@ async function chaincodeInstantiate(channel, client, org) {
 
     channel.initialize()
         .then((success) => {
-            logger.info('[chaincodeInstantiate:Nid=%d] Successfully initialize channel[%s]', Nid, channel.getName());
+            logger.info('[chaincodeInstantiate:Nid=%d] Successfully initialized channel[%s]', Nid, channel.getName());
             var upgrade = false;
 
             var badTransientMap = { 'test1': 'transientValue' }; // have a different key than what the chaincode example_cc1.go expects in Init()
@@ -811,7 +811,7 @@ async function chaincodeInstantiate(channel, client, org) {
                                     logger.error('[chaincodeInstantiate] The chaincode instantiate transaction was invalid, code = ' + code);
                                     reject();
                                 } else {
-                                    logger.info('[chaincodeInstantiate] The chaincode instantiate transaction was valid.');
+                                    logger.debug('[chaincodeInstantiate] The chaincode instantiate transaction was valid.');
                                     resolve();
                                 }
                             }, (err) => {
@@ -827,11 +827,10 @@ async function chaincodeInstantiate(channel, client, org) {
                     });
 
                     var tCurr=new Date().getTime();
-                    logger.info('[chaincodeInstantiate] Promise.all tCurr=%d', tCurr);
+                    logger.debug('[chaincodeInstantiate] Promise.all tCurr=%d', tCurr);
                     return Promise.all(eventPromises)
 
                         .then((results) => {
-
                             logger.info('[chaincodeInstantiate] Event promise all complete and testing complete');
                             return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
                         }).catch((err) => {
@@ -879,14 +878,14 @@ async function chaincodeUpgrade(channel, client, org) {
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( null === cpf ) {
-        logger.info('[chaincodeUpgrade] no connection profile is found for org(%s)', org);
+        logger.error('[chaincodeUpgrade] no connection profile is found for org(%s)', org);
         process.exit(1);
     }
 
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
         await testUtil.tlsEnroll(client, org, cpf);
-        logger.info('[chaincodeUpgrade] get user private key: org= %s', org);
+        logger.debug('[chaincodeUpgrade] get user private key: org= %s', org);
     }
     chainAddOrderer(channel, client, org);
 
@@ -900,7 +899,7 @@ async function chaincodeUpgrade(channel, client, org) {
 
     channel.initialize()
         .then((success) => {
-            logger.info('[chaincodeUpgrade:Nid=%d] Successfully initialize channel[%s]', Nid, channel.getName());
+            logger.info('[chaincodeUpgrade:Nid=%d] Successfully initialized channel[%s]', Nid, channel.getName());
             var upgrade = true;
 
             var badTransientMap = { 'test1': 'transientValue' }; // have a different key than what the chaincode example_cc1.go expects in Init()
@@ -969,11 +968,10 @@ async function chaincodeUpgrade(channel, client, org) {
                     });
 
                     var tCurr=new Date().getTime();
-                    logger.info('[chaincodeUpgrade] Promise.all tCurr=%d', tCurr);
+                    logger.debug('[chaincodeUpgrade] Promise.all tCurr=%d', tCurr);
                     return Promise.all(eventPromises)
 
                         .then((results) => {
-
                             logger.info('[chaincodeUpgrade] Event promise all complete and testing complete');
                             return results[0]; // the first returned value is from the 'sendPromise' which is from the 'sendTransaction()' call
                         }).catch((err) => {
@@ -1017,7 +1015,7 @@ function readAllFiles(dir) {
     var certs = [];
     files.forEach((file_name) => {
         let file_path = path.resolve(dir,file_name);
-        logger.info('[readAllFiles] looking at file ::'+file_path);
+        logger.debug('[readAllFiles] looking at file ::'+file_path);
         let data = fs.readFileSync(file_path);
         certs.push(data);
     });
@@ -1040,7 +1038,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
 
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, channelOrgName[0]);
     if ( null === cpf ) {
-        logger.info('[createOrUpdateOneChannel] no connection profile is found for org(%s)', org);
+        logger.error('[createOrUpdateOneChannel] no connection profile is found for org(%s)', org);
         process.exit(1);
     }
 
@@ -1059,7 +1057,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
         await testUtil.tlsEnroll(client, channelOrgName[0], cpf);
-        logger.info('[createOrUpdateOneChannel] get user private key: org= %s', channelOrgName[0]);
+        logger.debug('[createOrUpdateOneChannel] get user private key: org= %s', channelOrgName[0]);
     }
     //clientNewOrderer(client, channelOrgName[0]);
 
@@ -1082,8 +1080,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
                 username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
                 secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
                 orgName = cpOrgs[org].name;
-                logger.info('[createOrUpdateOneChannel] org= %s, org name= %s', org, orgName);
-                logger.info('[createOrUpdateOneChannel] org= %s, org name= %s, username= %s, secret= %s', org, orgName, username, secret);
+                logger.debug('[createOrUpdateOneChannel] org= %s, org name= %s, username= %s, secret= %s', org, orgName, username, secret);
                 client._userContext = null;
                 resolve(testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf));
             });
@@ -1111,7 +1108,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             // collect signature from org admin
             signatures.push(signature);
 
-            logger.info('[createOrUpdateOneChannel] done signing: %s', channelName);
+            logger.debug('[createOrUpdateOneChannel] done signing: %s', channelName);
             // add new orderer
             clientNewOrderer(client, channelOrgName[0]);
             // build up the create request
@@ -1163,7 +1160,7 @@ async function joinChannel(channel, client, org) {
     try{
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
     if ( null === cpf ) {
-        logger.info('[joinChannel] no connection profile is found for org(%s)', org);
+        logger.error('[joinChannel] no connection profile is found for org(%s)', org);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];
@@ -1172,7 +1169,7 @@ async function joinChannel(channel, client, org) {
     logger.info('[joinChannel] Calling peers in organization (%s) to join the channel (%s)', orgName, channelName);
     var username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
     var secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
-    logger.info('[joinChannel] user=%s, secret=%s', username, secret);
+    logger.debug('[joinChannel] user=%s, secret=%s', username, secret);
     var genesis_block = null;
     var eventHubs = [];
     var blockCallbacks = [];
@@ -1180,7 +1177,7 @@ async function joinChannel(channel, client, org) {
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
         await testUtil.tlsEnroll(client, org, cpf);
-        logger.info('[joinChannel] get user private key: org= %s', org);
+        logger.debug('[joinChannel] get user private key: org= %s', org);
     }
 
 
@@ -1231,7 +1228,7 @@ async function joinChannel(channel, client, org) {
         return channel.joinChannel(request);
     })
         .then((results) => {
-            logger.info(util.format('[joinChannel:%s] join Channel (%s) R E S P O N S E : %j', org, channelName, results));
+            logger.debug(util.format('[joinChannel:%s] join Channel (%s) R E S P O N S E : %j', org, channelName, results));
 
             if(results[0] && results[0].response && results[0].response.status == 200) {
                 logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
@@ -1330,7 +1327,7 @@ try{
     logger.info('[queryBlockchainInfo] channel (%s)', channelName);
     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, channelOrgName[0]);
     if ( null === cpf ) {
-        logger.info('[queryBlockchainInfo] no connection profile is found for org(%s)', org);
+        logger.error('[queryBlockchainInfo] no connection profile is found for org(%s)', org);
         process.exit(1);
     }
 
@@ -1351,7 +1348,7 @@ try{
     // get client key
     if ( TLS == testUtil.TLSCLIENTAUTH ) {
         await testUtil.tlsEnroll(client, org, cpf);
-        logger.info('[queryBlockchainInfo] got user private key: org= %s', org);
+        logger.debug('[queryBlockchainInfo] got user private key: org= %s', org);
     }
 
     chainAddOrderer(channel, client, org);
@@ -1404,7 +1401,7 @@ async function performance_main() {
         let org = channelOrgName[i];
         var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
         if ( null === cpf ) {
-            logger.info('[performance_main] no connection profile is found for org(%s)', org);
+            logger.error('[performance_main] no connection profile is found for org(%s)', org);
             process.exit(1);
         }
         var cpOrgs = cpf['organizations'];
@@ -1417,7 +1414,7 @@ async function performance_main() {
             initDeploy(org);
             let username=testUtil.getOrgEnrollIdSubmitter(cpf, org);
             let secret=testUtil.getOrgEnrollSecretSubmitter(cpf, org);
-            logger.info('[performance_main] Deploy: user= %s, secret= %s', username, secret);
+            logger.debug('[performance_main] Deploy: user= %s, secret= %s', username, secret);
 
             hfc.newDefaultKeyValueStore({
                 path: testUtil.storePathForOrg(Nid, orgName)
@@ -1426,7 +1423,7 @@ async function performance_main() {
                     client.setStateStore(store);
                     var cpf=testUtil.findOrgConnProfileSubmitter(cpList, org);
                     if ( null === cpf ) {
-                        logger.info('[performance_main] no connection profile is found for org(%s)', org);
+                        logger.error('[performance_main] no connection profile is found for org(%s)', org);
                         process.exit(1);
                     }
                     testUtil.getSubmitter(username, secret, client, true, Nid, org, cpf)
@@ -1522,7 +1519,8 @@ async function performance_main() {
                 logger.info('[performance_main] peer channel join, channel name: ', channelName);
                 joinChannel(channel, client, org);
             } else {
-                logger.info('[performance_main] UNKNOWN channelOpt.action (%s); channel name: ', channelOpt.action, channelName);
+                logger.error('[performance_main] UNKNOWN channelOpt.action (%s); channel name: ', channelOpt.action, channelName);
+                process.exit(1)
             }
         } else if ( transType == 'QUERYBLOCK' ) {
             var channel = client.newChannel(channelName);
@@ -1534,12 +1532,14 @@ async function performance_main() {
             var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
             var invokeType = txCfgPtr.invokeType.toUpperCase();
             logger.info('nProcPerOrg ', nProcPerOrg);
+            let output = {}
             for (var j = 0; j < nProcPerOrg; j++) {
+                output = {}
                 const pteExecPath = path.join(__dirname, 'pte-execRequest.js')
                 var workerProcess = child_process.spawn('node', [pteExecPath, j, Nid, uiFile, tStart, org, PTEid]);
 
                 workerProcess.stdout.on('data', function (data) {
-                    logger.info('stdout: ' + data);
+                    logger.debug('stdout: ' + data);
                     if (data.indexOf('pte-exec:completed') > -1) {
                         var dataStr=data.toString();
                         var tempDataArray =dataStr.split("\n");
@@ -1597,11 +1597,11 @@ async function performance_main() {
                             var rawText=testSummaryArray[summaryIndex].toString();
                             logger.info('Test Summary[%d]: %s',summaryIndex, rawText.substring(rawText.indexOf("[Nid")));
                             if (rawText.indexOf("execTransMode")>-1) {
-                                logger.info("ERROR occurred:" +rawText);
+                                logger.error("ERROR occurred:" +rawText);
                                 continue;
                             };
                             if (rawText.indexOf("execModeConstant")>-1) {
-                                logger.info("ERROR occurred:" +rawText);
+                                logger.error("ERROR occurred:" +rawText);
                                 continue;
                             };
                             if ( (rawText.indexOf("postEventProc")>-1 ) || (rawText.indexOf("eventRegister")>-1) ) {
@@ -1741,29 +1741,43 @@ async function performance_main() {
 
                             // transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE transaction stats\n";
+                            output["INVOKE transactions type"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalInvokeTrans + "  received "+totalInvokeTransRcvd+"\n";
+                            const transactions = {"sent": totalInvokeTrans, "received": totalInvokeTransRcvd}
+                            output["Total transactions"] = transactions
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tfailures: proposal "+totalInvokePeerFailures + "  transactions "+totalInvokeOrdererFailures+"\n";
+                            const failures = {"proposal": totalInvokePeerFailures, "transactions": totalInvokeOrdererFailures}
+                            output["failures"]= failures
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tevent: received "+totalInvokeTransRcvd + "  timeout "+totalInvokeEventTimeout+ "  unreceived "+ totalInvokeEventUnreceived+"\n";
+                            const events = {"received": totalInvokeTransRcvd, "timeout": totalInvokeEventTimeout, "unreceived": totalInvokeEventUnreceived}
+                            output["event"] = events
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur+" ms"
                             fs.appendFileSync(rptFile, buff);
 
                             if ( transMode === 'LATENCY' ) {
                                 var iTPS=dur/totalInvokeTransRcvd;
                                 buff = "("+channelName+":"+chaincode_id+"):\tLatency "+iTPS.toFixed(2)+" ms \n";
+                                output["Latency"] = iTPS.toFixed(2)+" ms"
                                 fs.appendFileSync(rptFile, buff);
                             } else {
                                 var iTPS=1000*totalInvokeTransRcvd/dur;
                                 buff = "("+channelName+":"+chaincode_id+"):\tTPS "+iTPS.toFixed(2)+ "\n";
+                                output["TPS"] = iTPS.toFixed(2)
                                 fs.appendFileSync(rptFile, buff);
                             }
 
@@ -1771,31 +1785,46 @@ async function performance_main() {
                             buff = "("+channelName+":"+chaincode_id+"): peer latency stats (endorsement)\n";
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_peer[0] +"  total time: "+ latency_peer[1] +" ms \n";
+                            let peerLatencyStats = {"total transactions": latency_peer[0], "total time": latency_peer[1] +" ms"}
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_peer[0] > 0 ) {
                                 buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_peer[2] +" ms  max: "+ latency_peer[3] +" ms  avg: "+ (latency_peer[1]/latency_peer[0]).toFixed(2) +" ms \n";
+                                peerLatencyStats["min"] = latency_peer[2] +" ms"
+                                peerLatencyStats["max"] = latency_peer[3] +" ms"
+                                peerLatencyStats["avg"] = (latency_peer[1]/latency_peer[0]).toFixed(2) +" ms"
                                 fs.appendFileSync(rptFile, buff);
                             }
-
+                            output["peer latency stats (endorsement)"] = peerLatencyStats
                             // orderer latency output (transaction ack)
                             buff = "("+channelName+":"+chaincode_id+"): orderer latency stats (transaction ack)\n";
+                            let ordererLatencyStats = {}
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_orderer[0] +"  total time: "+ latency_orderer[1] +" ms \n";
+                            ordererLatencyStats = {"total transactions": latency_orderer[0], "total time": latency_orderer[1] +" ms"}
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_orderer[0] > 0 ) {
                                 buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_orderer[2] +" ms  max: "+ latency_orderer[3] +" ms  avg: "+ (latency_orderer[1]/latency_orderer[0]).toFixed(2) +" ms \n";
+                                ordererLatencyStats["min"] = latency_orderer[2] +" ms"
+                                ordererLatencyStats["max"] = latency_orderer[3] +" ms"
+                                ordererLatencyStats["avg"] = (latency_orderer[1]/latency_orderer[0]).toFixed(2) +" ms"
                                 fs.appendFileSync(rptFile, buff);
                             }
-
+                            output["orderer latency stats (submit tx ack/nack)"] = ordererLatencyStats
                             // event latency output (end-to-end)
                             buff = "("+channelName+":"+chaincode_id+"): event latency stats (end-to-end)\n";
+                            let eventLatencyStats = {}
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\ttotal transactions: "+ latency_event[0] +"  total time: "+ latency_event[1] +" ms \n";
+                            eventLatencyStats = {"total transactions": latency_event[0], "total time": latency_event[1] +" ms"}
                             fs.appendFileSync(rptFile, buff);
                             if ( latency_event[0] > 0 ) {
                                 buff = "("+channelName+":"+chaincode_id+"):\tmin: "+ latency_event[2] +" ms  max: "+ latency_event[3] +" ms  avg: "+ (latency_event[1]/latency_event[0]).toFixed(2) +" ms \n\n";
+                                eventLatencyStats["min"] = latency_event[2] +" ms"
+                                eventLatencyStats["max"] = latency_event[3] +" ms"
+                                eventLatencyStats["avg"] = (latency_event[1]/latency_event[0]).toFixed(2) +" ms"
                                 fs.appendFileSync(rptFile, buff);
                             }
+                            output["event latency stats (end to end)"] = eventLatencyStats
                         }
                         if (totalQueryTrans>0) {
                             var dur=etmp-stmp;
@@ -1804,20 +1833,29 @@ async function performance_main() {
 
                             // query transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " QUERY transaction stats\n";
+                            output["QUERY transaction stats"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalQueryTrans + "  received "+totalQueryReceived+"\n";
+                            const totalTransactions = {"sent": totalQueryTrans, "received": totalQueryReceived}
+                            output["Total transactions"] = totalTransactions
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tfailures: query transactions "+totalQueryFailed+"\n";
                             fs.appendFileSync(rptFile, buff);
-
+                            output["query transactions failed"] = totalQueryFailed
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur+" ms"
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+qTPS.toFixed(2)+ "\n\n";
+                            output["TPS"] = qTPS.toFixed(2)
                             fs.appendFileSync(rptFile, buff);
                         }
                         if (totalMixedTPS) {
@@ -1828,17 +1866,26 @@ async function performance_main() {
 
                             // mix transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+ transMode + " INVOKE/QUERY transaction stats\n";
+                            output["INVOKE/QUERY transaction mode"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+mixTotal+" INVOKE "+totalMixedInvoke+"  QUERY "+ totalMixedQuery + "\n";
+                            const totalTransactions = {"sent": mixTotal, "INVOKE": totalMixedInvoke, "QUERY": totalMixedQuery}
+                            output["Total transactions"] = totalTransactions
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur+" ms"
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+mTPS.toFixed(2)+ "\n\n";
+                            output["TPS"] = mTPS.toFixed(2)
                             fs.appendFileSync(rptFile, buff);
                         }
                         if (totalDiscoveryTrans>0) {
@@ -1849,22 +1896,39 @@ async function performance_main() {
 
                             // service discovery transaction output
                             var buff = "======= "+loggerMsg+" Test Summary: executed at " + sTime + " =======\n";
+                            output["Test executed at"] = sTime
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"): "+transMode+" "+transType+" transaction stats\n";
+                            output[transType+" transaction mode"] = transMode
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal processes "+procDone+"\n";
+                            output["Total processes"] = procDone
                             fs.appendFileSync(rptFile, buff);
                             var totalDiscoveryTransReceived = totalDiscoveryTrans - totalDiscoveryTransFailures;
                             buff = "("+channelName+":"+chaincode_id+"):\tTotal transactions sent "+totalDiscoveryTrans + "  received "+totalDiscoveryTransReceived+"\n";
+                            const totalTransactions = {"sent": totalDiscoveryTrans, "received": totalDiscoveryTransReceived}
+                            output["Total transactions"] = totalTransactions
                             fs.appendFileSync(rptFile, buff);
 
                             buff = "("+channelName+":"+chaincode_id+"):\tstart "+stmp+"  end "+etmp+"  duration "+dur+" ms \n";
+                            output["start"] = stmp
+                            output["end"] = etmp
+                            output["duration"] = dur
                             fs.appendFileSync(rptFile, buff);
                             buff = "("+channelName+":"+chaincode_id+"):\tTPS "+sdTPS.toFixed(2)+ "\n\n";
+                            output["TPS"] = sdTPS.toFixed(2)
                             fs.appendFileSync(rptFile, buff);
                         }
+                        output["channel name"] = channelName
+                        output["chaincode ID"] = chaincode_id
                         logger.info('[performance_main] pte-main:completed:');
+                        if(output["Total transactions"]["sent"] == output["Total transactions"]["received"]){
+                            output["Test Result"] = "PASS"
+                        } else{
+                            output["Test Result"] = "FAIL"
+                        }
 
+                        logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
                     }
 
                 });
