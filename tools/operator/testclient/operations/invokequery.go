@@ -140,8 +140,8 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgName, action, tls 
 	}
 	i.ChannelOpt = ChannelOptions{Name: invkQueryObject.ChannelName, OrgName: []string{orgName}}
 	i.ConnProfilePath = paths.GetConnProfilePathForOrg(orgName, organizations)
-	invokeParams["move"] = Parameters{Fcn: "invoke", Args: strings.Split(invkQueryObject.Args, ",")}
-	invokeParams["query"] = Parameters{Fcn: "invoke", Args: strings.Split(invkQueryObject.Args, ",")}
+	invokeParams["move"] = Parameters{Fcn: invkQueryObject.Fcn, Args: strings.Split(invkQueryObject.Args, ",")}
+	invokeParams["query"] = Parameters{Fcn: invkQueryObject.Fcn, Args: strings.Split(invkQueryObject.Args, ",")}
 	i.Parameters = invokeParams
 	for key := range invkQueryObject.TxnOptions {
 		mode := invkQueryObject.TxnOptions[key].Mode
