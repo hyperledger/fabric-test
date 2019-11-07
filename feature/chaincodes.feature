@@ -507,14 +507,6 @@ Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimA
   And a user receives a response containing "size":35
   And a user receives a response containing "owner":"dire straits"
 
-
-  # Test getHistoryForMarble
-  When a user queries on the chaincode named "mycc" with args ["getHistoryForMarble","marble1"]
-  Then a user receives a response containing "TxId"
-  And a user receives a response containing "Value":{"docType":"marble","name":"marble1","color":"red","size":35,"owner":"tom"}
-  And a user receives a response containing "Timestamp"
-  And a user receives a response containing "IsDelete":"false"
-
   #delete a marble
   When a user invokes on the chaincode named "mycc" with args ["delete","marble201"]
   And I wait "3" seconds
@@ -522,24 +514,11 @@ Scenario Outline: FAB-5791: Test API in SHIM interface using marbles02 and shimA
   Then a user receives an error response of status:500
   And a user receives an error response of {\"Error\":\"Marble does not exist: marble201\"}
 
-
-  #Test getHistoryForDeletedMarble
-  When a user queries on the chaincode named "mycc" with args ["getHistoryForMarble","marble201"]
-  Then a user receives a response containing "TxId"
-  And a user receives a response containing "Value":{"docType":"marble","name":"marble201","color":"blue","size":6,"owner":"ram"}
-  And a user receives a response containing "Timestamp"
-  And a user receives a response containing "IsDelete":"false"
-  Then a user receives a response containing "TxId"
-  And a user receives a response containing "Value":{"docType":"marble","name":"marble201","color":"blue","size":6,"owner":"ram"}
-  And a user receives a response containing "Timestamp"
-  And a user receives a response containing "IsDelete":"true"
-
   When a user queries on the chaincode named "myShimAPI" with args ["getTxTimestamp"]
   When a user queries on the chaincode named "myShimAPI" with args ["getCreator"]
   When a user invokes on the chaincode named "myShimAPI" with args ["getBinding"]
   When a user queries on the chaincode named "myShimAPI" with args ["getSignedProposal"]
   When a user queries on the chaincode named "myShimAPI" with args ["getTransient"]
-
 
   Examples:
    | type  | database |                      marbles02Path                            | VendorPath                       | shimAPIDriverPath                                              | language |
