@@ -7,9 +7,9 @@
 Feature: Fabric-CA Service
     As a user I want to be able to use the Fabric-CA for generation of certificates
 
-#@doNotDecompose
-@interop
-@daily
+##@doNotDecompose
+##@interop
+##@daily
 Scenario Outline: FAB-6489: Interoperability Test using <type> based orderer with a <database> db using the <interface> with <language> chaincode
     Given I have a bootstrapped fabric network of type <type> using state-database <database> with tls
     And I use the <interface> interface
@@ -41,7 +41,7 @@ Examples:
     | solo  | leveldb  | NodeJS SDK |   ../../fabric-samples/chaincode/chaincode_example02/java         |   JAVA   |
 
 
-@daily
+##@daily
 Scenario Outline: FAB-11621: JavaSDK interoperability Test using <language> chaincode shim
     Given I have a bootstrapped fabric network
     And I use the Java SDK interface
