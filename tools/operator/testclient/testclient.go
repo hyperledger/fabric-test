@@ -1,7 +1,6 @@
-package main
+package testclient
 
 import (
-	"flag"
 	"io/ioutil"
 	"strings"
 
@@ -9,19 +8,15 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/operations"
 	yaml "gopkg.in/yaml.v2"
+	"github.com/pkg/errors"
 )
 
-var testInputFilePath = flag.String("i", "", "Input file for pte (Required)")
-var action = flag.String("a", "", "Action to perform")
+func validateArguments(testInputFilePath string) error {
 
-func validateArguments(testInputFilePath *string) {
-
-	if *testInputFilePath == "" {
-		logger.CRIT(nil, "Input file not provided")
+	if testInputFilePath == "" {
+		return errors.New("Input file not provided")
 	}
-	if *action == "" {
-		*action = "all"
-	}
+	return nil
 }
 
 //GetInputData -- Read in the input data and parse the objects
@@ -41,7 +36,7 @@ func GetInputData(inputFilePath string) (inputStructs.Config, error) {
 	return config, nil
 }
 
-func doAction(action string, config inputStructs.Config, testInputFilePath string) {
+func doAction(action string, config inputStructs.Config, testInputFilePath string) error {
 
 	var actions []string
 	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query"
@@ -54,6 +49,7 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 	case "mutual":
 		tls = "clientauth"
 	}
+
 	if action == "all" {
 		actions = append(actions, []string{"create", "anchorpeer", "join", "install", "instantiate"}...)
 	} else {
@@ -65,39 +61,55 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 			var channelUIObject operations.ChannelUIObject
 			err := channelUIObject.ChannelConfigs(config, tls, action)
 			if err != nil {
-				logger.CRIT(err, "Failed to perform ", action, "action on channels; testInputFilePath = ", testInputFilePath)
+				return err
 			}
 		case "install":
 			var installCCUIObject operations.InstallCCUIObject
 			err := installCCUIObject.InstallCC(config, tls)
 			if err != nil {
-				logger.CRIT(err, "Failed to install chaincode; testInputFilePath = ", testInputFilePath)
+				return err
 			}
 		case "instantiate", "upgrade":
 			var instantiateCCUIObject operations.InstantiateCCUIObject
 			err := instantiateCCUIObject.InstantiateCC(config, tls, action)
 			if err != nil {
-				logger.CRIT(err, "Failed to ", action, " chaincode; testInputFilePath = ", testInputFilePath)
+				return err
 			}
 		case "invoke", "query":
 			var invokeQueryUIObject operations.InvokeQueryUIObject
 			err := invokeQueryUIObject.InvokeQuery(config, tls, strings.Title(action))
 			if err != nil {
-				logger.CRIT(err, "Failed to perform ", action, "; testInputFilePath = ", testInputFilePath)
+				return err
 			}
 		default:
-			logger.CRIT(nil, "Incorrect Unknown (", action, ").Supported actions:", supportedActions)
+			return errors.Errorf("Incorrect Unknown ( %s ).Supported actions: %s ", action, supportedActions)
 		}
 	}
+	return nil
 }
 
-func main() {
+func Testclient(action, testInputFilePath string) error {
 
-	flag.Parse()
-	validateArguments(testInputFilePath)
-	config, err := GetInputData(*testInputFilePath)
+	err := validateArguments(testInputFilePath)
 	if err != nil {
-		logger.CRIT(err)
+		logger.ERROR("Failed to validate arguments")
+		return err
 	}
-	doAction(*action, config, *testInputFilePath)
+
+	config, err := GetInputData(testInputFilePath)
+	if err != nil {
+		logger.ERROR("Failed to get configuration data from testInputFilePath = ", testInputFilePath)
+		return err
+	}
+
+	if action == "" {
+		action = "all"
+	}
+
+	err = doAction(action, config, testInputFilePath)
+	if err != nil {
+		logger.ERROR("Failed to perform ", action ," action, testInputFilePath = ", action, testInputFilePath)
+		return err
+	}
+	return nil
 }

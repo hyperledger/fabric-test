@@ -21,14 +21,3 @@ func ERROR(message ...string) {
 		log.Ldate|log.Ltime)
 	error.Println(strings.Join(message, ""))
 }
-
-//CRIT -- To print the critical error logs and exit
-func CRIT(err error, message ...string) {
-	crit := log.New(os.Stderr,
-		"CRIT: ",
-		log.Ldate|log.Ltime)
-	if err == nil {
-		crit.Fatalln(strings.Join(message, ""))
-	}
-	crit.Fatalf("%s err: %s", strings.Join(message, ""), err)
-}

@@ -8,6 +8,7 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	"github.com/pkg/errors"
 )
 
 type K8s struct {
@@ -237,7 +238,7 @@ func (k K8s) K8sNetwork(action string) error {
 			return err
 		}
 	default:
-		logger.CRIT(nil, "Incorrect action ", action, " Use up or down for action")
+		return errors.Errorf("Incorrect action %s Use up or down for action", action)
 	}
 	return nil
 }

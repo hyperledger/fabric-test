@@ -51,9 +51,9 @@ mkdir -p "$LogsDir"
 
 startNw() {
   # Create fabric network on k8s cluster
-  cd "$OperatorDir"/launcher || exit 1
+  cd "$OperatorDir" || exit 1
   # export kubeconfig file to KUBECONFIG
-  go run launcher.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$1" -k "$KUBECONFIG"
+  go run main.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$1" -k "$KUBECONFIG" -a up
   # list k8s pods
   kubectl get pods
   cd "$FabricTestDir"/fabric/internal/cryptogen || exit 1
@@ -73,9 +73,9 @@ startNw() {
 stopNw() {
   ArchiveLogsDir="$FabricTestDir"/regression/systemtest/PTELogs
 
-  cd "$OperatorDir"/launcher || exit 1
+  cd "$OperatorDir" || exit 1
   # provide networkspec 1 and kubeconfig 1 here
-  go run launcher.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$1" -k "$KUBECONFIG" -a down
+  go run main.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$1" -k "$KUBECONFIG" -a down
   # list k8s pods
   kubectl get pods
   rm -f /tmp/nws.txt

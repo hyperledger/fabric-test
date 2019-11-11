@@ -13,7 +13,7 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-	"github.com/hyperledger/fabric-test/tools/operator/ytt"
+	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -45,7 +45,7 @@ func (n Network) GenerateConfigurationFiles() error {
 	cryptoConfigPath := paths.TemplateFilePath("crypto-config")
 	inputFilePath := paths.TemplateFilePath("input")
 	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir())
-	yttPath := paths.YTTPath()
+	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
 	inputArgs := []string{configtxPath, cryptoConfigPath, n.TemplatesDir}
 	yttObject := ytt.YTT{InputPath: inputFilePath, OutputPath: configFilesPath}
 	_, err := networkclient.ExecuteCommand(yttPath, yttObject.Args(inputArgs), true)
