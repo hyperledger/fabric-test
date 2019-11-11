@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"io/ioutil"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
@@ -100,7 +101,14 @@ func (d DockerCompose) ordererOrgs(config networkspec.Config) (map[string]networ
 				return orderers, err
 			}
 			orderer.AdminCert = cert
-			privKeyPath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/users/Admin@%s/msp/keystore/priv_sk", orgName, orgName))
+			keystorePath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/users/Admin@%s/msp/keystore", orgName, orgName))
+
+			privKeyFile, err := ioutil.ReadDir(keystorePath)
+			if err != nil {
+				return orderers, err
+			}
+			privKeyPath := paths.JoinPath(keystorePath, fmt.Sprintf("%s", privKeyFile[0].Name()))
+
 			cert, err = connProfile.GetCertificateFromFile(privKeyPath)
 			if err != nil {
 				return orderers, err
