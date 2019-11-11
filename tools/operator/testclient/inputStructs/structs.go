@@ -63,18 +63,19 @@ type TimeOutOptions struct {
 
 //InvokeQuery --
 type InvokeQuery struct {
-	ChannelName   string               `yaml:"channelName,omitempty"`
-	ChaincodeName string               `yaml:"chaincodeName,omitempty"`
-	TargetPeers   string               `yaml:"targetPeers,omitempty"`
-	NProcPerOrg   int                  `yaml:"nProcPerOrg,omitempty"`
-	NRequest      int                  `yaml:"nRequest,omitempty"`
-	RunDuration   int                  `yaml:"runDur,omitempty"`
-	Organizations string               `yaml:"organizations,omitempty"`
-	TxnOptions    []TransactionOptions `yaml:"txnOpt,omitempty"`
-	QueryCheck    int                  `yaml:"queryCheck,omitempty"`
-	EventOptions  EventOptions         `yaml:"eventOpt,omitempty"`
-	CCOptions     CCOptions            `yaml:"ccOpt,omitempty"`
-	Args          string               `yaml:"args,omitempty"`
+	ChannelName      string               `yaml:"channelName,omitempty"`
+	ChaincodeName    string               `yaml:"chaincodeName,omitempty"`
+	TargetPeers      string               `yaml:"targetPeers,omitempty"`
+	NProcPerOrg      int                  `yaml:"nProcPerOrg,omitempty"`
+	NRequest         int                  `yaml:"nRequest,omitempty"`
+	RunDuration      int                  `yaml:"runDur,omitempty"`
+	Organizations    string               `yaml:"organizations,omitempty"`
+	TxnOptions       []TransactionOptions `yaml:"txnOpt,omitempty"`
+	QueryCheck       int                  `yaml:"queryCheck,omitempty"`
+	EventOptions     EventOptions         `yaml:"eventOpt,omitempty"`
+	CCOptions        CCOptions            `yaml:"ccOpt,omitempty"`
+	DiscoveryOptions DiscoveryOptions     `yaml:"discoveryOpt,omitempty"`
+	Args             string               `yaml:"args,omitempty"`
 }
 
 //TransactionOptions --
@@ -107,4 +108,10 @@ type CCOptions struct {
 	KeyStart   int    `yaml:"keyStart,omitempty"`
 	PayLoadMin int    `yaml:"payLoadMin,omitempty"`
 	PayLoadMax int    `yaml:"payLoadMax,omitempty"`
+}
+
+//DiscoveryOptions --
+type DiscoveryOptions struct {
+	Localhost bool `yaml:"localHost,omitempty"`
+	InitFreq  int `yaml:"initFreq,omitempty"`
 }

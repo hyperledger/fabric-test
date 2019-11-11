@@ -106,9 +106,13 @@
 #@   return output
 #@ end
 
-#@ def peerContainers(input, orgName, config, mspId):
+#@ def peerContainers(input, orgName, config, mspId, peerUniquePort):
+#@   endpoint = input
+#@   if config.nodeportIP:
+#@     endpoint = config.nodeportIP
+#@   end
 #@   env = [{"name": "CORE_VM_ENDPOINT", "value": "localhost:2375"}]
-#@   env.append({"name": "CORE_PEER_LISTENADDRESS", "value": "0.0.0.0:7051"})
+#@   env.append({"name": "CORE_PEER_LISTENADDRESS", "value": "0.0.0.0:{}".format(peerUniquePort)})
 #@   env.append({"name": "CORE_PEER_CHAINCODELISTENADDRESS", "value": "0.0.0.0:7052"})
 #@   if config.gossip_enable == True:
 #@     env.append({"name": "CORE_PEER_GOSSIP_STATE_ENABLED", "value": "true"})
@@ -131,15 +135,14 @@
 #@   env.append({"name": "CORE_PEER_TLS_KEY_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.key"})
 #@   env.append({"name": "CORE_PEER_TLS_ROOTCERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/tlsca.{}-cert.pem".format(orgName)})
 #@   env.append({"name": "CORE_PEER_ID", "value": "{}".format(input)})
-#@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
-#@   env.append({"name": "CORE_PEER_ADDRESS", "value": "{}:7051".format(input)})
+#@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:{}".format(endpoint, peerUniquePort)})
+#@   env.append({"name": "CORE_PEER_ADDRESS", "value": "{}:{}".format(input, peerUniquePort)})
 #@   env.append({"name": "CORE_PEER_CHAINCODEADDRESS", "value": "localhost:7052"})
 #@   env.append({"name": "CORE_CHAINCODE_EXECUTETIMEOUT", "value": "1500s"})
 #@   env.append({"name": "CORE_PEER_LOCALMSPID", "value": "{}".format(mspId)})
 #@   env.append({"name": "CORE_PEER_MSPCONFIGPATH", "value": "/etc/hyperledger/fabric/artifacts/msp"})
 #@   env.append({"name": "CORE_PEER_FILESYSTEMPATH", "value": "/shared/data"})
-#@   env.append({"name": "CORE_PEER_GOSSIP_EXTERNALENDPOINT", "value": "{}:7051".format(input)})
-#@   env.append({"name": "CORE_PEER_GOSSIP_BOOTSTRAP", "value": "{}:7051".format(input)})
+#@   env.append({"name": "CORE_PEER_GOSSIP_BOOTSTRAP", "value": "{}:{}".format(input, peerUniquePort)})
 #@   env.append({"name": "CORE_OPERATIONS_LISTENADDRESS", "value": ":9443"})
 #@   env.append({"name": "CORE_CHAINCODE_EXECUTETIMEOUT", "value": "1500s"})
 #@   if config.metrics == True:
@@ -181,8 +184,9 @@
 #@   return output
 #@ end
 
-#@ def ordererContainers(input, orgName, config, mspId):
+#@ def ordererContainers(input, orgName, config, mspId, ordererUniquePort):
 #@   env = [{"name": "ORDERER_GENERAL_LISTENADDRESS", "value": "0.0.0.0"}]
+#@   env.append({"name": "ORDERER_GENERAL_LISTENPORT", "value": "{}".format(ordererUniquePort)})
 #@   env.append({"name": "ORDERER_GENERAL_GENESISMETHOD", "value": "file"})
 #@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": config.orderer_fabric_logging_spec})
 #@   if config.tls == "mutual":
@@ -251,7 +255,7 @@
 #@   return specData
 #@ end
 
-#@ def spec(input, orgName, type, config, mspId):
+#@ def spec(input, orgName, type, config, mspId, port):
 #@   specData = {}
 #@   metadata = {}
 #@   initVolumes = [{"name": "cacerts", "configMap": {"name": "{}-msp".format(input), "items": [{"key": "cacerts", "path": "ca.{}-cert.pem".format(orgName)}]}},
@@ -281,7 +285,7 @@
 #@        volumes += mutualTLS(config, "volumes")
 #@     end
 #@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(type)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
-#@              "containers": ordererContainers(input, orgName, config, mspId)}
+#@              "containers": ordererContainers(input, orgName, config, mspId, port)}
 #@   elif type == "peer":
 #@     volumes = initVolumes
 #@     if config.k8s.data_persistence == True:
@@ -299,7 +303,7 @@
 #@        volumes += mutualTLS(config, "volumes")
 #@     end
 #@     specData = {"volumes": volumes, "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["{}".format(type)]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
-#@              "containers": peerContainers(input, orgName, config, mspId)}
+#@              "containers": peerContainers(input, orgName, config, mspId, port)}
 #@   end
 #@   selector = {"matchLabels": {"k8s-app": input, "type": type}}
 #@   if config.metrics == True:
@@ -368,15 +372,17 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
-spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id)
+spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id, "")
 #@   end
+#@   peerUniquePort = 31000
 #@   for j in range(0, organization.num_peers):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "peer{}-{}".format(j, organization.name)
-spec: #@ spec("peer{}-{}".format(j, organization.name), organization.name, "peer", config, organization.msp_id)
+spec: #@ spec("peer{}-{}".format(j, organization.name), organization.name, "peer", config, organization.msp_id, peerUniquePort)
+#@   peerUniquePort += 1
 #@   end
 #@ end
 
@@ -389,15 +395,17 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
-spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id)
+spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id, "")
 #@   end
 #@   num_orderers = organization.num_orderers
+#@   ordererUniquePort = 30000
 #@   for j in range(0, num_orderers):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "orderer{}-{}".format(j, organization.name)
-spec: #@ spec("orderer{}-{}".format(j, organization.name), organization.name, "orderer", config, organization.msp_id)
+spec: #@ spec("orderer{}-{}".format(j, organization.name), organization.name, "orderer", config, organization.msp_id, ordererUniquePort)
+#@   ordererUniquePort += 1
 #@   end
 #@ end
