@@ -111,32 +111,32 @@ k8s:
     orderers:
       limits:
          cpu: "1"
-         memory: 2Gi
+         memory: 3Gi
       requests:
          cpu: "1"
-         memory: 2Gi
+         memory: 3Gi
     peers:
       limits:
          cpu: "1"
-         memory: 4Gi
+         memory: 5Gi
       requests:
          cpu: "1"
-         memory: 2Gi
+         memory: 3Gi
 #! dind will be used to run all chaincode containers of a peer
     dind:
       limits:
          cpu: "2"
-         memory: 2Gi
+         memory: 3Gi
       requests:
          cpu: "2"
-         memory: 2Gi
+         memory: 3Gi
     kafka:
       limits:
          cpu: "1"
-         memory: 2Gi
+         memory: 3Gi
       requests:
          cpu: "0.5"
-         memory: 2Gi
+         memory: 3Gi
 
 #!#! TODO: future enhancement to read individual profiles for each channel creation.
 #!profiles:
