@@ -4,7 +4,6 @@
 
 #@ load("@ytt:data", "data")
 #@ config = data.values
-#@ peerUniquePort = 31000
 #@ for i in range(0, len(config.peer_organizations)):
 #@   organization = config.peer_organizations[i]
 #@   for j in range(0, organization.num_ca):
@@ -37,17 +36,12 @@ spec:
   type: #@ config.k8s.service_type
   ports:
     - name: port1
-      port: #@ peerUniquePort
-#@    if config.k8s.service_type == "NodePort":
-      nodePort: #@ peerUniquePort
-#@    end
+      port: 7051
     - name: port2
       port: 9443
-#@   peerUniquePort += 1
 #@ end
 #@ end
 #@ num_ordererOrgs = len(config.orderer_organizations)
-#@ ordererUniquePort = 30000
 #@ for i in range(0, num_ordererOrgs):
 #@   organization = config.orderer_organizations[i]
 #@   num_orderers = organization.num_orderers
@@ -81,13 +75,9 @@ spec:
   type: #@ config.k8s.service_type
   ports:
     - name: port1
-      port: #@ ordererUniquePort
-#@    if config.k8s.service_type == "NodePort":
-      nodePort: #@ ordererUniquePort
-#@    end
+      port: 7050
     - name: port2
       port: 8443
-#@    ordererUniquePort += 1
 #@ end
 #@ end
 

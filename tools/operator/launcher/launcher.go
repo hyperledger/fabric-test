@@ -78,12 +78,6 @@ func main() {
 		logger.CRIT(err, "Incorrect input file path")
 	}
 	contents = append([]byte("#@data/values \n"), contents...)
-	nodeportIP := ""
-	if kubeConfigPath != "" && config.K8s.ServiceType == "NodePort" {
-		K8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
-		nodeportIP, _ = K8s.GetK8sExternalIP(config, "")
-	}
-	contents = append(contents, []byte(fmt.Sprintf("nodeportIP: %s\n", nodeportIP))...)
 	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")
 	ioutil.WriteFile(inputPath, contents, 0644)
 	var network nl.Network
@@ -91,17 +85,6 @@ func main() {
 	if err != nil {
 		logger.CRIT(err)
 	}
-
-	err = validateBasicConsensusConfig(config)
-	if err != nil {
-		logger.ERROR("Launcher: Failed to validate consensus configuration in network input file ", networkSpecPath)
-		return err
-	}
-
-	err = doAction(action, env, kubeConfigPath, config)
-	if err != nil {
-		logger.ERROR("Launcher: Failed to perform ", action ," action using network input file ", networkSpecPath)
-		return err
-	}
-	return nil
+	validateBasicConsensusConfig(config)
+	doAction(*action, env, *kubeConfigPath, config)
 }
