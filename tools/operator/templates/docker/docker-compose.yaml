@@ -202,7 +202,7 @@
 #@         env.append("CORE_CHAINCODE_NODE_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(config.fabric_version))
 #@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(config.fabric_version)
 #@       end
-#@       ports = ["{}:{}".format(peerUniquerPort,peerUniquerPort), "{}:{}".format(peerHealthCheckPort,9443)]
+#@       ports = ["7051", "{}:{}".format(peerUniquerPort,peerUniquerPort), "{}:{}".format(peerHealthCheckPort,9443)]
 #@       services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name}
 #@       if config.db_type == "couchdb":
 #@         env.append("CORE_LEDGER_STATE_STATEDATABASE=CouchDB")
