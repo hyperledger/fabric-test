@@ -47,6 +47,7 @@ type InstantiateCC struct {
 	ChainCodeName     string         `yaml:"chaincodeName,omitempty"`
 	ChainCodeVersion  string         `yaml:"ccVersion,omitempty"`
 	Organizations     string         `yaml:"organizations,omitempty"`
+	CCFcn             string         `yaml:"fcn,omitempty"`
 	CCFcnArgs         string         `yaml:"args,omitempty"`
 	EndorsementPolicy string         `yaml:"endorsementPolicy,omitempty"`
 	ChannelPrefix     string         `yaml:"channelPrefix,omitempty"`
