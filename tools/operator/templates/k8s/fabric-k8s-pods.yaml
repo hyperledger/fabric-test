@@ -364,6 +364,7 @@ spec: #@ kafkaSpec("kafka{}".format(j), j, config.kafka.num_kafka_replications, 
 #@   end
 #@ end
 
+#@ peerUniquePort = 31000
 #@ for i in range(0, len(config.peer_organizations)):
 #@   organization = config.peer_organizations[i]
 #@   for j in range(0, organization.num_ca):
@@ -374,7 +375,6 @@ metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
 spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id, "")
 #@   end
-#@   peerUniquePort = 31000
 #@   for j in range(0, organization.num_peers):
 ---
 apiVersion: apps/v1
@@ -386,6 +386,7 @@ spec: #@ spec("peer{}-{}".format(j, organization.name), organization.name, "peer
 #@   end
 #@ end
 
+#@ ordererUniquePort = 30000
 #@ num_organizations = len(config.orderer_organizations)
 #@ for i in range(0, num_organizations):
 #@   organization = config.orderer_organizations[i]
@@ -398,7 +399,6 @@ metadata:
 spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id, "")
 #@   end
 #@   num_orderers = organization.num_orderers
-#@   ordererUniquePort = 30000
 #@   for j in range(0, num_orderers):
 ---
 apiVersion: apps/v1

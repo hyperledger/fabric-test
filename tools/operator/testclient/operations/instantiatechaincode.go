@@ -125,7 +125,7 @@ func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, cha
 		orgName = strings.TrimSpace(orgName)
 		i = InstantiateCCUIObject{TransType: action, TLS: tls, ConnProfilePath: paths.GetConnProfilePathForOrg(orgName, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
 		i.ChannelOpt = ChannelOptions{Name: channelName, OrgName: []string{orgName}}
-		i.DeployOpt = InstantiateDeployOptions{Function: "init", Arguments: strings.Split(ccObject.CCFcnArgs, ",")}
+		i.DeployOpt = InstantiateDeployOptions{Function: ccObject.CCFcn, Arguments: strings.Split(ccObject.CCFcnArgs, ",")}
 		i.TimeOutOpt = TimeOutOptions{PreConfig: ccObject.TimeOutOpt.PreConfig, Request: ccObject.TimeOutOpt.Request}
 		if ccObject.TimeOutOpt.PreConfig == "" {
 			i.TimeOutOpt = TimeOutOptions{PreConfig: "600000", Request: "600000"}

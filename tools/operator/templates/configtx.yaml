@@ -99,7 +99,7 @@
 #@         ordererOrg = config.orderer_organizations[i]
 #@         certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(artifacts_location, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
 #@         consenters.append({"Host":"orderer{}-{}".format(j, ordererOrg.name), "Port": port1, "ClientTLSCert": certs, "ServerTLSCert": certs})
-#@         port1 =+ 1
+#@         port1 += 1
 #@       end
 #@     end
 #@     options = {"TickInterval": etcd_options.TickInterval, "ElectionTick": etcd_options.ElectionTick, "HeartbeatTick": etcd_options.HeartbeatTick, "MaxInflightBlocks": etcd_options.MaxInflightBlocks, "SnapshotIntervalSize": etcd_options.SnapshotIntervalSize}

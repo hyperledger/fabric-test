@@ -30,5 +30,9 @@ PeerOrgs:
   Specs:
   #@ for i in range(0, peerOrg.num_peers):
     - Hostname: #@ "peer{}-{}".format(i, peerOrg.name)
+    #@ if config.nodeportIP != "":
+      SANS:
+        - #@ config.nodeportIP
+    #@ end
   #@ end
 #@ end
