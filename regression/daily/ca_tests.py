@@ -18,6 +18,7 @@ class FabricCaTests(unittest.TestCase):
         print output
         self.assertIn('RC: 0, ca_cluster PASSED', output)
 
+    @unittest.skip("skipping gencrl fabric-test; no longer required; fabric-ca repo owns sufficient test coverage")
     def test_FAB7206_GenCrlWindows(self):
         createLog = 'mkdir -p /tmp/logs/FAB7206; chmod 777 /tmp/logs/FAB7206'
         startContainer = 'docker run -v $PWD/../../tools/CTE/:/tmp/test -v /tmp/logs/FAB7206:/tmp -v $PWD/../../fabric-ca:/opt/gopath/src/github.com/hyperledger/fabric-ca hyperledger/fabric-ca-fvt /tmp/test/crl_test.sh'
