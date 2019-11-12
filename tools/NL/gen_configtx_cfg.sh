@@ -377,7 +377,7 @@ do
              echo "                Rule: \"OR('$ordMSP.admin', '$ordMSP.orderer', '$ordMSP.client', '$ordMSP.member')\"" >> $cfgOutFile
              echo "            Writers:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
-             echo "                Rule: \"OR('$ordMSP.admin', '$ordMSP.client', '$ordMSP.member')\"" >> $cfgOutFile
+             echo "                Rule: \"OR('$ordMSP.admin',  '$ordMSP.orderer', '$ordMSP.client', '$ordMSP.member')\"" >> $cfgOutFile
              echo "            Admins:" >> $cfgOutFile
              echo "                Type: Signature" >> $cfgOutFile
              echo "                Rule: \"OR('$ordMSP.admin')\"" >> $cfgOutFile
