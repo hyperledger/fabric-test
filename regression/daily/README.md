@@ -25,7 +25,6 @@ whereas other tests are located in the tools directories themselves, such as
 
 - *fabric-test/feature/* - User-friendly **Behave** functional tests feature files
 - *fabric-test/tools/PTE/* - Performance Traffic Engine **(PTE)** tool and tests
-- *fabric-test/tools/OTE/* - Orderer Traffic Engine **(OTE)** tool and tests
 
 Each testcase title should provide the test objective and a Jira FAB issue which can be referenced for more information. Test steps and specific details can be found in the summary comments of the test scripts themselves. Additional information can be found in the README files associated with the various test directories.
 
@@ -53,14 +52,6 @@ The Continuous Improvement (CI) team utilizes a Jenkins job to execute the full 
   ```
      cd /path/to/fabric-test/regression/daily
      py.test -v --junitxml example_results.xml ./Example.py
-  ```
-
-  1. Execute 'go test', and pipe the output through tool github.com/jstemmer/go-junit-report to convert to xml. **Note:** In the example shown, file 'results.xml' will be created with the test output.
-
-  ```
-     cd /path/to/fabric-test/tools/OTE
-     go get github.com/jstemmer/go-junit-report
-     go test -run ORD77 -v | go-junit-report >> results.xml
   ```
 
   1. *If you know another method that produces xml files that can be displayed correctly, please share it here!*

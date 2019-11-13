@@ -152,9 +152,6 @@ Please see the README located in the `tools/NL` directory for more detailed info
 #### Performance Traffic Engine
 Please see the README located in the `tools/PTE` directory for more detailed information for using the Performance Traffic Engine to drive transactions through a Fabric network.
 
-#### Orderer Traffic Engine
-Please see the README located in the `tools/OTE` directory for more detailed information for using the Orderer Traffic Engine to use broadcast clients to drive transactions through an Ordering Service and verify counts with deliver clients.
-
 #### Ledger Traffic Engine
 Please see the README located in the `tools/LTE` directory for more detailed information for using the Ledger Traffic Engine to execute APIs to test the functionality and throughput of Ledger code that exists inside the peer.
 
