@@ -78,6 +78,7 @@ type InvokeQuery struct {
 	DiscoveryOptions DiscoveryOptions     `yaml:"discoveryOpt,omitempty"`
 	Fcn              string               `yaml:"fcn,omitempty"`
 	Args             string               `yaml:"args,omitempty"`
+	TimeOutOpt       TimeOutOptions       `yaml:"timeoutOpt,omitempty"`
 }
 
 //TransactionOptions --

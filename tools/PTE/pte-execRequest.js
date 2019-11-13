@@ -284,8 +284,8 @@ var peerList = [];
 var currPeerId = 0;
 var ordererList = [];
 var currOrdererId = 0;
-var peerFO = new Boolean(0);
-var ordererFO = new Boolean(0);
+var peerFO = false;
+var ordererFO = false;
 var peerFOList = 'TARGETPEERS';
 var peerFOMethod = 'ROUNDROBIN';
 
