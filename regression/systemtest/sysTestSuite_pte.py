@@ -12,6 +12,7 @@ k8s_testsuite = '../../tools/PTE/CITest/k8s_testsuite/scripts'
 
 # error messages
 testScriptFailed =      "Test Failed with non-zero exit code; check for errors in fabric-test/tools/PTE/CITest"
+migrationFailure =      "Error: Failed to migrate from kafka to etcdraft"
 invokeFailure =         "Error: incorrect number of INVOKE transactions sent or received"
 queryCountFailure =     "Error: incorrect number of QUERY transactions sent or received"
 
@@ -105,6 +106,12 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
         # Migrate the network from kafka to raft
         returncode = subprocess.call("./operator.sh -t migrate", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
+
+        # check the migration status
+        count = subprocess.check_output(
+                "grep \"Successfully migrated from kafka to etcdraft\" kafka_couchdb_tls_kafka_2_raft_migrate.log | wc -l",
+                cwd=logs_directory, shell=True)
+        self.assertEqual(int(count.strip()), 1, msg=migrationFailure)
 
     # Send transactions after migrate from kafka to etcdraft network
     def test_10samplecc_orgAnchor_2chan(self):
