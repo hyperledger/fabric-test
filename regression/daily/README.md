@@ -13,7 +13,7 @@ This readme explains everything there is to know about our daily regression test
 
 ## How to Run the Tests, and Where to View the Results
 
-The script [runDailyTestSuite.sh](./runDailyTestSuite.sh) invokes some miscellaneous test driver scripts as well as the behave feature tests. This is only one part of the entire SVT daily test suite, which also includes other similarly named scripts in this folder such as [runLteTestSuite.sh](./runLteTestSuite.sh), and [runPteTestSuite.sh](./runPteTestSuite.sh). You can also manually execute any one of these scripts in their entirety, run any one of the test driver scripts via the command line, or you may simply view the results generated daily by an automated Continuous Improvement (CI) tool which executes *runDailyTestSuite.sh*. Reports are displayed on the [Daily Test Suite Results Page](https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/). When you look at the reports; click the *Expand All* button or click the buttons in the **'See children'** column to see the results breakdown by component and by individual tests.
+The script [runDailyTestSuite.sh](./runDailyTestSuite.sh) invokes some miscellaneous test driver scripts. This is only one part of the entire SVT daily test suite, which also includes other similarly named scripts in this folder such as [runLteTestSuite.sh](./runLteTestSuite.sh), and [runPteTestSuite.sh](./runPteTestSuite.sh). You can also manually execute any one of these scripts in their entirety, run any one of the test driver scripts via the command line, or you may simply view the results generated daily by an automated Continuous Improvement (CI) tool which executes *runDailyTestSuite.sh*. Reports are displayed on the [Daily Test Suite Results Page](https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/). When you look at the reports; click the *Expand All* button or click the buttons in the **'See children'** column to see the results breakdown by component and by individual tests.
 
 #### Where to Find Existing Tests
 
@@ -23,7 +23,6 @@ Examine the driver scripts to find the individual tests, which are actually stor
 
 whereas other tests are located in the tools directories themselves, such as
 
-- *fabric-test/feature/* - User-friendly **Behave** functional tests feature files
 - *fabric-test/tools/PTE/* - Performance Traffic Engine **(PTE)** tool and tests
 
 Each testcase title should provide the test objective and a Jira FAB issue which can be referenced for more information. Test steps and specific details can be found in the summary comments of the test scripts themselves. Additional information can be found in the README files associated with the various test directories.

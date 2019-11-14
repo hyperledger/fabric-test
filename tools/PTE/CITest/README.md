@@ -356,7 +356,6 @@ Here are some of the chaincodes available:
 - [marbles chaincode, node](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/marbles/node) in fabric-test
 - [marbles02 chaincode, go, node](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02) in fabric-samples
 - [marbles02_private chaincode, go](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02_private/go) in fabric-samples - used by PTE tests; includes a sample ../collections_config.json and ./META_INF/ with couchdb index file indexOwner.json, but note the PTE sideDB tests (FAB-10134, FAB-10135, FAB-12262) store their own collections files (e.g. PTE/CITest/FAB-10135-4i/preconfig/marbles02_private/collections_config-chan1.json)
-- [marbles02_private chaincode, go](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/marbles02_private) in fabric-test - used only by fabric-test/feature/ Behave tests; includes its own private data collections definition file but no couchdb index file (which is not needed because tests send only a few transactions)
 
 The user can add a chaincode for his test case by following the same directory structure in `preconfig` directory.
 

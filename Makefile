@@ -24,7 +24,6 @@
 #   - pull-images              - pull the images and binaries from Nexus.
 #   - javaenv                  - clone the fabric-chaincode-java repository and build the javaenv image.
 #   - nodeenv                  - clone the fabric-chaincode-node repository and build the nodeenv image.
-#   - svt-daily-behave-tests   - pulls the images, binaries from Nexus and runs the Behave feature tests.
 #   - svt-daily-pte-tests      - pulls the images, binaries from Nexus and runs the PTE Performance tests.
 #   - svt-daily-lte-tests      - pulls the images, runs the LTE test suite.
 #   - svt-daily-ca-tests       - pulls the images, runs the CA test suite.
@@ -32,7 +31,7 @@
 #   - svt-weekly-pte-12hr-test-k8s -- Test 12hr longrun test in k8s environment.
 #   - git-latest               - init git submodules to latest available commit.
 #   - git-init                 - init git submodules.
-#   - pre-setup                - installs node, govendor and behave pre-requisites.
+#   - pre-setup                - installs node and govendor
 #   - pte                      - builds pte docker image
 #   - clean                    - cleans the docker containers and images.
 #   - gotools                  - installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
@@ -49,7 +48,6 @@ FABRIC_CA = https://github.com/hyperledger/fabric-ca
 FABRIC-CHAINCODE-JAVA = https://github.com/hyperledger/fabric-chaincode-java
 FABRIC-CHAINCODE-NODE = https://github.com/hyperledger/fabric-chaincode-node
 HYPERLEDGER_DIR = $(GOPATH)/src/github.com/hyperledger
-INSTALL_BEHAVE_DEPS = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/install_behave.sh
 FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
 CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
 CHAINCODE-JAVA_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-java
@@ -76,13 +74,12 @@ git-init:
 .PHONY: pre-setup
 pre-setup: gotools
 	@bash $(PRE_SETUP)
-#	@bash $(INSTALL_BEHAVE_DEPS)
 
 .PHONY: pre-req
 pre-req: git-init git-latest clean pre-setup
 
 .PHONY: ci-daily
-ci-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper daily-tests
+ci-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images  daily-tests
 
 .PHONY: fabric
 fabric:
@@ -161,7 +158,7 @@ smoke-tests: gotools
 
 .PHONY: daily-tests
 daily-tests:
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh; ./runPteTestSuite.sh; ./runLteTestSuite.sh; ./runCATestSuite.sh
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh; ./runLteTestSuite.sh; ./runCATestSuite.sh
 
 .PHONY: interop-tests
 interop-tests:
@@ -212,26 +209,22 @@ pull-fabric-nodeenv:
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh fabric-nodeenv
 
 .PHONY: interop-fabric
-interop-fabric: pre-req fabric pull-thirdparty-images pull-fabric-javaenv pull-binaries-fabric-ca build-fabric build-fabric-ca build-sdk-wrapper interop-tests
+interop-fabric: pre-req fabric pull-thirdparty-images pull-fabric-javaenv pull-binaries-fabric-ca build-fabric build-fabric-ca  interop-tests
 
 .PHONY: interop-fabric-ca
-interop-fabric-ca: pre-req fabric pull-thirdparty-images pull-fabric pull-binaries-fabric pull-fabric-javaenv build-fabric-ca build-sdk-wrapper interop-tests
+interop-fabric-ca: pre-req fabric pull-thirdparty-images pull-fabric pull-binaries-fabric pull-fabric-javaenv build-fabric-ca  interop-tests
 
 .PHONY: interop-fabric-sdk-node
-interop-fabric-sdk-node: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv build-sdk-wrapper interop-tests
+interop-fabric-sdk-node: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv  interop-tests
 
 .PHONY: interop-fabric-nodeenv
-interop-fabric-nodeenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-nodeenv nodeenv build-sdk-wrapper interop-tests
+interop-fabric-nodeenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-nodeenv nodeenv  interop-tests
 
 .PHONY: interop-fabric-sdk-java
-interop-fabric-sdk-java: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv build-sdk-wrapper interop-tests
+interop-fabric-sdk-java: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv  interop-tests
 
 .PHONY: interop-fabric-javaenv
-interop-fabric-javaenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca javaenv build-sdk-wrapper interop-tests
-
-.PHONY: svt-daily-behave-tests
-svt-daily-behave-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images build-fabric-ca build-sdk-wrapper
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runBehaveTestSuite.sh
+interop-fabric-javaenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca javaenv  interop-tests
 
 .PHONY: svt-daily-pte-tests
 svt-daily-pte-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images
@@ -255,10 +248,10 @@ svt-weekly-pte-12hr-test-k8s:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest_k8s.sh
 
 .PHONY: svt-daily
-svt-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper daily-tests
+svt-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images  daily-tests
 
 .PHONY: svt-smoke
-svt-smoke: fabric pre-req pull-images pull-binaries pull-thirdparty-images build-sdk-wrapper smoke-tests
+svt-smoke: fabric pre-req pull-images pull-binaries pull-thirdparty-images  smoke-tests
 
 .PHONY: pte
 pte:
