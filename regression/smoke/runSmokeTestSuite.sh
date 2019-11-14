@@ -7,11 +7,6 @@
 SMOKEDIR="$GOPATH/src/github.com/hyperledger/fabric-test/regression/smoke"
 cd $SMOKEDIR
 
-echo "======== Behave feature and system tests ========"
-cd ../../feature
-behave --junit --junit-directory ../regression/smoke/. --tags=-skip --tags=smoke -k -D logs=y
-cd -
-
 echo "======== Ledger component performance tests using LTE ========"
 py.test -v --junitxml results_ledger_lte_smoke.xml ledger_lte_smoke.py
 
