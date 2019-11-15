@@ -1,3 +1,0 @@
-{% for ch in channelnum if ((item|int - 1) * 2) < ch|int <= (item|int * 2) %}
-sdk=node CITest/{{ testcase }}/preconfig/{{ chaincode }}/{{ chaincode }}-chan{{ ch }}-instantiate-TLS.json
-{% endfor %}
