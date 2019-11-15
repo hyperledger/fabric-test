@@ -4,9 +4,6 @@
 [submodule "fabric-ca"]
 	path = fabric-ca
 	url = https://github.com/hyperledger/fabric-ca
-[submodule "cello"]
-	path = cello
-	url = https://github.com/hyperledger/cello
 [submodule "fabric-sdk-node"]
 	path = fabric-sdk-node
 	url = https://github.com/hyperledger/fabric-sdk-node
