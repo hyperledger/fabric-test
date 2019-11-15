@@ -9,7 +9,7 @@
         "payLoadMax": "_PAYLOADMAX_"
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe/go",
         "language": "golang",
         "fcn": "init",
         "args": []

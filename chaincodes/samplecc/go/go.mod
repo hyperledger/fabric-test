@@ -1,8 +1,8 @@
 module github.com/hyperledger/fabric-test/chaincodes/samplecc/go
 
-go 1.12
+go 1.13
 
 require (
-	github.com/hyperledger/fabric-chaincode-go v0.0.0-20190823162523-04390e015b85
-	github.com/hyperledger/fabric-protos-go v0.0.0-20190823190507-26c33c998676
+	github.com/hyperledger/fabric-chaincode-go v0.0.0-20191108205148-17c4b2760b56
+	github.com/hyperledger/fabric-protos-go v0.0.0-20191114160927-6bee4929a99f
 )

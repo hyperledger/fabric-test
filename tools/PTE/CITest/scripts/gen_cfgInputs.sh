@@ -267,7 +267,7 @@ GRPCTIMEOUT=30000
 # chaincode path
 CCPathsamplecc="github.com/hyperledger/fabric-test/chaincodes/samplecc/go"
 CCPathsamplecc="${CCPathsamplecc//\//\\/}"
-CCPathsbe="github.com/hyperledger/fabric-test/chaincodes/sbe"
+CCPathsbe="github.com/hyperledger/fabric-test/chaincodes/sbe/go"
 CCPathsbe="${CCPathsbe//\//\\/}"
 CCPathsamplejs="github.com/hyperledger/fabric-test/chaincodes/samplecc/node"
 CCPathsamplejs="${CCPathsamplejs//\//\\/}"

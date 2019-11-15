@@ -30,3 +30,10 @@ go get -u github.com/kardianos/govendor
 ###########################
 echo "Install interruptingcow"
 python -m pip install --user --quiet interruptingcow
+
+
+########################################################
+# Updating go modules for all the fabric-test chaincodes
+########################################################
+cd $PWD/scripts
+./update_go_modules.sh

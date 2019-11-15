@@ -63,7 +63,7 @@
         "keyStart": "2000"
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/sbe/go",
         "fcn": "init",
         "args": []
     },
