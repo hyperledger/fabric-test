@@ -89,6 +89,8 @@ PTE can be used with either the stable `fabric-sdk-node` libraries obtained from
          - `git submodule foreach git pull origin master`
     - else:
          - `git submodule foreach git pull origin master`
+    - `cd $GOPATH/src/github.com/hyperledger/fabric-test/scripts and run ./update_go_modules.sh` to update all the go modules for the
+      chaincodes in the fabric-test
 
 3. Obtain appropriate docker images:
 

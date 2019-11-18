@@ -34,10 +34,10 @@ CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 cd $FabricTestDir
 make pre-setup
-cd chaincodes/sbe
+cd chaincodes/sbe/go
 govendor init
 govendor add +external
-cd ../../tools/PTE/CITest/scripts
+cd ../../../tools/PTE/CITest/scripts
 
 #### Launch network
 ./test_driver.sh -n -m FAB-11615-2i -p -c sbe_cc &> ../Logs/FAB-11615-precfg.log
