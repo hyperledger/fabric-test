@@ -8,7 +8,7 @@ import subprocess
 
 logs_directory = '../../tools/PTE/CITest/Logs'
 operator_directory = '../../tools/operator'
-k8s_testsuite = '../../tools/PTE/CITest/k8s_testsuite/scripts'
+k8s_testsuite = '../../tools/operator/scripts'
 
 # error messages
 testScriptFailed =      "Test Failed with non-zero exit code; check for errors in fabric-test/tools/PTE/CITest"
@@ -22,13 +22,13 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
     def test_01downNetwork(self):
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/kafka-couchdb-tls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_02launchNetwork(self):
 
         # Launch the network
-        returncode = subprocess.call("./operator.sh -a up -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a up -f ../testdata/kafka-couchdb-tls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_03createJoinChannel(self):
@@ -134,7 +134,7 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
     def test_11downNetwork(self):
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/kafka-couchdb-tls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
 class System_Tests_Raft_Couchdb_Mutual(unittest.TestCase):
@@ -142,13 +142,13 @@ class System_Tests_Raft_Couchdb_Mutual(unittest.TestCase):
     def test_01downNetwork(self):
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/raft_couchdb_mutualtls_servdisc.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/raft-couchdb-mutualtls-servdisc-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_02launchNetwork(self):
 
         # Launch the network
-        returncode = subprocess.call("./operator.sh -a up -f ../networkSpecFiles/raft_couchdb_mutualtls_servdisc.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a up -f ../testdata/raft-couchdb-mutualtls-servdisc-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_03createJoinChannel(self):
@@ -222,7 +222,7 @@ class System_Tests_Raft_Couchdb_Mutual(unittest.TestCase):
     def test_09downNetwork(self):
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/raft_couchdb_mutualtls_servdisc.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/raft-couchdb-mutualtls-servdisc-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
 class System_Tests_Kafka_Leveldb_NOTLS(unittest.TestCase):
@@ -230,13 +230,13 @@ class System_Tests_Kafka_Leveldb_NOTLS(unittest.TestCase):
     def test_01downNetwork(self):
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_leveldb_notls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/kafka-leveldb-notls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_02launchNetwork(self):
 
         # Launch the network
-        returncode = subprocess.call("./operator.sh -a up -f ../networkSpecFiles/kafka_leveldb_notls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a up -f ../testdata/kafka-leveldb-notls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_03createJoinChannel(self):
@@ -310,5 +310,5 @@ class System_Tests_Kafka_Leveldb_NOTLS(unittest.TestCase):
     def test_09downNetwork(self):
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_leveldb_notls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/kafka-leveldb-notls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
