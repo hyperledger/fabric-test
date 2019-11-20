@@ -224,6 +224,7 @@ chaincode_id = uiContent.chaincodeID
 if (channelID) {
     chaincode_id = uiContent.chaincodeID + channelID;
 }
+var endorsement_hint = {chaincodes: [{name: chaincode_id}]}
 chaincode_ver = uiContent.chaincodeVer;
 logger.debug('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] chaincode_id: %s', Nid, channel.getName(), org, pid, chaincode_id);
 
@@ -395,6 +396,7 @@ function getMoveRequest() {
 
     request_invoke = {
         chaincodeId: chaincode_id,
+        endorsement_hint: endorsement_hint,
         fcn: ccDfnPtr.invoke.move.fcn,
         args: ccFuncInst.testInvokeArgs,
         txId: tx_id
@@ -428,6 +430,7 @@ function getQueryRequest() {
     tx_id = client.newTransactionID();
     request_query = {
         chaincodeId: chaincode_id,
+        endorsement_hint: endorsement_hint,
         txId: tx_id,
         fcn: ccDfnPtr.invoke.query.fcn,
         args: ccFuncInst.testQueryArgs
@@ -1095,7 +1098,7 @@ function clearInitDiscTimeout() {
 
 function initDiscovery() {
     var tmpTime = new Date().getTime();
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d initDiscovery] discovery timestamp %d', Nid, channelName, org, pid, tmpTime);
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d initDiscovery] discovery timestamp %d, endorsement_hint: %j', Nid, channelName, org, pid, tmpTime, endorsement_hint);
     channel.initialize({
         discover: serviceDiscovery,
         asLocalhost: localHost
@@ -1302,6 +1305,11 @@ function setTargetPeers(tPeers) {
                 if (discoveryOpt.localHost == 'TRUE') {
                     localHost = true;
                 }
+            }
+            if (typeof(discoveryOpt.collection) !== 'undefined') {
+                endorsement_hint['chaincodes'] = [
+                    {name: chaincode_id, collection_names: txCfgPtr.discoveryOpt.collection}
+                ];
             }
             if ((typeof (discoveryOpt.initFreq) !== 'undefined')) {
                 initFreq = parseInt(discoveryOpt.initFreq);
