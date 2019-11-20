@@ -3,33 +3,33 @@
 #! SPDX-License-Identifier: Apache-2.0
 ---
 #! fabric_version:
-#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1
+#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.3
 #! Development stream images are pulled from
-#! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable
-fabric_version: 1.4.4-stable
+#! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.3-stable
+fabric_version: 1.4.5-stable
 #! peer database ledger type (couchdb, goleveldb)
 db_type: couchdb
 #! This parameter is used to define fabric logging spec in peers
 peer_fabric_logging_spec: info
 #! This parameter is used to define fabric logging spec in orderers
 orderer_fabric_logging_spec: info
-#! tls in the network (true, false or mutual(mutualtls))
-tls: mutual
+#! tls in the network (true, false or mutual (for mutualtls))
+tls: true
 #! fabric metrics with prometheus (true/false)
 metrics: true
 #! true - enable gossip and dynamic leader election
 #! false - disable gossip and set all peers as org leaders
-gossip_enable: true
+gossip_enable: false
 #! enable node ou's in fabric network (true/false)
 enableNodeOUs: true
 
-#! Location where crypto-config and channel-artifacts are stored
+#! Location where crypto-config, connection-profiles, channel-artifacts are stored
 artifacts_location: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
 
 #! Orderer Config Settings
 orderer:
 #! Consensus type
-  orderertype: etcdraft
+  orderertype: kafka
   batchsize:
     maxmessagecount: 100
     absolutemaxbytes: 99 MB
@@ -44,10 +44,18 @@ orderer:
     MaxInflightBlocks: 5
     SnapshotIntervalSize: 100 MB
 
+#! Number of kafka and zookeeper to be launched in network
+#! when orderertype is kafka
+kafka:
+  num_kafka: 5
+  #! number of kafka replications for each channel
+  num_kafka_replications: 3
+  num_zookeepers: 3
+
 orderer_organizations:
 - name: ordererorg1
   msp_id: OrdererOrg1
-  num_orderers: 5
+  num_orderers: 3
   num_ca: 1
 
 peer_organizations:
@@ -85,7 +93,7 @@ application_capabilities:
 #! This used testorgschannel as the prefix and channels are used like testorgschannel0,
 #! testorgschannel1.... based on number of channels passed
 #! (note: client will need to submit the transactions to create channels)
-num_channels: 10
+num_channels: 5
 
 k8s:
   service_type: NodePort
@@ -95,40 +103,47 @@ k8s:
   #! persistent volumes. When false is used, backup will not be configured.
   #! When local is used, hostPath will be used to store the data from fabric containers
   #! to worker nodes on which pods are running.
-  data_persistence: false
-  storage_class: default
+  data_persistence: true
+  storage_class: ibmc-file-gold
   storage_capacity: 20Gi
 
   resources:
     orderers:
       limits:
          cpu: "1"
-         memory: 3Gi
+         memory: 2Gi
       requests:
          cpu: "1"
-         memory: 3Gi
+         memory: 2Gi
     peers:
       limits:
          cpu: "1"
-         memory: 5Gi
+         memory: 4Gi
       requests:
          cpu: "1"
-         memory: 3Gi
+         memory: 2Gi
 #! dind will be used to run all chaincode containers of a peer
     dind:
       limits:
          cpu: "2"
-         memory: 3Gi
+         memory: 4Gi
       requests:
          cpu: "2"
-         memory: 3Gi
+         memory: 4Gi
     couchdb:
       limits:
          cpu: "1"
-         memory: 3Gi
+         memory: 2Gi
       requests:
          cpu: "1"
-         memory: 3Gi
+         memory: 2Gi
+    kafka:
+      limits:
+         cpu: "2"
+         memory: 4Gi
+      requests:
+         cpu: "2"
+         memory: 4Gi
 
 #!#! TODO: future enhancement to read individual profiles for each channel creation.
 #!profiles:
