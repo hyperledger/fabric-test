@@ -4,33 +4,39 @@
 
 
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
-trigger:
-- release-1.4
-pr:
-- release-1.4
+
+schedules:
+# 3 AM UTC/10 PM EST
+  - cron: "0 3 * * *"
+    displayName: 'PTE Daily Job'
+    branches:
+      include:
+        - release-1.4
+    always: true
 
 variables:
   GOPATH: $(Agent.BuildDirectory)/go
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-  GOVER: 1.11.5
-  NODE_VER: 8.14.0
+  GO_VER: 1.12.12
+  NODE_VER: 10.x
   PYTHON_VER: 2.7
 
 jobs:
-- job: VerifyBuild
+- job: PTEDailyBuild
   pool:
     vmImage: ubuntu-16.04
+  timeoutInMinutes: 360
   steps:
   - template: install_deps.yml
   - checkout: self
     path: 'go/src/github.com/hyperledger/fabric-test'
     displayName: Checkout Fabric Test Code
-  - script: make ci-smoke
-    displayName: Run Smoke Tests
+  - script: make svt-daily-pte-tests
+    displayName: Run PTE Daily Tests
   - script: |
       mkdir -p logs
-      cp -R tools/PTE/CITest/Logs/*.* logs
-      cp -R tools/LTE/TestResults/experiments/* logs
+      ls logs
+      cp tools/PTE/CITest/Logs/*.* logs
     displayName: Copy Logs
   - task: PublishBuildArtifacts@1
     inputs:
@@ -39,4 +45,4 @@ jobs:
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'JUnit'
-      testResultsFiles: 'regression/smoke/results*.xml'
+      testResultsFiles: 'regression/daily/results*.xml'
