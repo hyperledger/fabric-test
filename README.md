@@ -105,19 +105,19 @@ To build all images and binaries in fabric, fabric-ca, as required by tests (exe
 To install all the gotools, required for testing, execute the following command
 ```
   cd $GOPATH/src/github.com/hyperledger/fabric-test
-  
+
   make gotools     # Downloads the gotools like ginkgo, golint, goimports, gocov and govendor
 ```
 
 To update the go version in the repo, follow the below steps
 ```
-  Step 1: Change GO_VER in fabric-test/ci.properties
-  
+  Step 1: Change GO_VER in fabric-test/ci.properties and also update the same in azure-pipeline yml files in fabric-test/ci directory.
+
   Step 2: Find all files in repo called go.mod. 'cd' into each of those directories. Remove go.mod and go.sum files and execute the following steps
           1. go mod init
           2. go get -u github.com/hyperledger/fabric-test@master
           3. go mod tidy
-          
+
   Step 3: Commit all the go.mod and go.sum files that get changed in those directories
 ```
 

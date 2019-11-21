@@ -14,8 +14,8 @@ pr:
 variables:
   GOPATH: $(Agent.BuildDirectory)/go
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-  GOVER: 1.12.5
-  NODE_VER: 8.14.0
+  GO_VER: 1.13.4
+  NODE_VER: 10.x
   PYTHON_VER: 2.7
 
 jobs:
