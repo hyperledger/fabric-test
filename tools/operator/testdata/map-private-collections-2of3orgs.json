@@ -1,0 +1,33 @@
+[
+ {
+	 "name": "collectionSimple",
+	 "policy": {
+             "identities": [{
+                 "role": {
+                   "name": "peer",
+                   "mspId": "org1"
+                 }
+               },
+               {
+                 "role": {
+                   "name": "peer",
+                   "mspId": "org2"
+                 }
+               }
+             ],
+             "policy": {
+               "1-of": [
+                 {
+                   "signed-by": 0
+                 },
+                 {
+                   "signed-by": 1
+                 }
+               ]
+             }
+         },
+	 "requiredPeerCount": 1,
+	 "maxPeerCount": 2,
+	 "blockToLive": 0
+ }
+]

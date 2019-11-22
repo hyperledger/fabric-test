@@ -1,0 +1,267 @@
+# With private-data-test-input.yml,
+# creates two channels testorgschannel0 and testorgschannel1,
+# joins org1, org2, org3 peers to both channels,
+# installs samplecc, samplejs on org1, org2 and org3 peers
+# and map_private chaincode on org1 and org2 peers,
+# instantiates map_private on testorgschannel0 using
+# map-private-collections-2of3orgs.json collections, samplecc and
+# samplejs on testorgschannel1
+# invokes on testorgschannel0 using map_private chaincode, service
+# discovery on org1 and org2 each for two hours long sequentially
+# (5 transactions per second using 2 threads), invokes on testorgschannel1
+# using samplecc and samplejs chaincodes, with 1 thread per organization
+# org1, for 30 minutes sequentially (10 transaction per second)
+# queries on testorgschannel0 for map_private chaincode and on
+# testorgschannel1 for samplecc and samplejs chaincodes on all orgs
+
+tls: mutual
+organizations:
+  - name: org1
+    connProfilePath: ./connection-profile/connection_profile_org1.yaml
+  - name: org2
+    connProfilePath: ./connection-profile/connection_profile_org2.yaml
+  - name: org3
+    connProfilePath: ./connection-profile/connection_profile_org3.yaml
+
+createChannel:
+  - channelPrefix: testorgschannel
+    numChannels: 2
+    channelTxPath: ./channel-artifacts/
+    organizations: org1
+
+anchorPeerUpdate:
+  - channelName: testorgschannel0
+    organizations: org1
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org1anchor.tx
+  - channelName: testorgschannel0
+    organizations: org2
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org2anchor.tx
+  - channelName: testorgschannel0
+    organizations: org3
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org3anchor.tx
+  - channelName: testorgschannel1
+    organizations: org1
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel1org1anchor.tx
+  - channelName: testorgschannel1
+    organizations: org2
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel1org2anchor.tx
+  - channelName: testorgschannel1
+    organizations: org3
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel1org3anchor.tx
+
+joinChannel:
+  - channelPrefix: testorgschannel
+    numChannels: 2
+    organizations: org1,org2,org3
+
+installChaincode:
+# installs chaincode with specified name on all peers in listed organziations
+  - chaincodeName: samplecc
+    ccVersion: v1
+    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    organizations: org1,org2,org3
+    language: golang
+    metadataPath: ""
+
+  - chaincodeName: samplejs
+    ccVersion: v1
+    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/node
+    organizations: org1,org2,org3
+    language: node
+    metadataPath: ""
+
+  - chaincodeName: map
+    ccVersion: v1
+    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/map_private/go
+    organizations: org1,org2
+    language: golang
+    metadataPath: ""
+
+  - chaincodeName: map
+    ccVersion: v2
+    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/map_private/go
+    organizations: org1,org2
+    language: golang
+    metadataPath: ""
+
+instantiateChaincode:
+  - channelName: testorgschannel0
+    chaincodeName: map
+    ccVersion: v1
+    args: ""
+    fcn: "init"
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: "./testdata/map-private-collections-2of3orgs.json"
+
+  - channelName: testorgschannel1
+    chaincodeName: samplecc
+    ccVersion: v1
+    args: ""
+    organizations: org1
+    endorsementPolicy: 1of(org1,org2,org3)
+    collectionPath: ""
+
+  - channelName: testorgschannel1
+    chaincodeName: samplejs
+    ccVersion: v1
+    args: ""
+    organizations: org1
+    endorsementPolicy: 1of(org1,org2,org3)
+    collectionPath: ""
+
+upgradeChaincode:
+  - channelName: testorgschannel0
+    chaincodeName: map
+    ccVersion: v2
+    args: ""
+    fcn: init
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2,org3)
+    collectionPath: "./testdata/map-private-collections-2of3orgs.json"
+
+invokes:
+  - channelName: testorgschannel0
+    chaincodeName: map
+    targetPeers: DISCOVERY
+    nProcPerOrg: 2
+    nRequest: 0
+    runDur: 7200
+    organizations: org1,org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 200
+          devFreq: 0
+    queryCheck: 10
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 1024
+    fcn: "invoke"
+    args: "getPutPrivate,a1,1"
+    discoveryOpt:
+      localHost: false
+      initFreq: 60000
+    timeoutOpt:
+      request: 300000
+      preConfig: 300000
+
+  - channelName: testorgschannel1
+    chaincodeName: samplecc
+    targetPeers: OrgAnchor
+    nProcPerOrg: 1
+    nRequest: 0
+    runDur: 1800
+    organizations: org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 10
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 512
+      payLoadMax: 512
+    fcn: "invoke"
+    args: "put,a1,1"
+    discoveryOpt:
+      localHost: false
+      initFreq: 30000
+
+  - channelName: testorgschannel1
+    chaincodeName: samplejs
+    targetPeers: OrgAnchor
+    nProcPerOrg: 1
+    nRequest: 0
+    runDur: 1800
+    organizations: org1
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 10
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 15000
+      payLoadMin: 512
+      payLoadMax: 512
+    fcn: "invoke"
+    args: "put,a1,1"
+    discoveryOpt:
+      localHost: false
+      initFreq: 30000
+
+queries:
+  - channelName: testorgschannel0
+    chaincodeName: map
+    targetPeers: DISCOVERY
+    nProcPerOrg: 1
+    nRequest: 10
+    runDur: 0
+    organizations: org1,org2
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 0
+          devFreq: 0
+    args: "getPrivate,a1"
+    fcn: "invoke"
+    discoveryOpt:
+      localHost: false
+      initFreq: 30000
+
+  - channelName: testorgschannel1
+    chaincodeName: samplecc
+    targetPeers: OrgAnchor
+    nProcPerOrg: 1
+    nRequest: 10
+    runDur: 0
+    organizations: org1,org2,org3
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 0
+          devFreq: 0
+    args: "get,a1"
+    fcn: "invoke"
+
+  - channelName: testorgschannel1
+    chaincodeName: samplejs
+    targetPeers: OrgAnchor
+    nProcPerOrg: 1
+    nRequest: 10
+    runDur: 0
+    organizations: org1,org2,org3
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 0
+          devFreq: 0
+    args: "get,a1"
+    fcn: "invoke"
