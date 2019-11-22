@@ -763,6 +763,7 @@ The user input file contains configuration parameters including chaincode defini
         },
         "discoveryOpt": {
             "localHost": "true",
+            "collection": ["myCollectionName"],
             "initFreq": "300000"
         },
         "eventOpt": {
@@ -1022,6 +1023,7 @@ where:
              }
 * **discoveryOpt**: service discovery option. The option is valid only when targetPeer is set to `Discovery`.
     * **localHost**: set to `true` when fabric is running in containers and executing PTE from not in a container, else set to `false`. For CI automation tests or other tests on single host using docker, when sending invokes or queries, set `localHost=true` and set `targetPeers=discovery`. Default value is false.
+    * **collection**: an array of collection names for the discovery service to calculate the plan layout for invokes. This should match the name that is specified in the private-data collection file during the instantiation. If this attribute is missing, then only chaincode is used for plan layout calculation. This is useful for sending private-data queries or invokes to only the peers included in a private-data collection; without it, for example, a service-discovery query for private-data might be sent by SDK to a peer that is not in the collection but is still in the channel, and thus the query would fail. (This field is irrelevant for orderers.)
     * **initFreq**: service discovery re-initialization frequency in ms. PTE will not re-initialize service discovery if this parameter is set to 0. Default: 0.
 * **eventOpt**: event options
     * **type**: event service type, default: FilteredBlock
