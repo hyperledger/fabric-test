@@ -38,46 +38,6 @@ If you would like to update the git submodules, use the following command:
 ```
 **Note: When making changes for committing to a submodule (for example, fabric code), then make the change in the actual repository and not here in the submodules. This makes managing changes much easier when working with submodules.**
 
-### Set up git hooks and git review (Optional)
-
-If you are new to fabric-test repository, and if you plan to make changes to the tests and scripts herein, then after cloning the fabric-test repo, set up the git hooks and install and configure git review. In the following statements, replace < LFID > with your
-Linux Foundation Account ID.
-
-```
-  cd fabric-test
-  scp -p -P 29418 <LFID>@gerrit.hyperledger.org:hooks/commit-msg fabric-test/.git/hooks/
-
-```
-
-Add a local git hook to set 'signed-off-by' automatically to all commits.
-Open fabric-test/.git/hooks/commit-msg, add the commands below after the line
-"add_ChangeId":
-
-```
-
-  SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
-  grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
-
-
-```
-
-Install and configure git review:
-
-```
-  apt-get install git-review
-  git-review -s
-
-```
-
-To configure git review, add the following section to .git/config, and replace <LFID> with your gerrit id.
-
-```
-  [remote "gerrit"]
-    url = ssh://<LFID>@gerrit.hyperledger.org:29418/fabric-test.git
-    fetch = +refs/heads/*:refs/remotes/gerrit/*
-
-```
-
 ### Build the images, binaries and gotools
 
 Ensure you are in your $GOPATH/src/github.com/hyperledger/fabric-test directory. These steps will help prepare the environment.
@@ -167,19 +127,9 @@ to clone it and set up an ansible controller to deploy a network.
 
 # Continuous Integration
 
-Many tests are now integrated into CI. Every patch set triggers a `fabric-test-verify` job and executes `smoke` tests. Once the build is successfully executed, the CI job sends gerrit a +1 vote back to the corresponding gerrit patch set; otherwise it sends -1. Please see the  fabric-test CI job page:
+Many tests are now integrated into CI. Every patch set triggers a `fabric-test-verify` job and executes `smoke` tests. Once the build is successfully executed, the CI job sends `All checks have passed` vote back to the corresponding github pull request; otherwise it sends an error message. Please see the  fabric-test CI job page:
 
-https://jenkins.hyperledger.org/view/fabric-test/
-
-Jenkins also triggers a daily CI job (https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/) to execute `daily` tests as identified in fabric-test/regression/daily/runDailyTestSuite.sh. It clones the latest commits of fabric, fabric-ca, and other required repositories, and performs the following steps:
-
-* Clone the latest commits for repositories being tested, including fabric, fabric-ca, and more
-* Build docker images and binary files
-* Build fabric-ca and fabric peer, orderer, cryptogen and configtxgen
-* Update git submodules and install all the python required modules, including python, python-pytest
-* Run the tests identified in fabric-test/regression/daily/runDailyTestSuite.sh
-* After the tests are completed, the CI job reports test results and populates the Job console. Click here to view the Test Results report display:
-https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-daily-x86_64/test_results_analyzer/
+**Note**: Migrating from Jenkins to Azure CI.
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
