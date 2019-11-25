@@ -53,7 +53,7 @@ startNw() {
   # Create fabric network on k8s cluster
   cd "$OperatorDir" || exit 1
   # export kubeconfig file to KUBECONFIG
-  go run main.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$1" -k "$KUBECONFIG" -a up
+  go run main.go -i $OperatorDir/testdata/"$1".yml -k "$KUBECONFIG" -a up
   # list k8s pods
   kubectl get pods
   cd "$FabricTestDir"/fabric/internal/cryptogen || exit 1
@@ -75,7 +75,7 @@ stopNw() {
 
   cd "$OperatorDir" || exit 1
   # provide networkspec 1 and kubeconfig 1 here
-  go run main.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$1" -k "$KUBECONFIG" -a down
+  go run main.go -i $OperatorDir/testdata/"$1".yml -k "$KUBECONFIG" -a down
   # list k8s pods
   kubectl get pods
   rm -f /tmp/nws.txt
@@ -235,7 +235,7 @@ samplecc_go_50MB_TX() {
 migrate() {
   cd "$FabricTestDir"/tools/operator || exit 1
   echo "-------> kafka to etcdraft migration"
-  go run main.go -i "$PTEDir"/CITest/k8s_testsuite/networkSpecFiles/"$3" -k "$KUBECONFIG" -a migrate > "$LogsDir"/"$2"_kafka_2_raft_migrate.log
+  go run main.go -i $OperatorDir/testdata/"$2".yml -k "$KUBECONFIG" -a migrate > "$LogsDir"/"$2"_kafka_2_raft_migrate.log
   }
 
 # Install npm
@@ -246,15 +246,16 @@ fi
 tls=$(cat "$nws" | grep tls: | awk '{print $2}')
 # strip off the .yaml file extension
 nwspec_name=$(cat /tmp/nws.txt | cut -d "/" -f3 | cut -d "." -f1)
+echo "Network Spec Name" $nwspec_name
 case "$action" in
   up)
     echo "Start Network"
-    startNw "$nws"
+    startNw "$nwspec_name"
     exit
     ;;
   down)
     echo "Down Network"
-    stopNw "$nws" "$nwspec_name"
+    stopNw "$nwspec_name"
     exit
     ;;
 esac
@@ -281,5 +282,5 @@ if [ "$insta" == "y" ]; then
 fi
 # Execute Input testcase
 if [ ! -z "$testCase" ]; then
-  $testCase "$tls_mode" "$nwspec_name" "$nws"
+  $testCase "$tls_mode" "$nwspec_name"
 fi

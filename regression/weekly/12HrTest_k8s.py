@@ -8,7 +8,7 @@ import subprocess
 
 logs_directory = '../../tools/PTE/Logs'
 operator_directory = '../../tools/operator'
-k8s_testsuite = '../../tools/PTE/CITest/k8s_testsuite/scripts'
+k8s_testsuite = '../../tools/operator/scripts'
 
 # error messages
 testScriptFailed =      "Test Failed with non-zero exit code; check for errors in fabric-test/tools/PTE/CITest"
@@ -24,7 +24,7 @@ class System_Tests_Kafka_Couchdb_TLS_12hr(unittest.TestCase):
         '''
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/kafka-couchdb-tls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
 
@@ -35,7 +35,7 @@ class System_Tests_Kafka_Couchdb_TLS_12hr(unittest.TestCase):
         '''
 
         # Launch the network
-        returncode = subprocess.call("./operator.sh -a up -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a up -f ../testdata/kafka-couchdb-tls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
 
     def test_3createJoinChannel(self):
@@ -83,5 +83,5 @@ class System_Tests_Kafka_Couchdb_TLS_12hr(unittest.TestCase):
         '''
 
         # Teardown the network
-        returncode = subprocess.call("./operator.sh -a down -f ../networkSpecFiles/kafka_couchdb_tls.yaml", cwd=k8s_testsuite, shell=True)
+        returncode = subprocess.call("./operator.sh -a down -f ../testdata/kafka-couchdb-tls-network-spec.yml", cwd=k8s_testsuite, shell=True)
         self.assertEqual(returncode, 0, msg=testScriptFailed)
