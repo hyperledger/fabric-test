@@ -292,6 +292,50 @@ var _ = Describe("NL+PTE Test Suite", func() {
 		})
 	})
 
+	Describe("Running Functional and TPS performance measurement test", func() {
+
+		/*
+		   Description:
+		   Functional and TPS performance measurement test.
+		   - This scenario launches a network, as defined below,
+		     and runs two tests - for invokes, and for queries -
+		     on single host using networkLauncher (after removing
+		     any existing network and artifacts).
+
+		   Network Topology: 3 Ord, 4 KB, 3 ZK, 2 Org, 2 Peers/Org, TLS enabled
+		     LevelDB, 4 Channels, 1 chaincode (sample_cc), 8 threads total
+
+		   Part 1:
+		   - Use PTE in Constant Stress Mode to continuously send INVOKE
+		     transactions concurrently to 1 peer in both orgs,
+		     for each of the 4 channels (8 threads total, each
+		     send 100 transaction proposals)
+		   - Register a listener to receive an event for each
+		     Block (not per transaction) per
+		     Channel (full block events - not filtered blocks)
+		   - Count TXs and ensure events are received for each one (indicating
+		     each was written to ledger successfully) and calculate TPS results
+
+		   Part 2:
+		   - QUERY all the invoked transactions
+		   - Count successes and calculate TPS results
+
+		   Logs Artifacts Locations, PTE Testcase Logs:
+		       fabric-test/tools/PTE/CITest/Logs/FAB-7929-8i-pteReport.log
+		       fabric-test/tools/PTE/CITest/Logs/FAB-7929-8i-<MMDDHHMMSS>.log
+		       fabric-test/tools/PTE/CITest/Logs/FAB-7929-8q-<MMDDHHMMSS>.log
+		*/
+		It("test_FAB7929_8i", func() {
+			_, err := networkclient.ExecuteCommand("./FAB-7929-8i.sh", []string{}, true)
+			Expect(err).NotTo(HaveOccurred())
+			pteReportFilePath := path.Join(fabricTestDir, "tools/PTE/CITest/Logs/FAB-7929-8i-pteReport.log")
+			testStatus := getTestStatusFromReportFile(pteReportFilePath, "invoke")
+			Expect(testStatus).To(Equal(expectedInvokeStatus))
+			testStatus = getTestStatusFromReportFile(pteReportFilePath, "query")
+			Expect(testStatus).To(Equal(expectedQueryStatus))
+		})
+	})
+
 	AfterSuite(func() {
 		fmt.Println("\n===================================")
 		networkLauncherDir := path.Join(fabricTestDir, "tools/NL")
