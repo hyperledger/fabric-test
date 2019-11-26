@@ -25,7 +25,6 @@ whereas other tests are located in the tools directories themselves, such as
 
 - *fabric-test/feature/* - User-friendly **Behave** functional tests feature files
 - *fabric-test/tools/PTE/* - Performance Traffic Engine **(PTE)** tool and tests
-- *fabric-test/tools/OTE/* - Orderer Traffic Engine **(OTE)** tool and tests
 
 Each testcase title should provide the test objective and a Jira FAB issue which can be referenced for more information. Test steps and specific details can be found in the summary comments of the test scripts themselves. Additional information can be found in the README files associated with the various test directories.
 
@@ -33,12 +32,12 @@ Each testcase title should provide the test objective and a Jira FAB issue which
 
 We love contributors! Anyone may add a new test to an existing test driver script, or even create a new tool and new test driver script. The steps for both scenarios are provided further below as **Alternative 1** and **Alternative 2**. First, a few things to note:
 
-- Before linking a test case into the CI automation tests, please merge your (tool and) testcase into gerrit, and create a Jira task, as follows:
+- Before linking a test case into the CI automation tests, please merge your (tool and) testcase into github, and create a Jira task, as follows:
 
-  1. First merge your tool and tests to gerrit in appropriate folders under */path/to/fabric-test/*.
+  1. First merge your tool and tests to github in appropriate folders under */path/to/fabric-test/*.
   1. Of course, all tests must pass before being submitted. We do not want to see any false positives for test case failures.
   1. To integrate your new tests into the CI automation test suite, create a new Jira task FAB-nnnn for each testcase, and use 'relates-to' to link it to epic FAB-3770.
-  1. You will this new Jira task to submit a changeset to gerrit, to invoke your testcase from a driver script similar to */path/to/fabric-test/regression/daily/Example.py*. In the comments of the gerrit merge request submission, include the
+  1. You will this new Jira task to submit a changeset to github, to invoke your testcase from a driver script similar to */path/to/fabric-test/regression/daily/Example.py*. In the comments of the github merge request submission, include the
       - Jira task FAB-nnnn
       - the testcase title and objective
       - copy and fill in the template from Jira epic FAB-3770
@@ -53,14 +52,6 @@ The Continuous Improvement (CI) team utilizes a Jenkins job to execute the full 
   ```
      cd /path/to/fabric-test/regression/daily
      py.test -v --junitxml example_results.xml ./Example.py
-  ```
-
-  1. Execute 'go test', and pipe the output through tool github.com/jstemmer/go-junit-report to convert to xml. **Note:** In the example shown, file 'results.xml' will be created with the test output.
-
-  ```
-     cd /path/to/fabric-test/tools/OTE
-     go get github.com/jstemmer/go-junit-report
-     go test -run ORD77 -v | go-junit-report >> results.xml
   ```
 
   1. *If you know another method that produces xml files that can be displayed correctly, please share it here!*
