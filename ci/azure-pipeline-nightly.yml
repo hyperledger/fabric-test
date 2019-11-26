@@ -1,0 +1,62 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: $(SourceBranchName)-$(Date:yyyyMMdd)
+
+trigger: none
+pr: none
+schedules:
+  - cron: "0 1 * * *" # 20:00 EST / 01:00 UTC
+    displayName: Daily midnight build
+    branches:
+      include:
+        - master
+    always: "true"
+
+variables:
+  - group: Azure
+  - name: GOPATH
+    value: $(Agent.BuildDirectory)/go
+  - name: PATH
+    value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  - name: GO_VER
+    value: 1.13.4
+  - name: NODE_VER
+    value: 10.17.0
+  - name: RELEASE
+    value: 2.0.0-stable
+
+jobs:
+  - job: BYFN
+    pool:
+      vmImage: ubuntu-18.04
+    variables:
+      GOBIN: $(Agent.BuildDirectory)/go/bin
+    timeoutInMinutes: 90
+    steps:
+      - template: templates/install_deps.yml
+      - template: templates/install_deps_byfn.yml
+      - script: mkdir -p ${GOBIN}
+        displayName: Create GOBIN
+      - script: ./ci/scripts/build_fabric.sh
+        displayName: Build Fabric
+      - script: ./ci/scripts/build_fabric_ca.sh
+        displayName:  Build Fabric-CA
+      - script: ./ci/scripts/build_fabric_chaincode_java.sh
+        displayName: Build Chaincode Java
+      - script: ./ci/scripts/build_fabric_chaincode_node.sh
+        displayName: Build Chaincode Node
+      - script: ./ci/scripts/setup_fabric_samples.sh
+        displayName: Setup Fabric Samples
+      - script: ./ci/scripts/byfn_default.sh
+        displayName: Default Channel Verbose
+      - script: ./ci/scripts/byfn_custom.sh
+        displayName: Custom Channel Raft
+      - script: ./ci/scripts/byfn_javascript.sh
+        displayName: Javascript Chaincode
+      - script: ./ci/scripts/trigger_publish_artifacts.sh
+        displayName: Trigger Publish Jobs
+        env:
+          ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+          ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
