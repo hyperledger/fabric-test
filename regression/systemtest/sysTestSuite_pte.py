@@ -109,7 +109,7 @@ class System_Tests_Kafka_Couchdb_TLS(unittest.TestCase):
 
         # check the migration status
         count = subprocess.check_output(
-                "grep \"Successfully migrated from kafka to etcdraft\" kafka_couchdb_tls_kafka_2_raft_migrate.log | wc -l",
+                "grep \"Successfully migrated from kafka to etcdraft\" kafka-couchdb-tls-network-spec_kafka_2_raft_migrate.log | wc -l",
                 cwd=logs_directory, shell=True)
         self.assertEqual(int(count.strip()), 1, msg=migrationFailure)
 
