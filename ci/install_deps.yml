@@ -11,7 +11,7 @@ steps:
     displayName: Install Dependencies
   - task: GoTool@0
     inputs:
-      version: $(GOVER)
+      version: $(GO_VER)
       goPath:  $(GOPATH)
     displayName: Install GoLang
 
