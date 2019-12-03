@@ -4,6 +4,8 @@
 
 
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
+trigger: none
+pr: none
 
 schedules:
 # 3 AM UTC/10 PM EST
