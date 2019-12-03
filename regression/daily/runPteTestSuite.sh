@@ -34,5 +34,5 @@ if [ ! -d "node_modules" ];then
     fi
 fi
 
-cd $DAILYDIR && ginkgo -v && echo "------> PTE tests completed"
+cd $DAILYDIR && GO111MODULE=on  ginkgo -v && echo "------> PTE tests completed"
 archivePTE
