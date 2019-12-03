@@ -30,7 +30,6 @@ jobs:
   - script: |
       mkdir -p logs
       cp -R tools/PTE/CITest/Logs/*.* logs
-      cp -R tools/LTE/TestResults/experiments/* logs
     displayName: Copy Logs
   - task: PublishBuildArtifacts@1
     inputs:
