@@ -130,7 +130,7 @@ var tCurr;
 
 // timeout option
 var timeoutOpt;
-var cfgTimeout = 200000;   // default 200 sec
+var cfgTimeout = 300000;   // default 300 sec
 var grpcTimeout = 3000;    // default 3 sec
 if ((typeof (txCfgPtr.timeoutOpt) !== 'undefined')) {
     timeoutOpt = txCfgPtr.timeoutOpt;
