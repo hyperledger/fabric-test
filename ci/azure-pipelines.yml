@@ -31,7 +31,6 @@ jobs:
       mkdir -p logs
       ls logs
       cp tools/PTE/CITest/Logs/*.* logs
-      cp tools/LTE/TestResults/experiments/*/*.* logs
     displayName: Copy Logs
   - task: PublishBuildArtifacts@1
     inputs:
