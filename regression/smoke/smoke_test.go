@@ -4,7 +4,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/hyperledger/fabric-test/tools/operator/testclient"
+	"../../tools/operator/testclient"
 )
 
 var _ = Describe("Smoke Test Suite", func() {

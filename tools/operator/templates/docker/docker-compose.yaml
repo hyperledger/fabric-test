@@ -139,6 +139,8 @@
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifacts_location)]
+#!       volumes.append("orderer{}-{}:/var/hyperledger/production/orderer".format(j, org.name))
+#@       volumes.append("./backup/orderer{}-{}:/var/hyperledger/production/orderer".format(j, org.name))
 #@       container_name = "orderer{}-{}".format(j,org.name)
 #@       image = "hyperledger/fabric-orderer:{}".format(config.fabric_version)
 #@       if config.fabric_version.endswith("-stable"):
@@ -194,6 +196,8 @@
 #@       container_name = "peer{}-{}".format(j, org.name)
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifacts_location)]
 #@       volumes.append("/var/run/:/host/var/run/")
+#!       volumes.append("peer{}-{}:/var/hyperledger/production".format(j, org.name))
+#@       volumes.append("./backup/peer{}-{}:/var/hyperledger/production".format(j, org.name))
 #@       image = "hyperledger/fabric-peer:{}".format(config.fabric_version)
 #@       if config.fabric_version.endswith("-stable"):
 #@         env.append("CORE_CHAINCODE_BUILDER=nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabric_version))
@@ -215,12 +219,30 @@
 #@   end
 #@ end
 
+#@ def volumes(config):
+#@   volumes = {}
+#@   for i in range(0, len(config.peer_organizations)):
+#@     org = config.peer_organizations[i]
+#@     for j in range(0, org.num_peers):
+#@        volumes["peer{}-{}".format(j, org.name)] = {}
+#@     end
+#@   end
+#@   for k in range(0, len(config.orderer_organizations)):
+#@     org = config.orderer_organizations[k]
+#@     for l in range(0, org.num_orderers):
+#@        volumes["orderer{}-{}".format(l, org.name)] = {}
+#@     end
+#@   end
+#@   return volumes
+#@ end
+
 #@ config = data.values
 #@ artifacts_location = config.artifacts_location
 #@ if artifacts_location.endswith("/") == False:
 #@   artifacts_location = artifacts_location + "/"
 #@ end
 version: '2'
+#! volumes: #@ volumes(config)
 #@ caList(config)
 #@ if config.orderer.orderertype == "kafka":
 #@   kafka_zookeepers(config.kafka)
