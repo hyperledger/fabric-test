@@ -26,7 +26,7 @@ variables:
 jobs:
 - job: PTEDailyBuild
   pool:
-    vmImage: ubuntu-16.04
+    vmImage: ubuntu-18.04
   timeoutInMinutes: 360
   steps:
   - template: install_deps.yml
