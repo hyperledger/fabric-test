@@ -33,9 +33,9 @@ type Organization struct {
 
 //InstallCC --
 type InstallCC struct {
-	ChainCodeName    string `yaml:"chaincodeName,omitempty"`
-	ChainCodeVersion string `yaml:"ccVersion,omitempty"`
-	ChainCodePath    string `yaml:"chaincodePath,omitempty"`
+	ChainCodeName    string `yaml:"name,omitempty"`
+	ChainCodeVersion string `yaml:"version,omitempty"`
+	ChainCodePath    string `yaml:"path,omitempty"`
 	Organizations    string `yaml:"organizations,omitempty"`
 	Language         string `yaml:"language,omitempty"`
 	MetadataPath     string `yaml:"metadataPath,omitempty"`
@@ -44,8 +44,8 @@ type InstallCC struct {
 //InstantiateCC --
 type InstantiateCC struct {
 	ChannelName       string         `yaml:"channelName,omitempty"`
-	ChainCodeName     string         `yaml:"chaincodeName,omitempty"`
-	ChainCodeVersion  string         `yaml:"ccVersion,omitempty"`
+	ChainCodeName     string         `yaml:"name,omitempty"`
+	ChainCodeVersion  string         `yaml:"version,omitempty"`
 	Organizations     string         `yaml:"organizations,omitempty"`
 	CCFcn             string         `yaml:"fcn,omitempty"`
 	CCFcnArgs         string         `yaml:"args,omitempty"`
@@ -65,7 +65,7 @@ type TimeOutOptions struct {
 //InvokeQuery --
 type InvokeQuery struct {
 	ChannelName      string               `yaml:"channelName,omitempty"`
-	ChaincodeName    string               `yaml:"chaincodeName,omitempty"`
+	ChaincodeName    string               `yaml:"name,omitempty"`
 	TargetPeers      string               `yaml:"targetPeers,omitempty"`
 	NProcPerOrg      int                  `yaml:"nProcPerOrg,omitempty"`
 	NRequest         int                  `yaml:"nRequest,omitempty"`

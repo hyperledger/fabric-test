@@ -5,15 +5,15 @@
 #@ load("@ytt:data", "data")
 #@ config = data.values
 OrdererOrgs:
-#@ num_organizations = len(config.orderer_organizations)
+#@ num_organizations = len(config.ordererOrganizations)
 #@ for i in range(0, num_organizations):
-#@   ordererOrg = config.orderer_organizations[i]
+#@   ordererOrg = config.ordererOrganizations[i]
 - Domain: #@ ordererOrg.name
   Name: #@ ordererOrg.name
   EnableNodeOUs: #@ config.enableNodeOUs
   Specs:
-  #@ num_orderers = ordererOrg.num_orderers
-  #@ for i in range(0, num_orderers):
+  #@ numOderers = ordererOrg.numOderers
+  #@ for i in range(0, numOderers):
     - Hostname: #@ "orderer{}-{}".format(i, ordererOrg.name)
     #@ if config.nodeportIP != "":
       SANS:
@@ -22,13 +22,13 @@ OrdererOrgs:
   #@ end
 #@ end
 PeerOrgs:
-#@ for i in range(0, len(config.peer_organizations)):
-#@   peerOrg = config.peer_organizations[i]
+#@ for i in range(0, len(config.peerOrganizations)):
+#@   peerOrg = config.peerOrganizations[i]
 - Domain: #@ peerOrg.name
   Name: #@ peerOrg.name
   EnableNodeOUs: #@ config.enableNodeOUs
   Specs:
-  #@ for i in range(0, peerOrg.num_peers):
+  #@ for i in range(0, peerOrg.numPeers):
     - Hostname: #@ "peer{}-{}".format(i, peerOrg.name)
     #@ if config.nodeportIP != "":
       SANS:
