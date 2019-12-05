@@ -45,32 +45,32 @@ joinChannel:
 
 installChaincode:
 # installs chaincode with specified name on all peers in listed organziations
-  - chaincodeName: samplecc
-    ccVersion: v1
-    chaincodePath: $PWD/samplecc/go
+  - name: samplecc
+    version: v1
+    path: $PWD/samplecc/go
     organizations: org1,org2
     language: golang
     metadataPath: $PWD/txt.json
 
-  - chaincodeName: samplejs
-    ccVersion: v1
-    chaincodePath: $PWD/samplejs
+  - name: samplejs
+    version: v1
+    path: $PWD/samplejs
     organizations: org1,org2
     language: node
     metadataPath: $PWD/txt.json
 
 instantiateChaincode:
   - channelName: testorgschannel1
-    chaincodeName: samplecc
-    ccVersion: v1
+    name: samplecc
+    version: v1
     args: "1,2,3,4"
     organizations: org1
     endorsementPolicy: 2of(org1,org2)
     collectionPath: $PWD/txt.json
 
   - channelName: testorgschannel1
-    chaincodeName: samplejs
-    ccVersion: v1
+    name: samplejs
+    version: v1
     args: "1,2,3,4"
     organizations: org1
     endorsementPolicy: 2of(org1,org2)
@@ -78,8 +78,8 @@ instantiateChaincode:
 
   - channelPrefix: testorgschannel
     numChannels: 10
-    chaincodeName: samplejs
-    ccVersion: v1
+    name: samplejs
+    version: v1
     args: "1,2,3,4"
     organizations: org1
     endorsementPolicy: 2of(org1,org2)
@@ -87,8 +87,8 @@ instantiateChaincode:
 
 upgradeChaincode:
   - channelName: testorgschannel1
-    chaincodeName: samplecc
-    ccVersion: v2
+    name: samplecc
+    version: v2
     args: "1,2,3,4"
     organizations: org1
     endorsementPolicy: 2of(org1,org2)
@@ -96,8 +96,8 @@ upgradeChaincode:
 
   - channelPrefix: testorgschannel
     numChannels: 10
-    chaincodeName: samplejs
-    ccVersion: v2
+    name: samplejs
+    version: v2
     args: "1,2,3,4"
     organizations: org1
     endorsementPolicy: 2of(org1,org2)
@@ -105,7 +105,7 @@ upgradeChaincode:
 
 invokes:
   - channelName: testorgschannel1
-    chaincodeName: samplecc
+    name: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000
@@ -133,7 +133,7 @@ invokes:
 
 queries:
   - channelName: testorgschannel1
-    chaincodeName: samplecc
+    name: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000

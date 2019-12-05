@@ -3,7 +3,7 @@
 echo $#
 if [ $# != 6 ]; then
   echo "Invalid number of arguments. Usage:"
-  echo "./migrateToRaft.sh <kubeconfig path> <MSPID> <artifacts_location> <orderer_organizations list> <num_orderer in each org> <num_channels>"
+  echo "./migrateToRaft.sh <kubeconfig path> <MSPID> <artifactsLocation> <ordererOrganizations list> <numOrderer in each org> <numChannels>"
   exit 1
 fi
 
