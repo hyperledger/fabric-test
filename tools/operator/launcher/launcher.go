@@ -62,7 +62,6 @@ func validateBasicConsensusConfig(config networkspec.Config) error {
 }
 
 func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
-
 	var network nl.Network
 	var yttObject ytt.YTT
 	err := yttObject.DownloadYtt()
