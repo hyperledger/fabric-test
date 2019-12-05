@@ -12,7 +12,7 @@
 #@   env.append({"name": "ZOO_SYNC_LIMIT", "value": "2"})
 #@   resources = {"limits": {"cpu": "0.2", "memory": "0.4Gi"}, "requests": {"cpu": "0.1", "memory": "0.2Gi"}}
 #@   output = []
-#@   if config.k8s.data_persistence == True:
+#@   if config.k8s.dataPersistence == True:
 #@     output = [{"volumeMounts": [{"mountPath": "/data", "name": "zookeeper-data-storage"}], "name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
 #@   else:
 #@     output = [{"name": input, "image": "hyperledger/fabric-zookeeper", "imagePullPolicy": "Always", "env": env, "resources": resources}]
@@ -33,7 +33,7 @@
 #@   env.append({"name": "KAFKA_REPLICA_FETCH_MAX_BYTES", "value": "103809024"})
 #@   resources = config.k8s.resources.kafka
 #@   output = []
-#@   if config.k8s.data_persistence == True:
+#@   if config.k8s.dataPersistence == True:
 #@     output = [{"volumeMounts": [{"mountPath": "/opt/kafka/data", "name": "kafka-data-storage"}], "name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
 #@   else:
 #@     output = [{"name": input, "image": "hyperledger/fabric-kafka", "imagePullPolicy": "Always", "env": env, "resources": resources}]
@@ -60,9 +60,9 @@
 #@ end
 
 #@ def caContainers(input, orgName, config):
-#@   ca_image = "hyperledger/fabric-ca:{}".format(config.fabric_version)
-#@   if config.fabric_version.endswith("-stable"):
-#@     ca_image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(config.fabric_version)
+#@   ca_image = "hyperledger/fabric-ca:{}".format(config.fabricVersion)
+#@   if config.fabricVersion.endswith("-stable"):
+#@     ca_image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(config.fabricVersion)
 #@   end
 #@   env = [{"name": "FABRIC_CA_HOME", "value": "/etc/hyperledger/fabric-ca-server"}]
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_NAME", "value": "{}".format(input)})
@@ -83,8 +83,8 @@
 
 #@ def mutualTLS(config, type):
 #@   output = []
-#@   for i in range(0, len(config.peer_organizations)):
-#@     organization = config.peer_organizations[i]
+#@   for i in range(0, len(config.peerOrganizations)):
+#@     organization = config.peerOrganizations[i]
 #@     if type == "clientrootca":
 #@       output.append("/etc/hyperledger/fabric/artifacts/{}/ca.{}-cert.pem".format(organization.name, organization.name))
 #@     elif type == "volumeMounts":
@@ -93,8 +93,8 @@
 #@       output.append({"name": "{}-clientrootca".format(organization.name), "configMap": {"name": "{}-ca".format(organization.name)}})
 #@     end
 #@   end
-#@   for j in range(0, len(config.orderer_organizations)):
-#@     organization = config.orderer_organizations[j]
+#@   for j in range(0, len(config.ordererOrganizations)):
+#@     organization = config.ordererOrganizations[j]
 #@     if type == "clientrootca":
 #@       output.append("/etc/hyperledger/fabric/artifacts/{}/ca.{}-cert.pem".format(organization.name, organization.name))
 #@     elif type == "volumeMounts":
@@ -114,7 +114,7 @@
 #@   env = [{"name": "CORE_VM_ENDPOINT", "value": "localhost:2375"}]
 #@   env.append({"name": "CORE_PEER_LISTENADDRESS", "value": "0.0.0.0:{}".format(peerUniquePort)})
 #@   env.append({"name": "CORE_PEER_CHAINCODELISTENADDRESS", "value": "0.0.0.0:7052"})
-#@   if config.gossip_enable == True:
+#@   if config.gossipEnable == True:
 #@     env.append({"name": "CORE_PEER_GOSSIP_STATE_ENABLED", "value": "true"})
 #@     env.append({"name": "CORE_PEER_GOSSIP_USELEADERELECTION", "value": "true"})
 #@     env.append({"name": "CORE_PEER_GOSSIP_ORGLEADER", "value": "false"})
@@ -130,7 +130,7 @@
 #@   else:
 #@     env.append({"name": "CORE_PEER_TLS_ENABLED", "value": "{}".format(config.tls)})
 #@   end
-#@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": config.peer_fabric_logging_spec})
+#@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": config.peerFabricLoggingSpec})
 #@   env.append({"name": "CORE_PEER_TLS_CERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.crt"})
 #@   env.append({"name": "CORE_PEER_TLS_KEY_FILE", "value": "/etc/hyperledger/fabric/artifacts/tls/server.key"})
 #@   env.append({"name": "CORE_PEER_TLS_ROOTCERT_FILE", "value": "/etc/hyperledger/fabric/artifacts/msp/tlscacerts/tlsca.{}-cert.pem".format(orgName)})
@@ -153,25 +153,25 @@
 #@   if config.tls == "mutual":
 #@     volumeMounts += mutualTLS(config, "volumeMounts")
 #@   end
-#@   if config.k8s.data_persistence == True or config.k8s.data_persistence == "local":
+#@   if config.k8s.dataPersistence == True or config.k8s.dataPersistence == "local":
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "peer-data-storage"})
 #@   end
 #@   resources = config.k8s.resources.peers
 #@   dindResources = config.k8s.resources.dind
-#@   peer_image = "hyperledger/fabric-peer:{}".format(config.fabric_version)
-#@   if config.fabric_version.endswith("-stable"):
-#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabric_version)})
-#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(config.fabric_version)})
+#@   peer_image = "hyperledger/fabric-peer:{}".format(config.fabricVersion)
+#@   if config.fabricVersion.endswith("-stable"):
+#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabricVersion)})
+#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(config.fabricVersion)})
 #@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-0.4.18"})
 #@     env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseimage:amd64-0.4.18"})
-#@     peer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(config.fabric_version)
+#@     peer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(config.fabricVersion)
 #@   end
 
-#@   if config.db_type == "couchdb":
+#@   if config.dbType == "couchdb":
 #@     container = {}
 #@     env.append({"name": "CORE_LEDGER_STATE_STATEDATABASE", "value": "CouchDB"})
 #@     env.append({"name": "CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS", "value": "localhost:5984"})
-#@     if config.k8s.data_persistence == True or config.k8s.data_persistence == "local":
+#@     if config.k8s.dataPersistence == True or config.k8s.dataPersistence == "local":
 #@       couchdbMount = [{"mountPath": "/opt/couchdb/data", "name": "couchdb-data-storage"}]
 #@       container = {"name": "couchdb-{}".format(input), "image": "hyperledger/fabric-couchdb", "imagePullPolicy": "Always", "resources": config.k8s.resources.couchdb, "volumeMounts": couchdbMount}
 #@     else:
@@ -188,7 +188,7 @@
 #@   env = [{"name": "ORDERER_GENERAL_LISTENADDRESS", "value": "0.0.0.0"}]
 #@   env.append({"name": "ORDERER_GENERAL_LISTENPORT", "value": "{}".format(ordererUniquePort)})
 #@   env.append({"name": "ORDERER_GENERAL_GENESISMETHOD", "value": "file"})
-#@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": config.orderer_fabric_logging_spec})
+#@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": config.ordererFabricLoggingSpec})
 #@   if config.tls == "mutual":
 #@     env.append({"name": "ORDERER_GENERAL_TLS_CLIENTROOTCAS", "value": "[{}]".format(", ".join(mutualTLS(config, "clientrootca"))) })
 #@     env.append({"name": "ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED", "value": "true"})
@@ -218,13 +218,13 @@
 #@   if config.tls == "mutual":
 #@     volumeMounts += mutualTLS(config, "volumeMounts")
 #@   end
-#@   if config.k8s.data_persistence == True or config.k8s.data_persistence == "local":
+#@   if config.k8s.dataPersistence == True or config.k8s.dataPersistence == "local":
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "orderer-data-storage"})
 #@   end
 #@   resources = config.k8s.resources.orderers
-#@   orderer_image = "hyperledger/fabric-orderer:{}".format(config.fabric_version)
-#@   if config.fabric_version.endswith("-stable"):
-#@     orderer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(config.fabric_version)
+#@   orderer_image = "hyperledger/fabric-orderer:{}".format(config.fabricVersion)
+#@   if config.fabricVersion.endswith("-stable"):
+#@     orderer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(config.fabricVersion)
 #@   end
 #@   output = [{"name": input, "image": orderer_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["orderer"]}]
 #@   return output
@@ -235,7 +235,7 @@
 #@   specData = {}
 #@   if input.startswith("zookeeper"):
 #@     type = "zookeeper"
-#@     if config.k8s.data_persistence == True:
+#@     if config.k8s.dataPersistence == True:
 #@       specData = {"volumes": [{"name": "zookeeper-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}}], "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["zookeeper"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": zkContainers(input, id, zkList(numZK, type), config)}
 #@     else:
@@ -244,7 +244,7 @@
 #@     end
 #@   elif input.startswith("kafka"):
 #@     type = "kafka"
-#@     if config.k8s.data_persistence == True:
+#@     if config.k8s.dataPersistence == True:
 #@     specData = {"volumes": [{"name": "kafka-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}}], "affinity": {"podAntiAffinity": {"preferredDuringSchedulingIgnoredDuringExecution": [{"weight": 1, "podAffinityTerm": {"labelSelector": {"matchExpressions": [{"key": "type", "operator": "In", "values": ["kafka"]}]}, "topologyKey": "kubernetes.io/hostname"}}]}},
 #@              "containers": kafkaContainers(input, id, replicas, zkList(numZK, type), config)}
 #@     else:
@@ -276,9 +276,9 @@
 #@   elif type == "orderer":
 #@     volumes = initVolumes
 #@     volumes.append({"name": "genesisblock", "secret": {"secretName": "genesisblock"}})
-#@     if config.k8s.data_persistence == True:
+#@     if config.k8s.dataPersistence == True:
 #@        volumes.append({"name": "orderer-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}})
-#@     elif config.k8s.data_persistence == "local":
+#@     elif config.k8s.dataPersistence == "local":
 #@        volumes.append({"name": "orderer-data-storage", "hostPath": {"path": "/shared/{}-data".format(input)}})
 #@     end
 #@     if config.tls == "mutual":
@@ -288,14 +288,14 @@
 #@              "containers": ordererContainers(input, orgName, config, mspId, port)}
 #@   elif type == "peer":
 #@     volumes = initVolumes
-#@     if config.k8s.data_persistence == True:
+#@     if config.k8s.dataPersistence == True:
 #@        volumes.append({"name": "peer-data-storage", "persistentVolumeClaim": {"claimName": "{}-data".format(input)}})
-#@        if config.db_type == "couchdb":
+#@        if config.dbType == "couchdb":
 #@           volumes.append({"name": "couchdb-data-storage", "persistentVolumeClaim": {"claimName": "couchdb-{}-data".format(input)}})
 #@        end
-#@     elif config.k8s.data_persistence == "local":
+#@     elif config.k8s.dataPersistence == "local":
 #@        volumes.append({"name": "peer-data-storage", "hostPath": {"path": "/shared/{}-data".format(input)}})
-#@        if config.db_type == "couchdb":
+#@        if config.dbType == "couchdb":
 #@           volumes.append({"name": "couchdb-data-storage", "hostPath": {"path": "/shared/couchdb-{}-data".format(input)}})
 #@        end
 #@     end
@@ -324,7 +324,7 @@
 
 #@ def zkList(numZK, type):
 #@   output = []
-#@   for i in range(0, config.kafka.num_zookeepers):
+#@   for i in range(0, config.kafka.numZookeepers):
 #@     id = i + 1
 #@     if type == "zookeeper":
 #@       id = i + 1
@@ -340,7 +340,7 @@
 
 #@ config = data.values
 #@ if config.orderer.orderertype == "kafka":
-#@   for i in range(0, config.kafka.num_zookeepers):
+#@   for i in range(0, config.kafka.numZookeepers):
 ---
 apiVersion: v1
 kind: Pod
@@ -349,9 +349,9 @@ metadata:
   labels:
     k8s-app: #@ "zookeeper{}".format(i)
     type: zookeeper
-spec: #@ kafkaSpec("zookeeper{}".format(i), i, 0, "zookeeper", config.kafka.num_zookeepers, config)
+spec: #@ kafkaSpec("zookeeper{}".format(i), i, 0, "zookeeper", config.kafka.numZookeepers, config)
 #@   end
-#@   for j in range(0, config.kafka.num_kafka):
+#@   for j in range(0, config.kafka.numKafka):
 ---
 apiVersion: v1
 kind: Pod
@@ -360,52 +360,52 @@ metadata:
   labels:
     k8s-app: #@ "kafka{}".format(j)
     type: kafka
-spec: #@ kafkaSpec("kafka{}".format(j), j, config.kafka.num_kafka_replications, "kafka", config.kafka.num_zookeepers, config)
+spec: #@ kafkaSpec("kafka{}".format(j), j, config.kafka.numKafkaReplications, "kafka", config.kafka.numZookeepers, config)
 #@   end
 #@ end
 
 #@ peerUniquePort = 31000
-#@ for i in range(0, len(config.peer_organizations)):
-#@   organization = config.peer_organizations[i]
-#@   for j in range(0, organization.num_ca):
+#@ for i in range(0, len(config.peerOrganizations)):
+#@   organization = config.peerOrganizations[i]
+#@   for j in range(0, organization.numCa):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
-spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id, "")
+spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.mspId, "")
 #@   end
-#@   for j in range(0, organization.num_peers):
+#@   for j in range(0, organization.numPeers):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "peer{}-{}".format(j, organization.name)
-spec: #@ spec("peer{}-{}".format(j, organization.name), organization.name, "peer", config, organization.msp_id, peerUniquePort)
+spec: #@ spec("peer{}-{}".format(j, organization.name), organization.name, "peer", config, organization.mspId, peerUniquePort)
 #@   peerUniquePort += 1
 #@   end
 #@ end
 
 #@ ordererUniquePort = 30000
-#@ num_organizations = len(config.orderer_organizations)
+#@ num_organizations = len(config.ordererOrganizations)
 #@ for i in range(0, num_organizations):
-#@   organization = config.orderer_organizations[i]
-#@   for j in range(0, organization.num_ca):
+#@   organization = config.ordererOrganizations[i]
+#@   for j in range(0, organization.numCa):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "ca{}-{}".format(j, organization.name)
-spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.msp_id, "")
+spec: #@ spec("ca{}-{}".format(j, organization.name), organization.name, "ca", data.values, organization.mspId, "")
 #@   end
-#@   num_orderers = organization.num_orderers
-#@   for j in range(0, num_orderers):
+#@   numOderers = organization.numOderers
+#@   for j in range(0, numOderers):
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: #@ "orderer{}-{}".format(j, organization.name)
-spec: #@ spec("orderer{}-{}".format(j, organization.name), organization.name, "orderer", config, organization.msp_id, ordererUniquePort)
+spec: #@ spec("orderer{}-{}".format(j, organization.name), organization.name, "orderer", config, organization.mspId, ordererUniquePort)
 #@   ordererUniquePort += 1
 #@   end
 #@ end

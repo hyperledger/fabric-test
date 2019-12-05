@@ -30,24 +30,24 @@ joinChannel:
 
 installChaincode:
 # installs chaincode with specified name on all peers in listed organziations
-  - chaincodeName: samplecc
-    ccVersion: v1
-    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+  - name: samplecc
+    version: v1
+    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
     organizations: org1,org2
     language: golang
     metadataPath: ""
 
-  - chaincodeName: samplecc
-    ccVersion: v2
-    chaincodePath: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+  - name: samplecc
+    version: v2
+    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
     organizations: org1,org2
     language: golang
     metadataPath: ""
 
 instantiateChaincode:
   - channelName: testorgschannel0
-    chaincodeName: samplecc
-    ccVersion: v1
+    name: samplecc
+    version: v1
     args: ""
     organizations: org1
     endorsementPolicy: 2of(org1,org2)
@@ -55,8 +55,8 @@ instantiateChaincode:
 
 upgradeChaincode:
   - channelName: testorgschannel0
-    chaincodeName: samplecc
-    ccVersion: v2
+    name: samplecc
+    version: v2
     args: ""
     organizations: org1
     endorsementPolicy: 1of(org1,org2)
@@ -64,7 +64,7 @@ upgradeChaincode:
 
 invokes:
   - channelName: testorgschannel0
-    chaincodeName: samplecc
+    name: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 1000
@@ -89,7 +89,7 @@ invokes:
 
 queries:
   - channelName: testorgschannel0
-    chaincodeName: samplecc
+    name: samplecc
     targetPeers: OrgAnchor
     nProcPerOrg: 2
     nRequest: 100

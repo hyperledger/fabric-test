@@ -17,7 +17,7 @@
 #@ end
 #@ def orgOrderers(ordererOrg, port, config):
 #@  orderers = []
-#@  for i in range(0, ordererOrg.num_orderers):
+#@  for i in range(0, ordererOrg.numOderers):
 #@    if config.nodeportIP:
 #@      orderers.append("{}:{}".format(config.nodeportIP, port))
 #@    else:
@@ -34,23 +34,23 @@
 #@ end
 #@ def organizations(config, type):
 #@   output = []
-#@   artifacts_location = config.artifacts_location
-#@   if artifacts_location.endswith("/") == False:
-#@     artifacts_location = artifacts_location + "/"
+#@   artifactsLocation = config.artifactsLocation
+#@   if artifactsLocation.endswith("/") == False:
+#@     artifactsLocation = artifactsLocation + "/"
 #@   end
 #@   if type == "orderer":
 #@     port1 = 30000
-#@     num_organizations = len(config.orderer_organizations)
+#@     num_organizations = len(config.ordererOrganizations)
 #@     for i in range(0, num_organizations):
-#@       output.append({"Name": config.orderer_organizations[i].name, "OrdererEndpoints": orgOrderers(config.orderer_organizations[i], port1, config), "ID": config.orderer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/ordererOrganizations/"+config.orderer_organizations[i].name+"/msp", "Policies": orgPolicies(config.orderer_organizations[i].msp_id, "orderer", config.enableNodeOUs)})
-#@       port1 += config.orderer_organizations[i].num_orderers
+#@       output.append({"Name": config.ordererOrganizations[i].name, "OrdererEndpoints": orgOrderers(config.ordererOrganizations[i], port1, config), "ID": config.ordererOrganizations[i].mspId, "MSPDir": artifactsLocation+"crypto-config/ordererOrganizations/"+config.ordererOrganizations[i].name+"/msp", "Policies": orgPolicies(config.ordererOrganizations[i].mspId, "orderer", config.enableNodeOUs)})
+#@       port1 += config.ordererOrganizations[i].numOderers
 #@     end
 #@   end
 #@   if type == "peer":
 #@     port2 = 31000
-#@     for i in range(0, len(config.peer_organizations)):
-#@       output.append({"Name": config.peer_organizations[i].name, "AnchorPeers": anchorPeers(config.peer_organizations[i].name, port2),"ID": config.peer_organizations[i].msp_id, "MSPDir": artifacts_location+"crypto-config/peerOrganizations/"+config.peer_organizations[i].name+"/msp", "Policies": orgPolicies(config.peer_organizations[i].msp_id, "peer", config.enableNodeOUs)})
-#@       port2 += config.peer_organizations[i].num_peers
+#@     for i in range(0, len(config.peerOrganizations)):
+#@       output.append({"Name": config.peerOrganizations[i].name, "AnchorPeers": anchorPeers(config.peerOrganizations[i].name, port2),"ID": config.peerOrganizations[i].mspId, "MSPDir": artifactsLocation+"crypto-config/peerOrganizations/"+config.peerOrganizations[i].name+"/msp", "Policies": orgPolicies(config.peerOrganizations[i].mspId, "peer", config.enableNodeOUs)})
+#@       port2 += config.peerOrganizations[i].numPeers
 #@     end
 #@   end
 #@   return output
@@ -71,11 +71,11 @@
 #@ def ordererHosts(config):
 #@   result = []
 #@   port1 = 30000
-#@   num_organizations = len(config.orderer_organizations)
+#@   num_organizations = len(config.ordererOrganizations)
 #@   for i in range(0, num_organizations):
-#@     ordererOrg = config.orderer_organizations[i]
-#@     num_orderers = ordererOrg.num_orderers
-#@     for j in range(0, num_orderers):
+#@     ordererOrg = config.ordererOrganizations[i]
+#@     numOderers = ordererOrg.numOderers
+#@     for j in range(0, numOderers):
 #@       result.append("orderer"+str(j)+"-"+ordererOrg.name+":{}".format(port1))
 #@       port1 += 1
 #@     end
@@ -85,35 +85,35 @@
 #@ def orderer(config):
 #@   result = {}
 #@   batch_size_options = config.orderer.batchsize
-#@   artifacts_location = config.artifacts_location
-#@   if artifacts_location.endswith("/") == False:
-#@     artifacts_location = artifacts_location + "/"
+#@   artifactsLocation = config.artifactsLocation
+#@   if artifactsLocation.endswith("/") == False:
+#@     artifactsLocation = artifactsLocation + "/"
 #@   end
 #@   batchSize = {"MaxMessageCount": batch_size_options.maxmessagecount, "AbsoluteMaxBytes": batch_size_options.absolutemaxbytes, "PreferredMaxBytes": batch_size_options.preferredmaxbytes}
 #@   if(config.orderer.orderertype=="etcdraft"):
 #@     consenters = []
 #@     port1 = 30000
-#@     etcd_options = config.orderer.etcdraft_options
-#@     for i in range(0, len(config.orderer_organizations)):
-#@       for j in range(0, config.orderer_organizations[i].num_orderers):
-#@         ordererOrg = config.orderer_organizations[i]
-#@         certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(artifacts_location, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
+#@     etcd_options = config.orderer.etcdraftOptions
+#@     for i in range(0, len(config.ordererOrganizations)):
+#@       for j in range(0, config.ordererOrganizations[i].numOderers):
+#@         ordererOrg = config.ordererOrganizations[i]
+#@         certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(artifactsLocation, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
 #@         consenters.append({"Host":"orderer{}-{}".format(j, ordererOrg.name), "Port": port1, "ClientTLSCert": certs, "ServerTLSCert": certs})
 #@         port1 += 1
 #@       end
 #@     end
-#@     options = {"TickInterval": etcd_options.TickInterval, "ElectionTick": etcd_options.ElectionTick, "HeartbeatTick": etcd_options.HeartbeatTick, "MaxInflightBlocks": etcd_options.MaxInflightBlocks, "SnapshotIntervalSize": etcd_options.SnapshotIntervalSize}
-#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.orderer_capabilities, "EtcdRaft":{"Consenters":consenters, "Options":options}}
+#@     options = {"TickInterval": etcd_options.tickInterval, "ElectionTick": etcd_options.electionTick, "HeartbeatTick": etcd_options.heartbeatTick, "MaxInflightBlocks": etcd_options.maxInflightBlocks, "SnapshotIntervalSize": etcd_options.snapshotIntervalSize}
+#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.ordererCapabilities, "EtcdRaft":{"Consenters":consenters, "Options":options}}
 #@   elif (config.orderer.orderertype == "kafka"):
 #@     brokersList = []
 #@     kafka = {}
-#@     for i in range(0, config.kafka.num_kafka):
+#@     for i in range(0, config.kafka.numKafka):
 #@       brokersList.append("kafka{}:9092".format(i))
 #@     end
 #@     kafka = {"Brokers": brokersList}
-#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "kafka": kafka, "Organizations": organizations(config, "orderer"),"Policies": policies("orderer"),"Capabilities": config.orderer_capabilities}
+#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "kafka": kafka, "Organizations": organizations(config, "orderer"),"Policies": policies("orderer"),"Capabilities": config.ordererCapabilities}
 #@   else:
-#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.orderer_capabilities}
+#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.ordererCapabilities}
 #@   end
 #@   return result
 #@ end
@@ -122,16 +122,16 @@
 Profiles:
   testorgschannel:
     Policies: #@ policies("channel")
-    Capabilities: #@ config.channel_capabilities
+    Capabilities: #@ config.channelCapabilities
     Consortium: FabricConsortium
     Application:
       Organizations: #@ organizations(config, "peer")
       Policies: #@ policies("peer")
-      Capabilities:  #@ config.application_capabilities
+      Capabilities:  #@ config.applicationCapabilities
     Orderer: #@ orderer(config)
   testOrgsOrdererGenesis:
     Policies: #@ policies("channel")
-    Capabilities: #@ config.channel_capabilities
+    Capabilities: #@ config.channelCapabilities
     Orderer: #@ orderer(config)
     Consortiums:
       FabricConsortium:
