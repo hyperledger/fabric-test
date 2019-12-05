@@ -809,7 +809,7 @@ function assignThreadPeerList(channel, client, org) {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
             continue;
         }
-        var cpOrgsTmp = cpfTmp['organizations'];
+        // var cpOrgsTmp = cpfTmp['organizations'];
         var cpPeersTmp = cpfTmp['peers'];
         for (i = 0; i < listOpt[key].length; i++) {
             peername = listOpt[key][i];
