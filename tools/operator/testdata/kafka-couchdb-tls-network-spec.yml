@@ -29,13 +29,13 @@ artifactsLocation: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/f
 #! Orderer Config Settings
 orderer:
 #! Consensus type
-  orderertype: kafka
-  batchsize:
-    maxmessagecount: 100
-    absolutemaxbytes: 99 MB
-    preferredmaxbytes: 10 MB
-  batchtimeout: 2s
-#! Etcd raft options and this will be used when orderertype is
+  ordererType: kafka
+  batchSize:
+    maxMessageCount: 100
+    absoluteMaxBytes: 99 MB
+    preferredMaxBytes: 10 MB
+  batchTimeOut: 2s
+#! Etcd raft options and this will be used when ordererType is
 #! selected as etcdraft
   etcdraftOptions:
     tickInterval: 500ms
@@ -45,7 +45,7 @@ orderer:
     snapshotIntervalSize: 100 MB
 
 #! Number of kafka and zookeeper to be launched in network
-#! when orderertype is kafka
+#! when ordererType is kafka
 kafka:
   numKafka: 5
   #! number of kafka replications for each channel
