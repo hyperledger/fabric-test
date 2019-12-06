@@ -9,7 +9,7 @@ type Config struct {
 	OrdererOrganizations []OrdererOrganizations `yaml:"ordererOrganizations,omitempty"`
 	PeerOrganizations    []PeerOrganizations    `yaml:"peerOrganizations,omitempty"`
 	Orderer              struct {
-		OrdererType string `yaml:"orderertype,omitempty"`
+		OrdererType string `yaml:"ordererType,omitempty"`
 	} `yaml:"orderer,omitempty"`
 	NumChannels   int    `yaml:"numChannels,omitempty"`
 	TLS           string `yaml:"tls,omitempty"`
