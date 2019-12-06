@@ -2,6 +2,8 @@ module github.com/hyperledger/fabric-test/regression/smoke
 
 go 1.13
 
+replace github.com/hyperledger/fabric-test => ../../../fabric-test
+
 require (
 	github.com/onsi/ginkgo v1.10.3
 	github.com/onsi/gomega v1.7.1
