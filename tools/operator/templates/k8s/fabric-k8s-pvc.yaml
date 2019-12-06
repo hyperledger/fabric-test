@@ -5,7 +5,7 @@
 #@ load("@ytt:data", "data")
 #@ config = data.values
 #@ if config.k8s.dataPersistence == True:
-#@   if config.orderer.orderertype == "kafka":
+#@   if config.orderer.ordererType == "kafka":
 #@     for i in range(0, config.kafka.numKafka):
 ---
 apiVersion: v1

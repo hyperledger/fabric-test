@@ -84,13 +84,13 @@
 #@ end
 #@ def orderer(config):
 #@   result = {}
-#@   batch_size_options = config.orderer.batchsize
+#@   batch_size_options = config.orderer.batchSize
 #@   artifactsLocation = config.artifactsLocation
 #@   if artifactsLocation.endswith("/") == False:
 #@     artifactsLocation = artifactsLocation + "/"
 #@   end
-#@   batchSize = {"MaxMessageCount": batch_size_options.maxmessagecount, "AbsoluteMaxBytes": batch_size_options.absolutemaxbytes, "PreferredMaxBytes": batch_size_options.preferredmaxbytes}
-#@   if(config.orderer.orderertype=="etcdraft"):
+#@   batchSize = {"MaxMessageCount": batch_size_options.maxMessageCount, "AbsoluteMaxBytes": batch_size_options.absoluteMaxBytes, "PreferredMaxBytes": batch_size_options.preferredMaxBytes}
+#@   if(config.orderer.ordererType=="etcdraft"):
 #@     consenters = []
 #@     port1 = 30000
 #@     etcd_options = config.orderer.etcdraftOptions
@@ -103,17 +103,17 @@
 #@       end
 #@     end
 #@     options = {"TickInterval": etcd_options.tickInterval, "ElectionTick": etcd_options.electionTick, "HeartbeatTick": etcd_options.heartbeatTick, "MaxInflightBlocks": etcd_options.maxInflightBlocks, "SnapshotIntervalSize": etcd_options.snapshotIntervalSize}
-#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.ordererCapabilities, "EtcdRaft":{"Consenters":consenters, "Options":options}}
-#@   elif (config.orderer.orderertype == "kafka"):
+#@     result = {"OrdererType": config.orderer.ordererType, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchTimeOut, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.ordererCapabilities, "EtcdRaft":{"Consenters":consenters, "Options":options}}
+#@   elif (config.orderer.ordererType == "kafka"):
 #@     brokersList = []
 #@     kafka = {}
 #@     for i in range(0, config.kafka.numKafka):
 #@       brokersList.append("kafka{}:9092".format(i))
 #@     end
 #@     kafka = {"Brokers": brokersList}
-#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "kafka": kafka, "Organizations": organizations(config, "orderer"),"Policies": policies("orderer"),"Capabilities": config.ordererCapabilities}
+#@     result = {"OrdererType": config.orderer.ordererType, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchTimeOut, "BatchSize": batchSize, "kafka": kafka, "Organizations": organizations(config, "orderer"),"Policies": policies("orderer"),"Capabilities": config.ordererCapabilities}
 #@   else:
-#@     result = {"OrdererType": config.orderer.orderertype, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchtimeout, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.ordererCapabilities}
+#@     result = {"OrdererType": config.orderer.ordererType, "Addresses": ordererHosts(config), "BatchTimeout": config.orderer.batchTimeOut, "BatchSize": batchSize, "Organizations": organizations(config, "orderer"), "Policies": policies("orderer"), "Capabilities": config.ordererCapabilities}
 #@   end
 #@   return result
 #@ end

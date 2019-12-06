@@ -31,13 +31,13 @@ artifactsLocation: .
 #! Orderer Config Settings
 orderer:
 #! Consensus type
-  orderertype: etcdraft
-  batchsize:
-    maxmessagecount: 100
-    absolutemaxbytes: 10 MB
-    preferredmaxbytes: 2 MB
-  batchtimeout: 2s
-#! Etcd raft options and this will be used when orderertype is
+  ordererType: etcdraft
+  batchSize:
+    maxMessageCount: 100
+    absoluteMaxBytes: 10 MB
+    preferredMaxBytes: 2 MB
+  batchTimeOut: 2s
+#! Etcd raft options and this will be used when ordererType is
 #! selected as etcdraft
   etcdraftOptions:
     tickInterval: 500ms
@@ -48,7 +48,7 @@ orderer:
 
 #! Not being used for smoke test suite
 #! Number of kafka and zookeeper to be launched in network
-#! when orderertype is kafka
+#! when ordererType is kafka
 kafka:
   numKafka: 5
   #! number of kafka replications for each channel
