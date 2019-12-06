@@ -146,7 +146,7 @@
 #@       end
 #@       ports = ["{}:{}".format(ordererUniquerPort,ordererUniquerPort), "{}:{}".format(ordererHealthCheckPort,8443)]
 #@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name}
-#@       if config.orderer.orderertype == "kafka":
+#@       if config.orderer.ordererType == "kafka":
 #@         services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name, "depends_on":kafkaList(config.kafka.numKafka)}
 #@       end
 #@       ordererUniquerPort += 1
@@ -222,7 +222,7 @@
 #@ end
 version: '2'
 #@ caList(config)
-#@ if config.orderer.orderertype == "kafka":
+#@ if config.orderer.ordererType == "kafka":
 #@   kafka_zookeepers(config.kafka)
 #@ end
 #@ if config.dbType == "couchdb":

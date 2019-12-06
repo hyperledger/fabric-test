@@ -6,7 +6,7 @@
 #! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1 or 2.0.0
 #! Development stream images are pulled from
 #! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable or 2.0.0-stable
-fabricVersion: 1.4.4-stable
+fabricVersion: 1.4.5-stable
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers
@@ -29,13 +29,13 @@ artifactsLocation: /home/testuser/go/src/github.com/hyperledger/fabric-test/fabr
 #! Orderer Config Settings
 orderer:
 #! Consensus type
-  orderertype: kafka
-  batchsize:
-    maxmessagecount: 500
-    absolutemaxbytes: 10 MB
-    preferredmaxbytes: 2 MB
-  batchtimeout: 2s
-#! Etcd raft options and this will be used when orderertype is
+  ordererType: kafka
+  batchSize:
+    maxMessageCount: 500
+    absoluteMaxBytes: 10 MB
+    preferredMaxBytes: 2 MB
+  batchTimeOut: 2s
+#! Etcd raft options and this will be used when ordererType is
 #! selected as etcdraft
   etcdraftOptions:
     tickInterval: 500ms
@@ -45,7 +45,7 @@ orderer:
     snapshotIntervalSize: 100 MB
 
 #! Number of kafka and zookeeper to be launched in network
-#! when orderertype is kafka
+#! when ordererType is kafka
 kafka:
   numKafka: 5
   #! number of kafka replications for each channel

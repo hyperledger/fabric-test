@@ -339,7 +339,7 @@
 #@ end
 
 #@ config = data.values
-#@ if config.orderer.orderertype == "kafka":
+#@ if config.orderer.ordererType == "kafka":
 #@   for i in range(0, config.kafka.numZookeepers):
 ---
 apiVersion: v1

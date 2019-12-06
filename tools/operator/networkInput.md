@@ -18,12 +18,12 @@
    artifactsLocation: /home/testuser/go/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
 
    orderer:
-      orderertype: kafka
-      batchsize:
-         maxmessagecount: 500
-         absolutemaxbytes: 10 MB
-         preferredmaxbytes: 2 MB
-      batchtimeout: 2s
+      ordererType: kafka
+      batchSize:
+         maxMessageCount: 500
+         absoluteMaxBytes: 10 MB
+         preferredMaxBytes: 2 MB
+      batchTimeOut: 2s
 
       etcdraftOptions:
          tickInterval: 500ms
@@ -174,52 +174,52 @@
    - Description: `orderer` section is used to define configuration settings for orderer
    system channel
 
-      #### *orderertype*
+      #### *ordererType*
 
-      - Description: `orderertype` is used to define consensus type to be used in fabric
+      - Description: `ordererType` is used to define consensus type to be used in fabric
       network
       - Supported Values: solo, kafka, etcdraft
-      - Example: `orderertype: kafka`
+      - Example: `ordererType: kafka`
 
-      #### *batchsize*
+      #### *batchSize*
 
-      - Description: `batchsize` section is used to define block settings in fabric
+      - Description: `batchSize` section is used to define block settings in fabric
       network
 
-         ##### *maxmessagecount*
+         ##### *maxMessageCount*
 
-         - Description: `maxmessagecount` is used to set maximum messages per block in
+         - Description: `maxMessageCount` is used to set maximum messages per block in
          fabric network
          - Supported Values: Integer to set maximum messages allowed in a batch
-         - Example: `maxmessagecount: 10`
+         - Example: `maxMessageCount: 10`
 
-         ##### absolutemaxbytes
+         ##### absoluteMaxBytes
 
-         - Description: `absolutemaxbytes` is used to set absolute maximum number
+         - Description: `absoluteMaxBytes` is used to set absolute maximum number
          of bytes
          allowed for the serialized messages in a batch
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set value for `absolutemaxbytes`
-         - Example: `absolutemaxbytes: 10 MB`
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set value for `absoluteMaxBytes`
+         - Example: `absoluteMaxBytes: 10 MB`
 
-         ##### preferredmaxbytes
+         ##### preferredMaxBytes
 
-         - Description: `preferredmaxbytes` is used to set preferred maximum number
+         - Description: `preferredMaxBytes` is used to set preferred maximum number
          of bytes
          allowed for the serialized messages in a batch
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set value for `preferredmaxbytes`
-         - Example: `preferredmaxbytes: 2 MB`
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set value for `preferredMaxBytes`
+         - Example: `preferredMaxBytes: 2 MB`
 
-      #### *batchtimeout*
+      #### *batchTimeOut*
 
-      - Description: `batchtimeout` is used to wait before creating a batch in fabric
+      - Description: `batchTimeOut` is used to wait before creating a batch in fabric
       network
       - Supported Values: Value in time units to wait before creating a batch
-      - Example: `batchtimeout: 2s`
+      - Example: `batchTimeOut: 2s`
 
       #### *etcdraftOptions*
 
       - Description: `etcdraftOptions` section is referred and used only when
-      `orderertype` is set as `etcdraft`. The following are `etcdfraft` configurations:
+      `ordererType` is set as `etcdraft`. The following are `etcdfraft` configurations:
 
          ##### tickInterval
 
@@ -258,7 +258,7 @@
 
    ### **kafka**
 
-   - Description: `kafka` section is used when `orderertype` as `kafka` and to
+   - Description: `kafka` section is used when `ordererType` as `kafka` and to
    define number of kafka's, number of zookeeper's to be launched and number
    of kafka replications to have in kafka cluster. Refer to
    <https://kafka.apache.org/documentation/> for more information about kafka
@@ -582,7 +582,7 @@
          ##### kafka:
 
          - Description: `kafka` Section is used to list pod resources for all
-         kafka's in fabric network when `orderertype` is set as `kafka`
+         kafka's in fabric network when `ordererType` is set as `kafka`
          For example:
          ```yaml
          kafka:
