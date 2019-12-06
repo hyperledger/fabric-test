@@ -1978,7 +1978,7 @@ async function performance_main() {
                             output["channel name"] = channelName
                             output["chaincode ID"] = chaincode_id
                             logger.info('[performance_main] pte-main:completed:');
-                            if ((output["Total transactions"]["sent"] == output["Total transactions"]["received"]) && (output["Total transactions"]["sent"] != 0)) {
+                            if ((output["Total transactions"]["sent"]) && (output["Total transactions"]["sent"] == output["Total transactions"]["received"]) && (output["Total transactions"]["sent"] != 0)) {
                                 output["Test Result"] = "PASS"
                                 logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
                             } else {
