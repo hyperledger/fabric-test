@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"os"
+	"log"
 
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
@@ -159,6 +161,15 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	return nil
 }
 
+func writeLogToAFile() {
+	f, err := os.OpenFile("text.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+}
+
 func main()  {
 
 	flag.Parse()
@@ -168,6 +179,12 @@ func main()  {
 	if *kubeConfigPath != "" {
 		env = "k8s"
 	}
-
+	f, err := os.OpenFile("/tmp/orders.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	wrt := io.MultiWriter(f)
+	log.SetOutput(wrt)
 	doAction(*action, env, *kubeConfigPath, *inputFilePath)
 }

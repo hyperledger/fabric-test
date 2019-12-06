@@ -86,8 +86,9 @@ for i in ${ORDERERS[*]}
 do
   kubectl --kubeconfig=$KUBECONFIG delete statefulsets $i
 done
-
-kubectl --kubeconfig=$KUBECONFIG apply -f $PWD/../configFiles/fabric-k8s-pods.yaml
+ 
+CURRENT_DIRECTORY=$(cd `dirname $0` && pwd)
+kubectl --kubeconfig=$KUBECONFIG apply -f $CURRENT_DIRECTORY/../configFiles/fabric-k8s-pods.yaml
 
 sleep 180s
 
