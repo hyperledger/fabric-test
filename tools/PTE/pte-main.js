@@ -1984,7 +1984,8 @@ async function performance_main() {
                             } else {
                                 output["Test Result"] = "FAIL"
                                 logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
-                                throw new Error('[performance_main] Test ran, but failed with errors. Exiting... \n pteReport: %s', JSON.stringify(output, null, 4));
+                                const errMsg = '[performance_main] Test ran, but failed with errors. Exiting... \n pteReport: ' + JSON.stringify(output, null, 4)
+                                throw new Error(errMsg);
                             }
 
                         }
