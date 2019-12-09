@@ -75,7 +75,7 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 	}
 
 	contents, _ := ioutil.ReadFile(networkSpecPath)
-	stringContents := strings.Split(string(contents), "artifacts_location")
+	stringContents := strings.Split(string(contents), "artifactsLocation")
 	finalContents := stringContents[0] + "orderer: \n" + strings.Split(stringContents[1], "orderer:")[1]
 	config, err := network.GetConfigData(networkSpecPath)
 	if err != nil {
@@ -92,7 +92,7 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 		config.ArtifactsLocation = paths.JoinPath(currentDir, config.ArtifactsLocation)
 	}
 
-	finalContents = finalContents + fmt.Sprintf("artifacts_location: %s\n", config.ArtifactsLocation)
+	finalContents = finalContents + fmt.Sprintf("artifactsLocation: %s\n", config.ArtifactsLocation)
 	contents = []byte(finalContents)
 	contents = append([]byte("#@data/values \n"), contents...)
 	nodeportIP := ""

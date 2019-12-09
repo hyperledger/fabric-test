@@ -5,11 +5,11 @@
 package networkspec
 
 type Config struct {
-	ArtifactsLocation    string                 `yaml:"artifacts_location,omitempty"`
-	OrdererOrganizations []OrdererOrganizations `yaml:"orderer_organizations,omitempty"`
-	PeerOrganizations    []PeerOrganizations    `yaml:"peer_organizations,omitempty"`
+	ArtifactsLocation    string                 `yaml:"artifactsLocation,omitempty"`
+	OrdererOrganizations []OrdererOrganizations `yaml:"ordererOrganizations,omitempty"`
+	PeerOrganizations    []PeerOrganizations    `yaml:"peerOrganizations,omitempty"`
 	Orderer              struct {
-		OrdererType string `yaml:"orderertype,omitempty"`
+		OrdererType string `yaml:"ordererType,omitempty"`
 	} `yaml:"orderer,omitempty"`
 	NumChannels             int               `yaml:"num_channels,omitempty"`
 	TLS                     string            `yaml:"tls,omitempty"`
@@ -25,48 +25,22 @@ type Config struct {
 
 type OrdererOrganizations struct {
 	Name        string `yaml:"name,omitempty"`
-	MSPID       string `yaml:"msp_id,omitempty"`
-	NumOrderers int    `yaml:"num_orderers,omitempty"`
-	NumCA       int    `yaml:"num_ca,omitempty"`
+	MSPID       string `yaml:"mspId,omitempty"`
+	NumOrderers int    `yaml:"numOderers,omitempty"`
+	NumCA       int    `yaml:"numCa,omitempty"`
 }
 
 type KafkaConfig struct {
-	NumKafka             int `yaml:"num_kafka,omitempty"`
-	NumKafkaReplications int `yaml:"num_kafka_replications,omitempty"`
-	NumZookeepers        int `yaml:"num_zookeepers,omitempty"`
+	NumKafka             int `yaml:"numKafka,omitempty"`
+	NumKafkaReplications int `yaml:"numKafkaReplications,omitempty"`
+	NumZookeepers        int `yaml:"numZookeepers,omitempty"`
 }
 
 type PeerOrganizations struct {
 	Name     string `yaml:"name,omitempty"`
-	MSPID    string `yaml:"msp_id,omitempty"`
-	NumPeers int    `yaml:"num_peers,omitempty"`
-	NumCA    int    `yaml:"num_ca,omitempty"`
-}
-
-type MSP struct {
-	AdminPem   string `json:"admin_pem"`
-	CAPem      string `json:"ca_pem"`
-	TLSPem     string `json:"tls_pem"`
-	Pem        string `json:"pem"`
-	PrivateKey string `json:"private_key"`
-}
-
-type TLS struct {
-	CACert     string `json:"ca_cert"`
-	ServerCert string `json:"server_cert"`
-	ServerKey  string `json:"server_key"`
-}
-
-type CA struct {
-	Pem        string `json:"pem"`
-	PrivateKey string `json:"private_key"`
-}
-
-type Component struct {
-	Msp   MSP `json:"msp"`
-	TLS   TLS `json:"tls"`
-	CA    CA  `json:"ca"`
-	TLSCa CA  `json:"tlsca"`
+	MSPID    string `yaml:"mspId,omitempty"`
+	NumPeers int    `yaml:"numPeers,omitempty"`
+	NumCA    int    `yaml:"numCa,omitempty"`
 }
 
 type Orderer struct {
