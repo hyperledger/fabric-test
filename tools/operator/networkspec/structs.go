@@ -11,15 +11,15 @@ type Config struct {
 	Orderer              struct {
 		OrdererType string `yaml:"ordererType,omitempty"`
 	} `yaml:"orderer,omitempty"`
-	NumChannels             int               `yaml:"num_channels,omitempty"`
+	NumChannels             int               `yaml:"numChannels,omitempty"`
 	TLS                     string            `yaml:"tls,omitempty"`
 	EnableNodeOUs           bool              `yaml:"enableNodeOUs,omitempty"`
-	OrdererCapabilities     map[string]string `yaml:"orderer_capabilities,omitempty"`
-	ChannelCapabilities     map[string]string `yaml:"channel_capabilities,omitempty"`
-	ApplicationCapabilities map[string]string `yaml:"application_capabilities,omitempty"`
+	OrdererCapabilities     map[string]string `yaml:"ordererCapabilities,omitempty"`
+	ChannelCapabilities     map[string]string `yaml:"channelCapabilities,omitempty"`
+	ApplicationCapabilities map[string]string `yaml:"applicationCapabilities,omitempty"`
 	K8s                     struct {
-		DataPersistence string `yaml:"data_persistence,omitempty"`
-		ServiceType     string `yaml:"service_type,omitempty"`
+		DataPersistence string `yaml:"dataPersistence,omitempty"`
+		ServiceType     string `yaml:"serviceType,omitempty"`
 	} `yaml:"k8s,omitempty"`
 }
 

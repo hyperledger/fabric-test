@@ -52,7 +52,6 @@ func (d DockerCompose) LaunchLocalNetwork(config networkspec.Config) error {
 //UpgradeLocalNetwork -- To upgrade the network in the local environment
 func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 
-	//var network nl.Network
 	d.Config = config
 	configPath := paths.ConfigFilePath("docker")
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"down"}}
@@ -97,7 +96,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	}
 	
 	configDirPath := paths.ConfigFilesDir()
-	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s/backup:/tmp/backup", configDirPath), "busybox", "rm", "-rf", "/tmp/backup/*"}
+	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s/backup:/opt/backup", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup/*)"}
 	_, err = networkclient.ExecuteCommand("docker", cleanArgs, true)
 	if err != nil {
 		return err
@@ -107,6 +106,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		return err
 	}
+	
 	err = d.removeChainCodeContainersAndImages()
 	if err != nil {
 		return err

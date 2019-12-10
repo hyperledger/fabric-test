@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash
+set -x
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
