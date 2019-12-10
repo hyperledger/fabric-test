@@ -8,13 +8,13 @@
 #! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable or 2.0.0-stable
 fabricVersion: 2.0.0-stable
 #! peer database ledger type (couchdb, goleveldb)
-dbType: goleveldb
+dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers
 peerFabricLoggingSpec: info
 #! This parameter is used to define fabric logging spec in orderers
 ordererFabricLoggingSpec: info
 #! tls in the network (true, false or mutual(mutualtls))
-tls: false
+tls: mutual
 #! fabric metrics with prometheus (true/false)
 metrics: true
 #! true - enable gossip and dynamic leader election
@@ -24,12 +24,12 @@ gossipEnable: true
 enableNodeOUs: true
 
 #! Location where crypto-config and channel-artifacts are stored
-artifactsLocation: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
+artifactsLocation: .
 
 #! Orderer Config Settings
 orderer:
 #! Consensus type
-  ordererType: kafka
+  ordererType: etcdraft
   batchSize:
     maxMessageCount: 100
     absoluteMaxBytes: 99 MB
@@ -44,18 +44,10 @@ orderer:
     maxInflightBlocks: 5
     snapshotIntervalSize: 100 MB
 
-#! Number of kafka and zookeeper to be launched in network
-#! when ordererType is kafka
-kafka:
-  numKafka: 5
-  #! number of kafka replications for each channel
-  numKafkaReplications: 3
-  numZookeepers: 3
-
 ordererOrganizations:
 - name: ordererorg1
   mspId: OrdererOrg1
-  numOderers: 3
+  numOderers: 5
   numCa: 1
 
 peerOrganizations:
@@ -130,12 +122,12 @@ k8s:
       requests:
          cpu: "2"
          memory: 3Gi
-    kafka:
+    couchdb:
       limits:
          cpu: "1"
          memory: 3Gi
       requests:
-         cpu: "0.5"
+         cpu: "1"
          memory: 3Gi
 
 #!#! TODO: future enhancement to read individual profiles for each channel creation.

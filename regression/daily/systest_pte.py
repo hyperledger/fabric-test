@@ -502,7 +502,7 @@ class Perf_Stress_LevelDB(unittest.TestCase):
         '''
         Description:
 
-        FAB-7647-1i.sh latency for single thread, 1 transaction at a time sequentially, batchsize 1
+        FAB-7647-1i.sh latency for single thread, 1 transaction at a time sequentially, batchSize 1
         '''
 
         # Run the test scenario: launch network and run the invokes and query tests.

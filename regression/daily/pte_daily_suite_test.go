@@ -279,7 +279,7 @@ var _ = Describe("NL+PTE Test Suite", func() {
 
 		/*
 		   Description:
-		   FAB-7647-1i.sh latency for single thread, 1 transaction at a time sequentially, batchsize 1
+		   FAB-7647-1i.sh latency for single thread, 1 transaction at a time sequentially, batchSize 1
 		*/
 		It("test_FAB7647_1i_latency", func() {
 			_, err := networkclient.ExecuteCommand("./FAB-7647-1i.sh", []string{}, true)
