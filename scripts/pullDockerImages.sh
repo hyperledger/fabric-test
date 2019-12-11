@@ -17,11 +17,11 @@ fi
 
 echo "======== PULL DOCKER IMAGES ========"
 ##########################################################
-# Pull and Tag the fabric and fabric-ca images from Nexus
+# Pull and Tag the fabric and fabric-ca images from Artifactory
 ##########################################################
-echo "Fetching images from Nexus"
-NEXUS_URL=nexus3.hyperledger.org:10001
-ORG_NAME="hyperledger/fabric"
+echo "Fetching images from Artifactory"
+ARTIFACTORY_URL=hyperledger-fabric.jfrog.io
+ORG_NAME="hyperledger"
 ARCH=$(go env GOARCH)
 LATEST_TAG=${LATEST_TAG:=$ARCH-latest}
 echo "---------> REPO:" $REPO
@@ -34,31 +34,31 @@ dockerTag() {
 
   for IMAGE in $IMAGELIST; do
     echo
-    echo "Image: $IMAGE"
-    if ! docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG > /dev/null; then
+    echo "Image: fabric-$IMAGE"
+    if ! docker pull $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG > /dev/null; then
            echo  "FAILED: Docker Pull Failed on $IMAGE"
            exit 1
     fi
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$LATEST_TAG
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$VERSION
+    docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE
+    docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE:$LATEST_TAG
+    docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE:$VERSION
     if [ $IMAGE == javaenv ]; then
-        docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-$VERSION
+        docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE:$ARCH-$VERSION
     fi
-    echo "$ORG_NAME-$IMAGE:$LATEST_TAG"
-    echo "Deleting Nexus docker images: $IMAGE"
-    docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG
+    echo "Pulled: $ORG_NAME/fabric-$IMAGE:$LATEST_TAG"
+    echo "Deleting Artifactory docker images: fabric-$IMAGE"
+    docker rmi -f $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG
   done
 }
 
 dockerThirdParty() {
   for IMAGE in kafka zookeeper couchdb; do
-    echo "$ORG_NAME-$IMAGE"
-    if ! docker pull $ORG_NAME-$IMAGE:latest > /dev/null; then
+    echo "$ORG_NAME/fabric-$IMAGE"
+    if ! docker pull $ORG_NAME/fabric-$IMAGE:latest > /dev/null; then
        echo  "FAILED: Docker Pull Failed on $IMAGE"
        exit 1
     fi
-    docker tag $ORG_NAME-$IMAGE:latest $ORG_NAME-$IMAGE:$ARCH-latest
+    docker tag $ORG_NAME/fabric-$IMAGE:latest $ORG_NAME/fabric-$IMAGE:$ARCH-latest
   done
 }
 

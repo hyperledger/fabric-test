@@ -14,11 +14,11 @@ if [ "$ARCH" = "amd64" ]; then
 fi
 echo "Arch: $ARCH"
 
-echo "Fetching binary artifacts from Nexus"
+echo "Fetching binary artifacts from Artifactory"
 echo "---------> REPO: $REPO"
 
 ##########################################################
-# Pull the binaries from Nexus
+# Pull the binaries from Artifactory
 ##########################################################
 pullBinary() {
   REPOS=$@
@@ -27,27 +27,11 @@ pullBinary() {
     echo "======== PULL $repo BINARIES ========"
     echo
 
-    # Set Nexus Snapshot URL
-    NEXUS_URL=https://nexus.hyperledger.org/content/repositories/snapshots/org/hyperledger/$repo/hyperledger-$repo-$RELEASE_VERSION/$ARCH.$RELEASE_VERSION-SNAPSHOT
-
-    # Download the maven-metadata.xml file
-    curl "$NEXUS_URL"/maven-metadata.xml > maven-metadata.xml
-    if grep -q "not found in local storage of repository" "maven-metadata.xml"; then
-        echo  "FAILED: Unable to download from $NEXUS_URL"
-        exit 1
-    else
-        # Set latest tar file to the VERSION
-        VERSION=$(grep value maven-metadata.xml | sort -u | cut -d "<" -f2|cut -d ">" -f2)
-        echo "Version: $VERSION..."
-
-        # Download tar.gz file and extract it
-        mkdir -p "$WD"/bin
-        curl "$NEXUS_URL"/hyperledger-"$repo"-$RELEASE_VERSION-"$VERSION".tar.gz | tar xz
-        rm hyperledger-"$repo"-*.tar.gz
-        rm -f maven-metadata.xml
-        echo "Finished pulling $repo..."
-        echo
-    fi
+    ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
+    curl "${ARTIFACTORY_URL}" | tar -xvz
+    rm hyperledger-"$repo"-*.tar.gz
+    echo "Finished pulling $repo..."
+    echo
   done
 }
 
