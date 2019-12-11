@@ -62,7 +62,7 @@
 #@ def caContainers(input, orgName, config):
 #@   ca_image = "hyperledger/fabric-ca:{}".format(config.fabricVersion)
 #@   if config.fabricVersion.endswith("-stable"):
-#@     ca_image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(config.fabricVersion)
+#@     ca_image="hyperledger-fabric.jfrog.io/fabric-ca:amd64-{}".format(config.fabricVersion)
 #@   end
 #@   env = [{"name": "FABRIC_CA_HOME", "value": "/etc/hyperledger/fabric-ca-server"}]
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_NAME", "value": "{}".format(input)})
@@ -159,11 +159,11 @@
 #@   dindResources = config.k8s.resources.dind
 #@   peer_image = "hyperledger/fabric-peer:{}".format(config.fabricVersion)
 #@   if config.fabricVersion.endswith("-stable"):
-#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabricVersion)})
-#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(config.fabricVersion)})
-#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(config.fabricVersion)})
-#@     env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(config.fabricVersion)})
-#@     peer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(config.fabricVersion)
+#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-{}".format(config.fabricVersion)})
+#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "hyperledger-fabric.jfrog.io/fabric-baseos:amd64-{}".format(config.fabricVersion)})
+#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-{}".format(config.fabricVersion)})
+#@     env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-{}".format(config.fabricVersion)})
+#@     peer_image="hyperledger-fabric.jfrog.io/fabric-peer:amd64-{}".format(config.fabricVersion)
 #@   end
 
 #@   if config.dbType == "couchdb":
@@ -223,7 +223,7 @@
 #@   resources = config.k8s.resources.orderers
 #@   orderer_image = "hyperledger/fabric-orderer:{}".format(config.fabricVersion)
 #@   if config.fabricVersion.endswith("-stable"):
-#@     orderer_image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(config.fabricVersion)
+#@     orderer_image="hyperledger-fabric.jfrog.io/fabric-orderer:amd64-{}".format(config.fabricVersion)
 #@   end
 #@   output = [{"name": input, "image": orderer_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["orderer"]}]
 #@   return output

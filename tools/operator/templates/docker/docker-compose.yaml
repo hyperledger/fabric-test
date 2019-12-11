@@ -41,7 +41,7 @@
 #@   orgType = "{}Organizations".format(type)
 #@   image = "hyperledger/fabric-ca:{}".format(config.fabricVersion)
 #@   if config.fabricVersion.endswith("-stable"):
-#@     image="nexus3.hyperledger.org:10001/hyperledger/fabric-ca:amd64-{}".format(config.fabricVersion)
+#@     image="hyperledger-fabric.jfrog.io/fabric-ca:amd64-{}".format(config.fabricVersion)
 #@   end
 #@   env = ["FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server"]
 #@   env.append("FABRIC_CA_SERVER_CA_NAME={}".format(container_name))
@@ -142,7 +142,7 @@
 #@       container_name = "orderer{}-{}".format(j,org.name)
 #@       image = "hyperledger/fabric-orderer:{}".format(config.fabricVersion)
 #@       if config.fabricVersion.endswith("-stable"):
-#@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-orderer:amd64-{}".format(config.fabricVersion)
+#@         image="hyperledger-fabric.jfrog.io/fabric-orderer:amd64-{}".format(config.fabricVersion)
 #@       end
 #@       ports = ["{}:{}".format(ordererUniquerPort,ordererUniquerPort), "{}:{}".format(ordererHealthCheckPort,8443)]
 #@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name}
@@ -196,11 +196,11 @@
 #@       volumes.append("/var/run/:/host/var/run/")
 #@       image = "hyperledger/fabric-peer:{}".format(config.fabricVersion)
 #@       if config.fabricVersion.endswith("-stable"):
-#@         env.append("CORE_CHAINCODE_BUILDER=nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-baseos:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-javaenv:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_NODE_RUNTIME=nexus3.hyperledger.org:10001/hyperledger/fabric-nodeenv:amd64-{}".format(config.fabricVersion))
-#@         image="nexus3.hyperledger.org:10001/hyperledger/fabric-peer:amd64-{}".format(config.fabricVersion)
+#@         env.append("CORE_CHAINCODE_BUILDER=hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-{}".format(config.fabricVersion))
+#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger-fabric.jfrog.io/fabric-baseos:amd64-{}".format(config.fabricVersion))
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME=hyperledger-fabric.jfrog.io//fabric-javaenv:amd64-{}".format(config.fabricVersion))
+#@         env.append("CORE_CHAINCODE_NODE_RUNTIME=hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-{}".format(config.fabricVersion))
+#@         image="hyperledger-fabric.jfrog.io/fabric-peer:amd64-{}".format(config.fabricVersion)
 #@       end
 #@       ports = ["7051", "{}:{}".format(peerUniquerPort,peerUniquerPort), "{}:{}".format(peerHealthCheckPort,9443)]
 #@       services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name}

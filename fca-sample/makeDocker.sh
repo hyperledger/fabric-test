@@ -18,7 +18,7 @@ export FABRIC_CA_TAG=${FABRIC_CA_TAG:-${FABRIC_TAG}}
 export NS=${NS:-hyperledger}
 export MARCH=linux-$(echo "$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 CA_BINARY_FILE=hyperledger-fabric-ca-${MARCH}-${FABRIC_CA_TAG}.tar.gz
-URL=https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric-ca/hyperledger-fabric-ca/${MARCH}-${FABRIC_CA_TAG}/${CA_BINARY_FILE}
+URL=https://github.com/hyperledger/fabric-ca/releases/download/${FABRIC_CA_TAG}/hyperledger-fabric-ca-${MARCH}-${FABRIC_CA_TAG}.tar.gz
 
 SDIR=$(dirname "$0")
 source $SDIR/scripts/env.sh
