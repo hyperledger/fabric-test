@@ -50,7 +50,6 @@ HYPERLEDGER_DIR = $(GOPATH)/src/github.com/hyperledger
 FABRIC_DIR = $(HYPERLEDGER_DIR)/fabric
 CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
 CHAINCODE-JAVA_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-java
-PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/pre_setup.sh
 PTE_IMAGE = $(DOCKER_NS)/fabric-pte
 TARGET = pte
 STABLE_TAG ?= $(ARCH)-$(BRANCH)-stable
@@ -73,7 +72,6 @@ git-init:
 
 .PHONY: pre-setup
 pre-setup:  gotools
-	@bash $(PRE_SETUP)
 
 .PHONY: ci-daily
 ci-daily: fabric pull-images pull-binaries pull-thirdparty-images daily-tests
