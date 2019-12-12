@@ -139,6 +139,7 @@
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
+#@       volumes.append("./backup/orderer{}-{}:/var/hyperledger/production/orderer".format(j, org.name))
 #@       container_name = "orderer{}-{}".format(j,org.name)
 #@       image = "hyperledger/fabric-orderer:{}".format(config.fabricVersion)
 #@       if config.fabricVersion.endswith("-stable"):
@@ -194,6 +195,7 @@
 #@       container_name = "peer{}-{}".format(j, org.name)
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("/var/run/:/host/var/run/")
+#@       volumes.append("./backup/peer{}-{}:/var/hyperledger/production".format(j, org.name))
 #@       image = "hyperledger/fabric-peer:{}".format(config.fabricVersion)
 #@       if config.fabricVersion.endswith("-stable"):
 #@         env.append("CORE_CHAINCODE_BUILDER=nexus3.hyperledger.org:10001/hyperledger/fabric-ccenv:amd64-{}".format(config.fabricVersion))
