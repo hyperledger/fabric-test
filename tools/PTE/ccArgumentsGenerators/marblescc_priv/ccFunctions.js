@@ -28,12 +28,13 @@ class ccFunctions extends ccFunctionsBase {
         this.queryMarbleOwner = 'tom';
         this.queryMarbleName = 'marble';
         this.nOwner = 100;
+        this.tsMapKey = "marble";
         this.queryMarbleDocType = 'marble';
         this.keyStart = parseInt(this.ccDfnPtr.ccOpt.keyStart);
         this.payLoadMin = parseInt(this.ccDfnPtr.ccOpt.payLoadMin);
         this.payLoadMax = parseInt(this.ccDfnPtr.ccOpt.payLoadMax);
         this.arg0 = parseInt(this.keyStart);
-        this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
+        this.logger.info('[Nid:chan:org:id=%d:%s:%s:%d ccFunctions] %s chaincode setting: keyStart=%d payLoadMin=%d payLoadMax=%d',
                  this.Nid, this.channelName, this.org, this.pid, this.ccDfnPtr.ccType, this.keyStart,
                  parseInt(this.ccDfnPtr.ccOpt.payLoadMin), parseInt(this.ccDfnPtr.ccOpt.payLoadMax));
 
@@ -42,13 +43,20 @@ class ccFunctions extends ccFunctionsBase {
             this.nOwner=parseInt(this.ccDfnPtr.invoke.nOwner);
         }
 
-        // get prefix owner name
         // moveMarbleOwner
-        // "args": ["marble", "blue","35","tom"]
-        if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
-            this.moveMarbleOwner = this.ccDfnPtr.invoke.move.args[3];
+        // transientMap: {"marble": {"name":"marble", "color":"blue","size":35,"owner":"tom","price":99}}
+        if ( this.ccDfnPtr.invoke.move ) {
+            if ( this.ccDfnPtr.invoke.move.transientMap ) {
+                this.tsMapKey = Object.keys(this.ccDfnPtr.invoke.move.transientMap)[0];
+                this.moveMarbleOwner = this.ccDfnPtr.invoke.move.transientMap[this.tsMapKey].owner;
+                this.moveMarbleName = this.ccDfnPtr.invoke.move.transientMap[this.tsMapKey].name;
+            } else {
+                if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
+                    this.moveMarbleOwner = this.ccDfnPtr.invoke.move.args[3];
+                }
+                this.moveMarbleName = this.ccDfnPtr.invoke.move.args[0];
+            }
         }
-        this.moveMarbleName=ccDfnPtr.invoke.move.args[0];
 
         // queryMarbleByOwner
         // "args": ["tom"]
@@ -77,17 +85,14 @@ class ccFunctions extends ccFunctionsBase {
 
     getInvokeArgs(txIDVar) {
         this.arg0 ++;
-        var i = 0;
-        for ( i=0; i<this.keyIdx.length; i++ ) {
-            this.testInvokeArgs[this.keyIdx[i]] = this.moveMarbleName+'_'+txIDVar+'_'+this.arg0;
-        }
-        var index=this.arg0%this.nOwner;
-        if ( this.ccDfnPtr.invoke.move.fcn == 'initMarble' ) {
-            this.testInvokeArgs[3]=this.moveMarbleOwner+'_'+txIDVar+'_'+index;
-        }
-        // marble size
-        for ( i=0; i<this.keyPayLoad.length; i++ ) {
-            this.testInvokeArgs[this.keyPayLoad[i]] = String(index);
+        if ( this.ccDfnPtr.invoke.move.transientMap ) {
+            this.testInvokeTransientMap[this.tsMapKey].name = this.moveMarbleName+'_'+txIDVar+'_'+this.arg0;
+            var index=this.arg0%this.nOwner;
+            this.testInvokeTransientMap[this.tsMapKey].size = index;
+            if ( this.ccDfnPtr.invoke.move.fcn == 'transferMarble' ) {
+                this.testInvokeTransientMap[this.tsMapKey].owner=this.moveMarbleOwner+'_'+txIDVar+'_'+index;
+            }
+            this.testInvokeTransientMapEncoded[this.tsMapKey] = Buffer.from(JSON.stringify(this.testInvokeTransientMap[this.tsMapKey])).toString("base64");
         }
     }
 

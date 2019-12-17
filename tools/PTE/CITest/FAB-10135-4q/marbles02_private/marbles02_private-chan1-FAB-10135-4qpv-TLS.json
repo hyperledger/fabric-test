@@ -36,7 +36,7 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"]
+        "org1": ["peer0org1examplecom"]
     },
     "eventOpt": {
         "timeout": "240000"
@@ -49,19 +49,10 @@
         "payLoadMin": "1024",
         "payLoadMax": "1024"
     },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
-        "fcn": "init",
-        "args": []
-    },
     "invoke": {
         "query": {
             "fcn": "readMarblePrivateDetails",
             "args": ["marble"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
         }
     },
     "ConnProfilePath": "CITest/CIConnProfiles/test-network"

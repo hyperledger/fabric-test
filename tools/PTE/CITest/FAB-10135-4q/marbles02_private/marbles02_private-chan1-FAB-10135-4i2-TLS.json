@@ -36,7 +36,7 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"]
+        "org1": ["peer0org1examplecom"]
     },
     "eventOpt": {
         "type": "FilteredBlock",
@@ -59,7 +59,8 @@
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom","99"]
+            "transientMap": {"marble": {"name":"marble", "color":"blue","size":35,"owner":"tom","price":99}},
+            "args": []
         }
     },
     "ConnProfilePath": "CITest/CIConnProfiles/test-network"

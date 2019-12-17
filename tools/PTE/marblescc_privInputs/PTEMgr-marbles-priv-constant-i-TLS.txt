@@ -1,3 +1,1 @@
 driver=pte marblescc_privInputs/runCases-marbles-priv-constant-i1-TLS.txt
-driver=pte marblescc_privInputs/runCases-marbles-priv-constant-i2-TLS.txt
-driver=pte marblescc_privInputs/runCases-marbles-priv-constant-i3-TLS.txt
