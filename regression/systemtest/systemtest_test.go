@@ -79,6 +79,7 @@ var _ = Describe("Systemtest", func() {
 		expectedInvokeStatus string
 		expectedQueryStatus  string
 		fabricTestDir        string
+		testDataDir			 string
 		testStatus           string
 		pteReportFilePath    string
 	)
@@ -88,6 +89,7 @@ var _ = Describe("Systemtest", func() {
 		kafkaTLSLogsDir = filepath.Join(fabricTestDir, "regression/systemtest/Logs/kafka_couch_tls")
 		kafkaNoTLSLogsDir = filepath.Join(fabricTestDir, "regression/systemtest/Logs/kafka_level_no_tls")
 		raftMutualLogsDir = filepath.Join(fabricTestDir, "regression/systemtest/Logs/raft_mutual_tls")
+		testDataDir = filepath.Join(fabricTestDir, "tools/testdata")
 		expectedInvokeStatus = "INVOKE Overall TEST RESULTS PASSED"
 		expectedQueryStatus = "QUERY Overall TEST RESULTS PASSED"
 		kubeconfig, envVariableExists = os.LookupEnv("KUBECONFIG")
@@ -100,7 +102,7 @@ var _ = Describe("Systemtest", func() {
 	*/
 	Describe("Kafka_Couchdb_TLS", func() {
 		It("Step 1: Tearing the network", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/network-spec.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-network-spec.yml")
 			err = launcher.Launcher("down", "k8s", kubeconfig, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -111,7 +113,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 3: Creating channels and joining peers to channel", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/samplecc-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-samplecc-test-input.yml")
 			By("Creating the channels")
 			err = testclient.Testclient("create", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
@@ -150,7 +152,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 6: Performing invokes and queries using samplejs chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/samplejs-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-samplejs-test-input.yml")
 			By("Sending invokes for samplejs")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplejsInvokesPteReport.txt", kafkaTLSLogsDir)
@@ -169,7 +171,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 7: Sbe chiancode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/sbecc-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-sbecc-test-input.yml")
 			By("Installing sbe chaincode")
 			err = testclient.Testclient("install", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
@@ -188,7 +190,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 8: Sending 8 MB invoke using samplecc chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/samplecc-8MB-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-samplecc-8MB-test-input.yml")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplecc8MBInvokesPteReport.txt", kafkaTLSLogsDir)
 			Expect(err).NotTo(HaveOccurred())
@@ -203,7 +205,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 10: Performing invokes and queries using samplecc chaincode after migrating to etcdraft", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/samplecc-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-samplecc-test-input.yml")
 			By("Sending invokes for samplecc")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("sampleccInvokesAfterMigrationPteReport.txt", kafkaTLSLogsDir)
@@ -222,7 +224,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 11: Tearing the network", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-couchdb-tls/network-spec.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-network-spec.yml")
 			err = launcher.Launcher("down", "k8s", kubeconfig, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -234,7 +236,7 @@ var _ = Describe("Systemtest", func() {
 	*/
 	Describe("Raft_CouchDB_MutualTLS_ServiceDiscovery", func() {
 		It("Step 1: Tearing the network", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/raft-couchdb-mutualtls-servdisc/network-spec.yml")
+			inputSpecPath = filepath.Join(testDataDir, "raft-couchdb-mutualtls-servdisc-network-spec.yml")
 			err = launcher.Launcher("down", "k8s", kubeconfig, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -245,7 +247,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 3: Creating channels and joining peers to channel", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/raft-couchdb-mutualtls-servdisc/samplecc-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "raft-couchdb-mutualtls-servdisc-samplecc-test-input.yml")
 			By("Creating the channels")
 			err = testclient.Testclient("create", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
@@ -284,7 +286,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 6: Performing invokes and queries using samplejs chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/raft-couchdb-mutualtls-servdisc/samplejs-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "raft-couchdb-mutualtls-servdisc-samplejs-test-input.yml")
 			By("Sending invokes for samplejs")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplejsInvokesPteReport.txt", raftMutualLogsDir)
@@ -303,7 +305,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 7: Sending 8 MB invoke using samplecc chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/raft-couchdb-mutualtls-servdisc/samplecc-8MB-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "raft-couchdb-mutualtls-servdisc-samplecc-8MB-test-input.yml")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplecc8MBInvokesPteReport.txt", raftMutualLogsDir)
 			Expect(err).NotTo(HaveOccurred())
@@ -313,7 +315,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 8: Sending 50 MB invoke using samplecc chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/raft-couchdb-mutualtls-servdisc/samplecc-50MB-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "raft-couchdb-mutualtls-servdisc-samplecc-50MB-test-input.yml")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplecc50MBInvokesPteReport.txt", raftMutualLogsDir)
 			Expect(err).NotTo(HaveOccurred())
@@ -323,7 +325,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 9: Tearing the network", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/raft-couchdb-mutualtls-servdisc/network-spec.yml")
+			inputSpecPath = filepath.Join(testDataDir, "raft-couchdb-mutualtls-servdisc-network-spec.yml")
 			err = launcher.Launcher("down", "k8s", kubeconfig, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -335,7 +337,7 @@ var _ = Describe("Systemtest", func() {
 	*/
 	Describe("Kafka_Leveldb_NoTLS", func() {
 		It("Step 1: Tearing the network", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-leveldb-notls/network-spec.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-leveldb-notls-network-spec.yml")
 			err = launcher.Launcher("down", "k8s", kubeconfig, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -346,7 +348,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 3: Creating channels and joining peers to channel", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-leveldb-notls/samplecc-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-leveldb-notls-samplecc-test-input.yml")
 			By("Creating the channels")
 			err = testclient.Testclient("create", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
@@ -385,7 +387,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 6: Performing invokes and queries using samplejs chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-leveldb-notls/samplejs-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-leveldb-notls-samplejs-test-input.yml")
 			By("Sending invokes for samplejs")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplejsInvokesPteReport.txt", kafkaNoTLSLogsDir)
@@ -404,7 +406,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 7: Sending 8 MB invoke using samplecc chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-leveldb-notls/samplecc-8MB-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-leveldb-notls-samplecc-8MB-test-input.yml")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplecc8MBInvokesPteReport.txt", kafkaNoTLSLogsDir)
 			Expect(err).NotTo(HaveOccurred())
@@ -414,7 +416,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 8: Sending 50 MB invoke using samplecc chaincode", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-leveldb-notls/samplecc-50MB-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-leveldb-notls-samplecc-50MB-test-input.yml")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			movePTEReportFile("samplecc50MBInvokesPteReport.txt", kafkaNoTLSLogsDir)
 			Expect(err).NotTo(HaveOccurred())
@@ -424,7 +426,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 9: Tearing the network", func() {
-			inputSpecPath = filepath.Join(fabricTestDir, "tools/operator/testdata/kafka-leveldb-notls/network-spec.yml")
+			inputSpecPath = filepath.Join(testDataDir, "kafka-leveldb-notls-network-spec.yml")
 			err = launcher.Launcher("down", "k8s", kubeconfig, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
