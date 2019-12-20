@@ -1,8 +1,11 @@
 package smoke_test
 
 import (
+	"fmt"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"log"
+	"os/exec"
 
 	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
@@ -15,11 +18,16 @@ var _ = Describe("Smoke Test Suite", func() {
 			inputSpecPath string
 		)
 		It("Running end to end (old cc lifecycle)", func() {
+			out, err := exec.Command("pwd").Output()
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Printf("The date is %s\n", out)
 			inputSpecPath = "../../tools/operator/testdata/smoke-test-input.yml"
 
 			By("1) Creating channel")
 			action = "create"
-			err := testclient.Testclient(action, inputSpecPath)
+			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
 			By("2) Joining Peers to channel")
