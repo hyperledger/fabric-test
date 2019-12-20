@@ -3,9 +3,9 @@
 #! SPDX-License-Identifier: Apache-2.0
 ---
 #! fabricVersion:
-#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1
+#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.5
 #! Development stream images are pulled from
-#! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.1-stable
+#! hyperledger-fabric.jfrog.io/, e.g. 1.4.5-stable
 fabricVersion: 1.4.5-stable
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb

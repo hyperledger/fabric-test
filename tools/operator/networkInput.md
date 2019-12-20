@@ -116,7 +116,7 @@
    If `fabricVersion` is given without stable in it, for example: `1.4.2` or
    `latest`, it will use images from `hyperledger/` docker hub.
    If fabricVersion is given with stable in the value, it will pull images
-   from `nexus3.hyperledger.org:10001/hyperledger/`
+   from `hyeprledger-fabric.jfrog.io`
    - Supported Values: `1.4.2` or later
    - Example: `fabricVersion: 1.4.2`
    `fabricVersion: 1.4.2-stable`

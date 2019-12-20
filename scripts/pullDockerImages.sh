@@ -4,15 +4,15 @@ set -o pipefail
 REPO=$1
 
 echo "======== PULL DOCKER IMAGES ========"
-##########################################################
-# Pull and Tag the fabric and fabric-ca images from Nexus
-##########################################################
+###############################################################
+# Pull and Tag the fabric and fabric-ca images from Artifactory
+###############################################################
 WD=$GOPATH/src/github.com/hyperledger/fabric-test
 cd $WD
 
-echo "Fetching images from Nexus"
-NEXUS_URL=nexus3.hyperledger.org:10001
-ORG_NAME="hyperledger/fabric"
+echo "Fetching images from Artifactory"
+ARTIFACTORY_URL=hyperledger-fabric.jfrog.io
+ORG_NAME="hyperledger"
 ARCH=$(go env GOARCH)
 # The value for BASE_VERSION is defined in fabric-test Makefile
 LATEST_TAG=${LATEST_TAG:=$ARCH-$BASE_VERSION-stable}
@@ -27,19 +27,19 @@ dockerTag() {
   for IMAGE in $IMAGELIST; do
     echo "Image: $IMAGE"
     echo
-    docker pull $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG
-          if [ $? != 0 ]; then
+    docker pull $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG
+          if [[ $? != 0 ]]; then
              echo  "FAILED: Docker Pull Failed on $IMAGE"
              exit 1
           fi
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE
-    docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$LATEST_TAG
-    if [ $IMAGE == javaenv ]; then
-        docker tag $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG $ORG_NAME-$IMAGE:$ARCH-$BASE_VERSION
+    docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE
+    docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE:$LATEST_TAG
+    if [[ $IMAGE == javaenv ]]; then
+        docker tag $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG $ORG_NAME/fabric-$IMAGE:$ARCH-$BASE_VERSION
     fi
     echo "$ORG_NAME-$IMAGE:$LATEST_TAG"
-    echo "Deleting Nexus docker images: $IMAGE"
-    docker rmi -f $NEXUS_URL/$ORG_NAME-$IMAGE:$LATEST_TAG
+    echo "Deleting Artifactory docker images: $IMAGE"
+    docker rmi -f $ARTIFACTORY_URL/fabric-$IMAGE:$LATEST_TAG
   done
 }
 
@@ -48,12 +48,12 @@ dockerThirdParty() {
     echo "$ORG_NAME-$IMAGE"
     # 3rd party images are on dockerhub
     # The value for BASEIMAGE_RELEASE is defined in fabric-test Makefile
-    docker pull $ORG_NAME-$IMAGE:$ARCH-$BASEIMAGE_RELEASE
-    if [ $? != 0 ]; then
+    docker pull $ORG_NAME/fabric-$IMAGE:$ARCH-$BASEIMAGE_RELEASE
+    if [[ $? != 0 ]]; then
        echo  "FAILED: Docker Pull Failed on $IMAGE"
        exit 1
     fi
-    docker tag $ORG_NAME-$IMAGE:$ARCH-$BASEIMAGE_RELEASE $ORG_NAME-$IMAGE:latest
+    docker tag $ORG_NAME/fabric-$IMAGE:$ARCH-$BASEIMAGE_RELEASE $ORG_NAME-$IMAGE:latest
   done
 }
 
