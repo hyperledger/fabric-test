@@ -1,4 +1,3 @@
-tls: true
 organizations:
   - name: org1
     connProfilePath: ./connection-profile/connection_profile_org1.yaml

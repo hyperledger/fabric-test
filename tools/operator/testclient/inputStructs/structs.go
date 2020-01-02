@@ -2,7 +2,6 @@ package inputStructs
 
 //Config --
 type Config struct {
-	TLS                  string          `yaml:"tls,omitempty"`
 	OrdererSystemChannel string          `yaml:"ordererSystemChannel,omitempty"`
 	Organizations        []Organization  `yaml:"organizations,omitempty"`
 	CreateChannel        []Channel       `yaml:"createChannel,omitempty"`

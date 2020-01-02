@@ -1,4 +1,3 @@
-tls: true
 organizations:
   - name: org1
     connProfilePath: ./connection-profile/connection_profile_org1.yaml
@@ -16,7 +15,7 @@ invokes:
     nProcPerOrg: 1
     nRequest: 10
     runDur: 0
-    organizations: org1,org2
+    organizations: org1
     txnOpt:
       - mode: constant
         options:
@@ -30,32 +29,8 @@ invokes:
     ccOpt:
       ccType: ccchecker
       keyStart: 0
-      payLoadMin: 4194304
-      payLoadMax: 4194304
+      payLoadMin: 26214400
+      payLoadMax: 26214400
       payLoadType: Random
     args: "put,a1,1"
 
-  - channelName: testorgschannel1
-    name: samplecc
-    targetPeers: OrgAnchor
-    nProcPerOrg: 1
-    nRequest: 10
-    runDur: 0
-    organizations: org1,org2
-    txnOpt:
-      - mode: constant
-        options:
-          constFreq: 100
-          devFreq: 0
-    queryCheck: 100
-    eventOpt:
-      type: FilteredBlock
-      listener:  Block
-      timeout: 3600000
-    ccOpt:
-      ccType: ccchecker
-      keyStart: 0
-      payLoadMin: 4194304
-      payLoadMax: 4194304
-      payLoadType: Random
-    args: "put,a1,1"

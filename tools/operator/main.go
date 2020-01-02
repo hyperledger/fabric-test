@@ -21,7 +21,7 @@ import (
 
 var inputFilePath = flag.String("i", "", "Input file path (required)")
 var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
-var action = flag.String("a", "", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
+var action = flag.String("a", "up", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
 
 func validateArguments(networkSpecPath *string, kubeConfigPath *string) error {
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"errors"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -64,6 +65,9 @@ func (c ConnProfile) updateConnectionProfilePerOrg(organizations []inputStructs.
 
 	var err error
 	connectionProfilesList := []string{}
+	if len(inputArgs) < 3 || len(inputArgs) > 4{
+		return errors.New("Incorrect number of arguments passed")
+	}
 	action, orgName, channelName := inputArgs[0], inputArgs[1], inputArgs[2]
 	connProfilePath := paths.GetConnProfilePathForOrg(orgName, organizations)
 	connectionProfilesList = append(connectionProfilesList, connProfilePath)
