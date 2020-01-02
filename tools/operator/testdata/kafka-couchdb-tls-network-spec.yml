@@ -48,6 +48,8 @@ orderer:
 #! when ordererType is kafka
 kafka:
   numKafka: 5
+  #! Kafka Sarama version
+  kafkaVersion: 1.0.2
   #! number of kafka replications for each channel
   numKafkaReplications: 3
   numZookeepers: 3

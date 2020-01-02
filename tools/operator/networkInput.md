@@ -19,6 +19,7 @@
 
    orderer:
       ordererType: kafka
+      kafkaVersion: 1.0.2
       batchSize:
          maxMessageCount: 500
          absoluteMaxBytes: 10 MB
@@ -34,6 +35,7 @@
 
    kafka:
       numKafka: 5
+      kafkaVersion: 1.0.2
       numKafkaReplications: 3
       numZookeepers: 3
 
@@ -270,6 +272,11 @@
       - Supported Values: Value to launch number of kafka in fabric network.
       Supports value to be 3 or higher
       - Example: `numKafka: 5`
+
+      #### *kafkaVersion*
+
+      - Description: `kafkaVersion` is used to define the kafka Sarama Version (Applicable only on kafka configuration)
+      - Example: `kafkaVersion: 1.0.2`
 
       #### *numKafkaReplications*
 

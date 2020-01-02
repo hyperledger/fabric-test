@@ -188,6 +188,7 @@
 #@   env.append({"name": "ORDERER_GENERAL_LISTENPORT", "value": "{}".format(ordererUniquePort)})
 #@   env.append({"name": "ORDERER_GENERAL_GENESISMETHOD", "value": "file"})
 #@   env.append({"name": "FABRIC_LOGGING_SPEC", "value": config.ordererFabricLoggingSpec})
+#@   env.append({"name": "ORDERER_KAFKA_VERSION", "value": "{}".format(config.kafka.kafkaVersion)})
 #@   if config.tls == "mutual":
 #@     env.append({"name": "ORDERER_GENERAL_TLS_CLIENTROOTCAS", "value": "[{}]".format(", ".join(mutualTLS(config, "clientrootca"))) })
 #@     env.append({"name": "ORDERER_GENERAL_TLS_CLIENTAUTHREQUIRED", "value": "true"})

@@ -148,6 +148,7 @@
 #@       ports = ["{}:{}".format(ordererUniquerPort,ordererUniquerPort), "{}:{}".format(ordererHealthCheckPort,8443)]
 #@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name}
 #@       if config.orderer.ordererType == "kafka":
+#@         env.append("ORDERER_KAFKA_VERSION={}".format(config.kafka.kafkaVersion))
 #@         services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name, "depends_on":kafkaList(config.kafka.numKafka)}
 #@       end
 #@       ordererUniquerPort += 1
