@@ -14,7 +14,6 @@ variables:
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   GO_VER: 1.12.12
   NODE_VER: 10.x
-  PYTHON_VER: 2.7
 
 jobs:
 - job: VerifyBuild
@@ -22,20 +21,15 @@ jobs:
     vmImage: ubuntu-18.04
   steps:
   - template: templates/install_deps.yml
-  - checkout: self
-    path: 'go/src/github.com/hyperledger/fabric-test'
-    displayName: Checkout Fabric Test Code
   - script: make ci-smoke
     displayName: Run Smoke Tests
-  - script: |
-      mkdir -p logs
-      cp -R tools/PTE/CITest/Logs/*.* logs
-    displayName: Copy Logs
   - task: PublishBuildArtifacts@1
+    condition: always() # publish either way
     inputs:
-      pathtoPublish: 'logs'
+      pathtoPublish: 'tools/PTE/CITest/Logs'
       artifactName: 'Logs'
   - task: PublishTestResults@2
+    condition: always() # publish either way
     inputs:
       testResultsFormat: 'JUnit'
       testResultsFiles: 'regression/smoke/results*.xml'
