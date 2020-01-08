@@ -1,6 +1,5 @@
 #!/bin/bash -e
 
-echo $#
 if [ $# != 6 ]; then
   echo "Invalid number of arguments. Usage:"
   echo "./migrateToRaft.sh <kubeconfig path> <MSPID> <artifactsLocation> <ordererOrganizations list> <numOrderer in each org> <numChannels>"
@@ -9,6 +8,8 @@ fi
 
 export KUBECONFIG=$1
 export CORE_PEER_LOCALMSPID=$2
+export CONSENSUS_TYPE=etcdraft
+export CONSENSUS_STATE=STATE_MAINTENANCE
 ARTIFACTS_LOCATION=$3
 IFS=,
 ORDERER_ORGS=($4)
@@ -19,10 +20,12 @@ ORDERERS=()
 CONSENTERS=()
 CHANNELS=("orderersystemchannel")
 PORT=30000
+FLAG=0
+VALIDATE_BLOCK=false
 if [[ "$ARTIFACTS_LOCATION" == */ ]]; then
   ARTIFACTS_LOCATION="${ARTIFACTS_LOCATION::-1}"
 fi
-
+CURRENT_DIR=$(cd `dirname $0` && pwd)
 for j in ${!ORDERER_ORGS[@]}
 do
   for (( i=0; i < ${NUM_ORDERERS[$j]}; ++i ))
@@ -43,22 +46,18 @@ do
 done
 
 ORDERER_ORG=${ORDERER_ORGS[0]}
+export ORDERER_NAME=orderer0-$ORDERER_ORG
+export FABRIC_CFG_PATH=$PWD/../../fabric/.build/config/
 export CORE_PEER_MSPCONFIGPATH="$ARTIFACTS_LOCATION/crypto-config/ordererOrganizations/$ORDERER_ORG/users/Admin@$ORDERER_ORG/msp"
 export CORE_PEER_TLS_ROOTCERT_FILE="$ARTIFACTS_LOCATION/crypto-config/ordererOrganizations/$ORDERER_ORG/orderers/orderer0-$ORDERER_ORG.$ORDERER_ORG/tls/ca.crt"
-
-export ORDERER_NAME=orderer0-$ORDERER_ORG
 NODEPORT=$(kubectl --kubeconfig=$KUBECONFIG get -o jsonpath="{.spec.ports[0].nodePort}" services $ORDERER_NAME)
 NODEIP=$(kubectl --kubeconfig=$KUBECONFIG get nodes -o jsonpath='{ $.items[*].status.addresses[?(@.type=="ExternalIP")].address }' | cut -d' ' -f1)
 export CORE_PEER_ADDRESS=$NODEIP:$NODEPORT
-
-export FABRIC_CFG_PATH=$PWD/../../fabric/.build/config/
-
 rm -rf config
 mkdir config
 cd config/
 
 migrate(){
-
   CHANNEL_NAME=$2
   peer channel fetch config config_block.pb -o $CORE_PEER_ADDRESS -c $CHANNEL_NAME --tls --cafile $CORE_PEER_TLS_ROOTCERT_FILE --ordererTLSHostnameOverride $ORDERER_NAME
   configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
@@ -70,17 +69,44 @@ migrate(){
   echo '{"payload":{"header":{"channel_header":{"channel_id":"'$CHANNEL_NAME'", "type":2}},"data":{"config_update":'$(cat modified_update.json)'}}}' | jq . > modified_update_in_envelope.json
   configtxlator proto_encode --input modified_update_in_envelope.json --type common.Envelope --output modified_update_in_envelope.pb
   peer channel update -f modified_update_in_envelope.pb -c $CHANNEL_NAME -o $CORE_PEER_ADDRESS --tls --cafile $CORE_PEER_TLS_ROOTCERT_FILE --ordererTLSHostnameOverride $ORDERER_NAME
-   rm *.json *.pb
+  rm *.json *.pb
+  cd $CURRENT_DIR
+}
+
+modifyEnvVarForBlockAndConsensusCheck(){
+  if [[ "$1" == "block" ]]; then
+    export VALIDATE_BLOCK=true
+    export CONSENSUS_CHECK=false
+  else
+    export VALIDATE_BLOCK=false
+    export CONSENSUS_CHECK=true
+  fi
 }
 
 for i in ${CHANNELS[*]}
 do
+  echo "--------------------------------------------------------------------------"
   echo "Config update to change state to Maintenance for channel $i "
+  echo "--------------------------------------------------------------------------"
   migrate '"state":"STATE_MAINTENANCE"' $i
   sleep 5
+  echo "--------------------------------------------------------------------------"
   echo "Config update to change consensus to Etcdraft for channel $i "
+  echo "--------------------------------------------------------------------------"
   migrate '"type":"etcdraft","metadata":{"consenters":['$CONSENTERS'],"options":{"election_tick":10,"heartbeat_tick":1,"max_inflight_blocks":5,"snapshot_interval_size":104857600,"tick_interval":"500ms"}}' $i
 done
+
+echo "##########################################################################"
+echo "## Validating latest block in each orderer in etcdraft maintenance mode ##"
+echo "##########################################################################"
+modifyEnvVarForBlockAndConsensusCheck block
+./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+
+echo "##########################################################################"
+echo "### Checking the consensus type and state in etcdraft maintenance mode ###"
+echo "##########################################################################"
+modifyEnvVarForBlockAndConsensusCheck consensus
+./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
 
 for i in ${ORDERERS[*]}
 do
@@ -88,11 +114,26 @@ do
 done
 
 kubectl --kubeconfig=$KUBECONFIG apply -f $PWD/../configFiles/fabric-k8s-pods.yaml
-
 sleep 180s
 
 for i in ${CHANNELS[*]}
 do
+  echo "--------------------------------------------------------------------------"
   echo "Config update to change state to Normal for channel $i "
+  echo "--------------------------------------------------------------------------"
   migrate '"state":"STATE_NORMAL"' $i
 done
+
+echo "##########################################################################"
+echo "#### Validating latest block in each orderer in etcdraft normal mode #####"
+echo "##########################################################################"
+modifyEnvVarForBlockAndConsensusCheck block
+./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+
+echo "##########################################################################"
+echo "### Checking the consensus type and state in etcdraft maintenance mode ###"
+echo "##########################################################################"
+modifyEnvVarForBlockAndConsensusCheck consensus
+export CONSENSUS_STATE=STATE_NORMAL
+./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+rm -rf block.txt
