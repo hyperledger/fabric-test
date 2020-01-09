@@ -2,6 +2,9 @@
 
 REPO=$1
 VERSION=2.0.0
+COUCHDB_VER=2.3
+KAFKA_VER=5.3.1
+ZOOKEEPER_VER=5.3.1
 
 echo "======== VERIFYING WHETHER GOVENDOR IS INSTALLED ========"
 OUTPUT="$(which govendor)"
@@ -52,14 +55,12 @@ dockerTag() {
 }
 
 dockerThirdParty() {
-  for IMAGE in kafka zookeeper couchdb; do
-    echo "$ORG_NAME/fabric-$IMAGE"
-    if ! docker pull $ORG_NAME/fabric-$IMAGE:latest > /dev/null; then
-       echo  "FAILED: Docker Pull Failed on $IMAGE"
-       exit 1
-    fi
-    docker tag $ORG_NAME/fabric-$IMAGE:latest $ORG_NAME/fabric-$IMAGE:$ARCH-latest
-  done
+  docker pull couchdb:${COUCHDB_VER}
+  docker tag couchdb:${COUCHDB_VER} hyperledger/fabric-couchdb
+  docker pull confluentinc/cp-zookeeper:${ZOOKEEPER_VER}
+  docker tag confluentinc/cp-zookeeper:${ZOOKEEPER_VER} hyperledger/fabric-zookeeper
+  docker pull confluentinc/cp-kafka:${KAFKA_VER}
+  docker tag confluentinc/cp-kafka:${KAFKA_VER} hyperledger/fabric-kafka
 }
 
 case $REPO in
