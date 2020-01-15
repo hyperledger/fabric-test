@@ -6,6 +6,7 @@ import (
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
+	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
 //MigrateToRaft -  to migrate from solo or kafka to raft
@@ -20,7 +21,7 @@ func MigrateToRaft(config networkspec.Config, kubeConfigPath string) error {
 	ordererOrg := strings.Join(ordererOrgs[:], ",")
 	numOrderers := strings.Join(numOrderersPerOrg[:], ",")
 	args := []string{kubeConfigPath, config.OrdererOrganizations[0].MSPID, config.ArtifactsLocation, ordererOrg, numOrderers, fmt.Sprintf("%d", config.NumChannels)}
-	_, err := ExecuteCommand("./scripts/migrateToRaft.sh", args, true)
+	_, err := ExecuteCommand(paths.JoinPath(paths.ScriptsDir(), "migrateToRaft.sh"), args, true)
 	if err != nil {
 		return err
 	}

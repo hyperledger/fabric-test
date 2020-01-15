@@ -3,12 +3,13 @@ package testclient
 import (
 	"io/ioutil"
 	"strings"
+	"path/filepath"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/operations"
-	yaml "gopkg.in/yaml.v2"
 	"github.com/pkg/errors"
+	yaml "gopkg.in/yaml.v2"
 )
 
 func validateArguments(testInputFilePath string) error {
@@ -39,14 +40,23 @@ func GetInputData(inputFilePath string) (inputStructs.Config, error) {
 func doAction(action string, config inputStructs.Config, testInputFilePath string) error {
 
 	var actions []string
+	var err error
+	var connectionProfileFileContents []byte
+	tls := "disabled"
 	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query"
-	tls := config.TLS
-	switch tls {
-	case "true":
-		tls = "enabled"
-	case "false":
-		tls = "disabled"
-	case "mutual":
+	if strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yaml") || strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yml") {
+		connectionProfileFileContents, err = ioutil.ReadFile(config.Organizations[0].ConnProfilePath)
+	} else {
+		files, err := ioutil.ReadDir(config.Organizations[0].ConnProfilePath)
+		if err != nil {
+			return errors.Errorf("Failed to read the connection profiles directory; Error: %s", err)
+		}
+		connectionProfileFileContents, err = ioutil.ReadFile(filepath.Join(config.Organizations[0].ConnProfilePath, files[0].Name()))
+	}
+	if err != nil {
+		return errors.Errorf("Failed to read the connection profile file; Error: %s", err)
+	}
+	if strings.Contains(string(connectionProfileFileContents), "grpcs") {
 		tls = "clientauth"
 	}
 
@@ -108,7 +118,7 @@ func Testclient(action, testInputFilePath string) error {
 
 	err = doAction(action, config, testInputFilePath)
 	if err != nil {
-		logger.ERROR("Failed to perform ", action ," action, testInputFilePath = ", action, testInputFilePath)
+		logger.ERROR("Failed to perform ", action, " action, testInputFilePath = ", action, testInputFilePath)
 		return err
 	}
 	return nil

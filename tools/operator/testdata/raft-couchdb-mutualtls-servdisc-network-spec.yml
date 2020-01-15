@@ -24,7 +24,7 @@ gossipEnable: true
 enableNodeOUs: true
 
 #! Location where crypto-config and channel-artifacts are stored
-artifactsLocation: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
+artifactsLocation: .
 
 #! Orderer Config Settings
 orderer:

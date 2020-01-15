@@ -57,6 +57,18 @@ func TemplatesDir() string {
 	return componentPath(currentDir, "templates")
 }
 
+//ScriptsDir --
+func ScriptsDir() string {
+	currentDir, err := GetCurrentDir()
+	if err != nil {
+		logger.ERROR("ScriptsDir function is failed in getting current directory")
+	}
+	if strings.Contains(currentDir, "regression") {
+		return componentPath(currentDir, "../../tools/operator/scripts")
+	}
+	return componentPath(currentDir, "scripts")
+}
+
 //TemplateFilePath --
 func TemplateFilePath(fileName string) string {
 	templateFiles := map[string]string{"crypto-config": "crypto-config.yaml", "configtx": "configtx.yaml", "k8s": "k8s", "docker": "docker", "input": "input.yaml"}
