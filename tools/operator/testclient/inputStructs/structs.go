@@ -2,7 +2,6 @@ package inputStructs
 
 //Config --
 type Config struct {
-	TLS                  string          `yaml:"tls,omitempty"`
 	OrdererSystemChannel string          `yaml:"ordererSystemChannel,omitempty"`
 	Organizations        []Organization  `yaml:"organizations,omitempty"`
 	CreateChannel        []Channel       `yaml:"createChannel,omitempty"`
@@ -76,6 +75,7 @@ type InvokeQuery struct {
 	EventOptions     EventOptions         `yaml:"eventOpt,omitempty"`
 	CCOptions        CCOptions            `yaml:"ccOpt,omitempty"`
 	DiscoveryOptions DiscoveryOptions     `yaml:"discoveryOpt,omitempty"`
+	ListOptions      map[string][]string  `yaml:"listOpt,omitempty"`
 	Fcn              string               `yaml:"fcn,omitempty"`
 	Args             string               `yaml:"args,omitempty"`
 	TimeOutOpt       TimeOutOptions       `yaml:"timeoutOpt,omitempty"`
@@ -107,14 +107,15 @@ type EventOptions struct {
 
 //CCOptions --
 type CCOptions struct {
-	CCType     string `yaml:"ccType,omitempty"`
-	KeyStart   int    `yaml:"keyStart,omitempty"`
-	PayLoadMin int    `yaml:"payLoadMin,omitempty"`
-	PayLoadMax int    `yaml:"payLoadMax,omitempty"`
+	CCType      string `yaml:"ccType,omitempty"`
+	KeyStart    int    `yaml:"keyStart,omitempty"`
+	PayLoadMin  int    `yaml:"payLoadMin,omitempty"`
+	PayLoadMax  int    `yaml:"payLoadMax,omitempty"`
+	PayLoadType string `yaml:"payLoadType,omitempty"`
 }
 
 //DiscoveryOptions --
 type DiscoveryOptions struct {
 	Localhost bool `yaml:"localHost,omitempty"`
-	InitFreq  int `yaml:"initFreq,omitempty"`
+	InitFreq  int  `yaml:"initFreq,omitempty"`
 }

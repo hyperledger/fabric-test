@@ -3,6 +3,9 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"os"
+	"io"
+	"log"
 	"fmt"
 
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
@@ -19,7 +22,7 @@ import (
 
 var inputFilePath = flag.String("i", "", "Input file path (required)")
 var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
-var action = flag.String("a", "", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
+var action = flag.String("a", "up", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
 
 func validateArguments(networkSpecPath *string, kubeConfigPath *string) error {
 
@@ -160,6 +163,15 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	return nil
 }
 
+func writeLogToAFile() {
+	f, err := os.OpenFile("text.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
+}
+
 func main()  {
 
 	flag.Parse()
@@ -169,8 +181,15 @@ func main()  {
 	if *kubeConfigPath != "" {
 		env = "k8s"
 	}
+	f, err := os.OpenFile("/tmp/orders.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	wrt := io.MultiWriter(f)
+	log.SetOutput(wrt)
 
-	err := doAction(*action, env, *kubeConfigPath, *inputFilePath)
+	err = doAction(*action, env, *kubeConfigPath, *inputFilePath)
 	if err != nil {
 		logger.ERROR(fmt.Sprintln("Operator failed with error ", err))
 	}
