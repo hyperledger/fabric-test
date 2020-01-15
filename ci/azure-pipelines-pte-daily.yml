@@ -29,7 +29,7 @@ jobs:
     vmImage: ubuntu-18.04
   timeoutInMinutes: 360
   steps:
-  - template: install_deps.yml
+  - template: templates/install_deps.yml
   - checkout: self
     path: 'go/src/github.com/hyperledger/fabric-test'
     displayName: Checkout Fabric Test Code
