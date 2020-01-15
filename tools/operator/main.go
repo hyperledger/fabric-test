@@ -6,6 +6,7 @@ import (
 	"os"
 	"io"
 	"log"
+	"fmt"
 
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
@@ -47,7 +48,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	var err error
 	var inputPath string
 	var config networkspec.Config
-	actions := []string{"up", "down", "createChannelTxn", "migrate", "health"}
+	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork"}
 	if contains(actions, action) {
 		contents, _ := ioutil.ReadFile(inputFilePath)
 		contents = append([]byte("#@data/values \n"), contents...)
@@ -75,12 +76,12 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			logger.ERROR("Failed to delete network")
 			return err
 		}
-	// case "upgradeNetwork":
-	// 	err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
-	// 	if err != nil {
-	// 		logger.ERROR("Failed to upgrade network")
-	// 		return err
-	// 	}
+	case "upgradeNetwork":
+		err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
+		if err != nil {
+			logger.ERROR("Failed to upgrade network")
+			return err
+		}
 	case "create":
 		err = testclient.Testclient("create", inputFilePath)
 		if err != nil {
@@ -156,7 +157,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			return err
 		}
 	default:
-		logger.ERROR("Incorrect action ", action ," . Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health for action ", action)
+		logger.ERROR("Incorrect action ", action ," provided. Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health or upgradeNetwork for action ")
 		return err
 	}
 	return nil
@@ -187,5 +188,9 @@ func main()  {
 	defer f.Close()
 	wrt := io.MultiWriter(f)
 	log.SetOutput(wrt)
-	doAction(*action, env, *kubeConfigPath, *inputFilePath)
+
+	err = doAction(*action, env, *kubeConfigPath, *inputFilePath)
+	if err != nil {
+		logger.ERROR(fmt.Sprintln("Operator failed with error ", err))
+	}
 }
