@@ -1,0 +1,89 @@
+organizations:
+  - name: org1
+    connProfilePath: ./connection-profile/connection_profile_org1.yaml
+  - name: org2
+    connProfilePath: ./connection-profile/connection_profile_org2.yaml
+  - name: org3
+    connProfilePath: ./connection-profile/connection_profile_org3.yaml
+  - name: org4
+    connProfilePath: ./connection-profile/connection_profile_org4.yaml
+
+createChannel:
+  - channelPrefix: testorgschannel
+    numChannels: 2
+    channelTxPath: ./channel-artifacts/
+    organizations: org1
+
+joinChannel:
+  - channelPrefix: testorgschannel
+    numChannels: 2
+    organizations: org1,org2,org3,org4
+
+installChaincode:
+  - name: samplecc
+    version: v1
+    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    organizations: org1,org2,org3,org4
+    language: golang
+    metadataPath: ""
+
+instantiateChaincode:
+  - channelPrefix: testorgschannel
+    numChannels: 2
+    name: samplecc
+    version: v1
+    args: ""
+    organizations: org1
+    endorsementPolicy: ""
+    collectionPath: ""
+
+invokes:
+  - channelName: testorgschannel0
+    name: samplecc
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 0
+    runDur: 43200
+    organizations: org1,org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 0
+      payLoadMax: 1024
+      payLoadType: Random
+    args: "put,a1,1"
+
+  - channelName: testorgschannel1
+    name: samplecc
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 0
+    runDur: 43200
+    organizations: org1,org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 0
+      payLoadMax: 1024
+      payLoadType: Random
+    args: "put,a1,1"
