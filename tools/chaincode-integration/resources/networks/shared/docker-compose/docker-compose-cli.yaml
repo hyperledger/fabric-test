@@ -1,0 +1,22 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+
+services:
+  clinopeer:
+    container_name: cli
+    image: hyperledger/fabric-tools${FABRIC_IMG_TAG}
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - FABRIC_CFG_PATH=/etc/hyperledger/config
+
+      # LOGGING SETTINGS
+      - FABRIC_LOGGING_SPEC=${FABRIC_DEBUG}
+
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ${NETWORK_FOLDER}/crypto-material:/etc/hyperledger/config/
+      - ../../scripts/rename_sk.sh:/etc/hyperledger/tools/rename_sk.sh
