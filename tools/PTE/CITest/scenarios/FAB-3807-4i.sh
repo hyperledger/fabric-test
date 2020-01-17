@@ -8,4 +8,4 @@
 
 ########## CI test ##########
 
-./run_scenarios.sh -a samplecc -n FAB-3807-4i -p FAB-3835-4q -i FAB-3807-4i -q FAB-3835-4q
+./run_scenarios.sh -a samplejava -n FAB-3807-4i -p FAB-3835-4q -i FAB-3807-4i -q FAB-3835-4q

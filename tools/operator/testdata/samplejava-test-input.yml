@@ -1,0 +1,119 @@
+organizations:
+  - name: org1
+    connProfilePath: ./connection-profile/connection_profile_org1.yaml
+  - name: org2
+    connProfilePath: ./connection-profile/connection_profile_org2.yaml
+  - name: org3
+    connProfilePath: ./connection-profile/connection_profile_org3.yaml
+  - name: org4
+    connProfilePath: ./connection-profile/connection_profile_org4.yaml
+
+installChaincode:
+  - name: samplejava
+    version: v1
+    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/java
+    organizations: org1,org2,org3,org4
+    language: java
+    metadataPath: ""
+
+instantiateChaincode:
+  - channelPrefix: testorgschannel
+    numChannels: 5
+    name: samplejava
+    version: v1
+    args: ""
+    organizations: org1
+    endorsementPolicy: ""
+    collectionPath: ""
+
+invokes:
+  - channelName: testorgschannel0
+    name: samplejava
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+      payLoadType: Random
+    args: "put,a1,1"
+
+  - channelName: testorgschannel1
+    name: samplejava
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+      payLoadType: Random
+    args: "put,a1,1"
+
+queries:
+  - channelName: testorgschannel0
+    name: samplejava
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+      payLoadType: Random
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 0
+          devFreq: 0
+    args: "get,a1"
+
+  - channelName: testorgschannel1
+    name: samplejava
+    targetPeers: OrgAnchor
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+      payLoadType: Random
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 0
+          devFreq: 0
+    args: "get,a1"
