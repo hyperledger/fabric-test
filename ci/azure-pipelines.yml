@@ -5,9 +5,19 @@
 
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 trigger:
-- master
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - tools/chaincode-integration/*
 pr:
-- master
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - tools/chaincode-integration/*
 
 variables:
   GOPATH: $(Agent.BuildDirectory)/go
