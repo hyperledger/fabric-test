@@ -1,7 +1,7 @@
 ### Welcome to fabric-test
 -------
 
-[![Build Status](https://jenkins.hyperledger.org/buildStatus/icon?job=fabric-test-merge-x86_64)](https://jenkins.hyperledger.org/view/fabric-test/job/fabric-test-merge-x86_64/)
+[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Test/_apis/build/status/Fabric-Test?branchName=master)](https://dev.azure.com/Hyperledger/Fabric-Test/_build/latest?definitionId=58&branchName=master)
 
 You are in the right place if you are interested in testing the Hyperledger Fabric and related repositories.
 
