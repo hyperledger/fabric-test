@@ -1,6 +1,6 @@
 {
-    "channelID": "_ch4",
-    "chaincodeID": "sample_cc",
+    "channelID": "_ch1",
+    "chaincodeID": "sample_java",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
@@ -9,14 +9,13 @@
     "invokeType": "Query",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "2",
-    "nRequest": "10",
+    "nRequest": "10000",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel4",
+        "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
-            "org1",
             "org2"
         ]
     },
@@ -27,8 +26,7 @@
         "burstDur1": "10000"
     },
     "mixOpt": {
-        "mixQuery": "FALSE",
-        "mixFreq": "1000"
+        "mixFreq": "3000"
     },
     "constantOpt": {
         "recHist": "HIST",
@@ -50,7 +48,13 @@
         "keyPayLoad": [2],
         "keyStart": "0",
         "payLoadMin": "1024",
-        "payLoadMax": "2048"
+        "payLoadMax": "1024"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/java",
+        "fcn": "init",
+        "language": "java",
+        "args": []
     },
     "invoke": {
         "query": {
