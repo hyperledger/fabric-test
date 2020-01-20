@@ -64,6 +64,7 @@ services:
     volumes:
         - /var/run/:/host/var/run/
         - ${NETWORK_FOLDER}/crypto-material/:/etc/hyperledger/config/
+        - ../../../private-collections/:/etc/hyperledger/private-collections
 
   clibase:
     extends:
@@ -88,6 +89,7 @@ services:
       - /var/run/:/host/var/run/
       - ${NETWORK_FOLDER}/crypto-material/:/etc/hyperledger/configtx/
       - ../../../chaincode:/opt/gopath/src/github.com/hyperledger/fabric-chaincode-integration
+      - ../../../private-collections/:/etc/hyperledger/private-collections
 
   couchdb:
     container_name: couchdb

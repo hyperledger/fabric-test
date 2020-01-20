@@ -1,42 +1,18 @@
 {
     "info": {
-        "title": "SimpleChaincode",
+        "title": "PrivateChaincode",
         "version": "latest"
     },
     "contracts": {
         "SimpleContract": {
             "info": {
-                "title": "SimpleContract",
+                "title": "PrivateContract",
                 "version": "latest"
             },
-            "name": "SimpleContract",
+            "name": "PrivateContract",
             "transactions": [
                 {
-                    "name": "helloWorld",
-                    "returns": {
-                        "type": "string"
-                    },
-                    "tag": [],
-                    "description": "Returns the string literal 'Hello World'"
-                },
-                {
-                    "name": "callAndResponse",
-                    "parameters": [
-                        {
-                            "name": "value",
-                            "schema": {
-                                "type": "string"
-                            }
-                        }
-                    ],
-                    "returns": {
-                        "type": "string"
-                    },
-                    "tag": [],
-                    "description": "Returns the parameter it takes in"
-                },
-                {
-                    "name": "putState",
+                    "name": "putPrivateState",
                     "parameters": [
                         {
                             "name": "key",
@@ -54,10 +30,10 @@
                     "tag": [
                         "submit"
                     ],
-                    "description": "Writes value parameter to world state with the key parameter as the key. If an error occurs during this process it throws/returns it"
+                    "description": "Writes value parameter to the private data collection Org1AndOrg2 with the key parameter as the key. If an error occurs during this process it throws/returns it"
                 },
                 {
-                    "name": "getState",
+                    "name": "getPrivateState",
                     "parameters": [
                         {
                             "name": "key",
@@ -70,10 +46,10 @@
                         "type": "string"
                     },
                     "tag": [],
-                    "description": "Returns the value in the world state with the key of the key parameter. If an error occurs during this process it throws/returns it"
+                    "description": "Returns the value in the private data collection Org1AndOrg2 with the key of the key parameter. If an error occurs during this process it returns an error with the message: Could not read private collection Org1AndOrg2"
                 },
                 {
-                    "name": "deleteState",
+                    "name": "deletePrivateState",
                     "parameters": [
                         {
                             "name": "key",
@@ -85,7 +61,7 @@
                     "tag": [
                         "submit"
                     ],
-                    "description": "Deletes from the world state the key of the key parameter passed. If an error occurs during this process it throws/returns it"
+                    "description": "Deletes from the private data collection Org1AndOrg2 the key of the key parameter passed. If an error occurs during this process it throws/returns it"
                 }
             ]
         }

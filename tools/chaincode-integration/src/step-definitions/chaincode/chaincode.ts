@@ -2,6 +2,7 @@
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
+import * as assert from 'assert';
 import { TableDefinition } from 'cucumber';
 import { binding } from 'cucumber-tsflow/dist';
 import { Gateway } from 'fabric-network';
@@ -48,9 +49,9 @@ export class Chaincode {
         this.workspace.updateChaincodePolicy(chaincodeName, policy);
     }
 
-    @given(/Chaincode ['"](.*)['"] when instantiated on channel ['"](.*)['"] will use private data collection ['"](.*)['"]$/)
+    @given(/Chaincode ['"](.*)['"] when instantiated on channel ['"](.*)['"] will use private data collection config ['"](.*)['"]$/)
     public async configurePrivateCollection(chaincodeName: string, __: string, collectionFile: string) {
-        const collection = path.join(__dirname, '../../..', 'resources/private_collections', collectionFile);
+        const collection = path.join(__dirname, '../../..', 'resources/private-collections', collectionFile);
 
         this.workspace.updateChaincodeCollection(chaincodeName, collection);
     }
@@ -111,6 +112,31 @@ export class Chaincode {
         }
     }
 
+    @then(/Expecting the error ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]$/)
+    public async whenSubmitSpecificError(
+        errMsg: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+    ) {
+        try {
+            await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(null), true);
+            throw new Error('Expected transaction to fail but was successful');
+        } catch (err) {
+            assert.equal(err.message, errMsg);
+        }
+    }
+
+    @then(/Expecting the error ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"] with args:$/)
+    public async whenSubmitSpecificErrorWithArgs(
+        errMsg: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        args: TableDefinition,
+    ) {
+        try {
+            await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(args), true);
+            throw new Error('Expected transaction to fail but was successful');
+        } catch (err) {
+            assert.equal(err.message, errMsg);
+        }
+    }
+
     @then(/Expecting result ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]$/)
     public async thenSubmit(
         result: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
@@ -142,7 +168,7 @@ export class Chaincode {
                 policy = `-P "${chaincode.policy.split('"').join('\\"')}"`;
             }
             if (chaincode.collection) {
-                collection = `--collections-config ${chaincode.collection}`;
+                collection = `--collections-config ${chaincode.collection.docker}`;
             }
         }
 

@@ -38,10 +38,21 @@ export interface Profile {
 export type LogLevels = 'info' | 'debug';
 export type Languages = 'golang' | 'java' | 'node';
 
+export interface CollectionConfig {
+    docker: string;
+    local: string;
+}
+
+export interface ChaincodeConfig {
+    policy: string;
+    collection: CollectionConfig;
+}
+
 export interface Global extends NodeJS.Global {
     CHAINCODE_LANGUAGE: Languages;
     CURRENT_NETWORK: Network;
     LOGGING_LEVEL: LogLevels;
+    CHAINCODES: Map<string, ChaincodeConfig>;
 }
 
 export interface Channel {

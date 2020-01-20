@@ -12,7 +12,7 @@
             "name": "org.papernet.commercialpaper",
             "transactions": [
                 {
-                    "name": "Issue",
+                    "name": "issue",
                     "parameters": [
                         {
                             "name": "issuer",
@@ -55,7 +55,7 @@
                     "description": "Creates a new commercial paper object using the parameters provided as properties for that paper. It sets the status of the commercial paper to be issued (1) and puts the paper to the world state. The world state key for the paper is a composite key formed of the string literal 'org.papernet.commercialpaperlist', the issuer and paper number. The world state value is a serialized JSON representation of the paper which meets the definition for a paper found in this file. If an error occurs on the writing to the world state this is thrown/returned. It should error if a paper exists in the world state with that composite key already. The function returns the commercial paper it has created."
                 },
                 {
-                    "name": "Buy",
+                    "name": "buy",
                     "parameters": [
                         {
                             "name": "issuer",
@@ -104,7 +104,7 @@
                     "description": "Reads from the world state the paper with the composite key formed of the string literal 'org.papernet.commercialpaperlist', the passed issuer and the passed paperNumber. If an error occurs on reading from the world state it is thrown/returned. It should error if no paper exists for the composite key. If the paper found in the world state has an owner value that does not match the parameter currentOwner passed in then an error should be thrown/returned. If the paper has a status of redeemed (3) then an error should be thrown/returned. If the paper's status is issued (1) then this should be updated to trading (2). The paper owner should be updated to the value of the parameter newOwner passed in. The updated paper should be written to the world state using the same composite key as used to retrieve it as a serialized JSON representation of the paper which meets the definition for a paper found in this file. The updated paper should be returned."
                 },
                 {
-                    "name": "Redeem",
+                    "name": "redeem",
                     "parameters": [
                         {
                             "name": "issuer",

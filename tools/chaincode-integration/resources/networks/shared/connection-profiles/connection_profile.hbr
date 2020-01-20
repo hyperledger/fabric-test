@@ -51,7 +51,7 @@
             "url": "grpcs://localhost:{{externalPort}}",
             "eventUrl": "grpcs://localhost:{{externalEventPort}}",
             "tlsCACerts": {
-                "path": "{{../cryptoConfigPath}}/peerOrganizations/org1.com/peers/{{name}}/tls/ca.crt"
+                "path": "{{../cryptoConfigPath}}/peerOrganizations/{{../smallName}}.com/peers/{{name}}/tls/ca.crt"
             },
             "grpcOptions": {
                 "hostnameOverride": "{{name}}",
@@ -67,7 +67,7 @@
             "url": "https://localhost:{{externalPort}}",
             "caName": "{{name}}",
             "tlsOptions": {
-                "trustedRoots": ["{{../cryptoConfigPath}}/peerOrganizations/org1.com/tlsca/{{name}}-cert.pem"]
+                "trustedRoots": ["{{../cryptoConfigPath}}/peerOrganizations/{{../smallName}}.com/tlsca/{{name}}-cert.pem"]
             },
             "httpOptions": {
                 "verify": false

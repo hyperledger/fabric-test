@@ -7,9 +7,11 @@ import { HookScenarioResult, pickle, SourceLocation } from 'cucumber';
 import { after, before, binding } from 'cucumber-tsflow/dist';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Step } from '../interfaces/interfaces';
+import { Global, Step } from '../interfaces/interfaces';
 import { Logger } from '../utils/logger';
 import { Workspace } from './utils/workspace';
+
+declare const global: Global;
 
 const logger = Logger.getLogger('./src/step-definitions/hooks.ts');
 
@@ -76,6 +78,10 @@ export class Hooks {
 
             logger.error(`Scenario failed ${scenarioResult.pickle.name}`);
         }
+
+        // Workspace is per scenario so save for other scenarios
+        global.CURRENT_NETWORK = this.workspace.network;
+        global.CHAINCODES = this.workspace.chaincodes;
 
         logger.info(chalk.yellow(`Finished scenario ${scenarioResult.pickle.name}`));
     }
