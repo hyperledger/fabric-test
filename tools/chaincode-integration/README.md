@@ -65,6 +65,7 @@ To run the tool in its entirety (i.e. not tag limitted) the following chaincodes
 - simple
 - advancedtypes
 - commercialpaper
+- private
 
 You can find schemas defining how each of these chaincodes should be written in the [docs/schemas](./docs/schemas) folder. This is structured such that each chaincode has its own json file named `<CHAINCODE_NAME>.json` which contains a breakdown of the contracts that should make up the chaincode, their required transactions and what those transactions should do. It is important that chaincodes provided for use with this tool match exactly what is expected of them or tests will pass/fail when they shouldn't.
 

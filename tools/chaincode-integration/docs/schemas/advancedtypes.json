@@ -12,7 +12,7 @@
             "name": "AdvancedTypeContract",
             "transactions": [
                 {
-                    "name": "GetInt",
+                    "name": "getInt",
                     "returns": {
                         "type": "integer",
                         "format": "int64"
@@ -21,7 +21,7 @@
                     "description": "Returns the int 1"
                 },
                 {
-                    "name": "CallAndResponseInt",
+                    "name": "callAndResponseInt",
                     "parameters": [
                         {
                             "name": "sent",
@@ -39,7 +39,7 @@
                     "description": "Returns the parameter it takes in"
                 },
                 {
-                    "name": "GetFloat",
+                    "name": "getFloat",
                     "returns": {
                         "type": "number",
                         "format": "double"
@@ -48,7 +48,7 @@
                     "description": "Returns the float 1.1"
                 },
                 {
-                    "name": "CallAndResponseFloat",
+                    "name": "callAndResponseFloat",
                     "parameters": [
                         {
                             "name": "sent",
@@ -66,7 +66,7 @@
                     "description": "Returns the parameter it takes in"
                 },
                 {
-                    "name": "GetBool",
+                    "name": "getBool",
                     "returns": {
                         "type": "boolean"
                     },
@@ -74,7 +74,7 @@
                     "description": "Returns the bool true"
                 },
                 {
-                    "name": "CallAndResponseBool",
+                    "name": "callAndResponseBool",
                     "parameters": [
                         {
                             "name": "sent",
@@ -90,7 +90,7 @@
                     "description": "Returns the parameter it takes in"
                 },
                 {
-                    "name": "GetArray",
+                    "name": "getArray",
                     "returns": {
                         "type": "array",
                         "items": {
@@ -102,7 +102,7 @@
                     "description": "Returns the integer array [1, 2, 3]"
                 },
                 {
-                    "name": "CallAndResponseArray",
+                    "name": "callAndResponseArray",
                     "parameters": [
                         {
                             "name": "sent",
@@ -124,7 +124,7 @@
                     "description": "Returns the parameter it takes in"
                 },
                 {
-                    "name": "GetBasicAsset",
+                    "name": "getBasicAsset",
                     "returns": {
                         "$ref": "#/components/schemas/BasicAsset"
                     },
@@ -132,7 +132,7 @@
                     "description": "Returns an instance of BasicAsset with values {\"id\": \"OBJECT_1\", \"value\": 100}"
                 },
                 {
-                    "name": "CallAndResponseBasicAsset",
+                    "name": "callAndResponseBasicAsset",
                     "parameters": [
                         {
                             "name": "sent",
@@ -148,7 +148,7 @@
                     "description": "Returns the parameter it takes in"
                 },
                 {
-                    "name": "GetComplexAsset",
+                    "name": "getComplexAsset",
                     "returns": {
                         "$ref": "#/components/schemas/ComplexAsset"
                     },
@@ -156,7 +156,7 @@
                     "description": "Returns an instance of ComplexAsset with values {\"id\": \"OBJECT_1\", \"value\": 100, \"description\": {\"colour\": \"red\", \"owners\": [\"andy\", \"matthew\"]}}"
                 },
                 {
-                    "name": "CallAndResponseComplexAsset",
+                    "name": "callAndResponseComplexAsset",
                     "parameters": [
                         {
                             "name": "param0",

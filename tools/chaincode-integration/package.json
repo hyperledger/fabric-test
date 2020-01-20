@@ -1,6 +1,6 @@
 {
   "name": "fabric-chaincode-integration",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A tool for testing fabric chaincode implementations",
   "main": "dist/index.js",
   "bin": {

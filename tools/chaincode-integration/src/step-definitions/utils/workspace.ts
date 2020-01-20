@@ -2,18 +2,13 @@
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
-import { Feature, Global } from '../../interfaces/interfaces';
+import { ChaincodeConfig, Feature, Global } from '../../interfaces/interfaces';
 import { Network } from '../../network/network';
 import { Logger } from '../../utils/logger';
 
 const logger = Logger.getLogger('./src/step-definitions/utils/workspace.ts');
 
 declare const global: Global;
-
-interface ChaincodeConfig {
-    policy: string;
-    collection: string;
-}
 
 export class Workspace {
 
@@ -25,7 +20,7 @@ export class Workspace {
     public constructor() {
         this.network = global.CURRENT_NETWORK;
         this.language = global.CHAINCODE_LANGUAGE;
-        this.chaincodes = new Map();
+        this.chaincodes = global.CHAINCODES || new Map();
     }
 
     public updateChaincodePolicy(chaincode: string, policy: string) {
@@ -41,7 +36,10 @@ export class Workspace {
         logger.debug(`Setting private collection for ${chaincode} to:`, collection);
 
         const config = this.getConfig(chaincode);
-        config.collection = collection;
+        config.collection = {
+            docker: '/etc/hyperledger/private-collections' + collection.split('private-collections')[1],
+            local: collection,
+        };
 
         this.chaincodes.set(chaincode, config);
     }

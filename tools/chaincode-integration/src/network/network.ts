@@ -29,7 +29,8 @@ const networkResources = path.resolve(__dirname, '../../resources/networks');
 const networkComposeFile = 'docker-compose/docker-compose.yaml';
 const cliComposeFile = path.join(networkResources, 'shared', 'docker-compose/docker-compose-cli.yaml');
 
-export const DEFINED_NETWORKS = fs.readdirSync(networkResources).filter((name) => name !== 'shared' && name !== 'scripts');
+// export const DEFINED_NETWORKS = fs.readdirSync(networkResources).filter((name) => name !== 'shared' && name !== 'scripts');
+export const DEFINED_NETWORKS = ['three-org'];
 
 export class Network {
     private name: string;
@@ -238,6 +239,7 @@ export class Network {
             const tmpl = Handlebars.compile(rawTmpl);
 
             const orgClone = JSON.parse(JSON.stringify(org));
+            orgClone.smallName = orgToSmall(org.name);
             orgClone.orderers = [this.getDefaultOrderer()];
             orgClone.cryptoConfigPath = path.join(this.details.resourceFolder, 'crypto-material/crypto-config');
 
@@ -423,7 +425,7 @@ export class Network {
     }
 }
 
-function orgToSmall(orgName) {
+function orgToSmall(orgName: string) {
     if (orgName.toUpperCase() === orgName) {
         return orgName.toLowerCase();
     }

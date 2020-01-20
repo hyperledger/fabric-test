@@ -11,5 +11,3 @@ wallets
 !resources/networks/shared/connection-profiles
 resources/chaincode/*
 !resources/chaincode/.gitkeep
-resources/private_collections/*
-!resources/private_collections/.gitkeep
