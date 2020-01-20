@@ -103,4 +103,3 @@ queries:
           constFreq: 0
           devFreq: 0
     args: "get,a1"
-    

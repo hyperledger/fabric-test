@@ -62,7 +62,7 @@ func GetFabricTestDir() (string, error) {
 func ChangeTargetPeers(testFilePath, testFileName, targetPeersType string) error {
 	var config inputStructs.Config
 	var err error
-	yamlFile, err := ioutil.ReadFile(testFilePath)
+	yamlFile, err := ioutil.ReadFile(filepath.Join(testFilePath, testFileName))
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func ChangeTargetPeers(testFilePath, testFileName, targetPeersType string) error
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(fmt.Sprintf("%s_%s", strings.ToLower(targetPeersType), testFileName), yamlBytes, 0644)
+	err = ioutil.WriteFile(filepath.Join(testFilePath, fmt.Sprintf("%s-%s", strings.ToLower(targetPeersType), testFileName)), yamlBytes, 0644)
 	if err != nil {
 		return err
 	}

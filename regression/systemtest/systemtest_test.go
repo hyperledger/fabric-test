@@ -68,7 +68,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 3: Creating channels and joining peers to channel", func() {
-			inputSpecPath = filepath.Join(testDataDir, "test-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "systemtest-test-input.yml")
 			By("Creating the channels")
 			err = testclient.Testclient("create", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
@@ -160,7 +160,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 10: Performing invokes and queries using samplecc chaincode after migrating to etcdraft", func() {
-			inputSpecPath = filepath.Join(testDataDir, "kafka-couchdb-tls-test-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "systemtest-test-input.yml")
 			By("Sending invokes for samplecc")
 			err = testclient.Testclient("invoke", inputSpecPath)
 			MovePTEReportFile("sampleccInvokesAfterMigrationPteReport.txt", kafkaTLSLogsDir)
@@ -203,9 +203,9 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 3: Creating channels and joining peers to channel", func() {
-			err = ChangeTargetPeers(testDataDir, "test-input.yml", targetPeers)
+			err = ChangeTargetPeers(testDataDir, "systemtest-test-input.yml", targetPeers)
 			Expect(err).NotTo(HaveOccurred())
-			inputSpecPath = filepath.Join(testDataDir, "discovery-test-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "discovery-systemtest-test-input.yml")
 			By("Creating the channels")
 			err = testclient.Testclient("create", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
@@ -320,7 +320,7 @@ var _ = Describe("Systemtest", func() {
 		})
 
 		It("Step 3: Creating channels and joining peers to channel", func() {
-			inputSpecPath = filepath.Join(testDataDir, "test-input.yml")
+			inputSpecPath = filepath.Join(testDataDir, "systemtest-test-input.yml")
 			By("Creating the channels")
 			err = testclient.Testclient("create", inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
