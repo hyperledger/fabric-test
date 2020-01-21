@@ -1,23 +1,23 @@
 {
-    "channelID": "_ch3",
+    "channelID": "_ch1",
     "chaincodeID": "marbles_cc_priv",
     "chaincodeVer": "v0",
     "logLevel": "ERROR",
     "invokeCheck": "TRUE",
     "transMode": "Constant",
     "transType": "Invoke",
-    "invokeType": "Query",
+    "invokeType": "Move",
     "targetPeers": "OrgAnchor",
     "nProcPerOrg": "1",
     "nRequest": "10",
-    "runDur": "1200",
+    "runDur": "600",
     "TLS": "enabled",
     "channelOpt": {
-        "name": "testorgschannel3",
+        "name": "testorgschannel1",
         "action":  "create",
         "orgName": [
-            "org5",
-            "org6"
+            "org1",
+            "org2"
         ]
     },
     "burstOpt": {
@@ -34,34 +34,32 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org5": ["peer1"],
-        "org6": ["peer1"]
+        "org1": ["peer0org1examplecom"],
+        "org2": ["peer0org2examplecom"]
     },
     "eventOpt": {
-        "timeout": "240000"
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "300000"
     },
     "ccType": "marblescc_priv",
     "ccOpt": {
         "keyIdx": [0],
         "keyPayLoad": [2],
         "keyStart": "0",
-        "payLoadMin": "1024",
+        "payLoadMin": "1",
         "payLoadMax": "1024"
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
-        "fcn": "init",
-        "args": []
     },
     "invoke": {
         "query": {
-            "fcn": "readMarblePrivateDetails",
+            "fcn": "readMarble",
             "args": ["marble"]
         },
         "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
+            "fcn": "transferMarble",
+            "transientMap": {"marble_owner": {"name":"marble", "owner":"mary"}},
+            "args": []
         }
     },
-    "ConnProfilePath": "ConnProfiles/test-network"
+    "ConnProfilePath": "ConnProfiles/privateDB"
 }

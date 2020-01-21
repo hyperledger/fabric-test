@@ -9,14 +9,15 @@
         "action":  "create",
         "orgName": [
             "org1",
-            "org2"
+            "org2",
+            "org3"
         ]
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
-        "metadataPath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go/META-INF",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go",
+        "metadataPath": "github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go/META-INF",
         "fcn": "init",
         "args": []
     },
-    "ConnProfilePath": "ConnProfiles/test-network"
+    "ConnProfilePath": "ConnProfiles/privateDB"
 }

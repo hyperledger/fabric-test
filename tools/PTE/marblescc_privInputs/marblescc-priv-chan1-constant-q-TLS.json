@@ -7,7 +7,7 @@
     "transMode": "Constant",
     "transType": "Invoke",
     "invokeType": "Query",
-    "targetPeers": "OrgAnchor",
+    "targetPeers": "List",
     "nProcPerOrg": "1",
     "nRequest": "10",
     "runDur": "1200",
@@ -34,8 +34,9 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
+        "org1": ["peer0org1examplecom"],
+        "org2": ["peer0org2examplecom"],
+        "org3": ["peer0org3examplecom"]
     },
     "eventOpt": {
         "timeout": "240000"
@@ -48,20 +49,11 @@
         "payLoadMin": "1024",
         "payLoadMax": "1024"
     },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
-        "fcn": "init",
-        "args": []
-    },
     "invoke": {
         "query": {
             "fcn": "readMarble",
             "args": ["marble"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["marble", "blue","35","tom"]
         }
     },
-    "ConnProfilePath": "ConnProfiles/test-network"
+    "ConnProfilePath": "ConnProfiles/privateDB"
 }
