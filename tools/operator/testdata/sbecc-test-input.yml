@@ -1,0 +1,98 @@
+organizations:
+  - name: org1
+    connProfilePath: ./connection-profile
+  - name: org2
+    connProfilePath: ./connection-profile
+  - name: org3
+    connProfilePath: ./connection-profile
+  - name: org4
+    connProfilePath: ./connection-profile
+
+installChaincode:
+  - name: sbecc
+    version: v1
+    path: github.com/hyperledger/fabric-test/chaincodes/sbe/go
+    organizations: org1,org2,org3,org4
+    language: golang
+    metadataPath: ""
+
+instantiateChaincode:
+  - channelName: testorgschannel3
+    name: sbecc
+    version: v1
+    args: ""
+    organizations: org1
+    endorsementPolicy: 2of(org1,org2)
+    collectionPath: ""
+
+  - channelName: testorgschannel4
+    name: sbecc
+    version: v1
+    args: ""
+    organizations: org3
+    endorsementPolicy: 2of(org3,org4)
+    collectionPath: ""
+
+invokes:
+  - channelName: testorgschannel3
+    name: sbecc
+    targetPeers: List
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org1,org2
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    listOpt:
+      org1:
+        - peer0-org1
+      org2:
+        - peer0-org2
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+      payLoadType: Random
+    args: "key,200"
+    fcn: updateRecordVal
+
+  - channelName: testorgschannel4
+    name: sbecc
+    targetPeers: List
+    nProcPerOrg: 2
+    nRequest: 1000
+    runDur: 0
+    organizations: org3,org4
+    txnOpt:
+      - mode: constant
+        options:
+          constFreq: 100
+          devFreq: 0
+    queryCheck: 100
+    eventOpt:
+      type: FilteredBlock
+      listener:  Block
+      timeout: 240000
+    listOpt:
+      org3:
+        - peer0-org3
+      org4:
+        - peer0-org4
+    ccOpt:
+      ccType: ccchecker
+      keyStart: 0
+      payLoadMin: 1024
+      payLoadMax: 2048
+      payLoadType: Random
+    args: "key,200"
+    fcn: updateRecordVal
+

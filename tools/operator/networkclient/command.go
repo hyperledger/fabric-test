@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/onsi/ginkgo"
 )
 
 //ExecuteCommand - to execute the cli commands
@@ -13,10 +15,19 @@ func ExecuteCommand(name string, args []string, printLogs bool) (string, error) 
 
 	cmd := exec.Command(name, args...)
 	var stdBuffer bytes.Buffer
-	mw := io.MultiWriter(os.Stdout, &stdBuffer)
+	runTests, envVariableExists := os.LookupEnv("GinkoTests")
+	writerArgs := []io.Writer{os.Stdout, &stdBuffer}
+	mw := io.MultiWriter(writerArgs...)
 	if printLogs {
-		cmd.Stdout = mw
-		cmd.Stderr = mw
+		if envVariableExists && runTests == "true" {
+			writerArgs = append(writerArgs, ginkgo.GinkgoWriter)
+			mw = io.MultiWriter(writerArgs...)
+			cmd.Stdout = ginkgo.GinkgoWriter
+			cmd.Stderr = ginkgo.GinkgoWriter
+		} else {
+			cmd.Stdout = mw
+			cmd.Stderr = mw
+		}
 	} else {
 		cmd.Stdout = &stdBuffer
 		cmd.Stderr = &stdBuffer

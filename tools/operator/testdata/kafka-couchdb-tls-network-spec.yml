@@ -5,7 +5,7 @@
 #! fabricVersion:
 #! Released images are pulled from docker hub hyperledger/, e.g. 1.4.3 or 2.0.0
 #! Development stream images are pulled from
-#! nexus3.hyperledger.org:10001/hyperledger/, e.g. 1.4.3-stable or 2.0.0-stable
+#! hyperledger-fabric.jfrog.io/, e.g. 1.4.3-stable or 2.0.0-stable
 fabricVersion: 2.0.0-stable
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
@@ -24,7 +24,7 @@ gossipEnable: false
 enableNodeOUs: true
 
 #! Location where crypto-config, connection-profiles, channel-artifacts are stored
-artifactsLocation: /home/jenkins/gopath/src/github.com/hyperledger/fabric-test/fabric/internal/cryptogen/
+artifactsLocation: .
 
 #! Orderer Config Settings
 orderer:

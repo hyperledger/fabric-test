@@ -1,0 +1,65 @@
+{
+  "name": "fabric-chaincode-integration",
+  "version": "0.1.0",
+  "description": "A tool for testing fabric chaincode implementations",
+  "main": "dist/index.js",
+  "bin": {
+    "fabric-chaincode-integration": "dist/cli.js"
+  },
+  "scripts": {
+    "pretest": "licchk",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "npm run licchk && npm run build",
+    "build": "tsc",
+    "licchk": "license-check-and-add check"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyperledger/fabric-test/tree/master/tools/chaincode-integration"
+  },
+  "keywords": [
+    "fabric",
+    "testing",
+    "chaincode",
+    "cucumber"
+  ],
+  "author": "ampretia",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://jira.hyperledger.org"
+  },
+  "homepage": "https://github.com/hyperledger/fabric-test/tree/master/tools/chaincode-integration",
+  "devDependencies": {
+    "@types/chai": "^4.2.7",
+    "@types/cucumber": "^6.0.0",
+    "@types/fs-extra": "^8.0.1",
+    "@types/js-yaml": "^3.12.1",
+    "@types/lodash": "^4.14.149",
+    "license-check-and-add": "^3.0.3",
+    "ts-node": "^8.6.2",
+    "tslint": "^5.20.1",
+    "typescript": "^3.7.4"
+  },
+  "dependencies": {
+    "@types/yargs": "^15.0.0",
+    "assert": "^2.0.0",
+    "chai": "^4.2.0",
+    "chalk": "^3.0.0",
+    "cucumber": "^6.0.5",
+    "cucumber-tsflow": "^3.2.0",
+    "fabric-ca-client": "beta",
+    "fabric-client": "beta",
+    "fabric-network": "beta",
+    "fabric-shim": "beta",
+    "fast-safe-stringify": "^2.0.7",
+    "fs-extra": "^8.1.0",
+    "handlebars": "^4.7.2",
+    "js-yaml": "^3.13.1",
+    "lodash": "^4.17.15",
+    "nano": "^8.1.0",
+    "protobufjs": "^6.8.8",
+    "util": "^0.12.1",
+    "winston": "^3.2.1",
+    "yargs": "^15.1.0"
+  }
+}

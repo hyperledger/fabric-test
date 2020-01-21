@@ -1,0 +1,13 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+node_modules
+dist
+crypto-config
+*.tx
+core.yaml
+*.block
+connection-profiles
+wallets
+!resources/networks/shared/connection-profiles
+resources/chaincode/*
+!resources/chaincode/.gitkeep

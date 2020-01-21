@@ -6,8 +6,9 @@
         "action":  "join",
         "orgName": [
             "org1",
-            "org2"
+            "org2",
+            "org3"
         ]
     },
-    "ConnProfilePath": "ConnProfiles/test-network"
+    "ConnProfilePath": "ConnProfiles/privateDB"
 }

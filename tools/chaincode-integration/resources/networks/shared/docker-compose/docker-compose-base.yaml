@@ -1,0 +1,96 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+version: '2'
+
+services:
+  ca:
+    image: hyperledger/fabric-ca${FABRIC_CA__IMG_TAG}
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_CLIENT_HOME=/root/fabric-ca/clients/admin
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/key.pem
+      - FABRIC_CA_SERVER_TLS_ENABLED=true
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-tlsca/key.pem
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+
+  orderer:
+    container_name: orderer
+    image: hyperledger/fabric-orderer${FABRIC_IMG_TAG}
+    environment:
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
+
+      # LOGGING SETTINGS
+      - ORDERER_GENERAL_LOGLEVEL=${FABRIC_DEBUG}
+
+      # TLS SETTINGS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
+    command: orderer
+    volumes:
+        - ${NETWORK_FOLDER}/crypto-material/:/etc/hyperledger/configtx
+
+  peer:
+    container_name: peer
+    image: hyperledger/fabric-peer${FABRIC_IMG_TAG}
+    environment:
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_PEER_ADDRESSAUTODETECT=true
+      - CORE_PEER_GOSSIP_ORGLEADER=false
+      - CORE_PEER_GOSSIP_USELEADERELECTION=true
+      - CORE_PEER_PROFILE_ENABLED=true
+
+      # LOGGING SETTINGS
+      - FABRIC_LOGGING_SPEC=${FABRIC_DEBUG}
+      - CORE_CHAINCODE_LOGGING_LEVEL=${FABRIC_DEBUG}
+      - CORE_LOGGING_MSP=${FABRIC_DEBUG}
+      - CORE_LOGGING_GRPC=${FABRIC_DEBUG}
+      - CORE_LOGGING_LEDGER=${FABRIC_DEBUG}
+      - CORE_LOGGING_GOSSIP=${FABRIC_DEBUG}
+      - CORE_LOGGING_PEER_GOSSIP=${FABRIC_DEBUG}
+
+      # TLS SETTINGS
+      - CORE_PEER_TLS_ENABLED=true
+
+      ## the following setting redirects chaincode container logs to the peer container logs
+      - CORE_VM_DOCKER_ATTACHSTDOUT=true
+
+      # # the following setting starts chaincode containers on the same
+      # # bridge network as the peers
+      # # https://docs.docker.com/compose/networking/
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: peer node start --peer-chaincodedev=true
+    volumes:
+        - /var/run/:/host/var/run/
+        - ${NETWORK_FOLDER}/crypto-material/:/etc/hyperledger/config/
+        - ../../../private-collections/:/etc/hyperledger/private-collections
+
+  clibase:
+    extends:
+      file: docker-compose-cli.yaml
+      service: clinopeer
+    container_name: cli
+
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_CHAINCODE_KEEPALIVE=10
+      - FABRIC_CFG_PATH=/etc/hyperledger/config
+
+      # LOGGING SETTINGS
+      - FABRIC_LOGGING_SPEC=${FABRIC_DEBUG}
+
+      # TLS SETTINGS
+      - CORE_PEER_TLS_ENABLED=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+      - /var/run/:/host/var/run/
+      - ${NETWORK_FOLDER}/crypto-material/:/etc/hyperledger/configtx/
+      - ../../../chaincode:/opt/gopath/src/github.com/hyperledger/fabric-chaincode-integration
+      - ../../../private-collections/:/etc/hyperledger/private-collections
+
+  couchdb:
+    container_name: couchdb
+    image: hyperledger/fabric-couchdb${FABRIC_COUCHDB_TAG}

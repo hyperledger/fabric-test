@@ -34,8 +34,8 @@
         "devFreq": "0"
     },
     "listOpt": {
-        "org1": ["peer1"],
-        "org2": ["peer1"]
+        "org1": ["peer0org1examplecom"],
+        "org2": ["peer0org2examplecom"]
     },
     "eventOpt": {
         "type": "FilteredBlock",
@@ -50,20 +50,16 @@
         "payLoadMin": "1",
         "payLoadMax": "1024"
     },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
-        "fcn": "init",
-        "args": []
-    },
     "invoke": {
         "query": {
-            "fcn": "readMarble",
+            "fcn": "readMarblePrivateDetails",
             "args": ["marble"]
         },
         "move": {
             "fcn": "initMarble",
-            "args": ["marble", "blue","35","tom","99"]
+            "transientMap": {"marble": {"name":"marble", "color":"blue","size":35,"owner":"tom","price":99}},
+            "args": []
         }
     },
-    "ConnProfilePath": "ConnProfiles/test-network"
+    "ConnProfilePath": "ConnProfiles/privateDB"
 }

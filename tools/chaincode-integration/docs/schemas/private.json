@@ -1,0 +1,70 @@
+{
+    "info": {
+        "title": "PrivateChaincode",
+        "version": "latest"
+    },
+    "contracts": {
+        "SimpleContract": {
+            "info": {
+                "title": "PrivateContract",
+                "version": "latest"
+            },
+            "name": "PrivateContract",
+            "transactions": [
+                {
+                    "name": "putPrivateState",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "value",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Writes value parameter to the private data collection Org1AndOrg2 with the key parameter as the key. If an error occurs during this process it throws/returns it"
+                },
+                {
+                    "name": "getPrivateState",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "string"
+                    },
+                    "tag": [],
+                    "description": "Returns the value in the private data collection Org1AndOrg2 with the key of the key parameter. If an error occurs during this process it returns an error with the message: Could not read private collection Org1AndOrg2"
+                },
+                {
+                    "name": "deletePrivateState",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Deletes from the private data collection Org1AndOrg2 the key of the key parameter passed. If an error occurs during this process it throws/returns it"
+                }
+            ]
+        }
+    },
+    "components": {}
+}

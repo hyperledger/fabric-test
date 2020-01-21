@@ -3,6 +3,10 @@ package main
 import (
 	"flag"
 	"io/ioutil"
+	"os"
+	"io"
+	"log"
+	"fmt"
 
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
@@ -18,7 +22,7 @@ import (
 
 var inputFilePath = flag.String("i", "", "Input file path (required)")
 var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
-var action = flag.String("a", "", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
+var action = flag.String("a", "up", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
 
 func validateArguments(networkSpecPath *string, kubeConfigPath *string) error {
 
@@ -44,7 +48,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	var err error
 	var inputPath string
 	var config networkspec.Config
-	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "networkInSync"}
+	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync"}
 	if contains(actions, action) {
 		contents, _ := ioutil.ReadFile(inputFilePath)
 		contents = append([]byte("#@data/values \n"), contents...)
@@ -72,12 +76,12 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			logger.ERROR("Failed to delete network")
 			return err
 		}
-	// case "upgradeNetwork":
-	// 	err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
-	// 	if err != nil {
-	// 		logger.ERROR("Failed to upgrade network")
-	// 		return err
-	// 	}
+	case "upgradeNetwork":
+		err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
+		if err != nil {
+			logger.ERROR("Failed to upgrade network")
+			return err
+		}
 	case "create":
 		err = testclient.Testclient("create", inputFilePath)
 		if err != nil {
@@ -159,10 +163,19 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			return err
 		}
 	default:
-		logger.ERROR("Incorrect action ", action ," . Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health for action ", action)
+		logger.ERROR("Incorrect action ", action ," provided. Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health or upgradeNetwork for action ")
 		return err
 	}
 	return nil
+}
+
+func writeLogToAFile() {
+	f, err := os.OpenFile("text.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Println(err)
+	}
+	defer f.Close()
 }
 
 func main()  {
@@ -174,6 +187,16 @@ func main()  {
 	if *kubeConfigPath != "" {
 		env = "k8s"
 	}
+	f, err := os.OpenFile("/tmp/orders.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	wrt := io.MultiWriter(f)
+	log.SetOutput(wrt)
 
-	doAction(*action, env, *kubeConfigPath, *inputFilePath)
+	err = doAction(*action, env, *kubeConfigPath, *inputFilePath)
+	if err != nil {
+		logger.ERROR(fmt.Sprintln("Operator failed with error ", err))
+	}
 }

@@ -21,7 +21,6 @@ variables:
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   GO_VER: 1.13.4
   NODE_VER: 10.x
-  PYTHON_VER: 2.7
 
 jobs:
 - job: PTEDailyBuild
@@ -29,22 +28,16 @@ jobs:
     vmImage: ubuntu-18.04
   timeoutInMinutes: 360
   steps:
-  - template: install_deps.yml
-  - checkout: self
-    path: 'go/src/github.com/hyperledger/fabric-test'
-    displayName: Checkout Fabric Test Code
+  - template: templates/install_deps.yml
   - script: make svt-daily-pte-tests
     displayName: Run PTE Daily Tests
-  - script: |
-      mkdir -p logs
-      ls logs
-      cp tools/PTE/CITest/Logs/*.* logs
-    displayName: Copy Logs
   - task: PublishBuildArtifacts@1
+    condition: always() # publish either way
     inputs:
-      pathtoPublish: 'logs'
+      pathtoPublish: 'tools/PTE/CITest/Logs'
       artifactName: 'Logs'
   - task: PublishTestResults@2
+    condition: always()
     inputs:
       testResultsFormat: 'JUnit'
       testResultsFiles: 'regression/daily/results*.xml'

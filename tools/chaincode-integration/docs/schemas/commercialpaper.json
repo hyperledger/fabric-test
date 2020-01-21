@@ -1,0 +1,198 @@
+{
+    "info": {
+        "title": "CommercialPaperChaincode",
+        "version": "latest"
+    },
+    "contracts": {
+        "org.papernet.commercialpaper": {
+            "info": {
+                "title": "org.papernet.commercialpaper",
+                "version": "0.0.1"
+            },
+            "name": "org.papernet.commercialpaper",
+            "transactions": [
+                {
+                    "name": "issue",
+                    "parameters": [
+                        {
+                            "name": "issuer",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "paperNumber",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "issueDateTime",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "maturityDateTime",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "faceValue",
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "$ref": "#/components/schemas/CommercialPaper"
+                    },
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Creates a new commercial paper object using the parameters provided as properties for that paper. It sets the status of the commercial paper to be issued (1) and puts the paper to the world state. The world state key for the paper is a composite key formed of the string literal 'org.papernet.commercialpaperlist', the issuer and paper number. The world state value is a serialized JSON representation of the paper which meets the definition for a paper found in this file. If an error occurs on the writing to the world state this is thrown/returned. It should error if a paper exists in the world state with that composite key already. The function returns the commercial paper it has created."
+                },
+                {
+                    "name": "buy",
+                    "parameters": [
+                        {
+                            "name": "issuer",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "paperNumber",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "currentOwner",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "newOwner",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "price",
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        },
+                        {
+                            "name": "purchaseDateTime",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "$ref": "#/components/schemas/CommercialPaper"
+                    },
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Reads from the world state the paper with the composite key formed of the string literal 'org.papernet.commercialpaperlist', the passed issuer and the passed paperNumber. If an error occurs on reading from the world state it is thrown/returned. It should error if no paper exists for the composite key. If the paper found in the world state has an owner value that does not match the parameter currentOwner passed in then an error should be thrown/returned. If the paper has a status of redeemed (3) then an error should be thrown/returned. If the paper's status is issued (1) then this should be updated to trading (2). The paper owner should be updated to the value of the parameter newOwner passed in. The updated paper should be written to the world state using the same composite key as used to retrieve it as a serialized JSON representation of the paper which meets the definition for a paper found in this file. The updated paper should be returned."
+                },
+                {
+                    "name": "redeem",
+                    "parameters": [
+                        {
+                            "name": "issuer",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "paperNumber",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "redeemingOwner",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "redeemDateTime",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "$ref": "#/components/schemas/CommercialPaper"
+                    },
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Reads from the world state the paper with the composite key formed of the string literal 'org.papernet.commercialpaperlist', the passed issuer and the passed paperNumber. If an error occurs on reading the world state it is thrown/returned. It should error if no paper exists for the composite key. If the paper's owner does not match the passed in redeemingOwner then an error should be thrown/returned. If the paper already has a status of redeemed (3) then an error should be thrown/returned. The paper owner should be updated to the passed in issuer and its status set to redeemed (3). The updated paper should be written to the world state in a serialized JSON representation of the paper which meets the definition for a paper found in this file using the composite key used to retrieve it. If an error occurs on the writing to the world state it should be thrown/returned. The function should return the updated paper."
+                }
+            ]
+        }
+    },
+    "components": {
+        "schemas": {
+            "CommercialPaper": {
+                "$id": "CommercialPaper",
+                "properties": {
+                    "class": {
+                        "type": "string"
+                    },
+                    "currentState": {
+                        "type": "number",
+                        "format": "double",
+                        "maximum": 18446744073709552000,
+                        "minimum": 0,
+                        "multipleOf": 1
+                    },
+                    "faceValue": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "issueDateTime": {
+                        "type": "string"
+                    },
+                    "issuer": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "maturityDateTime": {
+                        "type": "string"
+                    },
+                    "owner": {
+                        "type": "string"
+                    },
+                    "paperNumber": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "paperNumber",
+                    "issuer",
+                    "issueDateTime",
+                    "faceValue",
+                    "maturityDateTime",
+                    "owner",
+                    "currentState",
+                    "class",
+                    "key"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

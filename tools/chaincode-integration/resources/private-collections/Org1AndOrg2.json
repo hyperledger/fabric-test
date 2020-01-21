@@ -1,0 +1,10 @@
+[
+    {
+        "name": "Org1AndOrg2",
+        "policy": "OR('Org1MSP.member', 'Org2MSP.member')",
+        "requiredPeerCount": 0,
+        "maxPeerCount": 1,
+        "blockToLive": 0,
+        "memberOnlyRead": true
+    }
+]

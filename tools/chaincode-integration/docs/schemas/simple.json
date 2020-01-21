@@ -1,0 +1,94 @@
+{
+    "info": {
+        "title": "SimpleChaincode",
+        "version": "latest"
+    },
+    "contracts": {
+        "SimpleContract": {
+            "info": {
+                "title": "SimpleContract",
+                "version": "latest"
+            },
+            "name": "SimpleContract",
+            "transactions": [
+                {
+                    "name": "helloWorld",
+                    "returns": {
+                        "type": "string"
+                    },
+                    "tag": [],
+                    "description": "Returns the string literal 'Hello World'"
+                },
+                {
+                    "name": "callAndResponse",
+                    "parameters": [
+                        {
+                            "name": "value",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "string"
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                },
+                {
+                    "name": "putState",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "schema": {
+                                "type": "string"
+                            }
+                        },
+                        {
+                            "name": "value",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Writes value parameter to world state with the key parameter as the key. If an error occurs during this process it throws/returns it"
+                },
+                {
+                    "name": "getState",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "string"
+                    },
+                    "tag": [],
+                    "description": "Returns the value in the world state with the key of the key parameter. If an error occurs during this process it throws/returns it"
+                },
+                {
+                    "name": "deleteState",
+                    "parameters": [
+                        {
+                            "name": "key",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": [
+                        "submit"
+                    ],
+                    "description": "Deletes from the world state the key of the key parameter passed. If an error occurs during this process it throws/returns it"
+                }
+            ]
+        }
+    },
+    "components": {}
+}

@@ -12,25 +12,25 @@ import (
 //MigrateToRaft -  to migrate from solo or kafka to raft
 func MigrateToRaft(config networkspec.Config, kubeConfigPath string) error {
 
-	var artifactsLocation string
+	artifactsLocation := config.ArtifactsLocation
 	ordererOrgs := []string{}
 	numOrderersPerOrg := []string{}
 	for j := 0; j < len(config.OrdererOrganizations); j++ {
 		ordererOrgs = append(ordererOrgs, config.OrdererOrganizations[j].Name)
 		numOrderersPerOrg = append(numOrderersPerOrg, fmt.Sprintf("%d", config.OrdererOrganizations[j].NumOrderers))
 	}
-	if !(strings.HasPrefix(config.ArtifactsLocation, "/")) {
+	if !(strings.HasPrefix(artifactsLocation, "/")) {
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
-			logger.ERROR("MigrateToRaft: GetCurrentDir failed; unable to join with ArtifactsLocation", config.ArtifactsLocation)
+			logger.ERROR("MigrateToRaft: GetCurrentDir failed; unable to join with ArtifactsLocation", artifactsLocation)
 			return err
 		}
-		artifactsLocation = paths.JoinPath(currentDir, config.ArtifactsLocation)
+		artifactsLocation = paths.JoinPath(currentDir, artifactsLocation)
 	}
 	ordererOrg := strings.Join(ordererOrgs[:], ",")
 	numOrderers := strings.Join(numOrderersPerOrg[:], ",")
 	args := []string{kubeConfigPath, config.OrdererOrganizations[0].MSPID, artifactsLocation, ordererOrg, numOrderers, fmt.Sprintf("%d", config.NumChannels)}
-	_, err := ExecuteCommand("./scripts/migrateToRaft.sh", args, true)
+	_, err := ExecuteCommand(paths.JoinPath(paths.ScriptsDir(), "migrateToRaft.sh"), args, true)
 	if err != nil {
 		return err
 	}

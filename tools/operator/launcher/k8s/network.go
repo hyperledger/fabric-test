@@ -57,10 +57,10 @@ func (k K8s) ConfigMapsNSecretsArgs(componentName, k8sType string) []string {
 }
 
 //GenerateConfigurationFiles - to generate all the configuration files
-func (k K8s) GenerateConfigurationFiles() error {
+func (k K8s) GenerateConfigurationFiles(upgrade bool) error {
 
 	network := nl.Network{TemplatesDir: paths.TemplateFilePath("k8s")}
-	err := network.GenerateConfigurationFiles()
+	err := network.GenerateConfigurationFiles(upgrade)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (k K8s) K8sNetwork(action string) error {
 	var network nl.Network
 	switch action {
 	case "up":
-		err = k.GenerateConfigurationFiles()
+		err = k.GenerateConfigurationFiles(false)
 		if err != nil {
 			logger.ERROR("Failed to generate k8s configuration files")
 			return err

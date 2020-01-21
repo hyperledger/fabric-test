@@ -37,7 +37,7 @@ an older released version, or from locally built docker images as follows:
 
     A couple of the Fabric CA images are built with Fabric peer and Fabric
     orderer docker images as the base images. The Fabric docker images may be
-    pulled from Nexus or DockerHub or they may be built from a local Fabric
+    pulled from Artifactory or DockerHub or they may be built from a local Fabric
     repository. The Fabric repository can be cloned with the following command:
 
     `git clone https://github.com/hyperledger/fabric.git`

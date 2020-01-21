@@ -399,6 +399,7 @@ function getMoveRequest() {
         endorsement_hint: endorsement_hint,
         fcn: ccDfnPtr.invoke.move.fcn,
         args: ccFuncInst.testInvokeArgs,
+        transientMap: ccFuncInst.testInvokeTransientMapEncoded,
         txId: tx_id
     };
 

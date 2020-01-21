@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
+	"errors"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -63,15 +64,46 @@ func (c ConnProfile) updateConnectionProfilePerChannel(inputObject interface{}, 
 func (c ConnProfile) updateConnectionProfilePerOrg(organizations []inputStructs.Organization, inputArgs ...string) error {
 
 	var err error
+	connectionProfilesList := []string{}
+	if len(inputArgs) < 3 || len(inputArgs) > 4{
+		return errors.New("Incorrect number of arguments passed")
+	}
 	action, orgName, channelName := inputArgs[0], inputArgs[1], inputArgs[2]
 	connProfilePath := paths.GetConnProfilePathForOrg(orgName, organizations)
-	switch action {
-	case "create":
-		err = c.updateConnectionProfile(connProfilePath, channelName, "orderer")
-	case "join":
-		err = c.updateConnectionProfile(connProfilePath, channelName, "peer")
-	case "instantiate", "upgrade":
-		err = c.updateConnectionProfile(connProfilePath, channelName, "chaincodes", inputArgs[len(inputArgs)-1])
+	connectionProfilesList = append(connectionProfilesList, connProfilePath)
+	if !strings.HasSuffix(connProfilePath, ".yaml") && !strings.HasSuffix(connProfilePath, ".yml"){
+		connectionProfilesList = []string{}
+		currentDir, err := paths.GetCurrentDir()
+		if err != nil {
+			logger.ERROR("ConnectionProfile: Failed to get the current directory, connProfilePath: ", connProfilePath)
+			return err
+		}
+		filesList, err := ioutil.ReadDir(paths.JoinPath(currentDir, connProfilePath))
+		if err != nil{
+			logger.ERROR("Failed to read the connection profiles directory, connProfilePath: ", connProfilePath)
+			return err
+		}
+		for _, file := range filesList {
+			connProfileFilePath := paths.JoinPath(connProfilePath, file.Name())
+			_, connProfileObject, err := c.getComponentsListFromConnProfile(connProfileFilePath, "")
+			if err != nil{
+				logger.ERROR("ConnectionProfile: Failed to read the connection profile, connProfilePath: ", connProfileFilePath)
+			}
+			if connProfileObject.Organizations[orgName].Name == orgName{
+				connectionProfilesList = append(connectionProfilesList, connProfileFilePath)
+
+			}
+		}
+	}
+	for _, file := range connectionProfilesList{
+		switch action {
+		case "create":
+			err = c.updateConnectionProfile(file, channelName, "orderer")
+		case "join":
+			err = c.updateConnectionProfile(file, channelName, "peer")
+		case "instantiate", "upgrade":
+			err = c.updateConnectionProfile(file, channelName, "chaincodes", inputArgs[len(inputArgs)-1])
+		}
 	}
 	if err != nil {
 		logger.ERROR("Failed to update connection profile after channel ", action)

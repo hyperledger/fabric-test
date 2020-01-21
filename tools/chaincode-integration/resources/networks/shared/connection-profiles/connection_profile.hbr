@@ -1,0 +1,78 @@
+{{! Copyright the Hyperledger Fabric contributors. All rights reserved. }}
+{{! SPDX-License-Identifier: Apache-2.0 }}
+{
+    "name": "{{networkName}}",
+    "x-type": "hlfv1",
+    "version": "1.0",
+    "client": {
+        "organization": "{{name}}",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300",
+                    "eventHub": "300",
+                    "eventReg": "300"
+                },
+                "orderer": "300"
+            }
+        }
+    },
+    "organizations": {
+        "{{name}}": {
+            "mspid": "{{mspid}}",
+            "peers": [
+            {{#peers}}
+                "{{name}}"{{#unless @last}},{{/unless}}
+            {{/peers}}
+            ],
+            "certificateAuthorities": [
+            {{#cas}}
+                "{{name}}"{{#unless @last}},{{/unless}}
+            {{/cas}}
+            ]
+        }
+    },
+    "orderers": {
+{{#orderers}}
+        "{{name}}": {
+            "url": "grpcs://localhost:{{externalPort}}",
+            "tlsCACerts": {
+                "path": "{{../cryptoConfigPath}}/ordererOrganizations/example.com/orderers/orderer.example.com/tls/ca.crt"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "{{name}}"
+            }
+        }
+    },
+{{/orderers}}
+    "peers": {
+{{#peers}}
+        "{{name}}": {
+            "url": "grpcs://localhost:{{externalPort}}",
+            "eventUrl": "grpcs://localhost:{{externalEventPort}}",
+            "tlsCACerts": {
+                "path": "{{../cryptoConfigPath}}/peerOrganizations/{{../smallName}}.com/peers/{{name}}/tls/ca.crt"
+            },
+            "grpcOptions": {
+                "hostnameOverride": "{{name}}",
+                "ssl-target-name-override": "{{name}}",
+                "request-timeout": 120001
+            }
+        }{{#unless @last}},{{/unless}}
+{{/peers}}
+    },
+    "certificateAuthorities": {
+{{#cas}}
+        "{{name}}": {
+            "url": "https://localhost:{{externalPort}}",
+            "caName": "{{name}}",
+            "tlsOptions": {
+                "trustedRoots": ["{{../cryptoConfigPath}}/peerOrganizations/{{../smallName}}.com/tlsca/{{name}}-cert.pem"]
+            },
+            "httpOptions": {
+                "verify": false
+            }
+        }{{#unless @last}},{{/unless}}
+{{/cas}}
+    }
+}

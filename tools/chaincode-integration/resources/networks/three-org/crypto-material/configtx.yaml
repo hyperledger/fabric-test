@@ -1,0 +1,255 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+---
+################################################################################
+#
+#   SECTION: Application
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for application related parameters
+#
+################################################################################
+Application: &ApplicationDefaults
+
+    Organizations:
+
+    Policies: &ApplicationDefaultPolicies
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+################################################################################
+#
+#   SECTION: Capabilities
+################################################################################
+Capabilities:
+    Channel: &ChannelCapabilities
+        V1_1: true
+
+    Orderer: &OrdererCapabilities
+        V1_1: true
+
+    Application: &ApplicationCapabilities
+        V1_2: true
+        V1_1: false
+################################################################################
+#
+#   CHANNEL
+#
+#   This section defines the values to encode into a config transaction or
+#   genesis block for channel related parameters.
+#
+################################################################################
+Channel: &ChannelDefaults
+
+    Policies:
+
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ChannelCapabilities
+
+
+################################################################################
+#
+#   SECTION: Orderer
+#
+#   - This section defines the values to encode into a config transaction or
+#   genesis block for orderer related parameters
+#
+################################################################################
+Orderer: &OrdererDefaults
+
+    Addresses:
+        - orderer.example.com:7050
+
+    BatchTimeout: 0.5s
+
+    BatchSize:
+
+        MaxMessageCount: 10
+
+        AbsoluteMaxBytes: 98 MB
+
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+    
+
+################################################################################
+#
+#   Section: Organizations
+#
+#   - This section defines the different organizational identities which will
+#   be referenced later in the configuration.
+#
+################################################################################
+Organizations:
+
+    - &OrdererOrg
+        Name: OrdererMSP
+
+        ID: OrdererMSP
+
+        MSPDir: crypto-config/ordererOrganizations/example.com/msp
+
+        Policies: &OrdererOrgPolicies
+            Readers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+
+            Writers:
+                Type: Signature
+                Rule: "OR('OrdererMSP.member')"
+
+            Admins:
+                Type: Signature
+                Rule: "OR('OrdererMSP.admin')"
+    - &Org1
+        Name: Org1MSP
+        ID: Org1MSP
+
+        MSPDir: crypto-config/peerOrganizations/org1.com/msp
+
+        AnchorPeers:
+            - Host: peer0.org1.com
+              Port: 7051
+
+        Policies: &Org1Policies
+            Readers:
+                Type: Signature
+                Rule: "OR('Org1MSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Org1MSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Org1MSP.admin')"
+    
+    - &Org2
+        Name: Org2MSP
+        ID: Org2MSP
+
+        MSPDir: crypto-config/peerOrganizations/org2.com/msp
+
+        AnchorPeers:
+            - Host: peer0.org2.com
+              Port: 8051
+
+        Policies: &Org2Policies
+            Readers:
+                Type: Signature
+                Rule: "OR('Org2MSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Org2MSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Org2MSP.admin')"
+
+    - &Org3
+        Name: Org3MSP
+        ID: Org3MSP
+
+        MSPDir: crypto-config/peerOrganizations/org3.com/msp
+
+        AnchorPeers:
+            - Host: peer0.org3.com
+              Port: 9051
+
+        Policies: &Org3Policies
+            Readers:
+                Type: Signature
+                Rule: "OR('Org3MSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Org3MSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Org3MSP.admin')"
+
+################################################################################
+#
+#   Profile
+#
+#   - Different configuration profiles may be encoded here to be specified
+#   as parameters to the configtxgen tool
+#
+################################################################################
+Profiles:
+
+    Genesis:
+        <<: *ChannelDefaults
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            OrdererType: etcdraft
+            EtcdRaft:
+                Consenters:
+                - Host: orderer.example.com
+                  Port: 7050
+                  ClientTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+                  ServerTLSCert: crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/server.crt
+            Addresses:
+                - orderer.example.com:7050
+            Organizations:
+            - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+            - <<: *OrdererOrg
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                - *Org1
+                - *Org2
+                - *Org3
+    channel:
+        <<: *ChannelDefaults
+        Consortium: SampleConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1
+                - *Org2
+                - *Org3
+            Capabilities:
+                <<: *ApplicationCapabilities

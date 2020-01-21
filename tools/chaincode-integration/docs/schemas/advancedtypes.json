@@ -1,0 +1,238 @@
+{
+    "info": {
+        "title": "AdvancedTypesChaincode",
+        "version": "latest"
+    },
+    "contracts": {
+        "AdvancedTypeContract": {
+            "info": {
+                "title": "AdvancedTypeContract",
+                "version": "latest"
+            },
+            "name": "AdvancedTypeContract",
+            "transactions": [
+                {
+                    "name": "getInt",
+                    "returns": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "tag": [],
+                    "description": "Returns the int 1"
+                },
+                {
+                    "name": "callAndResponseInt",
+                    "parameters": [
+                        {
+                            "name": "sent",
+                            "schema": {
+                                "type": "integer",
+                                "format": "int64"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                },
+                {
+                    "name": "getFloat",
+                    "returns": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "tag": [],
+                    "description": "Returns the float 1.1"
+                },
+                {
+                    "name": "callAndResponseFloat",
+                    "parameters": [
+                        {
+                            "name": "sent",
+                            "schema": {
+                                "type": "number",
+                                "format": "double"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                },
+                {
+                    "name": "getBool",
+                    "returns": {
+                        "type": "boolean"
+                    },
+                    "tag": [],
+                    "description": "Returns the bool true"
+                },
+                {
+                    "name": "callAndResponseBool",
+                    "parameters": [
+                        {
+                            "name": "sent",
+                            "schema": {
+                                "type": "boolean"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "boolean"
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                },
+                {
+                    "name": "getArray",
+                    "returns": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "format": "int64"
+                        }
+                    },
+                    "tag": [],
+                    "description": "Returns the integer array [1, 2, 3]"
+                },
+                {
+                    "name": "callAndResponseArray",
+                    "parameters": [
+                        {
+                            "name": "sent",
+                            "schema": {
+                                "type": "array",
+                                "items": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "type": "array",
+                        "items": {
+                            "type": "boolean"
+                        }
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                },
+                {
+                    "name": "getBasicAsset",
+                    "returns": {
+                        "$ref": "#/components/schemas/BasicAsset"
+                    },
+                    "tag": [],
+                    "description": "Returns an instance of BasicAsset with values {\"id\": \"OBJECT_1\", \"value\": 100}"
+                },
+                {
+                    "name": "callAndResponseBasicAsset",
+                    "parameters": [
+                        {
+                            "name": "sent",
+                            "schema": {
+                                "$ref": "#/components/schemas/BasicAsset"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "$ref": "#/components/schemas/BasicAsset"
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                },
+                {
+                    "name": "getComplexAsset",
+                    "returns": {
+                        "$ref": "#/components/schemas/ComplexAsset"
+                    },
+                    "tag": [],
+                    "description": "Returns an instance of ComplexAsset with values {\"id\": \"OBJECT_1\", \"value\": 100, \"description\": {\"colour\": \"red\", \"owners\": [\"andy\", \"matthew\"]}}"
+                },
+                {
+                    "name": "callAndResponseComplexAsset",
+                    "parameters": [
+                        {
+                            "name": "param0",
+                            "schema": {
+                                "$ref": "#/components/schemas/ComplexAsset"
+                            }
+                        }
+                    ],
+                    "returns": {
+                        "$ref": "#/components/schemas/ComplexAsset"
+                    },
+                    "tag": [],
+                    "description": "Returns the parameter it takes in"
+                }
+            ]
+        }
+    },
+    "components": {
+        "schemas": {
+            "BasicAsset": {
+                "$id": "BasicAsset",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "required": [
+                    "id",
+                    "value"
+                ],
+                "additionalProperties": false
+            },
+            "ComplexAsset": {
+                "$id": "ComplexAsset",
+                "properties": {
+                    "description": {
+                        "$ref": "Description"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                },
+                "required": [
+                    "id",
+                    "value",
+                    "description"
+                ],
+                "additionalProperties": false
+            },
+            "Description": {
+                "$id": "Description",
+                "properties": {
+                    "colour": {
+                        "type": "string"
+                    },
+                    "owners": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "colour",
+                    "owners"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

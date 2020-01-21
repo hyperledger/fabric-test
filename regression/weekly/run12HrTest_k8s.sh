@@ -12,6 +12,6 @@
 CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 WEEKLYDIR="$FabricTestDir/regression/weekly"
-
-echo "========== Performance PTE 12Hr test"
-cd $WEEKLYDIR && py.test -v --junitxml results_TimedRun_12hr_k8s.xml 12HrTest_k8s.py
+export GinkoTests=true
+echo "========== Performance PTE 12Hr test =========="
+cd $WEEKLYDIR && ginkgo

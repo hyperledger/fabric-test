@@ -465,13 +465,27 @@ The following chaincodes are tested and supported:
             "args": []
         },
 
-* **marblescc_priv**: [Marbles02 private chaincode](https://github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc_priv` when using this chaincode.  This chaincode ignores payload size, such as payLoadMin and payLoadMax. See directory `marblescc_privInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go`.  Set the deploy.chaincodePath to this directory in the user input file.  This chaincode can be used for side DB if user specifies collection configuration json in the `collectionsConfigPath` when instantiate the chaincode.
+* **marblescc_priv**: [Marbles02 private chaincode](https://github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go). PTE alters the marble name (the first argument) and the marble size (the third argument) for each `initMarble` transaction. Specify `ccType` as `marblescc_priv` when using this chaincode.  This chaincode ignores payload size, such as payLoadMin and payLoadMax. See directory `marblescc_privInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go`.  Set the deploy.chaincodePath to this directory in the user input file.  This chaincode can be used for side DB if user specifies collection configuration json in the `collectionsConfigPath` when instantiate the chaincode.
 
         "deploy": {
-            "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+            "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go",
             "collectionsConfigPath": "github.com/hyperledger/fabric-test/tools/PTE/marblescc_privInputs/collections_config-chan1.json",
             "fcn": "init",
             "args": []
+        },
+
+This chaincode passes private data as base64 encoded bytes in transient map.  User can define transient MAP in the `move` subsection under `invoke` section.  PTE will create a unique name for each marble.  See below for an example of transientMap.
+
+        "invoke": {
+            "query": {
+                "fcn": "readMarblePrivateDetails",
+                "args": ["marble"]
+            },
+            "move": {
+                "fcn": "initMarble",
+                "transientMap": {"marble": {"name":"marble", "color":"blue", "size":35, "owner":"tom", "price":99}},
+                "args": []
+            }
         },
 
 * **sample_js**: This is the Node JS chaincode of sample_cc. See directory `samplejsInputs` for examples related to this chaincode. This chaincode is available in `$GOPATH/src/github.com/hyperledger/fabric-test/chaincodes/samplecc/node`.  Set the deploy.chaincodePath to this directory in the user input file.

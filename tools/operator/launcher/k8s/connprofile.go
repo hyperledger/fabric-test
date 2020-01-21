@@ -3,8 +3,9 @@ package k8s
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"io/ioutil"
+	"net"
+	"strconv"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
@@ -12,6 +13,24 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
+
+var reservedIPBlocks []*net.IPNet
+
+func init() {
+	for _, cidr := range []string{
+		"127.0.0.0/8",    // IPv4 loopback
+		"10.0.0.0/8",     // RFC1918
+		"172.16.0.0/12",  // RFC1918
+		"192.168.0.0/16", // RFC1918
+		"169.254.0.0/16", // RFC3927 link-local
+	} {
+		_, block, err := net.ParseCIDR(cidr)
+		if err != nil {
+			panic(fmt.Errorf("parse error on %q: %v", cidr, err))
+		}
+		reservedIPBlocks = append(reservedIPBlocks, block)
+	}
+}
 
 type K8Ports struct {
 	Spec struct {
@@ -62,7 +81,15 @@ func (k K8s) GetK8sExternalIP(config networkspec.Config, serviceName string) (st
 		if err != nil {
 			logger.ERROR("Failed to unmarshall nodePortIP object")
 		}
-		nodeIP = nodePortIP.Items[0].Status.Addresses[1].Address
+		for _, ip := range nodePortIP.Items[0].Status.Addresses {
+			addr := net.ParseIP(ip.Address)
+			if addr != nil {
+				if !reservedIP(addr) {
+					nodeIP = ip.Address
+					break
+				}
+			}
+		}
 	} else if config.K8s.ServiceType == "LoadBalancer" {
 		inputArgs = []string{"get", "-o", "json", "services", serviceName}
 		k.Arguments = inputArgs
@@ -275,4 +302,17 @@ func (k K8s) GenerateConnectionProfiles(config networkspec.Config) error {
 		}
 	}
 	return nil
+}
+
+func reservedIP(ip net.IP) bool {
+	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return true
+	}
+
+	for _, block := range reservedIPBlocks {
+		if block.Contains(ip) {
+			return true
+		}
+	}
+	return false
 }
