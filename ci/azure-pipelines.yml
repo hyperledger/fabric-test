@@ -33,6 +33,8 @@ jobs:
   - template: templates/install_deps.yml
   - script: make ci-smoke
     displayName: Run Smoke Tests
+  - script: docker logs peer0-org1
+    displayName: Get Docker Logs
   - task: PublishBuildArtifacts@1
     condition: always()   # publish either way
     inputs:

@@ -3,9 +3,9 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/pkg/errors"
@@ -232,11 +232,11 @@ func (k K8s) K8sNetwork(action string) error {
 		}
 
 	case "down":
-		err = k.DownK8sNetwork(k.KubeConfigPath, k.Config)
-		if err != nil {
-			logger.ERROR("Failed to down K8s fabric network")
-			return err
-		}
+		//err = k.DownK8sNetwork(k.KubeConfigPath, k.Config)
+		//if err != nil {
+		//	logger.ERROR("Failed to down K8s fabric network")
+		//	return err
+		//}
 	default:
 		return errors.Errorf("Incorrect action %s Use up or down for action", action)
 	}

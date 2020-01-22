@@ -219,7 +219,7 @@ done
 
 #first handle network action: up|down
 if [ "$networkAction" == "down" ]; then
-    ./cleanNetwork.sh $comName
+#    ./cleanNetwork.sh $comName
     exit
 elif [ "$networkAction" != "up" ]; then
     echo "invalid network action option: $networkAction"

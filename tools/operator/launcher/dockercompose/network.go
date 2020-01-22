@@ -94,7 +94,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		return err
 	}
-	
+
 	configDirPath := paths.ConfigFilesDir()
 	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s/backup:/opt/backup", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup/*)"}
 	_, err = networkclient.ExecuteCommand("docker", cleanArgs, true)
@@ -106,7 +106,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		return err
 	}
-	
+
 	err = d.removeChainCodeContainersAndImages()
 	if err != nil {
 		return err
@@ -184,11 +184,11 @@ func (d DockerCompose) DockerNetwork(action string) error {
 			return err
 		}
 	case "down":
-		err = d.DownLocalNetwork(d.Config)
-		if err != nil {
-			logger.ERROR("Failed to down local fabric network")
-			return err
-		}
+		//err = d.DownLocalNetwork(d.Config)
+		//if err != nil {
+		//	logger.ERROR("Failed to down local fabric network")
+		//	return err
+		//}
 	default:
 		return errors.Errorf("Incorrect action %s Use up or down for action", action)
 	}
