@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
@@ -54,7 +54,7 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 					return errors.New("Containers exited")
 				}
 				count++
-				if count >= 4{
+				if count >= 4 {
 					return errors.New("Waiting time to bring up containers exceeded 1 minute")
 				}
 			}
@@ -118,4 +118,3 @@ func (d DockerCompose) CheckDockerContainersHealth(config networkspec.Config) er
 	}
 	return nil
 }
-

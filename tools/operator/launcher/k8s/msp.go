@@ -7,8 +7,8 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
@@ -92,7 +92,7 @@ func (k K8s) createCertsConfigmap(numComponents int, numCA int, componentType, o
 			return err
 		}
 	}
-	
+
 	return nil
 }
 

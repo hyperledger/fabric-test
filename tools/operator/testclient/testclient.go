@@ -2,8 +2,8 @@ package testclient
 
 import (
 	"io/ioutil"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"

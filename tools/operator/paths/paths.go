@@ -4,8 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
+
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 )
 
 //CryptoConfigDir --
@@ -126,7 +127,7 @@ func createDirectory(dirPath string) error {
 	return nil
 }
 
-func componentPath(artifactsLocation, component string) (string) {
+func componentPath(artifactsLocation, component string) string {
 	path := JoinPath(artifactsLocation, component)
 	isExists, _ := dirExists(path)
 	if isExists {
@@ -145,7 +146,7 @@ func JoinPath(oldPath, newPath string) string {
 }
 
 //PTEPath --
-func PTEPath() string{
+func PTEPath() string {
 	path, err := GetCurrentDir()
 	if err != nil {
 		logger.ERROR("PTEPath function is failed in getting current directory")

@@ -1,16 +1,17 @@
 package systemtest
 
 import (
-	"os"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"path"
-	"strings"
 	"path/filepath"
+	"strings"
+
 	"gopkg.in/yaml.v2"
 
-	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 )
 
 //MovePTEReportFile -- Move pteReport file after the test is executed
@@ -88,9 +89,9 @@ func ChangeTargetPeers(testFilePath, testFileName, targetPeersType string) error
 }
 
 //RemoveTemporaryFile -- To remove the temporary test-input.yaml file
-func RemoveTemporaryFile(filePath string) error{
+func RemoveTemporaryFile(filePath string) error {
 	err := os.Remove(filePath)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	return err

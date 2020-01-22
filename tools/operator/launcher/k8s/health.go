@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
@@ -41,7 +41,7 @@ func (k K8s) VerifyContainersAreRunning() error {
 					return nil
 				}
 				count++
-				logger.INFO("Waiting up to ",strconv.Itoa(timeout)," minutes for pods to be up and running; minute =", strconv.Itoa(count))
+				logger.INFO("Waiting up to ", strconv.Itoa(timeout), " minutes for pods to be up and running; minute =", strconv.Itoa(count))
 				if count >= timeout {
 					containers := strings.Split(output, "\n")
 					err = k.getReasonsPodsNotRunning(containers)
@@ -62,9 +62,9 @@ func (k K8s) getReasonsPodsNotRunning(containers []string) error {
 		if err != nil {
 			reasonsPodsNotRunning = append(reasonsPodsNotRunning, fmt.Sprintf("%s: Failed to get the reason for the failure; err: %s", containers[i], err))
 		}
-		if output != ""{
+		if output != "" {
 			eventsArr := strings.Split(output, "Events:")
-			reasonsPodsNotRunning = append(reasonsPodsNotRunning, fmt.Sprintf("%s:%s", containers[i], eventsArr[len(eventsArr) - 1]))
+			reasonsPodsNotRunning = append(reasonsPodsNotRunning, fmt.Sprintf("%s:%s", containers[i], eventsArr[len(eventsArr)-1]))
 		}
 	}
 	return errors.New(strings.Join(reasonsPodsNotRunning, "\n\n"))

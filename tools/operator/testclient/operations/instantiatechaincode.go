@@ -16,7 +16,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-//InstantiateCCUIObject -- 
+//InstantiateCCUIObject --
 type InstantiateCCUIObject struct {
 	TransType       string                   `json:"transType,omitempty"`
 	TLS             string                   `json:"TLS,omitempty"`
@@ -211,8 +211,8 @@ func (i InstantiateCCUIObject) getMSPIDForOrg(connProfilePath, orgName string) (
 		if err != nil {
 			return "", err
 		}
-		for _, file := range files{
-			if strings.Contains(file.Name(), orgName){
+		for _, file := range files {
+			if strings.Contains(file.Name(), orgName) {
 				connProfilePath = paths.JoinPath(connProfilePath, file.Name())
 				break
 			}

@@ -1,8 +1,8 @@
 package networkclient
 
 import (
-	"os"
 	"fmt"
+	"os"
 
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"

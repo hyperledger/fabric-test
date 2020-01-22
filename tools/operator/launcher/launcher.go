@@ -14,15 +14,15 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
 	"github.com/pkg/errors"
 )
 
 func validateArguments(networkSpecPath string, kubeConfigPath string) error {
 
 	if networkSpecPath == "" {
-		return errors.New("Launcher: Config file not provided");
+		return errors.New("Launcher: Config file not provided")
 	} else if kubeConfigPath == "" {
 		logger.INFO("Launcher: Kube config file not provided, proceeding with local environment")
 	}
@@ -70,7 +70,7 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 		return errors.Errorf("Launcher: Failed to download ytt with error: %s", err)
 	}
 
-	err = validateArguments(networkSpecPath, kubeConfigPath);
+	err = validateArguments(networkSpecPath, kubeConfigPath)
 	if err != nil {
 		return errors.Errorf("Launcher: Failed to validate arguments with error: %s", err)
 	}
@@ -119,7 +119,7 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 
 	err = doAction(action, env, kubeConfigPath, config)
 	if err != nil {
-		logger.ERROR("Launcher: Failed to perform ", action ," action using network input file ", networkSpecPath)
+		logger.ERROR("Launcher: Failed to perform ", action, " action using network input file ", networkSpecPath)
 		return err
 	}
 	return nil
