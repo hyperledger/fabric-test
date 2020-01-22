@@ -18,11 +18,11 @@ package experiments
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"regexp"
 	"testing"
 
-	"fmt"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/core/ledger/testutil"

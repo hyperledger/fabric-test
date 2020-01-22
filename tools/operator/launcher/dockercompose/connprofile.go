@@ -7,8 +7,8 @@ package dockercompose
 import (
 	"encoding/json"
 	"fmt"
-	"sort"
 	"io/ioutil"
+	"sort"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
@@ -49,13 +49,13 @@ func (d DockerCompose) GetDockerServicePort(serviceName string, forHealth bool) 
 		ports = append(ports, port)
 	}
 	sort.Strings(ports)
-/* We can't do anything with the input file, as it doesn't have anything regarding the ports.
-   Suppose if we take the first orderer and see the ports that the orderer container is using
-   will be [8443/tcp 30000/tcp 7050/tcp]. They will not appear in the same orderer every time.
-   So I am sorting them in line number 50. After sorting, they will be in alphabetical order
-   [30000/tcp 7050/tcp 8443/tcp]. 8443 is the port that we use to verify the health.
-   It will be always at index 2.
-*/
+	/* We can't do anything with the input file, as it doesn't have anything regarding the ports.
+	   Suppose if we take the first orderer and see the ports that the orderer container is using
+	   will be [8443/tcp 30000/tcp 7050/tcp]. They will not appear in the same orderer every time.
+	   So I am sorting them in line number 50. After sorting, they will be in alphabetical order
+	   [30000/tcp 7050/tcp 8443/tcp]. 8443 is the port that we use to verify the health.
+	   It will be always at index 2.
+	*/
 	port = containerPorts.Ports[ports[0]][0].HostPort
 	if forHealth {
 		port = containerPorts.Ports[ports[2]][0].HostPort

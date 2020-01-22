@@ -2,21 +2,21 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
-	"os"
-	"io"
-	"log"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"os"
 
-	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
+	"github.com/hyperledger/fabric-test/tools/operator/launcher"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
-	"github.com/hyperledger/fabric-test/tools/operator/launcher"
-	"github.com/hyperledger/fabric-test/tools/operator/testclient"
+	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 	"github.com/pkg/errors"
 )
 
@@ -35,12 +35,12 @@ func validateArguments(networkSpecPath *string, kubeConfigPath *string) error {
 }
 
 func contains(s []string, e string) bool {
-    for _, a := range s {
-        if a == e {
-            return true
-        }
-    }
-    return false
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 func doAction(action, env, kubeConfigPath, inputFilePath string) error {
@@ -157,7 +157,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			return err
 		}
 	default:
-		logger.ERROR("Incorrect action ", action ," provided. Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health or upgradeNetwork for action ")
+		logger.ERROR("Incorrect action ", action, " provided. Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health or upgradeNetwork for action ")
 		return err
 	}
 	return nil
@@ -172,7 +172,7 @@ func writeLogToAFile() {
 	defer f.Close()
 }
 
-func main()  {
+func main() {
 
 	flag.Parse()
 	validateArguments(inputFilePath, kubeConfigPath)

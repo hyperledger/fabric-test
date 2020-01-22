@@ -94,7 +94,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		return err
 	}
-	
+
 	configDirPath := paths.ConfigFilesDir()
 	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s/backup:/opt/backup", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup/*)"}
 	_, err = networkclient.ExecuteCommand("docker", cleanArgs, true)
@@ -106,7 +106,7 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		return err
 	}
-	
+
 	err = d.removeChainCodeContainersAndImages()
 	if err != nil {
 		return err
