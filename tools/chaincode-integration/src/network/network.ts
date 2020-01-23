@@ -29,8 +29,7 @@ const networkResources = path.resolve(__dirname, '../../resources/networks');
 const networkComposeFile = 'docker-compose/docker-compose.yaml';
 const cliComposeFile = path.join(networkResources, 'shared', 'docker-compose/docker-compose-cli.yaml');
 
-// export const DEFINED_NETWORKS = fs.readdirSync(networkResources).filter((name) => name !== 'shared' && name !== 'scripts');
-export const DEFINED_NETWORKS = ['three-org'];
+export const DEFINED_NETWORKS = fs.readdirSync(networkResources).filter((name) => name !== 'shared' && name !== 'scripts');
 
 export class Network {
     private name: string;

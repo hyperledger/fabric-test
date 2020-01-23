@@ -41,7 +41,7 @@ export class CouchDB {
                 continue;
             }
 
-            await this.checkKeyDeletedFromCollection(org, this.buildWorldStateName(chaincodeName, channelName), key);
+            await this.checkKeyDeletedFromCollection(org, this.buildWorldStateName(channelName, chaincodeName), key);
         }
     }
 

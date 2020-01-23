@@ -29,7 +29,6 @@ try {
     .argv;
 
     (results.thePromise as Promise<any>).then((resp) => {
-        console.log('Command succeeded');
         process.exit(0);
     }).catch((err) => {
         console.error(err.message);

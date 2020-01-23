@@ -82,6 +82,7 @@ export class Hooks {
         // Workspace is per scenario so save for other scenarios
         global.CURRENT_NETWORK = this.workspace.network;
         global.CHAINCODES = this.workspace.chaincodes;
+        global.CONNECTIONS = this.workspace.connections;
 
         logger.info(chalk.yellow(`Finished scenario ${scenarioResult.pickle.name}`));
     }

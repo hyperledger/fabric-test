@@ -4,7 +4,7 @@ version: '2'
 
 services:
   ca:
-    image: hyperledger/fabric-ca${FABRIC_CA__IMG_TAG}
+    image: hyperledger/fabric-ca${FABRIC_CA_IMG_TAG}
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_CLIENT_HOME=/root/fabric-ca/clients/admin
