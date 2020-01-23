@@ -46,10 +46,13 @@ const cmd: CommandModule = {
                 const tmpl = `# {{info.title}}
 {{#each contracts}}
 ## {{name}}
+{{#if description}}
+{{{description}}}
+{{/if}}
 {{#each transactions}}
 
 ### {{name}}
-> {{description}}
+> {{{description}}}
 
 {{#if parameters}}
 Parameters:

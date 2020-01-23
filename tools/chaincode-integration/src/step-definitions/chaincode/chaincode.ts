@@ -5,7 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 import * as assert from 'assert';
 import { TableDefinition } from 'cucumber';
 import { binding } from 'cucumber-tsflow/dist';
-import { Gateway } from 'fabric-network';
+import { TransientMap } from 'fabric-client';
+import { Contract, Transaction } from 'fabric-network';
 import * as path from 'path';
 import { given, then, when } from '../../decorators/steps';
 import { Policy } from '../../policy/policy';
@@ -15,6 +16,8 @@ import { getEnvVarsForCli, jsonResponseEqual, sleep } from '../utils/functions';
 import { Workspace } from '../utils/workspace';
 
 const logger = Logger.getLogger('./src/step-definitions/chaincode/chaincode.ts');
+
+type TransactionType = 'submit' | 'evaluate';
 
 @binding([Workspace])
 export class Chaincode {
@@ -66,90 +69,194 @@ export class Chaincode {
         await this.instantiate(orgName, chaincodeName, channelName, functionName, args);
     }
 
+    @given(/Organisation ['"](.*)['"] has created transaction ['"](.*)['"] for chaincode ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]/)
+    public async createTransaction(orgName: string, functionName: string, chaincodeName: string, channelName: string, identityName: string) {
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+
+        this.workspace.transactions.set(functionName, tx);
+    }
+
+    @given(/Transaction ['"](.*)['"] has transient data:$/)
+    public async setTransient(functionName: string, transientDataTbl: TableDefinition) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const txn = await this.workspace.transactions.get(functionName);
+
+        const transDataRaw = transientDataTbl.raw();
+
+        const transientData: TransientMap = {};
+
+        for (const row of transDataRaw) {
+            transientData[row[0]] = Buffer.from(row[1]);
+        }
+
+        logger.debug(`Set transient data for transaction ${functionName}`, transientData);
+
+        txn.setTransient(transientData);
+    }
+
     @when(/Organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]$/)
     public async whenSubmitNoArgs(
-        orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
     ) {
-        await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(null));
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.handleTransaction(tx, type, this.generateArgs(null));
     }
 
     @when(/Organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"] with args:$/)
     public async whenSubmit(
-        orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
         args: TableDefinition,
     ) {
-        await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(args));
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.handleTransaction(tx, type, this.generateArgs(args));
+    }
+
+    @when(/Transaction ['"](.*)['"] is (submit|evaluate)(te)?d$/)
+    public async whenSubmitCreated(functionName: string, type: TransactionType, _: string) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.handleTransaction(tx, type, this.generateArgs(null));
+
+        this.workspace.transactions.delete(functionName);
+    }
+
+    @when(/Transaction ['"](.*)['"] is (submit|evaluate)(te)?d with args:$/)
+    public async whenSubmitCreatedwithArgs(functionName: string, type: TransactionType, _: string, args: TableDefinition) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.handleTransaction(tx, type, this.generateArgs(args));
     }
 
     @then(/Expecting an error organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]$/)
     public async whenSubmitError(
-        orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
     ) {
-        try {
-            await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(null), true);
-            throw new Error('Expected transaction to fail but was successful');
-        } catch (err) {
-            if (err.message === 'Expected transaction to fail but was successful') {
-                throw err;
-            }
-            return;
-        }
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.submitExpectError(tx, type, null);
     }
 
     @then(/Expecting an error organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"] with args:$/)
     public async whenSubmitErrorWithArgs(
-        orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
         args: TableDefinition,
     ) {
-        try {
-            await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(args), true);
-            throw new Error('Expected transaction to fail but was successful');
-        } catch (err) {
-            if (err.message === 'Expected transaction to fail but was successful') {
-                throw err;
-            }
-            return;
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.submitExpectError(tx, type, args);
+    }
+
+    @then(/Expecting an error transaction ['"](.*)['"] is (submit|evaluate)(te)?d$/)
+    public async thenSubmitErrorCreatedTx(functionName: string, type: TransactionType, _: string) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
         }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.submitExpectError(tx, type, null);
+
+        this.workspace.transactions.delete(functionName);
+    }
+
+    @then(/Expecting an error transaction ['"](.*)['"] is (submit|evaluate)(te)?d with args:$/)
+    public async thenSubmitErrorwithArgsCreatedTx(functionName: string, type: TransactionType, _: string, args: TableDefinition) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.submitExpectError(tx, type, args);
+
+        this.workspace.transactions.delete(functionName);
     }
 
     @then(/Expecting the error ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]$/)
     public async whenSubmitSpecificError(
-        errMsg: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        errMsg: string, orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
     ) {
-        try {
-            await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(null), true);
-            throw new Error('Expected transaction to fail but was successful');
-        } catch (err) {
-            assert.equal(err.message, errMsg);
-        }
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.submitAndCheckError(tx, errMsg, type, null);
     }
 
     @then(/Expecting the error ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"] with args:$/)
     public async whenSubmitSpecificErrorWithArgs(
-        errMsg: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        errMsg: string, orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
         args: TableDefinition,
     ) {
-        try {
-            await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(args), true);
-            throw new Error('Expected transaction to fail but was successful');
-        } catch (err) {
-            assert.equal(err.message, errMsg);
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.submitAndCheckError(tx, errMsg, type, args);
+    }
+
+    @then(/Expecting the error ['"](.*)['"] transaction ['"](.*)['"] is (submit|evaluate)(te)?d$/)
+    public async thenSubmitSpecificErrorCreatedTx(errMsg: string, functionName: string, type: TransactionType, _: string) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
         }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.submitAndCheckError(tx, errMsg, type, null);
+
+        this.workspace.transactions.delete(functionName);
+    }
+
+    @then(/Expecting the error ['"](.*)['"] transaction ['"](.*)['"] is (submit|evaluate)(te)?d with args:$/)
+    public async thenSubmitSpecificErrorWithArgsCreatedTx(errMsg: string, functionName: string, type: TransactionType, _: string, args: TableDefinition) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.submitAndCheckError(tx, errMsg, type, args);
+
+        this.workspace.transactions.delete(functionName);
     }
 
     @then(/Expecting result ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"]$/)
     public async thenSubmit(
-        result: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        result: string, orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
     ) {
-        await this.submitAndCheck(result, orgName, type, chaincodeName, functionName, channelName, identityName, null);
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.submitAndCheck(tx, result, type, null);
     }
 
     @then(/Expecting result ['"](.*)['"] organisation ['"](.*)['"] (submit|evaluate)s against the chaincode ['"](.*)['"] the transaction ['"](.*)['"] on channel ['"](.*)['"] as ['"](.*)['"] with args:$/)
     public async thenSubmitWithArgs(
-        result: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
+        result: string, orgName: string, type: TransactionType, chaincodeName: string, functionName: string, channelName: string, identityName: string,
         args: TableDefinition,
     ) {
-        await this.submitAndCheck(result, orgName, type, chaincodeName, functionName, channelName, identityName, args);
+        const tx = await this.buildTransaction(orgName, chaincodeName, functionName, channelName, identityName);
+        await this.submitAndCheck(tx, result, type, args);
+    }
+
+    @then(/Expecting result ['"](.*)['"] transaction ['"](.*)['"] is (submit|evaluate)(te)?d$/)
+    public async thenSubmitCreatedTx(result: string, functionName: string, type: TransactionType, _: string) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.submitAndCheck(tx, result, type, null);
+
+        this.workspace.transactions.delete(functionName);
+    }
+
+    @then(/Expecting result ['"](.*)['"] transaction ['"](.*)['"] is (submit|evaluate)(te)?d with args:$/)
+    public async thenSubmitCreatedTxWithArgs(result: string, functionName: string, type: TransactionType, _: string, args: TableDefinition) {
+        if (!this.workspace.transactions.has(functionName)) {
+            throw new Error(`Transaction "${functionName}" has not been created`);
+        }
+
+        const tx = this.workspace.transactions.get(functionName);
+        await this.submitAndCheck(tx, result, type, args);
+
+        this.workspace.transactions.delete(functionName);
     }
 
     private async instantiate(orgName: string, chaincodeName: string, channelName: string, functionName: string, args: TableDefinition) {
@@ -180,52 +287,50 @@ export class Chaincode {
 
         for (let i = 0; i < attempts; i++) {
             try {
-                await this.handleTransaction(org.name, 'evaluate', chaincodeName, 'org.hyperledger.fabric:GetMetadata', channelName, 'admin', []);
+                const tx = await this.buildTransaction(orgName, chaincodeName, 'org.hyperledger.fabric:GetMetadata', channelName, 'admin');
+                await this.handleTransaction(tx, 'evaluate', []);
                 break;
             } catch (err) {
                 if (i === attempts - 1) {
                     console.log(err);
-                    throw new Error('Waiting for chaincode to insantiate timedout');
+                    throw new Error('Waiting for chaincode to instantiate timed out');
                 }
                 await sleep(2000);
             }
         }
     }
 
-    private async submitAndCheck(
-        result: string, orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string,
-        args: TableDefinition,
-    ) {
-        const data = await this.handleTransaction(orgName, type, chaincodeName, functionName, channelName, identityName, this.generateArgs(args));
+    private async submitAndCheck(tx: Transaction, result: string, type: TransactionType, args: TableDefinition) {
+        const data = await this.handleTransaction(tx, type, this.generateArgs(args));
 
         if (data !== result && !jsonResponseEqual(data, result)) {
             throw new Error(`Result did not match expected. Wanted ${result} got ${data}`);
         }
     }
 
-    private async handleTransaction(
-        orgName: string, type: 'submit' | 'evaluate', chaincodeName: string, functionName: string, channelName: string, identityName: string, args: string[],
-        hideError: boolean = false,
-    ): Promise<string> {
+    private async submitExpectError(tx: Transaction, type: TransactionType, args: TableDefinition) {
+        try {
+            await this.handleTransaction(tx, type, this.generateArgs(args), true);
+            throw new Error('Expected transaction to fail but was successful');
+        } catch (err) {
+            if (err.message === 'Expected transaction to fail but was successful') {
+                throw err;
+            }
+            return;
+        }
+    }
+
+    private async submitAndCheckError(tx: Transaction, errMsg: string, type: TransactionType, args: TableDefinition) {
+        try {
+            await this.handleTransaction(tx, type, this.generateArgs(args), true);
+            throw new Error('Expected transaction to fail but was successful');
+        } catch (err) {
+            assert.equal(err.message, errMsg);
+        }
+    }
+
+    private async handleTransaction(tx: Transaction, type: TransactionType, args: string[], hideError: boolean = false): Promise<string> {
         logger.debug(`Handling transaction of type ${type}`);
-
-        const org = this.workspace.network.getOrganisation(orgName);
-
-        const gateway = new Gateway();
-        await gateway.connect(org.ccp, { wallet: org.wallet, identity: identityName, discovery: { enabled: true, asLocalhost: true } });
-
-        logger.debug('Gateway connected');
-
-        const channel = await gateway.getNetwork(channelName);
-
-        logger.debug('Got channel', channelName);
-
-        const contract = await channel.getContract(chaincodeName);
-
-        logger.debug('Got chaincode', chaincodeName);
-
-        const tx = contract.createTransaction(functionName);
-
         try {
             const data = await tx[type](...args);
 
@@ -238,6 +343,31 @@ export class Chaincode {
             }
             throw err;
         }
+    }
+
+    private async buildTransaction(
+        orgName: string, chaincodeName: string, functionName: string, channelName: string, identityName: string,
+    ): Promise<Transaction> {
+        logger.debug(`Building transaction ${functionName} for chaincode ${chaincodeName} on channel ${chaincodeName} as organisation ${orgName} identity ${identityName}`);
+
+        const contract = await this.getContract(orgName, identityName, chaincodeName, channelName);
+
+        return contract.createTransaction(functionName);
+    }
+
+    private async getContract(orgName: string, identityName: string, chaincodeName: string, channelName: string): Promise<Contract> {
+        const org = this.workspace.network.getOrganisation(orgName);
+        const gateway = await this.workspace.getConnection(org, identityName);
+
+        const channel = await gateway.getNetwork(channelName);
+
+        logger.debug('Got channel', channelName);
+
+        const contract = await channel.getContract(chaincodeName);
+
+        logger.debug('Got chaincode', chaincodeName);
+
+        return contract;
     }
 
     private generateArgs(args: TableDefinition): string[] {

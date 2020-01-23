@@ -2,7 +2,7 @@
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
-import { Wallet } from 'fabric-network';
+import { Gateway, Wallet } from 'fabric-network';
 import { CommandModule as YargsCommandModule } from 'yargs';
 import { Network } from '../network/network';
 
@@ -53,6 +53,7 @@ export interface Global extends NodeJS.Global {
     CURRENT_NETWORK: Network;
     LOGGING_LEVEL: LogLevels;
     CHAINCODES: Map<string, ChaincodeConfig>;
+    CONNECTIONS: Map<string, Map<string, Gateway>>;
 }
 
 export interface Channel {

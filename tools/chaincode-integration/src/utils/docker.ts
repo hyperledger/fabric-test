@@ -61,7 +61,7 @@ export class Docker {
            project = `-p ${projectName} `;
         }
 
-        await exec(`docker-compose -f ${file} ${project}down`, allowError);
+        await exec(`docker-compose -f ${file} ${project}down --volumes`, allowError);
     }
 
     public static async exec(container: string, command: string): Promise<string> {

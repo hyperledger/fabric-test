@@ -1,0 +1,37 @@
+{
+    "info": {
+        "title": "TransactionHookChaincode",
+        "version": "latest"
+    },
+    "contracts": {
+        "TransactionHookContract": {
+            "info": {
+                "title": "TransactionHookContract",
+                "version": "latest"
+            },
+            "name": "TransactionHookContract",
+            "description": "Has a before transaction function which throws an error with the message 'Before transaction failed' if the transient data field 'fail' has the value 'BEFORE'. This also sets on the transaction context the values for transient data fields 'before_key' and 'before_value'. Has an after transaction function which throws an error with the message 'After transaction failed' if the transient data field 'fail' has the value 'AFTER'. If the after function receives a non null/nil value from the named function call it writes that value as a string to the world state using the key in the transient data field 'after_key'",
+            "transactions": [
+                {
+                    "name": "writeBeforeValue",
+                    "tag": ["submit"],
+                    "description": "Throws an error with the message 'Named transaction failed' if the transient data field 'fail' has the value 'NAMED'. Otherwise it writes to the world state the key and value stored by the before transaction in the transaction context."
+                },
+                {
+                    "name": "passAfterValue",
+                    "parameters": [
+                        {
+                            "name": "passToAfter",
+                            "schema": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "tag": ["submit"],
+                    "description": "Returns the value passed as parameter passToAfter"
+                }
+            ]
+        }
+    },
+    "components": {}
+}

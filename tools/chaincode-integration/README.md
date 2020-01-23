@@ -66,9 +66,22 @@ To run the tool in its entirety (i.e. not tag limitted) the following chaincodes
 - advancedtypes
 - commercialpaper
 - private
+- transactionhooks
 
 You can find schemas defining how each of these chaincodes should be written in the [docs/schemas](./docs/schemas) folder. This is structured such that each chaincode has its own json file named `<CHAINCODE_NAME>.json` which contains a breakdown of the contracts that should make up the chaincode, their required transactions and what those transactions should do. It is important that chaincodes provided for use with this tool match exactly what is expected of them or tests will pass/fail when they shouldn't.
 
-> Note: All chaincode supplied should be written using the contract API's for the given language.
+> Note: All chaincode supplied should be written using the contract APIs for the given language.
 
 > Note: All chaincode supplied should output arrays and objects in a stringified JSON format.
+
+You can use the following commands to see a list of the required chaincodes:
+
+```
+fabric-chaincode-integration contracts list
+```
+
+You can use the following command to get a more human readable (markdown) version of the schema JSON for a given contract:
+
+```
+fabric-chaincode-integration contracts details --chaincode <CONTRACT_NAME> --output <FILE_NAME>.md
+```
