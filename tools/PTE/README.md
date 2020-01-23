@@ -61,7 +61,7 @@ To build and test the following prerequisites must be installed first:
 - go (v1.11 or later)
     - refer to [Go - Getting Started](https://golang.org/doc/install)
 - others:
-    - in Ubuntu: `apt install -y build-essential python libltdl-dev`
+    - in Ubuntu: `apt install -y build-essential libltdl-dev`
     - or refer to your distribution's repository
 
 If planning to run your Fabric network locally, you'll need docker and a bit more. See [Hyperledger Fabric - Getting Started](http://hyperledger-fabric.readthedocs.io/en/latest/getting_started.html) for details.
