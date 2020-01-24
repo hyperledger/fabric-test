@@ -25,9 +25,6 @@
 #   - javaenv                  - clone the fabric-chaincode-java repository and build the javaenv image.
 #   - nodeenv                  - clone the fabric-chaincode-node repository and build the nodeenv image.
 #   - svt-daily-pte-tests      - pulls the images, binaries from Artifactory and runs the PTE Performance tests.
-#   - svt-daily-lte-tests      - pulls the images, runs the LTE test suite.
-#   - svt-daily-ca-tests       - pulls the images, runs the CA test suite.
-#   - svt-weekly-pte-12hr-test - pulls the images, binaries from Artifactory and runs the weekly 12hr PTE test.
 #   - svt-weekly-pte-12hr-test-k8s -- Test 12hr longrun test in k8s environment.
 #   - git-latest               - init git submodules to latest available commit.
 #   - git-init                 - init git submodules.
@@ -158,7 +155,7 @@ smoke-tests: gotools
 
 .PHONY: daily-tests
 daily-tests:
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh; ./runLteTestSuite.sh; ./runCATestSuite.sh
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
 
 .PHONY: interop-tests
 interop-tests:
@@ -229,19 +226,6 @@ interop-fabric-javaenv: pre-req fabric pull-thirdparty-images pull-binaries pull
 .PHONY: svt-daily-pte-tests
 svt-daily-pte-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
-
-.PHONY: svt-daily-lte-tests
-svt-daily-lte-tests: pre-req fabric pull-binaries pull-thirdparty-images
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runLteTestSuite.sh
-
-.PHONY: svt-daily-ca-tests
-svt-daily-ca-tests: pre-req pull-images pull-binaries-fabric build-fabric-ca
-	@make docker-fvt -C $(CA_DIR)
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runCATestSuite.sh
-
-.PHONY: svt-weekly-pte-12hr-test
-svt-weekly-pte-12hr-test: pre-req fabric pull-images pull-binaries pull-thirdparty-images
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest.sh
 
 .PHONY: svt-weekly-pte-12hr-test-k8s
 svt-weekly-pte-12hr-test-k8s:
