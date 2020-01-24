@@ -146,7 +146,6 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	case "networkInSync":
 		err = networkclient.CheckNetworkInSync(config, kubeConfigPath)
 		if err != nil {
-			logger.ERROR("Failed to check whether the network is synced or nor")
 			return err
 		}
 	case "health":

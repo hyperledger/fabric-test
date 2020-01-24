@@ -20,7 +20,6 @@ ORDERERS=()
 CONSENTERS=()
 CHANNELS=("orderersystemchannel")
 PORT=30000
-FLAG=0
 VALIDATE_BLOCK=false
 if [[ "$ARTIFACTS_LOCATION" == */ ]]; then
   ARTIFACTS_LOCATION="${ARTIFACTS_LOCATION::-1}"
@@ -55,9 +54,9 @@ NODEIP=$(kubectl --kubeconfig=$KUBECONFIG get nodes -o jsonpath='{ $.items[*].st
 export CORE_PEER_ADDRESS=$NODEIP:$NODEPORT
 rm -rf config
 mkdir config
-cd config/
 
 migrate(){
+  cd config/
   CHANNEL_NAME=$2
   peer channel fetch config config_block.pb -o $CORE_PEER_ADDRESS -c $CHANNEL_NAME --tls --cafile $CORE_PEER_TLS_ROOTCERT_FILE --ordererTLSHostnameOverride $ORDERER_NAME
   configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
@@ -70,7 +69,7 @@ migrate(){
   configtxlator proto_encode --input modified_update_in_envelope.json --type common.Envelope --output modified_update_in_envelope.pb
   peer channel update -f modified_update_in_envelope.pb -c $CHANNEL_NAME -o $CORE_PEER_ADDRESS --tls --cafile $CORE_PEER_TLS_ROOTCERT_FILE --ordererTLSHostnameOverride $ORDERER_NAME
   rm *.json *.pb
-  cd $CURRENT_DIR
+  cd -
 }
 
 modifyEnvVarForBlockAndConsensusCheck(){
@@ -100,13 +99,13 @@ echo "##########################################################################
 echo "## Validating latest block in each orderer in etcdraft maintenance mode ##"
 echo "##########################################################################"
 modifyEnvVarForBlockAndConsensusCheck block
-./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+./scripts/validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
 
 echo "##########################################################################"
 echo "### Checking the consensus type and state in etcdraft maintenance mode ###"
 echo "##########################################################################"
 modifyEnvVarForBlockAndConsensusCheck consensus
-./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+./scripts/validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
 
 for i in ${ORDERERS[*]}
 do
@@ -130,12 +129,12 @@ echo "##########################################################################
 echo "#### Validating latest block in each orderer in etcdraft normal mode #####"
 echo "##########################################################################"
 modifyEnvVarForBlockAndConsensusCheck block
-./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+./scripts/validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
 
 echo "##########################################################################"
 echo "### Checking the consensus type and state in etcdraft maintenance mode ###"
 echo "##########################################################################"
 modifyEnvVarForBlockAndConsensusCheck consensus
 export CONSENSUS_STATE=STATE_NORMAL
-./validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
+./scripts/validateNetworkInSync.sh $1 $2 $3 $4 $5 $6
 rm -rf block.txt
