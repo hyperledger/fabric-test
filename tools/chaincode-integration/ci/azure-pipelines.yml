@@ -1,0 +1,24 @@
+name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
+trigger:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - tools/chaincode-integration/*
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    include:
+      - tools/chaincode-integration/*
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+container: 'node:10'
+
+steps:
+- script: npm install
+  displayName: Install NPM Dependencies
