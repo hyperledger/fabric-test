@@ -81,13 +81,8 @@ To update the go version in the repo, follow the below steps
   Step 3: Commit all the go.mod and go.sum files that get changed in those directories
 ```
 
-Then, choose a tool and a test to run by following the instructions. For example, to run a Behave test, execute the following:
+Then, choose a tool and a test to run by following the instructions.
 
-```
-cd ../feature
-../scripts/install_behave.sh
-behave -t smoke -k
-```
 
 ### Easy Method to build all images and run tests with a single make target
 
@@ -107,22 +102,14 @@ You can run the automated test suites with a makefile target given below. This h
 
 ## Tools Used to Execute Tests
 
+#### Operator
+Please see the README located in the `tools/operator` directory for more detailed information for using the Operator to launch Fabric networks, administer them, and execute actions from test-input files to reconfigure the network, disrupt the network, or use PTE to send transactions.
+
 #### NetworkLauncher - dynamically build a Fabric network
 Please see the README located in the `tools/NL` directory for more detailed information for using the command line to run the Networker Launcher to dynamically create a Fabric network on a single host machine.
 
 #### Performance Traffic Engine
 Please see the README located in the `tools/PTE` directory for more detailed information for using the Performance Traffic Engine to drive transactions through a Fabric network.
-
-#### Ledger Traffic Engine
-Please see the README located in the `tools/LTE` directory for more detailed information for using the Ledger Traffic Engine to execute APIs to test the functionality and throughput of Ledger code that exists inside the peer.
-
-#### Cello Ansible Agent
-Cello is a Hyperledger Project (https://www.hyperledger.org/projects/cello) with its own repository.
-It contains the `Cello Ansible Agent`, an easy-to-use tool for
-deploying and managing a fabric network on one or more hosts in the cloud.
-Refer to these instructions
-https://github.com/hyperledger/cello/blob/master/src/agent/ansible/README.md
-to clone it and set up an ansible controller to deploy a network.
 
 
 # Continuous Integration

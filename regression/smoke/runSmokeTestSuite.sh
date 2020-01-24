@@ -9,9 +9,6 @@ FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fa
 SMOKEDIR="$FabricTestDir/regression/smoke"
 cd $SMOKEDIR
 
-# echo "======== Ledger component performance tests using LTE ========"
-# py.test -v --junitxml results_ledger_lte_smoke.xml ledger_lte_smoke.py
-
 cd $FabricTestDir/tools/PTE
 if [ ! -d "node_modules" ];then
     npm config set prefix ~/npm
@@ -23,7 +20,6 @@ if [ ! -d "node_modules" ];then
         echo "Successfully installed npm."
     fi
 fi
-# cd $SMOKEDIR && py.test -v --junitxml results_systest_pte.xml systest_pte.py
 
 echo "======== Smoke Test Suite using ginkgo and operator tools ========"
 cd $SMOKEDIR && ginkgo -v
