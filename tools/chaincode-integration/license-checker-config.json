@@ -3,7 +3,7 @@
     "license": "license.txt",
     "ignore": ["**/.gitkeep", "**/*.md"],
     "licenseFormats": {
-        "feature|yaml": {
+        "feature|yaml|yml": {
             "eachLine": {
                 "prepend": "# "
             }
