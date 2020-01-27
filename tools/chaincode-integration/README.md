@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Test/_apis/build/status/Fabric-Test-Chaincode-Integeration?branchName=master)](https://dev.azure.com/Hyperledger/Fabric-Test/_build/latest?definitionId=88&branchName=master)
+
 # Fabric Chaincode/Contract Integration
 
 This is a test tool specifically designed to ensure that Fabric chaincode/contract implementations in all languages are complete and consistent.
