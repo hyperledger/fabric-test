@@ -1,0 +1,15 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+trigger: none
+pr: none
+
+jobs:
+  - job: NpmReleasePublish
+    displayName: 'Publish release'
+    steps:
+      - task: Npm@1
+        inputs:
+          command: publish
+          workingDir: $(Agent.BuildDirectory)/tools/chaincode-integration
+          publishEndpoint: 'npm'
