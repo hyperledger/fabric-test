@@ -9,7 +9,7 @@
   "scripts": {
     "pretest": "licchk",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "npm run licchk && npm run build",
+    "prepare": "npm run build",
     "build": "tsc",
     "licchk": "license-check-and-add check"
   },

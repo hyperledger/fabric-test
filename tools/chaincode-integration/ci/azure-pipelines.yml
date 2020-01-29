@@ -1,3 +1,6 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 trigger:
   branches:
@@ -14,11 +17,37 @@ pr:
     include:
       - tools/chaincode-integration/*
 
-pool:
-  vmImage: 'ubuntu-16.04'
-
-container: 'node:10'
-
-steps:
-- script: npm install
-  displayName: Install NPM Dependencies
+jobs:
+  - job: Tests
+    pool:
+      vmImage: 'ubuntu-16.04'
+    container: 'node:10'
+    steps:
+      - script: npm install
+        workingDirectory: tools/chaincode-integration
+        displayName: Install NPM Dependencies
+      - script: npm run licchk
+        workingDirectory: tools/chaincode-integration
+        displayName: Run license checking
+  - job: NpmUnstablePublish
+    dependsOn: Tests
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    displayName: 'Publish unstable'
+    steps:
+      - script: |
+          touch $(Agent.TempDirectory)/.npmrc
+          echo '##vso[task.setvariable variable=NPM_CONFIG_USERCONFIG]$(Agent.TempDirectory)/.npmrc'
+        displayName: 'create user .npmrc file'
+      - script: |
+          npm config set registry https://registry.npmjs.org/
+          npm config ls
+        displayName: 'set npmjs registry'
+      - task: npmAuthenticate@0
+        inputs:
+          workingFile: '$(Agent.TempDirectory)/.npmrc'
+      - script: |
+          npm install
+          ./ci/scripts/package-stamp.js
+          npm publish --tag unstable
+        workingDirectory: tools/chaincode-integration
+        displayName: 'npm publish'
