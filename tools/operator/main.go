@@ -48,7 +48,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	var err error
 	var inputPath string
 	var config networkspec.Config
-	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork"}
+	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync"}
 	if contains(actions, action) {
 		contents, _ := ioutil.ReadFile(inputFilePath)
 		contents = append([]byte("#@data/values \n"), contents...)
@@ -141,6 +141,11 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 		err = networkclient.MigrateToRaft(config, kubeConfigPath)
 		if err != nil {
 			logger.ERROR("Failed to migrate consensus to raft from ", config.Orderer.OrdererType)
+			return err
+		}
+	case "networkInSync":
+		err = networkclient.CheckNetworkInSync(config, kubeConfigPath)
+		if err != nil {
 			return err
 		}
 	case "health":
