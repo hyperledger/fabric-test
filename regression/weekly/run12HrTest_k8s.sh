@@ -9,5 +9,9 @@
 ######################################################################
 ### Run one group of the tests in weekly test suite in k8s
 
-echo "========== Performance PTE 12Hr test"
-py.test -v --junitxml results_TimedRun_12hr_k8s.xml 12HrTest_k8s.py
+CurrentDirectory=$(cd `dirname $0` && pwd)
+FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+WEEKLYDIR="$FabricTestDir/regression/weekly"
+export GinkoTests=true
+echo "========== Performance PTE 12Hr test =========="
+cd $WEEKLYDIR && ginkgo

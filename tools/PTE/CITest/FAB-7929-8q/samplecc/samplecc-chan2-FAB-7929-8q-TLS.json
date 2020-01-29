@@ -8,8 +8,8 @@
     "transType": "Invoke",
     "invokeType": "Query",
     "targetPeers": "OrgAnchor",
-    "nProcPerOrg": "1",
-    "nRequest": "100",
+    "nProcPerOrg": "2",
+    "nRequest": "10",
     "runDur": "0",
     "TLS": "enabled",
     "channelOpt": {
