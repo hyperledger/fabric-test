@@ -57,16 +57,16 @@ networkProc() {
     cd $OPDir
     if [ ! -z "$kubeCfg" ]; then
         # bring down network
-        go run main.go -i testdata/barebones-networkspec-spec.yaml -k $kubeCfg -a down
+        go run main.go -i testdata/barebones-network-spec.yml -k $kubeCfg -a down
 
         # bring up network
-        go run main.go -i testdata/barebones-networkspec-spec.yaml -k $kubeCfg -a up
+        go run main.go -i testdata/barebones-network-spec.yml -k $kubeCfg -a up
     else
         # bring down network
-        go run main.go -i testdata/barebones-networkspec-spec.yaml -a down
+        go run main.go -i testdata/barebones-network-spec.yml -a down
 
         # bring up network
-        go run main.go -i testdata/barebones-networkspec-spec.yaml -a up
+        go run main.go -i testdata/barebones-network-spec.yml -a up
     fi
 }
 
@@ -104,7 +104,7 @@ txExecution(){
     fi
 
     # thread loop
-    for (( NTHREAD = 4; NTHREAD <= 4; NTHREAD+=4 )); do
+    for (( NTHREAD = 28; NTHREAD <= 36; NTHREAD+=4 )); do
 
         cd $OPDir
         cp $pteInputMaster $pteInput

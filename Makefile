@@ -7,11 +7,14 @@
 #   - ca                       - clones the fabric-ca repository.
 #   - ci-smoke                 - update submodules, clone fabric, pulls docker images and executes smoke
 #                              tests.
+#   - ci-barebones             - update submodules, clone fabric, pulls docker images and executes barebones
+#                              tests.
 #   - ci-daily                 - update submodules, clone fabric, pulls docker images and executes daily
 #                              test suite. NOT USED?
 #   - svt-daily                - clones fabric, pulls the images, binaries from Artifactory and runs the daily
 #                              test suite. NOT USED?
 #   - svt-smoke                - pulls the images, binaries from Artifactory and runs the smoke tests. NOT USED?
+#   - svt-barebones            - pulls the images, binaries from Artifactory and runs the barebones tests. NOT USED?
 #   - k8s-sys-test             - Triggers system tests on k8s cluster
 #   - build-docker-images      - builds fabric & ca docker images.
 #   - build-fabric             - builds fabric docker images and binaries.
@@ -20,6 +23,7 @@
 #   - fabric                   - clones fabric repository.
 #   - fabric-chaincode-java    - clones the fabric-chaincode-java repository.
 #   - smoke-tests              - runs Smoke Test Suite.
+#   - barebones-tests          - runs Barebones Test Suite.
 #   - daily-tests              - runs Daily Test Suite.
 #   - pull-images              - pull the images and binaries from Artifactory.
 #   - javaenv                  - clone the fabric-chaincode-java repository and build the javaenv image.
@@ -58,6 +62,9 @@ include gotools.mk
 
 .PHONY: ci-smoke
 ci-smoke: fabric ca pre-req pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca smoke-tests
+
+.PHONY: ci-barebones
+ci-barebones: fabric ca pre-req pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca barebones-tests
 
 .PHONY: git-latest
 git-latest:
@@ -153,6 +160,10 @@ nodeenv: fabric-chaincode-node
 smoke-tests: gotools
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/smoke && ./runSmokeTestSuite.sh
 
+.PHONY: barebones-tests
+barebones-tests: gotools
+	cd $(HYPERLEDGER_DIR)/fabric-test/regression/barebones && ./runBarebonesTestSuite.sh
+
 .PHONY: daily-tests
 daily-tests:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
@@ -236,6 +247,9 @@ svt-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images  dail
 
 .PHONY: svt-smoke
 svt-smoke: fabric pre-req pull-images pull-binaries pull-thirdparty-images  smoke-tests
+
+.PHONY: svt-barebones
+svt-barebones: fabric pre-req pull-images pull-binaries pull-thirdparty-images  barebones-tests
 
 .PHONY: pte
 pte:
