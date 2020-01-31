@@ -47,7 +47,7 @@ export class CouchDB {
 
     @then(/The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should not have key ['"](.*)['"]/)
     public async isDeletedFromPrivateCollection(collectionName: string, chaincodeName: string, channelName: string, key: string) {
-        const collection = await this.getCollection(chaincodeName, collectionName);
+        const collection = await this.getCollection(channelName, chaincodeName, collectionName);
         const orgs = await this.getOrgsInCollection(collection);
 
         for (const org of orgs) {
@@ -92,7 +92,7 @@ export class CouchDB {
     }
 
     private async checkPrivateCollectionState(collectionName: string, chaincodeName: string, channelName: string, value: string, key: string) {
-        const collection = await this.getCollection(chaincodeName, collectionName);
+        const collection = await this.getCollection(channelName, chaincodeName, collectionName);
         const orgs = await this.getOrgsInCollection(collection);
 
         for (const org of orgs) {
@@ -146,8 +146,8 @@ export class CouchDB {
         }
     }
 
-    private async getCollection(chaincodeName: string, collectionName: string) {
-        const collectionFile = this.workspace.chaincodes.get(chaincodeName).collection.local;
+    private async getCollection(channelName: string, chaincodeName: string, collectionName: string) {
+        const collectionFile = this.workspace.getChannelChaincodes(channelName).get(chaincodeName).collection.local;
 
         if (!collectionFile) {
             throw new Error(`Chaincode ${chaincodeName} was not instantiated using a collections config.`);

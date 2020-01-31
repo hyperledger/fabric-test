@@ -4,12 +4,12 @@
         "version": "latest"
     },
     "contracts": {
-        "AdvancedTypeContract": {
+        "AdvancedTypesContract": {
             "info": {
-                "title": "AdvancedTypeContract",
+                "title": "AdvancedTypesContract",
                 "version": "latest"
             },
-            "name": "AdvancedTypeContract",
+            "name": "AdvancedTypesContract",
             "transactions": [
                 {
                     "name": "getInt",

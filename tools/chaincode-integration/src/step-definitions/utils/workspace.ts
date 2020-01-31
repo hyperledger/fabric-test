@@ -15,7 +15,7 @@ export class Workspace {
 
     public network: Network;
     public language: string;
-    public chaincodes: Map<string, ChaincodeConfig>;
+    public chaincodes: Map<string, Map<string, ChaincodeConfig>>;
     public feature: Feature;
     public transactions: Map<string, Transaction>;
     public connections: Map<string, Map<string, Gateway>>;
@@ -28,25 +28,72 @@ export class Workspace {
         this.connections = global.CONNECTIONS || new Map();
     }
 
-    public updateChaincodePolicy(chaincode: string, policy: string) {
-        logger.debug(`Setting endorsement policy for ${chaincode} to:`, policy);
+    public addChaincode(channelName: string, chaincodeName: string) {
+        const channel = this.getChannelChaincodes(channelName);
 
-        const config = this.getConfig(chaincode);
-        config.policy = policy;
+        if (channel.has(chaincodeName)) {
+            throw new Error(`Chaincode with name ${chaincodeName} already exists on channel ${channelName}`);
+        }
 
-        this.chaincodes.set(chaincode, config);
+        channel.set(chaincodeName, {
+            collection: null,
+            metadata: null,
+            policy: null,
+        });
+
+        this.chaincodes.set(channelName, channel);
     }
 
-    public updateChaincodeCollection(chaincode: string, collection: string) {
-        logger.debug(`Setting private collection for ${chaincode} to:`, collection);
+    public updateChaincodePolicy(channelName: string, chaincodeName: string, policy: string) {
+        logger.debug(`Setting endorsement policy for ${chaincodeName} on channel ${channelName} to:`, policy);
 
-        const config = this.getConfig(chaincode);
+        const channel = this.getChannelChaincodes(channelName);
+
+        const config = this.getChaincodeConfig(channel, chaincodeName);
+        config.policy = policy;
+
+        channel.set(chaincodeName, config);
+
+        this.chaincodes.set(channelName, channel);
+    }
+
+    public updateChaincodeMetadata(channelName: string, chaincodeName: string, metadata: string) {
+        logger.debug(`Setting metadata for ${chaincodeName} on channel ${channelName} to:`, metadata);
+
+        const channel = this.getChannelChaincodes(channelName);
+
+        const config = this.getChaincodeConfig(channel, chaincodeName);
+        config.metadata = JSON.parse(metadata);
+
+        channel.set(chaincodeName, config);
+
+        this.chaincodes.set(channelName, channel);
+    }
+
+    public updateChaincodeCollection(channelName: string, chaincodeName: string, collection: string) {
+        logger.debug(`Setting private collection for ${chaincodeName} on channel ${channelName} to:`, collection);
+
+        const channel = this.getChannelChaincodes(channelName);
+
+        const config = this.getChaincodeConfig(channel, chaincodeName);
         config.collection = {
             docker: '/etc/hyperledger/private-collections' + collection.split('private-collections')[1],
             local: collection,
         };
 
-        this.chaincodes.set(chaincode, config);
+        channel.set(chaincodeName, config);
+
+        this.chaincodes.set(channelName, channel);
+    }
+
+    public getChannelChaincodes(channelName: string) {
+        let chaincodes = new Map<string, ChaincodeConfig>();
+
+        if (this.chaincodes.has(channelName)) {
+            chaincodes = this.chaincodes.get(channelName);
+        }
+
+        return chaincodes;
     }
 
     public async getConnection(org: Org, identityName: string): Promise<Gateway> {
@@ -72,14 +119,15 @@ export class Workspace {
         return this.connections.get(org.name).get(identityName);
     }
 
-    private getConfig(chaincodeName: string) {
+    private getChaincodeConfig(channelChaincodes: Map<string, ChaincodeConfig>, chaincodeName: string) {
         let config: ChaincodeConfig = {
             collection: null,
+            metadata: null,
             policy: null,
         };
 
-        if (this.chaincodes.has(chaincodeName)) {
-            config = this.chaincodes.get(chaincodeName);
+        if (channelChaincodes.has(chaincodeName)) {
+            config = channelChaincodes.get(chaincodeName);
         }
 
         return config;

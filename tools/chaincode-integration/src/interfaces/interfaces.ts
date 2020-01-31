@@ -46,13 +46,14 @@ export interface CollectionConfig {
 export interface ChaincodeConfig {
     policy: string;
     collection: CollectionConfig;
+    metadata: {[s: string]: any};
 }
 
 export interface Global extends NodeJS.Global {
     CHAINCODE_LANGUAGE: Languages;
     CURRENT_NETWORK: Network;
     LOGGING_LEVEL: LogLevels;
-    CHAINCODES: Map<string, ChaincodeConfig>;
+    CHAINCODES: Map<string, Map<string, ChaincodeConfig>>;
     CONNECTIONS: Map<string, Map<string, Gateway>>;
 }
 
