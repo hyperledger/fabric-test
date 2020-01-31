@@ -45,6 +45,7 @@ jobs:
       - task: npmAuthenticate@0
         inputs:
           workingFile: '$(Agent.TempDirectory)/.npmrc'
+          customEndpoint: 'npm'
       - script: |
           npm install
           ./ci/scripts/package-stamp.js
