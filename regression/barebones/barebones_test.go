@@ -105,7 +105,7 @@ var _ = Describe("Barebones Test", func() {
 		outputFile, err := os.Create(pteFinalReport)
 		Expect(err).NotTo(HaveOccurred())
 
-		for nProc := 2; nProc <= 6; nProc += 4 {
+		for nProc := 32; nProc <= 36; nProc += 4 {
 			// prepare PTE input for sending transactions
 			myKey += nRequest
 			getPTEInput(inputSpecPathMaster, inputSpecPath, myKey, nProc)

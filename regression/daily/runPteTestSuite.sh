@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 #
 # Copyright IBM Corp. All Rights Reserved.
 #
@@ -7,22 +7,9 @@
 CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 DAILYDIR="$FabricTestDir/regression/daily"
+BAREBONESDIR="$FabricTestDir/regression/barebones"
 
 echo "========== System Test Performance tests using PTE and NL tools..."
-cd $FabricTestDir/tools/PTE
-
-archivePTE() {
-    if [ ! -z $GERRIT_BRANCH ] && [ ! -z $WORKSPACE ]; then
-        # GERRIT_BRANCH is a Jenkins parameter and WORKSPACE is a Jenkins directory.This function is used only when the test is run in Jenkins to archive the log files.
-        echo "------> Archiving generated logs"
-        rm -rf $WORKSPACE/archives
-        mkdir -p $WORKSPACE/archives/PTE_Test_Logs
-        cp $FabricTestDir/tools/PTE/CITest/Logs/*.log $WORKSPACE/archives/PTE_Test_Logs/
-        mkdir -p $WORKSPACE/archives/PTE_Test_XML
-        cp $FabricTestDir/regression/daily/*.xml $WORKSPACE/archives/PTE_Test_XML/
-    fi
-}
-
 cd $FabricTestDir/tools/PTE
 if [ ! -d "node_modules" ];then
     npm config set prefix ~/npm
@@ -35,5 +22,26 @@ if [ ! -d "node_modules" ];then
     fi
 fi
 
-cd $DAILYDIR && ginkgo -v && echo "------> PTE tests completed"
-archivePTE
+cd $DAILYDIR && ginkgo -v
+StatusPteNL=$?
+
+if [ $StatusPteNL == 0 ]; then
+    echo "------> PTE/NL tests completed"
+else
+    echo "------> PTE/NL tests failed with above errors"
+fi
+cp $FabricTestDir/tools/PTE/CITest/Logs/*.log $DAILYDIR
+
+echo "========== System Test Barebones tests using PTE and operator tools..."
+cd $BAREBONESDIR && ginkgo -v
+StatusBarebones=$?
+
+if [ $StatusBarebones == 0 ]; then
+    echo "------> Barebones tests completed"
+else
+    echo "------> Barebones tests failed with above errors"
+fi
+# save barebones test result
+tCurr=`date +%Y%m%d`
+cp $FabricTestDir/regression/barebones/barebones-pteReport.log $DAILYDIR"/barebones-pteReport-"$tCurr".log"
+
