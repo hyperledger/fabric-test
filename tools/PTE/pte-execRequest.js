@@ -237,7 +237,16 @@ if (cpList.length === 0) {
     logger.error('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] error: invalid connection profile path or no connection profiles found in the connection profile path: %s', Nid, channel.getName(), org, pid, cpPath);
     process.exit(1);
 }
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList: ', Nid, channel.getName(), org, pid, cpList);
+
+// find all org from all connection profiles
+var orgList = [];
+orgList = testUtil.findAllOrgFromConnProfileSubmitter(cpList);
+if (orgList.length === 0) {
+    logger.error('[Nid=%d pte-main] error: no org contained in connection profiles', Nid);
+    process.exit(1);
+}
+logger.info('[Nid=%d pte-main] orgList: ', Nid, orgList);
 
 var orderersCPFList = {};
 orderersCPFList = testUtil.getNodetypeFromConnProfilesSubmitter(cpList, 'orderers');
@@ -606,8 +615,8 @@ function assignThreadAllPeers(channel, client, org) {
     var data;
     var event_connected = false;
 
-    for (var i = 0; i < channelOrgName.length; i++) {
-        let orgtmp = channelOrgName[i];
+    for (var i = 0; i < orgList.length; i++) {
+        var orgtmp = orgList[i];
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] org (%s)', Nid, channel.getName(), org, pid, orgtmp);
         // find the connection profile of the specified org
         var cpfTmp = testUtil.findOrgConnProfileSubmitter(cpList, orgtmp);
