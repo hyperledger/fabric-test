@@ -35,7 +35,7 @@ export class Chaincode {
         if (this.workspace.language !== 'golang') {
             prefix = '/opt/gopath/src/';
         } else {
-            await Docker.exec(channel.organisations[0].cli, `bash -c 'cd /opt/gopath/src/github.com/hyperledger/fabric-chaincode-integration/${chaincodeName} && go mod vendor'`);
+            await Docker.exec(channel.organisations[0].cli, `bash -c 'cd /opt/gopath/src/github.com/hyperledger/fabric-chaincode-integration/${chaincodeName} && if [ ! -d "vendor" ]; then go mod vendor; fi'`);
         }
 
         for (const org of channel.organisations) {
