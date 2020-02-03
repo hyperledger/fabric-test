@@ -222,6 +222,29 @@ module.exports.findOrgConnProfileSubmitter = function (fileList, orgname) {
     return findOrgConnProfile(fileList, orgname);
 }
 
+// find all org from Connection Profiles
+function findAllOrgFromConnProfile(fileList) {
+    var orgList = [];
+    for (i = 0; i < fileList.length; i++) {
+        var cpf = fileList[i];
+        var temp = readConfigFile(cpf, 'test-network');
+        if (temp['organizations']) {
+            for (var org in temp['organizations']) {
+                if ( !(orgList.indexOf(org) > -1) ) {
+                     orgList.push(org);
+                }
+            }
+        }
+    }
+    logger.debug('[findAllOrgFromConnProfile] org list:', orgList);
+
+    return orgList;
+}
+
+module.exports.findAllOrgFromConnProfileSubmitter = function (fileList) {
+    return findAllOrgFromConnProfile(fileList);
+}
+
 // set pointer to the keyreq in the input File
 // if key is missing or invalid, set the pointer to the beginning of the File
 function readConfigFile(inFile, keyreq) {
