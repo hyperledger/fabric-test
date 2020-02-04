@@ -69,7 +69,7 @@ func (c ConnProfile) updateConnectionProfilePerOrg(organizations []inputStructs.
 		return errors.New("Incorrect number of arguments passed")
 	}
 	action, orgName, channelName := inputArgs[0], inputArgs[1], inputArgs[2]
-	connProfilePath := paths.GetConnProfilePathForOrg(orgName, organizations)
+	connProfilePath := paths.GetConnProfilePath([]string{orgName}, organizations)
 	connectionProfilesList = append(connectionProfilesList, connProfilePath)
 	if !strings.HasSuffix(connProfilePath, ".yaml") && !strings.HasSuffix(connProfilePath, ".yml") {
 		connectionProfilesList = []string{}
