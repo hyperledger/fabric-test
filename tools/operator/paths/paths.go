@@ -158,12 +158,17 @@ func PTEPath() string {
 	return path
 }
 
-//GetConnProfilePathForOrg --
-func GetConnProfilePathForOrg(orgName string, organizations []inputStructs.Organization) string {
+//GetConnProfilePath --
+func GetConnProfilePath(orgNames []string, organizations []inputStructs.Organization) string {
 	var connProfilePath string
-	for i := 0; i < len(organizations); i++ {
-		if organizations[i].Name == orgName {
-			connProfilePath = organizations[i].ConnProfilePath
+	if len(orgNames) > 1 {
+		connProfilePath,_ = filepath.Split(organizations[0].ConnProfilePath)
+	} else {
+		for i := 0; i < len(organizations); i++ {
+			if organizations[i].Name == orgNames[0] {
+				connProfilePath = organizations[i].ConnProfilePath
+				break;
+			}
 		}
 	}
 	return connProfilePath

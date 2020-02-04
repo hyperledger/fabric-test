@@ -53,16 +53,13 @@ func (i InstallCCUIObject) createInstallCCObjects(ccObject inputStructs.InstallC
 	var deployOpt InstallCCDeployOpt
 	i = InstallCCUIObject{TransType: "install", TLS: tls, ChainCodeVer: ccObject.ChainCodeVersion, ChainCodeID: ccObject.ChainCodeName}
 	orgNames := strings.Split(ccObject.Organizations, ",")
-	for _, orgName := range orgNames {
-		orgName = strings.TrimSpace(orgName)
-		channelOpt = ChannelOptions{OrgName: []string{orgName}}
-		deployOpt = InstallCCDeployOpt{ChainCodePath: ccObject.ChainCodePath, Language: ccObject.Language}
-		deployOpt.MetadataPath = ccObject.MetadataPath
-		i.DeployOpt = deployOpt
-		i.ChannelOpt = channelOpt
-		i.ConnProfilePath = paths.GetConnProfilePathForOrg(orgName, organizations)
-		installCCObjects = append(installCCObjects, i)
-	}
+	channelOpt = ChannelOptions{OrgName: orgNames}
+	deployOpt = InstallCCDeployOpt{ChainCodePath: ccObject.ChainCodePath, Language: ccObject.Language}
+	deployOpt.MetadataPath = ccObject.MetadataPath
+	i.DeployOpt = deployOpt
+	i.ChannelOpt = channelOpt
+	i.ConnProfilePath = paths.GetConnProfilePath(orgNames, organizations)
+	installCCObjects = append(installCCObjects, i)
 	return installCCObjects
 }
 

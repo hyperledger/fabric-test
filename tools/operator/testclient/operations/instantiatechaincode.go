@@ -121,28 +121,25 @@ func (i InstantiateCCUIObject) generateInstantiateCCObjects(ccObject inputStruct
 func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, channelName, tls, action string, organizations []inputStructs.Organization, ccObject inputStructs.InstantiateCC) ([]InstantiateCCUIObject, error) {
 
 	var instantiateCCObjects []InstantiateCCUIObject
-	for _, orgName := range orgNames {
-		orgName = strings.TrimSpace(orgName)
-		i = InstantiateCCUIObject{TransType: action, TLS: tls, ConnProfilePath: paths.GetConnProfilePathForOrg(orgName, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
-		i.ChannelOpt = ChannelOptions{Name: channelName, OrgName: []string{orgName}}
-		i.DeployOpt = InstantiateDeployOptions{Function: ccObject.CCFcn, Arguments: strings.Split(ccObject.CCFcnArgs, ",")}
-		i.TimeOutOpt = TimeOutOptions{PreConfig: ccObject.TimeOutOpt.PreConfig, Request: ccObject.TimeOutOpt.Request}
-		if ccObject.TimeOutOpt.PreConfig == "" {
-			i.TimeOutOpt = TimeOutOptions{PreConfig: "600000", Request: "600000"}
-		}
-		if ccObject.EndorsementPolicy != "" {
-			endorsementPolicy, err := i.getEndorsementPolicy(organizations, ccObject.EndorsementPolicy)
-			if err != nil {
-				logger.ERROR("Failed to get the endorsement policy")
-				return instantiateCCObjects, err
-			}
-			i.DeployOpt.Endorsement = endorsementPolicy
-		}
-		if ccObject.CollectionPath != "" {
-			i.DeployOpt.CollectionsConfigPath = ccObject.CollectionPath
-		}
-		instantiateCCObjects = append(instantiateCCObjects, i)
+	i = InstantiateCCUIObject{TransType: action, TLS: tls, ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
+	i.ChannelOpt = ChannelOptions{Name: channelName, OrgName: orgNames}
+	i.DeployOpt = InstantiateDeployOptions{Function: ccObject.CCFcn, Arguments: strings.Split(ccObject.CCFcnArgs, ",")}
+	i.TimeOutOpt = TimeOutOptions{PreConfig: ccObject.TimeOutOpt.PreConfig, Request: ccObject.TimeOutOpt.Request}
+	if ccObject.TimeOutOpt.PreConfig == "" {
+		i.TimeOutOpt = TimeOutOptions{PreConfig: "600000", Request: "600000"}
 	}
+	if ccObject.EndorsementPolicy != "" {
+		endorsementPolicy, err := i.getEndorsementPolicy(organizations, ccObject.EndorsementPolicy)
+		if err != nil {
+			logger.ERROR("Failed to get the endorsement policy")
+			return instantiateCCObjects, err
+		}
+		i.DeployOpt.Endorsement = endorsementPolicy
+	}
+	if ccObject.CollectionPath != "" {
+		i.DeployOpt.CollectionsConfigPath = ccObject.CollectionPath
+	}
+	instantiateCCObjects = append(instantiateCCObjects, i)
 	return instantiateCCObjects, nil
 }
 
@@ -177,7 +174,7 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 
 	for _, orgName := range orgNames {
 		orgName = strings.TrimSpace(orgName)
-		connProfilePath := paths.GetConnProfilePathForOrg(orgName, organizations)
+		connProfilePath := paths.GetConnProfilePath([]string{orgName}, organizations)
 		mspID, err := i.getMSPIDForOrg(connProfilePath, orgName)
 		if err != nil {
 			return endorsementPolicy, err
