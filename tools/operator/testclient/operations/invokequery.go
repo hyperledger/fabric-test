@@ -113,16 +113,13 @@ func (i InvokeQueryUIObject) generateInvokeQueryObjects(invkQueryObject inputStr
 
 	var invokeQueryObjects []InvokeQueryUIObject
 	orgNames := strings.Split(invkQueryObject.Organizations, ",")
-	for _, orgName := range orgNames {
-		orgName = strings.TrimSpace(orgName)
-		invkQueryObjects := i.createInvokeQueryObjectForOrg(orgName, action, tls, organizations, invkQueryObject)
-		invokeQueryObjects = append(invokeQueryObjects, invkQueryObjects...)
-	}
+	invkQueryObjects := i.createInvokeQueryObjectForOrg(orgNames, action, tls, organizations, invkQueryObject)
+	invokeQueryObjects = append(invokeQueryObjects, invkQueryObjects...)
 	return invokeQueryObjects
 }
 
 //createInvokeQueryObjectForOrg -- To craete invoke/query objects for an organization
-func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgName, action, tls string, organizations []inputStructs.Organization, invkQueryObject inputStructs.InvokeQuery) []InvokeQueryUIObject {
+func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, action, tls string, organizations []inputStructs.Organization, invkQueryObject inputStructs.InvokeQuery) []InvokeQueryUIObject {
 
 	var invokeQueryObjects []InvokeQueryUIObject
 	invokeParams := make(map[string]Parameters)
@@ -145,8 +142,8 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgName, action, tls 
 		i.InvokeType = action
 		i.CCOpt = CCOptions{KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart)}
 	}
-	i.ChannelOpt = ChannelOptions{Name: invkQueryObject.ChannelName, OrgName: []string{orgName}}
-	i.ConnProfilePath = paths.GetConnProfilePathForOrg(orgName, organizations)
+	i.ChannelOpt = ChannelOptions{Name: invkQueryObject.ChannelName, OrgName: orgNames}
+	i.ConnProfilePath = paths.GetConnProfilePath(orgNames, organizations)
 	invokeParams["move"] = Parameters{Fcn: invkQueryObject.Fcn, Args: strings.Split(invkQueryObject.Args, ",")}
 	invokeParams["query"] = Parameters{Fcn: invkQueryObject.Fcn, Args: strings.Split(invkQueryObject.Args, ",")}
 	i.Parameters = invokeParams

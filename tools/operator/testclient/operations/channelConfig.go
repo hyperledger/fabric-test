@@ -92,7 +92,7 @@ func (c ChannelUIObject) createChannelConfigObjects(orgNames []string, channelNa
 			channelTxPath = anchorPeerTxPath
 		}
 		channelOpt = ChannelOptions{Name: channelName, Action: action, OrgName: []string{orgName}, ChannelTX: channelTxPath}
-		c = ChannelUIObject{TransType: "Channel", TLS: tls, ConnProfilePath: paths.GetConnProfilePathForOrg(orgName, organizations), ChannelOpt: channelOpt, OrdererSystemChannel: ordererChannel}
+		c = ChannelUIObject{TransType: "Channel", TLS: tls, ConnProfilePath: paths.GetConnProfilePath([]string{orgName}, organizations), ChannelOpt: channelOpt, OrdererSystemChannel: ordererChannel}
 		channelObjects = append(channelObjects, c)
 	}
 	return channelObjects
