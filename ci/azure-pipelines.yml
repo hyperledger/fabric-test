@@ -33,11 +33,6 @@ jobs:
   - template: templates/install_deps.yml
   - script: make ci-smoke
     displayName: Run Smoke Tests
-  - task: PublishBuildArtifacts@1
-    condition: always()   # publish either way
-    inputs:
-      pathtoPublish: 'tools/PTE/CITest/Logs'
-      artifactName: 'Logs'
   - task: PublishTestResults@2
     condition: always()   # publish either way
     inputs:

@@ -25,11 +25,7 @@ echo "======== Smoke Test Suite using ginkgo and operator tools ========"
 cd $SMOKEDIR && ginkgo -v
 StatusOperator=$?
 
-echo "======== Performance Test using PTE and NL tools ========"
-cd $SMOKEDIR/../daily && ginkgo --focus test_FAB7929_8i
-StatusPteNL=$?
-
-if [ $StatusOperator == 0 ] && [ $StatusPteNL == 0 ]; then
+if [ $StatusOperator == 0 ]; then
     echo "------> Smoke tests completed"
 else
     echo "------> Smoke tests failed with above errors"
