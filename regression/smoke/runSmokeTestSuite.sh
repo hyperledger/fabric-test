@@ -21,9 +21,12 @@ if [ ! -d "node_modules" ];then
 fi
 
 echo "======== Smoke Test Suite using ginkgo and operator tools ========"
-
 cd $SMOKEDIR && GO111MODULE=on ginkgo -v
-echo "======== Performance Test using PTE and NL tools ========"
-cd $SMOKEDIR/../daily && GO111MODULE=on ginkgo --focus test_FAB7929_8i
-echo "------> Smoke tests completed"
+StatusOperator=$?
 
+if [ $StatusOperator == 0 ]; then
+    echo "------> Smoke tests completed"
+else
+    echo "------> Smoke tests failed with above errors"
+    exit 1
+fi
