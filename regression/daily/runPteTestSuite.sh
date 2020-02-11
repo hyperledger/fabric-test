@@ -9,18 +9,6 @@ FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fa
 DAILYDIR="$FabricTestDir/regression/daily"
 BAREBONESDIR="$FabricTestDir/regression/barebones"
 
-cd $FabricTestDir/tools/PTE
-if [ ! -d "node_modules" ];then
-    npm config set prefix ~/npm
-    npm install
-    if [ $? != 0 ]; then
-        echo "FAILED: Failed to install npm. Cannot run pte test suite."
-        exit 1
-    else
-        echo "Successfully installed npm."
-    fi
-fi
-
 echo "========== System Test Barebones tests using PTE and operator tools..."
 cd $BAREBONESDIR && ginkgo -v
 StatusBarebones=$?

@@ -29,7 +29,7 @@ jobs:
   timeoutInMinutes: 360
   steps:
   - template: templates/install_deps.yml
-  - script: make svt-daily-pte-tests
+  - script: make ci-daily
     displayName: Run PTE Daily Tests
   - task: PublishBuildArtifacts@1
     condition: always() # publish either way
