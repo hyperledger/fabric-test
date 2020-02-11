@@ -1,15 +1,3 @@
 [submodule "fabric"]
 	path = fabric
 	url = https://github.com/hyperledger/fabric
-[submodule "fabric-ca"]
-	path = fabric-ca
-	url = https://github.com/hyperledger/fabric-ca
-[submodule "fabric-sdk-node"]
-	path = fabric-sdk-node
-	url = https://github.com/hyperledger/fabric-sdk-node
-[submodule "fabric-samples"]
-	path = fabric-samples
-	url = https://github.com/hyperledger/fabric-samples
-[submodule "fabric-sdk-java"]
-	path = fabric-sdk-java
-	url = https://github.com/hyperledger/fabric-sdk-java

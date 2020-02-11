@@ -71,7 +71,7 @@ To install all the gotools, required for testing, execute the following command
 
 To update the go version in the repo, follow the below steps
 ```
-  Step 1: Change GO_VER in fabric-test/ci.properties and also update the same in azure-pipeline yml files in fabric-test/ci directory.
+  Step 1: Change GO_VER in the azure-pipeline yml files in fabric-test/ci directory.
 
   Step 2: Find all files in repo called go.mod. 'cd' into each of those directories. Remove go.mod and go.sum files and execute the following steps
           1. go mod init
