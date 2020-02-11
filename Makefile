@@ -4,45 +4,33 @@
 # -------------------------------------------------------------
 # This makefile defines the following targets
 #
-#   - ca                       - clones the fabric-ca repository.
-#   - ci-smoke                 - update submodules, clone fabric, pulls docker images and executes smoke
-#                              tests.
-#   - ci-barebones             - update submodules, clone fabric, pulls docker images and executes barebones
-#                              tests.
-#   - ci-daily                 - update submodules, clone fabric, pulls docker images and executes daily
-#                              test suite. NOT USED?
-#   - svt-daily                - clones fabric, pulls the images, binaries from Artifactory and runs the daily
-#                              test suite. NOT USED?
-#   - svt-smoke                - pulls the images, binaries from Artifactory and runs the smoke tests. NOT USED?
-#   - svt-barebones            - pulls the images, binaries from Artifactory and runs the barebones tests. NOT USED?
-#   - k8s-sys-test             - Triggers system tests on k8s cluster
-#   - build-docker-images      - builds fabric & ca docker images.
-#   - build-fabric             - builds fabric docker images and binaries.
-#   - build-fabric-ca          - builds fabric-ca docker images and binaries.
-#   - build-sdk-wrapper        - builds fabric-sdk-java wrapper jar files.
-#   - fabric                   - clones fabric repository.
-#   - fabric-chaincode-java    - clones the fabric-chaincode-java repository.
-#   - smoke-tests              - runs Smoke Test Suite.
-#   - barebones-tests          - runs Barebones Test Suite.
-#   - daily-tests              - runs Daily Test Suite.
-#   - pull-images              - pull the images and binaries from Artifactory.
-#   - javaenv                  - clone the fabric-chaincode-java repository and build the javaenv image.
-#   - nodeenv                  - clone the fabric-chaincode-node repository and build the nodeenv image.
-#   - svt-daily-pte-tests      - pulls the images, binaries from Artifactory and runs the PTE Performance tests.
-#   - svt-weekly-pte-12hr-test-k8s -- Test 12hr longrun test in k8s environment.
-#   - git-latest               - init git submodules to latest available commit.
-#   - git-init                 - init git submodules.
-#   - pre-setup                - installs node and govendor
-#   - pte                      - builds pte docker image
-#   - clean                    - cleans the docker containers and images.
-#   - gotools                  - installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
+#   - ca                           - clones the fabric-ca repository.
+#   - ci-smoke                     - update submodules, clone fabric, pulls docker images and executes smoke tests.
+#   - ci-barebones                 - update submodules, clone fabric, pulls docker images and executes barebones tests.
+#   - ci-daily                     - update submodules, clone fabric, pulls docker images and executes daily test suite.
+#   - k8s-sys-test                 - Triggers system tests on k8s cluster
+#   - build-docker-images          - builds fabric & ca docker images.
+#   - build-fabric                 - builds fabric docker images and binaries.
+#   - build-fabric-ca              - builds fabric-ca docker images and binaries.
+#   - build-sdk-wrapper            - builds fabric-sdk-java wrapper jar files.
+#   - fabric                       - clones fabric repository.
+#   - fabric-chaincode-java        - clones the fabric-chaincode-java repository.
+#   - smoke-tests                  - runs Smoke Test Suite.
+#   - barebones-tests              - runs Barebones Test Suite.
+#   - daily-tests                  - runs Daily Test Suite.
+#   - pull-images                  - pull the images and binaries from Artifactory.
+#   - javaenv                      - clone the fabric-chaincode-java repository and build the javaenv image.
+#   - nodeenv                      - clone the fabric-chaincode-node repository and build the nodeenv image.
+#   - svt-weekly-pte-12hr-test-k8s - Test 12hr longrun test in k8s environment.
+#   - git-latest                   - init git submodules to latest available commit.
+#   - git-init                     - init git submodules.
+#   - pre-setup                    - installs node and govendor
+#   - pte                          - builds pte docker image
+#   - clean                        - cleans the docker containers and images.
+#   - gotools                      - installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
 #
 # ------------------------------------------------------------------
 
-TOOL_VERSION = 1.2.0
-DOCKER_NS = hyperledger
-EXTRA_VERSION ?= $(shell git rev-parse --short HEAD)
-PROJECT_TOOL_VERSION = $(TOOL_VERSION)-$(EXTRA_VERSION)
 BRANCH = master
 FABRIC = https://github.com/hyperledger/fabric
 FABRIC_CA = https://github.com/hyperledger/fabric-ca
@@ -54,17 +42,31 @@ CA_DIR = $(HYPERLEDGER_DIR)/fabric-ca
 CHAINCODE-JAVA_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-java
 CHAINCODE-NODE_DIR = $(HYPERLEDGER_DIR)/fabric-chaincode-node
 PRE_SETUP = $(GOPATH)/src/github.com/hyperledger/fabric-test/scripts/pre_setup.sh
-PTE_IMAGE = $(DOCKER_NS)/fabric-pte
-TARGET = pte
-STABLE_TAG ?= $(ARCH)-$(BRANCH)-stable
 
 include gotools.mk
 
 .PHONY: ci-smoke
-ci-smoke: fabric ca pre-req pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca smoke-tests
+ci-smoke: pre-reqs pull-binaries-fabric smoke-tests
 
 .PHONY: ci-barebones
-ci-barebones: fabric ca pre-req pull-images pull-binaries-fabric pull-thirdparty-images build-fabric-ca barebones-tests
+ci-barebones: pre-reqs pull-binaries-fabric barebones-tests
+
+.PHONY: ci-daily
+ci-daily: pre-reqs pull-binaries-fabric daily-tests
+
+.PHONY: npm-init
+npm-init:
+	cd $(CURDIR)/tools/PTE && npm install
+    ifeq ($(shell arch), i386)
+		cd $(CURDIR)/tools/PTE && npm rebuild 2>/dev/null
+    endif
+
+.PHONY: pre-reqs
+pre-reqs: docker-clean npm-init gotools
+
+.PHONY: pre-setup
+pre-setup: gotools
+	@bash $(PRE_SETUP)
 
 .PHONY: git-latest
 git-latest:
@@ -74,16 +76,6 @@ git-latest:
 .PHONY: git-init
 git-init:
 	@git submodule update --init --recursive
-
-.PHONY: pre-setup
-pre-setup: gotools
-	@bash $(PRE_SETUP)
-
-.PHONY: pre-req
-pre-req: git-init git-latest clean pre-setup
-
-.PHONY: ci-daily
-ci-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images  daily-tests
 
 .PHONY: fabric
 fabric:
@@ -217,47 +209,28 @@ pull-fabric-nodeenv:
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./pullDockerImages.sh fabric-nodeenv
 
 .PHONY: interop-fabric
-interop-fabric: pre-req fabric pull-thirdparty-images pull-fabric-javaenv pull-binaries-fabric-ca build-fabric build-fabric-ca  interop-tests
+interop-fabric: pre-reqs fabric pull-thirdparty-images pull-fabric-javaenv pull-binaries-fabric-ca build-fabric build-fabric-ca  interop-tests
 
 .PHONY: interop-fabric-ca
-interop-fabric-ca: pre-req fabric pull-thirdparty-images pull-fabric pull-binaries-fabric pull-fabric-javaenv build-fabric-ca  interop-tests
+interop-fabric-ca: pre-reqs fabric pull-thirdparty-images pull-fabric pull-binaries-fabric pull-fabric-javaenv build-fabric-ca  interop-tests
 
 .PHONY: interop-fabric-sdk-node
-interop-fabric-sdk-node: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv  interop-tests
+interop-fabric-sdk-node: pre-reqs fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv  interop-tests
 
 .PHONY: interop-fabric-nodeenv
-interop-fabric-nodeenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-nodeenv nodeenv  interop-tests
+interop-fabric-nodeenv: pre-reqs fabric pull-thirdparty-images pull-binaries pull-fabric-nodeenv nodeenv  interop-tests
 
 .PHONY: interop-fabric-sdk-java
-interop-fabric-sdk-java: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv  interop-tests
+interop-fabric-sdk-java: pre-reqs fabric pull-thirdparty-images pull-binaries pull-fabric-ca pull-fabric-javaenv  interop-tests
 
 .PHONY: interop-fabric-javaenv
-interop-fabric-javaenv: pre-req fabric pull-thirdparty-images pull-binaries pull-fabric-ca javaenv  interop-tests
-
-.PHONY: svt-daily-pte-tests
-svt-daily-pte-tests: pre-req fabric pull-images pull-binaries pull-thirdparty-images
-	cd $(HYPERLEDGER_DIR)/fabric-test/regression/daily && ./runPteTestSuite.sh
+interop-fabric-javaenv: pre-reqs fabric pull-thirdparty-images pull-binaries pull-fabric-ca javaenv  interop-tests
 
 .PHONY: svt-weekly-pte-12hr-test-k8s
 svt-weekly-pte-12hr-test-k8s:
 	cd $(HYPERLEDGER_DIR)/fabric-test/regression/weekly && ./run12HrTest_k8s.sh
 
-.PHONY: svt-daily
-svt-daily: pre-req fabric pull-images pull-binaries pull-thirdparty-images  daily-tests
-
-.PHONY: svt-smoke
-svt-smoke: fabric pre-req pull-images pull-binaries pull-thirdparty-images  smoke-tests
-
-.PHONY: svt-barebones
-svt-barebones: fabric pre-req pull-images pull-binaries pull-thirdparty-images  barebones-tests
-
-.PHONY: pte
-pte:
-	docker build -t $(PTE_IMAGE) images/PTE
-	docker tag $(PTE_IMAGE) $(PTE_IMAGE):$(PROJECT_TOOL_VERSION)
-
-.PHONY: clean
-clean:
-	-docker ps -aq | xargs -I '{}' docker rm -f '{}' || true
-	@make docker-clean -C $(FABRIC_DIR) || true
-	@make docker-clean -C $(CA_DIR) || true
+.PHONY: docker-clean
+docker-clean:
+	docker kill $(docker ps -a -q) || true
+	docker rm $(docker ps -a -q) || true
