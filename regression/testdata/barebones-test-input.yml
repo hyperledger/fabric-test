@@ -1,7 +1,6 @@
-tls: true
 organizations:
   - name: org1
-    connProfilePath: ./connection-profile/connection_profile_org1.yaml
+    connProfilePath: ./connection-profile
 
 createChannel:
   - channelPrefix: testorgschannel
@@ -37,7 +36,7 @@ invokes:
   - channelName: testorgschannel0
     name: samplecc
     targetPeers: OrgAnchor
-    nProcPerOrg: _NPROCPERORG_
+    nProcPerOrg: 32
     nRequest: 10000
     runDur: 0
     organizations: org1
@@ -53,7 +52,9 @@ invokes:
       timeout: 240000
     ccOpt:
       ccType: ccchecker
-      keyStart: _KEYSTART_
+      keyStart: 0
+      keyIdx: [1]
+      keyPayload: [2]
       payLoadMin: 8
       payLoadMax: 8
     args: "put,a1,1"
@@ -62,13 +63,14 @@ queries:
   - channelName: testorgschannel0
     name: samplecc
     targetPeers: OrgAnchor
-    nProcPerOrg: _NPROCPERORG_
+    nProcPerOrg: 32
     nRequest: 10000
     runDur: 0
     organizations: org1
     ccOpt:
       ccType: ccchecker
-      keyStart: _KEYSTART_
+      keyStart: 0
+      keyIdx: [1]
     txnOpt:
       - mode: constant
         options:
