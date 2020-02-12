@@ -12,7 +12,6 @@
 #   - build-docker-images          - builds fabric & ca docker images.
 #   - build-fabric                 - builds fabric docker images and binaries.
 #   - build-fabric-ca              - builds fabric-ca docker images and binaries.
-#   - build-sdk-wrapper            - builds fabric-sdk-java wrapper jar files.
 #   - fabric                       - clones fabric repository.
 #   - fabric-chaincode-java        - clones the fabric-chaincode-java repository.
 #   - smoke-tests                  - runs Smoke Test Suite.
@@ -22,11 +21,11 @@
 #   - javaenv                      - clone the fabric-chaincode-java repository and build the javaenv image.
 #   - nodeenv                      - clone the fabric-chaincode-node repository and build the nodeenv image.
 #   - svt-weekly-pte-12hr-test-k8s - Test 12hr longrun test in k8s environment.
+#   - npm-init                     - initialize the PTE NPM modules
 #   - git-latest                   - init git submodules to latest available commit.
 #   - git-init                     - init git submodules.
 #   - pre-setup                    - installs node and govendor
-#   - pte                          - builds pte docker image
-#   - clean                        - cleans the docker containers and images.
+#   - clean                        - cleans the docker containers.
 #   - gotools                      - installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
 #
 # ------------------------------------------------------------------
@@ -101,10 +100,6 @@ build-fabric-ca: ca
 	@make docker -C $(CA_DIR)
 	@make fabric-ca-client -C $(CA_DIR)
 	cd $(HYPERLEDGER_DIR)/fabric-test/scripts && ./buildFabricCaImages.sh $(BRANCH) $(CA_DIR)
-
-.PHONY: build-sdk-wrapper
-build-sdk-wrapper:
-	cd $(HYPERLEDGER_DIR)/fabric-test/feature/sdk/java && ./package.sh
 
 .PHONY: pull-thirdparty-images
 pull-thirdparty-images: gotools
