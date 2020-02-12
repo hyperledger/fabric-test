@@ -1,16 +1,15 @@
 package barebones_test
 
 import (
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/reporters"
 	. "github.com/onsi/gomega"
+
+	"github.com/hyperledger/fabric-test/tools/operator/launcher"
 )
 
 func TestPTEBarebones(t *testing.T) {
@@ -28,24 +27,59 @@ func getFabricTestDir() (string, error) {
 	return fabricTestPath, nil
 }
 
-func getTestStatusFromReportFile(filePath, action string) string {
-
-	invokeStatus := "INVOKE Overall TEST RESULTS PASSED"
-	queryStatus := "QUERY Overall TEST RESULTS PASSED"
-	data, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return fmt.Sprintf("%s", err)
+// get kubeConfig from environment variable
+func getKubeConfig() (string, string) {
+	kubeConfig, envKubeConfig = os.LookupEnv("KUBECONFIG")
+	if envKubeConfig {
+		containerType = "k8s"
+	} else {
+		containerType = "docker"
 	}
-	fileData := string(data)
-	switch action {
-	case "invoke":
-		if strings.Contains(fileData, invokeStatus) {
-			return invokeStatus
-		}
-	case "query":
-		if strings.Contains(fileData, queryStatus) {
-			return queryStatus
-		}
-	}
-	return "Overall TEST RESULTS FAILED"
+	return kubeConfig, containerType
 }
+
+var (
+	fabricTestDir string
+	testDataDir   string
+
+	action          string
+	networkSpecPath string
+
+	kubeConfig    string
+	envKubeConfig bool
+	containerType string
+)
+
+var _ = BeforeSuite(func() {
+	// set up dir variables
+	fabricTestDir, _ = getFabricTestDir()
+	testDataDir = path.Join(fabricTestDir, "regression/testdata")
+
+	// set up input file variables
+	networkSpecPath = path.Join(testDataDir, "barebones-network-spec.yml")
+
+	// get kube config env
+	kubeConfig, containerType = getKubeConfig()
+
+	// bring up network
+	action = "up"
+	err := launcher.Launcher(action, containerType, kubeConfig, networkSpecPath)
+	Expect(err).NotTo(HaveOccurred())
+})
+
+var _ = AfterSuite(func() {
+	// set up dir variables
+	fabricTestDir, _ = getFabricTestDir()
+	testDataDir = path.Join(fabricTestDir, "regression/testdata")
+
+	// set up input file variables
+	networkSpecPath = path.Join(testDataDir, "barebones-network-spec.yml")
+
+	// get kube config env
+	kubeConfig, containerType = getKubeConfig()
+
+	// bring down network
+	action = "down"
+	err := launcher.Launcher(action, containerType, kubeConfig, networkSpecPath)
+	Expect(err).NotTo(HaveOccurred())
+})
