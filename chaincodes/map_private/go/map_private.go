@@ -19,11 +19,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	pb "github.com/hyperledger/fabric/protos/peer"
+        "github.com/hyperledger/fabric-chaincode-go/shim"
+        pb "github.com/hyperledger/fabric-protos-go/peer"
 )
 
-var logger = shim.NewLogger("simpleChaincode")
 
 // COLLECTION is local collection
 const COLLECTION = "collectionSimple"
@@ -40,7 +39,6 @@ type simpleChaincode struct {
 
 //Init implements chaincode's Init interface
 func (t *simpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
-	logger.Info("########### Init ###########")
 	return shim.Success(nil)
 }
 
@@ -48,15 +46,12 @@ func (t *simpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
 func (t *simpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 	function, args := stub.GetFunctionAndParameters()
 	if function != "invoke" {
-		logger.Error("Unknown function call")
 		return shim.Error("Unknown function call")
 	}
 	if len(args) < 2 {
-		logger.Errorf(fmt.Sprintf("invalid number of args %d", len(args)))
 		return shim.Error(fmt.Sprintf("invalid number of args %d", len(args)))
 	}
 	method := args[0]
-	logger.Infof(">>>>>>> Invoke method : %s ", method)
 	switch method {
 
 	case "get":
@@ -64,14 +59,12 @@ func (t *simpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 
 	case "put":
 		if len(args) < 3 {
-			logger.Errorf(fmt.Sprintf("invalid number of args for put %d", len(args)))
 			return shim.Error(fmt.Sprintf("invalid number of args for put %d", len(args)))
 		}
 		return t.put(stub, args)
 
 	case "getPut":
 		if len(args) < 3 {
-			logger.Errorf(fmt.Sprintf("invalid number of args for getPut %d", len(args)))
 			return shim.Error(fmt.Sprintf("invalid number of args for getPut %d", len(args)))
 		}
 		return t.getPut(stub, args)
@@ -81,14 +74,12 @@ func (t *simpleChaincode) Invoke(stub shim.ChaincodeStubInterface) pb.Response {
 
 	case "putPrivate":
 		if len(args) < 3 {
-			logger.Errorf(fmt.Sprintf("invalid number of args for putPrivate %d", len(args)))
 			return shim.Error(fmt.Sprintf("invalid number of args for putPrivate %d", len(args)))
 		}
 		return t.putPrivate(stub, args)
 
 	case "getPutPrivate":
 		if len(args) < 3 {
-			logger.Errorf(fmt.Sprintf("invalid number of args for getPutPrivate %d", len(args)))
 			return shim.Error(fmt.Sprintf("invalid number of args for getPutPrivate %d", len(args)))
 		}
 		return t.getPutPrivate(stub, args)
