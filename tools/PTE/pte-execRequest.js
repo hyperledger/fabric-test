@@ -463,6 +463,13 @@ function listenToEventHub() {
 
 var reConnectEvtHub = 0;
 function peerFailover(channel, client) {
+
+    // return if no peer failover or using discovery to send transactions
+    // SDK handles failover when using discovery
+    if ((!peerFO) || (targetPeers === 'DISCOVERY')) {
+        return;
+    }
+
     var currId = currPeerId;
     var eh;
     channel.removePeer(peerList[currPeerId]);
@@ -1094,6 +1101,11 @@ function initDiscovery() {
 
 // reconnect orderer
 function ordererReconnect(channel, client, org) {
+    // SDK handles failover when using discovery
+    if (targetPeers === 'DISCOVERY') {
+        return;
+    }
+
     channel.removeOrderer(ordererList[currOrdererId]);
     channelAddOrderer(channel, client, org);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d ordererReconnect] Orderer reconnect (%s)', Nid, channel.getName(), org, pid, ordererList[currOrdererId]._url);
@@ -1101,6 +1113,12 @@ function ordererReconnect(channel, client, org) {
 
 // orderer failover
 function ordererFailover(channel, client) {
+    // return if no orderer failover or using discovery to send transactions
+    // SDK handles failover when using discovery
+    if ((!ordererFO) || (targetPeers === 'DISCOVERY')) {
+        return;
+    }
+
     var currId = currOrdererId;
     channel.removeOrderer(ordererList[currOrdererId]);
     currOrdererId = currOrdererId + 1;
@@ -1784,6 +1802,11 @@ function eventRegister(tx) {
 //    failover if failover is set
 //    reconnect if reconn=1
 function ordererHdlr() {
+
+    // SDK handles failover when using discovery
+    if (targetPeers === 'DISCOVERY') {
+        return;
+    }
 
     if (ordererFO) {
         ordererFailover(channel, client);
