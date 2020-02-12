@@ -132,7 +132,7 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgName, action, tls 
 	}
 	i = InvokeQueryUIObject{LogLevel: "ERROR", InvokeCheck: invokeCheck, TransType: "Invoke", InvokeType: "Move", TargetPeers: invkQueryObject.TargetPeers, TLS: tls, NProcPerOrg: strconv.Itoa(invkQueryObject.NProcPerOrg), NRequest: strconv.Itoa(invkQueryObject.NRequest), RunDur: strconv.Itoa(invkQueryObject.RunDuration), CCType: invkQueryObject.CCOptions.CCType, ChaincodeID: invkQueryObject.ChaincodeName}
 	i.EventOpt = EventOptions{Type: invkQueryObject.EventOptions.Type, Listener: invkQueryObject.EventOptions.Listener, TimeOut: strconv.Itoa(invkQueryObject.EventOptions.TimeOut)}
-	i.CCOpt = CCOptions{KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart), PayLoadMin: strconv.Itoa(invkQueryObject.CCOptions.PayLoadMin), PayLoadMax: strconv.Itoa(invkQueryObject.CCOptions.PayLoadMax), PayLoadType: invkQueryObject.CCOptions.PayLoadType}
+	i.CCOpt = CCOptions{KeyIdx: invkQueryObject.CCOptions.KeyIdx, KeyPayLoad: invkQueryObject.CCOptions.KeyPayload, KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart), PayLoadMin: strconv.Itoa(invkQueryObject.CCOptions.PayLoadMin), PayLoadMax: strconv.Itoa(invkQueryObject.CCOptions.PayLoadMax), PayLoadType: invkQueryObject.CCOptions.PayLoadType}
 	i.TimeOutOpt = TimeOutOptions{Request: invkQueryObject.TimeOutOpt.Request, PreConfig: invkQueryObject.TimeOutOpt.PreConfig}
 	if strings.EqualFold("DISCOVERY", invkQueryObject.TargetPeers) {
 		localHost := strings.ToUpper(strconv.FormatBool(invkQueryObject.DiscoveryOptions.Localhost))
@@ -143,7 +143,7 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgName, action, tls 
 	}
 	if action == "Query" {
 		i.InvokeType = action
-		i.CCOpt = CCOptions{KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart)}
+		i.CCOpt = CCOptions{KeyIdx: invkQueryObject.CCOptions.KeyIdx, KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart)}
 	}
 	i.ChannelOpt = ChannelOptions{Name: invkQueryObject.ChannelName, OrgName: []string{orgName}}
 	i.ConnProfilePath = paths.GetConnProfilePathForOrg(orgName, organizations)

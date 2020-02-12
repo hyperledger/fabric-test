@@ -108,6 +108,8 @@ type EventOptions struct {
 //CCOptions --
 type CCOptions struct {
 	CCType      string `yaml:"ccType,omitempty"`
+	KeyIdx      []int  `yaml:"keyIdx,omitempty"`
+	KeyPayload  []int  `yaml:"keyPayload,omitempty"`
 	KeyStart    int    `yaml:"keyStart,omitempty"`
 	PayLoadMin  int    `yaml:"payLoadMin,omitempty"`
 	PayLoadMax  int    `yaml:"payLoadMax,omitempty"`

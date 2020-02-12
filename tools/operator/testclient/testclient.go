@@ -118,7 +118,7 @@ func Testclient(action, testInputFilePath string) error {
 
 	err = doAction(action, config, testInputFilePath)
 	if err != nil {
-		logger.ERROR("Failed to perform ", action, " action, testInputFilePath = ", action, testInputFilePath)
+		logger.ERROR("Failed to perform ", action, " action, testInputFilePath = ", testInputFilePath)
 		return err
 	}
 	return nil
