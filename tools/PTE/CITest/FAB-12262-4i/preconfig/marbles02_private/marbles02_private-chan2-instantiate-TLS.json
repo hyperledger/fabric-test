@@ -13,7 +13,7 @@
         ]
     },
     "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/fabric-samples/chaincode/marbles02_private/go",
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go",
         "collectionsConfigPath": "github.com/hyperledger/fabric-test/tools/PTE/CITest/FAB-12262-4i/preconfig/marbles02_private/collections_config-chan2.json",
         "fcn": "init",
         "endorsement": {
