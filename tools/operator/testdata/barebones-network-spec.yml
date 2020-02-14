@@ -68,14 +68,11 @@ peerOrganizations:
   numCa: 1
 
 #! Capabilites for Orderer, Channel, Application groups
-ordererCapabilities:
-  V2_0: true
+ordererCapabilities: V2_0
 
-channelCapabilities:
-  V2_0: true
+channelCapabilities: V2_0
 
-applicationCapabilities:
-  V1_4_2: true
+applicationCapabilities: V1_4_2
 
 #! Create the channel creation transactions; every org will be included in every channel
 #! This used testorgschannel as the prefix and channels are used like testorgschannel0,

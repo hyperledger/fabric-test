@@ -30,7 +30,7 @@ func UpgradeDB(config networkspec.Config, kubeConfigPath string) error {
 //UpdateCapability -  to update capability
 func UpdateCapability(config networkspec.Config, kubeConfigPath string) error {
 	capabilityGroup := "channel"
-	capabilityKey := getKeyFromCapability(config.ChannelCapabilities)
+	capabilityKey := config.ChannelCapabilities
 	args := []string{"configUpdate",
 		config.OrdererOrganizations[0].MSPID,
 		fmt.Sprintf("orderer0-%s", config.OrdererOrganizations[0].Name),
@@ -47,7 +47,7 @@ func UpdateCapability(config networkspec.Config, kubeConfigPath string) error {
 	}
 
 	capabilityGroup = "orderer"
-	capabilityKey = getKeyFromCapability(config.OrdererCapabilities)
+	capabilityKey = config.OrdererCapabilities
 	args = []string{"configUpdate",
 		config.OrdererOrganizations[0].MSPID,
 		fmt.Sprintf("orderer0-%s", config.OrdererOrganizations[0].Name),
@@ -63,7 +63,7 @@ func UpdateCapability(config networkspec.Config, kubeConfigPath string) error {
 	}
 
 	capabilityGroup = "application"
-	capabilityKey = getKeyFromCapability(config.ApplicationCapabilities)
+	capabilityKey = config.ApplicationCapabilities
 	args = []string{"configUpdate",
 		config.OrdererOrganizations[0].MSPID,
 		fmt.Sprintf("orderer0-%s", config.OrdererOrganizations[0].Name),
@@ -141,12 +141,4 @@ func UpdatePolicy(config networkspec.Config, kubeConfigPath string) error {
 
 	logger.INFO("Successfully updated policies")
 	return nil
-}
-
-func getKeyFromCapability(config map[string]string) string {
-	var key string
-	for key = range config {
-		return key
-	}
-	return key
 }
