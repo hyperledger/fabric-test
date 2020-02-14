@@ -14,9 +14,9 @@ type Config struct {
 	NumChannels             int               `yaml:"numChannels,omitempty"`
 	TLS                     string            `yaml:"tls,omitempty"`
 	EnableNodeOUs           bool              `yaml:"enableNodeOUs,omitempty"`
-	OrdererCapabilities     map[string]string `yaml:"ordererCapabilities,omitempty"`
-	ChannelCapabilities     map[string]string `yaml:"channelCapabilities,omitempty"`
-	ApplicationCapabilities map[string]string `yaml:"applicationCapabilities,omitempty"`
+	OrdererCapabilities     string `yaml:"ordererCapabilities,omitempty"`
+	ChannelCapabilities     string `yaml:"channelCapabilities,omitempty"`
+	ApplicationCapabilities string `yaml:"applicationCapabilities,omitempty"`
 	K8s                     struct {
 		DataPersistence string `yaml:"dataPersistence,omitempty"`
 		ServiceType     string `yaml:"serviceType,omitempty"`
