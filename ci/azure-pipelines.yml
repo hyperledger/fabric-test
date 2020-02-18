@@ -31,10 +31,10 @@ jobs:
     vmImage: ubuntu-18.04
   steps:
   - template: templates/install_deps.yml
-  - script: make ci-smoke
+  - script: make regression/smoke
     displayName: Run Smoke Tests
   - task: PublishTestResults@2
-    condition: always()   # publish either way
+    condition: always()
     inputs:
       testResultsFormat: 'JUnit'
       testResultsFiles: 'regression/smoke/results*.xml'

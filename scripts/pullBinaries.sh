@@ -1,57 +1,37 @@
 #!/bin/bash
 set -euo pipefail
 
-REPO=$1
 # Set the working directory
-WD=$(cd `dirname $0`/.. && pwd)
+WD=$(cd $(dirname $0)/.. && pwd)
 cd ${WD}
 
 RELEASE_VERSION=${RELEASE_VERSION:=latest}
 
 # Get the arch value
 ARCH=$(arch)
-if [[ "${ARCH}" = "x86_64" ]]; then
-    ARCH=linux-amd64
-elif [[ "$ARCH" = "i386" ]]; then
-    ARCH=darwin-amd64
+if [[ ${ARCH} == "x86_64" ]]; then
+	ARCH=linux-amd64
+elif [[ ${ARCH} == "i386" ]]; then
+	ARCH=darwin-amd64
+else
+    printf "Unsupported Architecture, exiting...\n"
+    exit 1
 fi
 
-echo "Downloading ${REPO}-${ARCH} binary artifacts from Artifactory"
+printf "\nDownloading fabric-${ARCH} binaries from Artifactory\n"
 
 ##########################################################
 # Pull the binaries from Artifactory
 ##########################################################
 
-pullBinary() {
-  REPOS=$@
-  mkdir -p ${WD}/bin
-  for repo in "${REPOS}"; do
-    echo
-    ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
-    curl "${ARTIFACTORY_URL}" | tar -xvz
-    rm -rf config
-    echo "Finished pulling $repo..."
-    echo
-  done
-}
+REPOS=$@
+mkdir -p ${WD}/bin
+for repo in "${REPOS}"; do
+	ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
+	curl -sS "${ARTIFACTORY_URL}" -o binaries.tgz
+	tar -xf binaries.tgz
+	rm -rf config binaries.tgz
+	printf "\nFinished downloading $repo binaries\n\n"
+done
 
-##########################################################
-# Select which binaries are needed
-##########################################################
-case ${REPO} in
-fabric)
-  echo "Pull only fabric binaries"
-  pullBinary fabric
-  ;;
-fabric-ca)
-  echo "Pull only fabric-ca binaries"
-  pullBinary fabric-ca
-  ;;
-*)
-  echo "Pull all binaries"
-  pullBinary fabric fabric-ca
-  ;;
-esac
-
-echo "In the ${WD}/bin dir..."
-ls -l ${WD}/bin
+printf "The following binaries have been installed at ${WD}/bin:\n\n%s\n\n" "$(ls -l ${WD}/bin)"

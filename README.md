@@ -90,13 +90,9 @@ You can run the automated test suites with a makefile target given below. This h
 
 ```
 
-  make ci-daily    # Cleans environment, updates submodules, clones & builds
-                   # fabric & fabric-ca images, executes Daily tests from
-                   # regression/daily folder.
-
-  make ci-smoke    # Cleans environment, updates submodules, clones & builds
-                   # fabric & fabric-ca images, executes Smoke tests from
-                   # regression/smoke folder.
+  make regression/smoke     # Cleans environment, updates submodules, clones & builds
+                            # fabric & fabric-ca images, executes Smoke tests from
+                            # regression/smoke folder.
 
 ```
 
