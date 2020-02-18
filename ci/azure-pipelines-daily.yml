@@ -23,16 +23,24 @@ variables:
   NODE_VER: 10.x
 
 jobs:
-- job: PTEDailyBuild
-  pool:
-    vmImage: ubuntu-18.04
-  timeoutInMinutes: 360
-  steps:
-  - template: templates/install_deps.yml
-  - script: make ci-daily
-    displayName: Run PTE Daily Tests
-  - task: PublishTestResults@2
-    condition: always()
-    inputs:
-      testResultsFormat: 'JUnit'
-      testResultsFiles: 'regression/daily/results*.xml'
+  - job: Regression
+    pool:
+      vmImage: ubuntu-18.04
+    timeoutInMinutes: 360
+    strategy:
+      matrix:
+        Barebones:
+          SCENARIO: barebones
+        Basic:
+          SCENARIO: basicnetwork
+        Smoke:
+          SCENARIO: smoke
+    steps:
+    - template: templates/install_deps.yml
+    - script: make regression/$(SCENARIO)
+      displayName: Run Scenario
+    - task: PublishTestResults@2
+      condition: always()
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'regression/**/results*.xml'
