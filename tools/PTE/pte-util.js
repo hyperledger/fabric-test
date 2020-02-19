@@ -106,6 +106,62 @@ function isEmpty(obj) {
 
 }
 
+
+// total number of peers in all orgs listed in orgList
+function getTotalPeers(cpList, orgList) {
+    logger.info('[getTotalPeers] ');
+    var totalPeers = 0;
+    for (var i = 0; i< orgList.length; i++ ) {
+        var org = orgList[i]
+        var cpf = findOrgConnProfile(cpList, org);
+        if ( cpf === null ) {
+            logger.info('[getTargetPeerList] cannot find org(%s) in any connection profile)', org);
+            continue;
+        }
+        totalPeers = totalPeers + cpf['organizations'][org]['peers'].length;
+    }
+    logger.info('[getTotalPeers] find peer number: %d ', totalPeers);
+    return totalPeers;
+}
+
+module.exports.getTotalPeersSubmitter = function (cpList, orgList) {
+    return getTotalPeers(cpList, orgList);
+}
+
+// find target peers according to the targetPeerType (ANCHORPEER or ALLPEERS)
+function getTargetPeerList(cpList, orgList, targetPeerType) {
+    logger.info('[getTargetPeerList] targetPeerType: ', targetPeerType);
+    var targetPeers = {};
+    if ( targetPeerType  === 'ANCHORPEER' || targetPeerType  === 'ALLPEERS' ) {
+        for (var i = 0; i< orgList.length; i++ ) {
+            var org = orgList[i]
+            targetPeers[org]=[];
+            var cpf = findOrgConnProfile(cpList, org);
+            if ( cpf === null ) {
+                logger.info('[getTargetPeerList] cannot find org(%s) in any connection profile)', org);
+                continue;
+            }
+            var cpOrg = cpf['organizations'];
+            for ( var j=0; j<cpOrg[org]['peers'].length; j++ ) {
+                var peer = cpOrg[org]['peers'][j];
+                targetPeers[org].push(peer);
+                if ( targetPeerType  === 'ANCHORPEER' ) {
+                    break;
+                }
+            }
+        }
+    } else {
+        logger.error('[getTargetPeerList] invalid targetPeerType: %s ', targetPeerType);
+        return null;
+    }
+    logger.info('[getTargetPeerList] find peers: %j ', targetPeers);
+    return targetPeers;
+}
+
+module.exports.getTargetPeerListSubmitter = function (cpList, orgList, targetPeerType) {
+    return getTargetPeerList(cpList, orgList, targetPeerType);
+}
+
 // get connection profiles from directory cpPath or a single connection profile file
 function getConnProfileList(cpPath) {
 

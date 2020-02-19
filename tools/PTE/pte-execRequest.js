@@ -541,256 +541,26 @@ function removeAllPeers() {
 
 }
 
-// assign thread peers from all org
-function assignPeerList(channel, client, org) {
-    logger.info('[Nid:chan:id=%d:%s:%d assignPeerList]', Nid, channel.getName(), pid);
+// add peer(s) to a channel
+function assignChannelPeers(cpList, channel, client, targetPeers) {
+
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignChannelPeers] targetPeers: %j', Nid, channelName, org, pid, targetPeers);
     var peerTmp;
     var eh;
     var data;
-
-    for (let orgtmp in cpOrgs) {
-        for (let i = 0; i < cpOrgs[orgtmp]['peers'].length; i++) {
-            var key = cpOrgs[orgtmp]['peers'][i];
-            if (cpPeers.hasOwnProperty(key)) {
-                if (cpPeers[key].url) {
-                    if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(orgtmp, key, cpf, cpPath);
-                        if (data !== null) {
-                            peerTmp = client.newPeer(
-                                cpPeers[key].url,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                                }
-                            );
-                            peerList.push(peerTmp);
-                        }
-                    } else {
-                        peerTmp = client.newPeer(cpPeers[key].url);
-                        peerList.push(peerTmp);
-                    }
-                }
-            }
-        }
-    }
-    logger.info('[Nid:chan:id=%d:%s:%d assignPeerList] peerList', Nid, channel.getName(), pid, peerList);
-}
-
-// assign thread peers from all org
-function assignThreadAllPeers(channel, client, org) {
-    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllPeers]', Nid, channel.getName(), pid);
-    var peerTmp;
-    var eh;
-    var data;
-    var event_connected = false;
-
-    for (var i = 0; i < orgList.length; i++) {
-        var orgtmp = orgList[i];
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] org (%s)', Nid, channel.getName(), org, pid, orgtmp);
-        // find the connection profile of the specified org
-        var cpfTmp = testUtil.findOrgConnProfileSubmitter(cpList, orgtmp);
-        if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-            logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
-            continue;
-        }
-        var cpOrgsTmp = cpfTmp['organizations'];
-        var cpPeersTmp = cpfTmp['peers'];
-
-        for (let i = 0; i < cpOrgsTmp[orgtmp]['peers'].length; i++) {
-            var key = cpOrgsTmp[orgtmp]['peers'][i];
-            if (cpPeersTmp.hasOwnProperty(key)) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(orgtmp, key, cpfTmp, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeersTmp[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeersTmp[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                        if (peerFOList == 'TARGETPEERS') {
-                            peerList.push(peerTmp);
-                        }
-
-                        if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                            eh = channel.newChannelEventHub(peerTmp);
-                            eventHubs.push(eh);
-                            if (evtType == 'FILTEREDBLOCK') {
-                                eh.connect();
-                            } else {
-                                eh.connect(true);
-                            }
-                        }
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeersTmp[key].url);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if (peerFOList == 'TARGETPEERS') {
-                        peerList.push(peerTmp);
-                    }
-                    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if (evtType == 'FILTEREDBLOCK') {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllPeers] peers: %s', Nid, channel.getName(), pid, channel.getPeers());
-}
-
-
-// assign thread the anchor peer from all org
-function assignThreadAllAnchorPeers(channel, client, org) {
-    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllAnchorPeers]', Nid, channel.getName(), pid);
-    var peerTmp;
-    var eh;
-    var data;
-
-    for (let orgtmp in cpOrgs) {
-        let key = cpOrgs[orgtmp]['peers'][0];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(orgtmp, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                        if (peerFOList == 'TARGETPEERS') {
-                            peerList.push(peerTmp);
-                        }
-
-                        if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                            eh = channel.newChannelEventHub(peerTmp);
-                            eventHubs.push(eh);
-                            if (evtType == 'FILTEREDBLOCK') {
-                                eh.connect();
-                            } else {
-                                eh.connect(true);
-                            }
-                        }
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if (peerFOList == 'TARGETPEERS') {
-                        peerList.push(peerTmp);
-                    }
-                    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if (evtType == 'FILTEREDBLOCK') {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    logger.info('[Nid:chan:id=%d:%s:%d assignThreadAllAnchorPeers] peers: %s', Nid, channel.getName(), pid, channel.getPeers());
-}
-
-// assign thread all peers from the org
-function assignThreadOrgPeer(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgPeer]', Nid, channel.getName(), org, pid);
-    var peerTmp;
-    var eh;
-    var data;
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                        if (peerFOList == 'TARGETPEERS') {
-                            peerList.push(peerTmp);
-                        }
-
-                        if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                            eh = channel.newChannelEventHub(peerTmp);
-                            eventHubs.push(eh);
-                            if (evtType == 'FILTEREDBLOCK') {
-                                eh.connect();
-                            } else {
-                                eh.connect(true);
-                            }
-                        }
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    channel.addPeer(peerTmp);
-                    if (peerFOList == 'TARGETPEERS') {
-                        peerList.push(peerTmp);
-                    }
-                    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if (evtType == 'FILTEREDBLOCK') {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgPeer] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
-}
-
-
-// assign thread the peers from List
-function assignThreadPeerList(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList]', Nid, channel.getName(), org, pid);
-    var peerTmp;
-    var eh;
-    var data;
-    var listOpt = txCfgPtr.listOpt;
     var peername;
-    var event_connected = false;
 
-    for (var key in listOpt) {
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList key: %s]', Nid, channel.getName(), org, pid, key);
+    for (var j=0; j< Object.keys(targetPeers).length; j++) {
+        var key = Object.keys(targetPeers)[j];
         // find the connection profile of the specified org
-        var cpfTmp = testUtil.findOrgConnProfileSubmitter(cpList, key);
+        var cpfTmp =testUtil.findOrgConnProfileSubmitter(cpList, key);
         if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-            logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] no peer is found in the connection profile for org (%s)', Nid, channel.getName(), org, pid, orgtmp);
+            logger.info('[assignChannelPeers] no peer is found in the connection profile for org (%s)', org);
             continue;
         }
-        var cpOrgsTmp = cpfTmp['organizations'];
         var cpPeersTmp = cpfTmp['peers'];
-        for (i = 0; i < listOpt[key].length; i++) {
-            peername = listOpt[key][i];
+        for (i = 0; i < targetPeers[key].length; i++) {
+            peername = targetPeers[key][i];
             if (cpPeersTmp.hasOwnProperty(peername)) {
                 if (cpPeersTmp[peername].url) {
                     if (TLS > testUtil.TLSDISABLED) {
@@ -837,168 +607,47 @@ function assignThreadPeerList(channel, client, org) {
                     }
                 }
             } else {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] the listed peer does not exist in connection profile: %s', Nid, channelName, org, pid, peername);
+                logger.error('[assignChannelPeers] the targeted peer does not exist in connection profile: %s', peername);
                 process.exit(1);
             }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerList] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
+    logger.info('[assignChannelPeers] getPeers: : %s', channel.getPeers());
 }
-// assign thread the peers from getPeerID
-function assignThreadPeerID(channel, client, org, method) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID: method %s]', Nid, channel.getName(), org, pid, method);
+
+// assign thread peers from all org
+function assignPeerList(channel, client, org) {
+    logger.info('[Nid:chan:id=%d:%s:%d assignPeerList]', Nid, channel.getName(), pid);
     var peerTmp;
     var eh;
     var data;
 
-    var peername = testUtil.getPeerID(pid, org, txCfgPtr, cpf, method);
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID: %s]', Nid, channel.getName(), org, pid, peername);
-
-    var event_connected = false;
-    if (cpPeers.hasOwnProperty(peername)) {
-        if (cpPeers[peername].url) {
-            if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, peername, cpf, cpPath);
-                if (data !== null) {
-                    peerTmp = client.newPeer(
-                        cpPeers[peername].url,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
+    for (let orgtmp in cpOrgs) {
+        for (let i = 0; i < cpOrgs[orgtmp]['peers'].length; i++) {
+            var key = cpOrgs[orgtmp]['peers'][i];
+            if (cpPeers.hasOwnProperty(key)) {
+                if (cpPeers[key].url) {
+                    if (TLS > testUtil.TLSDISABLED) {
+                        data = testUtil.getTLSCert(orgtmp, key, cpf, cpPath);
+                        if (data !== null) {
+                            peerTmp = client.newPeer(
+                                cpPeers[key].url,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
+                                }
+                            );
+                            peerList.push(peerTmp);
                         }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if (peerFOList == 'TARGETPEERS') {
+                    } else {
+                        peerTmp = client.newPeer(cpPeers[key].url);
                         peerList.push(peerTmp);
                     }
-
-                    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if (evtType == 'FILTEREDBLOCK') {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
-                        }
-                    }
-                }
-            } else {
-                peerTmp = client.newPeer(cpPeers[peername].url);
-                channel.addPeer(peerTmp);
-                if (peerFOList == 'TARGETPEERS') {
-                    peerList.push(peerTmp);
-                }
-                if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                    eh = channel.newChannelEventHub(peerTmp);
-                    eventHubs.push(eh);
-                    if (evtType == 'FILTEREDBLOCK') {
-                        eh.connect();
-                    } else {
-                        eh.connect(true);
-                    }
                 }
             }
         }
     }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadPeerID] peers: : %s', Nid, channelName, org, pid, channel.getPeers());
-}
-
-function channelAddPeer(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeer]', Nid, channelName, org, pid);
-    var data;
-    var peerTmp;
-    var eh;
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-
-                        if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                            eh = channel.newChannelEventHub(peerTmp);
-                            eventHubs.push(eh);
-                            if (evtType == 'FILTEREDBLOCK') {
-                                eh.connect();
-                            } else {
-                                eh.connect(true);
-                            }
-                        }
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if (evtType == 'FILTEREDBLOCK') {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeer] peers: %s', Nid, channelName, org, pid, channel.getPeers());
-}
-
-
-function channelAddPeerEvent(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent]', Nid, channelName, org, pid);
-    var data;
-    var eh;
-    var peerTmp;
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        logger.info('key: ', key);
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] peer: ', Nid, channelName, org, pid, cpPeers[key].url);
-                }
-                targets.push(peerTmp);
-                channel.addPeer(peerTmp);
-                if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                    eh = channel.newChannelEventHub(peerTmp);
-                    eventHubs.push(eh);
-                    if (evtType == 'FILTEREDBLOCK') {
-                        eh.connect();
-                    } else {
-                        eh.connect(true);
-                    }
-                }
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddPeerEvent] requests: %s', Nid, channelName, org, pid, cpPeers[key].url);
-            }
-        }
-    }
+    logger.info('[Nid:chan:id=%d:%s:%d assignPeerList] peerList', Nid, channel.getName(), pid, peerList);
 }
 
 function channelDiscoveryEvent(channel, client, org) {
@@ -1017,53 +666,6 @@ function channelDiscoveryEvent(channel, client, org) {
     }
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelDiscoveryEvent] event length: %d', Nid, channelName, org, pid, eventHubs.length);
 }
-
-// add one peer to channel to perform service discovery
-function channelAdd1Peer(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAdd1Peer]', Nid, channelName, org, pid);
-    var data;
-    var peerTmp;
-    var eh;
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                }
-                if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                    eh = channel.newChannelEventHub(peerTmp);
-                    eventHubs.push(eh);
-                    if (evtType == 'FILTEREDBLOCK') {
-                        eh.connect();
-                    } else {
-                        eh.connect(true);
-                    }
-                }
-                break;
-            }
-        }
-    }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAdd1Peer] peers: %s ', Nid, channelName, org, pid, channel.getPeers());
-}
-
 
 
 function clearInitDiscTimeout() {
@@ -1206,85 +808,38 @@ function channelAddOrderer(channel, client, org) {
 }
 
 
-// assign thread the anchor peer (peer1) from the org
-function assignThreadOrgAnchorPeer(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] ', Nid, channelName, org, pid);
-    var peerTmp;
-    var eh;
-    var data;
-    var found = 0; // found first peer, as identified in the ConnProfile.
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers[key].url) {
-            if (TLS > testUtil.TLSDISABLED) {
-                data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                if (data !== null) {
-                    peerTmp = client.newPeer(
-                        cpPeers[key].url,
-                        {
-                            pem: Buffer.from(data).toString(),
-                            'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                        }
-                    );
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                    if (peerFOList == 'TARGETPEERS') {
-                        peerList.push(peerTmp);
-                    }
-
-                    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                        eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                        if (evtType == 'FILTEREDBLOCK') {
-                            eh.connect();
-                        } else {
-                            eh.connect(true);
-                        }
-                    }
-                    found = 1;
-                }
-            } else {
-                logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] key: %s, subkey: %s', Nid, channelName, org, pid, key, cpPeers[key].url);
-                peerTmp = client.newPeer(cpPeers[key].url);
-                targets.push(peerTmp);
-                channel.addPeer(peerTmp);
-                if (peerFOList == 'TARGETPEERS') {
-                    peerList.push(peerTmp);
-                }
-                if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
-                    eh = channel.newChannelEventHub(peerTmp);
-                    eventHubs.push(eh);
-                    if (evtType == 'FILTEREDBLOCK') {
-                        eh.connect();
-                    } else {
-                        eh.connect(true);
-                    }
-                }
-                found = 1;
-            }
-            if (found == 1) {
-                break;
-            }
-        }
-    }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadOrgAnchorPeer] peers: %s', Nid, channelName, org, pid, channel.getPeers());
-}
-
 // add target peers to channel
 function setTargetPeers(tPeers) {
+    var tgtPeers = [];
     if (tPeers == 'ORGANCHOR') {
-        assignThreadOrgAnchorPeer(channel, client, org);
+        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, channelOrgName, 'ANCHORPEER')
+        if ( tgtPeers ) {
+            assignChannelPeers(cpList, channel, client, tgtPeers)
+        }
     } else if (tPeers == 'ALLANCHORS') {
-        assignThreadAllAnchorPeers(channel, client, org);
+        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, orgList, 'ANCHORPEER')
+        if ( tgtPeers ) {
+            assignChannelPeers(cpList, channel, client, tgtPeers)
+        }
     } else if (tPeers == 'ORGPEERS') {
-        assignThreadOrgPeer(channel, client, org);
+        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, channelOrgName, 'ALLPEERS')
+        if ( tgtPeers ) {
+            assignChannelPeers(cpList, channel, client, tgtPeers)
+        }
     } else if (tPeers == 'ALLPEERS') {
-        assignThreadAllPeers(channel, client, org);
+        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, orgList, 'ALLPEERS')
+        if ( tgtPeers ) {
+            assignChannelPeers(cpList, channel, client, tgtPeers)
+        }
     } else if (tPeers == 'LIST') {
-        assignThreadPeerList(channel, client, org);
+        tgtPeers = txCfgPtr.listOpt;
+        if ( tgtPeers ) {
+            assignChannelPeers(cpList, channel, client, tgtPeers)
+        }
     } else if (tPeers == 'ROUNDROBIN') {
-        assignThreadPeerID(channel, client, org, tPeers);
+        tgtPeers[org] = [];
+        tgtPeers[org].push(testUtil.getPeerID(pid, org, txCfgPtr, cpf, tPeers));
+        assignChannelPeers(cpList, channel, client, tgtPeers)
     } else if ((tPeers == 'DISCOVERY') || (transType == 'DISCOVERY')) {
         serviceDiscovery = true;
         if ((typeof (txCfgPtr.discoveryOpt) !== 'undefined')) {
@@ -1305,7 +860,16 @@ function setTargetPeers(tPeers) {
             }
         }
 
-        channelAdd1Peer(channel, client, org);       // add one peer to channel to perform service discovery
+        // add one peer to channel to init service discovery
+        for (var j=0; j<channelOrgName.length; j++) {
+            var discOrg1 = [];
+            discOrg1 = channelOrgName.slice(j,j+1);
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, discOrg1, 'ANCHORPEER')
+            if ( tgtPeers ) {
+                assignChannelPeers(cpList, channel, client, tgtPeers)
+                break;    // break once one peer is found
+            }
+        }
         if ((tPeers == 'DISCOVERY') || (transType == 'DISCOVERY')) {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d setTargetPeers] serviceDiscovery=%j, localHost: %j', Nid, channelName, org, pid, serviceDiscovery, localHost);
             initDiscovery();
@@ -2339,12 +1903,13 @@ function invoke_move_dist(backoffCalculator) {
 function queryValidation(response) {
     var payload = response[0].data;
     var founderr = 0;
-    tx_stats[tx_rcvd] = tx_stats[tx_rcvd] + response.length;
     for (let j = 0; j < response.length; j++) {
         var qResp = response[j].toString('utf8').toUpperCase();
         if (qResp.includes('ERROR') || qResp.includes('FAIL')) {
             tx_stats[tx_pFail]++;
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d queryValidation] query return:', Nid, channelName, org, pid, response[j].toString('utf8'));
+        } else {
+            tx_stats[tx_rcvd]++;
         }
         if ((founderr == 0) && (payload !== response[j].data)) {
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d queryValidation] query responses of same tx from different peers contain different data: %j', Nid, channelName, org, pid, response);
