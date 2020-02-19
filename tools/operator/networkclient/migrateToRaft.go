@@ -1,9 +1,9 @@
 package networkclient
 
 import (
+	"errors"
 	"fmt"
 	"strings"
-	"errors"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -13,7 +13,7 @@ import (
 //MigrateToRaft -  to migrate from solo or kafka to raft
 func MigrateToRaft(config networkspec.Config, kubeConfigPath string) error {
 
-	if config.K8s.DataPersistence != "true"{
+	if config.K8s.DataPersistence != "true" {
 		return errors.New("MigrateToRaft: Data persistance is disabled. Make sure it is enabled")
 	}
 	artifactsLocation := config.ArtifactsLocation

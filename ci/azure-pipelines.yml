@@ -31,6 +31,8 @@ jobs:
     vmImage: ubuntu-18.04
   steps:
   - template: templates/install_deps.yml
+  - script: make lint
+    displayName: Lint Code
   - script: make regression/smoke
     displayName: Run Smoke Tests
   - task: PublishTestResults@2

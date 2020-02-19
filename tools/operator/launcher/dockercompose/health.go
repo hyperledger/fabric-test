@@ -90,7 +90,7 @@ func (d DockerCompose) checkHealth(componentName string, config networkspec.Conf
 		logger.INFO("Health check passed for ", componentName)
 		return nil
 	}
-	return fmt.Errorf("Health check failed for %s; Response status = %s", componentName, resp.StatusCode)
+	return fmt.Errorf("health check failed for %s; Response status = %d", componentName, resp.StatusCode)
 }
 
 func (d DockerCompose) CheckDockerContainersHealth(config networkspec.Config) error {

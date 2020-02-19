@@ -19,8 +19,8 @@ import (
 
 type ContainerPorts struct {
 	Ports map[string][]struct {
-		HostPort string `json:"HostPort", omitempty`
-	} `json:"Ports, omitempty"`
+		HostPort string `json:"HostPort,omitempty"`
+	} `json:"Ports,omitempty"`
 }
 
 //GetDockerExternalIP -- To get the externalIP of a fabric component

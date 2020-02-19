@@ -29,6 +29,10 @@ npm-init:
 		cd $(CURDIR)/tools/PTE && npm rebuild 2>/dev/null
     endif
 
+.PHONY: lint
+lint: gotools
+	./scripts/lint.sh
+
 .PHONY: pull-binaries
 pull-binaries:
 	./scripts/pullBinaries.sh fabric fabric-ca
