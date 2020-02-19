@@ -349,63 +349,6 @@ function channelAddPeer(channel, client, org) {
     return targets;
 }
 
-function channelAddListedPeer(channel, client, org) {
-    var peerTmp;
-    let channelName
-    if (channel) {
-        channelName = channel.getName()
-    }
-    logger.debug('[Nid:chan:org=%d:%s:%s channelAddListedPeer] listOpt: %j', Nid, channelName, org, txCfgPtr.listOpt);
-    var data;
-    var listOpt = txCfgPtr.listOpt;
-    var peername;
-    var targets = [];
-
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-        logger.error('[channelAddListedPeer] org: %s, no peer is found in the connection profile', org);
-        process.exit(1);
-    }
-    var cpPeers = cpf['peers'];
-
-    for (var key in listOpt) {
-        for (i = 0; i < listOpt[key].length; i++) {
-            peerTmp = null
-            if (cpPeers.hasOwnProperty(listOpt[key][i])) {
-                peername = listOpt[key][i];
-                if (cpPeers[peername].url) {
-                    if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpf, cpPath);
-                        if (data !== null) {
-                            peerTmp = client.newPeer(
-                                cpPeers[peername].url,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
-                                }
-                            );
-                            targets.push(peerTmp);
-                        }
-                    } else {
-                        peerTmp = client.newPeer(cpPeers[peername].url);
-                    }
-                    if (channel && peerTmp) {
-                        channel.addPeer(peerTmp);
-                    }
-                } else {
-                    logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) incorrect peer name', Nid, channelName, org, key, listOpt[key][i]);
-                    process.exit(1);
-                }
-            } else {
-                logger.error('[Nid:chan:org=%d:%s:%s channelAddListedPeer] cannot install cc: peer(%s:%s) does not exist', Nid, channelName, org, key, listOpt[key][i]);
-                process.exit(1);
-            }
-        }
-    }
-    logger.debug('[Nid:chan:org=%d:%s:%s channelAddListedPeer] add peer: %s', Nid, channelName, org, channel.getPeers());
-    return targets;
-}
-
 function channelAddQIPeer(channel, client, qorg, qpeer) {
     logger.debug('[channelAddQIPeer] channel name: ', channel.getName());
     logger.debug('[channelAddQIPeer] qorg %s qpeer: ', qorg, qpeer);
@@ -617,16 +560,7 @@ async function chaincodeInstall(client, org) {
             logger.debug('[chaincodeInstall] got user private key: org= %s', org);
         }
 
-        var targets;
-        if ((typeof (txCfgPtr.targetPeers) !== 'undefined') && (txCfgPtr.targetPeers.toUpperCase() == 'LIST')) {
-            if (typeof (txCfgPtr.listOpt) == 'undefined') {
-                logger.error('[Nid:org=%d::%s chaincodeInstall] listOpt undefined', Nid, org);
-                process.exit(1);
-            }
-            targets = channelAddListedPeer(channel, client, org);
-        } else {
-            targets = channelAddPeer(channel, client, org);
-        }
+        var targets = channelAddPeer(channel, client, org);
 
         //sendInstallProposal
         getCCID();
@@ -1933,6 +1867,38 @@ async function performance_main() {
                             if ((output["Total transactions"]["sent"]) && (output["Total transactions"]["sent"] == output["Total transactions"]["received"]) && (output["Total transactions"]["sent"] != 0) && (totalInvokeEventInvalid == 0)) {
                                 output["Test Result"] = "PASS"
                                 logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
+                            } else if ( invokeType == "QUERY" ) {
+                                var targetPeers = txCfgPtr.targetPeers.toUpperCase();
+                                var qFactor = 0;
+                                if ( targetPeers === 'ORGANCHOR' ) {
+                                    qFactor = channelOrgName.length;
+                                } else if ( targetPeers === 'ALLANCHORS' ) {
+                                    var orgList = [];
+                                    orgList = testUtil.findAllOrgFromConnProfileSubmitter(cpList);
+                                    qFactor = orgList.length;
+                                } else if ( targetPeers === 'ORGPEERS' ) {
+                                    qFactor = testUtil.getTotalPeersSubmitter(cpList, channelOrgName)
+                                } else if ( targetPeers === 'ALLPEERS' ) {
+                                    var orgList = [];
+                                    orgList = testUtil.findAllOrgFromConnProfileSubmitter(cpList);
+                                    qFactor = testUtil.getTotalPeersSubmitter(cpList, orgList)
+                                } else if ( targetPeers === 'DISCOVERY' ) {
+                                    qFactor = 1;
+                                } else {
+                                    logger.error('[performance_main] unknown targetPeers: %s',targetPeers);
+                                    qFactor = 0;
+                                }
+                                logger.info('[performance_main] Test targetPeers: %s, qFactor: %d',targetPeers, qFactor);
+
+                                if ( (output["Total transactions"]["sent"] != 0) && (output["Total transactions"]["received"] === qFactor * output["Total transactions"]["sent"]) ) {
+                                    output["Test Result"] = "PASS";
+                                    logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
+                                } else {
+                                    output["Test Result"] = "FAIL"
+                                    const errMsg = '[performance_main] Test ran, but failed with errors. Exiting... \n pteReport: ' + JSON.stringify(output, null, 4)
+                                    logger.error(errMsg);
+                                    process.exit(1)
+                                }
                             } else {
                                 output["Test Result"] = "FAIL"
                                 const errMsg = '[performance_main] Test ran, but failed with errors. Exiting... \n pteReport: ' + JSON.stringify(output, null, 4)
