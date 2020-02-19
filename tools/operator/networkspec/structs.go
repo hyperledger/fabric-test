@@ -11,9 +11,9 @@ type Config struct {
 	Orderer              struct {
 		OrdererType string `yaml:"ordererType,omitempty"`
 	} `yaml:"orderer,omitempty"`
-	NumChannels             int               `yaml:"numChannels,omitempty"`
-	TLS                     string            `yaml:"tls,omitempty"`
-	EnableNodeOUs           bool              `yaml:"enableNodeOUs,omitempty"`
+	NumChannels             int    `yaml:"numChannels,omitempty"`
+	TLS                     string `yaml:"tls,omitempty"`
+	EnableNodeOUs           bool   `yaml:"enableNodeOUs,omitempty"`
 	OrdererCapabilities     string `yaml:"ordererCapabilities,omitempty"`
 	ChannelCapabilities     string `yaml:"channelCapabilities,omitempty"`
 	ApplicationCapabilities string `yaml:"applicationCapabilities,omitempty"`
@@ -73,7 +73,7 @@ type CertificateAuthority struct {
 		Pem string `yaml:"pem"`
 	} `yaml:"tlsCACerts"`
 	HTTPOptions struct {
-		Verify bool `yaml:'verify'`
+		Verify bool `yaml:"verify"`
 	} `yaml:"httpOptions"`
 	Registrar struct {
 		EnrollID     string `yaml:"enrollId"`

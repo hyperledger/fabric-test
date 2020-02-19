@@ -2,8 +2,8 @@ package networkclient
 
 import (
 	"fmt"
-	"strings"
 	"os"
+	"strings"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
