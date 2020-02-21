@@ -46,7 +46,7 @@ instantiateChaincode:
     args: ""
     organizations: org1
     endorsementPolicy: 1of(org1)
-    collectionPath: github.com/hyperledger/fabric-test/tools/operator/testdata/map-private-collections.json
+    collectionPath: github.com/hyperledger/fabric-test/regression/testdata/map-private-collections.json
 
 invokes:
   - channelName: testorgschannel0

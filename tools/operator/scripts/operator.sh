@@ -41,6 +41,7 @@ done
 CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 OperatorDir="$FabricTestDir"/tools/operator
+testdataDir="$FabricTestDir"/regression/testdata
 PTEDir="$FabricTestDir"/tools/PTE
 LogsDir="$FabricTestDir"/tools/PTE/CITest/Logs
 ConnProfile=CITest/CIConnProfiles/test-network
@@ -53,7 +54,7 @@ startNw() {
   # Create fabric network on k8s cluster
   cd "$OperatorDir" || exit 1
   # export kubeconfig file to KUBECONFIG
-  go run main.go -i $OperatorDir/testdata/"$1".yml -k "$KUBECONFIG" -a up
+  go run main.go -i $testdataDir/"$1".yml -k "$KUBECONFIG" -a up
   # list k8s pods
   kubectl get pods
   cd "$FabricTestDir"/fabric/internal/cryptogen || exit 1
@@ -75,7 +76,7 @@ stopNw() {
 
   cd "$OperatorDir" || exit 1
   # provide networkspec 1 and kubeconfig 1 here
-  go run main.go -i $OperatorDir/testdata/"$1".yml -k "$KUBECONFIG" -a down
+  go run main.go -i $testdataDir/"$1".yml -k "$KUBECONFIG" -a down
   # list k8s pods
   kubectl get pods
   rm -f /tmp/nws.txt
@@ -235,7 +236,7 @@ samplecc_go_50MB_TX() {
 migrate() {
   cd "$FabricTestDir"/tools/operator || exit 1
   echo "-------> kafka to etcdraft migration"
-  go run main.go -i $OperatorDir/testdata/"$2".yml -k "$KUBECONFIG" -a migrate > "$LogsDir"/"$2"_kafka_2_raft_migrate.log
+  go run main.go -i $testdataDir/"$2".yml -k "$KUBECONFIG" -a migrate > "$LogsDir"/"$2"_kafka_2_raft_migrate.log
   }
 
 # Install npm

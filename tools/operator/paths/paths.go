@@ -88,6 +88,7 @@ func ConfigFilesDir() string {
 	return componentPath(currentDir, "configFiles")
 }
 
+//ConfigFilePath --
 func ConfigFilePath(fileName string) string {
 	configFiles := map[string]string{
 		"crypto-config": "crypto-config.yaml",
@@ -100,6 +101,7 @@ func ConfigFilePath(fileName string) string {
 	return JoinPath(ConfigFilesDir(), configFiles[fileName])
 }
 
+//GetCurrentDir --
 func GetCurrentDir() (string, error) {
 	path, err := os.Getwd()
 	if err != nil {
@@ -162,12 +164,12 @@ func PTEPath() string {
 func GetConnProfilePath(orgNames []string, organizations []inputStructs.Organization) string {
 	var connProfilePath string
 	if len(orgNames) > 1 {
-		connProfilePath,_ = filepath.Split(organizations[0].ConnProfilePath)
+		connProfilePath, _ = filepath.Split(organizations[0].ConnProfilePath)
 	} else {
 		for i := 0; i < len(organizations); i++ {
 			if organizations[i].Name == orgNames[0] {
 				connProfilePath = organizations[i].ConnProfilePath
-				break;
+				break
 			}
 		}
 	}

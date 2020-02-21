@@ -38,7 +38,7 @@ var _ = Describe("Barebones Test", func() {
 	BeforeEach(func() {
 		// set up dir variables
 		fabricTestDir, _ = getFabricTestDir()
-		testDataDir = path.Join(fabricTestDir, "tools/operator/testdata")
+		testDataDir = path.Join(fabricTestDir, "regression/testdata")
 		pteReportCmd = path.Join(fabricTestDir, "tools/PTE/CITest/scripts/get_pteReport.js")
 		pteReportTxt = path.Join(fabricTestDir, "regression/barebones/pteReport.txt")
 		pteFinalReport = path.Join(fabricTestDir, "regression/barebones/barebones-pteReport.log")

@@ -74,7 +74,7 @@ var _ = Describe("Systemtest", func() {
 	BeforeSuite(func() {
 		fabricTestDir, _ = getFabricTestDir()
 		logsDir = filepath.Join(fabricTestDir, "regression/weekly/Logs/")
-		testDataDir = filepath.Join(fabricTestDir, "tools/operator/testdata")
+		testDataDir = filepath.Join(fabricTestDir, "regression/testdata")
 		expectedInvokeStatus = "INVOKE Overall TEST RESULTS PASSED"
 		kubeconfig, envVariableExists = os.LookupEnv("KUBECONFIG")
 		Expect(envVariableExists).To(Equal(true))
