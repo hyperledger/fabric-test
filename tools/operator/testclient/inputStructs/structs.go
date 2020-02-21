@@ -32,6 +32,7 @@ type Organization struct {
 
 //InstallCC --
 type InstallCC struct {
+	SDK              string `yaml:"sdk,omitempty"`
 	ChainCodeName    string `yaml:"name,omitempty"`
 	ChainCodeVersion string `yaml:"version,omitempty"`
 	ChainCodePath    string `yaml:"path,omitempty"`
@@ -42,6 +43,7 @@ type InstallCC struct {
 
 //InstantiateCC --
 type InstantiateCC struct {
+	SDK               string         `yaml:"sdk,omitempty"`
 	ChannelName       string         `yaml:"channelName,omitempty"`
 	ChainCodeName     string         `yaml:"name,omitempty"`
 	ChainCodeVersion  string         `yaml:"version,omitempty"`

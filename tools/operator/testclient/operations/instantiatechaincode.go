@@ -18,6 +18,7 @@ import (
 
 //InstantiateCCUIObject --
 type InstantiateCCUIObject struct {
+	SDK             string                   `json:"sdk,omitempty"`
 	TransType       string                   `json:"transType,omitempty"`
 	TLS             string                   `json:"TLS,omitempty"`
 	ChainCodeID     string                   `json:"chaincodeID,omitempty"`
@@ -66,6 +67,14 @@ type GetMSPID struct {
 	Organizations map[string]struct {
 		MSPID string `yaml:"mspid,omitempty"`
 	} `yaml:"organizations,omitempty"`
+}
+
+//InstalledCC --
+type InstalledCC struct {
+	CC []struct {
+		PackageID string `json:"package_id,omitempty"`
+		Label     string `json:"label,omitempty"`
+	} `json:"installed_chaincodes,omitempty"`
 }
 
 //InstantiateCC -- To instantiate/upgrade chaincode with the objects created and to update connection profile
@@ -121,7 +130,7 @@ func (i InstantiateCCUIObject) generateInstantiateCCObjects(ccObject inputStruct
 func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, channelName, tls, action string, organizations []inputStructs.Organization, ccObject inputStructs.InstantiateCC) ([]InstantiateCCUIObject, error) {
 
 	var instantiateCCObjects []InstantiateCCUIObject
-	i = InstantiateCCUIObject{TransType: action, TLS: tls, ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
+	i = InstantiateCCUIObject{SDK: ccObject.SDK, TransType: action, TLS: tls, ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations), ChainCodeID: ccObject.ChainCodeName, ChainCodeVer: ccObject.ChainCodeVersion}
 	i.ChannelOpt = ChannelOptions{Name: channelName, OrgName: orgNames}
 	i.DeployOpt = InstantiateDeployOptions{Function: ccObject.CCFcn, Arguments: strings.Split(ccObject.CCFcnArgs, ",")}
 	i.TimeOutOpt = TimeOutOptions{PreConfig: ccObject.TimeOutOpt.PreConfig, Request: ccObject.TimeOutOpt.Request}
@@ -175,7 +184,7 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 	for _, orgName := range orgNames {
 		orgName = strings.TrimSpace(orgName)
 		connProfilePath := paths.GetConnProfilePath([]string{orgName}, organizations)
-		mspID, err := i.getMSPIDForOrg(connProfilePath, orgName)
+		mspID, err := GetMSPIDForOrg(connProfilePath, orgName)
 		if err != nil {
 			return endorsementPolicy, err
 		}
@@ -199,8 +208,9 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 	return endorsementPolicy, nil
 }
 
-//getMSPIDForOrg -- To get the MSP ID for an organization
-func (i InstantiateCCUIObject) getMSPIDForOrg(connProfilePath, orgName string) (string, error) {
+//GetMSPIDForOrg -- To get the MSP ID for an organization
+func GetMSPIDForOrg(connProfilePath, orgName string) (string, error) {
+
 	var config GetMSPID
 	var mspID string
 	if !(strings.HasSuffix(connProfilePath, "yaml") || strings.HasSuffix(connProfilePath, "yml")) {
@@ -229,21 +239,162 @@ func (i InstantiateCCUIObject) getMSPIDForOrg(connProfilePath, orgName string) (
 	return mspID, nil
 }
 
+//queryInstalledusingCLI -- querying installed cc using cli
+func (i InstantiateCCUIObject) queryInstalledusingCLI(instantiateObject InstantiateCCUIObject) (InstalledCC, error) {
+
+	queryInstalled := InstalledCC{}
+	orgName := instantiateObject.ChannelOpt.OrgName[0]
+	currentDir, err := paths.GetCurrentDir()
+	if err != nil {
+		return queryInstalled, err
+	}
+	err = SetEnvForCLI(orgName, instantiateObject.ConnProfilePath, instantiateObject.TLS, currentDir)
+	if err != nil {
+		return queryInstalled, err
+	}
+
+	args := []string{"lifecycle",
+		"chaincode",
+		"queryinstalled",
+		"--peerAddresses", "127.0.0.1:31000",
+		"--tlsRootCertFiles", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/peer0-%s.%s/tls/ca.crt", currentDir, orgName, orgName, orgName),
+		// "--connectionProfile",
+		// instantiateObject.ConnProfilePath,
+		"--output",
+		"json"}
+
+	if instantiateObject.TLS == "clientauth" {
+		args = append(args, "--tls")
+	}
+	installedCC, err := networkclient.ExecuteCommand("peer", args, true)
+	if err != nil {
+		return queryInstalled, err
+	}
+	err = json.Unmarshal([]byte(installedCC), &queryInstalled)
+	if err != nil {
+		return queryInstalled, err
+	}
+	return queryInstalled, nil
+}
+
+//approveCCusingCLI -- approving cc for organization using CLI
+func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCCUIObject) error {
+
+	var packageID string
+	orgName := instantiateObject.ChannelOpt.OrgName[0]
+	currentDir, err := paths.GetCurrentDir()
+	if err != nil {
+		return err
+	}
+	err = SetEnvForCLI(orgName, instantiateObject.ConnProfilePath, instantiateObject.TLS, currentDir)
+	if err != nil {
+		return err
+	}
+	queryInstalled, _ := i.queryInstalledusingCLI(instantiateObject)
+	for j := 0; j < len(queryInstalled.CC); j++ {
+		if queryInstalled.CC[j].Label == fmt.Sprintf("%s_%s", instantiateObject.ChainCodeID, instantiateObject.ChainCodeVer) {
+			packageID = queryInstalled.CC[j].PackageID
+			break
+		}
+	}
+
+	args := []string{"lifecycle",
+		"chaincode",
+		"approveformyorg",
+		"--channelID", instantiateObject.ChannelOpt.Name,
+		"--name", instantiateObject.ChainCodeID,
+		"--version", instantiateObject.ChainCodeVer,
+		"--package-id", packageID,
+		"--sequence", "1",
+		"--waitForEvent",
+		"--orderer", "127.0.0.1:30000",
+		"--cafile", fmt.Sprintf("%s/crypto-config/ordererOrganizations/ordererorg1/orderers/orderer0-ordererorg1.ordererorg1/tls/ca.crt", currentDir),
+		// "--connectionProfile",
+		// instantiateObject.ConnProfilePath,
+		"--peerAddresses", "127.0.0.1:31000",
+		"--tlsRootCertFiles", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/peer0-%s.%s/tls/ca.crt", currentDir, orgName, orgName, orgName)}
+
+	if instantiateObject.TLS == "clientauth" {
+		args = append(args, "--tls")
+	}
+	if instantiateObject.DeployOpt.CollectionsConfigPath != "" {
+		args = append(args, "--collections-config", instantiateObject.DeployOpt.CollectionsConfigPath)
+	}
+	_, err = networkclient.ExecuteCommand("peer", args, true)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+//commitCCusingCLI -- committing cc using CLI
+func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCUIObject) error {
+
+	orgName := instantiateObject.ChannelOpt.OrgName[0]
+	currentDir, err := paths.GetCurrentDir()
+	if err != nil {
+		return err
+	}
+	err = SetEnvForCLI(orgName, instantiateObject.ConnProfilePath, instantiateObject.TLS, currentDir)
+	if err != nil {
+		return err
+	}
+
+	args := []string{"lifecycle",
+		"chaincode",
+		"commit",
+		"--channelID", instantiateObject.ChannelOpt.Name,
+		"--name", instantiateObject.ChainCodeID,
+		"--version", instantiateObject.ChainCodeVer,
+		"--sequence", "1",
+		"--waitForEvent",
+		"--orderer", "127.0.0.1:30000",
+		"--cafile", fmt.Sprintf("%s/crypto-config/ordererOrganizations/ordererorg1/orderers/orderer0-ordererorg1.ordererorg1/tls/ca.crt", currentDir),
+		// "--connectionProfile",
+		// instantiateObject.ConnProfilePath,
+		"--peerAddresses", "127.0.0.1:31000",
+		"--tlsRootCertFiles", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/peer0-%s.%s/tls/ca.crt", currentDir, orgName, orgName, orgName)}
+
+	if instantiateObject.TLS == "clientauth" {
+		args = append(args, "--tls")
+	}
+	if instantiateObject.DeployOpt.CollectionsConfigPath != "" {
+		args = append(args, "--collections-config", instantiateObject.DeployOpt.CollectionsConfigPath)
+	}
+	_, err = networkclient.ExecuteCommand("peer", args, true)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 //instantiateCC -- To instantiate chaincode
 func (i InstantiateCCUIObject) instantiateCC(instantiateChainCodeObjects []InstantiateCCUIObject) error {
+
 	var err error
 	var jsonObject []byte
 	pteMainPath := paths.PTEPath()
 	for j := 0; j < len(instantiateChainCodeObjects); j++ {
-		jsonObject, err = json.Marshal(instantiateChainCodeObjects[j])
-		if err != nil {
-			return err
-		}
-		startTime := fmt.Sprintf("%s", time.Now())
-		args := []string{pteMainPath, strconv.Itoa(j), string(jsonObject), startTime}
-		_, err = networkclient.ExecuteCommand("node", args, true)
-		if err != nil {
-			return err
+		if instantiateChainCodeObjects[j].SDK == "cli" {
+			err = i.approveCCusingCLI(instantiateChainCodeObjects[j])
+			if err != nil {
+				return err
+			}
+			err = i.commitCCusingCLI(instantiateChainCodeObjects[j])
+			if err != nil {
+				return err
+			}
+		} else {
+			jsonObject, err = json.Marshal(instantiateChainCodeObjects[j])
+			if err != nil {
+				return err
+			}
+			startTime := fmt.Sprintf("%s", time.Now())
+			args := []string{pteMainPath, strconv.Itoa(j), string(jsonObject), startTime}
+			_, err = networkclient.ExecuteCommand("node", args, true)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return err

@@ -171,6 +171,7 @@
 #@         env.append("CORE_PEER_GOSSIP_ORGLEADER=true")
 #@         env.append("CORE_PEER_GOSSIP_USELEADERELECTION=false")
 #@       end
+#@       env.append("CORE_PEER_GOSSIP_BOOTSTRAP=127.0.0.1:{}".format(peerUniquerPort))
 #@       env.append("CORE_PEER_GOSSIP_ENDPOINT=peer{}-{}:{}".format(j, org.name, peerUniquerPort))
 #@       env.append("CORE_PEER_LISTENADDRESS=0.0.0.0:{}".format(peerUniquerPort))
 #@       env.append("CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:{}".format(7052))

@@ -68,7 +68,7 @@ ordererCapabilities: V2_0
 
 channelCapabilities: V2_0
 
-applicationCapabilities: V1_4_2
+applicationCapabilities: V2_0
 
 numChannels: 1
 

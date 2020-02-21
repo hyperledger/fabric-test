@@ -4,6 +4,7 @@
 
 #@ load("@ytt:data", "data")
 #@ config = data.values
+#@ localIP = "127.0.0.1"
 OrdererOrgs:
 #@ num_organizations = len(config.ordererOrganizations)
 #@ for i in range(0, num_organizations):
@@ -15,8 +16,9 @@ OrdererOrgs:
   #@ numOderers = ordererOrg.numOderers
   #@ for i in range(0, numOderers):
     - Hostname: #@ "orderer{}-{}".format(i, ordererOrg.name)
-    #@ if config.nodeportIP != "":
       SANS:
+        - #@ "{}".format(localIP) 
+    #@ if config.nodeportIP != "":
         - #@ config.nodeportIP
     #@ end
   #@ end
@@ -30,8 +32,9 @@ PeerOrgs:
   Specs:
   #@ for i in range(0, peerOrg.numPeers):
     - Hostname: #@ "peer{}-{}".format(i, peerOrg.name)
-    #@ if config.nodeportIP != "":
       SANS:
+        - #@ "{}".format(localIP) 
+    #@ if config.nodeportIP != "":
         - #@ config.nodeportIP
     #@ end
   #@ end
