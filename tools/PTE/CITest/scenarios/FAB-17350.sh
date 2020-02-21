@@ -19,11 +19,12 @@ CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 #operator dir
 OPDir=$FabricTestDir"/tools/operator"
+$testdataDirDir=$FabricTestDir"/regression/testdata/"
 
 pteReport=$OPDir"/pteReport.txt"
 
-pteInputMaster="testdata/barebones-test-input-master.yml"
-pteInput="testdata/barebones-test-input.yml"
+pteInputMaster="$testdataDir/barebones-test-input-master.yml"
+pteInput="$testdataDir/barebones-test-input.yml"
 
 usage () {
     echo -e "\nUSAGE:\t$0 [options] [values]"
@@ -57,16 +58,16 @@ networkProc() {
     cd $OPDir
     if [ ! -z "$kubeCfg" ]; then
         # bring down network
-        go run main.go -i testdata/barebones-network-spec.yml -k $kubeCfg -a down
+        go run main.go -i $testdataDir/barebones-network-spec.yml -k $kubeCfg -a down
 
         # bring up network
-        go run main.go -i testdata/barebones-network-spec.yml -k $kubeCfg -a up
+        go run main.go -i $testdataDir/barebones-network-spec.yml -k $kubeCfg -a up
     else
         # bring down network
-        go run main.go -i testdata/barebones-network-spec.yml -a down
+        go run main.go -i $testdataDir/barebones-network-spec.yml -a down
 
         # bring up network
-        go run main.go -i testdata/barebones-network-spec.yml -a up
+        go run main.go -i $testdataDir/barebones-network-spec.yml -a up
     fi
 }
 
@@ -78,21 +79,21 @@ chaincodeProc() {
     if [ ! -z "$kubeCfg" ]; then
         ### kubernetes network
         # create/join channel
-        go run main.go -i testdata/barebones-test-input.yml -k $kubeCfg -a create
-        go run main.go -i testdata/barebones-test-input.yml -k $kubeCfg -a join
+        go run main.go -i $testdataDir/barebones-test-input.yml -k $kubeCfg -a create
+        go run main.go -i $testdataDir/barebones-test-input.yml -k $kubeCfg -a join
 
         # install/instantiate chaincode
-        go run main.go -i testdata/barebones-test-input.yml -k $kubeCfg -a install
-        go run main.go -i testdata/barebones-test-input.yml -k $kubeCfg -a instantiate
+        go run main.go -i $testdataDir/barebones-test-input.yml -k $kubeCfg -a install
+        go run main.go -i $testdataDir/barebones-test-input.yml -k $kubeCfg -a instantiate
     else
         ### local network
         # create/join channel
-        go run main.go -i testdata/barebones-test-input.yml -a create
-        go run main.go -i testdata/barebones-test-input.yml -a join
+        go run main.go -i $testdataDir/barebones-test-input.yml -a create
+        go run main.go -i $testdataDir/barebones-test-input.yml -a join
 
         # install/instantiate chaincode
-        go run main.go -i testdata/barebones-test-input.yml -a install
-        go run main.go -i testdata/barebones-test-input.yml -a instantiate
+        go run main.go -i $testdataDir/barebones-test-input.yml -a install
+        go run main.go -i $testdataDir/barebones-test-input.yml -a instantiate
     fi
 
 }
@@ -117,17 +118,17 @@ txExecution(){
         if [ ! -z "$kubeCfg" ]; then
             ### kubernetes network
             # PTE: invokes
-            go run main.go -i testdata/barebones-test-input.yml -k launcher/FAB-17350-kubeConfig/kube-config-wdc04-community-migration.yml -a invoke
+            go run main.go -i $testdataDir/barebones-test-input.yml -k launcher/FAB-17350-kubeConfig/kube-config-wdc04-community-migration.yml -a invoke
             sleep 30
             # PTE: queries
-            go run main.go -i testdata/barebones-test-input.yml -k launcher/FAB-17350-kubeConfig/kube-config-wdc04-community-migration.yml -a query
+            go run main.go -i $testdataDir/barebones-test-input.yml -k launcher/FAB-17350-kubeConfig/kube-config-wdc04-community-migration.yml -a query
         else
             ### local network
             # PTE: invokes
-            go run main.go -i testdata/barebones-test-input.yml -a invoke
+            go run main.go -i $testdataDir/barebones-test-input.yml -a invoke
             sleep 30
             # PTE: queries
-            go run main.go -i testdata/barebones-test-input.yml -a invoke
+            go run main.go -i $testdataDir/barebones-test-input.yml -a invoke
         fi
 
         timestamp=`date`

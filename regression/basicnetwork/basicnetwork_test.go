@@ -17,7 +17,7 @@ var _ = Describe("Basic Network Test Suite", func() {
 
 	Describe("Running basic network test suite using testdata/basic-test-input.yml", func() {
 		BeforeEach(func() {
-			inputSpecPath = "../../tools/operator/testdata/basic-test-input.yml"
+			inputSpecPath = "../testdata/basic-test-input.yml"
 
 			By("1) Creating channel")
 			action = "create"
@@ -46,7 +46,7 @@ var _ = Describe("Basic Network Test Suite", func() {
 		})
 
 		It("Invoke and Query transactions for samplecc and mapcc using testdata/basic-test-input.yml", func() {
-			inputSpecPath = "../../tools/operator/testdata/basic-test-input.yml"
+			inputSpecPath = "../testdata/basic-test-input.yml"
 
 			By("1) Sending Queries")
 			action = "query"

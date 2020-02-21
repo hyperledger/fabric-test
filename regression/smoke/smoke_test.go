@@ -15,7 +15,7 @@ var _ = Describe("Smoke Test Suite", func() {
 			inputSpecPath string
 		)
 		It("Running end to end (old cc lifecycle)", func() {
-			inputSpecPath = "../../tools/operator/testdata/smoke-test-input.yml"
+			inputSpecPath = "../testdata/smoke-test-input.yml"
 
 			By("1) Creating channel")
 			action = "create"

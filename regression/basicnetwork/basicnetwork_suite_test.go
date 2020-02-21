@@ -20,7 +20,7 @@ func TestBasicnetwork(t *testing.T) {
 
 // Bringing up network using BeforeSuite
 var _ = BeforeSuite(func() {
-	networkSpecPath := "../../tools/operator/testdata/basic-network-spec.yml"
+	networkSpecPath := "../testdata/basic-network-spec.yml"
 	err := launcher.Launcher("up", "docker", "", networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
 })
@@ -28,7 +28,7 @@ var _ = BeforeSuite(func() {
 // Cleaning up network launched from BeforeSuite and removing all chaincode containers
 // and chaincode container images using AfterSuite
 var _ = AfterSuite(func() {
-	networkSpecPath := "../../tools/operator/testdata/basic-network-spec.yml"
+	networkSpecPath := "../testdata/basic-network-spec.yml"
 	err := launcher.Launcher("down", "docker", "", networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
 
