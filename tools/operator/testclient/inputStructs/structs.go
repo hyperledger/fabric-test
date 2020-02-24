@@ -2,16 +2,17 @@ package inputStructs
 
 //Config --
 type Config struct {
-	OrdererSystemChannel string          `yaml:"ordererSystemChannel,omitempty"`
-	Organizations        []Organization  `yaml:"organizations,omitempty"`
-	CreateChannel        []Channel       `yaml:"createChannel,omitempty"`
-	AnchorPeerUpdate     []Channel       `yaml:"anchorPeerUpdate,omitempty"`
-	JoinChannel          []Channel       `yaml:"joinChannel,omitempty"`
-	InstallCC            []InstallCC     `yaml:"installChaincode,omitempty"`
-	InstantiateCC        []InstantiateCC `yaml:"instantiateChaincode,omitempty"`
-	UpgradeCC            []InstantiateCC `yaml:"upgradeChaincode,omitempty"`
-	Invoke               []InvokeQuery   `yaml:"invokes,omitempty"`
-	Query                []InvokeQuery   `yaml:"queries,omitempty"`
+	OrdererSystemChannel string           `yaml:"ordererSystemChannel,omitempty"`
+	Organizations        []Organization   `yaml:"organizations,omitempty"`
+	CreateChannel        []Channel        `yaml:"createChannel,omitempty"`
+	AnchorPeerUpdate     []Channel        `yaml:"anchorPeerUpdate,omitempty"`
+	JoinChannel          []Channel        `yaml:"joinChannel,omitempty"`
+	InstallCC            []InstallCC      `yaml:"installChaincode,omitempty"`
+	InstantiateCC        []InstantiateCC  `yaml:"instantiateChaincode,omitempty"`
+	UpgradeCC            []InstantiateCC  `yaml:"upgradeChaincode,omitempty"`
+	Invoke               []InvokeQuery    `yaml:"invokes,omitempty"`
+	Query                []InvokeQuery    `yaml:"queries,omitempty"`
+	CommandOptions       []CommandOptions `yaml:"command,omitempty"`
 }
 
 //Channel --
@@ -120,4 +121,10 @@ type CCOptions struct {
 type DiscoveryOptions struct {
 	Localhost bool `yaml:"localHost,omitempty"`
 	InitFreq  int  `yaml:"initFreq,omitempty"`
+}
+
+//CommandOptions --
+type CommandOptions struct {
+	Name string   `yaml:"name,omitempty"`
+	Args []string `yaml:"args,omitempty"`
 }

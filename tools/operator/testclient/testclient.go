@@ -43,7 +43,7 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 	var err error
 	var connectionProfileFileContents []byte
 	tls := "disabled"
-	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query"
+	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query|command"
 	if strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yaml") || strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yml") {
 		connectionProfileFileContents, err = ioutil.ReadFile(config.Organizations[0].ConnProfilePath)
 	} else {
@@ -88,6 +88,11 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 		case "invoke", "query":
 			var invokeQueryUIObject operations.InvokeQueryUIObject
 			err := invokeQueryUIObject.InvokeQuery(config, tls, strings.Title(action))
+			if err != nil {
+				return err
+			}
+		case "command":
+			err := operations.DoCommandAction(config)
 			if err != nil {
 				return err
 			}

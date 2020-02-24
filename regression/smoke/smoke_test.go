@@ -42,24 +42,39 @@ var _ = Describe("Smoke Test Suite", func() {
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("6) Sending Queries")
+			By("6) Printing Peer Logs")
+			action = "command"
+			err = testclient.Testclient(action, inputSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("7) Sending Queries")
 			action = "query"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("7) Sending Invokes")
+			By("8) Sending Invokes")
 			action = "invoke"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("8) Upgrading Chaincode")
+			By("9) Printing Peer Logs")
+			action = "command"
+			err = testclient.Testclient(action, inputSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("10) Upgrading Chaincode")
 			action = "upgrade"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("9) Sending Queries")
+			By("11) Sending Queries")
 			action = "query"
 			testclient.Testclient(action, inputSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("12) Printing Peer Logs")
+			action = "command"
+			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
