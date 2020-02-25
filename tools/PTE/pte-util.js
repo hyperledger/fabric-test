@@ -23,7 +23,7 @@ var yaml = require('js-yaml');
 var winston = require('winston');
 
 var copService = require('fabric-ca-client/lib/FabricCAServices.js');
-var User = require('fabric-common/lib/User.js');
+var User = require('fabric-client/lib/User.js');
 
 var PTEid = parseInt(process.argv[5]);
 PTEid = PTEid ? PTEid : 0

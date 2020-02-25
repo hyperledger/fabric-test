@@ -655,7 +655,7 @@ async function chaincodeInstall(client, org) {
                             one_good = true;
                             logger.debug('[chaincodeInstall] org(%s): install proposal was good', org);
                         } else {
-                            logger.error('[chaincodeInstall] org(%s): install proposal was bad', org);
+                            logger.error('[chaincodeInstall] org(%s) install proposal was bad:', org, proposalResponses[i]);
                         }
                         all_good = all_good & one_good;
                     }
@@ -663,6 +663,7 @@ async function chaincodeInstall(client, org) {
                         logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s) and received ProposalResponse: Status - %s', orgName, proposalResponses[0].response.status));
                         evtDisconnect();
                     } else {
+                        logger.error('[chaincodeInstall] install proposal failed, proposalResponses: %j', proposalResponses);
                         throw new Error('[chaincodeInstall] Failed to send install Proposal in (%s) or receive valid response. Response null or status is not 200. exiting...', orgName);
                     }
 
@@ -822,7 +823,7 @@ async function chaincodeInstantiate(channel, client, org) {
                                 process.exit(1);
                             });
                     } else {
-                        logger.error('[chaincodeInstantiate] Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
+                        logger.error('[chaincodeInstantiate] Failed to send instantiate Proposal or receive valid response. Response results: %j', results);
                         evtDisconnect();
                         throw new Error('Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
                     }
@@ -833,7 +834,9 @@ async function chaincodeInstantiate(channel, client, org) {
                     evtDisconnect();
                     return;
                 } else {
-                    throw new Error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error code: ', Nid, channelName, response.status);
+                    logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error response: %j', Nid, channelName, response);
+                    evtDisconnect();
+                    throw new Error('Failed to instantiate transaction on %s. Response null or status is not 200. exiting...', channelName);
                 }
             }).catch((err) => {
                 logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s due to error: ', Nid, channelName, err.stack ? err.stack : err);
@@ -962,6 +965,7 @@ async function chaincodeUpgrade(channel, client, org) {
                                 process.exit(1);
                             });
                     } else {
+                        logger.error('[chaincodeUpgrade] Failed to send upgrade Proposal or receive valid response. Response results: %j', results);
                         evtDisconnect();
                         throw new Error('Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
                     }
@@ -972,7 +976,7 @@ async function chaincodeUpgrade(channel, client, org) {
                     evtDisconnect();
                     return;
                 } else {
-                    logger.error('[chaincodeUpgrade(Nid=%d)] Failed to Upgrade transaction on %s. Error code: ', Nid, channelName, response.status);
+                    logger.error('[chaincodeUpgrade(Nid=%d)] Failed to Upgrade transaction on %s. Error response: %j', Nid, channelName, response);
                     evtDisconnect();
                     process.exit(1);
                 }
@@ -1255,6 +1259,7 @@ async function joinChannel(channel, client, org) {
                     logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
                     evtDisconnect(eventHubs, blockCallbacks);
                 } else {
+                    logger.error('[joinChannel] Failed to join peers in org (%s), Error: %j', orgName, results);
                     evtDisconnect(eventHubs, blockCallbacks);
                     throw new Error('[joinChannel] Failed to join channel');
                 }
