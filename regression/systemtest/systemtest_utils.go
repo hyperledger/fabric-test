@@ -1,14 +1,14 @@
 package systemtest
 
 import (
-	"os"
-	"io/ioutil"
 	"fmt"
-	"path"
-	"strings"
-	"path/filepath"
 	"gopkg.in/yaml.v2"
-
+	"io/ioutil"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+	
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 )
@@ -88,9 +88,9 @@ func ChangeTargetPeers(testFilePath, testFileName, targetPeersType string) error
 }
 
 //RemoveTemporaryFile -- To remove the temporary test-input.yaml file
-func RemoveTemporaryFile(filePath string) error{
+func RemoveTemporaryFile(filePath string) error {
 	err := os.Remove(filePath)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	return err

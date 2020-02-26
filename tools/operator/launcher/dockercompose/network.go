@@ -12,12 +12,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+//DockerCompose --
 type DockerCompose struct {
 	ConfigPath string
 	Action     []string
 	Config     networkspec.Config
 }
 
+//Args --
 func (d DockerCompose) Args() []string {
 
 	args := []string{"-f", d.ConfigPath}
@@ -60,8 +62,8 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 		return err
 	}
 
-	configDirPath := paths.ConfigFilesDir()
-	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s/backup:/opt/backup", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup/*)"}
+	configDirPath := config.ArtifactsLocation
+	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s:/opt", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup)"}
 	_, err = networkclient.ExecuteCommand("docker", cleanArgs, true)
 	if err != nil {
 		return err
