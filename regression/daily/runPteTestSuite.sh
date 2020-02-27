@@ -32,3 +32,4 @@ else
     exit 1
 fi
 cp $FabricTestDir/tools/PTE/CITest/Logs/*.log $DAILYDIR
+

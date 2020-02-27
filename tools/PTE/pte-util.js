@@ -18,20 +18,12 @@ var fs = require('fs-extra');
 var hfc = require('fabric-client');
 var FabricCAServices = require('fabric-ca-client');
 var jsrsa = require('jsrsasign');
-var os = require('os');
 var path = require('path');
 var yaml = require('js-yaml');
-var util = require('util');
 var winston = require('winston');
-
-var KEYUTIL = jsrsa.KEYUTIL;
-
 
 var copService = require('fabric-ca-client/lib/FabricCAServices.js');
 var User = require('fabric-client/lib/User.js');
-//var Constants = require('./constants.js');
-
-// var logger = require('fabric-client/lib/Utils.js').getLogger('PTE util');
 
 var PTEid = parseInt(process.argv[5]);
 PTEid = PTEid ? PTEid : 0
@@ -222,6 +214,29 @@ module.exports.findOrgConnProfileSubmitter = function (fileList, orgname) {
     return findOrgConnProfile(fileList, orgname);
 }
 
+// find all org from Connection Profiles
+function findAllOrgFromConnProfile(fileList) {
+    var orgList = [];
+    for (i = 0; i < fileList.length; i++) {
+        var cpf = fileList[i];
+        var temp = readConfigFile(cpf, 'test-network');
+        if (temp['organizations']) {
+            for (var org in temp['organizations']) {
+                if ( !(orgList.indexOf(org) > -1) ) {
+                     orgList.push(org);
+                }
+            }
+        }
+    }
+    logger.debug('[findAllOrgFromConnProfile] org list:', orgList);
+
+    return orgList;
+}
+
+module.exports.findAllOrgFromConnProfileSubmitter = function (fileList) {
+    return findAllOrgFromConnProfile(fileList);
+}
+
 // set pointer to the keyreq in the input File
 // if key is missing or invalid, set the pointer to the beginning of the File
 function readConfigFile(inFile, keyreq) {
@@ -269,7 +284,6 @@ function findOrgCA(inPtr, org) {
 
 // get enroll ID
 function getOrgEnrollId(inPtr, org) {
-    var cpOrgs = inPtr['organizations'];
     if (0 === getConnProfilePropCnt(inPtr, 'certificateAuthorities')) {
         logger.error('[getOrgEnrollId] no certificateAuthority is found in the connection profile');
         process.exit(1);
@@ -290,7 +304,6 @@ module.exports.getOrgEnrollIdSubmitter = function (inPtr, org) {
 
 // get enroll secret
 function getOrgEnrollSecret(inPtr, org) {
-    var cpOrgs = inPtr['organizations'];
     if (0 === getConnProfilePropCnt(inPtr, 'certificateAuthorities')) {
         logger.error('[getOrgEnrollSecret] no certificateAuthority is found in the connection profile');
         process.exit(1);
@@ -682,7 +695,6 @@ module.exports.tlsEnroll = async function (client, orgName, cpf) {
             process.exit(1);
         }
         var cpCAs = cpf['certificateAuthorities'];
-        var orgCA = cpOrgs[orgName].certificateAuthorities[0];
         logger.debug('[tlsEnroll] CA tls enroll: %s, cpf: %s', orgName, cpf);
         return new Promise(function (resolve, reject) {
             if (!cpOrgs[orgName]) {
@@ -760,7 +772,6 @@ module.exports.getOrdererID = function (pid, orgName, org, txCfgPtr, cpf, method
     // find ordererID
     if (method == 'ROUNDROBIN') {
         // Round Robin
-        var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
         var orgNameLen = orgName.length;
         var orgIdx = orgName.indexOf(org);
         var SCordList = Object.keys(orderersCPFList);
@@ -812,7 +823,6 @@ module.exports.getPeerID = function (pid, org, txCfgPtr, cpf, method) {
     // find peerID
     if (method == 'ROUNDROBIN') {
         // Round Robin
-        var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
         var SCordList = [];
         for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
             var key = cpOrgs[org]['peers'][i];

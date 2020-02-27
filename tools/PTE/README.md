@@ -960,7 +960,7 @@ where:
     * **OrgAnchor**: send to the anchor peer (peer1) of the organization being executed in the current process
     * **AllAnchors**: send to the anchor peers of all organizations
     * **OrgPeers**: send to all peers in the organization being executed in the current process
-    * **AllPeers**: send to all peers in all organizations
+    * **AllPeers**: send to all peers in all organizations from all connection profiles
     * **List**: only send to the peers given in listOpt, see listOpt below for details
     * **Disovery**: use service discovery to determine the target peers, see discoveryOpt below for details
 * **nProcPerOrg**: number of processes for the test

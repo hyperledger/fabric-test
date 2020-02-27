@@ -29,7 +29,6 @@
 'use strict';
 
 var fs = require('fs');
-var grpc = require('grpc');
 var hfc = require('fabric-client');
 var path = require('path');
 var testUtil = require('./pte-util.js');
@@ -41,7 +40,6 @@ var logger = new testUtil.PTELogger({ "prefix": loggerMsg, "level": "info" });
 
 
 // local vars
-var tmp;
 var tCurr;
 var tEnd = 0;
 var tLocal;
@@ -53,6 +51,7 @@ var evtType = 'FILTEREDBLOCK';        // event type: FILTEREDBLOCK|CHANNEL, defa
 var evtTimeout = 120000;              // event timeout, default: 120000 ms
 var evtListener = 'BLOCK';            // event listener: BLOCK|TRANSACTION, default: BLOCK
 var evtLastRcvdTime = 0;              // last event received time
+var evtCode_VALID = 0;                // event valid code as defined in TxValidationCode in fabric transaction.pb.go (channel block only)
 var lastSentTime = 0;                 // last transaction sent time
 var IDone = 0;
 var QDone = 0;
@@ -66,7 +65,6 @@ var invokeCheckTxNum = 0;
 var chaincode_id;
 var chaincode_ver;
 var tx_id = null;
-var nonce = null;
 var the_user = null;
 var eventHubs = [];
 var targets = [];
@@ -88,7 +86,8 @@ var tx_rcvd = tx_sent + 1;                         // tx_stats idx: total transa
 var tx_pFail = tx_rcvd + 1;                        // tx_stats idx: total proposal (peer) failure
 var tx_txFail = tx_pFail + 1;                      // tx_stats idx: total transaction (orderer ack) failure
 var tx_evtTimeout = tx_txFail + 1;                 // tx_stats idx: total event timeout
-var tx_evtUnreceived = tx_evtTimeout + 1;          // tx_stats idx: total event unreceived
+var tx_evtInvalid = tx_evtTimeout + 1;             // tx_stats idx: total event received but invalid
+var tx_evtUnreceived = tx_evtInvalid + 1;          // tx_stats idx: total event unreceived
 for (var i = 0; i <= tx_evtUnreceived; i++) {
     tx_stats[i] = 0;
 }
@@ -237,7 +236,16 @@ if (cpList.length === 0) {
     logger.error('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] error: invalid connection profile path or no connection profiles found in the connection profile path: %s', Nid, channel.getName(), org, pid, cpPath);
     process.exit(1);
 }
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList; ', Nid, channel.getName(), org, pid, cpList);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] cpList: ', Nid, channel.getName(), org, pid, cpList);
+
+// find all org from all connection profiles
+var orgList = [];
+orgList = testUtil.findAllOrgFromConnProfileSubmitter(cpList);
+if (orgList.length === 0) {
+    logger.error('[Nid=%d pte-main] error: no org contained in connection profiles', Nid);
+    process.exit(1);
+}
+logger.info('[Nid=%d pte-main] orgList: ', Nid, orgList);
 
 var orderersCPFList = {};
 orderersCPFList = testUtil.getNodetypeFromConnProfilesSubmitter(cpList, 'orderers');
@@ -455,6 +463,13 @@ function listenToEventHub() {
 
 var reConnectEvtHub = 0;
 function peerFailover(channel, client) {
+
+    // return if no peer failover or using discovery to send transactions
+    // SDK handles failover when using discovery
+    if ((!peerFO) || (targetPeers === 'DISCOVERY')) {
+        return;
+    }
+
     var currId = currPeerId;
     var eh;
     channel.removePeer(peerList[currPeerId]);
@@ -525,44 +540,6 @@ function removeAllPeers() {
 
 }
 
-// assign thread the peers from List
-function assignPeerListFromList(channel, client, org) {
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignPeerListFromList]', Nid, channel.getName(), org, pid);
-    var peerTmp;
-    var eh;
-    var data;
-    var listOpt = txCfgPtr.listOpt;
-    var peername;
-    var event_connected = false;
-
-    for (var key in listOpt) {
-        for (i = 0; i < listOpt[key].length; i++) {
-            if (cpPeers.hasOwnProperty(listOpt[key][i])) {
-                peername = listOpt[key][i];
-                if (cpPeers[peername].url) {
-                    if (TLS > testUtil.TLSDISABLED) {
-                        data = testUtil.getTLSCert(key, peername, cpf, cpPath);
-                        if (data !== null) {
-                            peerTmp = client.newPeer(
-                                cpPeers[peername].url,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': cpPeers[peername]['grpcOptions']['ssl-target-name-override']
-                                }
-                            );
-                            peerList.push(peerTmp);
-                        }
-                    } else {
-                        peerTmp = client.newPeer(cpPeers[peername].url);
-                        peerList.push(peerTmp);
-                    }
-                }
-            }
-        }
-    }
-    //logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignPeerListFromList] peerList: %j', Nid, channelName, org, pid, peerList);
-}
-
 // assign thread peers from all org
 function assignPeerList(channel, client, org) {
     logger.info('[Nid:chan:id=%d:%s:%d assignPeerList]', Nid, channel.getName(), pid);
@@ -606,8 +583,8 @@ function assignThreadAllPeers(channel, client, org) {
     var data;
     var event_connected = false;
 
-    for (var i = 0; i < channelOrgName.length; i++) {
-        let orgtmp = channelOrgName[i];
+    for (var i = 0; i < orgList.length; i++) {
+        var orgtmp = orgList[i];
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignThreadAllPeers] org (%s)', Nid, channel.getName(), org, pid, orgtmp);
         // find the connection profile of the specified org
         var cpfTmp = testUtil.findOrgConnProfileSubmitter(cpList, orgtmp);
@@ -1124,6 +1101,11 @@ function initDiscovery() {
 
 // reconnect orderer
 function ordererReconnect(channel, client, org) {
+    // SDK handles failover when using discovery
+    if (targetPeers === 'DISCOVERY') {
+        return;
+    }
+
     channel.removeOrderer(ordererList[currOrdererId]);
     channelAddOrderer(channel, client, org);
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d ordererReconnect] Orderer reconnect (%s)', Nid, channel.getName(), org, pid, ordererList[currOrdererId]._url);
@@ -1131,6 +1113,12 @@ function ordererReconnect(channel, client, org) {
 
 // orderer failover
 function ordererFailover(channel, client) {
+    // return if no orderer failover or using discovery to send transactions
+    // SDK handles failover when using discovery
+    if ((!ordererFO) || (targetPeers === 'DISCOVERY')) {
+        return;
+    }
+
     var currId = currOrdererId;
     channel.removeOrderer(ordererList[currOrdererId]);
     currOrdererId = currOrdererId + 1;
@@ -1622,7 +1610,7 @@ function postEventProc(caller, stats) {
     stats[tx_evtUnreceived] = Object.keys(txidList).length;
     stats[tx_rcvd] = stats[tx_sent] - stats[tx_pFail] - stats[tx_txFail] - stats[tx_evtUnreceived];
     logger.debug('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] stats ', Nid, channelName, org, pid, caller, stats);
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd=%d sent= %d proposal failure %d tx orderer failure %d %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, stats[tx_rcvd], stats[tx_sent], stats[tx_pFail], stats[tx_txFail], transType, invokeType, evtLastRcvdTime - tLocal, tLocal, evtLastRcvdTime, stats[tx_evtTimeout], stats[tx_evtUnreceived], (stats[tx_rcvd] / (evtLastRcvdTime - tLocal) * 1000).toFixed(2));
+    logger.info('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] pte-exec:completed  Rcvd=%d sent= %d proposal failure %d tx orderer failure %d %s(%s) in %d ms, timestamp: start %d end %d, #event timeout: %d, #event unreceived: %d, #event invalid: %d, Throughput=%d TPS', Nid, channelName, org, pid, caller, stats[tx_rcvd], stats[tx_sent], stats[tx_pFail], stats[tx_txFail], transType, invokeType, evtLastRcvdTime - tLocal, tLocal, evtLastRcvdTime, stats[tx_evtTimeout], stats[tx_evtUnreceived], stats[tx_evtInvalid], (stats[tx_rcvd] / (evtLastRcvdTime - tLocal) * 1000).toFixed(2));
     if (stats[tx_evtUnreceived] > 0) {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d postEventProc:%s] unreceived number: %d, tx_id: ', Nid, channelName, org, pid, caller, stats[tx_evtUnreceived], txidList);
     }
@@ -1661,6 +1649,10 @@ function eventRegisterFilteredBlock() {
                                     tx_stats[tx_evtTimeout]++;
                                 }
                                 evtRcv = evtRcv + 1;
+                                if (filtered_block.filtered_transactions[i].tx_validation_code !== 'VALID') {
+                                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterFilteredBlock] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, txid, filtered_block.filtered_transactions[i].tx_validation_code);
+                                    tx_stats[tx_evtInvalid]++;
+                                }
                                 var tend = new Date().getTime();
                                 latency_update(evtRcv, tend - txidList[txid], latency_event);
                                 delete txidList[txid];
@@ -1717,6 +1709,11 @@ function eventRegisterBlock() {
                             tx_stats[tx_evtTimeout]++;
                         }
                         evtRcv = evtRcv + 1;
+                        // BlockMetadataIndex_TRANSACTIONS_FILTER = 2
+                        if (block.metadata.metadata[2][i] !== evtCode_VALID) {
+                            logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegisterBlock] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, txid, block.metadata.metadata[2][i]);
+                            tx_stats[tx_evtInvalid]++;
+                        }
                         var tend = new Date().getTime();
                         latency_update(evtRcv, tend - txidList[txid], latency_event);
                         delete txidList[txid];
@@ -1775,18 +1772,17 @@ function eventRegister(tx) {
                     evtRcv++;
                     var tend = new Date().getTime();
                     latency_update(evtRcv, tend - txidList[deployId.toString()], latency_event);
-                    delete txidList[deployId.toString()];
 
                     if (code !== 'VALID') {
                         logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, deployId.toString(), code);
-                        reject();
-                    } else {
-                        var totalTx = evtRcv + tx_stats[tx_pFail] + tx_stats[tx_txFail];
-                        if ((IDone == 1) && (inv_m == totalTx)) {
-                            postEventProc('eventRegister', tx_stats);
-                            if (!invokeCheck) {
-                                process.exit();
-                            }
+                        tx_stats[tx_evtInvalid]++;
+                    }
+                    delete txidList[deployId.toString()];
+                    var totalTx = evtRcv + tx_stats[tx_pFail] + tx_stats[tx_txFail];
+                    if ((IDone == 1) && (inv_m == totalTx)) {
+                        postEventProc('eventRegister', tx_stats);
+                        if (!invokeCheck) {
+                            process.exit();
                         }
                     }
                 }
@@ -1806,6 +1802,11 @@ function eventRegister(tx) {
 //    failover if failover is set
 //    reconnect if reconn=1
 function ordererHdlr() {
+
+    // SDK handles failover when using discovery
+    if (targetPeers === 'DISCOVERY') {
+        return;
+    }
 
     if (ordererFO) {
         ordererFailover(channel, client);

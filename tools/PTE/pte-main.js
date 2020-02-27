@@ -38,7 +38,6 @@ const child_process = require('child_process');
 
 var hfc = require('fabric-client');
 var fs = require('fs');
-var grpc = require('grpc');
 var path = require('path');
 var util = require('util');
 
@@ -47,8 +46,6 @@ var testUtil = require('./pte-util.js');
 
 hfc.setConfigSetting('crypto-keysize', 256);
 
-var webUser = null;
-var tmp;
 var i = 0;
 var procDone = 0;
 
@@ -123,10 +120,7 @@ logger.info('[Nid=%d pte-main] cpList; ', Nid, cpList);
 var orderersCPFList = {};
 orderersCPFList = testUtil.getNodetypeFromConnProfilesSubmitter(cpList, 'orderers');
 
-var users = hfc.getConfigSetting('users');
-
 var transType = txCfgPtr.transType.toUpperCase();
-var tCurr;
 
 // timeout option
 var timeoutOpt;
@@ -205,11 +199,7 @@ function verifyIfPathExists(inputPath) {
 }
 
 var tx_id = null;
-var nonce = null;
-
 var the_user = null;
-
-var cfgtxFile;
 var allEventhubs = [];
 var org;
 var orgName;
@@ -251,8 +241,6 @@ function clientNewOrderer(client, org) {
         logger.error('[clientNewOrderer] org: %s, no orderer found in the connection profile', org);
         process.exit(1);
     }
-    var cpOrgs = cpf['organizations'];
-
     var ordererID = getOrgOrdererID(org);
 
     logger.debug('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
@@ -284,7 +272,6 @@ function chainAddOrderer(channel, client, org) {
         logger.error('[chainAddOrderer] org: %s, no orderer is found in the connection profile', org);
         process.exit(1);
     }
-    var cpOrgs = cpf['organizations'];
     var ordererID = getOrgOrdererID(org);
 
     if (TLS > testUtil.TLSDISABLED) {
@@ -364,7 +351,6 @@ function channelAddPeer(channel, client, org) {
 
 function channelAddListedPeer(channel, client, org) {
     var peerTmp;
-    var eh;
     let channelName
     if (channel) {
         channelName = channel.getName()
@@ -380,7 +366,6 @@ function channelAddListedPeer(channel, client, org) {
         logger.error('[channelAddListedPeer] org: %s, no peer is found in the connection profile', org);
         process.exit(1);
     }
-    var cpOrgs = cpf['organizations'];
     var cpPeers = cpf['peers'];
 
     for (var key in listOpt) {
@@ -516,8 +501,6 @@ function channelAddPeer1(channel, client, org, eventHubs) {
 function channelAddPeerEventJoin(channel, client, org) {
     logger.debug('[channelAddPeerEventJoin] channel name: ', channel.getName());
     var data;
-    var eh;
-    var peerTmp;
 
     var targets = [];
     var eventHubs = [];
@@ -665,8 +648,6 @@ async function chaincodeInstall(client, org) {
             .then(
                 function (results) {
                     var proposalResponses = results[0];
-                    var proposal = results[1];
-                    var header = results[2];
                     var all_good = true;
                     for (var i in proposalResponses) {
                         let one_good = false;
@@ -674,7 +655,7 @@ async function chaincodeInstall(client, org) {
                             one_good = true;
                             logger.debug('[chaincodeInstall] org(%s): install proposal was good', org);
                         } else {
-                            logger.error('[chaincodeInstall] org(%s): install proposal was bad', org);
+                            logger.error('[chaincodeInstall] org(%s) install proposal was bad:', org, proposalResponses[i]);
                         }
                         all_good = all_good & one_good;
                     }
@@ -682,6 +663,7 @@ async function chaincodeInstall(client, org) {
                         logger.info(util.format('[chaincodeInstall] Successfully sent install Proposal to peers in (%s) and received ProposalResponse: Status - %s', orgName, proposalResponses[0].response.status));
                         evtDisconnect();
                     } else {
+                        logger.error('[chaincodeInstall] install proposal failed, proposalResponses: %j', proposalResponses);
                         throw new Error('[chaincodeInstall] Failed to send install Proposal in (%s) or receive valid response. Response null or status is not 200. exiting...', orgName);
                     }
 
@@ -762,7 +744,6 @@ async function chaincodeInstantiate(channel, client, org) {
                 var upgrade = false;
 
                 var badTransientMap = { 'test1': 'transientValue' }; // have a different key than what the chaincode example_cc1.go expects in Init()
-                var transientMap = { 'test': 'transientValue' };
                 var request = buildChaincodeProposal(client, the_user, language, upgrade, badTransientMap);
                 tx_id = request.txId;
 
@@ -842,7 +823,7 @@ async function chaincodeInstantiate(channel, client, org) {
                                 process.exit(1);
                             });
                     } else {
-                        logger.error('[chaincodeInstantiate] Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
+                        logger.error('[chaincodeInstantiate] Failed to send instantiate Proposal or receive valid response. Response results: %j', results);
                         evtDisconnect();
                         throw new Error('Failed to send instantiate Proposal or receive valid response. Response null or status is not 200. exiting...');
                     }
@@ -853,7 +834,9 @@ async function chaincodeInstantiate(channel, client, org) {
                     evtDisconnect();
                     return;
                 } else {
-                    throw new Error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error code: ', Nid, channelName, response.status);
+                    logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s. Error response: %j', Nid, channelName, response);
+                    evtDisconnect();
+                    throw new Error('Failed to instantiate transaction on %s. Response null or status is not 200. exiting...', channelName);
                 }
             }).catch((err) => {
                 logger.error('[chaincodeInstantiate(Nid=%d)] Failed to instantiate transaction on %s due to error: ', Nid, channelName, err.stack ? err.stack : err);
@@ -982,6 +965,7 @@ async function chaincodeUpgrade(channel, client, org) {
                                 process.exit(1);
                             });
                     } else {
+                        logger.error('[chaincodeUpgrade] Failed to send upgrade Proposal or receive valid response. Response results: %j', results);
                         evtDisconnect();
                         throw new Error('Failed to send upgrade Proposal or receive valid response. Response null or status is not 200. exiting...');
                     }
@@ -992,7 +976,7 @@ async function chaincodeUpgrade(channel, client, org) {
                     evtDisconnect();
                     return;
                 } else {
-                    logger.error('[chaincodeUpgrade(Nid=%d)] Failed to Upgrade transaction on %s. Error code: ', Nid, channelName, response.status);
+                    logger.error('[chaincodeUpgrade(Nid=%d)] Failed to Upgrade transaction on %s. Error response: %j', Nid, channelName, response);
                     evtDisconnect();
                     process.exit(1);
                 }
@@ -1011,25 +995,12 @@ async function chaincodeUpgrade(channel, client, org) {
     }
 }
 
-function readAllFiles(dir) {
-    var files = fs.readdirSync(dir);
-    var certs = [];
-    files.forEach((file_name) => {
-        let file_path = path.resolve(dir, file_name);
-        logger.debug('[readAllFiles] looking at file ::' + file_path);
-        let data = fs.readFileSync(file_path);
-        certs.push(data);
-    });
-    return certs;
-}
-
 //create or update channel
 async function createOrUpdateOneChannel(client, channelOrgName) {
     try {
         var config;
         var envelope_bytes;
         var signatures = [];
-        var key;
 
         var username;
         var secret;
@@ -1272,8 +1243,6 @@ async function joinChannel(channel, client, org) {
             eventHubs = targeteh.eventHubs;
             var targets = targeteh.targets;
 
-            var eventPromises = [];
-
             tx_id = client.newTransactionID();
             let request = {
                 targets: targets,
@@ -1290,6 +1259,7 @@ async function joinChannel(channel, client, org) {
                     logger.info('[joinChannel] Successfully joined peers in (%s:%s)', channelName, orgName);
                     evtDisconnect(eventHubs, blockCallbacks);
                 } else {
+                    logger.error('[joinChannel] Failed to join peers in org (%s), Error: %j', orgName, results);
                     evtDisconnect(eventHubs, blockCallbacks);
                     throw new Error('[joinChannel] Failed to join channel');
                 }
@@ -1304,22 +1274,6 @@ async function joinChannel(channel, client, org) {
         process.exit(1);
     }
 }
-
-function joinOneChannel(channel, client, org) {
-    logger.info('[joinOneChannel] org: ', org);
-
-    joinChannel(channel, client, org)
-        .then(() => {
-            logger.info('[joinOneChannel] Successfully joined peers in organization %s to join the channel %s', org, channelName);
-            process.exit();
-        })
-        .catch(function (err) {
-            logger.error('[joinOneChannel] Failed to join channel: ' + err);
-            process.exit(1);
-        });
-
-}
-
 
 var totalLength = 0;
 async function execQueryBlock(channel, sB, eB) {
@@ -1631,6 +1585,7 @@ async function performance_main() {
                             var totalInvokeOrdererFailures = 0;
                             var totalInvokeEventTimeout = 0;
                             var totalInvokeEventUnreceived = 0;
+                            var totalInvokeEventInvalid = 0;
                             var totalInvokeTps = 0;
                             var totalQueryTrans = 0;
                             var totalQueryFailed = 0;
@@ -1669,8 +1624,10 @@ async function performance_main() {
                                     totalInvokePeerFailures = totalInvokePeerFailures + peerFailures;
                                     var ordererFailures = parseInt(rawText.substring(rawText.indexOf("tx orderer failure") + 19, rawText.indexOf("(", rawText.indexOf("tx orderer failure") + 19)).trim());
                                     totalInvokeOrdererFailures = totalInvokeOrdererFailures + ordererFailures;
-                                    var eventUnreived = parseInt(rawText.substring(rawText.indexOf("event unreceived:") + 18).trim());
-                                    totalInvokeEventUnreceived = totalInvokeEventUnreceived + eventUnreived;
+                                    var eventUnreceived = parseInt(rawText.substring(rawText.indexOf("event unreceived:") + 18).trim());
+                                    totalInvokeEventUnreceived = totalInvokeEventUnreceived + eventUnreceived;
+                                    var eventInvalid = parseInt(rawText.substring(rawText.indexOf("event invalid:") + 15).trim());
+                                    totalInvokeEventInvalid = totalInvokeEventInvalid + eventInvalid;
                                     var tempTimeoutNum = parseInt(rawText.substring(rawText.indexOf("timeout:") + 8).trim());
                                     totalInvokeEventTimeout = totalInvokeEventTimeout + tempTimeoutNum;
                                     var tempDur = parseInt(rawText.substring(rawText.indexOf(") in") + 4, rawText.indexOf("ms")).trim());
@@ -1814,8 +1771,8 @@ async function performance_main() {
                                 output["failures"] = failures
                                 fs.appendFileSync(rptFile, buff);
 
-                                buff = "(" + channelName + ":" + chaincode_id + "):\tevent: received " + totalInvokeTransRcvd + "  timeout " + totalInvokeEventTimeout + "  unreceived " + totalInvokeEventUnreceived + "\n";
-                                const events = { "received": totalInvokeTransRcvd, "timeout": totalInvokeEventTimeout, "unreceived": totalInvokeEventUnreceived }
+                                buff = "(" + channelName + ":" + chaincode_id + "):\tevent: received " + totalInvokeTransRcvd + "  timeout " + totalInvokeEventTimeout + "  unreceived " + totalInvokeEventUnreceived + " invalid " + totalInvokeEventInvalid + "\n";
+                                const events = { "received": totalInvokeTransRcvd, "timeout": totalInvokeEventTimeout, "unreceived": totalInvokeEventUnreceived, "invalid": totalInvokeEventInvalid }
                                 output["event"] = events
                                 fs.appendFileSync(rptFile, buff);
 
@@ -1978,13 +1935,14 @@ async function performance_main() {
                             output["channel name"] = channelName
                             output["chaincode ID"] = chaincode_id
                             logger.info('[performance_main] pte-main:completed:');
-                            if ((output["Total transactions"]["sent"]) && (output["Total transactions"]["sent"] == output["Total transactions"]["received"]) && (output["Total transactions"]["sent"] != 0)) {
+                            if ((output["Total transactions"]["sent"]) && (output["Total transactions"]["sent"] == output["Total transactions"]["received"]) && (output["Total transactions"]["sent"] != 0) && (totalInvokeEventInvalid == 0)) {
                                 output["Test Result"] = "PASS"
                                 logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
                             } else {
                                 output["Test Result"] = "FAIL"
-                                logger.info('[performance_main] Test Output:', JSON.stringify(output, null, 4));
-                                throw new Error('[performance_main] Test ran, but failed with errors. Exiting...');
+                                const errMsg = '[performance_main] Test ran, but failed with errors. Exiting... \n pteReport: ' + JSON.stringify(output, null, 4)
+                                logger.error(errMsg);
+                                process.exit(1)
                             }
 
                         }
