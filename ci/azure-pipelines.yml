@@ -10,10 +10,10 @@ pr:
 - release-1.4
 
 variables:
+  GO_VER: 1.13.8
   GOPATH: $(Agent.BuildDirectory)/go
-  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/fabric/.build/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-  GO_VER: 1.12.12
-  NODE_VER: 10.x
+  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  NODE_VER: 8.x
 
 jobs:
 - job: VerifyBuild
@@ -21,7 +21,7 @@ jobs:
     vmImage: ubuntu-18.04
   steps:
   - template: templates/install_deps.yml
-  - script: make ci-smoke
+  - script: make regression/smoke
     displayName: Run Smoke Tests
   - task: PublishTestResults@2
     condition: always() # publish either way

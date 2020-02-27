@@ -1,66 +1,38 @@
 #!/bin/bash
+set -euo pipefail
 
-REPO=$1
+# Set the working directory
+WD=$(cd $(dirname $0)/.. && pwd)
+cd ${WD}
 
-RELEASE_VERSION=${RELEASE_VERSION:=$BASE_VERSION-stable}
+RELEASE_VERSION=$1
+shift
+
 # Get the arch value
-ARCH=$(dpkg --print-architecture)
-if [ "$ARCH" = "amd64" ]; then
-    ARCH=linux-amd64
+ARCH=$(arch)
+if [[ ${ARCH} == "x86_64" ]]; then
+	ARCH=linux-amd64
+elif [[ ${ARCH} == "i386" ]]; then
+	ARCH=darwin-amd64
+else
+    printf "Unsupported Architecture, exiting...\n"
+    exit 1
 fi
-echo "Arch: $ARCH"
 
-echo "Fetching binary artifacts from Artifactory"
-echo "---------> REPO: $REPO"
+printf "\nDownloading fabric-${ARCH} binaries from Artifactory\n"
 
 ##########################################################
 # Pull the binaries from Artifactory
 ##########################################################
-pullBinary() {
-  REPOS=$@
-  echo "Repos: $REPOS"
-  for repo in $REPOS; do
-    echo "======== PULL $repo BINARIES ========"
-    echo
 
-    ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
-    curl "${ARTIFACTORY_URL}" | tar -xvz
-    echo "Finished pulling $repo..."
-    echo
-  done
-}
+REPOS=$@
+mkdir -p ${WD}/bin
+for repo in "${REPOS}"; do
+	ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
+	curl -sS "${ARTIFACTORY_URL}" -o binaries.tgz
+	tar -xf binaries.tgz
+	rm -rf binaries.tgz
+	printf "\nFinished downloading $repo binaries\n\n"
+done
 
-##########################################################
-# Select which binaries are needed
-##########################################################
-case $REPO in
-fabric)
-  echo "Pull only fabric binaries"
-  pullBinary fabric
-  ;;
-fabric-ca)
-  echo "Pull only fabric-ca binaries"
-  pullBinary fabric-ca
-  ;;
-*)
-  echo "Pull all binaries"
-  pullBinary fabric fabric-ca
-  ;;
-esac
-
-#Set the PATH to the bin directory in order to execute the correct binaries
-export PATH="$(pwd)/bin:$PATH"
-
-# Show the results
-echo "In the bin dir..."
-ls -l bin/*
-echo
-echo "$PATH"
-
-# Copy new binaries to the exported PATH bin dir
-mkdir -p "../../fabric/.build/bin"
-cp -r bin/* "../../fabric/.build/bin/"
-
-# PTE looks for binaries in fabric submodule dir
-mkdir -p ../fabric/.build/bin
-cp -r bin/* "../fabric/.build/bin/"
+printf "The following binaries have been installed at ${WD}/bin:\n\n%s\n\n" "$(ls -l ${WD}/bin)"

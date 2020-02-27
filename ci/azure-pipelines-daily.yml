@@ -1,0 +1,43 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+name: Fabric-Test-Daily-$(Date:yyyyMMdd)
+trigger: none
+pr: none
+schedules:
+  # 3 AM UTC/10 PM EST
+  - cron: "0 3 * * *"
+    displayName: 'Fabric Test Daily Job'
+    branches:
+      include:
+        - master
+        - release-1.4
+    always: true
+
+variables:
+  FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
+  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  GO_VER: 1.12.12
+  GOPATH: $(Agent.BuildDirectory)/go
+  NODE_VER: 10.x
+
+stages:
+  - stage: Smoke
+    dependsOn: []
+    displayName: Smoke Network
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job:
+        displayName: Run Scenario
+        steps:
+          - template: templates/install_deps.yml
+          - script: make regression/smoke
+            displayName: Run Test
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'regression/**/results*.xml'
