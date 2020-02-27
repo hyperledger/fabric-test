@@ -26,6 +26,8 @@ variables:
     value: 8.x
   - name: RELEASE
     value: 1.4.5-stable
+  - name: TWO_DIGIT_RELEASE
+    value: 1.4-stable
 
 jobs:
   - job: BYFN
