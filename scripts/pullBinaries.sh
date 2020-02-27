@@ -5,7 +5,8 @@ set -euo pipefail
 WD=$(cd $(dirname $0)/.. && pwd)
 cd ${WD}
 
-RELEASE_VERSION=${RELEASE_VERSION:=latest}
+RELEASE_VERSION=$1
+shift
 
 # Get the arch value
 ARCH=$(arch)
