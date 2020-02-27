@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
+name: Fabric-Test-Daily-$(Date:yyyyMMdd)
 trigger: none
 pr: none
 schedules:
   # 3 AM UTC/10 PM EST
   - cron: "0 3 * * *"
-    displayName: 'PTE Daily Job'
+    displayName: 'Fabric Test Daily Job'
     branches:
       include:
         - master
@@ -17,30 +17,64 @@ schedules:
     always: true
 
 variables:
-  GOPATH: $(Agent.BuildDirectory)/go
+  FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   GO_VER: 1.13.4
+  GOPATH: $(Agent.BuildDirectory)/go
   NODE_VER: 10.x
 
-jobs:
-  - job: Regression
+stages:
+  - stage: Barebones
+    dependsOn: []
+    displayName: Barebones Network
     pool:
       vmImage: ubuntu-18.04
-    timeoutInMinutes: 360
-    strategy:
-      matrix:
-        Barebones:
-          SCENARIO: barebones
-        Basic:
-          SCENARIO: basicnetwork
-        Smoke:
-          SCENARIO: smoke
-    steps:
-    - template: templates/install_deps.yml
-    - script: make regression/$(SCENARIO)
-      displayName: Run Scenario
-    - task: PublishTestResults@2
-      condition: always()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'regression/**/results*.xml'
+    jobs:
+      - job:
+        displayName: Run Scenario
+        timeoutInMinutes: 360
+        steps:
+        - template: templates/install_deps.yml
+        - script: make regression/barebones
+          displayName: Run Test
+        - task: PublishTestResults@2
+          condition: always()
+          inputs:
+            testResultsFormat: 'JUnit'
+            testResultsFiles: 'regression/**/results*.xml'
+
+  - stage: BasicNetwork
+    dependsOn: []
+    displayName: Basic Network
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job:
+        displayName: Run Scenario
+        steps:
+          - template: templates/install_deps.yml
+          - script: make regression/basicnetwork
+            displayName: Run Test
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'regression/**/results*.xml'
+
+  - stage: Smoke
+    dependsOn: []
+    displayName: Smoke Network
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job:
+        displayName: Run Scenario
+        steps:
+          - template: templates/install_deps.yml
+          - script: make regression/smoke
+            displayName: Run Test
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'regression/**/results*.xml'
