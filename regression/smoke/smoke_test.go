@@ -14,7 +14,7 @@ var _ = Describe("Smoke Test Suite", func() {
 
 	Describe("Running Smoke Test Suite in fabric-test", func() {
 		var (
-			action string
+			action        string
 			inputSpecPath string
 		)
 		It("Running end to end (old cc lifecycle)", func() {
@@ -23,7 +23,7 @@ var _ = Describe("Smoke Test Suite", func() {
 				log.Fatal(err)
 			}
 			fmt.Printf("The date is %s\n", out)
-			inputSpecPath = "../../tools/operator/testdata/smoke-test-input.yml"
+			inputSpecPath = "../testdata/smoke-test-input.yml"
 
 			By("1) Creating channel")
 			action = "create"
@@ -35,12 +35,10 @@ var _ = Describe("Smoke Test Suite", func() {
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-
 			By("3) Updating channel with anchor peers")
 			action = "anchorpeer"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
-
 
 			By("4) Installing Chaincode on Peers")
 			action = "install"
