@@ -8,7 +8,8 @@
 #   - regression/basicnetwork		- Executes basicnetwork tests
 #   - regression/smoke				- Executes smoke tests
 #   - regression/systemtest			- Executes system tests on k8s cluster
-#   - regression/weekly				- Executres 12hr long running test in k8s environment
+#   - regression/weekly				- Executes 12hr long running test in k8s environment
+#   - upgrade						- Executes upgrade scenario in weekly from 1.4 to 2.0
 #   - npm-init						- Initializes the PTE NPM modules
 #   - gotools						- Installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
 #
@@ -18,6 +19,9 @@ include gotools.mk
 
 regression/%: pre-reqs
 	cd ${@} && ginkgo -v
+
+upgrade:
+	cd regression/upgrade && ./upgrade2.0.sh 1.4-stable 2.0-stable
 
 .PHONY: pre-reqs
 pre-reqs: npm-init pull-binaries-fabric gotools

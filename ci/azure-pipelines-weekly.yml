@@ -1,0 +1,39 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+name: Fabric-Test-Weekly-$(Date:yyyyMMdd)
+trigger: none
+pr: none
+schedules:
+  # 3 AM UTC/10 PM EST on every Friday
+  - cron: "0 3 * * FRI"
+    displayName: 'Fabric Test Weekly Job'
+    branches:
+      include:
+        - master
+    always: true
+
+variables:
+  FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
+  GOPATH: $(Agent.BuildDirectory)/go
+  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  GO_VER: 1.13.8
+  NODE_VER: 10.x
+
+stages:
+  - stage: Upgrade
+    dependsOn: []
+    displayName: Upgrade Network
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: Weekly
+        pool:
+          vmImage: ubuntu-18.04
+        timeoutInMinutes: 360
+        steps:
+        - template: templates/install_deps.yml
+        - script: make upgrade
+          displayName: Run Scenario

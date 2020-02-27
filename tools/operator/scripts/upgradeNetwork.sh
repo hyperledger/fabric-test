@@ -106,11 +106,13 @@ modifyAndSubmit(){
 }
 
 upgradeDB(){
-  setGlobals $1 $3 $4 peer
-  cd $4/backup/$2
-  export CORE_PEER_FILESYSTEMPATH=$PWD
-  peer node upgrade-dbs
-  cd -
+  docker run --name peer-cli --rm \
+  -e CORE_PEER_LOCALMSPID=$1 \
+  -e CORE_PEER_TLS_ENABLED=true \
+  -e CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/artifacts/users/Admin@$3/msp \
+  -v $4/backup/$2/:/var/hyperledger/production/ \
+  -v $4/crypto-config/peerOrganizations/$3/:/etc/hyperledger/fabric/artifacts/ \
+  hyperledger-fabric.jfrog.io/fabric-peer:amd64-2.0-stable peer node upgrade-dbs
 }
 
 configUpdate(){
