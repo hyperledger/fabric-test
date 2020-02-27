@@ -108,7 +108,7 @@ modifyAndSubmit(){
 
 upgradeDB(){
   setGlobals $1 $3 $4 peer
-  cd configFiles/backup/$2
+  cd $4/backup/$2
   export CORE_PEER_FILESYSTEMPATH=$PWD
   peer node upgrade-dbs
   cd -

@@ -13,12 +13,14 @@ import (
 	"github.com/pkg/errors"
 )
 
+//DockerCompose --
 type DockerCompose struct {
 	ConfigPath string
 	Action     []string
 	Config     networkspec.Config
 }
 
+//Args -- arguments
 func (d DockerCompose) Args() []string {
 
 	args := []string{"-f", d.ConfigPath}
@@ -57,7 +59,7 @@ func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"down"}}
 	_, err := networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {
-		return err
+		logger.WARNING("Unable to delete all active endpoints")
 	}
 
 	err = networkclient.UpgradeDB(config, "")
@@ -70,13 +72,21 @@ func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	err = networkclient.UpdateCapability(config, "")
+//UpdateCapability -- updates capabilities
+func (d DockerCompose) UpdateCapability(config networkspec.Config) error {
+	err := networkclient.UpdateCapability(config, "")
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	err = networkclient.UpdatePolicy(config, "")
+//UpdatePolicy -- updates policies
+func (d DockerCompose) UpdatePolicy(config networkspec.Config) error {
+	err := networkclient.UpdatePolicy(config, "")
 	if err != nil {
 		return err
 	}
@@ -95,8 +105,8 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 		return err
 	}
 
-	configDirPath := paths.ConfigFilesDir()
-	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s/backup:/opt/backup", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup/*)"}
+	configDirPath := config.ArtifactsLocation
+	cleanArgs := []string{"run", "--rm", "-v", fmt.Sprintf("%s:/opt", configDirPath), "busybox", "sh", "-c", "(rm -rf /opt/backup)"}
 	_, err = networkclient.ExecuteCommand("docker", cleanArgs, true)
 	if err != nil {
 		return err
@@ -181,6 +191,18 @@ func (d DockerCompose) DockerNetwork(action string) error {
 		err = d.UpgradeLocalNetwork(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to upgrade local fabric network")
+			return err
+		}
+	case "updateCapability":
+		err = d.UpdateCapability(d.Config)
+		if err != nil {
+			logger.ERROR("Failed to update capabilities and policies")
+			return err
+		}
+	case "updatePolicy":
+		err = d.UpdatePolicy(d.Config)
+		if err != nil {
+			logger.ERROR("Failed to update capabilities and policies")
 			return err
 		}
 	case "down":
