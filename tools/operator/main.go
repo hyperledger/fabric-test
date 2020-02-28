@@ -206,5 +206,6 @@ func main() {
 	err = doAction(*action, env, *kubeConfigPath, *inputFilePath)
 	if err != nil {
 		logger.ERROR(fmt.Sprintln("Operator failed with error ", err))
+		os.Exit(1)
 	}
 }

@@ -18,8 +18,7 @@
 # "Usage: ./upgradeNetwork.sh configUpdate $MSPID $NAME $ORG_NAME $ARTIFACTS_LOCATION $NUM_CHANNELS $CAPABILITY $GROUP $PEERORG_MSPID $PEERORG_NAME"
 
 setGlobals(){
-  export FABRIC_CFG_PATH=$GOPATH/config/
-  export ORDERER_ADDRESS=localhost:30000
+  export ORDERER_ADDRESS=127.0.0.1:30000
 
   export CORE_PEER_LOCALMSPID=$1
   export CORE_PEER_TLS_ENABLED=true
