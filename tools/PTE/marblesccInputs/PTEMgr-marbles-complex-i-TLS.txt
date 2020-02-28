@@ -1,3 +1,0 @@
-driver=pte marblesccInputs/runCases-marbles-complex-i1-TLS.txt
-driver=pte marblesccInputs/runCases-marbles-complex-i2-TLS.txt
-driver=pte marblesccInputs/runCases-marbles-complex-i3-TLS.txt

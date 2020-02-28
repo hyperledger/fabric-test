@@ -1,3 +1,0 @@
-driver=pte sampleccInputs/runCases-complex-i1-TLS.txt
-driver=pte sampleccInputs/runCases-complex-i2-TLS.txt
-driver=pte sampleccInputs/runCases-complex-i3-TLS.txt
