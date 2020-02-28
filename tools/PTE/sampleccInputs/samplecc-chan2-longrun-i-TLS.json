@@ -20,21 +20,9 @@
             "org4"
         ]
     },
-    "burstOpt": {
-        "burstFreq": ["500", "200", "300", "100"],
-        "burstDur":  ["3000", "2000", "3000", "1000"]
-    },
-    "mixOpt": {
-        "mixFreq": "3000"
-    },
     "constantOpt": {
-        "recHist": "HIST",
         "constFreq": "1000",
         "devFreq": "10"
-    },
-    "listOpt": {
-        "org3": ["peer1"],
-        "org4": ["peer1"]
     },
     "eventOpt": {
         "type": "FilteredBlock",
