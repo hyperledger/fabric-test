@@ -21,7 +21,6 @@
     },
     "eventOpt": {
         "type": "FilteredBlock",
-        "listener": "Block",
         "timeout": "240000"
     },
     "failoverOpt": {

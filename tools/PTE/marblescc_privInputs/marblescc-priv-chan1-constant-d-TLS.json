@@ -26,7 +26,6 @@
     },
     "eventOpt": {
         "type": "FilteredBlock",
-        "listener": "Block",
         "timeout": "300000"
     },
     "ccType": "marblescc_priv",

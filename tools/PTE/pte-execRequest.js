@@ -49,7 +49,6 @@ var inv_q = 0;    // counter of invoke query
 var n_sd = 0;     // counter of service discovery
 var evtType = 'FILTEREDBLOCK';        // event type: FILTEREDBLOCK|CHANNEL, default: FILTEREDBLOCK
 var evtTimeout = 120000;              // event timeout, default: 120000 ms
-var evtListener = 'BLOCK';            // event listener: BLOCK|TRANSACTION, default: BLOCK
 var evtLastRcvdTime = 0;              // last event received time
 var evtCode_VALID = 0;                // event valid code as defined in TxValidationCode in fabric transaction.pb.go (channel block only)
 var lastSentTime = 0;                 // last transaction sent time
@@ -171,13 +170,10 @@ if ((typeof (txCfgPtr.eventOpt) !== 'undefined') && (typeof (txCfgPtr.eventOpt.t
         process.exit(1);
     }
 }
-if ((typeof (txCfgPtr.eventOpt) !== 'undefined') && (typeof (txCfgPtr.eventOpt.listener) !== 'undefined')) {
-    evtListener = txCfgPtr.eventOpt.listener.toUpperCase();
-}
 if ((typeof (txCfgPtr.eventOpt) !== 'undefined') && (typeof (txCfgPtr.eventOpt.timeout) !== 'undefined')) {
     evtTimeout = txCfgPtr.eventOpt.timeout;
 }
-logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] event type: %s, listener: %s, timeout: %d', Nid, channel.getName(), org, pid, evtType, evtListener, evtTimeout);
+logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] event type: %s, timeout: %d', Nid, channel.getName(), org, pid, evtType, evtTimeout);
 
 if (typeof (txCfgPtr.invokeCheck) !== 'undefined') {
     if (txCfgPtr.invokeCheck == 'TRUE') {
@@ -442,14 +438,12 @@ function getQueryRequest() {
 
 function listenToEventHub() {
     // add event if Block listener
-    if (evtListener == 'BLOCK') {
-        if (evtType == 'FILTEREDBLOCK') {
-            // filteredBlock event
-            eventRegisterFilteredBlock();
-        } else {
-            // channel event
-            eventRegisterBlock();
-        }
+    if (evtType == 'FILTEREDBLOCK') {
+        // filteredBlock event
+        eventRegisterFilteredBlock();
+    } else {
+        // channel event
+        eventRegisterBlock();
     }
 }
 
@@ -968,8 +962,6 @@ async function execTransMode() {
                         execModeMix();
                     } else if (transMode == 'LATENCY') {
                         execModeLatency();
-                    } else if (transMode == 'PROPOSAL') {
-                        execModeProposal();
                     } else {
                         // invalid transaction request
                         logger.error(util.format("[Nid:chan:org:id=%d:%s:%s:%d execTransMode] pte-exec:completed:error Transaction %j and/or mode %s invalid", Nid, channelName, org, pid, transType, transMode));
@@ -1276,52 +1268,6 @@ function eventRegisterBlock() {
     });
 }
 
-function eventRegister(tx) {
-    var deployId = tx.getTransactionID();
-    eventHubs.forEach((eh) => {
-        let txPromise = new Promise((resolve, reject) => {
-            let handle = setTimeout(function () {
-                eh.unregisterTxEvent(deployId);
-                resolve()
-            }, evtTimeout);
-
-            eh.registerTxEvent(deployId.toString(), (tx, code, bk_num) => {
-                clearTimeout(handle);
-
-                if (txidList[deployId.toString()]) {
-                    evtLastRcvdTime = new Date().getTime();
-                    if ((evtLastRcvdTime - txidList[deployId.toString()]) > evtTimeout) {
-                        tx_stats[tx_evtTimeout]++;
-                    }
-                    eh.unregisterTxEvent(deployId);
-                    evtRcv++;
-                    var tend = new Date().getTime();
-                    latency_update(evtRcv, tend - txidList[deployId.toString()], latency_event);
-
-                    if (code !== 'VALID') {
-                        logger.error('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] The invoke transaction (%s) was invalid, code = ', Nid, channelName, org, pid, deployId.toString(), code);
-                        tx_stats[tx_evtInvalid]++;
-                    }
-                    delete txidList[deployId.toString()];
-                    var totalTx = evtRcv + tx_stats[tx_pFail] + tx_stats[tx_txFail];
-                    if ((IDone == 1) && (inv_m == totalTx)) {
-                        postEventProc('eventRegister', tx_stats);
-                        if (!invokeCheck) {
-                            process.exit();
-                        }
-                    }
-                }
-            }).catch((err) => {
-                clearTimeout(handle);
-            });
-        }).catch((err) => {
-            //logger.info('[Nid:chan:org:id=%d:%s:%s:%d eventRegister] number of events timeout=%d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, tx_stats[evtTimeout], transType, invokeType, tCurr-tLocal, tLocal, tCurr);
-        });
-
-        eventPromises.push(txPromise);
-    });
-}
-
 // orderer handler:
 //    failover if failover is set
 //    reconnect if reconn=1
@@ -1595,112 +1541,6 @@ function invoke_move_dist_evtBlock(backoffCalculator) {
         });
 }
 
-function invoke_move_dist_go(t1, backoffCalculator) {
-    var freq_n = backoffCalculator();
-    tCurr = new Date().getTime();
-    t1 = tCurr - t1;
-    if (t1 < freq_n) {
-        freq_n = freq_n - t1;
-    } else {
-        freq_n = 0;
-    }
-    setTimeout(function () {
-        invoke_move_dist(backoffCalculator);
-    }, freq_n);
-}
-
-// invoke_move_dist
-function invoke_move_dist(backoffCalculator) {
-    inv_m++;
-    tx_stats[tx_sent]++;
-
-    var t1 = new Date().getTime();
-    // getMoveRequest();
-    var txProposal = requestQueue.pop();
-    if (!txProposal) {
-        logger.debug("empty requestQueue");
-        invoke_move_dist_go(t1, backoffCalculator);
-        return;
-    }
-    txProposal.targets = targets;
-
-    var ts = new Date().getTime();
-    channel.sendTransactionProposal(txProposal)
-        .then((results) => {
-
-            var te = new Date().getTime();
-            latency_update(inv_m, te - ts, latency_peer);
-
-            for ( var u = 0; u< results.length; u++) {
-               if ((typeof(results[u][0]) !== 'undefined') && (typeof(results[u][0].response) !== 'undefined') &&
-                   (typeof(results[u][0].response.status) !== 'undefined') && (results[u][0].response.status !== 200)) {
-                   logger.warn('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist] failed proposal result: %j ', Nid, channelName, org, pid, results[u][0]);
-               }
-            }
-
-            txidList[txProposal.txId.getTransactionID().toString()] = new Date().getTime();
-
-            eventRegister(txProposal.txId);
-
-            getTxRequest(results);
-
-            var tos = new Date().getTime();
-            var sendPromise = channel.sendTransaction(txRequest);
-            return Promise.all([sendPromise].concat(eventPromises))
-                .then((results) => {
-
-                    var toe = new Date().getTime();
-                    latency_update(inv_m, toe - tos, latency_orderer);
-
-                    isExecDone('Move');
-                    if (results[0].status != 'SUCCESS') {
-                        tx_stats[tx_txFail]++;
-                        delete txidList[tx_id.getTransactionID().toString()];
-                        logger.warn('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist] Failed to send transaction due to invalid status: ', Nid, channelName, org, pid, results.status);
-                    }
-
-                    if (IDone != 1) {
-                        invoke_move_dist_go(t1, backoffCalculator);
-                    } else {
-                        IDoneMsg("invoke_move_dist");
-                        return;
-                    }
-
-                }).catch((err) => {
-                    tx_stats[tx_pFail]++;
-                    delete txidList[tx_id.getTransactionID().toString()];
-                    logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist] Failed to send transaction due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-
-                    isExecDone('Move');
-                    if (IDone != 1) {
-                        ordererHdlr();
-                        invoke_move_dist_go(t1, backoffCalculator);
-                    } else {
-                        IDoneMsg("invoke_move_dist");
-                        return;
-                    }
-                })
-
-        }).catch((err) => {
-            tx_stats[tx_pFail]++;
-            delete txidList[tx_id.getTransactionID().toString()];
-            var te = new Date().getTime();
-            latency_update(inv_m, te - ts, latency_peer);
-
-            logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err);
-
-            isExecDone('Move');
-            if (IDone != 1) {
-                if (peerFO) {
-                    peerFailover(channel, client);
-                }
-                invoke_move_dist_go(t1, backoffCalculator);
-            } else {
-                IDoneMsg("invoke_move_dist");
-                return;
-            }
-        });
-}
 
 // query validation
 function queryValidation(response) {
@@ -1794,13 +1634,7 @@ function execModeDistribution(backoffCalculator, delayCalculator) {
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeDistribution] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
 
         if (invokeType == 'MOVE') {
-
-            if (evtListener == 'BLOCK') {
-                invoke_move_dist_evtBlock(backoffCalculator);
-            } else {
-                requestPusher(getMoveRequest, delayCalculator, 10);
-                invoke_move_dist(backoffCalculator);
-            }
+            invoke_move_dist_evtBlock(backoffCalculator);
         } else if (invokeType == 'QUERY') {
             invoke_query_dist(backoffCalculator);
         }
@@ -1833,10 +1667,8 @@ function execModeConstant() {
         } else {
             devFreq = parseInt(txCfgPtr.constantOpt.devFreq);
         }
-
         logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeDistribution] Constant Freq: %d ms, variance Freq: %d ms', Nid, channelName, org, pid, freq, devFreq);
     }
-
     execModeDistribution(backoffCalculatorConstant, backoffCalculatorConstantFreq);
 }
 
@@ -1847,60 +1679,6 @@ function backoffCalculatorPoisson() {
 
 function execModePoisson() {
     execModeDistribution(backoffCalculatorPoisson);
-}
-
-// invoke_move_proposal
-function invoke_move_proposal() {
-    inv_m++;
-
-    getMoveRequest();
-
-    channel.sendTransactionProposal(request_invoke)
-        .then(
-            function (results) {
-                for ( var u = 0; u< results.length; u++) {
-                   if ((typeof(results[u][0]) !== 'undefined') && (typeof(results[u][0].response) !== 'undefined') &&
-                       (typeof(results[u][0].response.status) !== 'undefined') && (results[u][0].response.status !== 200)) {
-                       logger.warn('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_proposal] failed proposal result: %j ', Nid, channelName, org, pid, results[u][0]);
-                   }
-                }
-
-                isExecDone('Move');
-                if (IDone == 1) {
-                    tCurr = new Date().getTime();
-                    logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_proposal] completed %d %s(%s) in %d ms, timestamp: start %d end %d', Nid, channelName, org, pid, inv_m, transType, invokeType, tCurr - tLocal, tLocal, tCurr);
-                    evtDisconnect();
-                    return;
-                } else {
-                    invoke_move_proposal();
-                    return results[0];
-                }
-            }).catch(err => {
-                logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_proposal] Failed to send transaction proposal due to error: ', Nid, channelName, org, pid, err.stack ? err.stack : err)
-                evtDisconnect();
-                process.exit(1);
-            });
-}
-
-function execModeProposal() {
-    // send proposal to endorser
-    if (transType == 'INVOKE') {
-        tLocal = new Date().getTime();
-        if (runDur > 0) {
-            tEnd = tLocal + runDur;
-        }
-        logger.info('[Nid:chan:org:id=%d:%s:%s:%d execModeProposal] tStart %d, tLocal %d', Nid, channelName, org, pid, tStart, tLocal);
-        if (invokeType == 'MOVE') {
-            var freq = ccFuncInst.getExecModeProposalFreq();
-            invoke_move_proposal();
-        } else if (invokeType == 'QUERY') {
-            logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeProposal] invalid invokeType= %s', Nid, channelName, org, pid, invokeType);
-            evtDisconnect();
-        }
-    } else {
-        logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeProposal] invalid transType= %s', Nid, channelName, org, pid, transType);
-        evtDisconnect();
-    }
 }
 
 // discovery mode: discovery performance

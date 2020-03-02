@@ -773,7 +773,6 @@ The user input file contains configuration parameters including chaincode defini
         },
         "eventOpt": {
             "type": "FilteredBlock",
-            "listener": "Block",
             "timeout": "240000"
         },
         "failoverOpt": {
@@ -886,7 +885,6 @@ where
         },
         "eventOpt": {
             "type": "FilteredBlock",
-            "listener": "Block",
             "timeout": "240000"
         },
         "failoverOpt": {
@@ -1016,9 +1014,6 @@ where:
     * **type**: event service type, default: FilteredBlock
         * **FilteredBlock**: efficient option, delivers filtered events per channel for each block or transaction
         * **Channel**: basic option, delivers full events per channel for each block or transaction
-    * **listener**: event listener, default: Block
-        * **Transaction**: per transaction event
-        * **Block**: per block event
     * **timeout**: event timeout, unit ms, default: 120000 ms
 * **failoverOpt**: peer failover options
     * **method**: peer failover selection method, default is `RoundRobin`
