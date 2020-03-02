@@ -38,7 +38,6 @@ var PTEid = process.argv[7];
 var loggerMsg = 'PTE ' + PTEid + ' exec';
 var logger = new testUtil.PTELogger({ "prefix": loggerMsg, "level": "info" });
 
-
 // local vars
 var tCurr;
 var tEnd = 0;
@@ -126,7 +125,7 @@ for (i = 0; i < channelOpt.orgName.length; i++) {
     channelOrgName.push(channelOpt.orgName[i]);
 }
 
-var distOpt = txCfgPtr.constantOpt;		// Assume the default distribution is 'Constant'
+var distOpt;
 
 var ccDfnPtr;
 var ccDfntmp;
@@ -135,7 +134,7 @@ if (typeof (uiContent.ccDfnPtr) === 'undefined') {
 } else {
     ccDfntmp = uiContent.ccDfnPtr;
 }
-ccDfnPtr = uiContent
+ccDfnPtr = uiContent;
 if (fs.existsSync(uiFile)) {
     ccDfnPtr = testUtil.readConfigFileSubmitter(ccDfntmp);
 }
@@ -472,7 +471,7 @@ function peerFailover(channel, client) {
     channel.addPeer(peerList[currPeerId]);
 
     //handle channel eventHubs if evtType == CHANNEL
-    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
+    if (invokeType == 'MOVE') {
         //delete channel eventHubs
         for (var i = 0; i < eventHubs.length; i++) {
             var str = peerList[currId]._url.split('//');
@@ -560,7 +559,7 @@ function assignChannelPeers(cpList, channel, client, targetPeers) {
                                 peerList.push(peerTmp);
                             }
 
-                            if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
+                            if (invokeType == 'MOVE') {
                                 eh = channel.newChannelEventHub(peerTmp);
                                 eventHubs.push(eh);
                                 if (evtType == 'FILTEREDBLOCK') {
@@ -576,7 +575,7 @@ function assignChannelPeers(cpList, channel, client, targetPeers) {
                         if (peerFOList == 'TARGETPEERS') {
                             peerList.push(peerTmp);
                         }
-                        if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
+                        if (invokeType == 'MOVE') {
                             eh = channel.newChannelEventHub(peerTmp);
                             eventHubs.push(eh);
                             if (evtType == 'FILTEREDBLOCK') {
@@ -634,7 +633,7 @@ function assignPeerList(channel, client, org) {
 function channelDiscoveryEvent(channel, client, org) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelDiscoveryEvent]', Nid, channelName, org, pid);
     var peerTmp = channel.getPeers();
-    if (((evtType == 'CHANNEL') || (evtType == 'FILTEREDBLOCK')) && (invokeType == 'MOVE')) {
+    if (invokeType == 'MOVE') {
         for (var u = 0; u < peerTmp.length; u++) {
             var eh = channel.newChannelEventHub(peerTmp[u]);
             eventHubs.push(eh);
@@ -958,8 +957,6 @@ async function execTransMode() {
                     } else if (transMode == 'POISSON') {
                         distOpt = txCfgPtr.poissonOpt;
                         execModePoisson();
-                    } else if (transMode == 'MIX') {
-                        execModeMix();
                     } else if (transMode == 'LATENCY') {
                         execModeLatency();
                     } else {
@@ -1440,7 +1437,6 @@ function invoke_move_dist_go_evtBlock(t1, backoffCalculator) {
         freq_n = 0;
     }
     setTimeout(function () {
-        //logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist_evtBlock] Triggering invoke after %d msec', Nid, channelName, org, pid, freq_n);
         invoke_move_dist_evtBlock(backoffCalculator);
     }, freq_n);
 }
@@ -1503,7 +1499,6 @@ function invoke_move_dist_evtBlock(backoffCalculator) {
                         invoke_move_dist_go_evtBlock(t1, backoffCalculator);
                     } else {
                         IDoneMsg("invoke_move_dist_evtBlock");
-                   logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist_evtBlock] done ', Nid, channelName, org, pid);
                         return;
                     }
 
@@ -1593,7 +1588,6 @@ function invoke_query_dist(backoffCalculator) {
                     // do not log query statistics if invokeCheck
                     if ( !invokeCheckExec ) {
                         tCurr = new Date().getTime();
-                        logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_dist] query result response_payloads length:', Nid, channelName, org, pid, response_payloads.length);
                         for (let j = 0; j < response_payloads.length; j++) {
                             logger.info('[Nid:chan:org:id=%d:%s:%s:%d invoke_query_dist] query result:', Nid, channelName, org, pid, response_payloads[j].toString('utf8'));
                         }
