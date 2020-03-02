@@ -33,6 +33,10 @@ npm-init:
 lint: gotools
 	./scripts/lint.sh
 
+.PHONY: unit-tests
+unit-tests:
+	@go test -cover ./...
+
 .PHONY: pull-binaries
 pull-binaries:
 	./scripts/pullBinaries.sh latest fabric fabric-ca
