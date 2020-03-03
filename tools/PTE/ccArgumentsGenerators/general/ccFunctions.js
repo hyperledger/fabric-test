@@ -83,14 +83,6 @@ class ccFunctions extends ccFunctionsBase {
         return 0;
     }
 
-    getExecModeSimpleFreq() {
-        return 0;
-    }
-
-    getExecModeProposalFreq() {
-        return 0;
-    }
-
     // This is an OPTIONAL function
     // Returns lists of organization names allowed to invoke/query chaincode functions
     // - <function name> --> <array of organization names>
