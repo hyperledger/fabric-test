@@ -564,18 +564,6 @@ class ccFunctions extends ccFunctionsBase {
         // THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeLatency()'
     }
 
-    getExecModeSimpleFreq() {
-        return 0;	// RETURN APPROPRIATE INTEGER VALUE
-
-        // THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeSimple()'
-    }
-
-    getExecModeProposalFreq() {
-        return 0;	// RETURN APPROPRIATE INTEGER VALUE
-
-        // THIS VALUE WILL BE USED IN 'pte-execRequest.js:execModeProposal()'
-    }
-
     getAccessControlPolicyMap() {
         return {};	// RETURN JSON key-value mappings: <function-name> --> <array of org-names>
 
@@ -949,7 +937,6 @@ where:
 * **logLevel**: logging level for the run. Options are ERROR, DEBUG, or INFO.  Set to ERROR for performance test. The default value is ERROR.
 * **invokeCheck**: if this is `TRUE`, then queries will be executed for validation based on the setting of `invokeCheckOpt` once the event of all invokes are received. This value is ignored for query test.  Default: `FALSE`
 * **transMode**: transaction mode (applicable for each thread). Note: the per-thread transaction send rates for all modes have an upper bound. For example, if it typically takes 5 ms to get ack responses for sending transactions to peers in your network, then that limits your max effective rate to be 200 tps - such as when you use transMode = Constant with constantOpt.constFreq = any value between 1 - 5 ms. The host hardware cpu and memory resources may also impose limitations, especially when your test uses higher numbers of simultaneous connections and threads competing for those resources. (See *Notes on Statistical Distributions* for more info.)
-    * **Simple**: one transaction type and rate only, the subsequent transaction is sent when the response of sending transaction (not the event handler), success or failure, of the previous transaction received
     * **Constant**: the transactions are sent by the specified rate, see constantOpt for details
     * **Poisson**: the transactions are sent according to a Poisson distribution, see poissonOpt for details
     * **Latency**: one transaction type and rate only, the subsequent transaction is sent when the event message (ledger update is completed) of the previous transaction is received

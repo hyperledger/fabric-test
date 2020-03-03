@@ -118,13 +118,6 @@ class ccFunctions extends ccFunctionsBase {
         return 20000;
     }
 
-    getExecModeSimpleFreq() {
-        return 20000;
-    }
-
-    getExecModeProposalFreq() {
-        return 20000;
-    }
 }
 
 module.exports = ccFunctions;
