@@ -25,7 +25,7 @@ variables:
   - name: NODE_VER
     value: 8.x
   - name: RELEASE
-    value: 1.4.5-stable
+    value: 1.4.7-stable
   - name: TWO_DIGIT_RELEASE
     value: 1.4-stable
 
