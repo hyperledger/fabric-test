@@ -26,7 +26,7 @@ variables:
   - name: NODE_VER
     value: 10.17.0
   - name: RELEASE
-    value: 2.0.0-stable
+    value: 2.0.1-stable
   - name: TWO_DIGIT_RELEASE
     value: 2.0-stable
 
