@@ -101,9 +101,7 @@ function isEmpty(obj) {
         if (obj.hasOwnProperty(key))
             return false;
     }
-
     return true;
-
 }
 
 
@@ -160,6 +158,76 @@ function getTargetPeerList(cpList, orgList, targetPeerType) {
 
 module.exports.getTargetPeerListSubmitter = function (cpList, orgList, targetPeerType) {
     return getTargetPeerList(cpList, orgList, targetPeerType);
+}
+
+// add peer(s) to a channel
+function assignChannelPeers(cpList, channel, client, targetPeers, TLS, cpPath, evtType, invokeType, peerFOList, peerList, eventHubs) {
+    var peerTmp;
+    var eh;
+    var data;
+    var peername;
+    var targets = [];
+    logger.info('[assignChannelPeers] target peer list: %j', targetPeers);
+
+    for (var j=0; j< Object.keys(targetPeers).length; j++) {
+        var key = Object.keys(targetPeers)[j];
+        // find the connection profile of the specified org
+        var cpfTmp = findOrgConnProfile(cpList, key);
+        var cpf = findOrgConnProfile(cpList, key);
+        if (0 === getConnProfilePropCnt(cpf, 'peers')) {
+            logger.info('[assignChannelPeers] no peer is found in the connection profile for org (%s)', key);
+            continue;
+        }
+        var cpPeersTmp = cpfTmp['peers'];
+        for ( var i = 0; i < targetPeers[key].length; i++) {
+            peername = targetPeers[key][i];
+            if (cpPeersTmp.hasOwnProperty(peername)) {
+                if (cpPeersTmp[peername].url) {
+                    if (TLS > TLSDISABLED) {
+                        data = getTLSCert(key, peername, cpfTmp, cpPath);
+                        if (data !== null) {
+                            peerTmp = client.newPeer(
+                                cpPeersTmp[peername].url,
+                                {
+                                    pem: Buffer.from(data).toString(),
+                                    'ssl-target-name-override': cpPeersTmp[peername]['grpcOptions']['ssl-target-name-override']
+                                }
+                            );
+                        }
+                    } else {
+                        peerTmp = client.newPeer(cpPeersTmp[peername].url);
+                    }
+
+                    if ( channel ) {
+                        channel.addPeer(peerTmp);
+                    }
+                    if (peerFOList == 'TARGETPEERS') {
+                        peerList.push(peerTmp);
+                    }
+                    if (invokeType == 'MOVE') {
+                        eh = channel.newChannelEventHub(peerTmp);
+                        eventHubs.push(eh);
+                        if (evtType == 'FILTEREDBLOCK') {
+                            eh.connect();
+                        } else {
+                            eh.connect(true);
+                        }
+                    }
+                    targets.push(peerTmp);
+                }
+            } else {
+                logger.error('[assignChannelPeers] the targeted peer does not exist in connection profile: %s', peername);
+                process.exit(1);
+            }
+        }
+    }
+    if (channel) {
+        logger.info('[assignChannelPeers] getPeers: : %s', channel.getPeers());
+    }
+    return targets;
+}
+module.exports.assignChannelPeersSubmitter = function (cpList, channel, client, targetPeers, TLS, cpPath, evtType, invokeType, peerFOList, peerList, eventHubs) {
+    return assignChannelPeers(cpList, channel, client, targetPeers, TLS, cpPath, evtType, invokeType, peerFOList, peerList, eventHubs);
 }
 
 // get connection profiles from directory cpPath or a single connection profile file
