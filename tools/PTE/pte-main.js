@@ -33,7 +33,6 @@
 // in a happy-path scenario
 'use strict';
 
-
 const child_process = require('child_process');
 
 var hfc = require('fabric-client');
@@ -88,8 +87,8 @@ if (uiFile.endsWith(".json") || uiFile.endsWith(".yaml") || uiFile.endsWith(".ym
 else {
     uiContent = JSON.parse(uiFile)
     logger.debug('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent.deploy);
-    txCfgPtr = uiContent
-    ccDfnPtr = uiContent
+    txCfgPtr = uiContent;
+    ccDfnPtr = uiContent;
 }
 logger.debug('input parameters: Nid=%d, uiFile=%s, tStart=%d PTEid=%d', Nid, uiFile, tStart, PTEid);
 logger.debug('[Nid=%d pte-main] input ccDfnPtr[%s]: %j input txCfgPtr: %j', Nid, ccDfnTmp, ccDfnPtr, txCfgPtr);
@@ -208,8 +207,6 @@ var orderer;
 
 var sBlock = 0;
 var eBlock = 0;
-var qOrg;
-var qPeer;
 var maxWaitForFetchChannelBlock = 30;
 
 var testSummaryArray = [];
@@ -295,150 +292,6 @@ function chainAddOrderer(channel, client, org) {
         );
     }
     logger.debug('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
-}
-
-function channelAddPeer(channel, client, org) {
-    let channelName
-    if (channel) {
-        channelName = channel.getName()
-    }
-    logger.debug('[channelAddPeer] channel name: ', channelName);
-    var data;
-    var peerTmp;
-    var targets = [];
-
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-        logger.error('[channelAddPeer] org: %s, no peer is found in the connection profile', org);
-        process.exit(1);
-    }
-    var cpOrgs = cpf['organizations'];
-    var cpPeers = cpf['peers'];
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        peerTmp = null
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    targets.push(peerTmp);
-                }
-                if (channel && peerTmp) {
-                    channel.addPeer(peerTmp);
-                }
-            }
-        }
-    }
-    if (channel) {
-        logger.debug('[channelAddPeer] channel peers: %s', channel.getPeers());
-    }
-
-    return targets;
-}
-
-function channelAddQIPeer(channel, client, qorg, qpeer) {
-    logger.debug('[channelAddQIPeer] channel name: ', channel.getName());
-    logger.debug('[channelAddQIPeer] qorg %s qpeer: ', qorg, qpeer);
-    var data;
-    var peerTmp;
-    var targets = [];
-
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, qorg);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-        logger.error('[channelAddQIPeer] org: %s, no peer is found in the connection profile', qorg);
-        process.exit(1);
-    }
-    var cpOrgs = cpf['organizations'];
-    var cpPeers = cpf['peers'];
-
-    for (let i = 0; i < cpOrgs[qorg]['peers'].length; i++) {
-        var key = cpOrgs[qorg]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (key.indexOf(qpeer) === 0) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(qorg, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                }
-            }
-        }
-    }
-    logger.debug('[channelAddQIPeer] channel peers: %s', channel.getPeers());
-
-    return targets;
-}
-
-function channelAddPeer1(channel, client, org, eventHubs) {
-    logger.debug('[channelAddPeer1] channel name: %s, org: %s', channel.getName(), org);
-    var data;
-    var peerTmp;
-    var targets = [];
-
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-        logger.error('[channelAddPeer1] org: %s, no peer is found in the connection profile', org);
-        process.exit(1);
-    }
-    var cpOrgs = cpf['organizations'];
-    var cpPeers = cpf['peers'];
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        peerTmp = client.newPeer(
-                            cpPeers[key].url,
-                            {
-                                pem: Buffer.from(data).toString(),
-                                'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                            }
-                        );
-                        targets.push(peerTmp);
-                        channel.addPeer(peerTmp);
-                        let eh = channel.newChannelEventHub(peerTmp);
-                        eventHubs.push(eh);
-                    }
-                } else {
-                    peerTmp = client.newPeer(cpPeers[key].url);
-                    targets.push(peerTmp);
-                    channel.addPeer(peerTmp);
-                }
-                break; // found first peer, as identified in the ConnProfile
-            }
-        }
-    }
-    logger.debug('[channelAddPeer1] org: %s, channel peers: %s', org, channel.getPeers());
-
-    return targets;
 }
 
 function channelAddPeerEventJoin(channel, client, org) {
@@ -560,7 +413,14 @@ async function chaincodeInstall(client, org) {
             logger.debug('[chaincodeInstall] got user private key: org= %s', org);
         }
 
-        var targets = channelAddPeer(channel, client, org);
+        var targets;
+        var tgtOrg = [];
+        tgtOrg[0]=org;
+        var tgtPeers = [];
+        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+        if ( tgtPeers ) {
+            targets = testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, null);
+        }
 
         //sendInstallProposal
         getCCID();
@@ -666,8 +526,13 @@ async function chaincodeInstantiate(channel, client, org) {
 
         var ivar = 0
         for (ivar = 0; ivar < channelOrgName.length; ivar++) {
-            var orgInstantiate = channelOrgName[ivar];
-            channelAddPeer1(channel, client, orgInstantiate, eventHubs);
+            var tgtOrg = [];
+            tgtOrg[0]=channelOrgName[ivar];
+            var tgtPeers = [];
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+            if ( tgtPeers ) {
+                testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, eventHubs);
+            }
         }
 
         logger.info('[chaincodeInstantiate:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
@@ -809,8 +674,13 @@ async function chaincodeUpgrade(channel, client, org) {
 
         var ivar = 0
         for (ivar = 0; ivar < channelOrgName.length; ivar++) {
-            var orgInstantiate = channelOrgName[ivar];
-            channelAddPeer1(channel, client, orgInstantiate, eventHubs);
+            var tgtOrg = [];
+            tgtOrg[0]=channelOrgName[ivar];
+            var tgtPeers = [];
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+            if ( tgtPeers ) {
+                testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, eventHubs);
+            }
         }
 
         logger.info('[chaincodeUpgrade:Nid=%d] ready to initialize channel[%s]', Nid, channel.getName());
@@ -970,8 +840,6 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
         hfc.newDefaultKeyValueStore({
             path: testUtil.storePathForOrg(Nid, orgName)
         }).then((store) => {
-
-
             client.setStateStore(store);
             var cryptoSuite = hfc.newCryptoSuite();
             cryptoSuite.setCryptoKeyStore(hfc.newCryptoKeyStore({ path: testUtil.storePathForOrg(org) }));
@@ -980,7 +848,6 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             var submitePromises = [];
             channelOrgName.forEach((org) => {
                 submitter = new Promise(function (resolve, reject) {
-
                     cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
                     var cpOrgs = cpf['organizations'];
                     username = testUtil.getOrgEnrollIdSubmitter(cpf, org);
@@ -1280,9 +1147,6 @@ async function queryBlockchainInfo(channel, client, org) {
 
         sBlock = txCfgPtr.queryBlockOpt.startBlock;
         eBlock = txCfgPtr.queryBlockOpt.endBlock;
-        qOrg = txCfgPtr.queryBlockOpt.org;
-        qPeer = txCfgPtr.queryBlockOpt.peer;
-        logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%s:%d:%d', qOrg, qPeer, sBlock, eBlock);
 
         hfc.setConfigSetting('key-value-store', 'fabric-common/lib/impl/FileKeyValueStore.js');
         var cryptoSuite = hfc.newCryptoSuite();
@@ -1297,7 +1161,17 @@ async function queryBlockchainInfo(channel, client, org) {
 
         chainAddOrderer(channel, client, org);
 
-        channelAddQIPeer(channel, client, qOrg, qPeer);
+        var tmp = txCfgPtr.queryBlockOpt;
+        var tgtPeers = [];
+        var tgtOrg = Object.keys(tmp)[0]
+        tgtPeers[tgtOrg]=[];
+        for ( var j=0;  j<tmp[tgtOrg].length; j++) {
+            tgtPeers[tgtOrg].push(tmp[tgtOrg][j]);
+        }
+        if ( tgtPeers ) {
+            testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, null);
+        }
+        logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%j:%d:%d', tgtOrg, tgtPeers[tgtOrg], sBlock, eBlock);
 
         return hfc.newDefaultKeyValueStore({
             path: testUtil.storePathForOrg(orgName)
@@ -1320,9 +1194,7 @@ async function queryBlockchainInfo(channel, client, org) {
                 logger.info('[queryBlockchainInfo] channel(%s) reset eBlock to block height', channelName);
                 eBlock = blockHeight;
             }
-
             preQueryBlock(channel, sBlock, eBlock);
-
         }).catch((err) => {
             logger.error(err.stack ? err.stack : err);
             evtDisconnect();

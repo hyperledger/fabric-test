@@ -1,16 +1,5 @@
 {
-    "channelID": "_ch1",
-    "chaincodeID": "sample_cc",
-    "chaincodeVer": "v0",
-    "logLevel": "ERROR",
-    "invokeCheck": "TRUE",
-    "transMode": "Constant",
     "transType": "QueryBlock",
-    "invokeType": "Move",
-    "targetPeers": "OrgAnchor",
-    "nProcPerOrg": "4",
-    "nRequest": "1000",
-    "runDur": "600",
     "TLS": "enabled",
     "channelOpt": {
         "name": "testorgschannel1",
@@ -21,33 +10,9 @@
         ]
     },
     "queryBlockOpt": {
-        "org":  "org1",
-        "peer":  "peer0org1examplecom",
+        "org1":  ["peer0org1examplecom"],
         "startBlock":  "0",
         "endBlock":  "10"
-    },
-    "ccType": "ccchecker",
-    "ccOpt": {
-        "keyIdx": [1],
-        "keyPayLoad": [2],
-        "keyStart": "50000",
-        "payLoadMin": "1024",
-        "payLoadMax": "1024"
-    },
-    "deploy": {
-        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/samplecc/go",
-        "fcn": "init",
-        "args": []
-    },
-    "invoke": {
-        "query": {
-            "fcn": "invoke",
-            "args": ["get", "a1"]
-        },
-        "move": {
-            "fcn": "invoke",
-            "args": ["put", "a1","1"]
-        }
     },
     "ConnProfilePath": "ConnProfiles/test-network"
 }

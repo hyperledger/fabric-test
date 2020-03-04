@@ -425,8 +425,7 @@ Although PTE's primary use case is to drive transactions into a Fabric network, 
         To query the length (number of transactions) in blocks, set org, peer, startBlock, and endBlock in queryBlockOpt:
 
             "queryBlockOpt": {
-                "org":  "org1",
-                "peer":  "peer1",
+                "org1":  ["peer0org1examplecom"],
                 "startBlock":  "195",
                 "endBlock":  "200"
             },
@@ -733,8 +732,7 @@ The user input file contains configuration parameters including chaincode defini
         "runDur": "600",
         "TLS": "clientauth",
         "queryBlockOpt": {
-            "org":  "org1",
-            "peer":  "peer1",
+            "org1":  ["peer0org1examplecom"],
             "startBlock":  "6590",
             "endBlock":  "6800"
         },
@@ -858,8 +856,7 @@ where
         "runDur": "600",
         "TLS": "serverauth",
         "queryBlockOpt": {
-            "org":  "org1",
-            "peer":  "peer1",
+            "org1":  ["peer0org1examplecom"],
             "startBlock":  "6590",
             "endBlock":  "6800"
         },
@@ -972,8 +969,7 @@ where:
     * serverauth: server authentication, TLS
     * clientauth: client authentication, mutual TLS
 * **queryBlock**: query blockchain information options
-    * **org**: the org to be queried
-    * **peer**: the peer to be queried
+    * **org**: the org to be queried and the peer in the org
     * **startBlock**: the starting block
     * **endBlock**: the ending block. If the the ending block is greater than the chain height in the peer, eBlock will be set to the chain height.
 * **channelOpt**: transType channel options
