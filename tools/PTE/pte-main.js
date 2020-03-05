@@ -294,55 +294,6 @@ function chainAddOrderer(channel, client, org) {
     logger.debug('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
 }
 
-function channelAddPeerEventJoin(channel, client, org) {
-    logger.debug('[channelAddPeerEventJoin] channel name: ', channel.getName());
-    var data;
-
-    var targets = [];
-    var eventHubs = [];
-
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'peers')) {
-        logger.error('[channelAddPeerEventJoin] org: %s, no peer is found in the connection profile', org);
-        process.exit(1);
-    }
-    var cpOrgs = cpf['organizations'];
-    var cpPeers = cpf['peers'];
-
-    for (let i = 0; i < cpOrgs[org]['peers'].length; i++) {
-        var key = cpOrgs[org]['peers'][i];
-        if (cpPeers.hasOwnProperty(key)) {
-            if (cpPeers[key].url) {
-                if (TLS > testUtil.TLSDISABLED) {
-                    data = testUtil.getTLSCert(org, key, cpf, cpPath);
-                    if (data !== null) {
-                        targets.push(
-                            client.newPeer(
-                                cpPeers[key].url,
-                                {
-                                    pem: Buffer.from(data).toString(),
-                                    'ssl-target-name-override': cpPeers[key]['grpcOptions']['ssl-target-name-override']
-                                }
-                            )
-                        );
-                    }
-                } else {
-                    targets.push(
-                        client.newPeer(
-                            cpPeers[key].url
-                        )
-                    );
-                    logger.debug('[channelAddPeerEventJoin] peer: ', cpPeers[key].url);
-                }
-            }
-        }
-    }
-
-    allEventhubs = allEventhubs.concat(eventHubs);
-    return { targets: targets, eventHubs: eventHubs };
-}
-
-
 var chaincode_id;
 var chaincode_ver;
 function getCCID() {
@@ -1040,9 +991,14 @@ async function joinChannel(channel, client, org) {
             logger.debug('[joinChannel] org admin: ', admin);
 
             // add peers and events
-            var targeteh = channelAddPeerEventJoin(channel, client, org);
-            eventHubs = targeteh.eventHubs;
-            var targets = targeteh.targets;
+            var targets;
+            var tgtOrg = [];
+            tgtOrg[0]=org;
+            var tgtPeers = [];
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+            if ( tgtPeers ) {
+                targets = testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, eventHubs);
+            }
 
             tx_id = client.newTransactionID();
             let request = {
