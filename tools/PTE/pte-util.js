@@ -160,6 +160,67 @@ module.exports.getTargetPeerListSubmitter = function (cpList, orgList, targetPee
     return getTargetPeerList(cpList, orgList, targetPeerType);
 }
 
+
+function getOrgOrdererID(org, cpList) {
+    var ordererID;
+
+    var cpf = findOrgConnProfile(cpList, org);
+    if (0 === getConnProfilePropCnt(cpf, 'orderers')) {
+        logger.error('[getOrgOrdererID] org: %s, no orderer found in the connection profile', org);
+        process.exit(1);
+    }
+
+    var cpOrgs = cpf['organizations'];
+
+    if (typeof cpOrgs[org].ordererID !== 'undefined') {
+        ordererID = cpOrgs[org].ordererID;
+    } else {
+        var orderersCPFList = {};
+        orderersCPFList = getNodetypeFromConnProfiles(cpList, 'orderers');
+        ordererID = Object.getOwnPropertyNames(orderersCPFList)[0];
+    }
+    return ordererID;
+}
+
+function assignChannelOrderer(channel, client, org, cpPath, TLS) {
+    var data;
+    var cpList = [];
+    cpList = getConnProfileList(cpPath);
+    var orderersCPFList = {};
+    orderersCPFList = getNodetypeFromConnProfiles(cpList, 'orderers');
+    var cpf = findOrgConnProfile(cpList, org);
+    if (0 === getConnProfilePropCnt(cpf, 'orderers')) {
+        logger.error('[assignChannelOrderer] org: %s, no orderer is found in the connection profile', org);
+        process.exit(1);
+    }
+    var ordererID = getOrgOrdererID(org, cpList);
+    var orderer;
+
+    if (TLS > TLSDISABLED) {
+        data = getTLSCert('orderer', ordererID, cpf, cpPath);
+        if (data !== null) {
+            orderer = client.newOrderer(
+                orderersCPFList[ordererID].url,
+                {
+                    'pem': Buffer.from(data).toString(),
+                    'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
+                }
+           );
+        }
+    } else {
+        orderer = client.newOrderer(orderersCPFList[ordererID].url)
+    }
+
+    if (channel) {
+        channel.addOrderer(orderer);
+        logger.info('[assignChannelOrderer] channel orderers: %s', channel.getOrderers());
+    }
+    return orderer;
+}
+module.exports.assignChannelOrdererSubmitter = function (channel, client, org, cpPath, TLS) {
+    return assignChannelOrderer(channel, client, org, cpPath, TLS);
+}
+
 // add peer(s) to a channel
 function assignChannelPeers(cpList, channel, client, targetPeers, TLS, cpPath, evtType, invokeType, peerFOList, peerList, eventHubs) {
     var peerTmp;
@@ -576,7 +637,7 @@ function getOrdererAdmin(client, userOrg, cpPath) {
     cpList = getConnProfileList(cpPath);
     orderersCPFList = getNodetypeFromConnProfiles(cpList, 'orderers');
     if (Object.getOwnPropertyNames(orderersCPFList).length === 0) {
-        logger.error('[org:id=%s:%d getOrdererID] no orderer found', org, pid);
+        logger.error('[org:id=%s:%d getOrdererAdmin] no orderer found', org, pid);
         process.exit(1);
     }
 
@@ -768,7 +829,7 @@ function getTLSCert(key, subkey, cpf, cpPath) {
     cpList = getConnProfileList(cpPath);
     orderersCPFList = getNodetypeFromConnProfiles(cpList, 'orderers');
     if (Object.getOwnPropertyNames(orderersCPFList).length === 0) {
-        logger.error('[org:id=%s:%d getOrdererID] no orderer found', org, pid);
+        logger.error('[org:id=%s:%d getTLSCert] no orderer found', org, pid);
         process.exit(1);
     }
     var cpOrgs = cpf['organizations'];

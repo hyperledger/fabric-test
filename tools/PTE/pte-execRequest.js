@@ -614,7 +614,7 @@ function ordererReconnect(channel, client, org) {
     }
 
     channel.removeOrderer(ordererList[currOrdererId]);
-    channelAddOrderer(channel, client, org);
+    testUtil.assignChannelOrdererSubmitter(channel, client, org, cpPath, TLS)
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d ordererReconnect] Orderer reconnect (%s)', Nid, channel.getName(), org, pid, ordererList[currOrdererId]._url);
 }
 
@@ -680,32 +680,6 @@ function assignOrdererList(channel, client) {
     logger.info('[Nid:chan:org:id=%d:%s:%s:%d assignOrdererList] orderer list: %s', Nid, channelName, org, pid, ordererList);
 }
 
-function channelAddOrderer(channel, client, org) {
-    // assign ordererID
-    var ordererID = testUtil.getOrdererID(pid, channelOpt.orgName, org, txCfgPtr, cpf, ordererMethod, cpPath);
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer[%s] is assigned to this thread', Nid, channelName, org, pid, ordererID);
-
-    if (TLS > testUtil.TLSDISABLED) {
-        var data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
-        if (data !== null) {
-            let caroots = Buffer.from(data).toString();
-
-            channel.addOrderer(
-                client.newOrderer(
-                    orderersCPFList[ordererID].url,
-                    {
-                        'pem': caroots,
-                        'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
-                    }
-                )
-            );
-        }
-    } else {
-        channel.addOrderer(client.newOrderer(orderersCPFList[ordererID].url));
-        logger.debug('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer url: ', Nid, channelName, org, pid, orderersCPFList[ordererID].url);
-    }
-    logger.info('[Nid:chan:org:id=%d:%s:%s:%d channelAddOrderer] orderer: %s', Nid, channelName, org, pid, channel.getOrderers());
-}
 
 // add target peers to channel
 function setTargetPeers(tPeers) {
@@ -844,7 +818,7 @@ async function execTransMode() {
 
                 if (targetPeers != 'DISCOVERY') {
                     assignOrdererList(channel, client);
-                    channelAddOrderer(channel, client, org);
+                    testUtil.assignChannelOrdererSubmitter(channel, client, org, cpPath, TLS)
                     setCurrOrdererId(channel, client, org);
 
                     if (peerFOList == 'ALL') {

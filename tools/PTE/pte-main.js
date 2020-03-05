@@ -230,70 +230,6 @@ function getOrgOrdererID(org) {
     return ordererID;
 }
 
-function clientNewOrderer(client, org) {
-    var data;
-
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers')) {
-        logger.error('[clientNewOrderer] org: %s, no orderer found in the connection profile', org);
-        process.exit(1);
-    }
-    var ordererID = getOrgOrdererID(org);
-
-    logger.debug('[clientNewOrderer] org: %s, ordererID: %s', org, ordererID);
-    if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
-        if (data !== null) {
-            let caroots = Buffer.from(data).toString();
-
-            orderer = client.newOrderer(
-                orderersCPFList[ordererID].url,
-                {
-                    'pem': caroots,
-                    'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
-                }
-            );
-        }
-    } else {
-        orderer = client.newOrderer(orderersCPFList[ordererID].url);
-    }
-    logger.debug('[clientNewOrderer] orderer: %s', orderersCPFList[ordererID].url);
-}
-
-function chainAddOrderer(channel, client, org) {
-    logger.debug('[chainAddOrderer] channel name: ', channel.getName());
-
-    var data;
-    var cpf = testUtil.findOrgConnProfileSubmitter(cpList, org);
-    if (0 === testUtil.getConnProfilePropCntSubmitter(cpf, 'orderers')) {
-        logger.error('[chainAddOrderer] org: %s, no orderer is found in the connection profile', org);
-        process.exit(1);
-    }
-    var ordererID = getOrgOrdererID(org);
-
-    if (TLS > testUtil.TLSDISABLED) {
-        data = testUtil.getTLSCert('orderer', ordererID, cpf, cpPath);
-        if (data !== null) {
-            let caroots = Buffer.from(data).toString();
-
-            channel.addOrderer(
-                client.newOrderer(
-                    orderersCPFList[ordererID].url,
-                    {
-                        'pem': caroots,
-                        'ssl-target-name-override': orderersCPFList[ordererID]['grpcOptions']['ssl-target-name-override']
-                    }
-                )
-            );
-        }
-    } else {
-        channel.addOrderer(
-            client.newOrderer(orderersCPFList[ordererID].url)
-        );
-    }
-    logger.debug('[chainAddOrderer] channel orderers: %s', channel.getOrderers());
-}
-
 var chaincode_id;
 var chaincode_ver;
 function getCCID() {
@@ -473,7 +409,7 @@ async function chaincodeInstantiate(channel, client, org) {
             await testUtil.tlsEnroll(client, org, cpf);
             logger.debug('[chaincodeInstantiate] get user private key: org= %s', org);
         }
-        chainAddOrderer(channel, client, org);
+        testUtil.assignChannelOrdererSubmitter(channel, client, org, cpPath, TLS);
 
         var ivar = 0
         for (ivar = 0; ivar < channelOrgName.length; ivar++) {
@@ -621,7 +557,7 @@ async function chaincodeUpgrade(channel, client, org) {
             await testUtil.tlsEnroll(client, org, cpf);
             logger.debug('[chaincodeUpgrade] get user private key: org= %s', org);
         }
-        chainAddOrderer(channel, client, org);
+        testUtil.assignChannelOrdererSubmitter(channel, client, org, cpPath, TLS);
 
         var ivar = 0
         for (ivar = 0; ivar < channelOrgName.length; ivar++) {
@@ -786,7 +722,6 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
             await testUtil.tlsEnroll(client, channelOrgName[0], cpf);
             logger.debug('[createOrUpdateOneChannel] get user private key: org= %s', channelOrgName[0]);
         }
-        //clientNewOrderer(client, channelOrgName[0]);
 
         hfc.newDefaultKeyValueStore({
             path: testUtil.storePathForOrg(Nid, orgName)
@@ -830,7 +765,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
                 var channelName = uiContent.ordererSystemChannel ? uiContent.ordererSystemChannel : "orderersystemchannel"
                 var sysChannel = client.newChannel(channelName);
 
-                chainAddOrderer(sysChannel, client, channelOrgName[0]);
+                testUtil.assignChannelOrdererSubmitter(sysChannel, client, channelOrgName[0], cpPath, TLS);
 
                 let tx_id_sysCh = client.newTransactionID();
 
@@ -867,7 +802,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
 
                 logger.debug('[createOrUpdateOneChannel] done signing: %s', channelName);
                 // add new orderer
-                clientNewOrderer(client, channelOrgName[0]);
+                orderer = testUtil.assignChannelOrdererSubmitter(null, client, channelOrgName[0], cpPath, TLS);
                 // build up the create request
                 let tx_id = client.newTransactionID();
                 let nonce = tx_id.getNonce();
@@ -950,7 +885,7 @@ async function joinChannel(channel, client, org) {
             logger.debug('[joinChannel] orderer admin: ', admin);
 
             // add orderers
-            chainAddOrderer(channel, client, org);
+            testUtil.assignChannelOrdererSubmitter(channel, client, org, cpPath, TLS);
 
             let tx_id = client.newTransactionID();
             var request = {
@@ -1115,7 +1050,7 @@ async function queryBlockchainInfo(channel, client, org) {
             logger.debug('[queryBlockchainInfo] got user private key: org= %s', org);
         }
 
-        chainAddOrderer(channel, client, org);
+        testUtil.assignChannelOrdererSubmitter(channel, client, org, cpPath, TLS);
 
         var tmp = txCfgPtr.queryBlockOpt;
         var tgtPeers = [];
