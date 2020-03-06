@@ -26,9 +26,9 @@ variables:
   - name: NODE_VER
     value: 10.17.0
   - name: RELEASE
-    value: 2.0.1-stable
+    value: 2.1.0-stable
   - name: TWO_DIGIT_RELEASE
-    value: 2.0-stable
+    value: 2.1-stable
 
 jobs:
   - job: BYFN
