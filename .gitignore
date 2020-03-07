@@ -27,7 +27,8 @@ TESTS*.xml
 .settings
 .project
 .gradle
-build/
+./build/
+chaincodes/**/build
 bin/
 *.tx
 *.block

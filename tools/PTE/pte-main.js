@@ -311,8 +311,8 @@ async function chaincodeInstall(client, org) {
 
         //sendInstallProposal
         getCCID();
-        let baseDir = __dirname.split("/github.com/hyperledger/")[0]
-        baseDir = baseDir.endsWith("src") ? baseDir.substring(0, baseDir.length - 3) : baseDir
+        let baseDir = __dirname.split("/github.com/hyperledger/")[0];
+        baseDir = baseDir.endsWith("src") ? baseDir.substring(0, baseDir.length - 3) : baseDir;
         var request_install = {
             targets: targets,
             chaincodePath: chaincodePath,
@@ -325,7 +325,7 @@ async function chaincodeInstall(client, org) {
 
         logger.debug('request_install: %j', request_install.targets);
 
-        client.installChaincode(request_install)
+        client.installChaincode(request_install, cfgTimeout)
             .then(
                 function (results) {
                     var proposalResponses = results[0];

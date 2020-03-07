@@ -48,3 +48,6 @@ pull-binaries-fabric:
 .PHONY: pull-binaries-fabric-ca
 pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
+
+build/%:
+	./ci/scripts/${@}.sh
