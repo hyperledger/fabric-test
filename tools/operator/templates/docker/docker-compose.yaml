@@ -201,7 +201,7 @@
 #@       if config.fabricVersion.endswith("-stable"):
 #@         env.append("CORE_CHAINCODE_BUILDER=hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-{}".format(config.fabricVersion))
 #@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger-fabric.jfrog.io/fabric-baseos:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME=hyperledger-fabric.jfrog.io//fabric-javaenv:amd64-{}".format(config.fabricVersion))
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME=hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-{}".format(config.fabricVersion))
 #@         env.append("CORE_CHAINCODE_NODE_RUNTIME=hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-{}".format(config.fabricVersion))
 #@         image="hyperledger-fabric.jfrog.io/fabric-peer:amd64-{}".format(config.fabricVersion)
 #@       end

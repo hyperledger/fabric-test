@@ -8,3 +8,6 @@ git clone -b master https://github.com/hyperledger/fabric-chaincode-node "${GOPA
 cd "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-node"
 node common/scripts/install-run-rush.js install
 node common/scripts/install-run-rush.js rebuild
+
+# This is temporary until chaincode-node starts adding 2 digit tags
+docker tag hyperledger/fabric-nodeenv hyperledger/fabric-nodeenv:2.1
