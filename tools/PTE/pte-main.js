@@ -1290,10 +1290,6 @@ async function performance_main() {
                             var totalQueryTps = 0;
                             var totalInvokeTime = 0;
                             var totalQueryTime = 0;
-                            var totalMixedTPS = 0;
-                            var totalMixedTime = 0;
-                            var totalMixedInvoke = 0;
-                            var totalMixedQuery = 0;
                             var totalDiscoveryTrans = 0;
                             var totalDiscoveryTransFailures = 0;
                             var totalDiscoveryTime = 0;
@@ -1360,33 +1356,6 @@ async function performance_main() {
                                 if (rawText.indexOf("event latency stats") > -1) {
                                     update_latency_array(latency_event, rawText);
                                 }
-                                if (rawText.indexOf("invoke_query_mix") > -1) {
-                                    var mixedTransNum = parseInt(rawText.substring(rawText.indexOf("pte-exec:completed") + 18, rawText.indexOf("Invoke(move)")).trim());
-                                    totalMixedInvoke = totalMixedInvoke + mixedTransNum;
-                                    var mixedQueryNum = parseInt(rawText.substring(rawText.indexOf("and") + 3, rawText.indexOf("Invoke(query)")).trim());
-                                    totalMixedQuery = totalMixedQuery + mixedQueryNum;
-                                    var tempDur = parseInt(rawText.substring(rawText.indexOf(") in") + 4, rawText.indexOf("ms")).trim());
-                                    totalMixedTime = totalMixedTime + tempDur;
-                                    var tempMixedTps = parseFloat(rawText.substring(rawText.indexOf("Throughput=") + 11, rawText.indexOf("TPS")).trim());
-                                    if (tempMixedTps > 0) {
-                                        totalMixedTPS = totalMixedTPS + tempMixedTps;
-                                    }
-
-                                    var tmp = parseInt(rawText.substring(rawText.indexOf("start") + 5, rawText.indexOf("end")).trim());
-                                    var tmp1 = parseInt(rawText.substring(rawText.indexOf("end") + 3, rawText.indexOf(",Thr")).trim());
-                                    if (stmp == 0) {
-                                        stmp = tmp;
-                                    } else if (stmp > tmp) {
-                                        stmp = tmp;
-                                    }
-                                    if (etmp == 0) {
-                                        etmp = tmp1;
-                                    } else if (etmp < tmp1) {
-                                        etmp = tmp1;
-                                    }
-
-                                    continue;
-                                };
                                 if ((invokeType == "QUERY") && (rawText.indexOf("invoke_query_") > -1)) {
                                     var queryTransNum = parseInt(rawText.substring(rawText.indexOf("pte-exec:completed") + 18, rawText.indexOf("transaction", rawText.indexOf("pte-exec:completed") + 18)).trim());
                                     totalQueryTrans = totalQueryTrans + queryTransNum;
@@ -1566,36 +1535,6 @@ async function performance_main() {
                                 fs.appendFileSync(rptFile, buff);
                                 buff = "(" + channelName + ":" + chaincode_id + "):\tTPS " + qTPS.toFixed(2) + "\n\n";
                                 output["TPS"] = qTPS.toFixed(2)
-                                fs.appendFileSync(rptFile, buff);
-                            }
-                            if (totalMixedTPS) {
-                                var dur = etmp - stmp;
-                                var mixTotal = totalMixedInvoke + totalMixedQuery;
-                                var mTPS = 1000 * (totalMixedInvoke + totalMixedQuery) / dur;
-                                logger.info("Aggregate Test Summary (%s):Total MIX transaction invoke %d query %d total %d, start %d end %d duration is %d ms, TPS %d", chaincode_id, totalMixedInvoke, totalMixedQuery, totalMixedInvoke + totalMixedQuery, stmp, etmp, etmp - stmp, mTPS.toFixed(2));
-
-                                // mix transaction output
-                                var buff = "======= " + loggerMsg + " Test Summary: executed at " + sTime + " =======\n";
-                                output["Test executed at"] = sTime
-                                fs.appendFileSync(rptFile, buff);
-                                buff = "(" + channelName + ":" + chaincode_id + "): " + transMode + " INVOKE/QUERY transaction stats\n";
-                                output["INVOKE/QUERY transaction mode"] = transMode
-                                fs.appendFileSync(rptFile, buff);
-                                buff = "(" + channelName + ":" + chaincode_id + "):\tTotal processes " + procDone + "\n";
-                                output["Total processes"] = procDone
-                                fs.appendFileSync(rptFile, buff);
-                                buff = "(" + channelName + ":" + chaincode_id + "):\tTotal transactions sent " + mixTotal + " INVOKE " + totalMixedInvoke + "  QUERY " + totalMixedQuery + "\n";
-                                const totalTransactions = { "sent": mixTotal, "INVOKE": totalMixedInvoke, "QUERY": totalMixedQuery }
-                                output["Total transactions"] = totalTransactions
-                                fs.appendFileSync(rptFile, buff);
-
-                                buff = "(" + channelName + ":" + chaincode_id + "):\tstart " + stmp + "  end " + etmp + "  duration " + dur + " ms \n";
-                                output["start"] = stmp
-                                output["end"] = etmp
-                                output["duration"] = dur + " ms"
-                                fs.appendFileSync(rptFile, buff);
-                                buff = "(" + channelName + ":" + chaincode_id + "):\tTPS " + mTPS.toFixed(2) + "\n\n";
-                                output["TPS"] = mTPS.toFixed(2)
                                 fs.appendFileSync(rptFile, buff);
                             }
                             if (totalDiscoveryTrans > 0) {
