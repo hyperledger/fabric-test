@@ -35,7 +35,7 @@ lint: gotools
 
 .PHONY: unit-tests
 unit-tests:
-	@go test -cover ./...
+	@cd tools/operator && go test -cover ./...
 
 .PHONY: pull-binaries
 pull-binaries:
