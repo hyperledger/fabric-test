@@ -1,4 +1,4 @@
-module github.com/hyperledger/fabric-test
+module github.com/hyperledger/fabric-test/tools/operator
 
 go 1.13
 

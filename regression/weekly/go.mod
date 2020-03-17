@@ -2,10 +2,10 @@ module github.com/hyperledger/fabric-test/regression/weeklytest
 
 go 1.13
 
+replace github.com/hyperledger/fabric-test/tools/operator => ../../../fabric-test/tools/operator
+
 require (
-	github.com/hyperledger/fabric-test v1.1.1-0.20191210182509-1d3c883f142f
+	github.com/hyperledger/fabric-test/tools/operator v0.0.0-00010101000000-000000000000
 	github.com/onsi/ginkgo v1.12.0
 	github.com/onsi/gomega v1.8.1
 )
-
-replace github.com/hyperledger/fabric-test => ../../../fabric-test
