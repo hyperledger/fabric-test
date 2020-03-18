@@ -157,6 +157,12 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 		if err != nil {
 			return err
 		}
+	case "command":
+		err = testclient.Testclient("command", inputFilePath)
+		if err != nil {
+			logger.ERROR("Failed to execute command function")
+			return err
+		}
 	case "health":
 		switch env {
 		case "k8s":
