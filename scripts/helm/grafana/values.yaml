@@ -1,0 +1,53 @@
+persistence:
+  enabled: true
+  type: pvc
+  storageClassName: <storage_class_name> # Provide a pre-configured storage class
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-server.default.svc.cluster.local:80
+        access: proxy
+        isDefault: true
+        jsonData:
+          timeInterval: "10s" # Set the default polling time to 10 seconds
+
+resources:
+  requests:
+    cpu: 1
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1024Mi
+
+testFramework:
+  enabled: false # Disable automated deployment of resources for testing Grafana
+serviceAccount:
+  create: false # We are not using RBAC so we will disable
+
+adminUser: admin
+adminPassword: <default_admin_password> # The admin user will be created with this password
+
+# We use a database for performance. By default, Grafana uses SQLite3 for storage.
+# Under load, Grafana crashes when to many data points are queried at once using
+# SQLite3. Instead we should use either mysql or postgres as the database backend.
+grafana.ini:
+  database:
+    type: <database_type> # either mysql or postgres
+    host: <mysql_host_fqdn_or_ip>:<mysql_port>
+    name: <mysql_database_name>
+    user: <mysql_databasee_username>
+    password: <mysql_database_password>
+
+# Exposes the app on the public IP of all of Kubernetes nodes in the cluster
+service:
+  type: NodePort
+  port: 3000
+  targetPort: 3000
+  nodePort: 30080
+  annotations: {}
+  labels: {}
+  portName: grafana
