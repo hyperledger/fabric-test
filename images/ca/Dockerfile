@@ -16,10 +16,10 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir -p ${GOPATH}/src/github.com/hyperledger
 WORKDIR ${GOPATH}/src/github.com/hyperledger
-RUN git clone https://github.com/hyperledger/fabric-ca
+RUN git clone -b release-1.4 https://github.com/hyperledger/fabric-ca
 WORKDIR ${GOPATH}/src/github.com/hyperledger/fabric-ca
 RUN perl -i -p0e \
-    's/bccsp.+keystore/bccsp:\n    default: PKCS11\n    pkcs11:\n        Library: \/usr\/lib\/x86_64-linux-gnu\/softhsm\/libsofthsm2.so\n        Label: ForFabric\n        Pin: 98765432\n        hash: SHA2\n        security: 256/gms' \
+    's/bccsp.+keystore/bccsp:\n    default: PKCS11\n    pkcs11:\n        Library: \/usr\/lib\/x86_64-linux-gnu\/softhsm\/libsofthsm2.so\n        Label: ForFabric\n        Pin: "98765432"\n        hash: SHA2\n        security: 256/gms' \
     ./cmd/fabric-ca-server/config.go
 RUN go install -tags pkcs11 -ldflags "${GO_LDFLAGS}" github.com/hyperledger/fabric-ca/cmd/fabric-ca-server
 RUN go install -tags pkcs11 -ldflags "${GO_LDFLAGS}" github.com/hyperledger/fabric-ca/cmd/fabric-ca-client

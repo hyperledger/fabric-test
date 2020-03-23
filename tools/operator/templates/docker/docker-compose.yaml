@@ -45,15 +45,11 @@
 #@   end
 #@   env = ["FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server"]
 #@   env.append("FABRIC_CA_SERVER_CA_NAME={}".format(container_name))
-#@   env.append("FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca/ca.{}-cert.pem".format(orgName))
-#@   env.append("FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/ca/ca-priv_sk")
 #@   if config.tls == "mutual":
 #@     env.append("FABRIC_CA_SERVER_TLS_ENABLED=true")
 #@   else:
 #@     env.append("FABRIC_CA_SERVER_TLS_ENABLED={}".format(config.tls))
 #@   end
-#@   env.append("FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/tlsca/tlsca.{}-cert.pem".format(orgName))
-#@   env.append("FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tlsca/tlsca-priv_sk")
 #@   ports = ["{}:{}".format(caUniquePort, 7054)]
 #@   command = "sh -c 'fabric-ca-server start -b admin:adminpw -d'"
 #@   volumes = ["{}crypto-config/{}/{}/ca/:/etc/hyperledger/fabric-ca-server-config/ca".format(artifactsLocation, orgType, orgName)]
@@ -121,7 +117,7 @@
 #@   for i in range(0, len(config.ordererOrganizations)):
 #@     org = config.ordererOrganizations[i]
 #@     for j in range(0, org.numOderers):
-#@       env = ["FABRIC_LOGGING_SPEC={}".format(config.ordererFabricLoggingSpec), "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0", "ORDERER_GENERAL_LISTENPORT={}".format(ordererUniquerPort), "ORDERER_GENERAL_GENESISMETHOD=file"]
+#@       env = ["FABRIC_LOGGING_SPEC=debug", "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0", "ORDERER_GENERAL_LISTENPORT={}".format(ordererUniquerPort), "ORDERER_GENERAL_GENESISMETHOD=file"]
 #@       env.append("ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/fabric/artifacts/msp/channel-artifacts/genesis.block")
 #@       env.append("ORDERER_GENERAL_LOCALMSPID={}".format(org.mspId))
 #@       env.append("ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/msp".format(org.name, j, org.name, org.name))
@@ -138,6 +134,10 @@
 #@       env.append("ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt]".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
+#@       env.append("ORDERER_BCCSP_DEFAULT=PKCS11")
+#@       env.append("ORDERER_BCCSP_PKCS11_LIBRARY=/usr/lib/x86_64-linux-gnu/softhsm/libsofthsm2.so")
+#@       env.append("ORDERER_BCCSP_PKCS11_PIN=98765432")
+#@       env.append("ORDERER_BCCSP_PKCS11_LABEL=ForFabric")
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("{}/backup/orderer{}-{}:/var/hyperledger/production/orderer".format(artifactsLocation, j, org.name))
 #@       container_name = "orderer{}-{}".format(j,org.name)
@@ -161,7 +161,7 @@
 #@   for i in range(0, len(config.peerOrganizations)):
 #@     org = config.peerOrganizations[i]
 #@     for j in range(0, org.numPeers):
-#@       env = ["CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock", "FABRIC_LOGGING_SPEC={}".format(config.peerFabricLoggingSpec), "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=configfiles_default"]
+#@       env = ["CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock", "FABRIC_LOGGING_SPEC=debug", "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=configfiles_default"]
 #@       if config.gossipEnable == True:
 #@         env.append("CORE_PEER_GOSSIP_STATE_ENABLED=true")
 #@         env.append("CORE_PEER_GOSSIP_ORGLEADER=false")
@@ -212,6 +212,10 @@
 #@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-{}:5984".format(container_name))
 #@         services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name, "depends_on":["couchdb-{}".format(container_name)]}
 #@       end
+#@       env.append("CORE_BCCSP_DEFAULT=PKCS11")
+#@       env.append("CORE_BCCSP_PKCS11_LIBRARY=/usr/lib/x86_64-linux-gnu/softhsm/libsofthsm2.so")
+#@       env.append("CORE_BCCSP_PKCS11_PIN=98765432")
+#@       env.append("CORE_BCCSP_PKCS11_LABEL=ForFabric")
 #@       peerUniquerPort += 1
 #@       peerHealthCheckPort += 1
 #@     end

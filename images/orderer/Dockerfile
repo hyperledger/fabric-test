@@ -21,8 +21,11 @@ RUN apt-get update && apt-get install -y \
 	make
 RUN mkdir -p ${GOPATH}/src/github.com/hyperledger
 WORKDIR ${GOPATH}/src/github.com/hyperledger
-RUN git clone https://github.com/hyperledger/fabric
+RUN git clone -b release-1.4 https://github.com/hyperledger/fabric
 WORKDIR ${GOPATH}/src/github.com/hyperledger/fabric
+RUN perl -i -p0e \
+    's/BCCSP:.+KeyStore:/BCCSP:\n        default: PKCS11\n        PKCS11:\n            Library: \/usr\/lib\/x86_64-linux-gnu\/softhsm\/libsofthsm2.so\n            Label: ForFabric\n            Pin: "98765432"\n            Hash: SHA2\n            Security: 256/gms' \
+    ./sampleconfig/orderer.yaml
 
 FROM golang as orderer
 RUN make orderer GO_TAGS=pkcs11

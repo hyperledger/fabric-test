@@ -33,6 +33,11 @@ npm-init:
 		cd $(CURDIR)/tools/PTE && npm rebuild 2>/dev/null
     endif
 
+fabric-docker:
+	docker build -t hyperledger/fabric-ca ./images/ca
+	docker build -t hyperledger/fabric-peer ./images/peer
+	docker build -t hyperledger/fabric-orderer ./images/orderer
+
 .PHONY: lint
 lint: gotools
 	./scripts/lint.sh

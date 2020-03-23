@@ -23,6 +23,7 @@ metrics: false
 gossipEnable: false
 #! enable node ou's in fabric network (true/false)
 enableNodeOUs: true
+enableHSM: true
 
 #! For smoke test suite, crypto-config, connection-profile and channel-artifacts are stored
 #! in smoke directory
@@ -59,7 +60,7 @@ ordererOrganizations:
 - name: ordererorg1
   mspId: OrdererOrgExampleCom
   numOderers: 1
-  numCa: 0
+  numCa: 1
 
 peerOrganizations:
 - name: org1
