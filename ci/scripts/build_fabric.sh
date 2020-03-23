@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 
-git clone -b release-1.4 https://github.com/hyperledger/fabric "${GOPATH}/src/github.com/hyperledger/fabric"
+git clone -b ${BRANCH} https://github.com/hyperledger/fabric "${GOPATH}/src/github.com/hyperledger/fabric"
 cd "${GOPATH}/src/github.com/hyperledger/fabric"
 make docker
 make release/linux-amd64

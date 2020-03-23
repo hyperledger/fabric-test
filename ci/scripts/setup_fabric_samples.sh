@@ -4,6 +4,6 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 
-git clone -b release-1.4 https://github.com/hyperledger/fabric-samples "${GOPATH}/src/github.com/hyperledger/fabric-samples"
+git clone -b ${BRANCH} https://github.com/hyperledger/fabric-samples "${GOPATH}/src/github.com/hyperledger/fabric-samples"
 mkdir -p "${GOPATH}/src/github.com/hyperledger/fabric-samples/config"
 cp "${GOPATH}"/src/github.com/hyperledger/fabric/sampleconfig/*yaml "${GOPATH}/src/github.com/hyperledger/fabric-samples/config"

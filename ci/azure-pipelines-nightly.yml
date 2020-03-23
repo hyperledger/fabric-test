@@ -24,6 +24,8 @@ variables:
     value: 1.12.12
   - name: NODE_VER
     value: 8.x
+  - name: BRANCH
+    value: release-1.4
   - name: RELEASE
     value: 1.4.7-stable
   - name: TWO_DIGIT_RELEASE
