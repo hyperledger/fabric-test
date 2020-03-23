@@ -17,6 +17,8 @@ schedules:
 
 variables:
   - group: Azure
+  - name: GOBIN
+    value: $(Agent.BuildDirectory)/go/bin
   - name: GOPATH
     value: $(Agent.BuildDirectory)/go
   - name: PATH
@@ -25,12 +27,12 @@ variables:
     value: 1.13.8
   - name: NODE_VER
     value: 10.17.0
+  - name: BRANCH
+    value: master
   - name: RELEASE
     value: 2.1.0-stable
   - name: TWO_DIGIT_RELEASE
     value: 2.1-stable
-  - name: GOBIN
-    value: $(Agent.BuildDirectory)/go/bin
 
 jobs:
   - job: TestAndPublish
