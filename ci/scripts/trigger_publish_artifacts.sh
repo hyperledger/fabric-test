@@ -9,12 +9,6 @@ docker login -u "${ARTIFACTORY_USERNAME}" -p "${ARTIFACTORY_PASSWORD}" hyperledg
 for image in baseos peer orderer ccenv tools ca javaenv nodeenv; do
     docker tag "hyperledger/fabric-${image}" "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${RELEASE}"
     docker push "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${RELEASE}"
-
-    docker tag "hyperledger/fabric-${image}" "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${TWO_DIGIT_RELEASE}"
-    docker push "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${TWO_DIGIT_RELEASE}"
-
-    docker tag "hyperledger/fabric-${image}" "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-latest"
-    docker push "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-latest"
 done
 
 
@@ -30,10 +24,6 @@ for target in linux-amd64 darwin-amd64 windows-amd64; do
          -T "hyperledger-fabric-${target}-${RELEASE}.tar.gz" \
          "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-${target}-${RELEASE}.tar.gz"
 
-    curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
-         -T "hyperledger-fabric-${target}-${RELEASE}.tar.gz" \
-         "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-${target}-${TWO_DIGIT_RELEASE}.tar.gz"
-
     cd "${GOPATH}/src/github.com/hyperledger/fabric-ca"
     make "release/${target}"
 
@@ -42,8 +32,4 @@ for target in linux-amd64 darwin-amd64 windows-amd64; do
     curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
          -T "hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz" \
          "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz"
-
-     curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
-         -T "hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz" \
-         "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-ca-${target}-${TWO_DIGIT_RELEASE}.tar.gz"
 done
