@@ -31,8 +31,6 @@ variables:
   - name: BRANCH
     value: master
   - name: RELEASE
-    value: 2.1.0-stable
-  - name: TWO_DIGIT_RELEASE
     value: 2.1-stable
 
 jobs:
