@@ -3,7 +3,7 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 ---
-fabricVersion: 2.0.0-stable
+fabricVersion: 2.0-stable
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers
