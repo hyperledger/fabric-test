@@ -27,8 +27,6 @@ variables:
   - name: BRANCH
     value: release-1.4
   - name: RELEASE
-    value: 1.4.7-stable
-  - name: TWO_DIGIT_RELEASE
     value: 1.4-stable
 
 jobs:
