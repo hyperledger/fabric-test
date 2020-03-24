@@ -35,12 +35,12 @@ lint: gotools
 
 .PHONY: pull-binaries
 pull-binaries:
-	./scripts/pullBinaries.sh 1.4.5-stable fabric fabric-ca
+	./scripts/pullBinaries.sh 1.4-stable fabric fabric-ca
 
 .PHONY: pull-binaries-fabric
 pull-binaries-fabric:
-	./scripts/pullBinaries.sh 1.4.5-stable fabric
+	./scripts/pullBinaries.sh 1.4-stable fabric
 
 .PHONY: pull-binaries-fabric-ca
 pull-binaries-fabric-ca:
-	./scripts/pullBinaries.sh 1.4.5-stable fabric-ca
+	./scripts/pullBinaries.sh 1.4-stable fabric-ca

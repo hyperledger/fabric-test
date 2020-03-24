@@ -6,7 +6,7 @@
 #! Released images are pulled from docker hub hyperledger/, e.g. 1.4.5
 #! Development stream images are pulled from
 #! hyperledger-fabric.jfrog.io/, e.g. 1.4.5-stable
-fabricVersion: 1.4.5-stable
+fabricVersion: 1.4-stable
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers
