@@ -16,16 +16,16 @@ joinChannel:
 
 installChaincode:
 # installs chaincode with specified name on all peers in listed organziations
-  - name: samplecc
+  - name: mapcc
     version: v1
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    path: github.com/hyperledger/fabric-test/chaincodes/map_private/go
     organizations: org1
     language: golang
     metadataPath: ""
 
 instantiateChaincode:
   - channelName: testorgschannel0
-    name: samplecc
+    name: mapcc
     version: v1
     args: ""
     organizations: org1
@@ -34,7 +34,7 @@ instantiateChaincode:
 
 invokes:
   - channelName: testorgschannel0
-    name: samplecc
+    name: mapcc
     targetPeers: OrgAnchor
     nProcPerOrg: 32
     nRequest: 10000
@@ -57,11 +57,11 @@ invokes:
       keyPayload: [2]
       payLoadMin: 8
       payLoadMax: 8
-    args: "put,a1,1"
+    args: "getPut,a1,1"
 
 queries:
   - channelName: testorgschannel0
-    name: samplecc
+    name: mapcc
     targetPeers: OrgAnchor
     nProcPerOrg: 32
     nRequest: 10000
