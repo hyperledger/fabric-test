@@ -13,7 +13,7 @@ variables:
   GO_VER: 1.13.8
   GOPATH: $(Agent.BuildDirectory)/go
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-  NODE_VER: 8.x
+  NODE_VER: 10.x
 
 jobs:
 - job: VerifyBuild
