@@ -49,7 +49,7 @@ instantiateChaincode:
     version: v1
     args: ""
     organizations: org1
-    endorsementPolicy: 1of(org1,org2)
+    endorsementPolicy: 2of(org1,org2)
     collectionPath: ""
 
 upgradeChaincode:
@@ -64,7 +64,7 @@ upgradeChaincode:
 invokes:
   - channelName: testorgschannel0
     name: samplecc
-    targetPeers: OrgAnchor
+    targetPeers: AllPeers
     nProcPerOrg: 2
     nRequest: 10
     runDur: 0
