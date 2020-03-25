@@ -3,16 +3,13 @@ package barebones_test
 import (
 	"path"
 
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-
 	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
 var _ = Describe("Barebones Test", func() {
 
 	var (
-		inputSpecPath       string
+		inputSpecPath string
 	)
 
 	It("Running barebones Test)", func() {
