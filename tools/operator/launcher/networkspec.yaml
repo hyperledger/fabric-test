@@ -2,11 +2,35 @@
 #!
 #! SPDX-License-Identifier: Apache-2.0
 ---
-#! fabricVersion:
-#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.5 or 2.0.0
-#! Development stream images are pulled from
-#! hyperledger-fabric.jfrog.io/, e.g. 1.4.5-stable or 2.0.0-stable
-fabricVersion: 1.4.5-stable
+#! dockerOrg and dockerTag specify the organization name and image tag
+#! when pulling docker images. For example:
+#!
+#! dockerOrg: hyperledger-fabric.jfrog.io
+#! dockerTag: amd64-2.0-stable
+#!
+#! would pull the following seven fabric images:
+#!
+#! - hyperledger-fabric.jfrog.io/fabric-ca:amd64-2.0-stable
+#! - hyperledger-fabric.jfrog.io/fabric-peer:amd64-2.0-stable
+#! - hyperledger-fabric.jfrog.io/fabric-orderer:amd64-2.0-stable
+#! - hyperledger-fabric.jfrog.io/fabric-baseos:amd64-2.0-stable
+#! - hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-2.0-stable
+#! - hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-2.0-stable
+#! - hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-2.0-stable
+dockerOrg: hyperledger
+dockerTag: "2.0"
+
+#! dockerImages provides an override for each of the seven fabric images:
+#!
+#! ca, peer, orderer, baseos, ccenv, javaenv, nodeenv
+#!
+#! Specifying a full image name for any of thes values will take precedence over
+#! forming the image name using dockerOrg and dockerTag.
+#!
+#! dockerImages can be completely omitted if no override need be specified
+dockerImages:
+  ca: hyperledger/fabric-ca:1.4
+
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers

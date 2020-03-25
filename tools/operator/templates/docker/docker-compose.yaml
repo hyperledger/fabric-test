@@ -5,6 +5,10 @@
 #@ load("@ytt:data", "data")
 #@ services = {}
 
+#@ def validateAttributeExists(config, image):
+#@   return hasattr(config, "dockerImages") and hasattr(config.dockerImages, image)
+#@ end
+
 #@ def caList(config):
 #@   caUniquePort = 32000
 #@   for i in range(0, len(config.peerOrganizations)):
@@ -39,9 +43,11 @@
 
 #@ def ca(container_name, caUniquePort, type, orgName, config):
 #@   orgType = "{}Organizations".format(type)
-#@   image = "hyperledger/fabric-ca:{}".format(config.fabricVersion)
-#@   if config.fabricVersion.endswith("-stable"):
-#@     image="hyperledger-fabric.jfrog.io/fabric-ca:amd64-{}".format(config.fabricVersion)
+#@   image = ""
+#@   if validateAttributeExists(config, "ca"):
+#@     image = config.dockerImages.ca
+#@   else:
+#@     image = "{}/fabric-ca:{}".format(config.dockerOrg, config.dockerTag)
 #@   end
 #@   env = ["FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server"]
 #@   env.append("FABRIC_CA_SERVER_CA_NAME={}".format(container_name))
@@ -141,9 +147,11 @@
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("{}/backup/orderer{}-{}:/var/hyperledger/production/orderer".format(artifactsLocation, j, org.name))
 #@       container_name = "orderer{}-{}".format(j,org.name)
-#@       image = "hyperledger/fabric-orderer:{}".format(config.fabricVersion)
-#@       if config.fabricVersion.endswith("-stable"):
-#@         image="hyperledger-fabric.jfrog.io/fabric-orderer:amd64-{}".format(config.fabricVersion)
+#@       image = ""
+#@       if validateAttributeExists(config, "orderer"):
+#@         image = config.dockerImages.orderer
+#@       else:
+#@         image = "{}/fabric-orderer:{}".format(config.dockerOrg, config.dockerTag)
 #@       end
 #@       ports = ["{}:{}".format(ordererUniquerPort,ordererUniquerPort), "{}:{}".format(ordererHealthCheckPort,8443)]
 #@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name}
@@ -197,13 +205,31 @@
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("/var/run/:/host/var/run/")
 #@       volumes.append("{}/backup/peer{}-{}:/var/hyperledger/production".format(artifactsLocation,j, org.name))
-#@       image = "hyperledger/fabric-peer:{}".format(config.fabricVersion)
-#@       if config.fabricVersion.endswith("-stable"):
-#@         env.append("CORE_CHAINCODE_BUILDER=hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME=hyperledger-fabric.jfrog.io/fabric-baseos:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME=hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-{}".format(config.fabricVersion))
-#@         env.append("CORE_CHAINCODE_NODE_RUNTIME=hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-{}".format(config.fabricVersion))
-#@         image="hyperledger-fabric.jfrog.io/fabric-peer:amd64-{}".format(config.fabricVersion)
+#@       image = ""
+#@       if validateAttributeExists(config, "peer"):
+#@         image = config.dockerImages.peer
+#@       else:
+#@         image = "{}/fabric-peer:{}".format(config.dockerOrg, config.dockerTag)
+#@       end
+#@       if validateAttributeExists(config, "ccenv"):
+#@         env.append("CORE_CHAINCODE_BUILDER={}".format(config.dockerImages.ccenv))
+#@       else:
+#@         env.append("CORE_CHAINCODE_BUILDER={}/fabric-ccenv:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       if validateAttributeExists(config, "baseos"):
+#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME={}".format(config.dockerImages.baseos))
+#@       else:
+#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME={}/fabric-baseos:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       if validateAttributeExists(config, "javaenv"):
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME={}".format(config.dockerImages.javaenv))
+#@       else:
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME={}/fabric-javaenv:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       if validateAttributeExists(config, "nodeenv"):
+#@         env.append("CORE_CHAINCODE_NODEENV_RUNTIME={}".format(config.dockerImages.nodeenv))
+#@       else:
+#@         env.append("CORE_CHAINCODE_NODEENV_RUNTIME={}/fabric-nodeenv:{}".format(config.dockerOrg, config.dockerTag))
 #@       end
 #@       ports = ["7051", "{}:{}".format(peerUniquerPort,peerUniquerPort), "{}:{}".format(peerHealthCheckPort,9443)]
 #@       services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name}
