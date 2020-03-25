@@ -3,6 +3,11 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 #@ load("@ytt:data", "data")
+
+#@ def validateAttributeExists(config, image):
+#@   return hasattr(config, "dockerImages") and hasattr(config.dockerImages, image)
+#@ end
+
 #@ def zkContainers(input, id, zklist, config):
 #@   id = id + 1
 #@   env = [{ "name": "ZOO_MY_ID", "value": "{}".format(id)}]
@@ -60,9 +65,11 @@
 #@ end
 
 #@ def caContainers(input, orgName, config):
-#@   ca_image = "hyperledger/fabric-ca:{}".format(config.fabricVersion)
-#@   if config.fabricVersion.endswith("-stable"):
-#@     ca_image="hyperledger-fabric.jfrog.io/fabric-ca:amd64-{}".format(config.fabricVersion)
+#@   ca_image = ""
+#@   if validateAttributeExists(config, "ca"):
+#@     ca_image = config.dockerImages.ca
+#@   else:
+#@     ca_image = "{}/fabric-ca:{}".format(config.dockerOrg, config.dockerTag)
 #@   end
 #@   env = [{"name": "FABRIC_CA_HOME", "value": "/etc/hyperledger/fabric-ca-server"}]
 #@   env.append({"name": "FABRIC_CA_SERVER_CA_NAME", "value": "{}".format(input)})
@@ -157,13 +164,31 @@
 #@   end
 #@   resources = config.k8s.resources.peers
 #@   dindResources = config.k8s.resources.dind
-#@   peer_image = "hyperledger/fabric-peer:{}".format(config.fabricVersion)
-#@   if config.fabricVersion.endswith("-stable"):
-#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-{}".format(config.fabricVersion)})
-#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "hyperledger-fabric.jfrog.io/fabric-baseos:amd64-{}".format(config.fabricVersion)})
-#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-{}".format(config.fabricVersion)})
-#@     env.append({"name": "CORE_CHAINCODE_NODE_RUNTIME", "value": "hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-{}".format(config.fabricVersion)})
-#@     peer_image="hyperledger-fabric.jfrog.io/fabric-peer:amd64-{}".format(config.fabricVersion)
+#@   peer_image = ""
+#@   if validateAttributeExists(config, "peer"):
+#@     peer_image = config.dockerImages.peer
+#@   else:
+#@     peer_image = "{}/fabric-peer:{}".format(config.dockerOrg, config.dockerTag)
+#@   end
+#@   if validateAttributeExists(config, "ccenv"):
+#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "{}".format(config.dockerImages.ccenv)})
+#@   else:
+#@     env.append({"name": "CORE_CHAINCODE_BUILDER", "value": "{}/fabric-ccenv:{}".format(config.dockerOrg, config.dockerTag)})
+#@   end
+#@   if validateAttributeExists(config, "baseos"):
+#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "{}".format(config.dockerImages.baseos)})
+#@   else:
+#@     env.append({"name": "CORE_CHAINCODE_GOLANG_RUNTIME", "value": "{}/fabric-baseos:{}".format(config.dockerOrg, config.dockerTag)})
+#@   end
+#@   if validateAttributeExists(config, "javaenv"):
+#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "{}".format(config.dockerImages.javaenv)})
+#@   else:
+#@     env.append({"name": "CORE_CHAINCODE_JAVA_RUNTIME", "value": "{}/fabric-javaenv:{}".format(config.dockerOrg, config.dockerTag)})
+#@   end
+#@   if validateAttributeExists(config, "nodeenv"):
+#@     env.append({"name": "CORE_CHAINCODE_NODEENV_RUNTIME", "value": "{}".format(config.dockerImages.nodeenv)})
+#@   else:
+#@     env.append({"name": "CORE_CHAINCODE_NODEENV_RUNTIME", "value": "{}/fabric-nodeenv:{}".format(config.dockerOrg, config.dockerTag)})
 #@   end
 
 #@   if config.dbType == "couchdb":
@@ -221,9 +246,11 @@
 #@     volumeMounts.append({"mountPath": "/shared/data", "name": "orderer-data-storage"})
 #@   end
 #@   resources = config.k8s.resources.orderers
-#@   orderer_image = "hyperledger/fabric-orderer:{}".format(config.fabricVersion)
-#@   if config.fabricVersion.endswith("-stable"):
-#@     orderer_image="hyperledger-fabric.jfrog.io/fabric-orderer:amd64-{}".format(config.fabricVersion)
+#@   orderer_image = ""
+#@   if validateAttributeExists(config, "orderer"):
+#@     orderer_image = config.dockerImages.orderer
+#@   else:
+#@     orderer_image = "{}/fabric-orderer:{}".format(config.dockerOrg, config.dockerTag)
 #@   end
 #@   output = [{"name": input, "image": orderer_image, "imagePullPolicy": "Always", "env": env, "resources": resources, "volumeMounts": volumeMounts, "command": ["orderer"]}]
 #@   return output

@@ -3,7 +3,9 @@
 #! SPDX-License-Identifier: Apache-2.0
 
 ---
-fabricVersion: 2.1-stable
+dockerOrg: hyperledger-fabric.jfrog.io
+dockerTag: amd64-2.1-stable
+
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers

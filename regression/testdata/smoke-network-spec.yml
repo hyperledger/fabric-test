@@ -1,13 +1,10 @@
 #! Copyright IBM Corp. All Rights Reserved.
 #!
 #! SPDX-License-Identifier: Apache-2.0
-
 ---
-#! fabricVersion:
-#! Released images are pulled from docker hub hyperledger/, e.g. 1.4.1 or 2.0.0
-#! Development stream images are pulled from
-#! hyperledger-fabric.jfrog.io/, e.g. 1.4.1-stable or 2.0.0-stable
-fabricVersion: 2.1-stable
+dockerOrg: hyperledger-fabric.jfrog.io
+dockerTag: amd64-2.1-stable
+
 #! peer database ledger type (couchdb, goleveldb)
 dbType: goleveldb
 #! This parameter is used to define fabric logging spec in peers
@@ -94,7 +91,7 @@ k8s:
   #! persistent volumes. When false is used, backup will not be configured.
   #! When local is used, hostPath will be used to store the data from fabric containers
   #! to worker nodes on which pods are running.
-  dataPersistence: true
+  dataPersistence: false
   storageClass: default
   storageCapacity: 20Gi
   resources:
