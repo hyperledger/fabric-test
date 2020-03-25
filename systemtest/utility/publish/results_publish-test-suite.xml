@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <testsuite name="Publish Test Suite" tests="1" failures="0" errors="0" time="443.348">
+      <testcase name="Publish Test Suite Running Publish Test Suite in fabric-test Running end to end (old cc lifecycle)" classname="Publish Test Suite" time="397.663839876"></testcase>
+  </testsuite>

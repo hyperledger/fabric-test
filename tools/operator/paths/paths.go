@@ -40,8 +40,8 @@ func YTTPath() string {
 	if err != nil {
 		logger.ERROR("YTTPath function is failed in getting current directory")
 	}
-	if strings.Contains(currentDir, "regression") {
-		return componentPath(currentDir, "../../tools/operator/ytt")
+	if strings.Contains(currentDir, "systemtest") {
+		return componentPath(currentDir, "../../../tools/operator/ytt")
 	}
 	return componentPath(currentDir, "ytt")
 }
@@ -52,8 +52,8 @@ func TemplatesDir() string {
 	if err != nil {
 		logger.ERROR("TemplateDir function is failed in getting current directory")
 	}
-	if strings.Contains(currentDir, "regression") {
-		return componentPath(currentDir, "../../tools/operator/templates")
+	if strings.Contains(currentDir, "systemtest") {
+		return componentPath(currentDir, "../../../tools/operator/templates")
 	}
 	return componentPath(currentDir, "templates")
 }
@@ -64,8 +64,8 @@ func ScriptsDir() string {
 	if err != nil {
 		logger.ERROR("ScriptsDir function is failed in getting current directory")
 	}
-	if strings.Contains(currentDir, "regression") {
-		return componentPath(currentDir, "../../tools/operator/scripts")
+	if strings.Contains(currentDir, "systemtest") {
+		return componentPath(currentDir, "../../../tools/operator/scripts")
 	}
 	return componentPath(currentDir, "scripts")
 }
@@ -82,8 +82,8 @@ func ConfigFilesDir() string {
 	if err != nil {
 		logger.ERROR("ConfigFilesDir function is failed in getting current directory")
 	}
-	if strings.Contains(currentDir, "regression") {
-		return componentPath(currentDir, "../../tools/operator/configFiles")
+	if strings.Contains(currentDir, "systemtest") {
+		return componentPath(currentDir, "../../../tools/operator/configFiles")
 	}
 	return componentPath(currentDir, "configFiles")
 }
@@ -153,8 +153,8 @@ func PTEPath() string {
 	if err != nil {
 		logger.ERROR("PTEPath function is failed in getting current directory")
 	}
-	if strings.Contains(path, "regression") {
-		return JoinPath(path, "../../tools/PTE/pte-main.js")
+	if strings.Contains(path, "systemtest") {
+		return JoinPath(path, "../../../tools/PTE/pte-main.js")
 	}
 	path = JoinPath(path, "../PTE/pte-main.js")
 	return path

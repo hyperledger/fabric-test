@@ -1,0 +1,102 @@
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:06:01 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeGo): CONSTANT INVOKE transaction stats
+(testorgschannel0:chaincodeGo):	Total processes 4
+(testorgschannel0:chaincodeGo):	Total transactions sent 40  received 40
+(testorgschannel0:chaincodeGo):	failures: proposal 0  transactions 0
+(testorgschannel0:chaincodeGo):	event: received 40  timeout 0  unreceived 0 invalid 0
+(testorgschannel0:chaincodeGo):	start 1585148772549  end 1585148775546  duration 2997 ms 
+(testorgschannel0:chaincodeGo):	TPS 13.35
+(testorgschannel0:chaincodeGo): peer latency stats (endorsement)
+(testorgschannel0:chaincodeGo):	total transactions: 40  total time: 3859 ms 
+(testorgschannel0:chaincodeGo):	min: 27 ms  max: 623 ms  avg: 96.47 ms 
+(testorgschannel0:chaincodeGo): orderer latency stats (transaction ack)
+(testorgschannel0:chaincodeGo):	total transactions: 40  total time: 1541 ms 
+(testorgschannel0:chaincodeGo):	min: 13 ms  max: 112 ms  avg: 38.52 ms 
+(testorgschannel0:chaincodeGo): event latency stats (end-to-end)
+(testorgschannel0:chaincodeGo):	total transactions: 40  total time: 80087 ms 
+(testorgschannel0:chaincodeGo):	min: 1579 ms  max: 2377 ms  avg: 2002.17 ms 
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:06:16 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeJava): CONSTANT INVOKE transaction stats
+(testorgschannel0:chaincodeJava):	Total processes 4
+(testorgschannel0:chaincodeJava):	Total transactions sent 40  received 40
+(testorgschannel0:chaincodeJava):	failures: proposal 0  transactions 0
+(testorgschannel0:chaincodeJava):	event: received 40  timeout 0  unreceived 0 invalid 0
+(testorgschannel0:chaincodeJava):	start 1585148787400  end 1585148794867  duration 7467 ms 
+(testorgschannel0:chaincodeJava):	TPS 5.36
+(testorgschannel0:chaincodeJava): peer latency stats (endorsement)
+(testorgschannel0:chaincodeJava):	total transactions: 40  total time: 21108 ms 
+(testorgschannel0:chaincodeJava):	min: 126 ms  max: 3313 ms  avg: 527.70 ms 
+(testorgschannel0:chaincodeJava): orderer latency stats (transaction ack)
+(testorgschannel0:chaincodeJava):	total transactions: 40  total time: 1124 ms 
+(testorgschannel0:chaincodeJava):	min: 13 ms  max: 55 ms  avg: 28.10 ms 
+(testorgschannel0:chaincodeJava): event latency stats (end-to-end)
+(testorgschannel0:chaincodeJava):	total transactions: 40  total time: 67223 ms 
+(testorgschannel0:chaincodeJava):	min: 706 ms  max: 2603 ms  avg: 1680.58 ms 
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:06:35 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeNode): CONSTANT INVOKE transaction stats
+(testorgschannel0:chaincodeNode):	Total processes 4
+(testorgschannel0:chaincodeNode):	Total transactions sent 40  received 40
+(testorgschannel0:chaincodeNode):	failures: proposal 0  transactions 0
+(testorgschannel0:chaincodeNode):	event: received 40  timeout 0  unreceived 0 invalid 0
+(testorgschannel0:chaincodeNode):	start 1585148806678  end 1585148810975  duration 4297 ms 
+(testorgschannel0:chaincodeNode):	TPS 9.31
+(testorgschannel0:chaincodeNode): peer latency stats (endorsement)
+(testorgschannel0:chaincodeNode):	total transactions: 40  total time: 10180 ms 
+(testorgschannel0:chaincodeNode):	min: 40 ms  max: 1942 ms  avg: 254.50 ms 
+(testorgschannel0:chaincodeNode): orderer latency stats (transaction ack)
+(testorgschannel0:chaincodeNode):	total transactions: 40  total time: 1242 ms 
+(testorgschannel0:chaincodeNode):	min: 16 ms  max: 78 ms  avg: 31.05 ms 
+(testorgschannel0:chaincodeNode): event latency stats (end-to-end)
+(testorgschannel0:chaincodeNode):	total transactions: 40  total time: 74992 ms 
+(testorgschannel0:chaincodeNode):	min: 1376 ms  max: 2366 ms  avg: 1874.80 ms 
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:06:51 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeGo): CONSTANT QUERY transaction stats
+(testorgschannel0:chaincodeGo):	Total processes 4
+(testorgschannel0:chaincodeGo):	Total transactions sent 40  received 80
+(testorgschannel0:chaincodeGo):	failures: query transactions 0
+(testorgschannel0:chaincodeGo):	start 1585148822753  end 1585148823793  duration 1040 ms 
+(testorgschannel0:chaincodeGo):	TPS 76.92
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:07:04 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeJava): CONSTANT QUERY transaction stats
+(testorgschannel0:chaincodeJava):	Total processes 4
+(testorgschannel0:chaincodeJava):	Total transactions sent 40  received 80
+(testorgschannel0:chaincodeJava):	failures: query transactions 0
+(testorgschannel0:chaincodeJava):	start 1585148835546  end 1585148837551  duration 2005 ms 
+(testorgschannel0:chaincodeJava):	TPS 39.90
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:07:18 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeNode): CONSTANT QUERY transaction stats
+(testorgschannel0:chaincodeNode):	Total processes 4
+(testorgschannel0:chaincodeNode):	Total transactions sent 40  received 80
+(testorgschannel0:chaincodeNode):	failures: query transactions 0
+(testorgschannel0:chaincodeNode):	start 1585148849376  end 1585148850496  duration 1120 ms 
+(testorgschannel0:chaincodeNode):	TPS 71.43
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:07:39 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeGo): CONSTANT QUERY transaction stats
+(testorgschannel0:chaincodeGo):	Total processes 4
+(testorgschannel0:chaincodeGo):	Total transactions sent 40  received 80
+(testorgschannel0:chaincodeGo):	failures: query transactions 0
+(testorgschannel0:chaincodeGo):	start 1585148871046  end 1585148872130  duration 1084 ms 
+(testorgschannel0:chaincodeGo):	TPS 73.80
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:07:52 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeJava): CONSTANT QUERY transaction stats
+(testorgschannel0:chaincodeJava):	Total processes 4
+(testorgschannel0:chaincodeJava):	Total transactions sent 40  received 80
+(testorgschannel0:chaincodeJava):	failures: query transactions 0
+(testorgschannel0:chaincodeJava):	start 1585148884050  end 1585148889167  duration 5117 ms 
+(testorgschannel0:chaincodeJava):	TPS 15.63
+
+======= PTE 0 main Test Summary: executed at Wed Mar 25 2020 11:08:09 GMT-0400 (Eastern Daylight Time) =======
+(testorgschannel0:chaincodeNode): CONSTANT QUERY transaction stats
+(testorgschannel0:chaincodeNode):	Total processes 4
+(testorgschannel0:chaincodeNode):	Total transactions sent 40  received 80
+(testorgschannel0:chaincodeNode):	failures: query transactions 0
+(testorgschannel0:chaincodeNode):	start 1585148900965  end 1585148903378  duration 2413 ms 
+(testorgschannel0:chaincodeNode):	TPS 33.15
+

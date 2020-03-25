@@ -41,7 +41,7 @@ done
 CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
 OperatorDir="$FabricTestDir"/tools/operator
-testdataDir="$FabricTestDir"/regression/testdata
+testdataDir="$FabricTestDir"/systemtest/testdata
 PTEDir="$FabricTestDir"/tools/PTE
 LogsDir="$FabricTestDir"/tools/PTE/CITest/Logs
 ConnProfile=CITest/CIConnProfiles/test-network
@@ -72,7 +72,7 @@ startNw() {
 
 # Stop Network
 stopNw() {
-  ArchiveLogsDir="$FabricTestDir"/regression/systemtest/PTELogs
+  ArchiveLogsDir="$FabricTestDir"/systemtest/systemtest/PTELogs
 
   cd "$OperatorDir" || exit 1
   # provide networkspec 1 and kubeconfig 1 here

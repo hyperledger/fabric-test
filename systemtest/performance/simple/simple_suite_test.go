@@ -1,4 +1,4 @@
-package barebones_test
+package simple_test
 
 import (
 	"os"
@@ -14,8 +14,8 @@ import (
 
 func TestPTEBarebones(t *testing.T) {
 	RegisterFailHandler(Fail)
-	junitReporter := reporters.NewJUnitReporter("results_barebones-test-suite.xml")
-	RunSpecsWithDefaultAndCustomReporters(t, "Barebones Test Suite", []Reporter{junitReporter})
+	junitReporter := reporters.NewJUnitReporter("results_simple-test-suite.xml")
+	RunSpecsWithDefaultAndCustomReporters(t, "Simple Performance Test Suite", []Reporter{junitReporter})
 }
 
 func getFabricTestDir() (string, error) {
@@ -23,7 +23,7 @@ func getFabricTestDir() (string, error) {
 	if err != nil {
 		return currentDir, err
 	}
-	fabricTestPath := path.Join(currentDir, "../../")
+	fabricTestPath := path.Join(currentDir, "../../../")
 	return fabricTestPath, nil
 }
 
@@ -53,10 +53,10 @@ var (
 var _ = BeforeSuite(func() {
 	// set up dir variables
 	fabricTestDir, _ = getFabricTestDir()
-	testDataDir = path.Join(fabricTestDir, "regression/testdata")
+	testDataDir = path.Join(fabricTestDir, "systemtest/testdata")
 
 	// set up input file variables
-	networkSpecPath = path.Join(testDataDir, "barebones-network-spec.yml")
+	networkSpecPath = path.Join(testDataDir, "simple-network-spec.yml")
 
 	// get kube config env
 	kubeConfig, containerType = getKubeConfig()
@@ -70,10 +70,10 @@ var _ = BeforeSuite(func() {
 var _ = AfterSuite(func() {
 	// set up dir variables
 	fabricTestDir, _ = getFabricTestDir()
-	testDataDir = path.Join(fabricTestDir, "regression/testdata")
+	testDataDir = path.Join(fabricTestDir, "systemtest/testdata")
 
 	// set up input file variables
-	networkSpecPath = path.Join(testDataDir, "barebones-network-spec.yml")
+	networkSpecPath = path.Join(testDataDir, "simple-network-spec.yml")
 
 	// get kube config env
 	kubeConfig, containerType = getKubeConfig()

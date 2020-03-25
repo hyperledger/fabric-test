@@ -1,4 +1,4 @@
-package barebones_test
+package simple_test
 
 import (
 	"path"
@@ -6,18 +6,18 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
-var _ = Describe("Barebones Test", func() {
+var _ = Describe("Simple Performance Test", func() {
 
 	var (
 		inputSpecPath string
 	)
 
-	It("Running barebones Test)", func() {
+	It("Runs Simple Performance Tests)", func() {
 
 		fabricTestDir, _ = getFabricTestDir()
-		testDataDir = path.Join(fabricTestDir, "regression/testdata")
+		testDataDir = path.Join(fabricTestDir, "systemtest/testdata")
 
-		inputSpecPath = path.Join(testDataDir, "barebones-test-input.yml")
+		inputSpecPath = path.Join(testDataDir, "simple-test-input.yml")
 
 		By("1) Creating channel")
 		action = "create"
