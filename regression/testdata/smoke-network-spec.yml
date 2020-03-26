@@ -9,7 +9,7 @@
 #! hyperledger-fabric.jfrog.io/, e.g. 1.4.1-stable or 2.0.0-stable
 fabricVersion: 2.0-stable
 #! peer database ledger type (couchdb, goleveldb)
-dbType: goleveldb
+dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers
 peerFabricLoggingSpec: error
 #! This parameter is used to define fabric logging spec in orderers
