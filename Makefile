@@ -21,7 +21,7 @@ regression/%: pre-reqs
 	cd ${@} && ginkgo -v
 
 upgrade:
-	cd regression/upgrade && ./upgrade2.0.sh 1.4-stable 2.0-stable
+	cd regression/upgrade && ./upgrade2.1.sh
 
 .PHONY: pre-reqs
 pre-reqs: npm-init pull-binaries-fabric gotools
