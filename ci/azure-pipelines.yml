@@ -35,11 +35,15 @@ jobs:
   pool:
     vmImage: ubuntu-18.04
   steps:
-  - template: templates/install_deps.yml
-  - script: make lint
-    displayName: Lint Code
-  - script: make unit-tests
-    displayName: Run Go Tests
+  - script: |
+      sudo snap install couchdb
+      sudo snap set couchdb admin=admin
+      sudo snap start couchdb
+      sudo snap connect couchdb:mount-observe
+      sudo snap connect couchdb:process-control
+#      cat /snap/couchdb/5/opt/couchdb/etc/default.ini
+  - script: sleep 5
+  - script: curl localhost:5984
 
 - job: SmokeTest
   pool:
