@@ -17,11 +17,11 @@
 
 include gotools.mk
 
-regression/%: pre-reqs
+systemtest/%: pre-reqs
 	cd ${@} && ginkgo -v
 
 upgrade:
-	cd regression/upgrade && ./upgrade2.1.sh
+	cd systemtest/functional/upgrade && ./upgrade2.1.sh 1.4-stable 2.1-stable
 
 .PHONY: pre-reqs
 pre-reqs: npm-init pull-binaries-fabric gotools

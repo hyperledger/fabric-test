@@ -41,5 +41,6 @@ tools/PTE/Logs/
 tools/operator/configFiles
 tools/operator/launcher/ytt
 tools/operator/templates/input.yaml
-regression/systemtest/results_systest_pte.xml
+*.xml
+*.txt
 tools/PTE/runPTE/

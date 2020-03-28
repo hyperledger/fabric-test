@@ -42,23 +42,27 @@ stages:
             displayName: Run Go Tests
 
       - job: SmokeTest
+        pool:
+          vmImage: ubuntu-18.04
         steps:
           - template: templates/install_deps.yml
-          - script: make regression/smoke
+          - script: make systemtest/utility/smoke
             displayName: Run Smoke Tests
           - task: PublishTestResults@2
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
-              testResultsFiles: 'regression/smoke/results*.xml'
+              testResultsFiles: 'systemtest/smoke/results*.xml'
 
       - job: BasicNetworkTest
+        pool:
+          vmImage: ubuntu-18.04
         steps:
           - template: templates/install_deps.yml
-          - script: make regression/basicnetwork
+          - script: make systemtest/functional/basicnetwork
             displayName: Run Basic Network
           - task: PublishTestResults@2
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
-              testResultsFiles: 'regression/smoke/results*.xml'
+              testResultsFiles: 'systemtest/smoke/results*.xml'

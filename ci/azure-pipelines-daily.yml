@@ -25,9 +25,9 @@ variables:
   NODE_VER: 10.x
 
 stages:
-  - stage: Barebones
+  - stage: SimplePerformanceRegression
     dependsOn: []
-    displayName: Barebones Network
+    displayName: Simple Performance Network
     pool:
       vmImage: ubuntu-18.04
     jobs:
@@ -36,13 +36,13 @@ stages:
         timeoutInMinutes: 360
         steps:
         - template: templates/install_deps.yml
-        - script: make regression/barebones
+        - script: make systemtest/performance/simple
           displayName: Run Test
         - task: PublishTestResults@2
           condition: always()
           inputs:
             testResultsFormat: 'JUnit'
-            testResultsFiles: 'regression/**/results*.xml'
+            testResultsFiles: 'systemtest/**/results*.xml'
 
   - stage: BasicNetwork
     dependsOn: []
@@ -54,13 +54,13 @@ stages:
         displayName: Run Scenario
         steps:
           - template: templates/install_deps.yml
-          - script: make regression/basicnetwork
+          - script: make systemtest/functional/basicnetwork
             displayName: Run Test
           - task: PublishTestResults@2
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
-              testResultsFiles: 'regression/**/results*.xml'
+              testResultsFiles: 'systemtest/**/results*.xml'
 
   - stage: Smoke
     dependsOn: []
@@ -72,10 +72,10 @@ stages:
         displayName: Run Scenario
         steps:
           - template: templates/install_deps.yml
-          - script: make regression/smoke
+          - script: make systemtest/utility/smoke
             displayName: Run Test
           - task: PublishTestResults@2
             condition: always()
             inputs:
               testResultsFormat: 'JUnit'
-              testResultsFiles: 'regression/**/results*.xml'
+              testResultsFiles: 'systemtest/**/results*.xml'

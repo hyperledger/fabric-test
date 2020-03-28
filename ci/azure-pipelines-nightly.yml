@@ -44,7 +44,7 @@ jobs:
         displayName: Create GOBIN
       - script: make build/fabric build/fabric-ca build/fabric-chaincode-java build/fabric-chaincode-node
         displayName: Build Docker Images
-      - script: make regression/publish
+      - script: make systemtest/utility/publish
         displayName: Run Tests
       - script: ./ci/scripts/trigger_publish_artifacts.sh
         displayName: Publish Docker Images
