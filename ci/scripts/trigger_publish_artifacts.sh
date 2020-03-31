@@ -34,5 +34,5 @@ for target in linux-amd64 darwin-amd64 windows-amd64; do
     tar -czvf "hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz" bin
     curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
          -T "hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz" \
-         "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-ca-2.1-${RELEASE}.tar.gz"
+         "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz"
 done
