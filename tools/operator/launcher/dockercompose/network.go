@@ -211,6 +211,12 @@ func (d DockerCompose) DockerNetwork(action string) error {
 			logger.ERROR("Failed to down local fabric network")
 			return err
 		}
+	case "health":
+		err = d.CheckDockerContainersHealth(d.Config)
+		if err != nil {
+			logger.ERROR("Failed to check the health of local fabric network")
+			return err
+		}
 	default:
 		return errors.Errorf("Incorrect action %s Use up or down for action", action)
 	}

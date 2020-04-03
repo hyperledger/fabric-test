@@ -84,6 +84,7 @@ numChannels: 1
 
 #! Not being used for smoke test suite
 k8s:
+  namespace: fabric-system-test
   serviceType: NodePort
   #! dataPersistence is used to store the data from fabric containers
   #! It can take values of true, false and local
@@ -93,6 +94,8 @@ k8s:
   #! to worker nodes on which pods are running.
   dataPersistence: false
   storageClass: default
+  accessMode:
+    - ReadWriteMany
   storageCapacity: 20Gi
   resources:
     orderers:
