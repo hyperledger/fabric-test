@@ -21,6 +21,17 @@ type Network struct {
 	TemplatesDir string
 }
 
+//DockerImage --
+func DockerImage(component, dockerOrg, dockerTag, componentImage string) string {
+	var image string
+	if dockerOrg != "" {
+		image = fmt.Sprintf("%s/fabric-%s:%s", dockerOrg, component, dockerTag)
+	} else if componentImage != "" {
+		image = componentImage
+	}
+	return image
+}
+
 //GetConfigData - to read the yaml file and parse the data
 func (n Network) GetConfigData(networkSpecPath string) (networkspec.Config, error) {
 

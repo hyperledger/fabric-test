@@ -17,6 +17,9 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
 	"github.com/pkg/errors"
+
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func validateArguments(networkSpecPath string, kubeConfigPath string) error {
@@ -35,7 +38,7 @@ func doAction(action, env, kubeConfigPath string, config networkspec.Config) err
 	switch env {
 	case "k8s":
 		k8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
-		err = k8s.K8sNetwork(action)
+		err = k8s.Network(action)
 	case "docker":
 		dc := dockercompose.DockerCompose{Config: config}
 		err = dc.DockerNetwork(action)
@@ -99,7 +102,17 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 	nodeportIP := ""
 	if kubeConfigPath != "" && config.K8s.ServiceType == "NodePort" {
 		K8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
-		nodeportIP, _ = K8s.GetK8sExternalIP(config, "")
+		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
+		if err != nil {
+			logger.ERROR("Failed to create config for kubernetes")
+			return err
+		}
+		clientset, err := kubernetes.NewForConfig(kubeConfig)
+		if err != nil {
+			logger.ERROR("Failed to create clientset for kubernetes")
+			return err
+		}
+		nodeportIP, _ = K8s.ExternalIP(config, "", clientset)
 	}
 	contents = append(contents, []byte(fmt.Sprintf("nodeportIP: %s\n", nodeportIP))...)
 	inputPath := paths.JoinPath(paths.TemplatesDir(), "input.yaml")

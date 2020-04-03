@@ -9,8 +9,6 @@ import (
 	"os"
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher"
-	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
-	"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
@@ -164,14 +162,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			return err
 		}
 	case "health":
-		switch env {
-		case "k8s":
-			k8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
-			err = k8s.CheckK8sComponentsHealth(k8s.Config)
-		case "docker":
-			dc := dockercompose.DockerCompose{Config: config}
-			err = dc.CheckDockerContainersHealth(dc.Config)
-		}
+		err = launcher.Launcher("health", env, kubeConfigPath, inputPath)
 		if err != nil {
 			logger.ERROR("Failed to check health of fabric components")
 			return err
