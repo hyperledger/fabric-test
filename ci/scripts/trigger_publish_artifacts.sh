@@ -6,11 +6,10 @@ set -uo pipefail
 
 docker login -u "${ARTIFACTORY_USERNAME}" -p "${ARTIFACTORY_PASSWORD}" hyperledger-fabric.jfrog.io
 
-for image in baseos peer orderer ccenv tools ca javaenv nodeenv; do
+for image in baseos peer orderer ccenv tools ca; do
     docker tag "hyperledger/fabric-${image}" "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${RELEASE}"
     docker push "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${RELEASE}"
 done
-
 
 for target in linux-amd64 darwin-amd64 windows-amd64; do
     cd "${GOPATH}/src/github.com/hyperledger/fabric"

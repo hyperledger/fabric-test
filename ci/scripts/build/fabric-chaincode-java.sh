@@ -4,9 +4,5 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 
-git clone -b ${BRANCH} https://github.com/hyperledger/fabric-chaincode-java "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-java"
-cd "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-java"
-./gradlew buildImage -x test
-
-# This is temporary until chaincode-java starts adding 2 digit tags
-docker tag hyperledger/fabric-javaenv hyperledger/fabric-javaenv:2.1
+docker pull hyperledger/fabric-javaenv:2.0
+docker tag hyperledger/fabric-javaenv:2.1 hyperledger/fabric-javaenv:2.1
