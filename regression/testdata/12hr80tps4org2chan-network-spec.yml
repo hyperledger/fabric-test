@@ -3,7 +3,7 @@
 #! SPDX-License-Identifier: Apache-2.0
 ---
 dockerOrg: hyperledger-fabric.jfrog.io
-dockerTag: amd64-2.1-stable
+dockerTag: amd64-2.2-stable
 
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
