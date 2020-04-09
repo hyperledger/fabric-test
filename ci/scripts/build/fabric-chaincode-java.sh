@@ -5,4 +5,4 @@
 set -euo pipefail
 
 docker pull hyperledger/fabric-javaenv:2.0
-docker tag hyperledger/fabric-javaenv:2.1 hyperledger/fabric-javaenv:2.1
+docker tag hyperledger/fabric-javaenv:2.0 hyperledger/fabric-javaenv:latest
