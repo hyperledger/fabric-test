@@ -5,4 +5,4 @@
 set -euo pipefail
 
 docker pull hyperledger/fabric-nodeenv:2.0
-docker tag hyperledger/fabric-nodeenv:2.0 hyperledger/fabric-nodeenv:2.1
+docker tag hyperledger/fabric-nodeenv:2.0 hyperledger/fabric-nodeenv:latest
