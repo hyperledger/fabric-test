@@ -29,7 +29,7 @@ variables:
   - name: NODE_VER
     value: 12.16.1
   - name: BRANCH
-    value: release-2.x
+    value: release-2.1
   - name: RELEASE
     value: 2.1-stable
 
