@@ -27,7 +27,7 @@ variables:
   - name: GO_VER
     value: 1.13.8
   - name: NODE_VER
-    value: 10.17.0
+    value: 12.16.1
   - name: BRANCH
     value: master
   - name: RELEASE
