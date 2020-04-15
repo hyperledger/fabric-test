@@ -304,7 +304,7 @@ async function chaincodeInstall(client, org) {
         var tgtOrg = [];
         tgtOrg[0]=org;
         var tgtPeers = [];
-        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+        tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ALLPEERS')
         if ( tgtPeers ) {
             targets = testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, null);
         }
@@ -416,7 +416,7 @@ async function chaincodeInstantiate(channel, client, org) {
             var tgtOrg = [];
             tgtOrg[0]=channelOrgName[ivar];
             var tgtPeers = [];
-            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ALLPEERS')
             if ( tgtPeers ) {
                 testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, eventHubs);
             }
@@ -564,7 +564,7 @@ async function chaincodeUpgrade(channel, client, org) {
             var tgtOrg = [];
             tgtOrg[0]=channelOrgName[ivar];
             var tgtPeers = [];
-            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ALLPEERS')
             if ( tgtPeers ) {
                 testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, eventHubs);
             }
@@ -930,7 +930,7 @@ async function joinChannel(channel, client, org) {
             var tgtOrg = [];
             tgtOrg[0]=org;
             var tgtPeers = [];
-            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ANCHORPEER')
+            tgtPeers = testUtil.getTargetPeerListSubmitter(cpList, tgtOrg, 'ALLPEERS')
             if ( tgtPeers ) {
                 targets = testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, eventHubs);
             }
