@@ -1,0 +1,100 @@
+#! Copyright IBM Corp. All Rights Reserved.
+#!
+#! SPDX-License-Identifier: Apache-2.0
+---
+dockerOrg: hyperledger
+dockerTag: 2.1
+dbType: couchdb
+peerFabricLoggingSpec: error
+ordererFabricLoggingSpec: error
+tls: true
+metrics: true
+gossipEnable: true
+enableNodeOUs: true
+artifactsLocation: .
+
+orderer:
+  ordererType: etcdraft
+  batchSize:
+    maxMessageCount: 500
+    absoluteMaxBytes: 10 MB
+    preferredMaxBytes: 2 MB
+  batchTimeOut: 2s
+  etcdraftOptions:
+    tickInterval: 500ms
+    electionTick: 10
+    heartbeatTick: 1
+    maxInflightBlocks: 5
+    snapshotIntervalSize: 16 MB
+
+kafka:
+  numKafka: 5
+  numKafkaReplications: 3
+  numZookeepers: 3
+
+ordererOrganizations:
+- name: ordererorg1
+  mspId: OrdererOrgExampleCom
+  numOderers: 5
+  numCa: 0
+
+peerOrganizations:
+- name: org1
+  mspId: Org1ExampleCom
+  numPeers: 2
+  numCa: 1
+
+- name: org2
+  mspId: Org2ExampleCom
+  numPeers: 2
+  numCa: 1
+
+ordererCapabilities: V2_0
+
+channelCapabilities: V2_0
+
+applicationCapabilities: V2_0
+
+numChannels: 1
+
+k8s:
+  serviceType: NodePort
+  dataPersistence: true
+  storageClass: default
+  storageCapacity: 100Gi
+  resources:
+    orderers:
+      limits:
+         cpu: "0.25"
+         memory: 500Mi
+      requests:
+         cpu: "0.25"
+         memory: 500Mi
+    peers:
+      limits:
+         cpu: "0.2"
+         memory: 1000Mi
+      requests:
+         cpu: "0.2"
+         memory: 1000Mi
+    dind:
+      limits:
+         cpu: "0.5"
+         memory: 1000Mi
+      requests:
+         cpu: "0.5"
+         memory: 1000Mi
+    couchdb:
+      limits:
+         cpu: "0.2"
+         memory: 400Mi
+      requests:
+         cpu: "0.2"
+         memory: 400Mi
+    kafka:
+      limits:
+         cpu: "0.2"
+         memory: 1Gi
+      requests:
+         cpu: "0.1"
+         memory: 1Gi

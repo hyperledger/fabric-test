@@ -1,0 +1,47 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+name: Fabric-Test-K8s-Longrun-$(Date:yyyyMMdd)
+trigger: none
+pr: none
+schedules:
+  - cron: "0 11 * * *"
+    displayName: 'Fabric Test K8s Longrun Job'
+    branches:
+      include:
+        - master
+    always: true
+
+variables:
+  FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
+  GOPATH: $(Agent.BuildDirectory)/go
+  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  GO_VER: 1.13.8
+  NODE_VER: 10.x
+  KUBE_PATH: $(kubeconfig.secureFilePath)
+
+stages:
+  - stage: Invokes
+    dependsOn: []
+    displayName: Invokes
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: Longrun
+        pool:
+          vmImage: ubuntu-18.04
+        timeoutInMinutes: 360
+        steps:
+        - template: templates/install_deps.yml
+        - script: |
+            cd tools/operator
+            ARTIFACTORY_URL=https://hyperledger.jfrog.io/fabric-test-artifacts/community-longrun.tar.gz
+            curl -sS "${ARTIFACTORY_URL}" -o binaries.tgz
+            tar -xzvf binaries.tgz
+          displayName: Download network artifacts
+        - script: |
+            cd tools/operator
+            go run main.go -i ../../regression/testdata/k8s-run-test.yml -a invoke
+          displayName: Invokes
