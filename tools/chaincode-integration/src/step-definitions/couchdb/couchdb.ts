@@ -48,7 +48,7 @@ export class CouchDB {
     @then(/The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should not have key ['"](.*)['"]/)
     public async isDeletedFromPrivateCollection(collectionName: string, chaincodeName: string, channelName: string, key: string) {
         const collection = await this.getCollection(channelName, chaincodeName, collectionName);
-        const orgs = await this.getOrgsInCollection(collection);
+        const orgs = this.getOrgsInCollection(collection);
 
         for (const org of orgs) {
             await this.checkKeyDeletedFromCollection(org, this.buildPrivateCollectionName(channelName, chaincodeName, collectionName), key);
@@ -93,7 +93,7 @@ export class CouchDB {
 
     private async checkPrivateCollectionState(collectionName: string, chaincodeName: string, channelName: string, value: string, key: string) {
         const collection = await this.getCollection(channelName, chaincodeName, collectionName);
-        const orgs = await this.getOrgsInCollection(collection);
+        const orgs = this.getOrgsInCollection(collection);
 
         for (const org of orgs) {
             if ((collection.policy as string).includes(org.name)) {
@@ -108,26 +108,29 @@ export class CouchDB {
 
     private async checkKeyInCollection(org: Org, dbName: string, key: string, value: string) {
         const collection = nano(`http://127.0.0.1:${org.db.externalPort}`).db.use(dbName);
-
-        let resp;
+        let response: any;
         try {
-            resp = await collection.attachment.get(key, 'valueBytes'); // Basic puts seem to end up here - objects in the other
+            response = await collection.attachment.get(key, 'valueBytes'); // Basic puts seem to end up here - objects in the other
+            response = response.toString() as string;
+            logger.debug(`response is a string:`, response);
         } catch (err) {
-            resp = await collection.get(key);
+            response = await collection.get(key);
+            logger.debug(`response is an object:`, JSON.stringify(response));
         }
 
-        if (typeof resp === 'string') {
-            assert.equal(value, resp);
+        if (typeof response === 'string') {
+            assert.equal(value, response);
         } else {
-            for (const respKey in resp) {
-                if (respKey.startsWith('_') || respKey.startsWith('~')) {
-                    delete resp[respKey];
+            // response is an object
+            for (const responseKey in response) {
+                if (responseKey.startsWith('_') || responseKey.startsWith('~')) {
+                    delete response[responseKey];
                 }
             }
-
-            if (!jsonResponseEqual(JSON.stringify(resp), value)) {
-                throw new Error(`Objects not equal expected ${value} got ${JSON.stringify(resp)}`);
+            if (!jsonResponseEqual(JSON.stringify(response), value)) {
+                throw new Error(`Objects not equal expected ${value} got ${JSON.stringify(response)}`);
             }
+
         }
     }
 
