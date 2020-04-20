@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import * as assert from 'assert';
 import { TableDefinition } from 'cucumber';
 import { binding } from 'cucumber-tsflow/dist';
-import { TransientMap } from 'fabric-client';
+import { TransientMap } from 'fabric-common';
 import { Contract, Transaction } from 'fabric-network';
 import * as path from 'path';
 import { given, then, when } from '../../decorators/steps';
@@ -65,12 +65,12 @@ export class Chaincode {
         this.workspace.updateChaincodeCollection(channelName, chaincodeName, collection);
     }
 
-    @given(/Organisation ['"](.*)['"] has instantiated the chaincode ['"](.*)['"] on channel ['"](.*)['"]$/)
+    @given(/Organisation ['"](.*)['"] has instantiated the chaincode ['"](.*)['"] on channel ['"](.*)['"]$/, undefined, 30000)
     public async instantiateNoArgs(orgName: string, chaincodeName: string, channelName: string) {
         await this.instantiate(orgName, chaincodeName, channelName, null, null);
     }
 
-    @given(/Organisation ['"](.*)['"] has instantiated the chaincode ['"](.*)['"] on channel ['"](.*)['"] calling ['"](.*)['"] with args:$/)
+    @given(/Organisation ['"](.*)['"] has instantiated the chaincode ['"](.*)['"] on channel ['"](.*)['"] calling ['"](.*)['"] with args:$/, undefined, 30000)
     public async instantiateWithArgs(orgName: string, chaincodeName: string, channelName: string, functionName: string, args: TableDefinition) {
         await this.instantiate(orgName, chaincodeName, channelName, functionName, args);
     }
@@ -88,7 +88,7 @@ export class Chaincode {
             throw new Error(`Transaction "${functionName}" has not been created`);
         }
 
-        const txn = await this.workspace.transactions.get(functionName);
+        const txn = this.workspace.transactions.get(functionName);
 
         const transDataRaw = transientDataTbl.raw();
 

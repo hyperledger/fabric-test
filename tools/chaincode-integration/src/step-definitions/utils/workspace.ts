@@ -2,7 +2,8 @@
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
-import { Gateway, Transaction } from 'fabric-network';
+import { Gateway, GatewayOptions, Transaction } from 'fabric-network';
+import * as fs from 'fs-extra';
 import { ChaincodeConfig, Feature, Global, Org } from '../../interfaces/interfaces';
 import { Network } from '../../network/network';
 import { Logger } from '../../utils/logger';
@@ -100,8 +101,17 @@ export class Workspace {
         if (!this.connections.has(org.name) || !this.connections.get(org.name).has(identityName)) {
             logger.debug(`Creating new gateway for organisation ${org.name} identity ${identityName}`);
 
+            const commonConnectionProfile: any = JSON.parse(fs.readFileSync(org.ccp, 'utf8'));
             const gateway = new Gateway();
-            await gateway.connect(org.ccp, {wallet: org.wallet, identity: identityName, discovery: {enabled: true, asLocalhost: true}});
+            const gatewayOptions: GatewayOptions = {
+                discovery: {
+                    asLocalhost: true,
+                    enabled: true,
+                },
+                identity: identityName,
+                wallet: org.wallet,
+            }
+            await gateway.connect(commonConnectionProfile, gatewayOptions);
 
             if (!this.connections.has(org.name)) {
                 this.connections.set(org.name, new Map());
