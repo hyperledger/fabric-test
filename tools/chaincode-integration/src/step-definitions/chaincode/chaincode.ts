@@ -88,7 +88,7 @@ export class Chaincode {
             throw new Error(`Transaction "${functionName}" has not been created`);
         }
 
-        const txn = await this.workspace.transactions.get(functionName);
+        const txn = this.workspace.transactions.get(functionName);
 
         const transDataRaw = transientDataTbl.raw();
 

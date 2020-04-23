@@ -53,7 +53,7 @@ export class Network {
 
     public async setupConfig() {
         this.config = {
-            orderers: await this.parseOrderers(),
+            orderers: this.parseOrderers(),
             organisations: await this.parseOrgs(),
             profiles: await this.parseProfiles(),
         };
@@ -380,8 +380,8 @@ export class Network {
     }
 
     private configureEnvVars() {
-        process.env.FABRIC_IMG_TAG = ':2.0.0-beta';
-        process.env.FABRIC_CA_IMG_TAG = ':1.4.4';
+        process.env.FABRIC_IMG_TAG = ':2.1';
+        process.env.FABRIC_CA_IMG_TAG = ':1.4';
         process.env.FABRIC_COUCHDB_TAG = ':0.4.18';
         process.env.FABRIC_DEBUG = 'info';
         process.env.NETWORK_FOLDER = this.details.resourceFolder;
