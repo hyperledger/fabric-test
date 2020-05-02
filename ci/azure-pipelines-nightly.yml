@@ -25,9 +25,9 @@ variables:
   - name: PATH
     value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   - name: GO_VER
-    value: 1.13.8
+    value: 1.14.2
   - name: NODE_VER
-    value: 12.16.1
+    value: 12.15.0
   - name: BRANCH
     value: release-2.1
   - name: RELEASE
