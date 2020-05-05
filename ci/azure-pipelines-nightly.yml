@@ -17,7 +17,7 @@ schedules:
     always: "true"
 
 variables:
-  - group: Azure
+  - group: artifactory
   - name: GOBIN
     value: $(Agent.BuildDirectory)/go/bin
   - name: GOPATH
