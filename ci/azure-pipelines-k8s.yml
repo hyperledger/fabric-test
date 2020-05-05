@@ -51,6 +51,8 @@ stages:
             ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
             ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
           displayName: Download network artifacts
+        - script: make npm-init
+          displayName: Install NPM Packages
         - script: |
             cd tools/operator
             go run main.go -i ../../regression/testdata/k8s-run-test.yml -a invoke
