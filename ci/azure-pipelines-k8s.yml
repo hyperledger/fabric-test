@@ -15,12 +15,19 @@ schedules:
     always: true
 
 variables:
-  FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
-  GOPATH: $(Agent.BuildDirectory)/go
-  PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-  GO_VER: 1.13.8
-  NODE_VER: 10.x
-  KUBE_PATH: $(kubeconfig.secureFilePath)
+  - group: artifactory
+  - name: FABRIC_CFG_PATH
+    value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
+  - name: GOPATH
+    value: $(Agent.BuildDirectory)/go
+  - name: PATH
+    value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  - name: GO_VER
+    value: 1.13.8
+  - name: NODE_VER
+    value: 10.x
+  - name: KUBE_PATH
+    value: $(kubeconfig.secureFilePath)
 
 stages:
   - stage: Invokes
@@ -37,9 +44,12 @@ stages:
         - template: templates/install_deps.yml
         - script: |
             cd tools/operator
-            ARTIFACTORY_URL=https://hyperledger.jfrog.io/fabric-test-artifacts/community-longrun.tar.gz
-            curl -sS "${ARTIFACTORY_URL}" -o binaries.tgz
+            ARTIFACTORY_URL=https://hyperledger.jfrog.io/artifactory/fabric-test-artifacts/community-longrun.tar.gz
+            curl -sS -u ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD} "${ARTIFACTORY_URL}" -o binaries.tgz
             tar -xzvf binaries.tgz
+          env:
+            ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+            ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
           displayName: Download network artifacts
         - script: |
             cd tools/operator
