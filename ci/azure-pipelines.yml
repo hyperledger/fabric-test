@@ -26,39 +26,39 @@ variables:
   NODE_VER: 10.x
   FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
 
-jobs:
-- job: VerifyBuild
-  pool:
-    vmImage: ubuntu-18.04
-  steps:
-  - template: templates/install_deps.yml
-  - script: make lint
-    displayName: Lint Code
-  - script: make unit-tests
-    displayName: Run Go Tests
+stages:
+  - stage: TestPullRequest
+    dependsOn: []
+    displayName: Test Pull Request
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: VerifyBuild
+        steps:
+          - template: templates/install_deps.yml
+          - script: make lint
+            displayName: Lint Code
+          - script: make unit-tests
+            displayName: Run Go Tests
 
-- job: SmokeTest
-  pool:
-    vmImage: ubuntu-18.04
-  steps:
-    - template: templates/install_deps.yml
-    - script: make regression/smoke
-      displayName: Run Smoke Tests
-    - task: PublishTestResults@2
-      condition: always()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'regression/smoke/results*.xml'
+      - job: SmokeTest
+        steps:
+          - template: templates/install_deps.yml
+          - script: make regression/smoke
+            displayName: Run Smoke Tests
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'regression/smoke/results*.xml'
 
-- job: BasicNetworkTest
-  pool:
-    vmImage: ubuntu-18.04
-  steps:
-    - template: templates/install_deps.yml
-    - script: make regression/basicnetwork
-      displayName: Run Basic Network
-    - task: PublishTestResults@2
-      condition: always()
-      inputs:
-        testResultsFormat: 'JUnit'
-        testResultsFiles: 'regression/smoke/results*.xml'
+      - job: BasicNetworkTest
+        steps:
+          - template: templates/install_deps.yml
+          - script: make regression/basicnetwork
+            displayName: Run Basic Network
+          - task: PublishTestResults@2
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: 'regression/smoke/results*.xml'
