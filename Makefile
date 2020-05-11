@@ -54,4 +54,8 @@ pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
 
 build/%:
-	./ci/scripts/${@}.sh
+	./ci/scripts/interop/${@}.sh
+
+.PHONY: clean
+clean:
+	rm -rf bin/ build/ config/ tools/PTE/node_modules

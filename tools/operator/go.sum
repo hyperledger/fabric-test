@@ -116,8 +116,6 @@ github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/hyperledger/fabric v2.0.1+incompatible h1:7W+yG0gLKTC7NLcWPT3vfpnaseztPpH9wXGfAW7yvBs=
-github.com/hyperledger/fabric v2.0.1+incompatible/go.mod h1:tGFAOCT696D3rG0Vofd2dyWYLySHlh0aQjf7Q1HAju0=
 github.com/imdario/mergo v0.3.5 h1:JboBksRwiiAJWvIYJVo46AfV+IAIKZpfrSzVKj42R4Q=
 github.com/imdario/mergo v0.3.5/go.mod h1:2EnlNZ0deacrJVfApfmtdGgDfMuh/nq6Ok1EcJh5FfA=
 github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 h1:BQSFePA1RWJOlocH6Fxy8MmwDt+yVQYULKfN0RoTN8A=
@@ -323,7 +321,6 @@ k8s.io/api v0.16.8 h1:T72itM0CUT8KHqPAqbjTeSY0n24RyVM71nLiMlq/cAw=
 k8s.io/api v0.16.8/go.mod h1:a8EOdYHO8en+YHhPBLiW5q+3RfHTr7wxTqqp7emJ7PM=
 k8s.io/apimachinery v0.16.8 h1:wgFRqtel3w3rcclpba+iBkVlKeBlh42OzNp7FalXVCg=
 k8s.io/apimachinery v0.16.8/go.mod h1:Xk2vD2TRRpuWYLQNM6lT9R7DSFZUYG03SarNkbGrnKE=
-k8s.io/apimachinery v0.18.1 h1:hKPYcQRPLQoG2e7fKkVl0YCvm9TBefXTfGILa9vjVVk=
 k8s.io/client-go v0.16.8 h1:CmsQXJpSWq1aUyQ5Lp/rRPiMK2OYfJv32Ftl0D1D42U=
 k8s.io/client-go v0.16.8/go.mod h1:WmPuN0yJTKHXoklExKxzo3jSXmr3EnN+65uaTb5VuNs=
 k8s.io/gengo v0.0.0-20190128074634-0689ccc1d7d6/go.mod h1:ezvh/TsK7cY6rbqRK0oQQ8IAqLxYwwyPxAX1Pzy0ii0=

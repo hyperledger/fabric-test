@@ -1,6 +1,6 @@
 module github.com/hyperledger/fabric-test/tools/operator
 
-go 1.13
+go 1.14
 
 require (
 	github.com/fsouza/go-dockerclient v1.6.3

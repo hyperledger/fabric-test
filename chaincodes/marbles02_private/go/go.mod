@@ -1,6 +1,6 @@
 module github.com/hyperledger/fabric-test/chaincodes/marbles02_private/go
 
-go 1.13
+go 1.14
 
 require (
 	github.com/Knetic/govaluate v3.0.0+incompatible // indirect
@@ -9,6 +9,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.1.0 // indirect
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/hyperledger/fabric v1.4.4
+	github.com/hyperledger/fabric-amcl v0.0.0-20200424173818-327c9e2cf77a // indirect
 	github.com/klauspost/cpuid v1.2.2 // indirect
 	github.com/miekg/pkcs11 v1.0.3 // indirect
 	github.com/onsi/ginkgo v1.10.3 // indirect

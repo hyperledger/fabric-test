@@ -1,0 +1,297 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: InterOpLite-$(Date:yyyyMMdd)
+trigger: none
+pr: none
+schedules:
+  # 3 AM UTC
+  - cron: "0 3 * * *"
+    displayName: InterOp Testing
+    branches:
+      include:
+        - master
+    always: true
+
+variables:
+  - group: artifactory
+  - name: ARTIFACT_DIRECTORY
+    value: $(Pipeline.Workspace)
+  - name: BRANCH
+    value: master
+  - name: FABRIC_CFG_PATH
+    value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
+  - name: GO_BIN
+    value: $(Agent.BuildDirectory)/go/bin
+  - name: GO_PATH
+    value: $(Agent.BuildDirectory)/go
+  - name: GO_VER
+    value: 1.14.2
+  - name: NODE_VER
+    value: 12.15.0
+  - name: PATH
+    value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  - name: RELEASE
+    value: 2.2-stable
+  - name: WORKING_DIRECTORY
+    value: $(System.DefaultWorkingDirectory)
+
+stages:
+  # We have to deal with Fabric separately. Since it's build is a matrix,
+  # work has to be separated into it's own stages and jobs so it is
+  # not performed multiple times. In particular we can't publish the
+  # source code and docker images multiple times.
+  - stage: FabricSource
+    dependsOn: []
+    displayName: Package Source Code
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: PackageFabricSource
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - script: |
+              git clone -b "${BRANCH}" https://github.com/hyperledger/fabric --single-branch fabric
+              cd fabric
+              tar -czvf "${WORKING_DIRECTORY}/fabric-source.tgz" .
+            displayName: Package Fabric
+          - publish: fabric-source.tgz
+            artifact: fabric-source
+            displayName: Publish Binary Tarball
+
+  - stage: BuildImages
+    dependsOn:
+      - FabricSource
+    displayName: Build Images
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: BuildChaincodeNode
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - template: templates/install_deps.yml
+          - script: mkdir -p $(GO_BIN)
+            displayName: Create GOBIN
+          - script: make build/fabric-chaincode-node
+            displayName: Build Docker Images
+          - publish: $(System.DefaultWorkingDirectory)/nodeenv-docker.tgz
+            artifact: nodeenv-docker
+            displayName: Publish Docker Tarball
+          - publish: $(System.DefaultWorkingDirectory)/nodeenv-source.tgz
+            artifact: nodeenv-source
+            displayName: Publish Source Code Tarball
+
+      - job: BuildChaincodeJava
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - template: templates/install_deps.yml
+          - script: mkdir -p $(GO_BIN)
+            displayName: Create GOBIN
+          - script: make build/fabric-chaincode-java
+            displayName: Build Docker Images
+          - publish: $(System.DefaultWorkingDirectory)/javaenv-docker.tgz
+            artifact: javaenv-docker
+            displayName: Publish Docker Tarball
+          - publish: $(System.DefaultWorkingDirectory)/javaenv-source.tgz
+            artifact: javaenv-source
+            displayName: Publish Source Code Tarball
+
+      - job: BuildFabric
+        pool:
+          vmImage: ubuntu-18.04
+        strategy:
+          matrix:
+            BaseOS:
+              TARGET: baseos
+            CCEnv:
+              TARGET: ccenv
+            Orderer:
+              TARGET: orderer
+            Peer:
+              TARGET: peer
+            Tools:
+              TARGET: tools
+        steps:
+          - download: current
+            patterns: 'fabric-source.tgz'
+            displayName: Download Docker Tarballs
+          - template: templates/install_deps.yml
+          - script: mkdir -p $(GO_BIN)
+            displayName: Create GOBIN
+          - script: make build/fabric
+            env:
+              TARGET: $(TARGET)
+            displayName: Build Docker Images
+          - script: docker save -o $(TARGET)-docker.tgz hyperledger/fabric-$(TARGET):latest
+          - publish: $(System.DefaultWorkingDirectory)/$(TARGET)-docker.tgz
+            artifact: $(TARGET)-docker
+            displayName: Publish Docker Tarball
+
+      - job: BuildFabricCA
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - template: templates/install_deps.yml
+          - script: mkdir -p $(GO_BIN)
+            displayName: Create GOBIN
+          - script: make build/fabric-ca
+            displayName: Build Docker Images
+          - publish: $(System.DefaultWorkingDirectory)/ca-docker.tgz
+            artifact: ca-docker
+            displayName: Publish Docker Tarball
+          - publish: ca-source.tgz
+            artifact: ca-source
+            displayName: Publish Source Tarball
+
+  - stage: InterOp
+    dependsOn:
+      - BuildImages
+    displayName: Interop Testing
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: TestNodeChaincode
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - download: current
+            patterns: '*-docker.tgz'
+            displayName: Download Docker Tarballs
+          - download: current
+            artifact: nodeenv-source
+            displayName: Download Source Code Tarball
+          - template: templates/install_deps.yml
+          - script: ./ci/scripts/interop/common/load-docker-images.sh
+            displayName: Load Docker Images
+          - script: ./ci/scripts/interop/driver/fabric-chaincode-node.sh
+            displayName: Run Integration Tests
+
+      - job: TestJavaChaincode
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - download: current
+            patterns: '*-docker.tgz'
+            displayName: Download Docker Tarballs
+          - download: current
+            artifact: javaenv-source
+            displayName: Download Source Code Tarballs
+          - template: templates/install_deps.yml
+          - script: ./ci/scripts/interop/common/load-docker-images.sh
+            displayName: Load Docker Images
+          - script: ./ci/scripts/interop/driver/fabric-chaincode-java.sh
+            displayName: Run Integration Tests
+
+      - job: TestNodeSDK
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - download: current
+            patterns: '*-docker.tgz'
+            displayName: Download Docker Tarballs
+          - template: templates/install_deps.yml
+          - script: ./ci/scripts/interop/common/install-softhsm.sh
+            displayName: Install SoftHSM
+          - script: ./ci/scripts/interop/common/load-docker-images.sh
+            displayName: Load Docker Images
+          - script: ./ci/scripts/interop/driver/fabric-sdk-node.sh
+            displayName: Run Integration Tests
+
+      - job: TestJavaSDK
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - download: current
+            patterns: '*-docker.tgz'
+            displayName: Download Docker Tarballs
+          - template: templates/install_deps.yml
+          - script: ./ci/scripts/interop/common/load-docker-images.sh
+            displayName: Load Docker Images
+          - script: ./ci/scripts/interop/driver/fabric-sdk-java.sh
+            displayName: Run Integration Tests
+
+  - stage: Functional
+    dependsOn:
+      - BuildImages
+    displayName: Functional Testing
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: FunctionalTests
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - download: current
+            patterns: '*-docker.tgz'
+            displayName: Download Docker Tarballs
+          - checkout: self
+            path: 'go/src/github.com/hyperledger/fabric-test'
+            displayName: Checkout Fabric Test Code
+          - template: templates/install_deps.yml
+          - script: ./ci/scripts/interop/common/load-docker-images.sh
+            displayName: Load Docker Images
+          - script: mkdir -p ${GO_BIN}
+            displayName: Create GOBIN
+          - script: make regression/publish
+            displayName: Run Tests
+
+  - stage: Publish
+    dependsOn:
+      - Functional
+      - Interop
+    displayName: Publish
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: PublishArtifacts
+        pool:
+          vmImage: ubuntu-18.04
+        steps:
+          - download: current
+            patterns: '*-docker.tgz'
+            displayName: Download Docker Tarballs
+          - download: current
+            patterns: '*-source.tgz'
+            displayName: Download Docker Tarballs
+          - template: templates/install_deps.yml
+          - script: ./ci/scripts/interop/common/load-docker-images.sh
+            displayName: Load Docker Images
+          - script: ./ci/scripts/interop/publish/fabric-binary.sh
+            env:
+              ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+              ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+            displayName: Publish Fabric Binaries
+          - script: ./ci/scripts/interop/publish/fabric-ca-binary.sh
+            env:
+              ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+              ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+            displayName: Publish Fabric-CA Binaries
+          - script: ./ci/scripts/interop/publish/docker-images.sh
+            env:
+              ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+              ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+            displayName: Publish Docker Images
+
+# TODO: Implement testing for the Gateways and Contracts
+
+#      - job: TestGateway
+#        pool:
+#          vmImage: ubuntu-18.04
+#        steps:
+#          - download: current
+#            patterns: '*-docker.tgz'
+#            displayName: Download Docker Tarballs
+#          - script:
+#
+#      - job: TestContractAPIGo
+#        pool:
+#          vmImage: ubuntu-18.04
+#        steps:
+#          - download: current
+#            patterns: '*-docker.tgz'
+#            displayName: Download Docker Tarballs
+#          - script:

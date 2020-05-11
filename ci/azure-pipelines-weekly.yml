@@ -17,11 +17,11 @@ schedules:
 
 variables:
   FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
-  GOPATH: $(Agent.BuildDirectory)/go
+  GO_BIN: $(Agent.BuildDirectory)/go/bin
+  GO_PATH: $(Agent.BuildDirectory)/go
+  GO_VER: 1.14.2
+  NODE_VER: 12.15.0
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
-  GO_VER: 1.13.8
-  NODE_VER: 10.x
-
 stages:
   - stage: Upgrade
     dependsOn: []
@@ -34,6 +34,9 @@ stages:
           vmImage: ubuntu-18.04
         timeoutInMinutes: 360
         steps:
+        - checkout: self
+          path: 'go/src/github.com/hyperledger/fabric-test'
+          displayName: Checkout Fabric Test Code
         - template: templates/install_deps.yml
         - script: make upgrade
           displayName: Run Scenario
