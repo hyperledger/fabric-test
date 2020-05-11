@@ -1,8 +1,8 @@
 module github.com/hyperledger/fabric-test/regression/systemtest
 
-go 1.13
+go 1.14
 
-replace github.com/hyperledger/fabric-test/tools/operator => ../../../fabric-test/tools/operator
+replace github.com/hyperledger/fabric-test/tools/operator => ../../tools/operator
 
 require (
 	github.com/hyperledger/fabric-test/tools/operator v0.0.0-00010101000000-000000000000

@@ -59,4 +59,8 @@ caliper-init:
 	caliper bind --caliper-bind-sut fabric:latest --caliper-bind-args=-g
 
 build/%:
-	./ci/scripts/${@}.sh
+	./ci/scripts/interop/${@}.sh
+
+.PHONY: clean
+clean:
+	rm -rf bin/ build/ config/ tools/PTE/node_modules

@@ -3,23 +3,20 @@
 # SPDX-License-Identifier: Apache-2.0
 
 steps:
-  - checkout: self
-    path: 'go/src/github.com/hyperledger/fabric-test'
-    displayName: Checkout Fabric Test Code
-
   - script: sudo apt-get clean
     displayName: Run APT Clean
 
   - script: sudo apt-get update
     displayName: Run APT Update
 
-  - script: sudo apt-get install -y gcc haveged libtool make
+  - script: sudo apt-get install -y gcc gradle haveged libtool make
     displayName: Install Dependencies
 
   - task: GoTool@0
     inputs:
+      goBin: $(GO_BIN)
+      goPath:  $(GO_PATH)
       version: $(GO_VER)
-      goPath:  $(GOPATH)
     displayName: Install GoLang
 
   - task: NodeTool@0

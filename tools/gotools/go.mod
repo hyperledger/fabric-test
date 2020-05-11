@@ -1,6 +1,6 @@
 module github.com/hyperledger/fabric-test/tools/gotools
 
-go 1.13
+go 1.14
 
 require (
 	github.com/AlekSi/gocov-xml v0.0.0-20190121064608-3a14fb1c4737

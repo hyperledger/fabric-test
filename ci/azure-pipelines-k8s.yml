@@ -17,7 +17,7 @@ schedules:
 variables:
   - group: artifactory
   - name: FABRIC_CFG_PATH
-    value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
+    value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config
   - name: GOPATH
     value: $(Agent.BuildDirectory)/go
   - name: PATH
@@ -39,6 +39,9 @@ stages:
           vmImage: ubuntu-18.04
         timeoutInMinutes: 360
         steps:
+        - checkout: self
+          path: 'go/src/github.com/hyperledger/fabric-test'
+          displayName: Checkout Fabric Test Code
         - template: templates/install_deps.yml
         - script: |
             cd tools/operator
