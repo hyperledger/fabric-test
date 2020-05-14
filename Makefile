@@ -53,5 +53,23 @@ pull-binaries-fabric:
 pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
 
+docker: ca-docker orderer-docker peer-docker proxy-docker
+
+ca-docker:
+	cd images/ca && docker build --rm -t hyperledger/fabric-ca:hsm .
+	docker tag hyperledger/fabric-ca:hsm hyperledger-fabric.jfrog.io/fabric-ca:hsm
+
+orderer-docker:
+	cd images/orderer && docker build --rm -t hyperledger/fabric-orderer:hsm .
+	docker tag hyperledger/fabric-orderer:hsm hyperledger-fabric.jfrog.io/fabric-orderer:hsm
+
+peer-docker:
+	cd images/peer && docker build --rm -t hyperledger/fabric-peer:hsm .
+	docker tag hyperledger/fabric-peer:hsm hyperledger-fabric.jfrog.io/fabric-peer:hsm
+
+proxy-docker:
+	cd images/proxy && docker build --rm -t hyperledger/fabric-proxy:hsm .
+	docker tag hyperledger/fabric-proxy:hsm hyperledger-fabric.jfrog.io/fabric-proxy:hsm
+
 build/%:
 	./ci/scripts/${@}.sh
