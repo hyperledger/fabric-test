@@ -1,0 +1,44 @@
+url:
+mspdir: msp
+tls:
+  certfiles:
+  client:
+    certfile:
+    keyfile:
+csr:
+  cn: admin
+  keyrequest:
+    algo: ecdsa
+    size: 256
+  serialnumber:
+  names:
+    - C: US
+      ST: North Carolina
+      L:
+      O: Hyperledger
+      OU: Fabric
+  hosts:
+id:
+  name:
+  type:
+  affiliation:
+  maxenrollments: 0
+  attributes:
+enrollment:
+  profile:
+  label:
+caname:
+bccsp:
+    default: PKCS11
+    sw:
+      hash: SHA2
+      security: 256
+      filekeystore:
+        keystore: msp/keystore
+    pkcs11:
+      Library: /usr/local/lib/libpkcs11-proxy.so
+      Pin: 98765432
+      Label: ForFabric
+      hash: SHA2
+      security: 256
+      Immutable: false

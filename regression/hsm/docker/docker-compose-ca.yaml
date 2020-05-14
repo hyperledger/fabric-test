@@ -1,0 +1,93 @@
+version: '3.5'
+
+volumes:
+  proxy-config:
+    name: proxy-config
+  proxy-data:
+    name: proxy-data
+
+networks:
+  test:
+    name: testnet
+
+services:
+  proxy.example.com:
+    container_name: proxy.example.com
+    image: hyperledger-fabric.jfrog.io/fabric-proxy:hsm
+    networks:
+      test:
+    volumes:
+      - proxy-data:/var
+      - proxy-config:/etc
+
+  ca.org1.example.com:
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    container_name: ca.org1.example.com
+    depends_on:
+      - proxy.example.com
+    environment:
+      - PKCS11_PROXY_SOCKET=tcp://proxy.example.com:2345
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org1
+      - FABRIC_CA_SERVER_PORT=7054
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:8080
+      - FABRIC_CA_SERVER_BCCSP_DEFAULT=PKCS11
+    image: hyperledger-fabric.jfrog.io/fabric-ca:hsm
+    networks:
+      test:
+    ports:
+      - 7054:7054
+    volumes:
+      - ../organizations/fabric-ca/org1:/etc/hyperledger/fabric-ca-server
+
+  ca.org2.example.com:
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    container_name: ca.org2.example.com
+    depends_on:
+      - proxy.example.com
+    environment:
+      - PKCS11_PROXY_SOCKET=tcp://proxy.example.com:2345
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org2
+      - FABRIC_CA_SERVER_PORT=7054
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:8080
+      - FABRIC_CA_SERVER_BCCSP_DEFAULT=PKCS11
+    image: hyperledger-fabric.jfrog.io/fabric-ca:hsm
+    networks:
+      test:
+    ports:
+      - 8054:7054
+    volumes:
+      - ../organizations/fabric-ca/org2:/etc/hyperledger/fabric-ca-server
+
+  ca.orderer.example.com:
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    container_name: ca.orderer.example.com
+    depends_on:
+      - proxy.example.com
+    environment:
+      - PKCS11_PROXY_SOCKET=tcp://proxy.example.com:2345
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-orderer
+      - FABRIC_CA_SERVER_PORT=7054
+      - FABRIC_CA_SERVER_OPERATIONS_LISTENADDRESS=0.0.0.0:8080
+      - FABRIC_CA_SERVER_BCCSP_DEFAULT=PKCS11
+    image: hyperledger-fabric.jfrog.io/fabric-ca:hsm
+    networks:
+      test:
+    volumes:
+      - ../organizations/fabric-ca/ordererOrg:/etc/hyperledger/fabric-ca-server
+
+  tools:
+    command: sleep 50000
+    container_name: proxy_tools
+    environment:
+      - FABRIC_CA_CLIENT_BCCSP_DEFAULT=PKCS11
+      - PKCS11_PROXY_SOCKET=tcp://proxy.example.com:2345
+    depends_on:
+      - proxy.example.com
+    image: hyperledger-fabric.jfrog.io/fabric-proxy-tools:hsm
+    networks:
+      test:
+    volumes:
+      - ../:/data
