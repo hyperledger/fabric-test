@@ -24,6 +24,10 @@ regression/barebones_caliper: pre-reqs caliper-init
 regression/%: pre-reqs
 	cd ${@} && ginkgo -v
 
+.PHONY: regression/hsm
+regression/hsm: docker
+	cd ${@} && ./network.sh
+
 upgrade%:
 	cd regression/upgrade && ./${@}.sh
 
@@ -59,6 +63,19 @@ caliper-init:
 	cd regression/barebones_caliper && npm init -y
 	cd regression/barebones_caliper && npm install --only=prod @hyperledger/caliper-cli@0.3.1
 	cd regression/barebones_caliper && npx caliper bind --caliper-bind-sut fabric:latest
+
+docker: docker-ca docker-orderer docker-peer docker-proxy-tools docker-proxy
+docker-ca: docker-image-ca
+docker-orderer: docker-image-orderer
+docker-peer: docker-image-peer
+docker-proxy: docker-image-proxy
+docker-proxy-tools: docker-image-proxy-tools
+docker-image-%:
+	$(eval image = ${subst docker-image-,,${@}})
+	cd images/${image} && docker build -t hyperledger-fabric.jfrog.io/fabric-${image}:hsm .
+
+docker-clean:
+	docker rmi -f $$(docker images -f "dangling=true" -q)
 
 build/%:
 	./ci/scripts/interop/${@}.sh

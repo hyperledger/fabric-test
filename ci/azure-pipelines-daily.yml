@@ -143,3 +143,16 @@ stages:
           - template: templates/install_deps.yml
           - script: make upgrade1.4to2.2
             displayName: Run Test
+
+  - stage: HSM
+    dependsOn: []
+    displayName: HSM Network
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job:
+        displayName: Run Scenario
+        steps:
+          - template: templates/install_deps.yml
+          - script: make regression/hsm
+            displayName: Run Test

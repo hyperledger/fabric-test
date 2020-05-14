@@ -43,3 +43,4 @@ tools/operator/launcher/ytt
 tools/operator/templates/input.yaml
 regression/systemtest/results_systest_pte.xml
 tools/PTE/runPTE/
+/config

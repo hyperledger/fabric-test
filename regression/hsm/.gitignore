@@ -1,0 +1,12 @@
+/channel-artifacts/*.tx
+/channel-artifacts/*.block
+/ledgers
+/ledgers-backup
+/channel-artifacts/*.json
+organizations/fabric-ca/ordererOrg/*
+organizations/fabric-ca/org1/*
+organizations/fabric-ca/org2/*
+organizations/ordererOrganizations/*
+organizations/peerOrganizations/*
+system-genesis-block/*
+fabcar.tar.gz
