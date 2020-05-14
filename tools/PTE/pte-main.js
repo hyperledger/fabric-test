@@ -970,6 +970,9 @@ async function joinChannel(channel, client, org) {
 var totalLength = 0;
 async function execQueryBlock(channel, sB, eB) {
     try {
+        var tmp = txCfgPtr.queryBlockOpt;
+        var tgtOrg = Object.keys(tmp)[0];
+
         var qBlks = [];
         for (i = sB; i <= eB; i++) {
             qBlks.push(parseInt(i));
@@ -988,9 +991,9 @@ async function execQueryBlock(channel, sB, eB) {
             block.forEach(function (block) {
 
                 totalLength = totalLength + block.data.data.length;
-                logger.info('[execQueryBlock] channel(%s) block:Length:accu length= %d:%d:%d', channelName, block.header.number, block.data.data.length, totalLength);
+                logger.info('[execQueryBlock] channel:peer:block:length:accu length=%s:%s:%d:%d:%d', channelName, tmp[tgtOrg][0], block.header.number, block.data.data.length, totalLength);
             });
-            logger.info('[execQueryBlock] channel(%s) blocks= %d:%d, totalLength= %j', channelName, sBlock, eB, totalLength);
+            logger.info('[execQueryBlock] Summary channel:peer:starting block:ending block:length=%s:%s:%d:%d:%j', channelName, tmp[tgtOrg][0], sBlock, eB, totalLength);
 
         }).catch((err) => {
             logger.error(err.stack ? err.stack : err);
@@ -1062,7 +1065,7 @@ async function queryBlockchainInfo(channel, client, org) {
         if ( tgtPeers ) {
             testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, null, null, null, null, null);
         }
-        logger.info('[queryBlockchainInfo] query block info org:peer:start:end=%s:%j:%d:%d', tgtOrg, tgtPeers[tgtOrg], sBlock, eBlock);
+        logger.info('[queryBlockchainInfo] requested: channel:peer:start:end=%s:%s:%d:%d', channelName, tgtPeers[tgtOrg], sBlock, eBlock);
 
         return hfc.newDefaultKeyValueStore({
             path: testUtil.storePathForOrg(orgName)
@@ -1079,7 +1082,7 @@ async function queryBlockchainInfo(channel, client, org) {
             return channel.queryInfo();
         }).then((blockchainInfo) => {
             var blockHeight = blockchainInfo.height - 1;
-            logger.info('[queryBlockchainInfo] channel(%s) block height= %d', channelName, blockchainInfo.height);
+            logger.info('[queryBlockchainInfo] channel:peer:block height=%s:%s:%d', channelName, tgtPeers[tgtOrg], blockchainInfo.height);
             if (eBlock > blockHeight) {
                 logger.info('[queryBlockchainInfo] channel (%s) eBlock:block height = %d:%d', channelName, eBlock, blockHeight);
                 logger.info('[queryBlockchainInfo] channel(%s) reset eBlock to block height', channelName);
