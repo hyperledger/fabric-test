@@ -115,7 +115,46 @@ func main() {
 
 // Init initializes chaincode
 // ===========================
+// if length of args == 4, then perform a READ and then WRITE, for couchDB only
+// else no op
 func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface) pb.Response {
+	function, args := stub.GetFunctionAndParameters()
+	if len(args) != 4 {
+		return shim.Success(nil)
+	}
+	fmt.Println("- start "+function, args[0])
+
+	marbleName := args[0]
+	color := strings.ToLower(args[1])
+	owner := strings.ToLower(args[3])
+	size, err := strconv.Atoi(args[2])
+	if err != nil {
+		return shim.Error("3rd argument must be a numeric string")
+	}
+
+	// ==== Check if marble already exists ====
+	queryString := fmt.Sprintf(`{"selector":{"docType":"marble","owner":"%s","size":"35"}}`, owner)
+
+	queryResults, err := getQueryResultForQueryString(stub, queryString)
+	if err != nil {
+		fmt.Println("queryResults ", queryResults)
+		return shim.Error(err.Error())
+	}
+
+	// ==== Create marble object and marshal to JSON ====
+	objectType := "marble"
+	marble := &marble{objectType, marbleName, color, size, owner}
+	marbleJSONasBytes, err := json.Marshal(marble)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
+	// === Save marble to state ===
+	err = stub.PutState(marbleName, marbleJSONasBytes)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+
 	return shim.Success(nil)
 }
 
