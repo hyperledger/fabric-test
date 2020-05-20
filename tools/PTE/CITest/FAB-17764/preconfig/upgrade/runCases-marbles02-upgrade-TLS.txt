@@ -1,0 +1,10 @@
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan0-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan1-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan2-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan3-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan4-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan5-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan6-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan7-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan8-instantiate-TLS.json
+sdk=node CITest/FAB-17764/preconfig/upgrade/marbles02-chan9-instantiate-TLS.json

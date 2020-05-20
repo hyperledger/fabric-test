@@ -1,0 +1,10 @@
+driver=pte CITest/FAB-17764/marbles02/runCases-chan0-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan1-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan2-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan3-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan4-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan5-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan6-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan7-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan8-FAB-17764-i-TLS.txt
+driver=pte CITest/FAB-17764/marbles02/runCases-chan9-FAB-17764-i-TLS.txt

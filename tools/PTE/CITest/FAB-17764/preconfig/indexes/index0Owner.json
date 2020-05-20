@@ -1,0 +1,11 @@
+{
+	"index":{
+		"fields":[
+			{"size":"desc"},
+			{"docType":"desc"}
+		]
+	},
+	"ddoc":"indexOwnerDoc",
+	"name":"indexOwner",
+	"type":"json"
+}

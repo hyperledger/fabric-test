@@ -1,0 +1,10 @@
+sdk=node CITest/FAB-17764/preconfig/channels/chan0-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan1-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan2-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan3-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan4-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan5-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan6-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan7-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan8-create-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan9-create-TLS.json

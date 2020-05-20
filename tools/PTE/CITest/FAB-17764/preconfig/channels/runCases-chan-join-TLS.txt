@@ -1,0 +1,10 @@
+sdk=node CITest/FAB-17764/preconfig/channels/chan0-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan1-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan2-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan3-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan4-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan5-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan6-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan7-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan8-join-TLS.json
+sdk=node CITest/FAB-17764/preconfig/channels/chan9-join-TLS.json

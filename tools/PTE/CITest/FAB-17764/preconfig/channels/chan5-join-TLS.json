@@ -1,0 +1,16 @@
+{
+    "channelID": "_ch5",
+    "chaincodeID": "marbles02",
+    "chaincodeVer": "v0",
+    "transType": "Channel",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel5",
+        "action":  "join",
+        "orgName": [
+            "org1"
+        ]
+    },
+    "ConnProfilePath":"../operator/connection-profile"
+}

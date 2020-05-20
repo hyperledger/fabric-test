@@ -1,0 +1,59 @@
+{
+    "channelID": "_ch7",
+    "chaincodeID": "marbles02",
+    "chaincodeVer": "v0",
+    "logLevel": "ERROR",
+    "invokeCheck": "TRUE",
+    "transMode": "Constant",
+    "transType": "Invoke",
+    "invokeType": "Move",
+    "targetPeers": "LIST",
+    "nProcPerOrg": "1",
+    "nRequest": "100",
+    "runDur": "0",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name": "testorgschannel7",
+        "action":  "create",
+        "orgName": [
+            "org1"
+        ]
+    },
+    "constantOpt": {
+        "recHist": "HIST",
+        "constFreq": "5000",
+        "devFreq": "0"
+    },
+    "listOpt": {
+        "org1": ["peer1-org1"]
+    },
+    "eventOpt": {
+        "type": "FilteredBlock",
+        "listener": "Block",
+        "timeout": "240000"
+    },
+    "timeoutOpt": {
+        "preConfig": "300000",
+        "request": "300000",
+        "grpcTimeout": "30000"
+    },
+    "ccType": "marblescc",
+    "ccOpt": {
+        "keyIdx": [0],
+        "keyPayLoad": [2],
+        "keyStart": "_key0_",
+        "payLoadMin": "8",
+        "payLoadMax": "8"
+    },
+    "invoke": {
+        "query": {
+            "fcn": "readMarble",
+            "args": ["marble"]
+        },
+        "move": {
+            "fcn": "initMarble",
+            "args": ["marble", "blue","35","tom"]
+        }
+    },
+    "ConnProfilePath":"../operator/connection-profile"
+}

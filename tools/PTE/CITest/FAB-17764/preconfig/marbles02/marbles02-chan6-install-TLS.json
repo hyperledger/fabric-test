@@ -1,0 +1,26 @@
+{
+    "channelID": "_ch6",
+    "chaincodeID": "marbles02",
+    "chaincodeVer": "vv",
+    "transType": "install",
+    "nProcPerOrg": "1",
+    "TLS": "enabled",
+    "channelOpt": {
+        "name":  "testorgschannel6",
+        "action":  "create",
+        "orgName": [
+            "org1"
+        ]
+    },
+    "timeoutOpt": {
+        "preConfig": "60000000",
+        "request": "60000000"
+    },
+    "deploy": {
+        "chaincodePath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go",
+        "metadataPath": "github.com/hyperledger/fabric-test/chaincodes/marbles02/go/META-INF",
+        "fcn": "init",
+        "args": ["initMarbleName_ch6", "blue","35","tom"]
+    },
+    "ConnProfilePath":"../operator/connection-profile"
+}
