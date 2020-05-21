@@ -24,10 +24,10 @@ type Network struct {
 //DockerImage --
 func DockerImage(component, dockerOrg, dockerTag, componentImage string) string {
 	var image string
-	if dockerOrg != "" {
-		image = fmt.Sprintf("%s/fabric-%s:%s", dockerOrg, component, dockerTag)
-	} else if componentImage != "" {
+	if componentImage != "" {
 		image = componentImage
+	} else if dockerOrg != "" {
+		image = fmt.Sprintf("%s/fabric-%s:%s", dockerOrg, component, dockerTag)
 	}
 	return image
 }

@@ -3,11 +3,13 @@ package operations
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
@@ -23,6 +25,7 @@ type InstallCCUIObject struct {
 	ChannelOpt      ChannelOptions     `json:"channelOpt,omitempty"`
 	DeployOpt       InstallCCDeployOpt `json:"deploy,omitempty"`
 	ConnProfilePath string             `json:"ConnProfilePath,omitempty"`
+	TargetPeers     []string           `json:"targetPeers,omitempty"`
 }
 
 //InstallCCDeployOpt --
@@ -51,39 +54,47 @@ func (i InstallCCUIObject) InstallCC(config inputStructs.Config, tls string) err
 func (i InstallCCUIObject) createInstallCCObjects(ccObject inputStructs.InstallCC, organizations []inputStructs.Organization, tls string) []InstallCCUIObject {
 
 	var installCCObjects []InstallCCUIObject
-	var channelOpt ChannelOptions
-	var deployOpt InstallCCDeployOpt
-	i = InstallCCUIObject{SDK: ccObject.SDK, TransType: "install", TLS: tls, ChainCodeVer: ccObject.ChainCodeVersion, ChainCodeID: ccObject.ChainCodeName}
 	orgNames := strings.Split(ccObject.Organizations, ",")
-	channelOpt = ChannelOptions{OrgName: orgNames}
-	deployOpt = InstallCCDeployOpt{ChainCodePath: ccObject.ChainCodePath, Language: ccObject.Language}
-	deployOpt.MetadataPath = ccObject.MetadataPath
-	i.DeployOpt = deployOpt
-	i.ChannelOpt = channelOpt
-	i.ConnProfilePath = paths.GetConnProfilePath(orgNames, organizations)
+	targetPeers := strings.Split(ccObject.TargetPeers, ",")
+	i = InstallCCUIObject{
+		SDK:          ccObject.SDK,
+		TransType:    "install",
+		TLS:          tls,
+		ChainCodeVer: ccObject.ChainCodeVersion,
+		ChainCodeID:  ccObject.ChainCodeName,
+		DeployOpt: InstallCCDeployOpt{
+			ChainCodePath: ccObject.ChainCodePath,
+			Language:      ccObject.Language,
+			MetadataPath:  ccObject.MetadataPath,
+		},
+		ChannelOpt: ChannelOptions{
+			OrgName: orgNames,
+		},
+		TargetPeers:     targetPeers,
+		ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations),
+	}
 	installCCObjects = append(installCCObjects, i)
 	return installCCObjects
 }
 
 //SetEnvForCLI -- sets environment variables for running peer cli commands
-func SetEnvForCLI(orgName, connProfilePath, tls, currentDir string) error {
+func SetEnvForCLI(orgName, peerName, connProfilePath, tls, currentDir string) error {
 
 	var tlsNetwork string
-	mspID, err := GetMSPIDForOrg(connProfilePath, orgName)
+	connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
 	if err != nil {
 		return err
 	}
-
 	if tls == "clientauth" {
 		tlsNetwork = "true"
 	} else {
 		tlsNetwork = "false"
 	}
-
+	mspID := connProfConfig.Organizations[orgName].MSPID
 	os.Setenv("CORE_PEER_LOCALMSPID", mspID)
 	os.Setenv("CORE_PEER_TLS_ENABLED", tlsNetwork)
 	os.Setenv("CORE_PEER_MSPCONFIGPATH", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/users/Admin@%s/msp", currentDir, orgName, orgName))
-	os.Setenv("CORE_PEER_TLS_ROOTCERT_FILE", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/peer0-%s.%s/tls/ca.crt", currentDir, orgName, orgName, orgName))
+	os.Setenv("CORE_PEER_TLS_ROOTCERT_FILE", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/%s.%s/tls/ca.crt", currentDir, orgName, peerName, orgName))
 	return nil
 }
 
@@ -94,11 +105,11 @@ func (i InstallCCUIObject) packageCC(installObject InstallCCUIObject) error {
 	if err != nil {
 		return err
 	}
-	err = SetEnvForCLI(installObject.ChannelOpt.OrgName[0], installObject.ConnProfilePath, installObject.TLS, currentDir)
+	peerName := fmt.Sprintf("peer0-%s", installObject.ChannelOpt.OrgName[0])
+	err = SetEnvForCLI(installObject.ChannelOpt.OrgName[0], peerName, installObject.ConnProfilePath, installObject.TLS, currentDir)
 	if err != nil {
 		return err
 	}
-
 	args := []string{"lifecycle",
 		"chaincode",
 		"package",
@@ -116,34 +127,58 @@ func (i InstallCCUIObject) packageCC(installObject InstallCCUIObject) error {
 //installCCusingCLI -- installing cc using cli
 func (i InstallCCUIObject) installCCusingCLI(installObject InstallCCUIObject) error {
 
-	orgName := installObject.ChannelOpt.OrgName[0]
-	currentDir, err := paths.GetCurrentDir()
-	if err != nil {
-		return err
+	var connProfilePath string
+	for k := 0; k < len(installObject.ChannelOpt.OrgName); k++ {
+		orgName := installObject.ChannelOpt.OrgName[k]
+		currentDir, err := paths.GetCurrentDir()
+		if err != nil {
+			return err
+		}
+		if strings.Contains(installObject.ConnProfilePath, ".yaml") || strings.Contains(installObject.ConnProfilePath, ".json") {
+			connProfilePath = installObject.ConnProfilePath
+		} else {
+			connProfilePath = fmt.Sprintf("%s/connection_profile_%s.yaml", installObject.ConnProfilePath, orgName)
+		}
+		for p := 0; p < len(installObject.TargetPeers); p++ {
+			peerName := installObject.TargetPeers[p]
+			peerOrgName := strings.Split(installObject.TargetPeers[p], "-")
+			if peerOrgName[1] == orgName {
+				connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
+				if err != nil {
+					return err
+				}
+				peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
+				if err != nil {
+					logger.ERROR("Failed to get peer url from connection profile")
+					return err
+				}
+				peerAddress := peerURL.Host
+				err = SetEnvForCLI(orgName, peerName, connProfilePath, installObject.TLS, currentDir)
+				if err != nil {
+					return err
+				}
+				args := []string{"lifecycle",
+					"chaincode",
+					"install",
+					"cc.tgz",
+					"--peerAddresses",
+					peerAddress,
+					"--tlsRootCertFiles",
+					fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/%s.%s/tls/ca.crt", currentDir, orgName, peerName, orgName),
+				}
+				if installObject.TLS == "clientauth" {
+					args = append(args, "--tls")
+				}
+				_, err = networkclient.ExecuteCommand("peer", args, true)
+				if err != nil {
+					return err
+				}
+			} else {
+				continue
+			}
+		}
 	}
-	err = SetEnvForCLI(orgName, installObject.ConnProfilePath, installObject.TLS, currentDir)
-	if err != nil {
-		return err
-	}
-
-	args := []string{"lifecycle",
-		"chaincode",
-		"install",
-		"cc.tgz",
-		"--peerAddresses", "127.0.0.1:31000",
-		"--tlsRootCertFiles", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/peer0-%s.%s/tls/ca.crt", currentDir, orgName, orgName, orgName),
-		// "--connectionProfile",
-		// installObject.ConnProfilePath,
-	}
-
-	if installObject.TLS == "clientauth" {
-		args = append(args, "--tls")
-	}
-	_, err = networkclient.ExecuteCommand("peer", args, true)
-	if err != nil {
-		return err
-	}
-	return err
+	return nil
 }
 
 //installCC -- To install chaincode

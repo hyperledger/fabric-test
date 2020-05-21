@@ -22,6 +22,7 @@ installChaincode:
     version: v1
     path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
     organizations: org1
+    targetPeers: peer0-org1
     language: golang
     metadataPath: ""
 
@@ -30,6 +31,7 @@ installChaincode:
     version: v1
     path: github.com/hyperledger/fabric-test/chaincodes/map_private/go
     organizations: org1
+    targetPeers: peer0-org1
     language: golang
     metadataPath: ""
 
@@ -38,6 +40,8 @@ instantiateChaincode:
     sdk: cli
     name: samplecc
     version: v1
+    sequence: 1
+    targetPeers: peer0-org1
     args: ""
     organizations: org1
     endorsementPolicy: 1of(org1)
@@ -47,6 +51,8 @@ instantiateChaincode:
     sdk: cli
     name: mapcc
     version: v1
+    sequence: 1
+    targetPeers: peer0-org1
     args: ""
     organizations: org1
     endorsementPolicy: 1of(org1)
