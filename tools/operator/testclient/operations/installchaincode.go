@@ -127,21 +127,19 @@ func (i InstallCCUIObject) packageCC(installObject InstallCCUIObject) error {
 //installCCusingCLI -- installing cc using cli
 func (i InstallCCUIObject) installCCusingCLI(installObject InstallCCUIObject) error {
 
-	var connProfilePath string
-	for k := 0; k < len(installObject.ChannelOpt.OrgName); k++ {
-		orgName := installObject.ChannelOpt.OrgName[k]
+	for _, orgName := range installObject.ChannelOpt.OrgName {
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
 			return err
 		}
+		var connProfilePath string
 		if strings.Contains(installObject.ConnProfilePath, ".yaml") || strings.Contains(installObject.ConnProfilePath, ".json") {
 			connProfilePath = installObject.ConnProfilePath
 		} else {
 			connProfilePath = fmt.Sprintf("%s/connection_profile_%s.yaml", installObject.ConnProfilePath, orgName)
 		}
-		for p := 0; p < len(installObject.TargetPeers); p++ {
-			peerName := installObject.TargetPeers[p]
-			peerOrgName := strings.Split(installObject.TargetPeers[p], "-")
+		for _, peerName := range installObject.TargetPeers {
+			peerOrgName := strings.Split(peerName, "-")
 			if peerOrgName[1] == orgName {
 				connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
 				if err != nil {
@@ -173,8 +171,6 @@ func (i InstallCCUIObject) installCCusingCLI(installObject InstallCCUIObject) er
 				if err != nil {
 					return err
 				}
-			} else {
-				continue
 			}
 		}
 	}
