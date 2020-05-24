@@ -7,10 +7,8 @@ import (
 	"strconv"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -39,7 +37,7 @@ func (k8s K8s) ExternalIP(config networkspec.Config, serviceName string, clients
 	if config.K8s.ServiceType == "NodePort" {
 		output, err := k8s.NodeStatus(clientset)
 		if err != nil {
-			logger.ERROR("Failed to get the external IP for k8s using NodePort")
+			Logger.Error("Failed to get the external IP for k8s using NodePort")
 			return "", err
 		}
 		for _, ip := range output.Addresses {
@@ -54,7 +52,7 @@ func (k8s K8s) ExternalIP(config networkspec.Config, serviceName string, clients
 	} else if config.K8s.ServiceType == "LoadBalancer" {
 		output, err := k8s.ServiceStatus(config.K8s.Namespace, serviceName, clientset)
 		if err != nil {
-			logger.ERROR("Failed to get the external IP for k8s using LoadBalancer")
+			Logger.Error("Failed to get the external IP for k8s using LoadBalancer")
 			return "", err
 		}
 		nodeIP = output.Status.LoadBalancer.Ingress[0].IP
@@ -68,7 +66,7 @@ func (k8s K8s) ServicePort(serviceName, serviceType, namespace string, forHealth
 	var portNumber int32
 	output, err := k8s.ServiceStatus(namespace, serviceName, clientset)
 	if err != nil {
-		logger.ERROR("Failed to get the port number for service ", serviceName)
+		Logger.Error("Failed to get the port number for service ", serviceName)
 		return "", err
 	}
 	portNumber = output.Spec.Ports[0].NodePort
@@ -238,14 +236,14 @@ func (k8s K8s) GenerateConnectionProfiles(config networkspec.Config, clientset *
 		}
 		org, err := connProfile.Organization(peerorg, caList)
 		if err != nil {
-			logger.ERROR("Failed to get the organization details")
+			Logger.Error("Failed to get the organization details")
 			return err
 		}
 		organizations[peerorg.Name] = org
 		connProfile.Organizations = organizations
 		err = connProfile.GenerateConnProfilePerOrg(peerorg.Name)
 		if err != nil {
-			logger.ERROR("Failed to generate connection profile")
+			Logger.Error("Failed to generate connection profile")
 			return err
 		}
 	}

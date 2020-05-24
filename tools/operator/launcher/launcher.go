@@ -15,19 +15,20 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
+	"github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
 	"github.com/pkg/errors"
-
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
+
+var Logger = logger.Logger("launcher")
 
 func validateArguments(networkSpecPath string, kubeConfigPath string) error {
 
 	if networkSpecPath == "" {
 		return errors.New("Launcher: Config file not provided")
 	} else if kubeConfigPath == "" {
-		logger.INFO("Launcher: Kube config file not provided, proceeding with local environment")
+		Logger.Info("Launcher: Kube config file not provided, proceeding with local environment")
 	}
 	return nil
 }
@@ -83,14 +84,14 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 	finalContents := stringContents[0] + "orderer: \n" + strings.Split(stringContents[1], "orderer:")[1]
 	config, err := network.GetConfigData(networkSpecPath)
 	if err != nil {
-		logger.ERROR("Launcher: Failed to read the input file", networkSpecPath)
+		Logger.Error("Launcher: Failed to read the input file", networkSpecPath)
 		return err
 	}
 
 	if !(strings.HasPrefix(config.ArtifactsLocation, "/")) {
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
-			logger.ERROR("Launcher: GetCurrentDir failed; unable to join with ArtifactsLocation", config.ArtifactsLocation)
+			Logger.Error("Launcher: GetCurrentDir failed; unable to join with ArtifactsLocation", config.ArtifactsLocation)
 			return err
 		}
 		config.ArtifactsLocation = paths.JoinPath(currentDir, config.ArtifactsLocation)
@@ -104,12 +105,12 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 		K8s := k8s.K8s{KubeConfigPath: kubeConfigPath, Config: config}
 		kubeConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 		if err != nil {
-			logger.ERROR("Failed to create config for kubernetes")
+			Logger.Error("Failed to create config for kubernetes")
 			return err
 		}
 		clientset, err := kubernetes.NewForConfig(kubeConfig)
 		if err != nil {
-			logger.ERROR("Failed to create clientset for kubernetes")
+			Logger.Error("Failed to create clientset for kubernetes")
 			return err
 		}
 		nodeportIP, _ = K8s.ExternalIP(config, "", clientset)
@@ -120,19 +121,19 @@ func Launcher(action, env, kubeConfigPath, networkSpecPath string) error {
 
 	config, err = network.GetConfigData(inputPath)
 	if err != nil {
-		logger.ERROR("Launcher: Failed to get configuration data from network input file ", networkSpecPath)
+		Logger.Error("Launcher: Failed to get configuration data from network input file ", networkSpecPath)
 		return err
 	}
 
 	err = validateBasicConsensusConfig(config)
 	if err != nil {
-		logger.ERROR("Launcher: Failed to validate consensus configuration in network input file ", networkSpecPath)
+		Logger.Error("Launcher: Failed to validate consensus configuration in network input file ", networkSpecPath)
 		return err
 	}
 
 	err = doAction(action, env, kubeConfigPath, config)
 	if err != nil {
-		logger.ERROR("Launcher: Failed to perform ", action, " action using network input file ", networkSpecPath)
+		Logger.Error("Launcher: Failed to perform ", action, " action using network input file ", networkSpecPath)
 		return err
 	}
 	return nil

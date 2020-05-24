@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
@@ -75,19 +74,19 @@ func (c ConnProfile) updateConnectionProfilePerOrg(organizations []inputStructs.
 		connectionProfilesList = []string{}
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
-			logger.ERROR("ConnectionProfile: Failed to get the current directory, connProfilePath: ", connProfilePath)
+			Logger.Error("ConnectionProfile: Failed to get the current directory, connProfilePath: ", connProfilePath)
 			return err
 		}
 		filesList, err := ioutil.ReadDir(paths.JoinPath(currentDir, connProfilePath))
 		if err != nil {
-			logger.ERROR("Failed to read the connection profiles directory, connProfilePath: ", connProfilePath)
+			Logger.Error("Failed to read the connection profiles directory, connProfilePath: ", connProfilePath)
 			return err
 		}
 		for _, file := range filesList {
 			connProfileFilePath := paths.JoinPath(connProfilePath, file.Name())
 			_, connProfileObject, err := c.getComponentsListFromConnProfile(connProfileFilePath, "")
 			if err != nil {
-				logger.ERROR("ConnectionProfile: Failed to read the connection profile, connProfilePath: ", connProfileFilePath)
+				Logger.Error("ConnectionProfile: Failed to read the connection profile, connProfilePath: ", connProfileFilePath)
 			}
 			if connProfileObject.Organizations[orgName].Name == orgName {
 				connectionProfilesList = append(connectionProfilesList, connProfileFilePath)
@@ -106,7 +105,7 @@ func (c ConnProfile) updateConnectionProfilePerOrg(organizations []inputStructs.
 		}
 	}
 	if err != nil {
-		logger.ERROR("Failed to update connection profile after channel ", action)
+		Logger.Error("Failed to update connection profile after channel ", action)
 		return err
 	}
 	return err
@@ -138,7 +137,7 @@ func (c ConnProfile) updateConnectionProfile(inputArgs ...string) error {
 	}
 	componentsList, connProfileObject, err := c.getComponentsListFromConnProfile(connProfileFilePath, componentType)
 	if err != nil {
-		logger.ERROR("Failed to get the components list from the connection profile file")
+		Logger.Error("Failed to get the components list from the connection profile file")
 		return err
 	}
 	switch componentType {
@@ -155,10 +154,10 @@ func (c ConnProfile) updateConnectionProfile(inputArgs ...string) error {
 	yamlBytes = append([]byte("version: 1.0 \nname: My network \ndescription: Connection Profile for Blockchain Network \n"), yamlBytes...)
 	err = ioutil.WriteFile(connProfileFilePath, yamlBytes, 0644)
 	if err != nil {
-		logger.ERROR("Failed to update connection profile")
+		Logger.Error("Failed to update connection profile")
 		return err
 	}
-	logger.INFO("Successfully update connection profile ", connProfileFilePath)
+	Logger.Info("Successfully update connection profile ", connProfileFilePath)
 	return err
 }
 
@@ -170,12 +169,12 @@ func (c ConnProfile) getComponentsListFromConnProfile(connProfileFilePath, compo
 	var connectionProfileObject networkspec.ConnectionProfile
 	yamlFile, err := ioutil.ReadFile(connProfileFilePath)
 	if err != nil {
-		logger.ERROR("Failed to read connection profile")
+		Logger.Error("Failed to read connection profile")
 		return componentsList, connectionProfileObject, err
 	}
 	err = yaml.Unmarshal(yamlFile, &connectionProfileObject)
 	if err != nil {
-		logger.ERROR("Failed to unmarshall yaml file")
+		Logger.Error("Failed to unmarshall yaml file")
 		return componentsList, connectionProfileObject, err
 	}
 	if componentType == "orderer" {

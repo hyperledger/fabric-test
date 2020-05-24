@@ -13,9 +13,11 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
-	yaml "gopkg.in/yaml.v2"
+	"github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
+	"gopkg.in/yaml.v2"
 )
+
+var Logger = logger.Logger("networklauncher")
 
 type Network struct {
 	TemplatesDir string
@@ -38,12 +40,12 @@ func (n Network) GetConfigData(networkSpecPath string) (networkspec.Config, erro
 	var config networkspec.Config
 	yamlFile, err := ioutil.ReadFile(networkSpecPath)
 	if err != nil {
-		logger.ERROR("Failed to read input file")
+		Logger.Error("Failed to read input file")
 		return config, err
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		logger.ERROR("Failed to create config object")
+		Logger.Error("Failed to create config object")
 		return config, err
 	}
 	return config, nil
@@ -143,7 +145,7 @@ func (n Network) moveKey(path, fileName string) error {
 	var err error
 	files, err := ioutil.ReadDir(path)
 	if err != nil {
-		logger.ERROR("Failed to read files")
+		Logger.Error("Failed to read files")
 		return err
 	}
 	for _, file := range files {
@@ -151,7 +153,7 @@ func (n Network) moveKey(path, fileName string) error {
 			args := []string{paths.JoinPath(path, file.Name()), paths.JoinPath(path, fileName)}
 			_, err = networkclient.ExecuteCommand("mv", args, true)
 			if err != nil {
-				logger.ERROR("Failed to move files")
+				Logger.Error("Failed to move files")
 				return err
 			}
 		}
@@ -166,19 +168,19 @@ func (n Network) GenerateNetworkArtifacts(config networkspec.Config) error {
 
 	err = n.GenerateCryptoCerts(config)
 	if err != nil {
-		logger.ERROR("Failed to generate certificates")
+		Logger.Error("Failed to generate certificates")
 		return err
 	}
 
 	err = n.GenerateGenesisBlock(config)
 	if err != nil {
-		logger.ERROR("Failed to create orderer genesis block")
+		Logger.Error("Failed to create orderer genesis block")
 		return err
 	}
 
 	err = networkclient.GenerateChannelTransaction(config, configFilesPath)
 	if err != nil {
-		logger.ERROR("Failed to create channel transaction")
+		Logger.Error("Failed to create channel transaction")
 		return err
 	}
 	return err

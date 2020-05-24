@@ -11,12 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
-
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-
+	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -113,12 +110,12 @@ func (k8s K8s) CreateStatefulset(launchConfig LaunchConfig, nsConfig networkspec
 		statefulsetRes.Spec.Template.ObjectMeta.Annotations = annotations
 	}
 
-	logger.INFO("Creating Statefulset for ", launchConfig.Name)
+	Logger.Info("Creating Statefulset for ", launchConfig.Name)
 	result, err := statefulsetClient.Create(statefulsetRes)
 	if err != nil {
 		return errors.Wrap(err, "failed to create statefulset")
 	}
-	logger.INFO("Created Statefulset ", result.GetName())
+	Logger.Info("Created Statefulset ", result.GetName())
 
 	return nil
 }
@@ -172,7 +169,7 @@ func (k8s K8s) DeleteNameSpace(ns string, clientset *kubernetes.Clientset) error
 	}()
 	select {
 	case res := <-status:
-		logger.INFO("Namespace ", ns, " is ", res)
+		Logger.Info("Namespace ", ns, " is ", res)
 	case <-time.After(180 * time.Second):
 		return errors.Wrap(err, " namespace is still in terminating phase")
 	}
@@ -196,7 +193,7 @@ func (k8s K8s) createPVC(name, ns string, nsConfig networkspec.Config, clientset
 		},
 	}
 
-	logger.INFO("Creating PVC...")
+	Logger.Info("Creating PVC...")
 	_, err := clientset.CoreV1().PersistentVolumeClaims(ns).Create(pvcRes)
 	if err != nil {
 		return errors.Wrap(err, "failed to create pvc")
@@ -205,7 +202,6 @@ func (k8s K8s) createPVC(name, ns string, nsConfig networkspec.Config, clientset
 }
 
 func (k8s K8s) createService(name, componentType, ns string, ports []int32, nsConfig networkspec.Config, clientset *kubernetes.Clientset) error {
-
 	servicePorts := make([]corev1.ServicePort, 0)
 	for i, p := range ports {
 		sp := corev1.ServicePort{
@@ -252,7 +248,7 @@ func (k8s K8s) CreateSecret(name string, nsConfig networkspec.Config, clientset 
 	path := paths.JoinPath(channelArtifactPath, "genesis.block")
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
-		logger.ERROR("Failed to read genesis block")
+		Logger.Error("Failed to read genesis block")
 		return err
 	}
 	secretRes := &corev1.Secret{
@@ -392,7 +388,7 @@ func (k8s K8s) createCertsConfigmap(numCA int, componentType, orgName string, ns
 func (k8s K8s) verifyContainersAreRunning(ns, podName string, clientset *kubernetes.Clientset, wg *sync.WaitGroup) error {
 
 	defer wg.Done()
-	logger.INFO("Checking status of pod ", podName, " to verify if it is running")
+	Logger.Info("Checking status of pod ", podName, " to verify if it is running")
 	opts := metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("k8s-app=%s", podName),
 	}
@@ -440,7 +436,7 @@ func (k8s K8s) PodStatusCheck(ns string, clientset *kubernetes.Clientset) error 
 		go func(failed error) {
 			err := k8s.verifyContainersAreRunning(ns, podLabels["k8s-app"], clientset, &wg)
 			if err != nil {
-				logger.ERROR(fmt.Sprintf("Pod failed to start: %v", err))
+				Logger.Error(fmt.Sprintf("Pod failed to start: %v", err))
 				statusError = fmt.Errorf("statefulset failed to deploy")
 			}
 		}(statusError)

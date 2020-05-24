@@ -9,6 +9,8 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 )
 
+var Logger = logger.Logger("paths")
+
 //CryptoConfigDir --
 func CryptoConfigDir(artifactsLocation string) string {
 	return componentPath(artifactsLocation, "crypto-config")
@@ -38,7 +40,7 @@ func PeerOrgsDir(artifactsLocation string) string {
 func YTTPath() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.ERROR("YTTPath function is failed in getting current directory")
+		Logger.Error("YTTPath function is failed in getting current directory")
 	}
 	if strings.Contains(currentDir, "regression") {
 		return componentPath(currentDir, "../../tools/operator/ytt")
@@ -50,7 +52,7 @@ func YTTPath() string {
 func TemplatesDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.ERROR("TemplateDir function is failed in getting current directory")
+		Logger.Error("TemplateDir function is failed in getting current directory")
 	}
 	if strings.Contains(currentDir, "regression") {
 		return componentPath(currentDir, "../../tools/operator/templates")
@@ -62,7 +64,7 @@ func TemplatesDir() string {
 func ScriptsDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.ERROR("ScriptsDir function is failed in getting current directory")
+		Logger.Error("ScriptsDir function is failed in getting current directory")
 	}
 	if strings.Contains(currentDir, "regression") {
 		return componentPath(currentDir, "../../tools/operator/scripts")
@@ -80,7 +82,7 @@ func TemplateFilePath(fileName string) string {
 func ConfigFilesDir() string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
-		logger.ERROR("ConfigFilesDir function is failed in getting current directory")
+		Logger.Error("ConfigFilesDir function is failed in getting current directory")
 	}
 	if strings.Contains(currentDir, "regression") {
 		return componentPath(currentDir, "../../tools/operator/configFiles")
@@ -137,7 +139,7 @@ func componentPath(artifactsLocation, component string) string {
 	}
 	err := createDirectory(path)
 	if err != nil {
-		logger.ERROR("componentPath function is failed in creating new directory")
+		Logger.Error("componentPath function is failed in creating new directory")
 	}
 	return path
 }
@@ -151,7 +153,7 @@ func JoinPath(oldPath, newPath string) string {
 func PTEPath() string {
 	path, err := GetCurrentDir()
 	if err != nil {
-		logger.ERROR("PTEPath function is failed in getting current directory")
+		Logger.Error("PTEPath function is failed in getting current directory")
 	}
 	if strings.Contains(path, "regression") {
 		return JoinPath(path, "../../tools/PTE/pte-main.js")

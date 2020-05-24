@@ -15,6 +15,8 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
+var Logger = logger.Logger("ytt")
+
 type YTT struct {
 	InputPath  string
 	OutputPath string
@@ -38,20 +40,20 @@ func (y YTT) DownloadYtt() error {
 
 		resp, err := http.Get(url)
 		if err != nil {
-			logger.ERROR("Error while downloading the ytt")
+			Logger.Error("Error while downloading the ytt")
 			return err
 		}
 		defer resp.Body.Close()
 		ytt, err := os.Create(fmt.Sprintf("%s/ytt", yttPath))
 		if err != nil {
-			logger.ERROR("Error while creating the ytt file")
+			Logger.Error("Error while creating the ytt file")
 			return err
 		}
 		defer ytt.Close()
 		io.Copy(ytt, resp.Body)
 		err = os.Chmod(fmt.Sprintf("%s/ytt", yttPath), 0777)
 		if err != nil {
-			logger.ERROR("Failed to change permissions to ytt")
+			Logger.Error("Failed to change permissions to ytt")
 			return err
 		}
 	}

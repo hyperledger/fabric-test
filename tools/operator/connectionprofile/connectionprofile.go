@@ -12,8 +12,10 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
+
+var Logger = logger.Logger("connectionprofile")
 
 type ConnProfile struct {
 	Peers         map[string]networkspec.Peer
@@ -73,21 +75,21 @@ func (c ConnProfile) GenerateConnProfilePerOrg(orgName string) error {
 	cp := networkspec.ConnectionProfile{Client: client, Organizations: c.Organizations, Orderers: c.Orderers, Peers: c.Peers, CA: c.CA}
 	yamlBytes, err := yaml.Marshal(cp)
 	if err != nil {
-		logger.ERROR("Failed to convert the connection profile struct to bytes")
+		Logger.Error("Failed to convert the connection profile struct to bytes")
 		return err
 	}
 	_, err = os.Create(fileName)
 	if err != nil {
-		logger.ERROR("Failed to create ", fileName)
+		Logger.Error("Failed to create ", fileName)
 		return err
 	}
 	yamlBytes = append([]byte("version: 1.0 \nname: My network \ndescription: Connection Profile for Blockchain Network \n"), yamlBytes...)
 	err = ioutil.WriteFile(fileName, yamlBytes, 0644)
 	if err != nil {
-		logger.ERROR("Failed to write content to ", fileName)
+		Logger.Error("Failed to write content to ", fileName)
 		return err
 	}
-	logger.INFO("Successfully created ", fileName)
+	Logger.Info("Successfully created ", fileName)
 	return nil
 }
 
@@ -99,13 +101,13 @@ func (c ConnProfile) GetCertificateFromFile(certPath string) (string, error) {
 
 	file, err := os.Open(certPath)
 	if err != nil {
-		logger.ERROR("Failed to open file")
+		Logger.Error("Failed to open file")
 		return cert, err
 	}
 	defer file.Close()
 	fileContent, err := ioutil.ReadAll(file)
 	if err != nil {
-		logger.ERROR("Failed to read file content")
+		Logger.Error("Failed to read file content")
 		return cert, err
 	}
 	return string(fileContent), err

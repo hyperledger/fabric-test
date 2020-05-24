@@ -9,8 +9,10 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/operations"
 	"github.com/pkg/errors"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
+
+var Logger = logger.Logger("testclient")
 
 func validateArguments(testInputFilePath string) error {
 
@@ -26,12 +28,12 @@ func GetInputData(inputFilePath string) (inputStructs.Config, error) {
 	var config inputStructs.Config
 	yamlFile, err := ioutil.ReadFile(inputFilePath)
 	if err != nil {
-		logger.ERROR("Failed to read input file")
+		Logger.Error("Failed to read input file")
 		return config, err
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		logger.ERROR("Failed to create config object")
+		Logger.Error("Failed to create config object")
 		return config, err
 	}
 	return config, nil
@@ -107,13 +109,13 @@ func Testclient(action, testInputFilePath string) error {
 
 	err := validateArguments(testInputFilePath)
 	if err != nil {
-		logger.ERROR("Failed to validate arguments")
+		Logger.Error("Failed to validate arguments")
 		return err
 	}
 
 	config, err := GetInputData(testInputFilePath)
 	if err != nil {
-		logger.ERROR("Failed to get configuration data from testInputFilePath = ", testInputFilePath)
+		Logger.Error("Failed to get configuration data from testInputFilePath = ", testInputFilePath)
 		return err
 	}
 
@@ -123,7 +125,7 @@ func Testclient(action, testInputFilePath string) error {
 
 	err = doAction(action, config, testInputFilePath)
 	if err != nil {
-		logger.ERROR("Failed to perform ", action, " action, testInputFilePath = ", testInputFilePath)
+		Logger.Error("Failed to perform ", action, " action, testInputFilePath = ", testInputFilePath)
 		return err
 	}
 	return nil

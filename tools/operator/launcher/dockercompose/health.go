@@ -9,19 +9,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
 func (d DockerCompose) VerifyContainersAreRunning() error {
 
-	logger.INFO("Check status of all the containers to verify they are running")
+	Logger.Info("Check status of all the containers to verify they are running")
 	count := 0
 	args := []string{"ps", "-a"}
 	output, err := networkclient.ExecuteCommand("docker", args, false)
 	if err != nil {
-		logger.ERROR("Error occured while listing all the containers")
+		Logger.Error("Error occured while listing all the containers")
 		return err
 	}
 	numContainers := len(strings.Split(string(output), "\n"))
@@ -34,23 +33,23 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 				args = []string{"ps", "-af", "status=running"}
 				output, err = networkclient.ExecuteCommand("docker", args, false)
 				if err != nil {
-					logger.ERROR("Error occured while listing the running containers")
+					Logger.Error("Error occurred while listing the running containers")
 					return err
 				}
 				runningContainers := len(strings.Split(string(output), "\n"))
 				if numContainers == runningContainers {
-					logger.INFO("All the containers are up and running")
+					Logger.Info("All the containers are up and running")
 					return nil
 				}
 				args = []string{"ps", "-af", "status=exited", "-af", "status=created", "--format", "{{.Names}}"}
 				output, err = networkclient.ExecuteCommand("docker", args, false)
 				if err != nil {
-					logger.ERROR("Error occured while listing the exited containers")
+					Logger.Error("Error occured while listing the exited containers")
 					return err
 				}
 				exitedContainers := strings.Split(strings.TrimSpace(string(output)), "\n")
 				if len(exitedContainers) > 0 {
-					logger.ERROR("Exited Containers: ", strings.Join(exitedContainers, ","))
+					Logger.Error("Exited Containers: ", strings.Join(exitedContainers, ","))
 					return errors.New("Containers exited")
 				}
 				count++
@@ -64,18 +63,18 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 
 func (d DockerCompose) checkHealth(componentName string, config networkspec.Config) error {
 
-	logger.INFO("Checking health for ", componentName)
+	Logger.Info("Checking health for ", componentName)
 	var nodeIP string
 	portNumber, err := d.GetDockerServicePort(componentName, true)
 	if err != nil {
-		logger.ERROR("Failed to get the port for ", componentName)
+		Logger.Error("Failed to get the port for ", componentName)
 		return err
 	}
 	nodeIP = d.GetDockerExternalIP()
 	url := fmt.Sprintf("http://%s:%s/healthz", nodeIP, portNumber)
 	resp, err := http.Get(url)
 	if err != nil {
-		logger.ERROR("Error while hitting the endpoint")
+		Logger.Error("Error while hitting the endpoint")
 		return err
 	}
 	defer resp.Body.Close()
@@ -84,10 +83,10 @@ func (d DockerCompose) checkHealth(componentName string, config networkspec.Conf
 		return err
 	}
 	healthStatus := string(bodyBytes)
-	logger.INFO("Response status: ", strconv.Itoa(resp.StatusCode))
-	logger.INFO("Response body: ", healthStatus)
+	Logger.Info("Response status: ", strconv.Itoa(resp.StatusCode))
+	Logger.Info("Response body: ", healthStatus)
 	if resp.StatusCode == http.StatusOK {
-		logger.INFO("Health check passed for ", componentName)
+		Logger.Info("Health check passed for ", componentName)
 		return nil
 	}
 	return fmt.Errorf("health check failed for %s; Response status = %d", componentName, resp.StatusCode)

@@ -13,8 +13,10 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 )
+
+var Logger = logger.Logger("operations")
 
 //InstantiateCCUIObject --
 type InstantiateCCUIObject struct {
@@ -140,7 +142,7 @@ func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, cha
 	if ccObject.EndorsementPolicy != "" {
 		endorsementPolicy, err := i.getEndorsementPolicy(organizations, ccObject.EndorsementPolicy)
 		if err != nil {
-			logger.ERROR("Failed to get the endorsement policy")
+			Logger.Error("Failed to get the endorsement policy")
 			return instantiateCCObjects, err
 		}
 		i.DeployOpt.Endorsement = endorsementPolicy
@@ -194,7 +196,7 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 	}
 	numPolicies, err := strconv.Atoi(args[0][0:1])
 	if err != nil {
-		logger.ERROR("Failed to convert string to integer")
+		Logger.Error("Failed to convert string to integer")
 		return endorsementPolicy, err
 	}
 	key := fmt.Sprintf("%d-of", numPolicies)
@@ -227,12 +229,12 @@ func GetMSPIDForOrg(connProfilePath, orgName string) (string, error) {
 	}
 	yamlFile, err := ioutil.ReadFile(connProfilePath)
 	if err != nil {
-		logger.ERROR("Failed to read connectionprofile to get MSPID ")
+		Logger.Error("Failed to read connectionprofile to get MSPID ")
 		return mspID, err
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		logger.ERROR("Failed to create GetMSPID object")
+		Logger.Error("Failed to create GetMSPID object")
 		return mspID, err
 	}
 	mspID = config.Organizations[orgName].MSPID

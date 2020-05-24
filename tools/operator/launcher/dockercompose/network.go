@@ -9,9 +9,10 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-
 	"github.com/pkg/errors"
 )
+
+var Logger = logger.Logger("dockerlauncher")
 
 //DockerCompose --
 type DockerCompose struct {
@@ -59,7 +60,7 @@ func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"down"}}
 	_, err := networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {
-		logger.WARNING("Unable to delete all active endpoints")
+		Logger.Warn("Unable to delete all active endpoints")
 	}
 
 	err = networkclient.UpgradeDB(config, "")
@@ -155,7 +156,7 @@ func (d DockerCompose) DockerNetwork(action string) error {
 	case "up":
 		err = d.GenerateConfigurationFiles(false)
 		if err != nil {
-			logger.ERROR("Failed to generate docker compose file")
+			Logger.Error("Failed to generate docker compose file")
 			return err
 		}
 		err = network.GenerateNetworkArtifacts(d.Config)
@@ -164,57 +165,57 @@ func (d DockerCompose) DockerNetwork(action string) error {
 		}
 		err = d.LaunchLocalNetwork(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to launch fabric network")
+			Logger.Error("Failed to launch fabric network")
 			return err
 		}
 		err = d.VerifyContainersAreRunning()
 		if err != nil {
-			logger.ERROR("Failed to verify docker container state")
+			Logger.Error("Failed to verify docker container state")
 			return err
 		}
 		err = d.CheckDockerContainersHealth(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to check docker containers health")
+			Logger.Error("Failed to check docker containers health")
 			return err
 		}
 		err = d.GenerateConnectionProfiles(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to generate connection profile")
+			Logger.Error("Failed to generate connection profile")
 			return err
 		}
 	case "upgradeNetwork":
 		err = d.GenerateConfigurationFiles(true)
 		if err != nil {
-			logger.ERROR("Failed to generate docker compose file")
+			Logger.Error("Failed to generate docker compose file")
 			return err
 		}
 		err = d.UpgradeLocalNetwork(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to upgrade local fabric network")
+			Logger.Error("Failed to upgrade local fabric network")
 			return err
 		}
 	case "updateCapability":
 		err = d.UpdateCapability(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to update capabilities and policies")
+			Logger.Error("Failed to update capabilities and policies")
 			return err
 		}
 	case "updatePolicy":
 		err = d.UpdatePolicy(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to update capabilities and policies")
+			Logger.Error("Failed to update capabilities and policies")
 			return err
 		}
 	case "down":
 		err = d.DownLocalNetwork(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to down local fabric network")
+			Logger.Error("Failed to down local fabric network")
 			return err
 		}
 	case "health":
 		err = d.CheckDockerContainersHealth(d.Config)
 		if err != nil {
-			logger.ERROR("Failed to check the health of local fabric network")
+			Logger.Error("Failed to check the health of local fabric network")
 			return err
 		}
 	default:

@@ -3,19 +3,19 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
-	corev1 "k8s.io/api/core/v1"
-	apiResource "k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
 	"github.com/hyperledger/fabric-test/tools/operator/fabricconfig"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	apiResource "k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
+
+var Logger = logger.Logger("k8slauncher")
 
 //K8s -
 type K8s struct {
@@ -391,13 +391,13 @@ func (k8s K8s) launchNetwork(config networkspec.Config, clientset *kubernetes.Cl
 
 	launchConfig, err := k8s.launchObject(config)
 	if err != nil {
-		logger.ERROR("Failed to launch the fabric k8s components")
+		Logger.Error("Failed to launch the fabric k8s components")
 		return err
 	}
 	for i := 0; i < len(launchConfig); i++ {
 		err = k8s.CreateStatefulset(launchConfig[i], config, clientset)
 		if err != nil {
-			logger.ERROR("Failed to launch the fabric k8s network")
+			Logger.Error("Failed to launch the fabric k8s network")
 			return err
 		}
 	}
@@ -408,12 +408,12 @@ func (k8s K8s) buildClientset(kubeconfig *string) (*kubernetes.Clientset, error)
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
-		logger.ERROR("Failed to create config for kubernetes")
+		Logger.Error("Failed to create config for kubernetes")
 		return &kubernetes.Clientset{}, err
 	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		logger.ERROR("Failed to create clientset for kubernetes")
+		Logger.Error("Failed to create clientset for kubernetes")
 		return &kubernetes.Clientset{}, err
 	}
 	return clientset, nil
@@ -431,63 +431,63 @@ func (k8s K8s) Network(action string) error {
 	case "up":
 		err = k8s.GenerateConfigurationFiles(false)
 		if err != nil {
-			logger.ERROR("Failed to generate k8s configuration files")
+			Logger.Error("Failed to generate k8s configuration files")
 			return err
 		}
 		err = network.GenerateNetworkArtifacts(k8s.Config)
 		if err != nil {
-			logger.ERROR("Failed to generate network artifacts for kubernetes")
+			Logger.Error("Failed to generate network artifacts for kubernetes")
 			return err
 		}
 		clientset, err := k8s.buildClientset(kubeconfig)
 		if err != nil {
-			logger.ERROR("Failed to generate clientset for kubernetes")
+			Logger.Error("Failed to generate clientset for kubernetes")
 			return err
 		}
 		err = k8s.CreateNameSpace(k8s.Config.K8s.Namespace, clientset)
 		if err != nil {
-			logger.ERROR("Failed to create namespace")
+			Logger.Error("Failed to create namespace")
 			return err
 		}
 		err = k8s.CreateSecret("genesisblock", k8s.Config, clientset)
 		if err != nil {
-			logger.ERROR("Failed to create secret for genesis block")
+			Logger.Error("Failed to create secret for genesis block")
 			return err
 		}
 		err = k8s.CreateMSPConfigMaps(k8s.Config, clientset)
 		if err != nil {
-			logger.ERROR("Failed to create configmaps")
+			Logger.Error("Failed to create configmaps")
 			return err
 		}
 		err = k8s.launchNetwork(k8s.Config, clientset)
 		if err != nil {
-			logger.ERROR("Failed to launch k8s fabric network")
+			Logger.Error("Failed to launch k8s fabric network")
 			return err
 		}
 		err = k8s.PodStatusCheck(k8s.Config.K8s.Namespace, clientset)
 		if err != nil {
-			logger.ERROR("Failed to verify fabric K8s pods state")
+			Logger.Error("Failed to verify fabric K8s pods state")
 			return err
 		}
 		err = k8s.CheckComponentsHealth(k8s.Config, clientset)
 		if err != nil {
-			logger.ERROR("Failed to check fabric K8s pods health")
+			Logger.Error("Failed to check fabric K8s pods health")
 			return err
 		}
 		err = k8s.GenerateConnectionProfiles(k8s.Config, clientset)
 		if err != nil {
-			logger.ERROR("Failed to generate connection profile")
+			Logger.Error("Failed to generate connection profile")
 			return err
 		}
 	case "down":
 		clientset, err := k8s.buildClientset(kubeconfig)
 		if err != nil {
-			logger.ERROR("Failed to generate clientset for kubernetes")
+			Logger.Error("Failed to generate clientset for kubernetes")
 			return err
 		}
 		err = k8s.DeleteNameSpace(k8s.Config.K8s.Namespace, clientset)
 		if err != nil {
-			logger.ERROR("Failed to down K8s fabric network")
+			Logger.Error("Failed to down K8s fabric network")
 			return err
 		}
 		err = network.NetworkCleanUp(k8s.Config)
@@ -497,7 +497,7 @@ func (k8s K8s) Network(action string) error {
 	case "health":
 		clientset, err := k8s.buildClientset(kubeconfig)
 		if err != nil {
-			logger.ERROR("Failed to generate clientset for kubernetes")
+			Logger.Error("Failed to generate clientset for kubernetes")
 			return err
 		}
 		err = k8s.CheckComponentsHealth(k8s.Config, clientset)

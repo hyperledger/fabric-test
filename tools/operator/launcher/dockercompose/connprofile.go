@@ -11,7 +11,6 @@ import (
 	"sort"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -38,12 +37,12 @@ func (d DockerCompose) GetDockerServicePort(serviceName string, forHealth bool) 
 	output, err := networkclient.ExecuteCommand("docker", args, false)
 	output = output[1 : len(output)-1]
 	if err != nil {
-		logger.ERROR("Failed to get the port number for service ", serviceName)
+		Logger.Error("Failed to get the port number for service ", serviceName)
 		return "", err
 	}
 	err = json.Unmarshal([]byte(output), &containerPorts)
 	if err != nil {
-		logger.ERROR("Failed to unmarshall containerPorts object")
+		Logger.Error("Failed to unmarshall containerPorts object")
 	}
 	for port = range containerPorts.Ports {
 		ports = append(ports, port)
@@ -215,14 +214,14 @@ func (d DockerCompose) GenerateConnectionProfiles(config networkspec.Config) err
 		}
 		org, err := connProfile.Organization(peerorg, caList)
 		if err != nil {
-			logger.ERROR("Failed to get the organization details")
+			Logger.Error("Failed to get the organization details")
 			return err
 		}
 		organizations[peerorg.Name] = org
 		connProfile.Organizations = organizations
 		err = connProfile.GenerateConnProfilePerOrg(peerorg.Name)
 		if err != nil {
-			logger.ERROR("Failed to generate connection profile")
+			Logger.Error("Failed to generate connection profile")
 			return err
 		}
 	}

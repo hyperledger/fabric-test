@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
@@ -14,11 +13,11 @@ import (
 func CheckNetworkInSync(config networkspec.Config, kubeConfigPath string) error {
 
 	var artifactsLocation string
-	ordererOrgs := []string{}
-	numOrderersPerOrg := []string{}
-	peerOrgs := []string{}
-	numPeersPerOrg := []string{}
-	peerOrgsMSPID := []string{}
+	var ordererOrgs []string
+	var numOrderersPerOrg []string
+	var peerOrgs []string
+	var numPeersPerOrg []string
+	var peerOrgsMSPID []string
 	for j := 0; j < len(config.OrdererOrganizations); j++ {
 		ordererOrgs = append(ordererOrgs, config.OrdererOrganizations[j].Name)
 		numOrderersPerOrg = append(numOrderersPerOrg, fmt.Sprintf("%d", config.OrdererOrganizations[j].NumOrderers))
@@ -31,7 +30,7 @@ func CheckNetworkInSync(config networkspec.Config, kubeConfigPath string) error 
 	if !(strings.HasPrefix(config.ArtifactsLocation, "/")) {
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
-			logger.ERROR("CheckNetworkSync: GetCurrentDir failed; unable to join with ArtifactsLocation", config.ArtifactsLocation)
+			Logger.Error("CheckNetworkSync: GetCurrentDir failed; unable to join with ArtifactsLocation", config.ArtifactsLocation)
 			return err
 		}
 		artifactsLocation = paths.JoinPath(currentDir, config.ArtifactsLocation)
@@ -47,6 +46,6 @@ func CheckNetworkInSync(config networkspec.Config, kubeConfigPath string) error 
 	if err != nil {
 		return err
 	}
-	logger.INFO("Successfully verfied that the network is synced and all the orderers and the peers are at same block level in their respective channels")
+	Logger.Error("Successfully verfied that the network is synced and all the orderers and the peers are at same block level in their respective channels")
 	return nil
 }

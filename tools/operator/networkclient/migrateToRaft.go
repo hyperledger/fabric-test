@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
@@ -26,7 +25,7 @@ func MigrateToRaft(config networkspec.Config, kubeConfigPath string) error {
 	if !(strings.HasPrefix(artifactsLocation, "/")) {
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
-			logger.ERROR("MigrateToRaft: GetCurrentDir failed; unable to join with ArtifactsLocation", artifactsLocation)
+			Logger.Error("MigrateToRaft: GetCurrentDir failed; unable to join with ArtifactsLocation", artifactsLocation)
 			return err
 		}
 		artifactsLocation = paths.JoinPath(currentDir, artifactsLocation)
@@ -38,6 +37,6 @@ func MigrateToRaft(config networkspec.Config, kubeConfigPath string) error {
 	if err != nil {
 		return err
 	}
-	logger.INFO("Successfully migrated from kafka to etcdraft")
+	Logger.Info("Successfully migrated from kafka to etcdraft")
 	return nil
 }

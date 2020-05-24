@@ -3,7 +3,6 @@ package networkclient
 import (
 	"fmt"
 
-	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
@@ -23,7 +22,7 @@ func UpgradeDB(config networkspec.Config, kubeConfigPath string) error {
 			}
 		}
 	}
-	logger.INFO("Successfully updated dbs for all peers")
+	Logger.Info("Successfully updated dbs for all peers")
 	return nil
 }
 
@@ -79,7 +78,7 @@ func UpdateCapability(config networkspec.Config, kubeConfigPath string) error {
 		return err
 	}
 
-	logger.INFO("Successfully updated capabilities")
+	Logger.Info("Successfully updated capabilities")
 	return nil
 }
 
@@ -139,6 +138,6 @@ func UpdatePolicy(config networkspec.Config, kubeConfigPath string) error {
 		}
 	}
 
-	logger.INFO("Successfully updated policies")
+	Logger.Info("Successfully updated policies")
 	return nil
 }
