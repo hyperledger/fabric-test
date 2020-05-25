@@ -314,7 +314,8 @@ func (k8s K8s) certsLists(componentName, componentType, certsType string, nsConf
 	var cm configmapData
 	c := strings.Split(componentName, "-")
 	orgName := c[len(c)-1]
-	if certsType == "msp" {
+	switch certsType {
+	case "msp":
 		cm.MSP = map[string]string{
 			"cacerts":    k8s.readData(componentName, orgName, componentType, fmt.Sprintf("msp/cacerts/ca.%s-cert.pem", orgName)),
 			"signcerts":  k8s.readData(componentName, orgName, componentType, fmt.Sprintf("msp/signcerts/%s.%s-cert.pem", componentName, orgName)),
@@ -325,14 +326,14 @@ func (k8s K8s) certsLists(componentName, componentType, certsType string, nsConf
 			cm.MSP["config"] = k8s.readData(componentName, orgName, componentType, "msp/config.yaml")
 		}
 		return cm.MSP
-	} else if certsType == "tls" {
+	case "tls":
 		cm.TLS = map[string]string{
 			"server.crt": k8s.readData(componentName, orgName, componentType, "tls/server.crt"),
 			"server.key": k8s.readData(componentName, orgName, componentType, "tls/server.key"),
 			"ca.crt":     k8s.readData(componentName, orgName, componentType, "tls/ca.crt"),
 		}
 		return cm.TLS
-	} else if certsType == "config" {
+	case "config":
 		typeName := componentType
 		if componentType == "peer" {
 			typeName = "core"
@@ -342,21 +343,19 @@ func (k8s K8s) certsLists(componentName, componentType, certsType string, nsConf
 			componentConfig: k8s.readData(componentName, orgName, componentType, fmt.Sprintf("%s-%s.yaml", typeName, componentName)),
 		}
 		return cm.Config
-	} else if certsType == "admincerts" {
-		var certPath string
+	case "admincerts":
 		if nsConfig.EnableNodeOUs {
-			certPath = "msp/admincerts"
 			cm.Admincerts = map[string]string{
 				"admincerts": "",
 			}
 		} else {
-			certPath = fmt.Sprintf("msp/admincerts/Admin@%s-cert.pem", orgName)
+			certPath := fmt.Sprintf("msp/admincerts/Admin@%s-cert.pem", orgName)
 			cm.Admincerts = map[string]string{
 				"admincerts": k8s.readData(componentName, orgName, componentType, certPath),
 			}
 		}
 		return cm.Admincerts
-	} else if certsType == "ca" {
+	case "ca":
 		caCert := fmt.Sprintf("ca.%s-cert.pem", orgName)
 		tlscaCert := fmt.Sprintf("tlsca.%s-cert.pem", orgName)
 		cm.CA = map[string]string{
@@ -447,7 +446,6 @@ func (k8s K8s) PodStatusCheck(ns string, clientset *kubernetes.Clientset) error 
 
 //CreateMSPConfigMaps --
 func (k8s K8s) CreateMSPConfigMaps(nsConfig networkspec.Config, clientset *kubernetes.Clientset) error {
-
 	for i := 0; i < len(nsConfig.OrdererOrganizations); i++ {
 		organization := nsConfig.OrdererOrganizations[i]
 		err := k8s.createCertsConfigmap(organization.NumCA, "orderer", organization.Name, nsConfig, clientset)

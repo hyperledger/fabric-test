@@ -151,6 +151,9 @@ func (c ConnProfile) updateConnectionProfile(inputArgs ...string) error {
 		connProfileObject.Channels[channelName] = networkspec.Channel{Orderers: channelObject.Orderers, Peers: channelObject.Peers, Chaincodes: []string{inputArgs[len(inputArgs)-1]}}
 	}
 	yamlBytes, err := yaml.Marshal(connProfileObject)
+	if err != nil {
+		return fmt.Errorf("failed to marshal connection profile: %v", err)
+	}
 	yamlBytes = append([]byte("version: 1.0 \nname: My network \ndescription: Connection Profile for Blockchain Network \n"), yamlBytes...)
 	err = ioutil.WriteFile(connProfileFilePath, yamlBytes, 0644)
 	if err != nil {

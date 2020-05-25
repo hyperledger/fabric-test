@@ -1,6 +1,7 @@
 package testclient
 
 import (
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -48,16 +49,20 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query|command"
 	if strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yaml") || strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yml") {
 		connectionProfileFileContents, err = ioutil.ReadFile(config.Organizations[0].ConnProfilePath)
+		if err != nil {
+			return fmt.Errorf("failed to read the connection profile file: %v", err)
+		}
 	} else {
 		files, err := ioutil.ReadDir(config.Organizations[0].ConnProfilePath)
 		if err != nil {
-			return errors.Errorf("Failed to read the connection profiles directory; Error: %s", err)
+			return fmt.Errorf("failed to read the connection profiles directory; Error: %v", err)
 		}
 		connectionProfileFileContents, err = ioutil.ReadFile(filepath.Join(config.Organizations[0].ConnProfilePath, files[0].Name()))
+		if err != nil {
+			return fmt.Errorf("failed to read the connection profile file: %v", err)
+		}
 	}
-	if err != nil {
-		return errors.Errorf("Failed to read the connection profile file; Error: %s", err)
-	}
+
 	if strings.Contains(string(connectionProfileFileContents), "grpcs") {
 		tls = "clientauth"
 	}
