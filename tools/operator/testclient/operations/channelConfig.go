@@ -134,7 +134,7 @@ func (c ChannelUIObject) doChannelAction(channelUIObjects []ChannelUIObject) err
 		if err != nil {
 			return err
 		}
-		startTime := fmt.Sprintf("%s", time.Now())
+		startTime := time.Now().String()
 		args := []string{pteMainPath, strconv.Itoa(i), string(jsonObject), startTime}
 		_, err = networkclient.ExecuteCommand("node", args, true)
 		if err != nil {

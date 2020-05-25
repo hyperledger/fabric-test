@@ -253,7 +253,7 @@ func (k8s K8s) CreateSecret(name string, nsConfig networkspec.Config, clientset 
 	}
 	secretRes := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: fmt.Sprintf("%s", name),
+			Name: name,
 		},
 		Data: map[string][]byte{
 			"genesis.block": data,
@@ -305,7 +305,7 @@ func (k8s K8s) readData(componentName, orgName, componentType, filePath string) 
 
 	cryptoConfigPath := paths.CryptoConfigDir(k8s.Config.ArtifactsLocation)
 	path := paths.JoinPath(cryptoConfigPath, fmt.Sprintf("%sOrganizations/%s/%ss/%s.%s/%s", componentType, orgName, componentType, componentName, orgName, filePath))
-	d, _ := ioutil.ReadFile(fmt.Sprintf("%s", path))
+	d, _ := ioutil.ReadFile(path)
 	return string(d)
 }
 
@@ -352,7 +352,7 @@ func (k8s K8s) certsLists(componentName, componentType, certsType string, nsConf
 		} else {
 			certPath = fmt.Sprintf("msp/admincerts/Admin@%s-cert.pem", orgName)
 			cm.Admincerts = map[string]string{
-				"admincerts": k8s.readData(componentName, orgName, componentType, fmt.Sprintf("%s", certPath)),
+				"admincerts": k8s.readData(componentName, orgName, componentType, certPath),
 			}
 		}
 		return cm.Admincerts

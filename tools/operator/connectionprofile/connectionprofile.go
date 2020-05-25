@@ -51,7 +51,7 @@ func (c ConnProfile) Organization(peerorg networkspec.PeerOrganizations, caList 
 	if err != nil {
 		return organization, err
 	}
-	privKeyPath := paths.JoinPath(keystorePath, fmt.Sprintf("%s", privKeyFile[0].Name()))
+	privKeyPath := paths.JoinPath(keystorePath, privKeyFile[0].Name())
 	cert, err = c.GetCertificateFromFile(privKeyPath)
 	if err != nil {
 		return organization, err

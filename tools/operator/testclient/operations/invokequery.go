@@ -2,7 +2,6 @@ package operations
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -175,7 +174,7 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 		if err != nil {
 			return err
 		}
-		startTime := fmt.Sprintf("%s", time.Now())
+		startTime := time.Now().String()
 		args := []string{pteMainPath, strconv.Itoa(key), string(jsonObject), startTime}
 		_, err = networkclient.ExecuteCommand("node", args, true)
 		if err != nil {

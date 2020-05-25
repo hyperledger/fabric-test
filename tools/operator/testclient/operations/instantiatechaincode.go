@@ -391,7 +391,7 @@ func (i InstantiateCCUIObject) instantiateCC(instantiateChainCodeObjects []Insta
 			if err != nil {
 				return err
 			}
-			startTime := fmt.Sprintf("%s", time.Now())
+			startTime := time.Now().String()
 			args := []string{pteMainPath, strconv.Itoa(j), string(jsonObject), startTime}
 			_, err = networkclient.ExecuteCommand("node", args, true)
 			if err != nil {

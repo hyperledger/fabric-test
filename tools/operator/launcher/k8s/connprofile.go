@@ -125,7 +125,7 @@ func (k8s K8s) ordererOrganizations(config networkspec.Config, clientset *kubern
 			if err != nil {
 				return orderers, err
 			}
-			privKeyPath := paths.JoinPath(keystorePath, fmt.Sprintf("%s", privKeyFile[0].Name()))
+			privKeyPath := paths.JoinPath(keystorePath, privKeyFile[0].Name())
 			cert, err = connProfile.GetCertificateFromFile(privKeyPath)
 			if err != nil {
 				return orderers, err

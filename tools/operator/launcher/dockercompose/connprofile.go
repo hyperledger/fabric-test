@@ -106,7 +106,7 @@ func (d DockerCompose) ordererOrgs(config networkspec.Config) (map[string]networ
 			if err != nil {
 				return orderers, err
 			}
-			privKeyPath := paths.JoinPath(keystorePath, fmt.Sprintf("%s", privKeyFile[0].Name()))
+			privKeyPath := paths.JoinPath(keystorePath, privKeyFile[0].Name())
 
 			cert, err = connProfile.GetCertificateFromFile(privKeyPath)
 			if err != nil {

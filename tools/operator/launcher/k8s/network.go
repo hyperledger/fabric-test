@@ -87,7 +87,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				container = corev1.Container{
 					Name:      "couchdb",
 					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:     fmt.Sprintf("hyperledger/fabric-couchdb"),
+					Image:     "hyperledger/fabric-couchdb",
 				}
 				if nsConfig.K8s.DataPersistence == "true" || nsConfig.K8s.DataPersistence == "local" {
 					volumeMount := corev1.VolumeMount{MountPath: "/opt/couchdb/data", Name: "data-storage"}
@@ -421,12 +421,8 @@ func (k8s K8s) buildClientset(kubeconfig *string) (*kubernetes.Clientset, error)
 
 //Network --
 func (k8s K8s) Network(action string) error {
-
 	var err error
 	var network nl.Network
-	var kubeconfig *string
-	kubeconfig = &k8s.KubeConfigPath
-
 	switch action {
 	case "up":
 		err = k8s.GenerateConfigurationFiles(false)
@@ -439,7 +435,7 @@ func (k8s K8s) Network(action string) error {
 			Logger.Error("Failed to generate network artifacts for kubernetes")
 			return err
 		}
-		clientset, err := k8s.buildClientset(kubeconfig)
+		clientset, err := k8s.buildClientset(&k8s.KubeConfigPath)
 		if err != nil {
 			Logger.Error("Failed to generate clientset for kubernetes")
 			return err
@@ -480,7 +476,7 @@ func (k8s K8s) Network(action string) error {
 			return err
 		}
 	case "down":
-		clientset, err := k8s.buildClientset(kubeconfig)
+		clientset, err := k8s.buildClientset(&k8s.KubeConfigPath)
 		if err != nil {
 			Logger.Error("Failed to generate clientset for kubernetes")
 			return err
@@ -495,7 +491,7 @@ func (k8s K8s) Network(action string) error {
 			return err
 		}
 	case "health":
-		clientset, err := k8s.buildClientset(kubeconfig)
+		clientset, err := k8s.buildClientset(&k8s.KubeConfigPath)
 		if err != nil {
 			Logger.Error("Failed to generate clientset for kubernetes")
 			return err
