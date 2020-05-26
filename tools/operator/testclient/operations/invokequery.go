@@ -3,10 +3,13 @@ package operations
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
@@ -127,13 +130,47 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, ac
 	if invkQueryObject.QueryCheck > 0 {
 		invokeCheck = "FALSE"
 	}
-	i = InvokeQueryUIObject{LogLevel: "ERROR", InvokeCheck: invokeCheck, TransType: "Invoke", InvokeType: "Move", TargetPeers: invkQueryObject.TargetPeers, TLS: tls, NProcPerOrg: strconv.Itoa(invkQueryObject.NProcPerOrg), NRequest: strconv.Itoa(invkQueryObject.NRequest), RunDur: strconv.Itoa(invkQueryObject.RunDuration), CCType: invkQueryObject.CCOptions.CCType, ChaincodeID: invkQueryObject.ChaincodeName}
-	i.EventOpt = EventOptions{Type: invkQueryObject.EventOptions.Type, Listener: invkQueryObject.EventOptions.Listener, TimeOut: strconv.Itoa(invkQueryObject.EventOptions.TimeOut)}
-	i.CCOpt = CCOptions{KeyIdx: invkQueryObject.CCOptions.KeyIdx, KeyPayLoad: invkQueryObject.CCOptions.KeyPayload, KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart), PayLoadMin: strconv.Itoa(invkQueryObject.CCOptions.PayLoadMin), PayLoadMax: strconv.Itoa(invkQueryObject.CCOptions.PayLoadMax), PayLoadType: invkQueryObject.CCOptions.PayLoadType}
-	i.TimeOutOpt = TimeOutOptions{Request: invkQueryObject.TimeOutOpt.Request, PreConfig: invkQueryObject.TimeOutOpt.PreConfig}
+	i = InvokeQueryUIObject{
+		LogLevel:    "ERROR",
+		InvokeCheck: invokeCheck,
+		TransType:   "Invoke",
+		InvokeType:  "Move",
+		TargetPeers: invkQueryObject.TargetPeers,
+		TLS:         tls,
+		NProcPerOrg: strconv.Itoa(invkQueryObject.NProcPerOrg),
+		NRequest:    strconv.Itoa(invkQueryObject.NRequest),
+		RunDur:      strconv.Itoa(invkQueryObject.RunDuration),
+		CCType:      invkQueryObject.CCOptions.CCType,
+		ChaincodeID: invkQueryObject.ChaincodeName,
+		EventOpt: EventOptions{
+			Type:     invkQueryObject.EventOptions.Type,
+			Listener: invkQueryObject.EventOptions.Listener,
+			TimeOut:  strconv.Itoa(invkQueryObject.EventOptions.TimeOut),
+		},
+		CCOpt: CCOptions{
+			KeyIdx:      invkQueryObject.CCOptions.KeyIdx,
+			KeyPayLoad:  invkQueryObject.CCOptions.KeyPayload,
+			KeyStart:    strconv.Itoa(invkQueryObject.CCOptions.KeyStart),
+			PayLoadMin:  strconv.Itoa(invkQueryObject.CCOptions.PayLoadMin),
+			PayLoadMax:  strconv.Itoa(invkQueryObject.CCOptions.PayLoadMax),
+			PayLoadType: invkQueryObject.CCOptions.PayLoadType,
+		},
+		TimeOutOpt: TimeOutOptions{
+			Request:   invkQueryObject.TimeOutOpt.Request,
+			PreConfig: invkQueryObject.TimeOutOpt.PreConfig,
+		},
+		ChannelOpt: ChannelOptions{
+			Name:    invkQueryObject.ChannelName,
+			OrgName: orgNames,
+		},
+		ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations),
+	}
 	if strings.EqualFold("DISCOVERY", invkQueryObject.TargetPeers) {
 		localHost := strings.ToUpper(strconv.FormatBool(invkQueryObject.DiscoveryOptions.Localhost))
-		i.DiscoveryOpt = DiscoveryOptions{Localhost: localHost, InitFreq: invkQueryObject.DiscoveryOptions.InitFreq}
+		i.DiscoveryOpt = DiscoveryOptions{
+			Localhost: localHost,
+			InitFreq:  invkQueryObject.DiscoveryOptions.InitFreq,
+		}
 	}
 	if strings.EqualFold("LIST", invkQueryObject.TargetPeers) {
 		i.ListOpt = invkQueryObject.ListOptions
@@ -142,10 +179,14 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, ac
 		i.InvokeType = action
 		i.CCOpt = CCOptions{KeyIdx: invkQueryObject.CCOptions.KeyIdx, KeyStart: strconv.Itoa(invkQueryObject.CCOptions.KeyStart)}
 	}
-	i.ChannelOpt = ChannelOptions{Name: invkQueryObject.ChannelName, OrgName: orgNames}
-	i.ConnProfilePath = paths.GetConnProfilePath(orgNames, organizations)
-	invokeParams["move"] = Parameters{Fcn: invkQueryObject.Fcn, Args: strings.Split(invkQueryObject.Args, ",")}
-	invokeParams["query"] = Parameters{Fcn: invkQueryObject.Fcn, Args: strings.Split(invkQueryObject.Args, ",")}
+	invokeParams["move"] = Parameters{
+		Fcn:  invkQueryObject.Fcn,
+		Args: strings.Split(invkQueryObject.Args, ","),
+	}
+	invokeParams["query"] = Parameters{
+		Fcn:  invkQueryObject.Fcn,
+		Args: strings.Split(invkQueryObject.Args, ","),
+	}
 	i.Parameters = invokeParams
 	for key := range invkQueryObject.TxnOptions {
 		mode := invkQueryObject.TxnOptions[key].Mode
@@ -164,11 +205,22 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, ac
 	return invokeQueryObjects
 }
 
+func (i InvokeQueryUIObject) invokeConfig(channelName string, args []string, wg *sync.WaitGroup) error {
+	defer wg.Done()
+	_, err := networkclient.ExecuteCommand("node", args, true)
+	if err != nil {
+		logger.ERROR(fmt.Sprintf("Failed to perform invoke/query on %s channel: %v", channelName, err))
+		os.Exit(1)
+	}
+	return nil
+}
+
 //invokeQueryTransactions -- To invoke/query transactions
 func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []InvokeQueryUIObject) error {
 
 	var err error
 	var jsonObject []byte
+	var wg sync.WaitGroup
 	pteMainPath := paths.PTEPath()
 	for key := range invokeQueryObjects {
 		jsonObject, err = json.Marshal(invokeQueryObjects[key])
@@ -177,10 +229,9 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 		}
 		startTime := fmt.Sprintf("%s", time.Now())
 		args := []string{pteMainPath, strconv.Itoa(key), string(jsonObject), startTime}
-		_, err = networkclient.ExecuteCommand("node", args, true)
-		if err != nil {
-			return err
-		}
+		wg.Add(1)
+		go i.invokeConfig(invokeQueryObjects[key].ChannelOpt.Name, args, &wg)
 	}
-	return err
+	wg.Wait()
+	return nil
 }
