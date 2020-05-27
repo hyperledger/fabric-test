@@ -26,17 +26,15 @@ variables:
     value: 1.13.8
   - name: NODE_VER
     value: 10.x
-  - name: KUBE_PATH
-    value: $(kubeconfig.secureFilePath)
 
 stages:
-  - stage: Invokes
+  - stage: Longrun
     dependsOn: []
-    displayName: Invokes
+    displayName: Longrun
     pool:
       vmImage: ubuntu-18.04
     jobs:
-      - job: Longrun
+      - job: Invokes
         pool:
           vmImage: ubuntu-18.04
         timeoutInMinutes: 360
@@ -45,6 +43,33 @@ stages:
         - script: |
             cd tools/operator
             ARTIFACTORY_URL=https://hyperledger.jfrog.io/artifactory/fabric-test-artifacts/community-longrun.tar.gz
+            curl -sS -u ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD} "${ARTIFACTORY_URL}" -o binaries.tgz
+            tar -xzvf binaries.tgz
+          env:
+            ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+            ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+          displayName: Download network artifacts
+        - script: make npm-init
+          displayName: Install NPM Packages
+        - script: |
+            cd tools/operator
+            go run main.go -i ../../regression/testdata/k8s-run-test.yml -a invoke
+          displayName: Invokes
+  - stage: Chaos
+    dependsOn: []
+    displayName: Chaos
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: Invokes
+        pool:
+          vmImage: ubuntu-18.04
+        timeoutInMinutes: 360
+        steps:
+        - template: templates/install_deps.yml
+        - script: |
+            cd tools/operator
+            ARTIFACTORY_URL=https://hyperledger.jfrog.io/artifactory/fabric-test-artifacts/community-chaos.tar.gz
             curl -sS -u ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD} "${ARTIFACTORY_URL}" -o binaries.tgz
             tar -xzvf binaries.tgz
           env:

@@ -81,7 +81,7 @@ func (i InstallCCUIObject) createInstallCCObjects(ccObject inputStructs.InstallC
 func SetEnvForCLI(orgName, peerName, connProfilePath, tls, currentDir string) error {
 
 	var tlsNetwork string
-	connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
+	connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
 	if err != nil {
 		return err
 	}
@@ -141,7 +141,7 @@ func (i InstallCCUIObject) installCCusingCLI(installObject InstallCCUIObject) er
 		for _, peerName := range installObject.TargetPeers {
 			peerOrgName := strings.Split(peerName, "-")
 			if peerOrgName[1] == orgName {
-				connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
+				connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
 				if err != nil {
 					return err
 				}

@@ -65,8 +65,8 @@ type Identity struct {
 	} `json:"role,omitempty"`
 }
 
-//GetConnProfileOptions --
-type GetConnProfileOptions struct {
+//ConnProfileOptions --
+type ConnProfileOptions struct {
 	Organizations map[string]struct {
 		MSPID string `yaml:"mspid,omitempty"`
 	} `yaml:"organizations,omitempty"`
@@ -212,7 +212,7 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 	for _, orgName := range orgNames {
 		orgName = strings.TrimSpace(orgName)
 		connProfilePath := paths.GetConnProfilePath([]string{orgName}, organizations)
-		connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
+		connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
 		if err != nil {
 			return endorsementPolicy, err
 		}
@@ -237,10 +237,10 @@ func (i InstantiateCCUIObject) getEndorsementPolicy(organizations []inputStructs
 	return endorsementPolicy, nil
 }
 
-//GetConnProfileInformationForOrg -- To get the MSP ID for an organization
-func GetConnProfileInformationForOrg(connProfilePath, orgName string) (GetConnProfileOptions, error) {
+//ConnProfileInformationForOrg -- To get the MSP ID for an organization
+func ConnProfileInformationForOrg(connProfilePath, orgName string) (ConnProfileOptions, error) {
 
-	var config GetConnProfileOptions
+	var config ConnProfileOptions
 	if !(strings.HasSuffix(connProfilePath, "yaml") || strings.HasSuffix(connProfilePath, "yml")) {
 		files, err := ioutil.ReadDir(connProfilePath)
 		if err != nil {
@@ -260,7 +260,7 @@ func GetConnProfileInformationForOrg(connProfilePath, orgName string) (GetConnPr
 	}
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		logger.ERROR("Failed to create GetConnProfileOptions object")
+		logger.ERROR("Failed to create ConnProfileOptions object")
 		return config, err
 	}
 	return config, nil
@@ -328,7 +328,7 @@ func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCC
 		} else {
 			connProfilePath = fmt.Sprintf("%s/connection_profile_%s.yaml", instantiateObject.ConnProfilePath, orgName)
 		}
-		connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
+		connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
 		if err != nil {
 			return err
 		}
@@ -408,7 +408,7 @@ func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCU
 	if err != nil {
 		return err
 	}
-	connProfConfig, err := GetConnProfileInformationForOrg(connProfilePath, orgName)
+	connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
 	if err != nil {
 		return err
 	}
@@ -458,10 +458,7 @@ func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCU
 		args = append(args, "--collections-config", instantiateObject.DeployOpt.CollectionsConfigPath)
 	}
 	_, err = networkclient.ExecuteCommand("peer", args, true)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 //instantiateCC -- To instantiate chaincode

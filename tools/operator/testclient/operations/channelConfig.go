@@ -160,7 +160,7 @@ func (c ChannelUIObject) doChannelAction(channelUIObjects []ChannelUIObject) err
 		if err != nil {
 			return err
 		}
-		startTime := fmt.Sprintf("%s", time.Now())
+		startTime := time.Now().String()
 		args = []string{pteMainPath, strconv.Itoa(i), string(jsonObject), startTime}
 		wg.Add(1)
 		go c.channelConfig(channelObject.ChannelOpt.Action, channelObject.ChannelOpt.Name, args, &wg)

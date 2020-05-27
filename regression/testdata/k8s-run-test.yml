@@ -24,7 +24,8 @@ joinChannel:
 installChaincode:
   - name: mapcc
     sdk: cli
-    version: v1
+    targetPeers: peer0-org1,peer0-org2,peer1-org1,peer1-org2
+    version: 1
     path: github.com/hyperledger/fabric-test/chaincodes/map_private/go
     organizations: org1,org2
     language: golang
@@ -33,12 +34,14 @@ installChaincode:
 instantiateChaincode:
   - channelName: testorgschannel0
     sdk: cli
+    sequence: 1
     name: mapcc
-    version: v1
+    version: 1
     args: ""
-    organizations: org1
+    organizations: org1,org2
+    targetPeers: peer0-org1,peer0-org2,peer1-org1,peer1-org2
     endorsementPolicy: 1of(org1, org2)
-    collectionPath: ../../regression/testdata/map-private-collections.json
+    collectionPath: ../../regression/testdata/map-private-collections-2orgs.json
 
 invokes:
   - channelName: testorgschannel0
