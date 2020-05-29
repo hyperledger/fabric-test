@@ -53,5 +53,10 @@ pull-binaries-fabric:
 pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
 
+.PHONY: caliper-init
+caliper-init:
+	npm install -g --only=prod @hyperledger/caliper-cli@0.3.1
+	caliper bind --caliper-bind-sut fabric:latest --caliper-bind-args=-g
+
 build/%:
 	./ci/scripts/${@}.sh
