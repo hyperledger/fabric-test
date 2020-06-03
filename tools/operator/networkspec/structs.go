@@ -156,8 +156,8 @@ type Channel struct {
 
 //Client --
 type Client struct {
-	Organization string `yaml:"organization"`
-	Conenction   struct {
+	Organization string `yaml:"Organization"`
+	Connection   struct {
 		Timeout struct {
 			Peer struct {
 				Endorser int `yaml:"endorser"`
@@ -171,10 +171,13 @@ type Client struct {
 
 //ConnectionProfile --
 type ConnectionProfile struct {
-	Client        Client                          `yaml:"client"`
+	Name          string                          `yaml:"Name"`
+	Description   string                          `yaml:"Description"`
+	Version       string                          `yaml:"Version"`
+	Organizations map[string]Organization         `yaml:"organizations"`
 	Channels      map[string]Channel              `yaml:"channels"`
 	Orderers      map[string]Orderer              `yaml:"orderers"`
 	Peers         map[string]Peer                 `yaml:"peers"`
 	CA            map[string]CertificateAuthority `yaml:"certificateAuthorities"`
-	Organizations map[string]Organization         `yaml:"organizations"`
+	Client        Client                          `yaml:"client"`
 }

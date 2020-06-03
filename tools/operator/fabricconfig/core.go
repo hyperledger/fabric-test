@@ -11,13 +11,11 @@ import (
 	"io/ioutil"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-
-	docker "github.com/fsouza/go-dockerclient"
+	"gopkg.in/yaml.v2"
 )
 
 type Core struct {
