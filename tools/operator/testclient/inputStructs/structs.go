@@ -40,6 +40,7 @@ type InstallCC struct {
 	Organizations    string `yaml:"organizations,omitempty"`
 	Language         string `yaml:"language,omitempty"`
 	MetadataPath     string `yaml:"metadataPath,omitempty"`
+	TargetPeers      string `yaml:"targetPeers,omitempty"`
 }
 
 //InstantiateCC --
@@ -56,6 +57,8 @@ type InstantiateCC struct {
 	NumChannels       int            `yaml:"numChannels,omitempty"`
 	CollectionPath    string         `yaml:"collectionPath,omitempty"`
 	TimeOutOpt        TimeOutOptions `yaml:"timeoutOpt,omitempty"`
+	Sequence          string         `yaml:"sequence,omitempty"`
+	TargetPeers       string         `yaml:"targetPeers,omitempty"`
 }
 
 //TimeOutOptions --

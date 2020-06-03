@@ -3,11 +3,14 @@ package operations
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
+	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient/inputStructs"
@@ -91,8 +94,19 @@ func (c ChannelUIObject) createChannelConfigObjects(orgNames []string, channelNa
 			action = "update"
 			channelTxPath = anchorPeerTxPath
 		}
-		channelOpt = ChannelOptions{Name: channelName, Action: action, OrgName: []string{orgName}, ChannelTX: channelTxPath}
-		c = ChannelUIObject{TransType: "Channel", TLS: tls, ConnProfilePath: paths.GetConnProfilePath([]string{orgName}, organizations), ChannelOpt: channelOpt, OrdererSystemChannel: ordererChannel}
+		channelOpt = ChannelOptions{
+			Name:      channelName,
+			Action:    action,
+			OrgName:   []string{orgName},
+			ChannelTX: channelTxPath,
+		}
+		c = ChannelUIObject{
+			TransType:            "Channel",
+			TLS:                  tls,
+			ConnProfilePath:      paths.GetConnProfilePath([]string{orgName}, organizations),
+			ChannelOpt:           channelOpt,
+			OrdererSystemChannel: ordererChannel,
+		}
 		channelObjects = append(channelObjects, c)
 	}
 	return channelObjects
@@ -123,23 +137,34 @@ func (c ChannelUIObject) createChannelObjectIfChanPrefix(channel inputStructs.Ch
 	return channelUIObjects
 }
 
+func (c ChannelUIObject) channelConfig(action, channelName string, args []string, wg *sync.WaitGroup) error {
+	defer wg.Done()
+	_, err := networkclient.ExecuteCommand("node", args, true)
+	if err != nil {
+		logger.ERROR(fmt.Sprintf("Failed to perform %s action on %s channel: %v", action, channelName, err))
+		os.Exit(1)
+	}
+	return nil
+}
+
 //doChannelAction -- To perform channel operations including create, anchorpeer update and join channel
 func (c ChannelUIObject) doChannelAction(channelUIObjects []ChannelUIObject) error {
 
 	var err error
 	var jsonObject []byte
+	var wg sync.WaitGroup
 	pteMainPath := paths.PTEPath()
-	for i := 0; i < len(channelUIObjects); i++ {
-		jsonObject, err = json.Marshal(channelUIObjects[i])
+	var args []string
+	for i, channelObject := range channelUIObjects {
+		jsonObject, err = json.Marshal(channelObject)
 		if err != nil {
 			return err
 		}
-		startTime := fmt.Sprintf("%s", time.Now())
-		args := []string{pteMainPath, strconv.Itoa(i), string(jsonObject), startTime}
-		_, err = networkclient.ExecuteCommand("node", args, true)
-		if err != nil {
-			return err
-		}
+		startTime := time.Now().String()
+		args = []string{pteMainPath, strconv.Itoa(i), string(jsonObject), startTime}
+		wg.Add(1)
+		go c.channelConfig(channelObject.ChannelOpt.Action, channelObject.ChannelOpt.Name, args, &wg)
 	}
+	wg.Wait()
 	return nil
 }

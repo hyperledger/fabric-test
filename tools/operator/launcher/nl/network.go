@@ -23,13 +23,10 @@ type Network struct {
 
 //DockerImage --
 func DockerImage(component, dockerOrg, dockerTag, componentImage string) string {
-	var image string
-	if dockerOrg != "" {
-		image = fmt.Sprintf("%s/fabric-%s:%s", dockerOrg, component, dockerTag)
-	} else if componentImage != "" {
-		image = componentImage
+	if componentImage != "" {
+		return componentImage
 	}
-	return image
+	return fmt.Sprintf("%s/fabric-%s:%s", dockerOrg, component, dockerTag)
 }
 
 //GetConfigData - to read the yaml file and parse the data

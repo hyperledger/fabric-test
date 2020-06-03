@@ -1,0 +1,28 @@
+organizations:
+  - name: org1
+    connProfilePath: ./connection-profile/connection_profile_org1.yaml
+  - name: org2
+    connProfilePath: ./connection-profile/connection_profile_org2.yaml
+
+command:
+  - name: helm
+    args:
+      - --namespace
+      - fabric-system-test
+      - install
+      - --set
+      - labels=type=orderer,namespaces=fabric-system-test,dryRun=false,rbac.create=true,interval=30m,minimumAge=60m
+      - --name
+      - chaos-orderer
+      - stable/chaoskube'
+  
+  - name: helm
+    args:
+      - install
+      - --namespace
+      - fabric-system-test
+      - --set
+      - labels=type=peer,namespaces=fabric-system-test,dryRun=false,rbac.create=true,interval=30m,minimumAge=60m
+      - --name
+      - chaos-peer
+      - stable/chaoskube
