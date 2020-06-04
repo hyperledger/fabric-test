@@ -66,7 +66,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 			container := corev1.Container{
 				Name:            "dind",
 				Image:           "docker:dind",
-				Args:            []string{"dockerd", "-H tcp://0.0.0.0:2375"},
+				Args:            []string{"dockerd", "-H tcp://0.0.0.0:2375", "-H unix://var/run/docker.sock"},
 				SecurityContext: &corev1.SecurityContext{Privileged: &privileged},
 				Resources:       k8s.resources(nsConfig.K8s.Resources.Dind),
 			}
@@ -83,18 +83,6 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				VolumeMounts: k8s.volumeMountLists("peer", nsConfig.K8s.DataPersistence, nsConfig.EnableNodeOUs),
 			}
 			containers = append(containers, container)
-			if nsConfig.DBType == "couchdb" {
-				container = corev1.Container{
-					Name:      "couchdb",
-					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:     fmt.Sprintf("hyperledger/fabric-couchdb"),
-				}
-				if nsConfig.K8s.DataPersistence == "true" || nsConfig.K8s.DataPersistence == "local" {
-					volumeMount := corev1.VolumeMount{MountPath: "/opt/couchdb/data", Name: "data-storage"}
-					container.VolumeMounts = append(container.VolumeMounts, volumeMount)
-				}
-				containers = append(containers, container)
-			}
 			l := LaunchConfig{
 				Name:       fmt.Sprintf("peer%d-%s", j, org.Name),
 				Type:       "peer",
@@ -103,6 +91,32 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				Ports:      []int32{peerPort, peerMetricsPort},
 			}
 			launchConfig = append(launchConfig, l)
+			if nsConfig.DBType == "couchdb" {
+				c := LaunchConfig{
+					Name: fmt.Sprintf("couchdb-peer%d-%s", j, org.Name),
+					Type: "couchdb",
+				}
+				container = corev1.Container{
+					Name:      "couchdb",
+					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
+					Image:     fmt.Sprintf("hyperledger/fabric-couchdb"),
+				}
+				if nsConfig.K8s.DataPersistence == "true" || nsConfig.K8s.DataPersistence == "local" {
+					volumeMount := corev1.VolumeMount{MountPath: "/opt/couchdb/data", Name: "couchdb-data-storage"}
+					container.VolumeMounts = append(container.VolumeMounts, volumeMount)
+					volume := corev1.Volume{
+						Name: "couchdb-data-storage",
+						VolumeSource: corev1.VolumeSource{
+							PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{
+								ClaimName: fmt.Sprintf("couchdb-peer%d-%s-data", j, org.Name),
+							},
+						},
+					}
+					c.Volumes = []corev1.Volume{volume}
+				}
+				c.Containers = []corev1.Container{container}
+				launchConfig = append(launchConfig, c)
+			}
 			peerPort++
 			peerMetricsPort++
 		}

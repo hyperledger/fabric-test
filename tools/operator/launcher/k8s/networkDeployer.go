@@ -58,13 +58,6 @@ func (k8s K8s) CreateStatefulset(launchConfig LaunchConfig, nsConfig networkspec
 			if err != nil {
 				return err
 			}
-			if launchConfig.Type == "peer" && k8s.Config.DBType == "couchdb" {
-				couchDbName := fmt.Sprintf("couchdb-%s", launchConfig.Name)
-				err = k8s.createPVC(couchDbName, ns, nsConfig, clientset)
-				if err != nil {
-					return err
-				}
-			}
 		}
 	}
 
@@ -207,19 +200,30 @@ func (k8s K8s) createPVC(name, ns string, nsConfig networkspec.Config, clientset
 func (k8s K8s) createService(name, componentType, ns string, ports []int32, nsConfig networkspec.Config, clientset *kubernetes.Clientset) error {
 
 	servicePorts := make([]corev1.ServicePort, 0)
-	for i, p := range ports {
+	var serviceType corev1.ServiceType
+	if componentType == "couchdb" {
 		sp := corev1.ServicePort{
-			Name: fmt.Sprintf("port%d", i),
+			Name: "port0",
+			Port: 5984,
 		}
-		if componentType == "ca" {
-			sp.Port = 7054
-		} else {
-			sp.Port = p
-		}
-		if nsConfig.K8s.ServiceType == "NodePort" {
-			sp.NodePort = p
-		}
+		serviceType = corev1.ServiceType("ClusterIP")
 		servicePorts = append(servicePorts, sp)
+	} else {
+		for i, p := range ports {
+			sp := corev1.ServicePort{
+				Name: fmt.Sprintf("port%d", i),
+			}
+			if componentType == "ca" {
+				sp.Port = 7054
+			} else {
+				sp.Port = p
+			}
+			if nsConfig.K8s.ServiceType == "NodePort" {
+				sp.NodePort = p
+			}
+			serviceType = corev1.ServiceType(nsConfig.K8s.ServiceType)
+			servicePorts = append(servicePorts, sp)
+		}
 	}
 	serviceRes := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -232,7 +236,7 @@ func (k8s K8s) createService(name, componentType, ns string, ports []int32, nsCo
 			Selector: map[string]string{
 				"k8s-app": name,
 			},
-			Type:  corev1.ServiceType(nsConfig.K8s.ServiceType),
+			Type:  serviceType,
 			Ports: servicePorts,
 		},
 	}
