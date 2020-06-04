@@ -377,7 +377,6 @@ func CoreConfig(nsConfig networkspec.Config) (Core, error) {
 	}
 	if nsConfig.DBType == "couchdb" {
 		coreConfig.Ledger.State.StateDatabase = "CouchDB"
-		coreConfig.Ledger.State.CouchDBConfig.CouchDBAddress = "localhost:5984"
 	}
 	coreConfig.Chaincode.Builder = nl.DockerImage("ccenv", nsConfig.DockerOrg, nsConfig.DockerTag, nsConfig.DockerImages.Ccenv)
 	coreConfig.Chaincode.Golang.Runtime = nl.DockerImage("baseos", nsConfig.DockerOrg, nsConfig.DockerTag, nsConfig.DockerImages.Baseos)
@@ -396,6 +395,7 @@ func GenerateCorePeerConfig(name, orgName, mspID, artifactsLocation string, port
 	coreConfig.Peer.Address = fmt.Sprintf("%s:%d", name, port)
 	coreConfig.Peer.LocalMSPID = mspID
 	coreConfig.Peer.Gossip.Bootstrap = fmt.Sprintf("%s:%d", name, port)
+	coreConfig.Ledger.State.CouchDBConfig.CouchDBAddress = fmt.Sprintf("couchdb-%s:5984", name)
 	coreConfig.Operations.ListenAddress = fmt.Sprintf(":%d", metricsPort)
 	d, err := yaml.Marshal(&coreConfig)
 	if err != nil {
