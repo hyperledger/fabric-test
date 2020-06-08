@@ -30,14 +30,16 @@ type Config struct {
 	Orderer                  struct {
 		OrdererType string `yaml:"ordererType,omitempty"`
 	} `yaml:"orderer,omitempty"`
-	NumChannels             int    `yaml:"numChannels,omitempty"`
-	TLS                     string `yaml:"tls,omitempty"`
-	Metrics                 bool   `yaml:"metrics,omitempty"`
-	GossipEnable            bool   `yaml:"gossipEnable,omitempty"`
-	EnableNodeOUs           bool   `yaml:"enableNodeOUs,omitempty"`
-	OrdererCapabilities     string `yaml:"ordererCapabilities,omitempty"`
-	ChannelCapabilities     string `yaml:"channelCapabilities,omitempty"`
-	ApplicationCapabilities string `yaml:"applicationCapabilities,omitempty"`
+	NumChannels             int           `yaml:"numChannels,omitempty"`
+	ChannelPrefix           string        `yaml:"channelPrefix,omitempty"`
+	ChaincodeIDs            []ChaincodeID `yaml:"chaincodeIDs,omitempty"`
+	TLS                     string        `yaml:"tls,omitempty"`
+	Metrics                 bool          `yaml:"metrics,omitempty"`
+	GossipEnable            bool          `yaml:"gossipEnable,omitempty"`
+	EnableNodeOUs           bool          `yaml:"enableNodeOUs,omitempty"`
+	OrdererCapabilities     string        `yaml:"ordererCapabilities,omitempty"`
+	ChannelCapabilities     string        `yaml:"channelCapabilities,omitempty"`
+	ApplicationCapabilities string        `yaml:"applicationCapabilities,omitempty"`
 	K8s                     struct {
 		Namespace       string                              `yaml:"namespace,omitempty"`
 		DataPersistence string                              `yaml:"dataPersistence,omitempty"`
@@ -177,4 +179,126 @@ type ConnectionProfile struct {
 	Peers         map[string]Peer                 `yaml:"peers"`
 	CA            map[string]CertificateAuthority `yaml:"certificateAuthorities"`
 	Organizations map[string]Organization         `yaml:"organizations"`
+}
+
+//ChaincodeID --
+type ChaincodeID struct {
+	Id      string `yaml:"id,omitempty"`
+	Version string `yaml:"version,omitempty"`
+}
+
+// Caliper related struct
+//Orderer --
+type CaliperOrderer struct {
+	URL         string `yaml:"url"`
+	GrpcOptions struct {
+		SslTarget string `yaml:"ssl-target-name-override"`
+	} `yaml:"grpcOptions"`
+	TLSCACerts struct {
+		Pem string `yaml:"pem"`
+	} `yaml:"tlsCACerts"`
+}
+
+//Peer --
+type CaliperPeer struct {
+	URL         string `yaml:"url"`
+	GrpcOptions struct {
+		SslTarget string `yaml:"ssl-target-name-override"`
+	} `yaml:"grpcOptions"`
+	TLSCACerts struct {
+		Pem string `yaml:"pem"`
+	} `yaml:"tlsCACerts"`
+}
+
+//CertificateAuthority --
+type CARegistrar struct {
+	EnrollID     string `yaml:"enrollId"`
+	EnrollSecret string `yaml:"enrollSecret"`
+}
+
+type CaliperCertificateAuthority struct {
+	URL        string `yaml:"url"`
+	CAName     string `yaml:"caName"`
+	TLSCACerts struct {
+		Pem string `yaml:"pem"`
+	} `yaml:"tlsCACerts"`
+	HTTPOptions struct {
+		Verify bool `yaml:"verify"`
+	} `yaml:"httpOptions"`
+	Registrar []CARegistrar `yaml:"registrar"`
+}
+
+//Organization --
+type CaliperOrganization struct {
+	MSPID                  string   `yaml:"mspid"`
+	Peers                  []string `yaml:"peers"`
+	CertificateAuthorities []string `yaml:"certificateAuthorities"`
+	AdminPrivateKey        struct {
+		Pem string `yaml:"pem"`
+	} `yaml:"adminPrivateKey"`
+	SignedCert struct {
+		Pem string `yaml:"pem"`
+	} `yaml:"signedCert"`
+}
+
+//CaliperChannel --
+type CaliperChannelPeer struct {
+	EventSource bool `yaml:"eventSource"`
+}
+
+type CaliperChannelChaincode struct {
+	Id      string `yaml:"id"`
+	Version string `yaml:"version"`
+}
+
+type CaliperChannel struct {
+	Created    bool                          `yaml:"created"`
+	Orderers   []string                      `yaml:"orderers"`
+	Peers      map[string]CaliperChannelPeer `yaml:"peers"`
+	Chaincodes []ChaincodeID                 `yaml:"chaincodes"`
+}
+
+// caliper --
+type Caliper struct {
+	Blockchain string `yaml:"blockchain"`
+}
+
+//Clients --
+type CaliperClient struct {
+	Client struct {
+		Organization    string `yaml:"organization"`
+		CredentialStore struct {
+			Path        string `yaml:"path"`
+			CryptoStore struct {
+				Path string `yaml:"path"`
+			} `yaml:"cryptoStore"`
+		} `yaml:"credentialStore"`
+		ClientPrivateKey struct {
+			Pem string `yaml:"pem"`
+		} `yaml:"clientPrivateKey"`
+		ClientSignedCert struct {
+			Pem string `yaml:"pem"`
+		} `yaml:"clientSignedCert"`
+		Conenction struct {
+			Timeout struct {
+				Peer struct {
+					Endorser int `yaml:"endorser"`
+					EventHub int `yaml:"eventHub"`
+					EventReg int `yaml:"eventReg"`
+				} `yaml:"peer"`
+				Orderer int `yaml:"orderer"`
+			} `yaml:"timeout"`
+		} `yaml:"connection"`
+	} `yaml:"client"`
+}
+
+//ConnectionProfile --
+type CaliperConnectionProfile struct {
+	Caliper       Caliper                                `yaml:"caliper"`
+	Clients       map[string]CaliperClient               `yaml:"clients"`
+	Channels      map[string]CaliperChannel              `yaml:"channels"`
+	Orderers      map[string]CaliperOrderer              `yaml:"orderers"`
+	Peers         map[string]CaliperPeer                 `yaml:"peers"`
+	CA            map[string]CaliperCertificateAuthority `yaml:"certificateAuthorities"`
+	Organizations map[string]CaliperOrganization         `yaml:"organizations"`
 }

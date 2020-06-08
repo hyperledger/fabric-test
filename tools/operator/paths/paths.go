@@ -24,6 +24,11 @@ func ConnectionProfilesDir(artifactsLocation string) string {
 	return componentPath(artifactsLocation, "connection-profile")
 }
 
+//CaliperConnectionProfilesDir --
+func CaliperConnectionProfilesDir(artifactsLocation string) string {
+	return componentPath(artifactsLocation, "caliper-connection-profile")
+}
+
 //OrdererOrgsDir --
 func OrdererOrgsDir(artifactsLocation string) string {
 	return componentPath(CryptoConfigDir(artifactsLocation), "ordererOrganizations")
