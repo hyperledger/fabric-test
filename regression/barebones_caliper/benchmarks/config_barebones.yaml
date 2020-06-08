@@ -1,0 +1,25 @@
+---
+test:
+  workers:
+    type: local
+    number: 32
+  rounds:
+  - label: create
+    txNumber: 320000
+    rateControl:
+      type: fixed-backlog
+      opts:
+      - unfinished_per_client: 1500
+        startingTps: 2000
+    callback: ../../regression/barebones_caliper/benchmarks/callbacks/barebonesCreateAsset.js
+  - label: end
+    txNumber: 320000
+    rateControl:
+      type: fixed-backlog
+      opts:
+      - unfinished_per_client: 1500
+        startingTps: 2000
+    callback: ../../regression/barebones_caliper/benchmarks/callbacks/barebonesCreateAsset.js
+monitor:
+  type:
+  - none

@@ -234,6 +234,12 @@ func (d DockerCompose) GenerateConnectionProfiles(config networkspec.Config) err
 			logger.ERROR("Failed to generate connection profile")
 			return err
 		}
+
+		err = connProfile.GenerateCaliperConnProfilePerOrg(peerorg.Name)
+		if err != nil {
+			logger.ERROR("Failed to generate caliper connection profile")
+			return err
+		}
 	}
 	return nil
 }

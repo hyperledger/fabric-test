@@ -22,7 +22,8 @@ func (n Network) NetworkCleanUp(config networkspec.Config) error {
 		paths.JoinPath(paths.TemplatesDir(), "input.yaml"),
 		paths.ChannelArtifactsDir(artifactsLocation),
 		paths.CryptoConfigDir(artifactsLocation),
-		paths.ConnectionProfilesDir(artifactsLocation)}
+		paths.ConnectionProfilesDir(artifactsLocation),
+		paths.CaliperConnectionProfilesDir(artifactsLocation)}
 	err := n.removeDirectories(paths)
 	if err != nil {
 		return err
