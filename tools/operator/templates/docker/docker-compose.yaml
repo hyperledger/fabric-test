@@ -138,6 +138,8 @@
 #@       else:
 #@         env.append("ORDERER_GENERAL_TLS_ENABLED={}".format(config.tls))
 #@       end
+#@       env.append("ORDERER_OPERATIONS_TLS_ENABLED=false")
+#@       env.append("ORDERER_METRICS_PROVIDER=prometheus")
 #@       env.append("ORDERER_OPERATIONS_LISTENADDRESS=0.0.0.0:8443")
 #@       env.append("ORDERER_GENERAL_TLS_PRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_TLS_CERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
@@ -191,6 +193,8 @@
 #@       env.append("CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443")
 #@       env.append("CORE_PEER_CHAINCODEADDRESS=peer{}-{}:{}".format(j, org.name, 7052))
 #@       env.append("CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer{}-{}:{}".format(j, org.name, peerUniquerPort))
+#@       env.append("CORE_OPERATIONS_TLS_ENABLED=false")
+#@       env.append("CORE_METRICS_PROVIDER=prometheus")
 #@       if config.tls == "mutual":
 #@         env.append("CORE_PEER_TLS_CLIENTROOTCAS_FILES={}".format(" ".join(mutualTLS(config))))
 #@         env.append("CORE_PEER_TLS_CLIENTAUTHREQUIRED=true")

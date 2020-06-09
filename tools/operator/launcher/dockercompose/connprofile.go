@@ -69,10 +69,6 @@ func (d DockerCompose) ordererOrgs(config networkspec.Config) (map[string]networ
 	orderers := make(map[string]networkspec.Orderer)
 	artifactsLocation := config.ArtifactsLocation
 	ordererOrgsPath := paths.OrdererOrgsDir(artifactsLocation)
-	var err error
-	var orderer networkspec.Orderer
-	var portNumber string
-	var connProfile connectionprofile.ConnProfile
 	nodeIP := d.GetDockerExternalIP()
 	protocol := "grpc"
 	if config.TLS == "true" || config.TLS == "mutual" {
@@ -81,13 +77,22 @@ func (d DockerCompose) ordererOrgs(config networkspec.Config) (map[string]networ
 	for org := 0; org < len(config.OrdererOrganizations); org++ {
 		ordererOrg := config.OrdererOrganizations[org]
 		orgName := ordererOrg.Name
+		connProfile := connectionprofile.ConnProfile{}
 		for i := 0; i < ordererOrg.NumOrderers; i++ {
 			ordererName := fmt.Sprintf("orderer%d-%s", i, orgName)
-			portNumber, err = d.GetDockerServicePort(ordererName, false)
+			portNumber, err := d.GetDockerServicePort(ordererName, false)
 			if err != nil {
 				return orderers, err
 			}
-			orderer = networkspec.Orderer{MSPID: ordererOrg.MSPID, URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber)}
+			metricsPortNumber, err := d.GetDockerServicePort(ordererName, true)
+			if err != nil {
+				return orderers, err
+			}
+			orderer := networkspec.Orderer{
+				MSPID:      ordererOrg.MSPID,
+				URL:        fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber),
+				MetricsURL: fmt.Sprintf("http://%s:%s", nodeIP, metricsPortNumber),
+			}
 			orderer.GrpcOptions.SslTarget = ordererName
 			tlscaCertPath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/orderers/%s.%s/msp/tlscacerts/tlsca.%s-cert.pem", orgName, ordererName, orgName, orgName))
 			cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
@@ -124,10 +129,6 @@ func (d DockerCompose) ordererOrgs(config networkspec.Config) (map[string]networ
 func (d DockerCompose) certificateAuthorities(peerOrg networkspec.PeerOrganizations, config networkspec.Config) (map[string]networkspec.CertificateAuthority, error) {
 
 	CAs := make(map[string]networkspec.CertificateAuthority)
-	var err error
-	var CA networkspec.CertificateAuthority
-	var connProfile connectionprofile.ConnProfile
-	var portNumber string
 	nodeIP := d.GetDockerExternalIP()
 	protocol := "http"
 	if config.TLS == "true" || config.TLS == "mutual" {
@@ -137,15 +138,19 @@ func (d DockerCompose) certificateAuthorities(peerOrg networkspec.PeerOrganizati
 	orgName := peerOrg.Name
 	for i := 0; i < peerOrg.NumCA; i++ {
 		caName := fmt.Sprintf("ca%d-%s", i, orgName)
-		portNumber, err = d.GetDockerServicePort(caName, false)
+		connProfile := connectionprofile.ConnProfile{}
+		portNumber, err := d.GetDockerServicePort(caName, false)
 		if err != nil {
 			return CAs, err
 		}
-		CA = networkspec.CertificateAuthority{URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber), CAName: caName}
 		tlscaCertPath := paths.JoinPath(paths.PeerOrgsDir(artifactsLocation), fmt.Sprintf("%s/ca/ca.%s-cert.pem", orgName, orgName))
 		cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
 		if err != nil {
 			return CAs, err
+		}
+		CA := networkspec.CertificateAuthority{
+			URL:    fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber),
+			CAName: caName,
 		}
 		CA.TLSCACerts.Pem = cert
 		CA.HTTPOptions.Verify = false
@@ -158,10 +163,6 @@ func (d DockerCompose) certificateAuthorities(peerOrg networkspec.PeerOrganizati
 //PeersPerOrganization --
 func (d DockerCompose) peersPerOrganization(peerorg networkspec.PeerOrganizations, config networkspec.Config) (map[string]networkspec.Peer, error) {
 
-	var err error
-	var peer networkspec.Peer
-	var portNumber string
-	var connProfile connectionprofile.ConnProfile
 	nodeIP := d.GetDockerExternalIP()
 	peerOrgsLocation := paths.PeerOrgsDir(config.ArtifactsLocation)
 	peers := make(map[string]networkspec.Peer)
@@ -170,12 +171,20 @@ func (d DockerCompose) peersPerOrganization(peerorg networkspec.PeerOrganization
 		protocol = "grpcs"
 	}
 	for i := 0; i < peerorg.NumPeers; i++ {
+		connProfile := connectionprofile.ConnProfile{}
 		peerName := fmt.Sprintf("peer%d-%s", i, peerorg.Name)
-		portNumber, err = d.GetDockerServicePort(peerName, false)
+		portNumber, err := d.GetDockerServicePort(peerName, false)
 		if err != nil {
 			return peers, err
 		}
-		peer = networkspec.Peer{URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber)}
+		metricsPortNumber, err := d.GetDockerServicePort(peerName, true)
+		if err != nil {
+			return peers, err
+		}
+		peer := networkspec.Peer{
+			URL:        fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber),
+			MetricsURL: fmt.Sprintf("http://%s:%s", nodeIP, metricsPortNumber),
+		}
 		peer.GrpcOptions.SslTarget = peerName
 		tlscaCertPath := paths.JoinPath(peerOrgsLocation, fmt.Sprintf("%s/tlsca/tlsca.%s-cert.pem", peerorg.Name, peerorg.Name))
 		cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)

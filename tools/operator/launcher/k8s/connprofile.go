@@ -86,10 +86,6 @@ func (k8s K8s) ordererOrganizations(config networkspec.Config, clientset *kubern
 	orderers := make(map[string]networkspec.Orderer)
 	artifactsLocation := config.ArtifactsLocation
 	ordererOrgsPath := paths.OrdererOrgsDir(artifactsLocation)
-	var err error
-	var orderer networkspec.Orderer
-	var connProfile connectionprofile.ConnProfile
-	var portNumber, nodeIP string
 	protocol := "grpc"
 	if config.TLS == "true" || config.TLS == "mutual" {
 		protocol = "grpcs"
@@ -98,16 +94,25 @@ func (k8s K8s) ordererOrganizations(config networkspec.Config, clientset *kubern
 		ordererOrg := config.OrdererOrganizations[org]
 		orgName := ordererOrg.Name
 		for i := 0; i < ordererOrg.NumOrderers; i++ {
+			connProfile := connectionprofile.ConnProfile{}
 			ordererName := fmt.Sprintf("orderer%d-%s", i, orgName)
-			portNumber, err = k8s.ServicePort(ordererName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
+			portNumber, err := k8s.ServicePort(ordererName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
 			if err != nil {
 				return orderers, err
 			}
-			nodeIP, err = k8s.ExternalIP(config, ordererName, clientset)
+			nodeIP, err := k8s.ExternalIP(config, ordererName, clientset)
 			if err != nil {
 				return orderers, err
 			}
-			orderer = networkspec.Orderer{MSPID: ordererOrg.MSPID, URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber)}
+			metricsPortNumber, err := k8s.ServicePort(ordererName, config.K8s.ServiceType, config.K8s.Namespace, true, clientset)
+			if err != nil {
+				return orderers, err
+			}
+			orderer := networkspec.Orderer{
+				MSPID:      ordererOrg.MSPID,
+				URL:        fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber),
+				MetricsURL: fmt.Sprintf("http://%s:%s", nodeIP, metricsPortNumber),
+			}
 			orderer.GrpcOptions.SslTarget = ordererName
 			tlscaCertPath := paths.JoinPath(ordererOrgsPath, fmt.Sprintf("%s/orderers/%s.%s/msp/tlscacerts/tlsca.%s-cert.pem", orgName, ordererName, orgName, orgName))
 			cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
@@ -142,10 +147,6 @@ func (k8s K8s) ordererOrganizations(config networkspec.Config, clientset *kubern
 func (k8s K8s) certificateAuthorities(peerOrg networkspec.PeerOrganizations, config networkspec.Config, clientset *kubernetes.Clientset) (map[string]networkspec.CertificateAuthority, error) {
 
 	CAs := make(map[string]networkspec.CertificateAuthority)
-	var err error
-	var connProfile connectionprofile.ConnProfile
-	var CA networkspec.CertificateAuthority
-	var portNumber, nodeIP string
 	protocol := "http"
 	if config.TLS == "true" || config.TLS == "mutual" {
 		protocol = "https"
@@ -153,16 +154,20 @@ func (k8s K8s) certificateAuthorities(peerOrg networkspec.PeerOrganizations, con
 	artifactsLocation := config.ArtifactsLocation
 	orgName := peerOrg.Name
 	for i := 0; i < peerOrg.NumCA; i++ {
+		connProfile := connectionprofile.ConnProfile{}
 		caName := fmt.Sprintf("ca%d-%s", i, orgName)
-		portNumber, err = k8s.ServicePort(caName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
+		portNumber, err := k8s.ServicePort(caName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
 		if err != nil {
 			return CAs, err
 		}
-		nodeIP, err = k8s.ExternalIP(config, caName, clientset)
+		nodeIP, err := k8s.ExternalIP(config, caName, clientset)
 		if err != nil {
 			return CAs, err
 		}
-		CA = networkspec.CertificateAuthority{URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber), CAName: caName}
+		CA := networkspec.CertificateAuthority{
+			URL:    fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber),
+			CAName: caName,
+		}
 		tlscaCertPath := paths.JoinPath(paths.PeerOrgsDir(artifactsLocation), fmt.Sprintf("%s/ca/ca.%s-cert.pem", orgName, orgName))
 		cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)
 		if err != nil {
@@ -178,10 +183,6 @@ func (k8s K8s) certificateAuthorities(peerOrg networkspec.PeerOrganizations, con
 
 func (k8s K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, config networkspec.Config, clientset *kubernetes.Clientset) (map[string]networkspec.Peer, error) {
 
-	var err error
-	var peer networkspec.Peer
-	var portNumber, nodeIP string
-	var connProfile connectionprofile.ConnProfile
 	peers := make(map[string]networkspec.Peer)
 	protocol := "grpc"
 	peerOrgsLocation := paths.PeerOrgsDir(config.ArtifactsLocation)
@@ -189,16 +190,24 @@ func (k8s K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, confi
 		protocol = "grpcs"
 	}
 	for i := 0; i < peerorg.NumPeers; i++ {
+		connProfile := connectionprofile.ConnProfile{}
 		peerName := fmt.Sprintf("peer%d-%s", i, peerorg.Name)
-		portNumber, err = k8s.ServicePort(peerName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
+		portNumber, err := k8s.ServicePort(peerName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
 		if err != nil {
 			return peers, err
 		}
-		nodeIP, err = k8s.ExternalIP(config, peerName, clientset)
+		nodeIP, err := k8s.ExternalIP(config, peerName, clientset)
 		if err != nil {
 			return peers, err
 		}
-		peer = networkspec.Peer{URL: fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber)}
+		metricsPortNumber, err := k8s.ServicePort(peerName, config.K8s.ServiceType, config.K8s.Namespace, true, clientset)
+		if err != nil {
+			return peers, err
+		}
+		peer := networkspec.Peer{
+			URL:        fmt.Sprintf("%s://%s:%s", protocol, nodeIP, portNumber),
+			MetricsURL: fmt.Sprintf("http://%s:%s", nodeIP, metricsPortNumber),
+		}
 		peer.GrpcOptions.SslTarget = peerName
 		tlscaCertPath := paths.JoinPath(peerOrgsLocation, fmt.Sprintf("%s/tlsca/tlsca.%s-cert.pem", peerorg.Name, peerorg.Name))
 		cert, err := connProfile.GetCertificateFromFile(tlscaCertPath)

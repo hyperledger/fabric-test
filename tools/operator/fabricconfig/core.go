@@ -371,10 +371,8 @@ func CoreConfig(nsConfig networkspec.Config) (Core, error) {
 	coreConfig.Chaincode.ExecuteTimeout = ccExecuteTimeout
 	coreConfig.Peer.MSPConfigPath = "/etc/hyperledger/fabric/artifacts/msp"
 	coreConfig.Peer.FileSystemPath = "/shared/data"
-	if nsConfig.Metrics {
-		coreConfig.Operations.TLS.Enabled = false
-		coreConfig.Metrics.Provider = "prometheus"
-	}
+	coreConfig.Operations.TLS.Enabled = false
+	coreConfig.Metrics.Provider = "prometheus"
 	if nsConfig.DBType == "couchdb" {
 		coreConfig.Ledger.State.StateDatabase = "CouchDB"
 	}

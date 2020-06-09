@@ -94,6 +94,7 @@ type PeerOrganizations struct {
 type Orderer struct {
 	MSPID       string `yaml:"mspid"`
 	URL         string `yaml:"url"`
+	MetricsURL  string `yaml:"metricsURL"`
 	GrpcOptions struct {
 		SslTarget string `yaml:"ssl-target-name-override"`
 	} `yaml:"grpcOptions"`
@@ -107,6 +108,7 @@ type Orderer struct {
 //Peer --
 type Peer struct {
 	URL         string `yaml:"url"`
+	MetricsURL  string `yaml:"metricsURL"`
 	GrpcOptions struct {
 		SslTarget string `yaml:"ssl-target-name-override"`
 	} `yaml:"grpcOptions"`

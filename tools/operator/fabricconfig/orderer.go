@@ -175,13 +175,12 @@ func OrdererConfig(nsConfig networkspec.Config) (Orderer, error) {
 	ordererConfig.General.Cluster.ClientPrivateKey = "/etc/hyperledger/fabric/artifacts/tls/server.key"
 	ordererConfig.General.LocalMSPDir = "/etc/hyperledger/fabric/artifacts/msp"
 	ordererConfig.FileLedger.Location = "/shared/data"
-	if nsConfig.Metrics {
-		ordererConfig.Operations.TLS.Enabled = false
-		ordererConfig.Metrics.Provider = "prometheus"
-	}
+	ordererConfig.Operations.TLS.Enabled = false
+	ordererConfig.Metrics.Provider = "prometheus"
 	return ordererConfig, nil
 }
 
+//GenerateOrdererConfig --
 func GenerateOrdererConfig(name, orgName, mspID, artifactsLocation string, port int32, metricsPort int32, ordererConfig Orderer) error {
 
 	ordererConfig.General.LocalMSPID = mspID

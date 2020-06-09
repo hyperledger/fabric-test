@@ -3,7 +3,11 @@ package operations
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -91,11 +95,16 @@ type Parameters struct {
 	Args []string `json:"args,omitempty"`
 }
 
+type blockchainCount struct {
+	peerTransactionCount int
+	peerBlockchainHeight int
+	peerBlockHash        string
+}
+
 //InvokeQuery -- To perform invoke/query with the objects created
 func (i InvokeQueryUIObject) InvokeQuery(config inputStructs.Config, tls, action string) error {
 
 	var invokeQueryObjects []InvokeQueryUIObject
-	var err error
 	configObjects := config.Invoke
 	if action == "Query" {
 		configObjects = config.Query
@@ -104,7 +113,7 @@ func (i InvokeQueryUIObject) InvokeQuery(config inputStructs.Config, tls, action
 		invkQueryObjects := i.generateInvokeQueryObjects(configObjects[key], config.Organizations, tls, action)
 		invokeQueryObjects = append(invokeQueryObjects, invkQueryObjects...)
 	}
-	err = i.invokeQueryTransactions(invokeQueryObjects)
+	err := i.invokeQueryTransactions(invokeQueryObjects)
 	if err != nil {
 		return err
 	}
@@ -205,8 +214,8 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, ac
 	return invokeQueryObjects
 }
 
-func (i InvokeQueryUIObject) invokeConfig(channelName string, args []string, wg *sync.WaitGroup) error {
-	defer wg.Done()
+func (i InvokeQueryUIObject) invokeConfig(channelName string, args []string) error {
+
 	_, err := networkclient.ExecuteCommand("node", args, true)
 	if err != nil {
 		logger.ERROR(fmt.Sprintf("Failed to perform invoke/query on %s channel: %v", channelName, err))
@@ -218,20 +227,135 @@ func (i InvokeQueryUIObject) invokeConfig(channelName string, args []string, wg 
 //invokeQueryTransactions -- To invoke/query transactions
 func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []InvokeQueryUIObject) error {
 
-	var err error
-	var jsonObject []byte
 	var wg sync.WaitGroup
+	var statusError error
 	pteMainPath := paths.PTEPath()
 	for key := range invokeQueryObjects {
-		jsonObject, err = json.Marshal(invokeQueryObjects[key])
+		jsonObject, err := json.Marshal(invokeQueryObjects[key])
 		if err != nil {
 			return err
 		}
-		startTime := fmt.Sprintf("%s", time.Now())
+		startTime := time.Now().String()
 		args := []string{pteMainPath, strconv.Itoa(key), string(jsonObject), startTime}
 		wg.Add(1)
-		go i.invokeConfig(invokeQueryObjects[key].ChannelOpt.Name, args, &wg)
+		go func(invokeQueryObjectIndex int, wg *sync.WaitGroup) {
+			defer wg.Done()
+			err := i.invokeConfig(invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name, args)
+			if err != nil {
+				logger.ERROR("Failed to complete invokes/queries")
+				statusError = fmt.Errorf("Something went wrong in completing invokes/queries")
+			}
+			blockchain, err := i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex])
+			if err != nil {
+				logger.ERROR("failed fetching metrics")
+				statusError = fmt.Errorf("Something went wrong in fetching metrics")
+			}
+			var blockchainHeight int
+			var transactionCount int
+			var blockHash string
+			channelBlock := blockchain[invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name]
+			for key, value := range channelBlock {
+				if blockchainHeight == 0 && transactionCount == 0 {
+					blockchainHeight = value.peerBlockchainHeight
+					transactionCount = value.peerTransactionCount
+					blockHash = value.peerBlockHash
+				} else {
+					if value.peerBlockchainHeight != blockchainHeight || value.peerTransactionCount != transactionCount || value.peerBlockHash != blockHash {
+						logger.ERROR("Peers are not in sync")
+						statusError = fmt.Errorf("Something went wrong with peer %s as blockchain height or transactions does not match up", key)
+					}
+				}
+			}
+		}(key, &wg)
 	}
 	wg.Wait()
-	return nil
+	return statusError
+}
+
+func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject) (map[string]map[string]blockchainCount, error) {
+
+	channelBlockchainCount := make(map[string]map[string]blockchainCount)
+	connectionProfilePath := invokeQueryObject.ConnProfilePath
+	orgName := invokeQueryObject.ChannelOpt.OrgName
+	for index := range orgName {
+		connProfilePath := fmt.Sprintf("%s/connection_profile_%s.yaml", connectionProfilePath, orgName[index])
+		if strings.Contains(connectionProfilePath, ".yaml") || strings.Contains(connectionProfilePath, ".json") {
+			connProfilePath = connectionProfilePath
+		}
+		connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName[index])
+		if err != nil {
+			return nil, err
+		}
+		channelName := invokeQueryObject.ChannelOpt.Name
+		channelBlockchainCount[channelName] = make(map[string]blockchainCount)
+		for _, peerName := range connProfConfig.Channels[channelName].Peers {
+			metricsURL, err := url.Parse(connProfConfig.Peers[peerName].MetricsURL)
+			if err != nil {
+				logger.ERROR("Failed to get peer url from connection profile")
+				return nil, err
+			}
+			resp, err := http.Get(fmt.Sprintf("%s/metrics", metricsURL))
+			if err != nil {
+				logger.ERROR("Error while hitting the endpoint")
+				return nil, err
+			}
+			defer resp.Body.Close()
+			bodyBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			metrics := string(bodyBytes)
+			blockHeight := strings.Split(metrics, fmt.Sprintf(`ledger_blockchain_height{channel="%s"}`, channelName))
+			height := strings.Split(blockHeight[1], "\n")[0]
+			num, _ := strconv.Atoi(strings.TrimSpace(height))
+			regex := regexp.MustCompile(fmt.Sprintf(`ledger_transaction_count{chaincode="%s:[0-9A-Za-z]+",channel="%s",transaction_type="ENDORSER_TRANSACTION",validation_code="VALID"}`, invokeQueryObject.ChaincodeID, channelName))
+			transactionCount := strings.Split(metrics, fmt.Sprintf(`%s`, regex.FindString(metrics)))
+			trxnCount := strings.Split(transactionCount[1], "\n")[0]
+			count, _ := strconv.Atoi(strings.TrimSpace(trxnCount))
+			peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
+			if err != nil {
+				logger.ERROR("Failed to get peer url from connection profile")
+				return nil, err
+			}
+			peerAddress := peerURL.Host
+			blockHash, _ := i.fetchBlockHash(peerAddress, orgName[index], peerName, channelName, connProfilePath, invokeQueryObject.TLS)
+			channelBlockchainCount[channelName][peerName] = blockchainCount{
+				peerBlockchainHeight: num,
+				peerTransactionCount: count,
+				peerBlockHash:        blockHash,
+			}
+		}
+	}
+	return channelBlockchainCount, nil
+}
+
+//fetchBlockHash --
+func (i InvokeQueryUIObject) fetchBlockHash(peerAddress, orgName, peerName, channelName, connProfilePath, tls string) (string, error) {
+
+	currentDir, err := paths.GetCurrentDir()
+	if err != nil {
+		return "", err
+	}
+	err = SetEnvForCLI(orgName, peerName, connProfilePath, tls, currentDir)
+	if err != nil {
+		return "", err
+	}
+	args := []string{
+		"channel",
+		"getinfo",
+		"-c", channelName,
+	}
+	if tls == "clientauth" {
+		args = append(args, "--tls")
+	}
+	os.Setenv("CORE_PEER_ADDRESS", peerAddress)
+	peerGetInfo, err := networkclient.ExecuteCommand("peer", args, false)
+	if err != nil {
+		return "", err
+	}
+	blockHash := strings.Split(peerGetInfo, `"currentBlockHash":`)
+	currentBlockHash := strings.Split(blockHash[1], ",")[0]
+	currentBlockHash = strings.ReplaceAll(currentBlockHash, `"`, "")
+	hash := strings.TrimSpace(currentBlockHash)
+	return hash, err
 }
