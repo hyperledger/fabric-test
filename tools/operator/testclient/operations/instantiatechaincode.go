@@ -68,13 +68,20 @@ type Identity struct {
 //ConnProfileOptions --
 type ConnProfileOptions struct {
 	Organizations map[string]struct {
-		MSPID string `yaml:"mspid,omitempty"`
+		MSPID string   `yaml:"mspid,omitempty"`
+		Peers []string `yaml:"peers,omitempty"`
 	} `yaml:"organizations,omitempty"`
 	Peers map[string]struct {
-		URL string `json:"url,omitempty"`
+		URL        string `yaml:"url,omitempty"`
+		MetricsURL string `yaml:"metricsURL,omitempty"`
 	} `yaml:"peers,omitempty"`
 	Orderers map[string]struct {
-		URL string `json:"url,omitempty"`
+		URL        string `yaml:"url,omitempty"`
+		MetricsURL string `yaml:"metricsURL,omitempty"`
+	}
+	Channels map[string]struct {
+		Orderers []string `yaml:"orderers,omitempty"`
+		Peers    []string `yaml:"peers,omitempty"`
 	}
 }
 
