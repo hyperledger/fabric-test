@@ -62,8 +62,8 @@
 #@   env.append("FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/tlsca/tlsca-priv_sk")
 #@   ports = ["{}:{}".format(caUniquePort, 7054)]
 #@   command = "sh -c 'fabric-ca-server start -b admin:adminpw -d'"
-#@   volumes = ["{}crypto-config/{}/{}/ca/:/etc/hyperledger/fabric-ca-server-config/ca".format(artifactsLocation, orgType, orgName)]
-#@   volumes.append("{}crypto-config/{}/{}/tlsca/:/etc/hyperledger/fabric-ca-server-config/tlsca".format(artifactsLocation, orgType, orgName))
+#@   volumes = ["{}/../crypto-config/{}/{}/ca/:/etc/hyperledger/fabric-ca-server-config/ca".format(artifactsLocation, orgType, orgName)]
+#@   volumes.append("{}/../crypto-config/{}/{}/tlsca/:/etc/hyperledger/fabric-ca-server-config/tlsca".format(artifactsLocation, orgType, orgName))
 #@   ca = {"image":image, "environment":env, "ports":ports, "command":command, "volumes":volumes, "container_name":container_name}
 #@   return ca
 #@ end
@@ -144,7 +144,7 @@
 #@       env.append("ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt]".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
-#@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
+#@       volumes = ["{}/../:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("{}/backup/orderer{}-{}:/var/hyperledger/production/orderer".format(artifactsLocation, j, org.name))
 #@       container_name = "orderer{}-{}".format(j,org.name)
 #@       image = ""
@@ -202,7 +202,7 @@
 #@       env.append("CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/tls/ca.crt".format(org.name, j, org.name, org.name))
 #@       container_name = "peer{}-{}".format(j, org.name)
-#@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
+#@       volumes = ["{}/../:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("/var/run/:/host/var/run/")
 #@       volumes.append("{}/backup/peer{}-{}:/var/hyperledger/production".format(artifactsLocation,j, org.name))
 #@       image = ""

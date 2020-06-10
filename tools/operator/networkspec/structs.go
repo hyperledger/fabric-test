@@ -28,7 +28,9 @@ type Config struct {
 	OrdererOrganizations     []OrdererOrganizations `yaml:"ordererOrganizations,omitempty"`
 	PeerOrganizations        []PeerOrganizations    `yaml:"peerOrganizations,omitempty"`
 	Orderer                  struct {
-		OrdererType string `yaml:"ordererType,omitempty"`
+		OrdererType  string    `yaml:"ordererType,omitempty"`
+		BatchSize    BatchSize `yaml:"batchSize,omitempty"`
+		BatchTimeout string    `yaml:"batchTimeOut,omitempty"`
 	} `yaml:"orderer,omitempty"`
 	NumChannels             int    `yaml:"numChannels,omitempty"`
 	TLS                     string `yaml:"tls,omitempty"`
@@ -53,6 +55,12 @@ type Config struct {
 			Kafka    Resource `yaml:"kafka,omitempty"`
 		} `yaml:"resources,omitempty"`
 	} `yaml:"k8s,omitempty"`
+}
+
+type BatchSize struct {
+	MaxMessageCount   string `yaml:"maxMessageCount,omitempty"`
+	AbsoluteMaxBytes  string `yaml:"absoluteMaxBytes,omitempty"`
+	PreferredMaxBytes string `yaml:"preferredMaxBytes,omitempty"`
 }
 
 //Resource --

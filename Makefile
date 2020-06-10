@@ -29,9 +29,6 @@ pre-reqs: npm-init pull-binaries-fabric gotools
 .PHONY: npm-init
 npm-init:
 	cd $(CURDIR)/tools/PTE && npm install
-    ifeq ($(shell arch), i386)
-		cd $(CURDIR)/tools/PTE && npm rebuild 2>/dev/null
-    endif
 
 .PHONY: lint
 lint: gotools

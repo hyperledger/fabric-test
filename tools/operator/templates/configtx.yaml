@@ -27,11 +27,7 @@
 #@ def orgOrderers(ordererOrg, port, config):
 #@  orderers = []
 #@  for i in range(0, ordererOrg.numOderers):
-#@    if config.nodeportIP:
-#@      orderers.append("{}:{}".format(config.nodeportIP, port))
-#@    else:
-#@      orderers.append("orderer{}-{}:{}".format(i, ordererOrg.name, port))
-#@    end
+#@    orderers.append("orderer{}-{}:{}".format(i, ordererOrg.name, port))
 #@    port += 1
 #@  end
 #@  return orderers
@@ -53,7 +49,7 @@
 #@     port1 = 30000
 #@     num_organizations = len(config.ordererOrganizations)
 #@     for i in range(0, num_organizations):
-#@       output.append({"Name": config.ordererOrganizations[i].name, "OrdererEndpoints": orgOrderers(config.ordererOrganizations[i], port1, config), "ID": config.ordererOrganizations[i].mspId, "MSPDir": artifactsLocation+"crypto-config/ordererOrganizations/"+config.ordererOrganizations[i].name+"/msp", "Policies": orgPolicies(config.ordererOrganizations[i].mspId, "orderer", config.enableNodeOUs, "")})
+#@       output.append({"Name": config.ordererOrganizations[i].name, "OrdererEndpoints": orgOrderers(config.ordererOrganizations[i], port1, config), "ID": config.ordererOrganizations[i].mspId, "MSPDir": artifactsLocation+"/../crypto-config/ordererOrganizations/"+config.ordererOrganizations[i].name+"/msp", "Policies": orgPolicies(config.ordererOrganizations[i].mspId, "orderer", config.enableNodeOUs, "")})
 #@       port1 += config.ordererOrganizations[i].numOderers
 #@     end
 #@   end
@@ -61,7 +57,7 @@
 #@     port2 = 31000
 #@     capability = config.applicationCapabilities
 #@     for i in range(0, len(config.peerOrganizations)):
-#@       output.append({"Name": config.peerOrganizations[i].name, "AnchorPeers": anchorPeers(config.peerOrganizations[i].name, port2),"ID": config.peerOrganizations[i].mspId, "MSPDir": artifactsLocation+"crypto-config/peerOrganizations/"+config.peerOrganizations[i].name+"/msp", "Policies": orgPolicies(config.peerOrganizations[i].mspId, "peer", config.enableNodeOUs, capability)})
+#@       output.append({"Name": config.peerOrganizations[i].name, "AnchorPeers": anchorPeers(config.peerOrganizations[i].name, port2),"ID": config.peerOrganizations[i].mspId, "MSPDir": artifactsLocation+"/../crypto-config/peerOrganizations/"+config.peerOrganizations[i].name+"/msp", "Policies": orgPolicies(config.peerOrganizations[i].mspId, "peer", config.enableNodeOUs, capability)})
 #@       port2 += config.peerOrganizations[i].numPeers
 #@     end
 #@   end
@@ -117,7 +113,7 @@
 #@     for i in range(0, len(config.ordererOrganizations)):
 #@       for j in range(0, config.ordererOrganizations[i].numOderers):
 #@         ordererOrg = config.ordererOrganizations[i]
-#@         certs = "{}crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(artifactsLocation, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
+#@         certs = "{}/../crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(artifactsLocation, ordererOrg.name, j, ordererOrg.name, ordererOrg.name)
 #@         consenters.append({"Host":"orderer{}-{}".format(j, ordererOrg.name), "Port": port1, "ClientTLSCert": certs, "ServerTLSCert": certs})
 #@         port1 += 1
 #@       end

@@ -14,7 +14,6 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
 //K8s -
@@ -392,13 +391,8 @@ func (k8s K8s) volumesList(componentType, orgName, name, dataPersistence string,
 
 //GenerateConfigurationFiles - to generate all the configuration files
 func (k8s K8s) GenerateConfigurationFiles(upgrade bool) error {
-
-	network := nl.Network{TemplatesDir: paths.TemplateFilePath("k8s")}
-	err := network.GenerateConfigurationFiles(upgrade)
-	if err != nil {
-		return err
-	}
-	return nil
+	network := nl.Network{}
+	return network.GenerateConfigurationFiles(upgrade)
 }
 
 func (k8s K8s) launchNetwork(config networkspec.Config, clientset *kubernetes.Clientset) error {

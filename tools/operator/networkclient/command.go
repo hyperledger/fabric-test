@@ -12,7 +12,6 @@ import (
 
 //ExecuteCommand - to execute the cli commands
 func ExecuteCommand(name string, args []string, printLogs bool) (string, error) {
-
 	cmd := exec.Command(name, args...)
 	var stdBuffer bytes.Buffer
 	runTests, envVariableExists := os.LookupEnv("GinkoTests")

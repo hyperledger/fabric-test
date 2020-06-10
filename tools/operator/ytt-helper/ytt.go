@@ -21,11 +21,11 @@ type YTT struct {
 }
 
 func (y YTT) Args(input []string) []string {
-	args := []string{}
-	for i := 0; i < len(input); i++ {
-		args = append(args, []string{"-f", input[i]}...)
+	var args []string
+	for _, i := range input {
+		args = append(args, "-f", i)
 	}
-	args = append(args, []string{"-f", y.InputPath, y.OutputPath}...)
+	args = append(args, "-f", y.InputPath, y.OutputPath)
 	return args
 }
 

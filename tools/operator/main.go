@@ -3,206 +3,151 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"os"
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher"
-	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 	"github.com/pkg/errors"
+	"gopkg.in/yaml.v2"
 )
 
-var inputFilePath = flag.String("i", "", "Input file path (required)")
-var kubeConfigPath = flag.String("k", "", "Kube config file path (optional)")
-var action = flag.String("a", "up", "Set action (Available options up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health)")
+var inputFilePathFlag = flag.String("i", "", "Required: Input file path")
+var kubeConfigPathFlag = flag.String("k", "", "Optional: Kube config file path (optional)")
+var actionFlag = flag.String("a", "up", "Required: Available actions: up, down, create, join, install, instantiate, upgrade, invoke, query, createChannelTxn, migrate, health")
 
-func validateArguments(networkSpecPath *string, kubeConfigPath *string) error {
-
-	if *networkSpecPath == "" {
+func validateArguments(networkSpecPath string, kubeConfigPath string) error {
+	if networkSpecPath == "" {
 		return errors.New("Input file not provided")
-	} else if *kubeConfigPath == "" {
-		logger.INFO("Kube config file not provided, proceeding with local environment")
+	}
+	if kubeConfigPath == "" {
+		logger.INFO("Kube config file not provided, proceeding with Docker-based deployment")
 	}
 	return nil
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
+func run(action, inputFilePath, kubeConfigPath string) error {
+	contents, err := ioutil.ReadFile(inputFilePath)
+	if err != nil {
+		return fmt.Errorf("failed to reading config file from disk: %v", err)
 	}
-	return false
-}
 
-func doAction(action, env, kubeConfigPath, inputFilePath string) error {
+	// We read the network spec from disk, append the YTT "#@data/values" to the start of it and
+	// write it back to disk. This updated file will be used by YTT to generate YAML files from
+	// this template file we just created.
+	err = ioutil.WriteFile(paths.TemplateFilePath("input"), append([]byte("#@data/values\n"), contents...), 0644)
+	if err != nil {
+		return fmt.Errorf("failed to write config file to disk: %v", err)
+	}
 
-	var err error
-	var inputPath string
 	var config networkspec.Config
-	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync", "updateCapability", "updatePolicy"}
-	if contains(actions, action) {
-		contents, _ := ioutil.ReadFile(inputFilePath)
-		contents = append([]byte("#@data/values \n"), contents...)
-		inputPath = paths.JoinPath(paths.TemplatesDir(), "input.yaml")
-		ioutil.WriteFile(inputPath, contents, 0644)
-
-		var network nl.Network
-		config, err = network.GetConfigData(inputPath)
-		if err != nil {
-			return err
-		}
+	err = yaml.Unmarshal(contents, &config)
+	if err != nil {
+		return fmt.Errorf("failed to marshal network config file [%s]: %v", inputFilePath, err)
 	}
 
 	switch action {
 	case "up":
-		err = launcher.Launcher("up", env, kubeConfigPath, inputPath)
+		err := launcher.Launcher("up", kubeConfigPath, config)
 		if err != nil {
-			logger.ERROR("Failed to launch network")
-			return err
+			return fmt.Errorf("failed to launch network: %v", err)
 		}
 	case "down":
-		err = launcher.Launcher("down", env, kubeConfigPath, inputPath)
+		err := launcher.Launcher("down", kubeConfigPath, config)
 		if err != nil {
-			logger.ERROR("Failed to delete network")
-			return err
+			return fmt.Errorf("failed to delete network: %v", err)
 		}
 	case "upgradeNetwork":
-		err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
+		err := launcher.Launcher("upgradeNetwork", kubeConfigPath, config)
 		if err != nil {
-			logger.ERROR("Failed to upgrade network")
-			return err
+			return fmt.Errorf("failed to upgrade network: %v", err)
 		}
 	case "updateCapability":
-		err = launcher.Launcher("updateCapability", env, kubeConfigPath, inputPath)
-		if err != nil {
-			return err
-		}
+		return launcher.Launcher("updateCapability", kubeConfigPath, config)
 	case "updatePolicy":
-		err = launcher.Launcher("updatePolicy", env, kubeConfigPath, inputPath)
-		if err != nil {
-			return err
-		}
+		return launcher.Launcher("updatePolicy", kubeConfigPath, config)
 	case "create":
-		err = testclient.Testclient("create", inputFilePath)
+		err := testclient.Testclient("create", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to create channel in network")
-			return err
+			return fmt.Errorf("failed to create channel in network: %v", err)
 		}
 	case "anchorpeer":
-		err = testclient.Testclient("anchorpeer", inputFilePath)
+		err := testclient.Testclient("anchorpeer", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to add anchor peers to channel in network")
-			return err
+			return fmt.Errorf("failed to add anchor peers to channel in network: %v", err)
 		}
 	case "join":
-		err = testclient.Testclient("join", inputFilePath)
+		err := testclient.Testclient("join", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to join peers to channel in network")
-			return err
+			return fmt.Errorf("failed to join peers to channel in network: %v", err)
 		}
 	case "install":
-		err = testclient.Testclient("install", inputFilePath)
+		err := testclient.Testclient("install", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to install chaincode")
-			return err
+			return fmt.Errorf("failed to install chaincode: %v", err)
 		}
 	case "instantiate":
-		err = testclient.Testclient("instantiate", inputFilePath)
+		err := testclient.Testclient("instantiate", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to instantiate chaincode")
-			return err
+			return fmt.Errorf("failed to instantiate chaincode: %v", err)
 		}
 	case "upgrade":
-		err = testclient.Testclient("upgrade", inputFilePath)
+		err := testclient.Testclient("upgrade", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to upgrade chaincode")
-			return err
+			return fmt.Errorf("failed to upgrade chaincode: %v", err)
 		}
 	case "invoke":
-		err = testclient.Testclient("invoke", inputFilePath)
+		err := testclient.Testclient("invoke", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to send invokes")
-			return err
+			return fmt.Errorf("failed to invoke chaincode: %v", err)
 		}
 	case "query":
-		err = testclient.Testclient("query", inputFilePath)
+		err := testclient.Testclient("query", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to send queries")
-			return err
+			return fmt.Errorf("failed to query chaincode: %v", err)
 		}
 	case "createChannelTxn":
 		configTxnPath := paths.ConfigFilesDir()
-		err = networkclient.GenerateChannelTransaction(config, configTxnPath)
+		err := networkclient.GenerateChannelTransaction(config, configTxnPath)
 		if err != nil {
-			logger.ERROR("Failed to create channel transaction")
-			return err
+			return fmt.Errorf("failed to create channel transaction: %v", err)
 		}
 	case "migrate":
-		err = networkclient.MigrateToRaft(config, kubeConfigPath)
+		err := networkclient.MigrateToRaft(config, kubeConfigPath)
 		if err != nil {
-			logger.ERROR("Failed to migrate consensus to raft from ", config.Orderer.OrdererType)
-			return err
+			return fmt.Errorf("failed to migrate consensus to raft from %s: %v", config.Orderer.OrdererType, err)
 		}
 	case "networkInSync":
-		err = networkclient.CheckNetworkInSync(config, kubeConfigPath)
-		if err != nil {
-			return err
-		}
+		return networkclient.CheckNetworkInSync(config, kubeConfigPath)
 	case "command":
-		err = testclient.Testclient("command", inputFilePath)
+		err := testclient.Testclient("command", inputFilePath)
 		if err != nil {
-			logger.ERROR("Failed to execute command function")
-			return err
+			return fmt.Errorf("failed to execute command function: %v", err)
 		}
 	case "health":
-		err = launcher.Launcher("health", env, kubeConfigPath, inputPath)
+		err := launcher.Launcher("health", kubeConfigPath, config)
 		if err != nil {
-			logger.ERROR("Failed to check health of fabric components")
-			return err
+			return fmt.Errorf("failed to perform healthcheck: %v", err)
 		}
 	default:
-		logger.ERROR("Incorrect action ", action, " provided. Use up or down or create or join or anchorpeer or install or instantiate or upgrade or invoke or query or createChannelTxn or migrate or health or upgradeNetwork for action ")
-		return err
+		flag.PrintDefaults()
+		return fmt.Errorf("unsupported action [%s]", action)
 	}
 	return nil
 }
 
-func writeLogToAFile() {
-	f, err := os.OpenFile("text.log",
-		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		log.Println(err)
-	}
-	defer f.Close()
-}
-
 func main() {
-
 	flag.Parse()
-	validateArguments(inputFilePath, kubeConfigPath)
-
-	env := "docker"
-	if *kubeConfigPath != "" {
-		env = "k8s"
-	}
-	f, err := os.OpenFile("/tmp/orders.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	err := validateArguments(*inputFilePathFlag, *kubeConfigPathFlag)
 	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+		log.Fatalf("Invalid arguments: %s", err)
 	}
-	defer f.Close()
-	wrt := io.MultiWriter(f)
-	log.SetOutput(wrt)
-
-	err = doAction(*action, env, *kubeConfigPath, *inputFilePath)
+	err = run(*actionFlag, *inputFilePathFlag, *kubeConfigPathFlag)
 	if err != nil {
-		logger.ERROR(fmt.Sprintln("Operator failed with error ", err))
-		os.Exit(1)
+		log.Fatalf("Operator failed with error: %s", err.Error())
 	}
 }

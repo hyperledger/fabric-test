@@ -17,10 +17,7 @@ OrdererOrgs:
   #@ for i in range(0, numOderers):
     - Hostname: #@ "orderer{}-{}".format(i, ordererOrg.name)
       SANS:
-        - #@ "{}".format(localIP) 
-    #@ if config.nodeportIP != "":
-        - #@ config.nodeportIP
-    #@ end
+        - #@ "{}".format(localIP)
   #@ end
 #@ end
 PeerOrgs:
@@ -33,9 +30,6 @@ PeerOrgs:
   #@ for i in range(0, peerOrg.numPeers):
     - Hostname: #@ "peer{}-{}".format(i, peerOrg.name)
       SANS:
-        - #@ "{}".format(localIP) 
-    #@ if config.nodeportIP != "":
-        - #@ config.nodeportIP
-    #@ end
+        - #@ "{}".format(localIP)
   #@ end
 #@ end

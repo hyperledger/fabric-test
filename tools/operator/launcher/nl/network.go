@@ -14,7 +14,6 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
 	ytt "github.com/hyperledger/fabric-test/tools/operator/ytt-helper"
-	yaml "gopkg.in/yaml.v2"
 )
 
 type Network struct {
@@ -29,41 +28,23 @@ func DockerImage(component, dockerOrg, dockerTag, componentImage string) string 
 	return fmt.Sprintf("%s/fabric-%s:%s", dockerOrg, component, dockerTag)
 }
 
-//GetConfigData - to read the yaml file and parse the data
-func (n Network) GetConfigData(networkSpecPath string) (networkspec.Config, error) {
-
-	var config networkspec.Config
-	yamlFile, err := ioutil.ReadFile(networkSpecPath)
-	if err != nil {
-		logger.ERROR("Failed to read input file")
-		return config, err
-	}
-	err = yaml.Unmarshal(yamlFile, &config)
-	if err != nil {
-		logger.ERROR("Failed to create config object")
-		return config, err
-	}
-	return config, nil
-}
-
 //GenerateConfigurationFiles - to generate all the configuration files
 func (n Network) GenerateConfigurationFiles(upgrade bool) error {
-
 	configtxPath := paths.TemplateFilePath("configtx")
 	cryptoConfigPath := paths.TemplateFilePath("crypto-config")
 	inputFilePath := paths.TemplateFilePath("input")
 	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir())
 	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
-	inputArgs := []string{configtxPath, cryptoConfigPath, n.TemplatesDir}
-	if upgrade {
-		inputArgs = []string{n.TemplatesDir}
+	inputArgs := []string{
+		configtxPath,
+		cryptoConfigPath,
+	}
+	if upgrade || n.TemplatesDir != "" {
+		inputArgs = append(inputArgs, n.TemplatesDir)
 	}
 	yttObject := ytt.YTT{InputPath: inputFilePath, OutputPath: configFilesPath}
 	_, err := networkclient.ExecuteCommand(yttPath, yttObject.Args(inputArgs), true)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // GenerateCryptoCerts -  to generate the crypto certs

@@ -30,7 +30,9 @@ func (d DockerCompose) Args() []string {
 //GenerateConfigurationFiles - to generate all the configuration files
 func (d DockerCompose) GenerateConfigurationFiles(upgrade bool) error {
 
-	network := nl.Network{TemplatesDir: paths.TemplateFilePath("docker")}
+	network := nl.Network{
+		TemplatesDir: paths.TemplateFilePath("docker"),
+	}
 	err := network.GenerateConfigurationFiles(upgrade)
 	if err != nil {
 		return err
@@ -149,11 +151,10 @@ func (d DockerCompose) removeChainCodeContainersAndImages() error {
 //DockerNetwork --
 func (d DockerCompose) DockerNetwork(action string) error {
 
-	var err error
 	var network nl.Network
 	switch action {
 	case "up":
-		err = d.GenerateConfigurationFiles(false)
+		err := d.GenerateConfigurationFiles(false)
 		if err != nil {
 			logger.ERROR("Failed to generate docker compose file")
 			return err
@@ -183,7 +184,7 @@ func (d DockerCompose) DockerNetwork(action string) error {
 			return err
 		}
 	case "upgradeNetwork":
-		err = d.GenerateConfigurationFiles(true)
+		err := d.GenerateConfigurationFiles(true)
 		if err != nil {
 			logger.ERROR("Failed to generate docker compose file")
 			return err
@@ -194,25 +195,25 @@ func (d DockerCompose) DockerNetwork(action string) error {
 			return err
 		}
 	case "updateCapability":
-		err = d.UpdateCapability(d.Config)
+		err := d.UpdateCapability(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to update capabilities and policies")
 			return err
 		}
 	case "updatePolicy":
-		err = d.UpdatePolicy(d.Config)
+		err := d.UpdatePolicy(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to update capabilities and policies")
 			return err
 		}
 	case "down":
-		err = d.DownLocalNetwork(d.Config)
+		err := d.DownLocalNetwork(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to down local fabric network")
 			return err
 		}
 	case "health":
-		err = d.CheckDockerContainersHealth(d.Config)
+		err := d.CheckDockerContainersHealth(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to check the health of local fabric network")
 			return err
