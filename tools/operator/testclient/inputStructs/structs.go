@@ -85,6 +85,10 @@ type InvokeQuery struct {
 	Fcn              string               `yaml:"fcn,omitempty"`
 	Args             string               `yaml:"args,omitempty"`
 	TimeOutOpt       TimeOutOptions       `yaml:"timeoutOpt,omitempty"`
+	PeerFailOver     bool                 `yaml:"peerFailover,omitempty"`
+	OrdererFailOver  bool                 `yaml:"ordererFailover,omitempty"`
+	PeerOpt          PeerOptions          `yaml:"peerOptions,omitempty"`
+	OrdererOpt       OrdererOptions       `yaml:"ordererOptions,omitempty"`
 }
 
 //TransactionOptions --
@@ -126,6 +130,16 @@ type CCOptions struct {
 type DiscoveryOptions struct {
 	Localhost bool `yaml:"localHost,omitempty"`
 	InitFreq  int  `yaml:"initFreq,omitempty"`
+}
+
+type PeerOptions struct {
+	Method string `yaml:"method,omitempty"`
+	List   string `yaml:"list,omitempty"`
+}
+
+type OrdererOptions struct {
+	Method    string `yaml:"method,omitempty"`
+	NOrderers int    `yaml:"nOrderers,omitempty"`
 }
 
 //CommandOptions --

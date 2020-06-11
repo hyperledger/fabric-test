@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -44,6 +46,10 @@ type InvokeQueryUIObject struct {
 	Parameters      map[string]Parameters `json:"invoke,omitempty"`
 	ConnProfilePath string                `json:"ConnProfilePath,omitempty"`
 	TimeOutOpt      TimeOutOptions        `json:"timeoutOpt,timeoutOpt"`
+	PeerFailover    string                `json:"peerFailover,omitempty"`
+	OrdererFailover string                `json:"ordererFailover,omitempty"`
+	FailoverOpt     PeerOptions           `json:"failoverOpt,omitempty"`
+	OrdererOpt      OrdererOptions        `json:"ordererOpt,omitempty"`
 }
 
 //BurstOptions --
@@ -95,10 +101,24 @@ type Parameters struct {
 	Args []string `json:"args,omitempty"`
 }
 
-type blockchainCount struct {
+type PeerOptions struct {
+	Method string `json:"method,omitempty"`
+	List   string `json:"list,omitempty"`
+}
+
+type OrdererOptions struct {
+	Method    string `json:"method,omitempty"`
+	NOrderers int    `json:"nOrderers,omitempty"`
+}
+
+type BlockchainCount struct {
 	peerTransactionCount int
 	peerBlockchainHeight int
 	peerBlockHash        string
+}
+
+type Result struct {
+	Err error
 }
 
 //InvokeQuery -- To perform invoke/query with the objects created
@@ -197,6 +217,20 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, ac
 		Args: strings.Split(invkQueryObject.Args, ","),
 	}
 	i.Parameters = invokeParams
+	if invkQueryObject.PeerFailOver {
+		i.PeerFailover = "TRUE"
+		i.FailoverOpt = PeerOptions{
+			Method: invkQueryObject.PeerOpt.Method,
+			List:   invkQueryObject.PeerOpt.List,
+		}
+	}
+	if invkQueryObject.OrdererFailOver {
+		i.OrdererFailover = "TRUE"
+		i.OrdererOpt = OrdererOptions{
+			Method:    invkQueryObject.OrdererOpt.Method,
+			NOrderers: invkQueryObject.OrdererOpt.NOrderers,
+		}
+	}
 	for key := range invkQueryObject.TxnOptions {
 		mode := invkQueryObject.TxnOptions[key].Mode
 		options := invkQueryObject.TxnOptions[key].Options
@@ -218,63 +252,78 @@ func (i InvokeQueryUIObject) invokeConfig(channelName string, args []string) err
 
 	_, err := networkclient.ExecuteCommand("node", args, true)
 	if err != nil {
-		logger.ERROR(fmt.Sprintf("Failed to perform invoke/query on %s channel: %v", channelName, err))
-		os.Exit(1)
+		return errors.Errorf(fmt.Sprintf("Failed to perform invoke/query on %s channel: %v", channelName, err))
 	}
 	return nil
 }
 
 //invokeQueryTransactions -- To invoke/query transactions
 func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []InvokeQueryUIObject) error {
-
 	var wg sync.WaitGroup
-	var statusError error
 	pteMainPath := paths.PTEPath()
+	errCh := make(chan error, 1)
 	for key := range invokeQueryObjects {
 		jsonObject, err := json.Marshal(invokeQueryObjects[key])
 		if err != nil {
 			return err
 		}
-		startTime := time.Now().String()
-		args := []string{pteMainPath, strconv.Itoa(key), string(jsonObject), startTime}
+		args := []string{pteMainPath, strconv.Itoa(key), string(jsonObject), time.Now().String()}
 		wg.Add(1)
-		go func(invokeQueryObjectIndex int, wg *sync.WaitGroup) {
+		go func(invokeQueryObjectIndex int, wg *sync.WaitGroup, errCh chan error) {
 			defer wg.Done()
 			err := i.invokeConfig(invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name, args)
 			if err != nil {
-				logger.ERROR("Failed to complete invokes/queries")
-				statusError = fmt.Errorf("Something went wrong in completing invokes/queries")
+				logger.ERROR("Failed to complete invokes/queries " + err.Error())
+				checkAndPushError(errCh)
 			}
 			blockchain, err := i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex])
 			if err != nil {
-				logger.ERROR("failed fetching metrics")
-				statusError = fmt.Errorf("Something went wrong in fetching metrics")
+				logger.ERROR("Failed fetching metrics " + err.Error())
+				checkAndPushError(errCh)
 			}
-			var blockchainHeight int
-			var transactionCount int
-			var blockHash string
-			channelBlock := blockchain[invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name]
-			for key, value := range channelBlock {
-				if blockchainHeight == 0 && transactionCount == 0 {
-					blockchainHeight = value.peerBlockchainHeight
-					transactionCount = value.peerTransactionCount
-					blockHash = value.peerBlockHash
-				} else {
-					if value.peerBlockchainHeight != blockchainHeight || value.peerTransactionCount != transactionCount || value.peerBlockHash != blockHash {
-						logger.ERROR("Peers are not in sync")
-						statusError = fmt.Errorf("Something went wrong with peer %s as blockchain height or transactions does not match up", key)
-					}
-				}
+			err = validateLedger(blockchain[invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name])
+			if err != nil {
+				logger.ERROR(err.Error())
+				checkAndPushError(errCh)
 			}
-		}(key, &wg)
+		}(key, &wg, errCh)
 	}
 	wg.Wait()
-	return statusError
+	select {
+	case err := <-errCh:
+		close(errCh)
+		return err
+	default:
+		close(errCh)
+		return nil
+	}
 }
 
-func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject) (map[string]map[string]blockchainCount, error) {
+func checkAndPushError(errCh chan error) {
+	if len(errCh) != cap(errCh) {
+		errCh <- fmt.Errorf("Failed invoking/querying chaincode")
+	}
+}
 
-	channelBlockchainCount := make(map[string]map[string]blockchainCount)
+func validateLedger(blocks map[string]BlockchainCount) error {
+	var blockchainHeight int
+	var transactionCount int
+	var blockHash string
+	for key, block := range blocks {
+		if blockchainHeight == 0 && transactionCount == 0 {
+			blockchainHeight = block.peerBlockchainHeight
+			transactionCount = block.peerTransactionCount
+			blockHash = block.peerBlockHash
+		} else if block.peerBlockchainHeight != blockchainHeight || block.peerTransactionCount != transactionCount || block.peerBlockHash != blockHash {
+			return fmt.Errorf("peer [%s] is not in sync", key)
+		}
+	}
+	return nil
+}
+
+func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject) (map[string]map[string]BlockchainCount, error) {
+
+	channelBlockchainCount := make(map[string]map[string]BlockchainCount)
 	connectionProfilePath := invokeQueryObject.ConnProfilePath
 	orgName := invokeQueryObject.ChannelOpt.OrgName
 	for index := range orgName {
@@ -287,7 +336,7 @@ func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject)
 			return nil, err
 		}
 		channelName := invokeQueryObject.ChannelOpt.Name
-		channelBlockchainCount[channelName] = make(map[string]blockchainCount)
+		channelBlockchainCount[channelName] = make(map[string]BlockchainCount)
 		for _, peerName := range connProfConfig.Channels[channelName].Peers {
 			metricsURL, err := url.Parse(connProfConfig.Peers[peerName].MetricsURL)
 			if err != nil {
@@ -319,7 +368,7 @@ func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject)
 			}
 			peerAddress := peerURL.Host
 			blockHash, _ := i.fetchBlockHash(peerAddress, orgName[index], peerName, channelName, connProfilePath, invokeQueryObject.TLS)
-			channelBlockchainCount[channelName][peerName] = blockchainCount{
+			channelBlockchainCount[channelName][peerName] = BlockchainCount{
 				peerBlockchainHeight: num,
 				peerTransactionCount: count,
 				peerBlockHash:        blockHash,

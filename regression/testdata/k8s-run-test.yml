@@ -46,7 +46,7 @@ instantiateChaincode:
 invokes:
   - channelName: testorgschannel0
     name: mapcc
-    targetPeers: OrgAnchor
+    targetPeers: AllPeers
     nProcPerOrg: 1
     nRequest: 0
     runDur: 18000
@@ -56,6 +56,14 @@ invokes:
         options:
           constFreq: 100
           devFreq: 0
+    peerFailover: true
+    ordererFailover: true
+    peerOptions:
+      method: RoundRobin
+      list: targetPeers
+    ordererOptions:
+      method: RoundRobin
+      nOrderers: 5
     queryCheck: 10
     eventOpt:
       type: FilteredBlock
