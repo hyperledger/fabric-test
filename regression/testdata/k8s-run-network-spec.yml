@@ -2,8 +2,11 @@
 #!
 #! SPDX-License-Identifier: Apache-2.0
 ---
-dockerOrg: hyperledger
-dockerTag: 2.1
+dockerOrg: hyperledger-fabric.jfrog.io
+dockerTag: amd64-2.2-stable
+dockerImages:
+  ca: hyperledger/fabric-ca
+
 dbType: couchdb
 peerFabricLoggingSpec: error
 ordererFabricLoggingSpec: error
@@ -58,8 +61,11 @@ applicationCapabilities: V2_0
 numChannels: 1
 
 k8s:
+  namespace: fabric-system-test
   serviceType: NodePort
   dataPersistence: true
+  accessMode:
+    - ReadWriteMany
   storageClass: default
   storageCapacity: 100Gi
   resources:
