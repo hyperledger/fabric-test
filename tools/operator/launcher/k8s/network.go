@@ -99,7 +99,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				container = corev1.Container{
 					Name:      "couchdb",
 					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:     fmt.Sprintf("hyperledger/fabric-couchdb"),
+					Image:     "couchdb:2.3",
 				}
 				if nsConfig.K8s.DataPersistence == "true" || nsConfig.K8s.DataPersistence == "local" {
 					volumeMount := corev1.VolumeMount{MountPath: "/opt/couchdb/data", Name: "couchdb-data-storage"}
