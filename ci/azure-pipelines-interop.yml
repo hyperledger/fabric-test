@@ -242,7 +242,6 @@ stages:
   - stage: Publish
     dependsOn:
       - Functional
-      - Interop
     displayName: Publish
     pool:
       vmImage: ubuntu-18.04
