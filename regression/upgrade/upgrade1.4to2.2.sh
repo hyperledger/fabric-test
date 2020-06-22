@@ -1,8 +1,7 @@
 #!/bin/bash
 
 Tag14=1.4-stable
-Tag20=2.0-stable
-Tag21=2.1-stable
+Tag22=2.2-stable
 
 CurrentDirectory=$(cd `dirname $0` && pwd)
 FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
@@ -62,52 +61,35 @@ executeAction $testdataDir/smoke-test-input.yml invoke
 
 cd $FabricTestDir
 echo "Checking out to master branch"
-fabrictestCheckout release-2.0
-
-echo "Installing node modules"
-make npm-init
-
-echo "Fabric Binaries"
-pullFabricBinaries $Tag20
-
-cd $OperatorDir
-echo "Upgrading fabric network using operator"
-executeAction $testdataDir/basic-network-spec.yml upgradeNetwork
-
-echo "Invoking transactions"
-executeAction $testdataDir/smoke-test-input.yml invoke
-
-echo "Upgrading fabric network using operator"
-executeAction $testdataDir/basic-network-spec.yml updateCapability
-
-echo "Upgrading fabric network using operator"
-executeAction $testdataDir/basic-network-spec.yml updatePolicy
-
-echo "Upgrading fabric network using operator"
-executeAction $testdataDir/smoke-network-spec.yml upgradeNetwork
-
-echo "Installing chaincode using lifecycle"
-executeAction $testdataDir/basic-test-input.yml install
-
-echo "Committing chaincode using lifecycle"
-executeAction $testdataDir/basic-test-input.yml instantiate
-
-echo "Invoking transactions"
-executeAction $testdataDir/basic-test-input.yml invoke
-
-cd $FabricTestDir
-echo "Checking out to master branch"
 fabrictestCheckout master
 
 echo "Installing node modules"
 make npm-init
 
 echo "Fabric Binaries"
-pullFabricBinaries $Tag21
+pullFabricBinaries $Tag22
 
 cd $OperatorDir
-echo "Upgrading fabric network using operator"
+echo "Upgrading fabric network using operator for 1 organization"
 executeAction $testdataDir/basic-network-spec.yml upgradeNetwork
+
+echo "Invoking transactions"
+executeAction $testdataDir/smoke-test-input.yml invoke
+
+echo "Updating fabric network capabilities using operator"
+executeAction $testdataDir/basic-network-spec.yml updateCapability
+
+echo "Updating fabric network policies using operator"
+executeAction $testdataDir/basic-network-spec.yml updatePolicy
+
+echo "Upgrading fabric network using operator for 2 organizations"
+executeAction $testdataDir/smoke-network-spec.yml upgradeNetwork
+
+echo "Installing chaincode using lifecycle"
+executeAction $testdataDir/smoke-test-input.yml install
+
+echo "Committing chaincode using lifecycle"
+executeAction $testdataDir/smoke-test-input.yml instantiate
 
 echo "Invoking transactions"
 executeAction $testdataDir/smoke-test-input.yml invoke
