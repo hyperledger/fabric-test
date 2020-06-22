@@ -62,13 +62,17 @@ func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 		logger.WARNING("Unable to delete all active endpoints")
 	}
 
-	err = networkclient.UpgradeDB(config, "")
+	d = DockerCompose{ConfigPath: configPath, Action: []string{"up", "-d"}}
+	_, err = networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {
 		return err
 	}
+	return nil
+}
 
-	d = DockerCompose{ConfigPath: configPath, Action: []string{"up", "-d"}}
-	_, err = networkclient.ExecuteCommand("docker-compose", d.Args(), true)
+//UpgradeDB -- upgrade database
+func (d DockerCompose) UpgradeDB(config networkspec.Config) error {
+	err := networkclient.UpgradeDB(config, "")
 	if err != nil {
 		return err
 	}
@@ -191,6 +195,12 @@ func (d DockerCompose) DockerNetwork(action string) error {
 		err = d.UpgradeLocalNetwork(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to upgrade local fabric network")
+			return err
+		}
+	case "upgradeDB":
+		err = d.UpgradeDB(d.Config)
+		if err != nil {
+			logger.ERROR("Failed to upgrade database during upgrade process")
 			return err
 		}
 	case "updateCapability":

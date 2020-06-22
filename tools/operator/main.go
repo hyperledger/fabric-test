@@ -46,7 +46,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	var err error
 	var inputPath string
 	var config networkspec.Config
-	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync", "updateCapability", "updatePolicy"}
+	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync", "updateCapability", "updatePolicy", "upgradeDB"}
 	if contains(actions, action) {
 		contents, _ := ioutil.ReadFile(inputFilePath)
 		contents = append([]byte("#@data/values \n"), contents...)
@@ -77,6 +77,12 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 		err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
 		if err != nil {
 			logger.ERROR("Failed to upgrade network")
+			return err
+		}
+	case "upgradeDB":
+		err = launcher.Launcher("upgradeDB", env, kubeConfigPath, inputPath)
+		if err != nil {
+			logger.ERROR("Failed to upgrade network database")
 			return err
 		}
 	case "updateCapability":

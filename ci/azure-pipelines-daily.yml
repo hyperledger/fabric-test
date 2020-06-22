@@ -89,3 +89,19 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'regression/**/results*.xml'
+
+  - stage: Upgrade
+    dependsOn: []
+    displayName: Upgrade Network
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: Upgrade
+        displayName: Run Scenario
+        steps:
+          - checkout: self
+            path: 'go/src/github.com/hyperledger/fabric-test'
+            displayName: Checkout Fabric Test Code
+          - template: templates/install_deps.yml
+          - script: make upgrade
+            displayName: Run Test
