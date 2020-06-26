@@ -128,7 +128,7 @@ stages:
           - script: make upgrade2.2
             displayName: Run Test
 
-  - stage: Upgrade2.2
+  - stage: Upgrade2_2
     dependsOn: []
     displayName: Upgrade Network From 1.4 Directly to 2.2
     pool:
