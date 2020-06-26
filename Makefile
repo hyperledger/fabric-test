@@ -24,8 +24,8 @@ regression/barebones_caliper: pre-reqs caliper-init
 regression/%: pre-reqs
 	cd ${@} && ginkgo -v
 
-upgrade:
-	cd regression/upgrade && ./upgrade2.2.sh && ./upgrade1.4to2.2.sh
+upgrade%:
+	cd regression/upgrade && ./${@}.sh
 
 .PHONY: pre-reqs
 pre-reqs: npm-init pull-binaries-fabric gotools
