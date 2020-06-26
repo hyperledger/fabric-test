@@ -11,6 +11,8 @@ organizations:
 installChaincode:
   - name: samplejava
     version: v1
+    sdk: cli
+    targetPeers: peer0-org1,peer0-org2,peer0-org3,peer0-org4
     path: github.com/hyperledger/fabric-test/chaincodes/samplecc/java
     organizations: org1,org2,org3,org4
     language: java
@@ -21,8 +23,10 @@ instantiateChaincode:
     numChannels: 5
     name: samplejava
     version: v1
+    sdk: cli
     args: ""
-    organizations: org1
+    targetPeers: peer0-org1,peer0-org2,peer0-org3,peer0-org4
+    organizations: org1,org2,org2,org4
     endorsementPolicy: ""
     collectionPath: ""
 

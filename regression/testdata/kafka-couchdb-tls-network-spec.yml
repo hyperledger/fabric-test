@@ -4,6 +4,8 @@
 ---
 dockerOrg: hyperledger-fabric.jfrog.io
 dockerTag: amd64-2.2-stable
+dockerImages:
+  ca: hyperledger/fabric-ca
 
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
@@ -82,7 +84,7 @@ ordererCapabilities: V2_0
 
 channelCapabilities: V2_0
 
-applicationCapabilities: V1_4_2
+applicationCapabilities: V2_0
 
 #! Create the channel creation transactions; every org will be included in every channel
 #! This used testorgschannel as the prefix and channels are used like testorgschannel0,
@@ -91,6 +93,7 @@ applicationCapabilities: V1_4_2
 numChannels: 5
 
 k8s:
+  namespace: fabric-system-test
   serviceType: NodePort
   #! dataPersistence is used to store the data from fabric containers
   #! It can take values of true, false and local
@@ -99,6 +102,8 @@ k8s:
   #! When local is used, hostPath will be used to store the data from fabric containers
   #! to worker nodes on which pods are running.
   dataPersistence: true
+  accessMode:
+    - ReadWriteMany
   storageClass: ibmc-file-gold
   storageCapacity: 20Gi
 
