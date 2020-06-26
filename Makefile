@@ -56,8 +56,9 @@ pull-binaries-fabric-ca:
 
 .PHONY: caliper-init
 caliper-init:
-	npm install -g --only=prod @hyperledger/caliper-cli@0.3.1
-	caliper bind --caliper-bind-sut fabric:latest --caliper-bind-args=-g
+	cd regression/barebones_caliper && npm init -y
+	cd regression/barebones_caliper && npm install --only=prod @hyperledger/caliper-cli@0.3.1
+	cd regression/barebones_caliper && npx caliper bind --caliper-bind-sut fabric:latest
 
 build/%:
 	./ci/scripts/interop/${@}.sh
