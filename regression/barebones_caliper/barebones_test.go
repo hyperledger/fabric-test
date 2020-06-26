@@ -6,14 +6,14 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
 var _ = Describe("Barebones Caliper Test", func() {
 
 	var (
-		inputSpecPath       string
+		inputSpecPath string
 	)
 
 	It("Running barebones_caliper Test)", func() {
@@ -44,13 +44,19 @@ var _ = Describe("Barebones Caliper Test", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		By("5)Sending Caliper Invokes and Queries")
-		benchmarkConfig := "benchmarks/config_barebones.yaml"
-		networkConfig := "caliper-connection-profile/caliper_connection_profile_org1.yaml"
-		benchmarkConfigOpt := "--caliper-benchconfig"
-		networkConfigOpt := "--caliper-networkconfig"
-                caliperArgs := []string{"launch", "master", "--caliper-workspace", "./", benchmarkConfigOpt, benchmarkConfig, networkConfigOpt, networkConfig, "--caliper-flow-only-test"}
-		networkclient.ExecuteCommand("caliper", caliperArgs, true)
-
+		caliperArgs := []string{
+			"caliper",
+			"launch",
+			"master",
+			"--caliper-workspace",
+			".",
+			"--caliper-benchconfig",
+			"benchmarks/config_barebones.yaml",
+			"--caliper-networkconfig",
+			"caliper-connection-profile/caliper_connection_profile_org1.yaml",
+			"--caliper-flow-only-test",
+		}
+		networkclient.ExecuteCommand("npx", caliperArgs, true)
 
 	})
 })

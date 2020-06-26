@@ -61,7 +61,7 @@ stages:
           - checkout: self
             path: 'go/src/github.com/hyperledger/fabric-test'
             displayName: Checkout Fabric Test Code
-          - template: templates/install_deps.yml
+          - template: templates/install_deps_caliper.yml
           - script: make regression/barebones_caliper
             displayName: Run Test
           - task: PublishTestResults@2
