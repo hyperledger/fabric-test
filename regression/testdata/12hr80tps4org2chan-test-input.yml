@@ -21,19 +21,24 @@ joinChannel:
 
 installChaincode:
   - name: samplecc
+    sdk: cli
     version: v1
     path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
     organizations: org1,org2,org3,org4
+    targetPeers: peer0-org1,peer1-org1,peer0-org2,peer1-org2,peer0-org3,peer1-org3,peer0-org4,peer1-org4
     language: golang
     metadataPath: ""
 
 instantiateChaincode:
   - channelPrefix: testorgschannel
     numChannels: 2
+    sdk: cli
     name: samplecc
     version: v1
+    sequence: 1
     args: ""
     organizations: org1
+    targetPeers: peer0-org1,peer1-org1
     endorsementPolicy: ""
     collectionPath: ""
 
