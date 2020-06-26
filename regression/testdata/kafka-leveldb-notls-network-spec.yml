@@ -4,6 +4,8 @@
 ---
 dockerOrg: hyperledger-fabric.jfrog.io
 dockerTag: amd64-2.2-stable
+dockerImages:
+  ca: hyperledger/fabric-ca
 
 #! peer database ledger type (couchdb, goleveldb)
 dbType: goleveldb
@@ -17,7 +19,7 @@ tls: false
 metrics: true
 #! true - enable gossip and dynamic leader election
 #! false - disable gossip and set all peers as org leaders
-gossipEnable: true
+gossipEnable: false
 #! enable node ou's in fabric network (true/false)
 enableNodeOUs: true
 
@@ -82,7 +84,7 @@ ordererCapabilities: V2_0
 
 channelCapabilities: V2_0
 
-applicationCapabilities: V1_4_2
+applicationCapabilities: V2_0
 
 #! Create the channel creation transactions; every org will be included in every channel
 #! This used testorgschannel as the prefix and channels are used like testorgschannel0,

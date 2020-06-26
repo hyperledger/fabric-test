@@ -12,7 +12,7 @@ peerFabricLoggingSpec: error
 ordererFabricLoggingSpec: error
 tls: true
 metrics: true
-gossipEnable: true
+gossipEnable: false
 enableNodeOUs: true
 artifactsLocation: .
 
