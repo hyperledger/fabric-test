@@ -112,7 +112,7 @@ stages:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'regression/**/results*.xml'
 
-  - stage: Upgrade1.4to2.2
+  - stage: Upgrade1_4to2_2
     dependsOn: []
     displayName: Upgrade Network
     pool:
