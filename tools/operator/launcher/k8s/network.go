@@ -99,7 +99,17 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				container = corev1.Container{
 					Name:      "couchdb",
 					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:     "couchdb:2.3",
+					Image:     "couchdb:3.1",
+					Env: []corev1.EnvVar{
+						{
+							Name:  "COUCHDB_USER",
+							Value: "admin",
+						},
+						{
+							Name:  "COUCHDB_PASSWORD",
+							Value: "adminpw",
+						},
+					},
 				}
 				if nsConfig.K8s.DataPersistence == "true" || nsConfig.K8s.DataPersistence == "local" {
 					volumeMount := corev1.VolumeMount{MountPath: "/opt/couchdb/data", Name: "couchdb-data-storage"}

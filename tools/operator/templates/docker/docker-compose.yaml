@@ -35,7 +35,8 @@
 #@     org = config.peerOrganizations[i]
 #@     for j in range(0, org.numPeers):
 #@       container_name = "couchdb-peer{}-{}".format(j, org.name)
-#@       services[container_name] = {"container_name":container_name, "image":"couchdb:2.3", "ports":["{}:5984".format(couchDBUniquePort)]}
+#@       env = ["COUCHDB_USER=admin", "COUCHDB_PASSWORD=adminpw"]
+#@       services[container_name] = {"container_name":container_name, "environment":env, "image":"couchdb:3.1", "ports":["{}:5984".format(couchDBUniquePort)]}
 #@       couchDBUniquePort += 1
 #@     end
 #@   end
@@ -172,6 +173,8 @@
 #@     org = config.peerOrganizations[i]
 #@     for j in range(0, org.numPeers):
 #@       env = ["CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock", "FABRIC_LOGGING_SPEC={}".format(config.peerFabricLoggingSpec), "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=configfiles_default"]
+#@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin")
+#@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw")
 #@       if config.gossipEnable == True:
 #@         env.append("CORE_PEER_GOSSIP_STATE_ENABLED=true")
 #@         env.append("CORE_PEER_GOSSIP_ORGLEADER=false")
