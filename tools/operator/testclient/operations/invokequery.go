@@ -338,40 +338,42 @@ func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject)
 		channelName := invokeQueryObject.ChannelOpt.Name
 		channelBlockchainCount[channelName] = make(map[string]BlockchainCount)
 		for _, peerName := range connProfConfig.Channels[channelName].Peers {
-			metricsURL, err := url.Parse(connProfConfig.Peers[peerName].MetricsURL)
-			if err != nil {
-				logger.ERROR("Failed to get peer url from connection profile")
-				return nil, err
-			}
-			resp, err := http.Get(fmt.Sprintf("%s/metrics", metricsURL))
-			if err != nil {
-				logger.ERROR("Error while hitting the endpoint")
-				return nil, err
-			}
-			defer resp.Body.Close()
-			bodyBytes, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-			metrics := string(bodyBytes)
-			blockHeight := strings.Split(metrics, fmt.Sprintf(`ledger_blockchain_height{channel="%s"}`, channelName))
-			height := strings.Split(blockHeight[1], "\n")[0]
-			num, _ := strconv.Atoi(strings.TrimSpace(height))
-			regex := regexp.MustCompile(fmt.Sprintf(`ledger_transaction_count{chaincode="%s:[0-9A-Za-z]+",channel="%s",transaction_type="ENDORSER_TRANSACTION",validation_code="VALID"}`, invokeQueryObject.ChaincodeID, channelName))
-			transactionCount := strings.Split(metrics, fmt.Sprintf(`%s`, regex.FindString(metrics)))
-			trxnCount := strings.Split(transactionCount[1], "\n")[0]
-			count, _ := strconv.Atoi(strings.TrimSpace(trxnCount))
-			peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
-			if err != nil {
-				logger.ERROR("Failed to get peer url from connection profile")
-				return nil, err
-			}
-			peerAddress := peerURL.Host
-			blockHash, _ := i.fetchBlockHash(peerAddress, orgName[index], peerName, channelName, connProfilePath, invokeQueryObject.TLS)
-			channelBlockchainCount[channelName][peerName] = BlockchainCount{
-				peerBlockchainHeight: num,
-				peerTransactionCount: count,
-				peerBlockHash:        blockHash,
+			if connProfConfig.Peers[peerName].MetricsURL != "" {
+				metricsURL, err := url.Parse(connProfConfig.Peers[peerName].MetricsURL)
+				if err != nil {
+					logger.ERROR("Failed to get peer url from connection profile")
+					return nil, err
+				}
+				resp, err := http.Get(fmt.Sprintf("%s/metrics", metricsURL))
+				if err != nil {
+					logger.ERROR("Error while hitting the endpoint")
+					return nil, err
+				}
+				defer resp.Body.Close()
+				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					return nil, err
+				}
+				metrics := string(bodyBytes)
+				blockHeight := strings.Split(metrics, fmt.Sprintf(`ledger_blockchain_height{channel="%s"}`, channelName))
+				height := strings.Split(blockHeight[1], "\n")[0]
+				num, _ := strconv.Atoi(strings.TrimSpace(height))
+				regex := regexp.MustCompile(fmt.Sprintf(`ledger_transaction_count{chaincode="%s:[0-9A-Za-z]+",channel="%s",transaction_type="ENDORSER_TRANSACTION",validation_code="VALID"}`, invokeQueryObject.ChaincodeID, channelName))
+				transactionCount := strings.Split(metrics, fmt.Sprintf(`%s`, regex.FindString(metrics)))
+				trxnCount := strings.Split(transactionCount[1], "\n")[0]
+				count, _ := strconv.Atoi(strings.TrimSpace(trxnCount))
+				peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
+				if err != nil {
+					logger.ERROR("Failed to get peer url from connection profile")
+					return nil, err
+				}
+				peerAddress := peerURL.Host
+				blockHash, _ := i.fetchBlockHash(peerAddress, orgName[index], peerName, channelName, connProfilePath, invokeQueryObject.TLS)
+				channelBlockchainCount[channelName][peerName] = BlockchainCount{
+					peerBlockchainHeight: num,
+					peerTransactionCount: count,
+					peerBlockHash:        blockHash,
+				}
 			}
 		}
 	}
