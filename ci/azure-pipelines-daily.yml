@@ -112,13 +112,13 @@ stages:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'regression/**/results*.xml'
 
-  - stage: Upgrade1_4to2_2
+  - stage: Upgrade2_2
     dependsOn: []
     displayName: Upgrade Network
     pool:
       vmImage: ubuntu-18.04
     jobs:
-      - job: Upgrade
+      - job: Upgrade2_2
         displayName: Run Scenario
         steps:
           - checkout: self
@@ -128,13 +128,13 @@ stages:
           - script: make upgrade2.2
             displayName: Run Test
 
-  - stage: Upgrade2_2
+  - stage: Upgrade1_4to2_2
     dependsOn: []
     displayName: Upgrade Network From 1.4 Directly to 2.2
     pool:
       vmImage: ubuntu-18.04
     jobs:
-      - job: Upgrade1.4to2.2
+      - job: Upgrade1_4to2_2
         displayName: Run Scenario
         steps:
           - checkout: self
