@@ -10,8 +10,7 @@ cd "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-node"
 # Package source code prior to polluting the directory
 tar -czvf "${WORKING_DIRECTORY}/nodeenv-source.tgz" .
 
-node common/scripts/install-run-rush.js install
-node common/scripts/install-run-rush.js rebuild
+docker build -t hyperledger/fabric-nodeenv:latest docker/fabric-nodeenv
 
 # Package docker artifact and stage
 docker save -o "${WORKING_DIRECTORY}/nodeenv-docker.tgz" hyperledger/fabric-nodeenv:latest
