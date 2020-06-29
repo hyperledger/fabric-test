@@ -1,0 +1,89 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+name: Fabric-Test-K8s-Longrun-$(Date:yyyyMMdd)
+trigger: none
+pr: none
+schedules:
+  - cron: "0 11 * * *"
+    displayName: 'Fabric Test K8s Longrun Job'
+    branches:
+      include:
+        - master
+    always: true
+
+variables:
+  - group: artifactory
+  - name: FABRIC_CFG_PATH
+    value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config
+  - name: GO_PATH
+    value: $(Agent.BuildDirectory)/go
+  - name: PATH
+    value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  - name: GO_VER
+    value: 1.14.2
+  - name: NODE_VER
+    value: 12.15.0
+  - name: GO_BIN
+    value: $(Agent.BuildDirectory)/go/bin
+
+stages:
+  - stage: Longrun
+    dependsOn: []
+    displayName: Longrun
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: Invokes
+        pool:
+          vmImage: ubuntu-18.04
+        timeoutInMinutes: 360
+        steps:
+        - checkout: self
+          path: 'go/src/github.com/hyperledger/fabric-test'
+          displayName: Checkout Fabric Test Code
+        - template: templates/install_deps.yml
+        - script: |
+            cd tools/operator
+            ARTIFACTORY_URL=https://hyperledger.jfrog.io/artifactory/fabric-test-artifacts/community-longrun.tar.gz
+            curl -sS -u ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD} "${ARTIFACTORY_URL}" -o binaries.tgz
+            tar -xzvf binaries.tgz
+          env:
+            ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+            ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+          displayName: Download network artifacts
+        - script: make npm-init
+          displayName: Install NPM Packages
+        - script: |
+            cd tools/operator
+            go run main.go -i ../../regression/testdata/k8s-run-test.yml -a invoke
+          displayName: Invokes
+  - stage: Chaos
+    dependsOn: []
+    displayName: Chaos
+    pool:
+      vmImage: ubuntu-18.04
+    jobs:
+      - job: Invokes
+        pool:
+          vmImage: ubuntu-18.04
+        timeoutInMinutes: 360
+        steps:
+        - template: templates/install_deps.yml
+        - script: |
+            cd tools/operator
+            ARTIFACTORY_URL=https://hyperledger.jfrog.io/artifactory/fabric-test-artifacts/community-chaos.tar.gz
+            curl -sS -u ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_PASSWORD} "${ARTIFACTORY_URL}" -o binaries.tgz
+            tar -xzvf binaries.tgz
+          env:
+            ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+            ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+          displayName: Download network artifacts
+        - script: make npm-init
+          displayName: Install NPM Packages
+        - script: |
+            cd tools/operator
+            go run main.go -i ../../regression/testdata/k8s-run-test.yml -a invoke
+          displayName: Invokes
