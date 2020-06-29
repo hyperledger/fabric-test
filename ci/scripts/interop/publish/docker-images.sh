@@ -9,4 +9,7 @@ docker login -u "${ARTIFACTORY_USERNAME}" -p "${ARTIFACTORY_PASSWORD}" hyperledg
 for image in baseos peer orderer ccenv tools ca javaenv nodeenv; do
     docker tag "hyperledger/fabric-${image}" "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${RELEASE}"
     docker push "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-${RELEASE}"
+
+    docker tag "hyperledger/fabric-${image}" "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-latest"
+    docker push "hyperledger-fabric.jfrog.io/fabric-${image}:amd64-latest"
 done
