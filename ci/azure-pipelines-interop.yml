@@ -33,7 +33,7 @@ variables:
   - name: PATH
     value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   - name: RELEASE
-    value: 2.2-stable
+    value: 2.3-stable
   - name: WORKING_DIRECTORY
     value: $(System.DefaultWorkingDirectory)
 
