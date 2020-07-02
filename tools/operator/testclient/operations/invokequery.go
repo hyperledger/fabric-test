@@ -262,6 +262,7 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 	var wg sync.WaitGroup
 	pteMainPath := paths.PTEPath()
 	errCh := make(chan error, 1)
+	channelBlockchainCount := make(map[string]map[string]BlockchainCount)
 	for key := range invokeQueryObjects {
 		jsonObject, err := json.Marshal(invokeQueryObjects[key])
 		if err != nil {
@@ -276,19 +277,23 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 				logger.ERROR("Failed to complete invokes/queries " + err.Error())
 				checkAndPushError(errCh)
 			}
-			blockchain, err := i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex])
+			channelName := invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name
+			channelBlockchainCount[channelName] = make(map[string]BlockchainCount)
+			channelBlockchainCount[channelName], err = i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex], channelBlockchainCount[channelName])
 			if err != nil {
 				logger.ERROR("Failed fetching metrics " + err.Error())
-				checkAndPushError(errCh)
-			}
-			err = validateLedger(blockchain[invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name])
-			if err != nil {
-				logger.ERROR(err.Error())
 				checkAndPushError(errCh)
 			}
 		}(key, &wg, errCh)
 	}
 	wg.Wait()
+	for channelName := range channelBlockchainCount {
+		err := validateLedger(channelBlockchainCount[channelName])
+		if err != nil {
+			logger.ERROR(err.Error())
+			checkAndPushError(errCh)
+		}
+	}
 	select {
 	case err := <-errCh:
 		close(errCh)
@@ -315,17 +320,18 @@ func validateLedger(blocks map[string]BlockchainCount) error {
 			transactionCount = block.peerTransactionCount
 			blockHash = block.peerBlockHash
 		} else if block.peerBlockchainHeight != blockchainHeight || block.peerTransactionCount != transactionCount || block.peerBlockHash != blockHash {
+			logger.ERROR("peer is not in sync ", key)
 			return fmt.Errorf("peer [%s] is not in sync", key)
 		}
 	}
 	return nil
 }
 
-func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject) (map[string]map[string]BlockchainCount, error) {
+func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject, channelBlockchainCount map[string]BlockchainCount) (map[string]BlockchainCount, error) {
 
-	channelBlockchainCount := make(map[string]map[string]BlockchainCount)
 	connectionProfilePath := invokeQueryObject.ConnProfilePath
 	orgName := invokeQueryObject.ChannelOpt.OrgName
+	channelName := invokeQueryObject.ChannelOpt.Name
 	for index := range orgName {
 		connProfilePath := fmt.Sprintf("%s/connection_profile_%s.yaml", connectionProfilePath, orgName[index])
 		if strings.Contains(connectionProfilePath, ".yaml") || strings.Contains(connectionProfilePath, ".json") {
@@ -335,8 +341,6 @@ func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject)
 		if err != nil {
 			return nil, err
 		}
-		channelName := invokeQueryObject.ChannelOpt.Name
-		channelBlockchainCount[channelName] = make(map[string]BlockchainCount)
 		for _, peerName := range connProfConfig.Channels[channelName].Peers {
 			if connProfConfig.Peers[peerName].MetricsURL != "" {
 				metricsURL, err := url.Parse(connProfConfig.Peers[peerName].MetricsURL)
@@ -369,7 +373,7 @@ func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject)
 				}
 				peerAddress := peerURL.Host
 				blockHash, _ := i.fetchBlockHash(peerAddress, orgName[index], peerName, channelName, connProfilePath, invokeQueryObject.TLS)
-				channelBlockchainCount[channelName][peerName] = BlockchainCount{
+				channelBlockchainCount[peerName] = BlockchainCount{
 					peerBlockchainHeight: num,
 					peerTransactionCount: count,
 					peerBlockHash:        blockHash,
