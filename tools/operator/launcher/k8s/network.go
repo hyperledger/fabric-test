@@ -14,7 +14,7 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	//"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
 //K8s -
@@ -66,6 +66,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 			container := corev1.Container{
 				Name:            "dind",
 				Image:           "docker:dind",
+				ImagePullPolicy: corev1.PullPolicy("Always"),
 				Args:            []string{"dockerd", "-H tcp://0.0.0.0:2375", "-H unix://var/run/docker.sock"},
 				SecurityContext: &corev1.SecurityContext{Privileged: &privileged},
 				Resources:       k8s.resources(nsConfig.K8s.Resources.Dind),
@@ -77,6 +78,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				Args:      []string{"node", "start"},
 				Resources: k8s.resources(nsConfig.K8s.Resources.Peers),
 				Image:     peerImage,
+				ImagePullPolicy: corev1.PullPolicy("Always"),
 				Env: []corev1.EnvVar{
 					{Name: "FABRIC_LOGGING_SPEC", Value: nsConfig.PeerFabricLoggingSpec},
 				},
@@ -100,6 +102,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 					Name:      "couchdb",
 					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
 					Image:     "couchdb:3.1",
+					ImagePullPolicy: corev1.PullPolicy("Always"),
 					Env: []corev1.EnvVar{
 						{
 							Name:  "COUCHDB_USER",
@@ -153,6 +156,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				Command:   []string{"orderer"},
 				Resources: k8s.resources(nsConfig.K8s.Resources.Orderers),
 				Image:     ordererImage,
+				ImagePullPolicy: corev1.PullPolicy("Always"),
 				Env: []corev1.EnvVar{
 					{Name: "FABRIC_LOGGING_SPEC", Value: nsConfig.OrdererFabricLoggingSpec},
 				},
@@ -208,6 +212,7 @@ func (k8s K8s) caLaunchConfig(id int, orgName, caImage string) LaunchConfig {
 			{Name: "FABRIC_CA_SERVER_CA_NAME", Value: fmt.Sprintf("ca%d-%s", id, orgName)},
 		},
 		Image: caImage,
+		ImagePullPolicy: corev1.PullPolicy("Always"),
 		Name:  "ca",
 		VolumeMounts: []corev1.VolumeMount{{
 			MountPath: "/etc/hyperledger/fabric/artifacts/",
@@ -403,7 +408,7 @@ func (k8s K8s) volumesList(componentType, orgName, name, dataPersistence string,
 //GenerateConfigurationFiles - to generate all the configuration files
 func (k8s K8s) GenerateConfigurationFiles(upgrade bool) error {
 
-	network := nl.Network{TemplatesDir: paths.TemplateFilePath("k8s")}
+	network := nl.Network{}
 	err := network.GenerateConfigurationFiles(upgrade)
 	if err != nil {
 		return err

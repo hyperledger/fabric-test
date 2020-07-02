@@ -394,6 +394,8 @@ func GenerateCorePeerConfig(name, orgName, mspID, artifactsLocation string, port
 	coreConfig.Peer.LocalMSPID = mspID
 	coreConfig.Peer.Gossip.Bootstrap = fmt.Sprintf("%s:%d", name, port)
 	coreConfig.Ledger.State.CouchDBConfig.CouchDBAddress = fmt.Sprintf("couchdb-%s:5984", name)
+	coreConfig.Ledger.State.CouchDBConfig.Username = "admin"
+	coreConfig.Ledger.State.CouchDBConfig.Password = "adminpw"
 	coreConfig.Operations.ListenAddress = fmt.Sprintf(":%d", metricsPort)
 	d, err := yaml.Marshal(&coreConfig)
 	if err != nil {
