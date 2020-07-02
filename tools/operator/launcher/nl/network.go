@@ -49,14 +49,18 @@ func (n Network) GetConfigData(networkSpecPath string) (networkspec.Config, erro
 //GenerateConfigurationFiles - to generate all the configuration files
 func (n Network) GenerateConfigurationFiles(upgrade bool) error {
 
+	var inputArgs []string
 	configtxPath := paths.TemplateFilePath("configtx")
 	cryptoConfigPath := paths.TemplateFilePath("crypto-config")
 	inputFilePath := paths.TemplateFilePath("input")
 	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir())
 	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
-	inputArgs := []string{configtxPath, cryptoConfigPath, n.TemplatesDir}
-	if upgrade {
-		inputArgs = []string{n.TemplatesDir}
+	inputArgs = []string{configtxPath, cryptoConfigPath}
+	if n.TemplatesDir != "" {
+		inputArgs = append(inputArgs, n.TemplatesDir)
+		if upgrade {
+			inputArgs = []string{n.TemplatesDir}
+		}
 	}
 	yttObject := ytt.YTT{InputPath: inputFilePath, OutputPath: configFilesPath}
 	_, err := networkclient.ExecuteCommand(yttPath, yttObject.Args(inputArgs), true)
