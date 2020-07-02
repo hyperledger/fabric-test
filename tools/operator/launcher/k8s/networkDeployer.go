@@ -96,11 +96,11 @@ func (k8s K8s) CreateStatefulset(launchConfig LaunchConfig, nsConfig networkspec
 		},
 	}
 
-	if nsConfig.Metrics {
+	if nsConfig.Metrics && launchConfig.Type != "ca" && launchConfig.Type != "couchdb" {
 		annotations := map[string]string{
 			"prometheus.io/scrape": "true",
 			"prometheus.io/path":   "metrics",
-			"prometheus.io/port":   "9443",
+			"prometheus.io/port":   fmt.Sprintf(":%d", launchConfig.Ports[1]),
 			"prometheus.io/scheme": "http",
 		}
 		statefulsetRes.Spec.Template.ObjectMeta.Annotations = annotations
