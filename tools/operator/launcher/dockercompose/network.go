@@ -61,7 +61,10 @@ func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 	if err != nil {
 		logger.WARNING("Unable to delete all active endpoints")
 	}
-
+	err = networkclient.UpgradeDB(config, "")
+	if err != nil {
+		return err
+	}
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"up", "-d"}}
 	_, err = networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {

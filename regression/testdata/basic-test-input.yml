@@ -44,7 +44,7 @@ instantiateChaincode:
     targetPeers: peer0-org1
     args: ""
     organizations: org1
-    endorsementPolicy: 1of(org1)
+    endorsementPolicy: "OR ('Org1ExampleCom.peer','Org2ExampleCom.peer')"
     collectionPath: ""
 
   - channelName: testorgschannel0
@@ -55,7 +55,7 @@ instantiateChaincode:
     targetPeers: peer0-org1
     args: ""
     organizations: org1
-    endorsementPolicy: 1of(org1)
+    endorsementPolicy: "OR ('Org1ExampleCom.peer','Org2ExampleCom.peer')"
     collectionPath: ../../regression/testdata/map-private-collections.json
 
 invokes:
