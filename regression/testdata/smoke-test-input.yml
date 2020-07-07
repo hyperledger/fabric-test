@@ -56,7 +56,7 @@ instantiateChaincode:
     args: ""
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
-    endorsementPolicy: 2of(org1,org2)
+    endorsementPolicy: "AND ('Org1ExampleCom.peer','Org2ExampleCom.peer')"
     collectionPath: ""
 
 upgradeChaincode:
@@ -68,7 +68,7 @@ upgradeChaincode:
     args: ""
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
-    endorsementPolicy: 1of(org1,org2)
+    endorsementPolicy: "OR ('Org1ExampleCom.peer','Org2ExampleCom.peer')"
     collectionPath: ""
 
 invokes:
