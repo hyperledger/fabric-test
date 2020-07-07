@@ -48,8 +48,9 @@ type TimeOutOptions struct {
 
 //EndorsementPolicy --
 type EndorsementPolicy struct {
-	Identities []Identity          `json:"identities,omitempty"`
-	Policy     map[string][]Policy `json:"policy,omitempty"`
+	Identities      []Identity          `json:"identities,omitempty"`
+	Policy          map[string][]Policy `json:"policy,omitempty"`
+	SignaturePolicy string              `json:"signaturePolicy,omitempty"`
 }
 
 //Policy --
@@ -173,12 +174,17 @@ func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, cha
 		i.TimeOutOpt = TimeOutOptions{PreConfig: "600000", Request: "600000"}
 	}
 	if ccObject.EndorsementPolicy != "" {
-		endorsementPolicy, err := i.getEndorsementPolicy(organizations, ccObject.EndorsementPolicy)
-		if err != nil {
-			logger.ERROR("Failed to get the endorsement policy")
-			return instantiateCCObjects, err
+		if ccObject.SDK != "cli" || strings.Contains(ccObject.EndorsementPolicy, "of") {
+			endorsementPolicy, err := i.getEndorsementPolicy(organizations, ccObject.EndorsementPolicy)
+			if err != nil {
+				logger.ERROR("Failed to get the endorsement policy")
+				return instantiateCCObjects, err
+			}
+			i.DeployOpt.Endorsement = endorsementPolicy
+		} else {
+			endorsementPolicy := &EndorsementPolicy{SignaturePolicy: ccObject.EndorsementPolicy}
+			i.DeployOpt.Endorsement = endorsementPolicy
 		}
-		i.DeployOpt.Endorsement = endorsementPolicy
 	}
 	if ccObject.CollectionPath != "" {
 		i.DeployOpt.CollectionsConfigPath = ccObject.CollectionPath
@@ -324,7 +330,6 @@ func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCC
 
 	var packageID string
 	for _, orgName := range instantiateObject.ChannelOpt.OrgName {
-		//orgName := instantiateObject.ChannelOpt.OrgName[k]
 		currentDir, err := paths.GetCurrentDir()
 		if err != nil {
 			return err
@@ -389,6 +394,9 @@ func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCC
 		args = append(args, "--package-id", packageID)
 		if instantiateObject.TLS == "clientauth" {
 			args = append(args, "--tls")
+		}
+		if instantiateObject.DeployOpt.Endorsement != nil && instantiateObject.SDK == "cli" {
+			args = append(args, "--signature-policy", instantiateObject.DeployOpt.Endorsement.SignaturePolicy)
 		}
 		if instantiateObject.DeployOpt.CollectionsConfigPath != "" {
 			args = append(args, "--collections-config", instantiateObject.DeployOpt.CollectionsConfigPath)
@@ -460,6 +468,9 @@ func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCU
 	}
 	if instantiateObject.TLS == "clientauth" {
 		args = append(args, "--tls")
+	}
+	if instantiateObject.DeployOpt.Endorsement != nil && instantiateObject.SDK == "cli" {
+		args = append(args, "--signature-policy", instantiateObject.DeployOpt.Endorsement.SignaturePolicy)
 	}
 	if instantiateObject.DeployOpt.CollectionsConfigPath != "" {
 		args = append(args, "--collections-config", instantiateObject.DeployOpt.CollectionsConfigPath)
