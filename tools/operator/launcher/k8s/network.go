@@ -73,11 +73,11 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 			}
 			containers = append(containers, container)
 			container = corev1.Container{
-				Name:      "peer",
-				Command:   []string{"peer"},
-				Args:      []string{"node", "start"},
-				Resources: k8s.resources(nsConfig.K8s.Resources.Peers),
-				Image:     peerImage,
+				Name:            "peer",
+				Command:         []string{"peer"},
+				Args:            []string{"node", "start"},
+				Resources:       k8s.resources(nsConfig.K8s.Resources.Peers),
+				Image:           peerImage,
 				ImagePullPolicy: corev1.PullPolicy("Always"),
 				Env: []corev1.EnvVar{
 					{Name: "FABRIC_LOGGING_SPEC", Value: nsConfig.PeerFabricLoggingSpec},
@@ -99,9 +99,9 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 					Type: "couchdb",
 				}
 				container = corev1.Container{
-					Name:      "couchdb",
-					Resources: k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:     "couchdb:3.1",
+					Name:            "couchdb",
+					Resources:       k8s.resources(nsConfig.K8s.Resources.Couchdb),
+					Image:           "couchdb:3.1",
 					ImagePullPolicy: corev1.PullPolicy("Always"),
 					Env: []corev1.EnvVar{
 						{
@@ -152,10 +152,10 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 			}
 			containers := make([]corev1.Container, 0)
 			container := corev1.Container{
-				Name:      "orderer",
-				Command:   []string{"orderer"},
-				Resources: k8s.resources(nsConfig.K8s.Resources.Orderers),
-				Image:     ordererImage,
+				Name:            "orderer",
+				Command:         []string{"orderer"},
+				Resources:       k8s.resources(nsConfig.K8s.Resources.Orderers),
+				Image:           ordererImage,
 				ImagePullPolicy: corev1.PullPolicy("Always"),
 				Env: []corev1.EnvVar{
 					{Name: "FABRIC_LOGGING_SPEC", Value: nsConfig.OrdererFabricLoggingSpec},
@@ -211,9 +211,9 @@ func (k8s K8s) caLaunchConfig(id int, orgName, caImage string) LaunchConfig {
 			{Name: "FABRIC_CA_SERVER_TLS_CERTFILE", Value: fmt.Sprintf("/etc/hyperledger/fabric/artifacts/tlsca.%s-cert.pem", orgName)},
 			{Name: "FABRIC_CA_SERVER_CA_NAME", Value: fmt.Sprintf("ca%d-%s", id, orgName)},
 		},
-		Image: caImage,
+		Image:           caImage,
 		ImagePullPolicy: corev1.PullPolicy("Always"),
-		Name:  "ca",
+		Name:            "ca",
 		VolumeMounts: []corev1.VolumeMount{{
 			MountPath: "/etc/hyperledger/fabric/artifacts/",
 			Name:      "cacerts"},
