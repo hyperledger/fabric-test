@@ -71,3 +71,23 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'regression/smoke/results*.xml'
+
+      - job: Kubernetes
+        steps:
+          - checkout: self
+            path: 'go/src/github.com/hyperledger/fabric-test'
+            displayName: Checkout Fabric Test Code
+          - template: templates/install_deps.yml
+          - script: |
+              sudo apt install conntrack -y
+              curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+              chmod +x minikube
+              sudo mkdir -p /usr/local/bin/
+              sudo install minikube /usr/local/bin/
+              sudo minikube start --driver=none
+              sudo chown -R $USER ~/.kube
+              sudo chown -R $USER ~/.minikube
+              make pre-reqs
+              cd tools/operator
+              go run main.go -i ../../regression/testdata/barebones-network-spec.yml -k ~/.kube/config -a up
+            displayName: Run Basic Network

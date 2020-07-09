@@ -413,6 +413,7 @@ func (k8s K8s) verifyContainersAreRunning(ns, podName string, clientset *kuberne
 			}
 			i := 0
 			for i < len(pod.Spec.Containers) {
+				fmt.Println("CHECKING")
 				if pod.Status.ContainerStatuses[i].State.Running != nil {
 					i++
 				} else if pod.Status.ContainerStatuses[i].State.Terminated != nil {
@@ -431,7 +432,6 @@ func (k8s K8s) verifyContainersAreRunning(ns, podName string, clientset *kuberne
 
 //PodStatusCheck --
 func (k8s K8s) PodStatusCheck(ns string, clientset *kubernetes.Clientset) error {
-
 	podList, err := k8s.listPods(ns, clientset)
 	if err != nil {
 		return errors.Wrap(err, "failed to list the pods")
@@ -441,15 +441,15 @@ func (k8s K8s) PodStatusCheck(ns string, clientset *kubernetes.Clientset) error 
 	for i := 0; i < len(podList); i++ {
 		wg.Add(1)
 		podLabels := podList[i].ObjectMeta.Labels
-		go func(failed error) {
-			err := k8s.verifyContainersAreRunning(ns, podLabels["k8s-app"], clientset, &wg)
-			if err != nil {
-				logger.ERROR(fmt.Sprintf("Pod failed to start: %v", err))
-				statusError = fmt.Errorf("statefulset failed to deploy")
-			}
-		}(statusError)
+		//go func(failed error) {
+		err := k8s.verifyContainersAreRunning(ns, podLabels["k8s-app"], clientset, &wg)
+		if err != nil {
+			logger.ERROR(fmt.Sprintf("Pod failed to start: %v", err))
+			statusError = fmt.Errorf("statefulset failed to deploy")
+		}
+		//}(statusError)
 	}
-	wg.Wait()
+	//wg.Wait()
 	return statusError
 }
 

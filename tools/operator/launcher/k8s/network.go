@@ -3,18 +3,15 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
-
-	corev1 "k8s.io/api/core/v1"
-	apiResource "k8s.io/apimachinery/pkg/api/resource"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
 	"github.com/hyperledger/fabric-test/tools/operator/fabricconfig"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	//"github.com/hyperledger/fabric-test/tools/operator/paths"
+	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
+	apiResource "k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 //K8s -
@@ -498,6 +495,7 @@ func (k8s K8s) Network(action string) error {
 			logger.ERROR("Failed to verify fabric K8s pods state")
 			return err
 		}
+		fmt.Println("Finished checking status")
 		err = k8s.CheckComponentsHealth(k8s.Config, clientset)
 		if err != nil {
 			logger.ERROR("Failed to check fabric K8s pods health")

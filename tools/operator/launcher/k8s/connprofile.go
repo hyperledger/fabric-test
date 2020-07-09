@@ -18,11 +18,11 @@ var reservedIPBlocks []*net.IPNet
 
 func init() {
 	for _, cidr := range []string{
-		"127.0.0.0/8",    // IPv4 loopback
-		"10.0.0.0/8",     // RFC1918
-		"172.16.0.0/12",  // RFC1918
-		"192.168.0.0/16", // RFC1918
-		"169.254.0.0/16", // RFC3927 link-local
+		//"127.0.0.0/8",    // IPv4 loopback
+		//"10.0.0.0/8", // RFC1918
+		//"172.16.0.0/12",  // RFC1918
+		//"192.168.0.0/16", // RFC1918
+		//"169.254.0.0/16", // RFC3927 link-local
 	} {
 		_, block, err := net.ParseCIDR(cidr)
 		if err != nil {
@@ -41,6 +41,9 @@ func (k8s K8s) ExternalIP(config networkspec.Config, serviceName string, clients
 		if err != nil {
 			logger.ERROR("Failed to get the external IP for k8s using NodePort")
 			return "", err
+		}
+		for _, ip := range output.Addresses {
+			fmt.Println("Address: " + ip.Address)
 		}
 		for _, ip := range output.Addresses {
 			addr := net.ParseIP(ip.Address)

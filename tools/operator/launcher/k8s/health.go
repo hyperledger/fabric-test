@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -28,11 +28,24 @@ func (k8s K8s) checkHealth(componentName string, config networkspec.Config, clie
 	}
 
 	url := fmt.Sprintf("http://%s:%s/healthz", nodeIP, portNumber)
-	resp, err := http.Get(url)
+	client := http.Client{
+		Timeout: 1 * time.Second,
+	}
+	var resp *http.Response
+	for i := 0; i < 12; i++ {
+		fmt.Println("Querying componenet: " + url)
+		resp, err = client.Get(url)
+		if err == nil {
+			break
+		}
+		fmt.Println("Sleeping...")
+		time.Sleep(5 * time.Second)
+	}
 	if err != nil {
 		logger.ERROR("Error while hitting the endpoint")
 		return err
 	}
+	fmt.Println("No Errors!")
 	defer resp.Body.Close()
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
