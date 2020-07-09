@@ -48,8 +48,8 @@ invokes:
     name: mapcc
     targetPeers: AllPeers
     nProcPerOrg: 1
-    nRequest: 10
-    runDur: 0
+    nRequest: 0
+    runDur: 18000
     organizations: org1,org2
     txnOpt:
       - mode: constant
@@ -63,7 +63,7 @@ invokes:
       list: targetPeers
     ordererOptions:
       method: RoundRobin
-      nOrderers: 4
+      nOrderers: 5
     queryCheck: 10
     eventOpt:
       type: FilteredBlock
