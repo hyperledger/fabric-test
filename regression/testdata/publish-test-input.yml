@@ -114,6 +114,7 @@ instantiateChaincode:
 
 upgradeChaincode:
   - channelName: testorgschannel0
+    name: chaincodeGo
     version: v2
     sdk: cli
     targetPeers: peer0-org1,peer0-org2
@@ -128,6 +129,7 @@ upgradeChaincode:
     version: v2
     sdk: cli
     targetPeers: peer0-org1,peer0-org2
+    sequence: 2
     args: ""
     organizations: org1,org2
     endorsementPolicy: 1of(org1,org2)
@@ -138,6 +140,7 @@ upgradeChaincode:
     version: v2
     sdk: cli
     targetPeers: peer0-org1,peer0-org2
+    sequence: 2
     args: ""
     organizations: org1,org2
     endorsementPolicy: 1of(org1,org2)
