@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -100,7 +101,6 @@ func SetEnvForCLI(orgName, peerName, connProfilePath, tls, currentDir string) er
 
 //packageCC -- package cc using cli
 func (i InstallCCUIObject) packageCC(installObject InstallCCUIObject) error {
-
 	currentDir, err := paths.GetCurrentDir()
 	if err != nil {
 		return err
@@ -110,17 +110,20 @@ func (i InstallCCUIObject) packageCC(installObject InstallCCUIObject) error {
 	if err != nil {
 		return err
 	}
+
+	relativePath := fmt.Sprintf("%s/../../%s", currentDir, installObject.DeployOpt.ChainCodePath)
+	chaincodePath, err := filepath.Abs(relativePath)
+	if err != nil {
+		return err
+	}
 	args := []string{"lifecycle",
 		"chaincode",
 		"package",
 		"cc.tgz",
-		"--path", installObject.DeployOpt.ChainCodePath,
+		"--lang", strings.ToLower(installObject.DeployOpt.Language),
+		"--path", chaincodePath,
 		"--label", fmt.Sprintf("%s_%s", installObject.ChainCodeID, installObject.ChainCodeVer)}
-
 	_, err = networkclient.ExecuteCommand("peer", args, true)
-	if err != nil {
-		return err
-	}
 	return err
 }
 
