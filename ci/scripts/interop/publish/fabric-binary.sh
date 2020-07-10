@@ -14,7 +14,7 @@ for target in linux-amd64 darwin-amd64; do
     cp ../../sampleconfig/*yaml config
     tar -czvf "hyperledger-fabric-${target}-${RELEASE}.tar.gz" bin config
     curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
-		-T "hyperledger-fabric-${target}-${RELEASE}.tar.gz" \
-		"https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-${target}-${RELEASE}.tar.gz"
+		  -T "hyperledger-fabric-${target}-${RELEASE}.tar.gz" \
+		  "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-${target}-${RELEASE}.tar.gz"
     popd
 done

@@ -32,7 +32,7 @@ installChaincode:
   - name: samplecc
     sdk: cli
     version: v1
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    path: chaincodes/samplecc/go
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: golang
@@ -41,7 +41,7 @@ installChaincode:
   - name: samplecc
     sdk: cli
     version: v2
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    path: chaincodes/samplecc/go
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: golang
