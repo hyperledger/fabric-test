@@ -5,7 +5,7 @@
 dockerOrg: hyperledger-fabric.jfrog.io
 dockerTag: amd64-2.2-stable
 dockerImages:
-  ca: hyperledger/fabric-ca
+  ca: hyperledger/fabric-ca:1.4
 
 dbType: couchdb
 peerFabricLoggingSpec: error
