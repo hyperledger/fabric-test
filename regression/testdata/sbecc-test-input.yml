@@ -11,7 +11,7 @@ organizations:
 installChaincode:
   - name: sbecc
     version: v1
-    path: github.com/hyperledger/fabric-test/chaincodes/sbe/go
+    path: chaincodes/sbe/go
     organizations: org1,org2,org3,org4
     language: golang
     metadataPath: ""

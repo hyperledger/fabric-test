@@ -22,14 +22,14 @@ joinChannel:
 installChaincode:
   - name: samplecc
     version: v1
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    path: chaincodes/samplecc/go
     organizations: org1,org2,org3,org4
     language: golang
     metadataPath: ""
 
   - name: samplejs
     version: v1
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/node
+    path: chaincodes/samplecc/node
     organizations: org1,org2,org3,org4
     language: node
     metadataPath: ""

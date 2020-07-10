@@ -27,7 +27,7 @@ installChaincode:
   - name: chaincodeGo
     version: v1
     sdk: cli
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    path: chaincodes/samplecc/go
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: golang
@@ -36,7 +36,7 @@ installChaincode:
   - name: chaincodeJava
     version: v1
     sdk: cli
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/java
+    path: chaincodes/samplecc/java
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: java
@@ -45,7 +45,7 @@ installChaincode:
   - name: chaincodeNode
     version: v1
     sdk: cli
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/node
+    path: chaincodes/samplecc/node
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: node
@@ -54,7 +54,7 @@ installChaincode:
   - name: chaincodeGo
     version: v2
     sdk: cli
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/go
+    path: chaincodes/samplecc/go
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: golang
@@ -63,7 +63,7 @@ installChaincode:
   - name: chaincodeJava
     version: v2
     sdk: cli
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/java
+    path: chaincodes/samplecc/java
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: java
@@ -72,7 +72,7 @@ installChaincode:
   - name: chaincodeNode
     version: v2
     sdk: cli
-    path: github.com/hyperledger/fabric-test/chaincodes/samplecc/node
+    path: chaincodes/samplecc/node
     organizations: org1,org2
     targetPeers: peer0-org1,peer0-org2
     language: node
