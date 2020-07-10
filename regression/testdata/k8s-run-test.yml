@@ -26,7 +26,7 @@ installChaincode:
     sdk: cli
     targetPeers: peer0-org1,peer0-org2,peer1-org1,peer1-org2
     version: 1
-    path: github.com/hyperledger/fabric-test/chaincodes/map_private/go
+    path: chaincodes/map_private/go
     organizations: org1,org2
     language: golang
     metadataPath: ""
