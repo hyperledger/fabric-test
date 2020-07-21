@@ -267,7 +267,7 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 	var wg sync.WaitGroup
 	pteMainPath := paths.PTEPath()
 	errCh := make(chan error, 1)
-	channelBlockchainCount := make(map[string]map[string]BlockchainCount)
+	channelBlockchainCount := make(map[string]map[int]map[string]BlockchainCount)
 	for key := range invokeQueryObjects {
 		jsonObject, err := json.Marshal(invokeQueryObjects[key])
 		if err != nil {
@@ -282,12 +282,29 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 				logger.ERROR("Failed to complete invokes/queries " + err.Error())
 				checkAndPushError(errCh)
 			}
-			channelName := invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name
-			channelBlockchainCount[channelName] = make(map[string]BlockchainCount)
-			channelBlockchainCount[channelName], err = i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex], channelBlockchainCount[channelName])
-			if err != nil {
-				logger.ERROR("Failed fetching metrics " + err.Error())
-				checkAndPushError(errCh)
+			count := 0
+			ticker := time.NewTicker(30 * time.Second)
+			done := make(chan bool, 1)
+			defer ticker.Stop()
+			for {
+				select {
+				case <-ticker.C:
+					if count >= 5 {
+						done <- true
+						break
+					}
+					channelName := invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name
+					channelBlockchainCount[channelName] = make(map[int]map[string]BlockchainCount)
+					channelBlockchainCount[channelName][count] = make(map[string]BlockchainCount)
+					channelBlockchainCount[channelName][count], err = i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex], channelBlockchainCount[channelName][count])
+					if err != nil {
+						logger.ERROR("Failed fetching metrics " + err.Error())
+						checkAndPushError(errCh)
+					}
+					count++
+				case <-done:
+					return
+				}
 			}
 		}(key, &wg, errCh)
 	}
@@ -315,11 +332,14 @@ func checkAndPushError(errCh chan error) {
 	}
 }
 
-func validateLedger(blocks map[string]BlockchainCount) error {
+func validateLedger(blocks map[int]map[string]BlockchainCount) error {
 	var blockchainHeight int
 	var transactionCount int
 	var blockHash string
-	for key, block := range blocks {
+	for key, block := range blocks[5] {
+		if blocks[5][key].peerBlockchainHeight != blocks[4][key].peerBlockchainHeight && blocks[5][key].peerBlockchainHeight != blocks[3][key].peerBlockchainHeight {
+			return fmt.Errorf("peer [%s] is slow in receiving blocks", key)
+		}
 		if blockchainHeight == 0 && transactionCount == 0 {
 			blockchainHeight = block.peerBlockchainHeight
 			transactionCount = block.peerTransactionCount
