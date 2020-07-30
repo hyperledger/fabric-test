@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/hyperledger/fabric-test/tools/operator/fabricconfiguration"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -50,12 +51,11 @@ func (n Network) GetConfigData(networkSpecPath string) (networkspec.Config, erro
 func (n Network) GenerateConfigurationFiles(upgrade bool) error {
 
 	var inputArgs []string
-	configtxPath := paths.TemplateFilePath("configtx")
 	cryptoConfigPath := paths.TemplateFilePath("crypto-config")
 	inputFilePath := paths.TemplateFilePath("input")
 	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir(false))
 	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
-	inputArgs = []string{configtxPath, cryptoConfigPath}
+	inputArgs = []string{cryptoConfigPath}
 	if n.TemplatesDir != "" {
 		inputArgs = append(inputArgs, n.TemplatesDir)
 		if upgrade {
@@ -130,8 +130,8 @@ func (n Network) GenerateGenesisBlock(config networkspec.Config) error {
 	path := paths.ChannelArtifactsDir(artifactsLocation)
 	outputPath := paths.JoinPath(path, "genesis.block")
 	configFilesPath := paths.ConfigFilesDir(false)
-	configtxgen := networkclient.Configtxgen{Config: configFilesPath, OutputPath: outputPath}
-	_, err := networkclient.ExecuteCommand("configtxgen", configtxgen.Args(), true)
+	configtxgen := fabricconfiguration.Configtxgen{ConfigPath: configFilesPath, OutputPath: outputPath, Profile: "testOrgsOrdererGenesis", ChannelID: "orderersystemchannel"}
+	err := fabricconfiguration.CreateConfigtx(&configtxgen, config)
 	if err != nil {
 		return err
 	}

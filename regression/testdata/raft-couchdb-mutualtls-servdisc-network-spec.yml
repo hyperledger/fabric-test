@@ -47,7 +47,7 @@ orderer:
 ordererOrganizations:
 - name: ordererorg1
   mspId: OrdererOrg1
-  numOderers: 5
+  numOrderers: 5
   numCa: 1
 
 peerOrganizations:

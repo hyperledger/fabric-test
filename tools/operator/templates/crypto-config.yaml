@@ -13,8 +13,8 @@ OrdererOrgs:
   Name: #@ ordererOrg.name
   EnableNodeOUs: #@ config.enableNodeOUs
   Specs:
-  #@ numOderers = ordererOrg.numOderers
-  #@ for i in range(0, numOderers):
+  #@ numOrderers = ordererOrg.numOrderers
+  #@ for i in range(0, numOrderers):
     - Hostname: #@ "orderer{}-{}".format(i, ordererOrg.name)
       SANS:
         - #@ "{}".format(localIP) 

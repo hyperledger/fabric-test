@@ -127,7 +127,7 @@
 #@   (ordererUniquerPort, ordererHealthCheckPort, ordererAdminListenPort) = (30000, 30100, 30200)
 #@   for i in range(0, len(config.ordererOrganizations)):
 #@     org = config.ordererOrganizations[i]
-#@     for j in range(0, org.numOderers):
+#@     for j in range(0, org.numOrderers):
 #@       env = ["FABRIC_LOGGING_SPEC={}".format(config.ordererFabricLoggingSpec), "ORDERER_GENERAL_LISTENADDRESS=0.0.0.0", "ORDERER_GENERAL_LISTENPORT={}".format(ordererUniquerPort), "ORDERER_GENERAL_GENESISMETHOD=file"]
 #@       env.append("ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/fabric/artifacts/msp/channel-artifacts/genesis.block")
 #@       env.append("ORDERER_GENERAL_LOCALMSPID={}".format(org.mspId))
