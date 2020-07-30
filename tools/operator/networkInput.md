@@ -40,7 +40,7 @@
    ordererOrganizations:
     - name: ordererorg1
       mspId: OrdererOrgExampleCom
-      numOderers: 1
+      numOrderers: 1
       numCa: 1
 
    peerOrganizations:
@@ -307,13 +307,13 @@
       capital letters, numbers
       - Example: `mspId: OrdererOrgExampleCom`
 
-      #### *numOderers*
+      #### *numOrderers*
 
-      - Description: `numOderers` is used to set number of orderers in listed orderer
+      - Description: `numOrderers` is used to set number of orderers in listed orderer
       organization
       - Supported Values: Value to launch number of orderers in listed orderer organization
       in fabric network. Supports value to be >= 1
-      - Example: `numOderers: 1`
+      - Example: `numOrderers: 1`
 
       #### *numCa*
 
@@ -327,11 +327,11 @@
    ordererOrganizations:
       - name: ordererorg1
          mspId: OrdererOrg1ExampleCom
-         numOderers: 3
+         numOrderers: 3
          numCa: 0
       - name: ordererorg2
          mspId: OrdererOrg2ExampleCom
-         numOderers: 2
+         numOrderers: 2
          numCa: 0
    ```
 

@@ -5,6 +5,9 @@
 package networkspec
 
 import (
+	"time"
+
+	"github.com/hyperledger/fabric-protos-go/orderer/etcdraft"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -30,6 +33,19 @@ type Config struct {
 	AddPeersToOrganization   []PeerOrganizations    `yaml:"addPeer,omitempty"`
 	Orderer                  struct {
 		OrdererType string `yaml:"ordererType,omitempty"`
+		BatchSize   struct {
+			MaxMessageCount   uint32 `yaml:"maxMessageCount,omitempty"`
+			AbsoluteMaxBytes  string `yaml:"absoluteMaxBytes,omitempty"`
+			PreferredMaxBytes string `yaml:"preferredMaxBytes,omitempty"`
+		} `yaml:"batchSize,omitempty"`
+		BatchTimeOut    time.Duration `yaml:"batchTimeOut,omitempty"`
+		EtcdraftOptions struct {
+			TickInterval         string `yaml:"tickInterval,omitempty"`
+			ElectionTick         uint32 `yaml:"electionTick,omitempty"`
+			HeartbeatTick        uint32 `yaml:"heartbeatTick,omitempty"`
+			MaxInflightBlocks    uint32 `yaml:"maxInflightBlocks,omitempty"`
+			SnapshotIntervalSize string `yaml:"snapshotIntervalSize,omitempty"`
+		} `yaml:"etcdraftOptions,omitempty"`
 	} `yaml:"orderer,omitempty"`
 	NumChannels             int           `yaml:"numChannels,omitempty"`
 	ChannelPrefix           string        `yaml:"channelPrefix,omitempty"`
@@ -74,7 +90,7 @@ type Resource struct {
 type OrdererOrganizations struct {
 	Name        string `yaml:"name,omitempty"`
 	MSPID       string `yaml:"mspId,omitempty"`
-	NumOrderers int    `yaml:"numOderers,omitempty"`
+	NumOrderers int    `yaml:"numOrderers,omitempty"`
 	NumCA       int    `yaml:"numCa,omitempty"`
 }
 
@@ -231,7 +247,7 @@ type CaliperCertificateAuthority struct {
 	Registrar []CARegistrar `yaml:"registrar"`
 }
 
-//Organization --
+//CaliperOrganization --
 type CaliperOrganization struct {
 	MSPID                  string   `yaml:"mspid"`
 	Peers                  []string `yaml:"peers"`
@@ -304,4 +320,73 @@ type CaliperConnectionProfile struct {
 	Peers         map[string]CaliperPeer                 `yaml:"peers"`
 	CA            map[string]CaliperCertificateAuthority `yaml:"certificateAuthorities"`
 	Organizations map[string]CaliperOrganization         `yaml:"organizations"`
+}
+
+const (
+	EtcdRaft = "etcdraft"
+)
+
+type ConfigtxProfile struct {
+	Consortium   string                         `yaml:"Consortium"`
+	Application  *ConfigtxApplication           `yaml:"Application"`
+	Orderer      *ConfigtxOrderer               `yaml:"Orderer"`
+	Consortiums  map[string]*ConfigtxConsortium `yaml:"Consortiums"`
+	Capabilities map[string]bool                `yaml:"Capabilities"`
+	Policies     map[string]*ConfigtxPolicy     `yaml:"Policies"`
+}
+
+type ConfigtxPolicy struct {
+	Type string `yaml:"Type"`
+	Rule string `yaml:"Rule"`
+}
+
+type ConfigtxConsortium struct {
+	Organizations []*ConfigtxOrganization `yaml:"Organizations"`
+}
+
+type ConfigtxApplication struct {
+	Organizations []*ConfigtxOrganization    `yaml:"Organizations"`
+	Capabilities  map[string]bool            `yaml:"Capabilities"`
+	Policies      map[string]*ConfigtxPolicy `yaml:"Policies"`
+	ACLs          map[string]string          `yaml:"ACLs"`
+}
+
+type ConfigtxOrganization struct {
+	Name             string                     `yaml:"Name"`
+	ID               string                     `yaml:"ID"`
+	MSPDir           string                     `yaml:"MSPDir"`
+	MSPType          string                     `yaml:"MSPType"`
+	Policies         map[string]*ConfigtxPolicy `yaml:"Policies"`
+	AnchorPeers      []*ConfigtxAnchorPeer      `yaml:"AnchorPeers"`
+	OrdererEndpoints []string                   `yaml:"OrdererEndpoints"`
+	AdminPrincipal   string                     `yaml:"AdminPrincipal"`
+	SkipAsForeign    bool
+}
+
+type ConfigtxAnchorPeer struct {
+	Host string `yaml:"Host"`
+	Port int    `yaml:"Port"`
+}
+
+type ConfigtxOrderer struct {
+	OrdererType   string                     `yaml:"OrdererType"`
+	Addresses     []string                   `yaml:"Addresses"`
+	BatchTimeout  time.Duration              `yaml:"BatchTimeout"`
+	BatchSize     ConfigtxBatchSize          `yaml:"BatchSize"`
+	Kafka         ConfigtxKafka              `yaml:"Kafka"`
+	EtcdRaft      *etcdraft.ConfigMetadata   `yaml:"EtcdRaft"`
+	Organizations []*ConfigtxOrganization    `yaml:"Organizations"`
+	MaxChannels   uint64                     `yaml:"MaxChannels"`
+	Capabilities  map[string]bool            `yaml:"Capabilities"`
+	Policies      map[string]*ConfigtxPolicy `yaml:"Policies"`
+}
+
+type ConfigtxBatchSize struct {
+	MaxMessageCount   uint32 `yaml:"MaxMessageCount"`
+	AbsoluteMaxBytes  uint32 `yaml:"AbsoluteMaxBytes"`
+	PreferredMaxBytes uint32 `yaml:"PreferredMaxBytes"`
+}
+
+type ConfigtxKafka struct {
+	Brokers []string `yaml:"Brokers"`
 }
