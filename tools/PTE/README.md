@@ -774,6 +774,13 @@ The user input file contains configuration parameters including chaincode defini
             "method": "UserDefined",
             "nOrderers": "3",
         },
+        "snapshot": {
+            "enabled":  true,
+            "height":  [100000, 200000, 300000],
+            "channelID":  "testchannel1",
+            "peerName":  "peer0-org1",
+            "queryFreq":  "10000"
+        },
         "timeoutOpt": {
             "preConfig": "200000",
             "request": "45000",
@@ -1016,6 +1023,12 @@ where:
          * **UserDefined**: the orderer defined in the `ordererID` in the Service Credentials File for each org is used for invoke transactions. Note this is the same orderer used for all admin transactions.
          * **RoundRobin**: an orderer from the orderer section of Service Credentials File is assigned to each thread in the round robin fashion
     * **nOrderers**: the number of orderers to participate in the transactions, if this number is greater than the number of orderers listed in the service credential json, then all orderers will participate in the transactions.  If this number is set to 0, then all orderers participate in the transactions. Default: 0.
+* **snapshot**: PTE will spawn off an additional process to poll the blockheight of the specified peer periodically.  Once the specified blockheight is reached or exceeded, PTE will stop all invoke transaction processes.
+    * **enabled**: snapshot enabled: true or false
+    * **height**: an array of blockheights
+    * **channelID**: the channel ID
+    * **peerName**: the peer to poll blockheight
+    * **queryFreq**: blockheight polling frequency, unit: ms. Default: 10,000 ms
 * **timeoutOpt**: timeout configuration
     * **preConfig**: The timeout for channel creation and join and chaincode installation and instantiation. Unit: ms. Default:200,000.
     * **request**: The timeout for proposal and transaction. Unit: ms. Default:45,000.

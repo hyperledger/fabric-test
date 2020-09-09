@@ -105,7 +105,7 @@ var txCfgPtr;
 var txCfgTmp;
 if (fs.existsSync(uiFile)) {
     uiContent = testUtil.readConfigFileSubmitter(uiFile);
-    if (typeof (uiContent.txCfgPtr) === 'undefined') {
+    if (!uiContent.hasOwnProperty('txCfgPtr')) {
         txCfgTmp = uiFile;
     } else {
         txCfgTmp = uiContent.txCfgPtr;
@@ -129,7 +129,7 @@ var distOpt;
 
 var ccDfnPtr;
 var ccDfntmp;
-if (typeof (uiContent.ccDfnPtr) === 'undefined') {
+if (!uiContent.hasOwnProperty('ccDfnPtr')) {
     ccDfntmp = uiFile;
 } else {
     ccDfntmp = uiContent.ccDfnPtr;
@@ -161,7 +161,7 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] channelOrgName.length
 var client = new hfc();
 var channel = client.newChannel(channelName);
 
-if ((typeof (txCfgPtr.eventOpt) !== 'undefined') && (typeof (txCfgPtr.eventOpt.type) !== 'undefined')) {
+if ((txCfgPtr.hasOwnProperty('eventOpt')) && (txCfgPtr.eventOpt.hasOwnProperty('type'))) {
     evtType = txCfgPtr.eventOpt.type.toUpperCase();
     if ((evtType != 'FILTEREDBLOCK') && (evtType != 'CHANNEL')) {
         logger.error('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] unsupported event type: %s', Nid, channelName, org, pid, evtType);
@@ -169,12 +169,12 @@ if ((typeof (txCfgPtr.eventOpt) !== 'undefined') && (typeof (txCfgPtr.eventOpt.t
         process.exit(1);
     }
 }
-if ((typeof (txCfgPtr.eventOpt) !== 'undefined') && (typeof (txCfgPtr.eventOpt.timeout) !== 'undefined')) {
+if ((txCfgPtr.hasOwnProperty('eventOpt')) && (txCfgPtr.eventOpt.hasOwnProperty('timeout'))) {
     evtTimeout = txCfgPtr.eventOpt.timeout;
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] event type: %s, timeout: %d', Nid, channel.getName(), org, pid, evtType, evtTimeout);
 
-if (typeof (txCfgPtr.invokeCheck) !== 'undefined') {
+if (txCfgPtr.hasOwnProperty('invokeCheck')) {
     if (txCfgPtr.invokeCheck == 'TRUE') {
         invokeCheck = true;
     } else if (txCfgPtr.invokeCheck == 'FALSE') {
@@ -272,10 +272,8 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] transMode: %s, transT
 
 // orderer parameters
 var ordererMethod = 'USERDEFINED';    // default method
-if (typeof (txCfgPtr.ordererOpt) !== 'undefined') {
-    if (typeof (txCfgPtr.ordererOpt.method) !== 'undefined') {
-        ordererMethod = txCfgPtr.ordererOpt.method.toUpperCase();
-    }
+if (txCfgPtr.hasOwnProperty('ordererOpt') && txCfgPtr.ordererOpt.hasOwnProperty('method')) {
+    ordererMethod = txCfgPtr.ordererOpt.method.toUpperCase();
 }
 logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] input parameters: ordererMethod=%s', Nid, channelName, org, pid, ordererMethod);
 
@@ -291,7 +289,7 @@ var peerFOMethod = 'ROUNDROBIN';
 
 // failover is handled by SDK in discovery mode
 if (targetPeers != 'DISCOVERY') {
-    if (typeof (txCfgPtr.peerFailover) !== 'undefined') {
+    if (txCfgPtr.hasOwnProperty('peerFailover')) {
         if (txCfgPtr.peerFailover == 'TRUE') {
             peerFO = true;
         } else if (txCfgPtr.peerFailover == 'FALSE') {
@@ -300,7 +298,7 @@ if (targetPeers != 'DISCOVERY') {
             peerFO = txCfgPtr.peerFailover;
         }
     }
-    if (typeof (txCfgPtr.ordererFailover) !== 'undefined') {
+    if (txCfgPtr.hasOwnProperty('ordererFailover')) {
         if (txCfgPtr.ordererFailover == 'TRUE') {
             ordererFO = true;
         } else if (txCfgPtr.ordererFailover == 'FALSE') {
@@ -311,11 +309,11 @@ if (targetPeers != 'DISCOVERY') {
     }
 }
 if (peerFO) {
-    if (typeof (txCfgPtr.failoverOpt) !== 'undefined') {
-        if (typeof (txCfgPtr.failoverOpt.list) !== 'undefined') {
+    if (txCfgPtr.hasOwnProperty('failoverOpt')) {
+        if (txCfgPtr.failoverOpt.hasOwnProperty('list')) {
             peerFOList = txCfgPtr.failoverOpt.list.toUpperCase();
         }
-        if (typeof (txCfgPtr.failoverOpt.method) !== 'undefined') {
+        if (txCfgPtr.failoverOpt.hasOwnProperty('method')) {
             peerFOMethod = txCfgPtr.failoverOpt.method.toUpperCase();
         }
     }
@@ -340,13 +338,13 @@ logger.info('[Nid:chan:org:id=%d:%s:%s:%d pte-execRequest] runForever: %d', Nid,
 var timeoutOpt;
 var reqTimeout = 45000;     // default 45 sec
 var grpcTimeout = 3000;     // default 3 sec
-if ((typeof (txCfgPtr.timeoutOpt) !== 'undefined')) {
+if (txCfgPtr.hasOwnProperty('timeoutOpt')) {
     timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
-    if ((typeof (timeoutOpt.request) !== 'undefined')) {
+    if (timeoutOpt.hasOwnProperty('request')) {
         reqTimeout = parseInt(timeoutOpt.request);
     }
-    if ((typeof (timeoutOpt.grpcTimeout) !== 'undefined')) {
+    if (timeoutOpt.hasOwnProperty('grpcTimeout')) {
         grpcTimeout = parseInt(timeoutOpt.grpcTimeout);
         hfc.setConfigSetting('grpc-wait-for-ready-timeout', grpcTimeout);
     }
@@ -715,20 +713,20 @@ function setTargetPeers(tPeers) {
         testUtil.assignChannelPeersSubmitter(cpList, channel, client, tgtPeers, TLS, cpPath, evtType, invokeType, peerFOList, peerList, eventHubs);
     } else if ((tPeers == 'DISCOVERY') || (transType == 'DISCOVERY')) {
         serviceDiscovery = true;
-        if ((typeof (txCfgPtr.discoveryOpt) !== 'undefined')) {
+        if (txCfgPtr.hasOwnProperty('discoveryOpt')) {
             var discoveryOpt = txCfgPtr.discoveryOpt;
             logger.info('[Nid:chan:org:id=%d:%s:%s:%d setTargetPeers] discoveryOpt: %j', Nid, channelName, org, pid, discoveryOpt);
-            if ((typeof (discoveryOpt.localHost) !== 'undefined')) {
+            if (discoveryOpt.hasOwnProperty('localHost')) {
                 if (discoveryOpt.localHost == 'TRUE') {
                     localHost = true;
                 }
             }
-            if (typeof(discoveryOpt.collection) !== 'undefined') {
+            if (discoveryOpt.hasOwnProperty('collection')) {
                 endorsement_hint['chaincodes'] = [
                     {name: chaincode_id, collection_names: txCfgPtr.discoveryOpt.collection}
                 ];
             }
-            if ((typeof (discoveryOpt.initFreq) !== 'undefined')) {
+            if (discoveryOpt.hasOwnProperty('initFreq')) {
                 initFreq = parseInt(discoveryOpt.initFreq);
             }
         }
@@ -1055,8 +1053,8 @@ function eventRegisterFilteredBlock() {
                 clearTimeout(handle);
 
                 // this block listener handles the filtered block
-                if ((typeof (filtered_block.number) != 'undefined') && (filtered_block.number > 0)) {
-                    if (typeof (filtered_block.filtered_transactions) != 'undefined') {
+                if ((filtered_block.hasOwnProperty('number')) && (filtered_block.number > 0)) {
+                    if (filtered_block.hasOwnProperty('filtered_transactions')) {
                         for (i = 0; i < filtered_block.filtered_transactions.length; i++) {
                             var txid = filtered_block.filtered_transactions[i].txid;
                             if (txidList[txid]) {
@@ -1359,7 +1357,7 @@ function invoke_move_dist_evtBlock(backoffCalculator) {
                }
             }
 
-            if (typeof (results[0][0].response) === 'undefined') {
+            if (!results[0][0].hasOwnProperty('response')) {
                 reConnectEvtHub = 1;
                 tx_stats[tx_pFail]++;
                 logger.error('[Nid:chan:org:id=%d:%s:%s:%d invoke_move_dist_evtBlock] proposal failed %d, %j', Nid, channelName, org, pid, tx_stats[tx_pFail], tx_id.getTransactionID().toString());
@@ -1547,7 +1545,7 @@ function backoffCalculatorConstant() {
 function execModeConstant() {
     var freq = backoffCalculatorConstantFreq();
     if (transType == 'INVOKE') {
-        if (typeof (txCfgPtr.constantOpt.devFreq) == 'undefined') {
+        if (!txCfgPtr.constantOpt.hasOwnProperty('devFreq')) {
             logger.error('[Nid:chan:org:id=%d:%s:%s:%d execModeDistribution] devFreq undefined, set to 0', Nid, channelName, org, pid);
             devFreq = 0;
         } else {
