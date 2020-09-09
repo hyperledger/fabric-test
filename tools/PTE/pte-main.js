@@ -70,14 +70,14 @@ if (uiFile.endsWith(".json") || uiFile.endsWith(".yaml") || uiFile.endsWith(".ym
     uiContent = testUtil.readConfigFileSubmitter(uiFile);
     logger.debug('[Nid=%d pte-main] input uiContent[%s]: %j', Nid, uiFile, uiContent);
 
-    if (typeof (uiContent.txCfgPtr) === 'undefined') {
+    if (!uiContent.hasOwnProperty('txCfgPtr')) {
         txCfgTmp = uiFile;
     } else {
         txCfgTmp = uiContent.txCfgPtr;
     }
     txCfgPtr = testUtil.readConfigFileSubmitter(txCfgTmp);
 
-    if (typeof (uiContent.ccDfnPtr) === 'undefined') {
+    if (!uiContent.hasOwnProperty('ccDfnPtr')) {
         ccDfnTmp = uiFile;
     } else {
         ccDfnTmp = uiContent.ccDfnPtr;
@@ -105,6 +105,16 @@ for (i = 0; i < channelOpt.orgName.length; i++) {
 logger.info('[Nid=%d pte-main] channelName: %s', Nid, channelName);
 logger.info('[Nid=%d pte-main] channelOrgName.length: %d, channelOrgName: %s', Nid, channelOrgName.length, channelOrgName);
 
+// snapshot
+let workerPid = [];
+let snapshotPid = [];
+let snapshotProcess;
+let snapshot = null;
+if (uiContent.hasOwnProperty('snapshot')) {
+    snapshot = uiContent.snapshot;
+    logger.info('snapshot: %j', snapshot);
+}
+
 // find all connection profiles
 var cpList = [];
 var cpPath = verifyIfPathExists(uiContent.ConnProfilePath);
@@ -125,13 +135,13 @@ var transType = txCfgPtr.transType.toUpperCase();
 var timeoutOpt;
 var cfgTimeout = 300000;   // default 300 sec
 var grpcTimeout = 3000;    // default 3 sec
-if ((typeof (txCfgPtr.timeoutOpt) !== 'undefined')) {
+if (txCfgPtr.hasOwnProperty('timeoutOpt')) {
     timeoutOpt = txCfgPtr.timeoutOpt;
     logger.info('main - timeoutOpt: %j', timeoutOpt);
-    if ((typeof (timeoutOpt.preConfig) !== 'undefined')) {
+    if (timeoutOpt.hasOwnProperty('preConfig')) {
         cfgTimeout = parseInt(timeoutOpt.preConfig);
     }
-    if ((typeof (timeoutOpt.grpcTimeout) !== 'undefined')) {
+    if (timeoutOpt.hasOwnProperty('grpcTimeout')) {
         grpcTimeout = parseInt(timeoutOpt.grpcTimeout);
         hfc.setConfigSetting('grpc-wait-for-ready-timeout', grpcTimeout);
     }
@@ -145,7 +155,7 @@ var chaincodePath;
 var metadataPath;
 var collectionsConfigPath;
 function initDeploy(org, transType) {
-    if ((typeof (ccDfnPtr.deploy.language) !== 'undefined')) {
+    if (ccDfnPtr.deploy.hasOwnProperty('language')) {
         language = ccDfnPtr.deploy.language.toLowerCase();
     }
 
@@ -160,7 +170,7 @@ function initDeploy(org, transType) {
         process.exit(1);
     }
 
-    if ((typeof (ccDfnPtr.deploy.chaincodePath) !== 'undefined')) {
+    if (ccDfnPtr.deploy.hasOwnProperty('chaincodePath')) {
         if (language == "golang") {
             chaincodePath = getRelativePath(ccDfnPtr.deploy.chaincodePath);
         } else {
@@ -169,13 +179,13 @@ function initDeploy(org, transType) {
         logger.info('chaincode language: %s, path: %s', language, chaincodePath);
     }
 
-    if ((typeof (ccDfnPtr.deploy.metadataPath) !== 'undefined')) {
+    if (ccDfnPtr.deploy.hasOwnProperty('metadataPath')) {
         metadataPath = verifyIfPathExists(ccDfnPtr.deploy.metadataPath);
         logger.info('metadataPath: %s', metadataPath);
     }
 
     //This part is untested, it might need to call the getRelativePath() function
-    if ((typeof (ccDfnPtr.deploy.collectionsConfigPath) !== 'undefined')) {
+    if (ccDfnPtr.deploy.hasOwnProperty('collectionsConfigPath')) {
         collectionsConfigPath = verifyIfPathExists(ccDfnPtr.deploy.collectionsConfigPath);
         logger.info('collectionsConfigPath: %s', collectionsConfigPath);
     }
@@ -222,7 +232,7 @@ function getOrgOrdererID(org) {
 
     var cpOrgs = cpf['organizations'];
 
-    if (typeof cpOrgs[org].ordererID !== 'undefined') {
+    if (cpOrgs[org].hasOwnProperty('ordererID')) {
         ordererID = cpOrgs[org].ordererID;
     } else {
         ordererID = Object.getOwnPropertyNames(orderersCPFList)[0];
@@ -1101,6 +1111,54 @@ async function queryBlockchainInfo(channel, client, org) {
     }
 }
 
+/**
+ * stop a child process
+ *
+ * @param {string} proc The child process to be stopped
+ * @param {string} msg The log message
+ * @returns {Promise<void>}
+ */
+async function stopProcess(proc, msg) {
+    for (let wpid in proc) {
+        process.kill(wpid);
+    }
+    logger.info("[stopProcess] %s terminated", msg);
+}
+
+/**
+ * snapshot queryinfo handler
+ *
+ * @param {string} org The target organization name
+ * @param {string} proc The child process to be terminated
+ * @returns {Promise<void>}
+ */
+async function snapshotHandler(org, proc) {
+    const pteSnapshotPath = path.join(__dirname, 'pte-snapshot.js')
+    snapshotProcess = child_process.spawn('node', [pteSnapshotPath, Nid, uiFile, PTEid]);
+    snapshotPid.push(snapshotProcess.pid);
+    logger.info('[pte-main:snapshotHandler] spawn off snapshot child process pid: %d', snapshotProcess.pid);
+    logger.info('[pte-main:snapshotHandler] node %s %d %s %s %d', pteSnapshotPath, Nid, uiFile, PTEid);
+
+    snapshotProcess.stdout.on('data', function (data) {
+        logger.info('stdout: ' + data);
+        if (data.indexOf("reach final block height:") > -1) {
+            logger.info('snapshots are generated successfully, stop transaction proc');
+            stopProcess(proc, 'transaction processes');
+            process.exit(0);
+        }
+    });
+
+    snapshotProcess.on('close', function (code) {
+        logger.info('snapshotProcess closed, with code=', code);
+    });
+
+    snapshotProcess.on('exit', function (code, signal) {
+        logger.info("snapshotProcess exited, with code= " + code + " and signal= " + signal);
+        stopProcess(proc, 'transaction processes');
+        process.exit(0);
+    });
+}
+
 async function performance_main() {
     try {
         var channelConfigDone = 0;
@@ -1237,6 +1295,7 @@ async function performance_main() {
                 logger.info('[performance_main] channel name: ', channelName);
                 queryBlockchainInfo(channel, client, org);
             } else if ((transType == 'INVOKE') || (transType == 'DISCOVERY')) {
+
                 // spawn off processes for transactions
                 getCCID();
                 var nProcPerOrg = parseInt(txCfgPtr.nProcPerOrg);
@@ -1247,6 +1306,12 @@ async function performance_main() {
                     output = {}
                     const pteExecPath = path.join(__dirname, 'pte-execRequest.js')
                     var workerProcess = child_process.spawn('node', [pteExecPath, j, Nid, uiFile, tStart, org, PTEid]);
+                    workerPid.push(workerProcess.pid);
+
+                    // spawn off process for snapshot
+                    if ( (!snapshotProcess) && (j === 0) && (snapshot) && (snapshot.enabled) && (invokeType === 'MOVE') ) {
+                        snapshotHandler(org, workerPid);
+                    }
 
                     workerProcess.stdout.on('data', function (data) {
                         logger.debug('stdout: ' + data);
@@ -1275,6 +1340,11 @@ async function performance_main() {
                         logger.info("Child proc exited, procId= " + procDone + ", exit with code= " + code + " and signal= " + signal);
 
                         if (procDone === nProcPerOrg * channelOrgName.length) {
+                            // end snapshot process if exists
+                            if ( snapshotProcess ) {
+                                logger.info('stop snapshot proc pid: ', snapshotPid);
+                                stopProcess(snapshotPid, 'snapshot process');
+                            }
 
                             var summaryIndex;
                             var transMode = txCfgPtr.transMode.toUpperCase();

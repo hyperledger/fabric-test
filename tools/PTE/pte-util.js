@@ -172,7 +172,7 @@ function getOrgOrdererID(org, cpList) {
 
     var cpOrgs = cpf['organizations'];
 
-    if (typeof cpOrgs[org].ordererID !== 'undefined') {
+    if (cpOrgs[org].hasOwnProperty('ordererID')) {
         ordererID = cpOrgs[org].ordererID;
     } else {
         var orderersCPFList = {};
@@ -314,6 +314,32 @@ function getConnProfileList(cpPath) {
 }
 module.exports.getConnProfileListSubmitter = function (fileList) {
     return getConnProfileList(fileList);
+}
+
+// find the name of the org that contains the peer
+function findOrgnameFromPeer(fileList, peerName) {
+
+    for (i = 0; i < fileList.length; i++) {
+        let cpf = fileList[i];
+
+        let temp = readConfigFile(cpf, 'test-network');
+        let organzation;
+        if (!isEmpty(temp['organizations'])) {
+            peerOrg = temp['organizations'];
+            for (let org in peerOrg) {
+                if (!isEmpty(peerOrg[org]['peers']) && peerOrg[org]['peers'].includes(peerName)) {
+                    logger.info('find peer(%s) in org(%s)', peerName, org);
+                    return org;
+                }
+            }
+        }
+    }
+
+    return null;
+
+}
+module.exports.findOrgnameFromPeerSubmitter = function (fileList, peerName) {
+    return findOrgnameFromPeer(fileList, peerName);
 }
 
 // get orderers or peers from all connection profiles
@@ -577,34 +603,34 @@ function getAdmin(client, nid, userOrg, cpf) {
     var certPath;
     var certPEM;
 
-    if (typeof cpOrgs[userOrg].admin_cert !== 'undefined') {
+    if (cpOrgs[userOrg].hasOwnProperty('admin_cert')) {
         logger.debug('[getAdmin] %s admin_cert defined', userOrg);
         keyPEM = cpOrgs[userOrg].priv;
         certPEM = cpOrgs[userOrg].admin_cert;
-    } else if ((typeof cpOrgs[userOrg].adminPrivateKey !== 'undefined') &&
-        (typeof cpOrgs[userOrg].signedCert !== 'undefined')) {
+    } else if ((cpOrgs[userOrg].hasOwnProperty('adminPrivateKey')) &&
+        (cpOrgs[userOrg].hasOwnProperty('signedCert'))) {
         logger.debug('[getAdmin] %s adminPrivateKey and signedCert defined', userOrg);
-        if (typeof cpOrgs[userOrg].adminPrivateKey.path !== 'undefined') {
+        if (cpOrgs[userOrg].adminPrivateKey.hasOwnProperty('path')) {
             keyPath = path.resolve(cpOrgs[userOrg].adminPrivateKey.path, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
             logger.debug('[getAdmin] keyPath: %s', keyPath);
-        } else if (typeof cpOrgs[userOrg].adminPrivateKey.pem !== 'undefined') {
+        } else if (cpOrgs[userOrg].adminPrivateKey.hasOwnProperty('pem')) {
             keyPEM = cpOrgs[userOrg].adminPrivateKey.pem;
         } else {
             logger.error('[getAdmin] error: adminPrivateKey invalid');
             return null;
         }
-        if (typeof cpOrgs[userOrg].signedCert.path !== 'undefined') {
+        if (cpOrgs[userOrg].signedCert.hasOwnProperty('path')) {
             certPath = path.resolve(cpOrgs[userOrg].signedCert.path, 'signcerts');
             certPEM = Buffer.from(readAllFiles(certPath)[0]).toString();
             logger.debug('[getAdmin] certPath: %s', certPath);
-        } else if (typeof cpOrgs[userOrg].signedCert.pem !== 'undefined') {
+        } else if (cpOrgs[userOrg].signedCert.hasOwnProperty('pem')) {
             certPEM = cpOrgs[userOrg].signedCert.pem;
         } else {
             logger.error('[getAdmin] error: signedCert invalid');
             return null;
         }
-    } else if (typeof cpOrgs[userOrg].adminPath !== 'undefined') {
+    } else if (cpOrgs[userOrg].hasOwnProperty('adminPath')) {
         logger.debug('[getAdmin] %s adminPath defined', userOrg);
         keyPath = path.resolve(cpOrgs[userOrg].adminPath, 'keystore');
         keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
@@ -657,40 +683,40 @@ function getOrdererAdmin(client, userOrg, cpPath) {
     }
     logger.debug('[getOrdererAdmin] orderer ID= %s', ordererID);
 
-    if ((typeof orderersCPFList.admin_cert !== 'undefined') &&
-        (typeof orderersCPFList.priv !== 'undefined')) {
+    if (orderersCPFList.hasOwnProperty('admin_cert') &&
+        orderersCPFList.hasOwnProperty('priv')) {
         logger.debug('[getOrdererAdmin] %s global orderer admin_cert and priv defined', userOrg);
         keyPEM = orderersCPFList.priv;
         certPEM = orderersCPFList.admin_cert;
-    } else if ((typeof orderersCPFList[ordererID].admin_cert !== 'undefined') &&
-        (typeof orderersCPFList[ordererID].priv !== 'undefined')) {
+    } else if (orderersCPFList[ordererID].hasOwnProperty('admin_cert') &&
+        orderersCPFList[ordererID].hasOwnProperty('priv')) {
         logger.debug('[getOrdererAdmin] %s local orderer admin_cert and priv defined', userOrg);
         keyPEM = orderersCPFList[ordererID].priv;
         certPEM = orderersCPFList[ordererID].admin_cert;
-    } else if ((typeof orderersCPFList[ordererID].adminPrivateKey !== 'undefined') &&
-        (typeof orderersCPFList[ordererID].signedCert !== 'undefined')) {
+    } else if (orderersCPFList[ordererID].hasOwnProperty('adminPrivateKey') &&
+        orderersCPFList[ordererID].hasOwnProperty('signedCert')) {
         logger.debug('[getOrdererAdmin] %s adminPrivateKey and signedCert defined', ordererID);
-        if (typeof orderersCPFList[ordererID].adminPrivateKey.path !== 'undefined') {
+        if (orderersCPFList[ordererID].adminPrivateKey.hasOwnProperty('path')) {
             keyPath = path.resolve(orderersCPFList[ordererID].adminPrivateKey.path, 'keystore');
             keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
             logger.debug('[getOrdererAdmin] %s keyPath: %s', ordererID, keyPath);
-        } else if (typeof orderersCPFList[ordererID].adminPrivateKey.pem !== 'undefined') {
+        } else if (orderersCPFList[ordererID].adminPrivateKey.hasOwnProperty('pem')) {
             keyPEM = orderersCPFList[ordererID].adminPrivateKey.pem;
         } else {
             logger.error('[getOrdererAdmin] %s error: adminPrivateKey invalid', ordererID);
             return null;
         }
-        if (typeof orderersCPFList[ordererID].signedCert.path !== 'undefined') {
+        if (orderersCPFList[ordererID].signedCert.hasOwnProperty('path')) {
             certPath = path.resolve(orderersCPFList[ordererID].signedCert.path, 'signcerts');
             certPEM = Buffer.from(readAllFiles(certPath)[0]).toString();
             logger.debug('[getOrdererAdmin] %s certPath: %s', ordererID, certPath);
-        } else if (typeof orderersCPFList[ordererID].signedCert.pem !== 'undefined') {
+        } else if (orderersCPFList[ordererID].signedCert.hasOwnProperty('pem')) {
             certPEM = orderersCPFList[ordererID].signedCert.pem;
         } else {
             logger.error('[getOrdererAdmin] %s error: signedCert invalid', ordererID);
             return null;
         }
-    } else if (typeof orderersCPFList.adminPath !== 'undefined') {
+    } else if (orderersCPFList.hasOwnProperty('adminPath')) {
         logger.debug('[getOrdererAdmin] %s global orderer adminPath defined', userOrg);
         keyPath = path.resolve(orderersCPFList.adminPath, 'keystore');
         keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
@@ -698,7 +724,7 @@ function getOrdererAdmin(client, userOrg, cpPath) {
         certPEM = readAllFiles(certPath)[0];
         logger.debug('[getOrdererAdmin] keyPath: %s', keyPath);
         logger.debug('[getOrdererAdmin] certPath: %s', certPath);
-    } else if (typeof orderersCPFList[ordererID].adminPath !== 'undefined') {
+    } else if (orderersCPFList[ordererID].hasOwnProperty('adminPath')) {
         logger.debug('[getOrdererAdmin] %s local orderer adminPath defined', userOrg);
         keyPath = path.resolve(orderersCPFList[ordererID].adminPath, 'keystore');
         keyPEM = Buffer.from(readAllFiles(keyPath)[0]).toString();
@@ -847,13 +873,13 @@ function getTLSCert(key, subkey, cpf, cpPath) {
     }
     logger.debug('[getTLSCert] key found: %j', cpPtr[subkey]);
 
-    if (typeof (cpf.tls_cert) !== 'undefined') {
+    if (cpf.hasOwnProperty('tls_cert')) {
         data = cpf.tls_cert;
     } else {
-        if (typeof (cpPtr[subkey].tlsCACerts.pem) != 'undefined') {
+        if (cpPtr[subkey].tlsCACerts.hasOwnProperty('pem')) {
             //tlscerts is a cert
             data = cpPtr[subkey].tlsCACerts['pem'];
-        } else if (typeof (cpPtr[subkey].tlsCACerts.path) != 'undefined') {
+        } else if (cpPtr[subkey].tlsCACerts.hasOwnProperty('path')) {
             //tlscerts is a path
             var caRootsPath = path.join(homeDirectory, cpPtr[subkey].tlsCACerts['path']);
             if (fs.existsSync(caRootsPath)) {
@@ -978,7 +1004,7 @@ module.exports.getOrdererID = function (pid, orgName, org, txCfgPtr, cpf, method
         ordererID = SCordList[ordIdx];
     } else {
         // default method: USERDEFINED
-        if (typeof cpOrgs[org].ordererID !== 'undefined') {
+        if (cpOrgs[org].hasOwnProperty('ordererID')) {
             ordererID = cpOrgs[org].ordererID;
         } else {
             ordererID = Object.getOwnPropertyNames(orderersCPFList)[0];
