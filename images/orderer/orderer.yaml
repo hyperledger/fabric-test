@@ -336,11 +336,6 @@ ChannelParticipation:
   # Channel participation API is enabled.
   Enabled: "false"
 
-  # Permanently remove storage resources when a channel is removed.
-  # Defines the default behavior of channel removal.
-  RemoveStorage: "false"
-
-
 ################################################################################
 #
 #   Consensus Configuration
