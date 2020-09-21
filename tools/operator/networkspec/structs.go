@@ -27,6 +27,7 @@ type Config struct {
 	ArtifactsLocation        string                 `yaml:"artifactsLocation,omitempty"`
 	OrdererOrganizations     []OrdererOrganizations `yaml:"ordererOrganizations,omitempty"`
 	PeerOrganizations        []PeerOrganizations    `yaml:"peerOrganizations,omitempty"`
+	AddPeersToOrganization   []PeerOrganizations    `yaml:"addPeer,omitempty"`
 	Orderer                  struct {
 		OrdererType string `yaml:"ordererType,omitempty"`
 	} `yaml:"orderer,omitempty"`

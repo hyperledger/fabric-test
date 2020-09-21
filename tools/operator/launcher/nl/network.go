@@ -53,7 +53,7 @@ func (n Network) GenerateConfigurationFiles(upgrade bool) error {
 	configtxPath := paths.TemplateFilePath("configtx")
 	cryptoConfigPath := paths.TemplateFilePath("crypto-config")
 	inputFilePath := paths.TemplateFilePath("input")
-	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir())
+	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir(false))
 	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
 	inputArgs = []string{configtxPath, cryptoConfigPath}
 	if n.TemplatesDir != "" {
@@ -70,14 +70,39 @@ func (n Network) GenerateConfigurationFiles(upgrade bool) error {
 	return nil
 }
 
+//ExtendConfigurationFiles - to extend all the configuration files
+func (n Network) ExtendConfigurationFiles(env string) error {
+
+	var inputArgs []string
+	var peerExtendPath string
+	cryptoConfigPath := paths.TemplateFilePath("crypto-config-extend")
+	inputArgs = []string{cryptoConfigPath}
+	if env == "docker" {
+		peerExtendPath = paths.TemplateFilePath("peer-extend")
+		inputArgs = append(inputArgs, peerExtendPath)
+	}
+	inputFilePath := paths.TemplateFilePath("input")
+	configFilesPath := fmt.Sprintf("--output=%s", paths.ConfigFilesDir(true))
+	yttPath := fmt.Sprintf("%s/ytt", paths.YTTPath())
+	yttObject := ytt.YTT{InputPath: inputFilePath, OutputPath: configFilesPath}
+	_, err := networkclient.ExecuteCommand(yttPath, yttObject.Args(inputArgs), true)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // GenerateCryptoCerts -  to generate the crypto certs
-func (n Network) GenerateCryptoCerts(config networkspec.Config) error {
+func (n Network) GenerateCryptoCerts(config networkspec.Config, cryptoAction string) error {
 
 	artifactsLocation := config.ArtifactsLocation
 	outputPath := paths.CryptoConfigDir(artifactsLocation)
 	cryptoConfigPath := paths.ConfigFilePath("crypto-config")
+	if cryptoAction == "extend" {
+		cryptoConfigPath = paths.ConfigFilePath("crypto-config-extend")
+	}
 	generate := networkclient.Cryptogen{ConfigPath: cryptoConfigPath, Output: outputPath}
-	_, err := networkclient.ExecuteCommand("cryptogen", generate.Args(), true)
+	_, err := networkclient.ExecuteCommand("cryptogen", generate.Args(cryptoAction), true)
 	if err != nil {
 		return err
 	}
@@ -104,7 +129,7 @@ func (n Network) GenerateGenesisBlock(config networkspec.Config) error {
 	artifactsLocation := config.ArtifactsLocation
 	path := paths.ChannelArtifactsDir(artifactsLocation)
 	outputPath := paths.JoinPath(path, "genesis.block")
-	configFilesPath := paths.ConfigFilesDir()
+	configFilesPath := paths.ConfigFilesDir(false)
 	configtxgen := networkclient.Configtxgen{Config: configFilesPath, OutputPath: outputPath}
 	_, err := networkclient.ExecuteCommand("configtxgen", configtxgen.Args(), true)
 	if err != nil {
@@ -162,10 +187,10 @@ func (n Network) moveKey(path, fileName string) error {
 
 func (n Network) GenerateNetworkArtifacts(config networkspec.Config) error {
 
-	configFilesPath := paths.ConfigFilesDir()
+	configFilesPath := paths.ConfigFilesDir(false)
 	var err error
 
-	err = n.GenerateCryptoCerts(config)
+	err = n.GenerateCryptoCerts(config, "generate")
 	if err != nil {
 		logger.ERROR("Failed to generate certificates")
 		return err

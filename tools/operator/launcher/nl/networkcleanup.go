@@ -18,7 +18,7 @@ func (n Network) NetworkCleanUp(config networkspec.Config) error {
 
 	artifactsLocation := config.ArtifactsLocation
 	paths := []string{
-		paths.ConfigFilesDir(),
+		paths.ConfigFilesDir(false),
 		paths.JoinPath(paths.TemplatesDir(), "input.yaml"),
 		paths.ChannelArtifactsDir(artifactsLocation),
 		paths.CryptoConfigDir(artifactsLocation),

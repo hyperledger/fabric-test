@@ -1,0 +1,155 @@
+#! Copyright IBM Corp. All Rights Reserved.
+#!
+#! SPDX-License-Identifier: Apache-2.0
+
+#@ load("@ytt:data", "data")
+#@ services = {}
+
+#@ def validateAttributeExists(config, image):
+#@   return hasattr(config, "dockerImages") and hasattr(config.dockerImages, image)
+#@ end
+
+#@ def couchDB(config):
+#@   totalPeers = 0
+#@   for k in range(0, len(config.peerOrganizations)):
+#@     totalPeers = totalPeers + config.peerOrganizations[k].numPeers
+#@   end
+#@   couchDBUniquePort = 33000 + totalPeers
+#@   for k in range(0, len(config.peerOrganizations)):
+#@     for i in range(0, len(config.addPeer)):
+#@     if config.addPeer[i].name == config.peerOrganizations[k].name:
+#@     org = config.addPeer[i]
+#@     for j in range(0, org.numPeers):
+#@       j = j + config.peerOrganizations[k].numPeers
+#@       container_name = "couchdb-peer{}-{}".format(j, org.name)
+#@       env = ["COUCHDB_USER=admin", "COUCHDB_PASSWORD=adminpw"]
+#@       services[container_name] = {"container_name":container_name, "environment":env, "image":"couchdb:3.1", "ports":["{}:5984".format(couchDBUniquePort)]}
+#@       couchDBUniquePort += 1
+#@     end
+#@     end
+#@     end
+#@   end
+#@ end
+
+#@ def mutualTLS(config):
+#@   output = []
+#@     for i in range(0, len(config.peerOrganizations)):
+#@       organization = config.peerOrganizations[i]
+#@       output.append("/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/ca/ca.{}-cert.pem".format(organization.name, organization.name))
+#@     end
+#@     for j in range(0, len(config.ordererOrganizations)):
+#@       organization = config.ordererOrganizations[j]
+#@       output.append("/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/ca/ca.{}-cert.pem".format(organization.name, organization.name))
+#@     end
+#@   return output
+#@ end
+
+#@ def peers(config):
+#@   totalPeers = 0
+#@   for k in range(0, len(config.peerOrganizations)):
+#@     totalPeers = totalPeers + config.peerOrganizations[k].numPeers
+#@   end
+#@   for k in range(0, len(config.peerOrganizations)):
+#@     peerUniquerPort = 31000 + totalPeers
+#@     peerHealthCheckPort = 31100 + totalPeers
+#@     for i in range(0, len(config.addPeer)):
+#@     if config.addPeer[i].name == config.peerOrganizations[k].name:
+#@     org = config.addPeer[i]
+#@     for j in range(0, org.numPeers):
+#@       j = j + config.peerOrganizations[k].numPeers
+#@       env = ["CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock", "FABRIC_LOGGING_SPEC={}".format(config.peerFabricLoggingSpec), "CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=configfiles_default"]
+#@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=admin")
+#@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=adminpw")
+#@       if config.gossipEnable == True:
+#@         env.append("CORE_PEER_GOSSIP_STATE_ENABLED=true")
+#@         env.append("CORE_PEER_GOSSIP_ORGLEADER=false")
+#@         env.append("CORE_PEER_GOSSIP_USELEADERELECTION=true")
+#@       else:
+#@         env.append("CORE_PEER_GOSSIP_STATE_ENABLED=false")
+#@         env.append("CORE_PEER_GOSSIP_ORGLEADER=true")
+#@         env.append("CORE_PEER_GOSSIP_USELEADERELECTION=false")
+#@       end
+#@       env.append("CORE_PEER_GOSSIP_BOOTSTRAP=127.0.0.1:{}".format(peerUniquerPort))
+#@       env.append("CORE_PEER_GOSSIP_ENDPOINT=peer{}-{}:{}".format(j, org.name, peerUniquerPort))
+#@       env.append("CORE_PEER_LISTENADDRESS=0.0.0.0:{}".format(peerUniquerPort))
+#@       env.append("CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:{}".format(7052))
+#@       env.append("CORE_CHAINCODE_EXECUTETIMEOUT=1500s")
+#@       env.append("CORE_PEER_ID=peer{}-{}".format(j, org.name))
+#@       env.append("CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/msp".format(org.name, j, org.name, org.name))
+#@       env.append("CORE_PEER_LOCALMSPID={}".format(org.mspId))
+#@       env.append("CORE_PEER_ADDRESS=peer{}-{}:{}".format(j, org.name, peerUniquerPort))
+#@       env.append("CORE_OPERATIONS_LISTENADDRESS=0.0.0.0:9443")
+#@       env.append("CORE_PEER_CHAINCODEADDRESS=peer{}-{}:{}".format(j, org.name, 7052))
+#@       env.append("CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer{}-{}:{}".format(j, org.name, peerUniquerPort))
+#@       env.append("CORE_OPERATIONS_TLS_ENABLED=false")
+#@       env.append("CORE_METRICS_PROVIDER=prometheus")
+#@       if config.tls == "mutual":
+#@         env.append("CORE_PEER_TLS_CLIENTROOTCAS_FILES={}".format(" ".join(mutualTLS(config))))
+#@         env.append("CORE_PEER_TLS_CLIENTAUTHREQUIRED=true")
+#@         env.append("CORE_PEER_TLS_ENABLED=true")
+#@       else:
+#@         env.append("CORE_PEER_TLS_ENABLED={}".format(config.tls))
+#@       end
+#@       env.append("CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
+#@       env.append("CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
+#@       env.append("CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/tls/ca.crt".format(org.name, j, org.name, org.name))
+#@       container_name = "peer{}-{}".format(j, org.name)
+#@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
+#@       volumes.append("/var/run/:/host/var/run/")
+#@       volumes.append("{}/backup/peer{}-{}:/var/hyperledger/production".format(artifactsLocation,j, org.name))
+#@       image = ""
+#@       if validateAttributeExists(config, "peer"):
+#@         image = config.dockerImages.peer
+#@       else:
+#@         image = "{}/fabric-peer:{}".format(config.dockerOrg, config.dockerTag)
+#@       end
+#@       if validateAttributeExists(config, "ccenv"):
+#@         env.append("CORE_CHAINCODE_BUILDER={}".format(config.dockerImages.ccenv))
+#@       else:
+#@         env.append("CORE_CHAINCODE_BUILDER={}/fabric-ccenv:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       if validateAttributeExists(config, "baseos"):
+#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME={}".format(config.dockerImages.baseos))
+#@       else:
+#@         env.append("CORE_CHAINCODE_GOLANG_RUNTIME={}/fabric-baseos:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       if validateAttributeExists(config, "javaenv"):
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME={}".format(config.dockerImages.javaenv))
+#@       else:
+#@         env.append("CORE_CHAINCODE_JAVA_RUNTIME={}/fabric-javaenv:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       if validateAttributeExists(config, "nodeenv"):
+#@         env.append("CORE_CHAINCODE_NODE_RUNTIME={}".format(config.dockerImages.nodeenv))
+#@       else:
+#@         env.append("CORE_CHAINCODE_NODE_RUNTIME={}/fabric-nodeenv:{}".format(config.dockerOrg, config.dockerTag))
+#@       end
+#@       ports = ["7051", "{}:{}".format(peerUniquerPort,peerUniquerPort), "{}:{}".format(peerHealthCheckPort,9443)]
+#@       services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name}
+#@       if config.dbType == "couchdb":
+#@         env.append("CORE_LEDGER_STATE_STATEDATABASE=CouchDB")
+#@         env.append("CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb-{}:5984".format(container_name))
+#@         services[container_name] = {"image":image, "environment":env, "volumes":volumes, "ports":ports, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric/peer", "command":"peer node start", "container_name":container_name, "depends_on":["couchdb-{}".format(container_name)]}
+#@       end
+#@       peerUniquerPort += 1
+#@       peerHealthCheckPort += 1
+#@     end
+#@     end
+#@     end
+#@   end
+#@ end
+
+#@ config = data.values
+#@ artifactsLocation = config.artifactsLocation
+#@ if artifactsLocation.endswith("/") == False:
+#@   artifactsLocation = artifactsLocation + "/"
+#@ end
+version: '2'
+#@ if config.dbType == "couchdb":
+#@   couchDB(config)
+#@ end
+#@ peers(config)
+networks:
+  default:
+    external:
+      name: configfiles_default
+services: #@ services

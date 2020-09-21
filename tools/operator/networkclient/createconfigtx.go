@@ -12,7 +12,7 @@ import (
 func CreateConfigTxYaml() error {
 
 	var err error
-	configFilesDir := paths.ConfigFilesDir()
+	configFilesDir := paths.ConfigFilesDir(false)
 	configtxTemplatePath := paths.TemplateFilePath("configtx")
 	inputFilePath := paths.TemplateFilePath("input")
 	configtxPath := paths.ConfigFilePath("configtx")

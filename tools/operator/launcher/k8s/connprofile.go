@@ -6,6 +6,8 @@ import (
 	"net"
 	"strconv"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
@@ -181,7 +183,7 @@ func (k8s K8s) certificateAuthorities(peerOrg networkspec.PeerOrganizations, con
 	return CAs, nil
 }
 
-func (k8s K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, config networkspec.Config, clientset *kubernetes.Clientset) (map[string]networkspec.Peer, error) {
+func (k8s K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, config networkspec.Config, clientset *kubernetes.Clientset, extend bool) (map[string]networkspec.Peer, error) {
 
 	peers := make(map[string]networkspec.Peer)
 	protocol := "grpc"
@@ -189,7 +191,20 @@ func (k8s K8s) peersPerOrganization(peerorg networkspec.PeerOrganizations, confi
 	if config.TLS == "true" || config.TLS == "mutual" {
 		protocol = "grpcs"
 	}
-	for i := 0; i < peerorg.NumPeers; i++ {
+	var totalPeers int
+	var peerIndex int
+	if extend {
+		for _, org := range config.PeerOrganizations {
+			if org.Name == peerorg.Name {
+				totalPeers = org.NumPeers + peerorg.NumPeers
+				peerIndex = org.NumPeers
+			}
+		}
+	} else {
+		totalPeers = peerorg.NumPeers
+		peerIndex = 0
+	}
+	for i := peerIndex; i < totalPeers; i++ {
 		connProfile := connectionprofile.ConnProfile{}
 		peerName := fmt.Sprintf("peer%d-%s", i, peerorg.Name)
 		portNumber, err := k8s.ServicePort(peerName, config.K8s.ServiceType, config.K8s.Namespace, false, clientset)
@@ -231,7 +246,7 @@ func (k8s K8s) GenerateConnectionProfiles(config networkspec.Config, clientset *
 	for org := 0; org < len(config.PeerOrganizations); org++ {
 		organizations := make(map[string]networkspec.Organization)
 		peerorg := config.PeerOrganizations[org]
-		peersMap, err := k8s.peersPerOrganization(peerorg, config, clientset)
+		peersMap, err := k8s.peersPerOrganization(peerorg, config, clientset, false)
 		if err != nil {
 			return err
 		}
@@ -263,6 +278,52 @@ func (k8s K8s) GenerateConnectionProfiles(config networkspec.Config, clientset *
 			logger.ERROR("Failed to generate caliper connection profile")
 			return err
 		}
+	}
+	return nil
+}
+
+func (k8s K8s) UpdateConnectionProfilesToAddNewPeers(config networkspec.Config, clientset *kubernetes.Clientset) error {
+
+	var connectionProfileObject networkspec.ConnectionProfile
+	for _, org := range config.AddPeersToOrganization {
+		peersMap, err := k8s.peersPerOrganization(org, config, clientset, true)
+		if err != nil {
+			return err
+		}
+		path := paths.ConnectionProfilesDir(config.ArtifactsLocation)
+		fileName := paths.JoinPath(path, fmt.Sprintf("connection_profile_%s.yaml", org.Name))
+		yamlFile, err := ioutil.ReadFile(fileName)
+		if err != nil {
+			logger.ERROR("Failed to read connection profile")
+			return err
+		}
+		err = yaml.Unmarshal(yamlFile, &connectionProfileObject)
+		if err != nil {
+			logger.ERROR("Failed to unmarshall yaml file")
+			return err
+		}
+		peers := connectionProfileObject.Peers
+		orgPeers := connectionProfileObject.Organizations[org.Name].Peers
+		for peerName, peerConfig := range peersMap {
+			orgPeers = append(orgPeers, peerName)
+			peers[peerName] = peerConfig
+		}
+		orgObject := connectionProfileObject.Organizations[org.Name]
+		orgObject.Peers = orgPeers
+		connectionProfileObject.Organizations[org.Name] = orgObject
+		connectionProfileObject.Peers = peers
+		yamlBytes, err := yaml.Marshal(connectionProfileObject)
+		if err != nil {
+			logger.ERROR("Failed to convert the connection profile struct to bytes")
+			return err
+		}
+		yamlBytes = append([]byte("version: 1.0 \nname: My network \ndescription: Connection Profile for Blockchain Network \n"), yamlBytes...)
+		err = ioutil.WriteFile(fileName, yamlBytes, 0644)
+		if err != nil {
+			logger.ERROR("Failed to write content to ", fileName)
+			return err
+		}
+		logger.INFO("Successfully updated ", fileName)
 	}
 	return nil
 }

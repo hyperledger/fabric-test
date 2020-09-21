@@ -16,6 +16,19 @@ joinChannel:
   - channelName: testorgschannel0
     organizations: org1
 
+snapshotChannel:
+  - channelName: testorgschannel0
+    organizations: org1
+    targetPeers: peer0-org1
+    blockNumber: 
+    - 1
+
+joinChannelBySnapshot:
+  - channelName: testorgschannel0
+    organizations: org1
+    targetPeers: peer1-org1
+    snapshotPath: peer0-org1:1
+
 installChaincode:
   - name: samplecc
     sdk: cli

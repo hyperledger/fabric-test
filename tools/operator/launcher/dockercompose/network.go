@@ -2,6 +2,7 @@ package dockercompose
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
@@ -73,6 +74,23 @@ func (d DockerCompose) UpgradeLocalNetwork(config networkspec.Config) error {
 	return nil
 }
 
+//ExtendLocalNetwork -- To upgrade the network in the local environment
+func (d DockerCompose) ExtendLocalNetwork(config networkspec.Config) error {
+
+	d.Config = config
+	configPath := paths.ConfigFilePath("peer-extend")
+	d = DockerCompose{ConfigPath: configPath, Action: []string{"up", "-d"}}
+	_, err := networkclient.ExecuteCommand("docker-compose", d.Args(), true)
+	if err != nil {
+		return err
+	}
+	err = d.UpdateConnectionProfilesToAddNewPeers(config)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 //UpgradeDB -- upgrade database
 func (d DockerCompose) UpgradeDB(config networkspec.Config) error {
 	err := networkclient.UpgradeDB(config, "")
@@ -105,9 +123,20 @@ func (d DockerCompose) DownLocalNetwork(config networkspec.Config) error {
 
 	var network nl.Network
 	d.Config = config
+
+	extendConfigPath := paths.ConfigFilePath("peer-extend")
+	_, err := os.Stat(extendConfigPath)
+	if err == nil {
+		d = DockerCompose{ConfigPath: extendConfigPath, Action: []string{"down", "--volumes"}}
+		_, err = networkclient.ExecuteCommand("docker-compose", d.Args(), true)
+		if err != nil {
+			return err
+		}
+	}
+
 	configPath := paths.ConfigFilePath("docker")
 	d = DockerCompose{ConfigPath: configPath, Action: []string{"down", "--volumes", "--remove-orphans"}}
-	_, err := networkclient.ExecuteCommand("docker-compose", d.Args(), true)
+	_, err = networkclient.ExecuteCommand("docker-compose", d.Args(), true)
 	if err != nil {
 		return err
 	}
@@ -198,6 +227,23 @@ func (d DockerCompose) DockerNetwork(action string) error {
 		err = d.UpgradeLocalNetwork(d.Config)
 		if err != nil {
 			logger.ERROR("Failed to upgrade local fabric network")
+			return err
+		}
+	case "addPeer":
+		var network nl.Network
+		err = network.ExtendConfigurationFiles("docker")
+		if err != nil {
+			logger.ERROR("Failed to generate docker compose file")
+			return err
+		}
+		err = network.GenerateCryptoCerts(d.Config, "extend")
+		if err != nil {
+			logger.ERROR("Failed to generate certificates")
+			return err
+		}
+		err = d.ExtendLocalNetwork(d.Config)
+		if err != nil {
+			logger.ERROR("Failed to extend local fabric network")
 			return err
 		}
 	case "upgradeDB":

@@ -38,6 +38,10 @@ func (c ConnProfile) updateConnectionProfilePerChannel(inputObject interface{}, 
 		channelName, channelPrefix, numChannels = configObject.ChannelName, configObject.ChannelPrefix, configObject.NumChannels
 		chainCodeID = fmt.Sprintf("%s:%s", configObject.ChainCodeName, configObject.ChainCodeVersion)
 		orgNames = strings.Split(configObject.Organizations, ",")
+	} else if action == "joinBySnapshot" {
+		configObject, _ := inputObject.(*inputStructs.JoinChannelBySnapshot)
+		channelName, channelPrefix, numChannels = configObject.ChannelName, configObject.ChannelPrefix, configObject.NumChannels
+		orgNames = strings.Split(configObject.Organizations, ",")
 	} else {
 		configObject, _ := inputObject.(*inputStructs.Channel)
 		channelName, channelPrefix, numChannels = configObject.ChannelName, configObject.ChannelPrefix, configObject.NumChannels
@@ -99,7 +103,7 @@ func (c ConnProfile) updateConnectionProfilePerOrg(organizations []inputStructs.
 		switch action {
 		case "create":
 			err = c.updateConnectionProfile(file, channelName, "orderer")
-		case "join":
+		case "join", "joinBySnapshot":
 			err = c.updateConnectionProfile(file, channelName, "peer")
 		case "instantiate", "upgrade":
 			err = c.updateConnectionProfile(file, channelName, "chaincodes", inputArgs[len(inputArgs)-1])
