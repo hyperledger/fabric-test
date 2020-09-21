@@ -27,6 +27,23 @@ joinChannel:
     numChannels: 1
     organizations: org1,org2
 
+snapshotChannel:
+# snapshot channel for the channel at the given block number 
+  - channelName: testorgschannel0
+    organizations: org1
+    targetPeers: peer0-org1
+    blockNumber: 
+    - 10
+    - 20
+    - 30
+
+joinChannelBySnapshot:
+# join targetPeers to the channel using snapshot
+  - channelName: testorgschannel0
+    organizations: org1
+    targetPeers: peer1-org1
+    snapshotPath: peer0-org1:10
+
 installChaincode:
 # installs chaincode with specified name on all peers in listed organziations
   - name: samplecc
@@ -76,13 +93,13 @@ invokes:
     name: samplecc
     targetPeers: AllPeers
     nProcPerOrg: 2
-    nRequest: 10
+    nRequest: 50
     runDur: 0
     organizations: org1,org2
     txnOpt:
       - mode: constant
         options:
-          constFreq: 0
+          constFreq: 2000
           devFreq: 0
     queryCheck: 100
     eventOpt:
@@ -97,6 +114,12 @@ invokes:
       payLoadMin: 1024
       payLoadMax: 2048
     args: "put,a1,1"
+    snapshotOptions:
+      height:
+      - 10
+      queryFrequency: 100
+      snapshotPeer: peer0-org1
+      enabled: false
 
 queries:
   - channelName: testorgschannel0

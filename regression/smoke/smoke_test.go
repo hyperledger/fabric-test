@@ -5,6 +5,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/hyperledger/fabric-test/tools/operator/testclient"
+	l "github.com/hyperledger/fabric-test/tools/operator/launcher"
 )
 
 var _ = Describe("Smoke Test Suite", func() {
@@ -13,9 +14,11 @@ var _ = Describe("Smoke Test Suite", func() {
 		var (
 			action        string
 			inputSpecPath string
+			networkSpecPath string
 		)
 		It("Running end to end (old cc lifecycle)", func() {
 			inputSpecPath = "../testdata/smoke-test-input.yml"
+			networkSpecPath = "../testdata/smoke-network-spec.yml"
 
 			By("1) Creating channel")
 			action = "create"
@@ -52,28 +55,48 @@ var _ = Describe("Smoke Test Suite", func() {
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("8) Sending Invokes")
+			By("8) Snashot the ledger")
+			action = "snapshot"
+			err = testclient.Testclient(action, inputSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("9) Sending Invokes")
 			action = "invoke"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("9) Printing Peer Logs")
+			By("10) Printing Peer Logs")
 			action = "command"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("10) Upgrading Chaincode")
+			By("11) Adding new peer to the network")
+			action = "addPeer"
+			err = l.Launcher(action, "docker", "", networkSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("12) Upgrading Chaincode")
 			action = "upgrade"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("11) Sending Queries")
+			By("13) Sending Queries")
 			action = "query"
 			testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("12) Printing Peer Logs")
+			By("14) Printing Peer Logs")
 			action = "command"
+			err = testclient.Testclient(action, inputSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("15) Join new peers using snapshot")
+			action = "joinBySnapshot"
+			err = testclient.Testclient(action, inputSpecPath)
+			Expect(err).NotTo(HaveOccurred())
+
+			By("16) Sending Invokes")
+			action = "invoke"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 		})

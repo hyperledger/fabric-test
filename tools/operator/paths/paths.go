@@ -77,33 +77,46 @@ func ScriptsDir() string {
 
 //TemplateFilePath --
 func TemplateFilePath(fileName string) string {
-	templateFiles := map[string]string{"crypto-config": "crypto-config.yaml", "configtx": "configtx.yaml", "k8s": "k8s", "docker": "docker", "input": "input.yaml"}
+	templateFiles := map[string]string{
+		"crypto-config":        "crypto-config.yaml",
+		"crypto-config-extend": "crypto-config-extend.yaml",
+		"configtx":             "configtx.yaml",
+		"docker":               "docker/docker-compose.yaml",
+		"peer-extend":          "docker/peer-extend.yaml",
+		"input":                "input.yaml",
+	}
 	return JoinPath(TemplatesDir(), templateFiles[fileName])
 }
 
 //ConfigFilesDir --
-func ConfigFilesDir() string {
+func ConfigFilesDir(extend bool) string {
 	currentDir, err := GetCurrentDir()
 	if err != nil {
 		logger.ERROR("ConfigFilesDir function is failed in getting current directory")
 	}
+	configDirName := "configFiles"
 	if strings.Contains(currentDir, "regression") {
-		return componentPath(currentDir, "../../tools/operator/configFiles")
+		configDirName = "../../tools/operator/configFiles"
 	}
-	return componentPath(currentDir, "configFiles")
+	if extend {
+		configDirName = "configFiles/extend"
+		if strings.Contains(currentDir, "regression") {
+			configDirName = "../../tools/operator/configFiles/extend"
+		}
+	}
+	return componentPath(currentDir, configDirName)
 }
 
 //ConfigFilePath --
 func ConfigFilePath(fileName string) string {
 	configFiles := map[string]string{
-		"crypto-config": "crypto-config.yaml",
-		"configtx":      "configtx.yaml",
-		"docker":        "docker-compose.yaml",
-		"services":      "fabric-k8s-service.yaml",
-		"pods":          "fabric-k8s-pods.yaml",
-		"pvc":           "fabric-k8s-pvc.yaml",
+		"crypto-config":        "crypto-config.yaml",
+		"crypto-config-extend": "extend/crypto-config-extend.yaml",
+		"configtx":             "configtx.yaml",
+		"docker":               "docker-compose.yaml",
+		"peer-extend":          "extend/peer-extend.yaml",
 	}
-	return JoinPath(ConfigFilesDir(), configFiles[fileName])
+	return JoinPath(ConfigFilesDir(false), configFiles[fileName])
 }
 
 //GetCurrentDir --

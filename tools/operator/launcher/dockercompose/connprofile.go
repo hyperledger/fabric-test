@@ -10,6 +10,8 @@ import (
 	"io/ioutil"
 	"sort"
 
+	yaml "gopkg.in/yaml.v2"
+
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
@@ -161,7 +163,7 @@ func (d DockerCompose) certificateAuthorities(peerOrg networkspec.PeerOrganizati
 }
 
 //PeersPerOrganization --
-func (d DockerCompose) peersPerOrganization(peerorg networkspec.PeerOrganizations, config networkspec.Config) (map[string]networkspec.Peer, error) {
+func (d DockerCompose) peersPerOrganization(peerorg networkspec.PeerOrganizations, config networkspec.Config, extend bool) (map[string]networkspec.Peer, error) {
 
 	nodeIP := d.GetDockerExternalIP()
 	peerOrgsLocation := paths.PeerOrgsDir(config.ArtifactsLocation)
@@ -170,7 +172,20 @@ func (d DockerCompose) peersPerOrganization(peerorg networkspec.PeerOrganization
 	if config.TLS == "true" || config.TLS == "mutual" {
 		protocol = "grpcs"
 	}
-	for i := 0; i < peerorg.NumPeers; i++ {
+	var totalPeers int
+	var peerIndex int
+	if extend {
+		for _, org := range config.PeerOrganizations {
+			if org.Name == peerorg.Name {
+				totalPeers = org.NumPeers + peerorg.NumPeers
+				peerIndex = org.NumPeers
+			}
+		}
+	} else {
+		totalPeers = peerorg.NumPeers
+		peerIndex = 0
+	}
+	for i := peerIndex; i < totalPeers; i++ {
 		connProfile := connectionprofile.ConnProfile{}
 		peerName := fmt.Sprintf("peer%d-%s", i, peerorg.Name)
 		portNumber, err := d.GetDockerServicePort(peerName, false)
@@ -208,7 +223,7 @@ func (d DockerCompose) GenerateConnectionProfiles(config networkspec.Config) err
 	for org := 0; org < len(config.PeerOrganizations); org++ {
 		organizations := make(map[string]networkspec.Organization)
 		peerorg := config.PeerOrganizations[org]
-		peersMap, err := d.peersPerOrganization(peerorg, config)
+		peersMap, err := d.peersPerOrganization(peerorg, config, false)
 		if err != nil {
 			return err
 		}
@@ -240,6 +255,52 @@ func (d DockerCompose) GenerateConnectionProfiles(config networkspec.Config) err
 			logger.ERROR("Failed to generate caliper connection profile")
 			return err
 		}
+	}
+	return nil
+}
+
+func (d DockerCompose) UpdateConnectionProfilesToAddNewPeers(config networkspec.Config) error {
+
+	var connectionProfileObject networkspec.ConnectionProfile
+	for _, org := range config.AddPeersToOrganization {
+		peersMap, err := d.peersPerOrganization(org, config, true)
+		if err != nil {
+			return err
+		}
+		path := paths.ConnectionProfilesDir(config.ArtifactsLocation)
+		fileName := paths.JoinPath(path, fmt.Sprintf("connection_profile_%s.yaml", org.Name))
+		yamlFile, err := ioutil.ReadFile(fileName)
+		if err != nil {
+			logger.ERROR("Failed to read connection profile")
+			return err
+		}
+		err = yaml.Unmarshal(yamlFile, &connectionProfileObject)
+		if err != nil {
+			logger.ERROR("Failed to unmarshall yaml file")
+			return err
+		}
+		peers := connectionProfileObject.Peers
+		orgPeers := connectionProfileObject.Organizations[org.Name].Peers
+		for peerName, peerConfig := range peersMap {
+			orgPeers = append(orgPeers, peerName)
+			peers[peerName] = peerConfig
+		}
+		orgObject := connectionProfileObject.Organizations[org.Name]
+		orgObject.Peers = orgPeers
+		connectionProfileObject.Organizations[org.Name] = orgObject
+		connectionProfileObject.Peers = peers
+		yamlBytes, err := yaml.Marshal(connectionProfileObject)
+		if err != nil {
+			logger.ERROR("Failed to convert the connection profile struct to bytes")
+			return err
+		}
+		yamlBytes = append([]byte("version: 1.0 \nname: My network \ndescription: Connection Profile for Blockchain Network \n"), yamlBytes...)
+		err = ioutil.WriteFile(fileName, yamlBytes, 0644)
+		if err != nil {
+			logger.ERROR("Failed to write content to ", fileName)
+			return err
+		}
+		logger.INFO("Successfully updated ", fileName)
 	}
 	return nil
 }

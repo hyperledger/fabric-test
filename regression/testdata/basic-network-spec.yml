@@ -67,6 +67,11 @@ peerOrganizations:
   numPeers: 1
   numCa: 1
 
+addPeer:
+- name: org1
+  mspId: Org1ExampleCom
+  numPeers: 1
+
 #! Capabilites for Orderer, Channel, Application groups
 ordererCapabilities: V2_0
 

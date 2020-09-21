@@ -50,6 +50,15 @@ type InvokeQueryUIObject struct {
 	OrdererFailover string                `json:"ordererFailover,omitempty"`
 	FailoverOpt     PeerOptions           `json:"failoverOpt,omitempty"`
 	OrdererOpt      OrdererOptions        `json:"ordererOpt,omitempty"`
+	Snapshot        SnapshotOptions       `json:"snapshot,omitempty"`
+}
+
+type SnapshotOptions struct {
+	Enabled   bool   `json:"enabled,omitempty"`
+	Height    []int  `json:"height,omitempty"`
+	QueryFreq int    `json:"queryFreq,omitempty"`
+	PeerName  string `json:"peerName,omitempty"`
+	ChannelID string `json:"channelID,omitempty"`
 }
 
 //BurstOptions --
@@ -192,6 +201,13 @@ func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, ac
 			Name:    invkQueryObject.ChannelName,
 			OrgName: orgNames,
 		},
+		Snapshot: SnapshotOptions{
+			Enabled:   invkQueryObject.SnapshotOpt.Enabled,
+			Height:    invkQueryObject.SnapshotOpt.Height,
+			QueryFreq: invkQueryObject.SnapshotOpt.QueryFrequency,
+			ChannelID: invkQueryObject.ChannelName,
+			PeerName:  invkQueryObject.SnapshotOpt.SnapshotPeer,
+		},
 		ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations),
 	}
 	if strings.EqualFold("DISCOVERY", invkQueryObject.TargetPeers) {
@@ -281,6 +297,7 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 			ticker := time.NewTicker(30 * time.Second)
 			done := make(chan bool, 1)
 			defer ticker.Stop()
+			mutex := sync.Mutex{}
 			for {
 				select {
 				case <-ticker.C:
@@ -289,9 +306,11 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 						break
 					}
 					channelName := invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name
+					mutex.Lock()
 					channelBlockchainCount[channelName] = make(map[int]map[string]BlockchainCount)
 					channelBlockchainCount[channelName][count] = make(map[string]BlockchainCount)
 					channelBlockchainCount[channelName][count], err = i.fetchMetrics(invokeQueryObjects[invokeQueryObjectIndex], channelBlockchainCount[channelName][count])
+					mutex.Unlock()
 					if err != nil {
 						logger.ERROR("Failed fetching metrics " + err.Error())
 						checkAndPushError(errCh)

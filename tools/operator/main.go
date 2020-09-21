@@ -46,7 +46,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 	var err error
 	var inputPath string
 	var config networkspec.Config
-	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync", "updateCapability", "updatePolicy", "upgradeDB"}
+	actions := []string{"up", "down", "createChannelTxn", "migrate", "health", "upgradeNetwork", "networkInSync", "updateCapability", "updatePolicy", "upgradeDB", "addPeer"}
 	if contains(actions, action) {
 		contents, _ := ioutil.ReadFile(inputFilePath)
 		contents = append([]byte("#@data/values \n"), contents...)
@@ -77,6 +77,12 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 		err = launcher.Launcher("upgradeNetwork", env, kubeConfigPath, inputPath)
 		if err != nil {
 			logger.ERROR("Failed to upgrade network")
+			return err
+		}
+	case "addPeer":
+		err = launcher.Launcher("addPeer", env, kubeConfigPath, inputPath)
+		if err != nil {
+			logger.ERROR("Failed to add peers to network")
 			return err
 		}
 	case "upgradeDB":
@@ -113,6 +119,18 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			logger.ERROR("Failed to join peers to channel in network")
 			return err
 		}
+	case "joinBySnapshot":
+		err = testclient.Testclient("joinBySnapshot", inputFilePath)
+		if err != nil {
+			logger.ERROR("Failed to join peers to channel using snapshot in network")
+			return err
+		}
+	case "snapshot":
+		err = testclient.Testclient("snapshot", inputFilePath)
+		if err != nil {
+			logger.ERROR("Failed to create a snapshot on peer to channel in network")
+			return err
+		}
 	case "install":
 		err = testclient.Testclient("install", inputFilePath)
 		if err != nil {
@@ -144,7 +162,7 @@ func doAction(action, env, kubeConfigPath, inputFilePath string) error {
 			return err
 		}
 	case "createChannelTxn":
-		configTxnPath := paths.ConfigFilesDir()
+		configTxnPath := paths.ConfigFilesDir(false)
 		err = networkclient.GenerateChannelTransaction(config, configTxnPath)
 		if err != nil {
 			logger.ERROR("Failed to create channel transaction")

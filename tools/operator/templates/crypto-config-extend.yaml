@@ -1,0 +1,31 @@
+#! Copyright IBM Corp. All Rights Reserved.
+#!
+#! SPDX-License-Identifier: Apache-2.0
+
+#@ load("@ytt:data", "data")
+#@ config = data.values
+#@ localIP = "127.0.0.1"
+PeerOrgs:
+#@ for j in range(0, len(config.peerOrganizations)):
+#@ for i in range(0, len(config.addPeer)):
+#@ if config.addPeer[i].name == config.peerOrganizations[j].name:
+#@   peerOrg = config.addPeer[i]
+- Domain: #@ peerOrg.name
+  Name: #@ peerOrg.name
+  EnableNodeOUs: #@ config.enableNodeOUs
+  Users:
+    Count: 1
+  Specs:
+  #@ for i in range(0, peerOrg.numPeers):
+  #@ peerNum = i + config.peerOrganizations[j].numPeers
+    - Hostname: #@ "peer{}-{}".format(peerNum, peerOrg.name)
+      SANS:
+        - #@ "{}".format(localIP) 
+    #@ if config.nodeportIP != "":
+        - #@ config.nodeportIP
+    #@ end
+  #@ end
+#@ end
+#@ end
+#@ end
+

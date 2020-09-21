@@ -5,10 +5,15 @@ type Cryptogen struct {
 	Output     string
 }
 
-func (c Cryptogen) Args() []string {
-	return []string{
-		"generate",
+func (c Cryptogen) Args(action string) []string {
+	crytogenArgs := []string{
+		action,
 		"--config", c.ConfigPath,
-		"--output", c.Output,
 	}
+	if action == "extend" {
+		crytogenArgs = append(crytogenArgs, "--input", c.Output)
+	} else {
+		crytogenArgs = append(crytogenArgs, "--output", c.Output)
+	}
+	return crytogenArgs
 }

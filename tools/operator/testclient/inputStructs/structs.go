@@ -2,17 +2,19 @@ package inputStructs
 
 //Config --
 type Config struct {
-	OrdererSystemChannel string           `yaml:"ordererSystemChannel,omitempty"`
-	Organizations        []Organization   `yaml:"organizations,omitempty"`
-	CreateChannel        []Channel        `yaml:"createChannel,omitempty"`
-	AnchorPeerUpdate     []Channel        `yaml:"anchorPeerUpdate,omitempty"`
-	JoinChannel          []Channel        `yaml:"joinChannel,omitempty"`
-	InstallCC            []InstallCC      `yaml:"installChaincode,omitempty"`
-	InstantiateCC        []InstantiateCC  `yaml:"instantiateChaincode,omitempty"`
-	UpgradeCC            []InstantiateCC  `yaml:"upgradeChaincode,omitempty"`
-	Invoke               []InvokeQuery    `yaml:"invokes,omitempty"`
-	Query                []InvokeQuery    `yaml:"queries,omitempty"`
-	CommandOptions       []CommandOptions `yaml:"command,omitempty"`
+	OrdererSystemChannel  string                  `yaml:"ordererSystemChannel,omitempty"`
+	Organizations         []Organization          `yaml:"organizations,omitempty"`
+	CreateChannel         []Channel               `yaml:"createChannel,omitempty"`
+	AnchorPeerUpdate      []Channel               `yaml:"anchorPeerUpdate,omitempty"`
+	JoinChannel           []Channel               `yaml:"joinChannel,omitempty"`
+	JoinChannelBySnapshot []JoinChannelBySnapshot `yaml:"joinChannelBySnapshot,omitempty"`
+	SnapshotChannel       []Snapshot              `yaml:"snapshotChannel,omitempty"`
+	InstallCC             []InstallCC             `yaml:"installChaincode,omitempty"`
+	InstantiateCC         []InstantiateCC         `yaml:"instantiateChaincode,omitempty"`
+	UpgradeCC             []InstantiateCC         `yaml:"upgradeChaincode,omitempty"`
+	Invoke                []InvokeQuery           `yaml:"invokes,omitempty"`
+	Query                 []InvokeQuery           `yaml:"queries,omitempty"`
+	CommandOptions        []CommandOptions        `yaml:"command,omitempty"`
 }
 
 //Channel --
@@ -23,12 +25,30 @@ type Channel struct {
 	ChannelPrefix    string `yaml:"channelPrefix,omitempty"`
 	AnchorPeerTxPath string `yaml:"anchorPeerUpdateTxPath,omitempty"`
 	NumChannels      int    `yaml:"numChannels,omitempty"`
+	TargetPeers      string `yaml:"targetPeers,omitempty"`
+	SnapshotPath     string `yaml:"snapshotPath,omitempty"`
 }
 
 //Organization --
 type Organization struct {
 	Name            string `yaml:"name,omitempty"`
 	ConnProfilePath string `yaml:"connProfilePath,omitempty"`
+}
+
+type Snapshot struct {
+	ChannelName   string `yaml:"channelName,omitempty"`
+	Organizations string `yaml:"organizations,omitempty"`
+	BlockNumber   []int  `yaml:"blockNumber,omitempty"`
+	TargetPeers   string `yaml:"targetPeers,omitempty"`
+}
+
+type JoinChannelBySnapshot struct {
+	ChannelName   string `yaml:"channelName,omitempty"`
+	Organizations string `yaml:"organizations,omitempty"`
+	TargetPeers   string `yaml:"targetPeers,omitempty"`
+	SnapshotPath  string `yaml:"snapshotPath,omitempty"`
+	ChannelPrefix string `yaml:"channelPrefix,omitempty"`
+	NumChannels   int    `yaml:"numChannels,omitempty"`
 }
 
 //InstallCC --
@@ -89,12 +109,20 @@ type InvokeQuery struct {
 	OrdererFailOver  bool                 `yaml:"ordererFailover,omitempty"`
 	PeerOpt          PeerOptions          `yaml:"peerOptions,omitempty"`
 	OrdererOpt       OrdererOptions       `yaml:"ordererOptions,omitempty"`
+	SnapshotOpt      SnapshotOptions      `yaml:"snapshotOptions,omitempty"`
 }
 
 //TransactionOptions --
 type TransactionOptions struct {
 	Mode    string  `yaml:"mode,omitempty"`
 	Options Options `yaml:"options,omitempty"`
+}
+
+type SnapshotOptions struct {
+	Enabled        bool   `yaml:"enabled,omitempty"`
+	Height         []int  `yaml:"height,omitempty"`
+	QueryFrequency int    `yaml:"queryFrequency,omitempty"`
+	SnapshotPeer   string `yaml:"snapshotPeer,omitempty"`
 }
 
 //Options  --

@@ -43,7 +43,7 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 	var err error
 	var connectionProfileFileContents []byte
 	tls := "disabled"
-	supportedActions := "create|anchorpeer|join|install|instantiate|upgrade|invoke|query|command"
+	supportedActions := "create|anchorpeer|join|joinBySnapshot|install|instantiate|upgrade|invoke|query|command|snapshot"
 	if strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yaml") || strings.HasSuffix(config.Organizations[0].ConnProfilePath, "yml") {
 		connectionProfileFileContents, err = ioutil.ReadFile(config.Organizations[0].ConnProfilePath)
 	} else {
@@ -70,6 +70,18 @@ func doAction(action string, config inputStructs.Config, testInputFilePath strin
 		case "create", "join", "anchorpeer":
 			var channelUIObject operations.ChannelUIObject
 			err := channelUIObject.ChannelConfigs(config, tls, action)
+			if err != nil {
+				return err
+			}
+		case "joinBySnapshot":
+			var joinBySnapshotUIObject operations.JoinBySnapshotUIObject
+			err := joinBySnapshotUIObject.JoinBySnapshot(config, tls)
+			if err != nil {
+				return err
+			}
+		case "snapshot":
+			var snapshotUIObject operations.SnapshotUIObject
+			err := snapshotUIObject.Snapshot(config, tls)
 			if err != nil {
 				return err
 			}

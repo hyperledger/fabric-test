@@ -508,6 +508,42 @@ func (k8s K8s) Network(action string) error {
 			logger.ERROR("Failed to generate connection profile")
 			return err
 		}
+	case "addPeer":
+		err = network.ExtendConfigurationFiles("k8s")
+		if err != nil {
+			logger.ERROR("Failed to generate docker compose file")
+			return err
+		}
+		err = network.GenerateCryptoCerts(k8s.Config, "extend")
+		if err != nil {
+			logger.ERROR("Failed to generate certificates")
+			return err
+		}
+		clientset, err := k8s.buildClientset(kubeconfig)
+		if err != nil {
+			logger.ERROR("Failed to generate clientset for kubernetes")
+			return err
+		}
+		err = k8s.extendLaunchNetwork(k8s.Config, clientset)
+		if err != nil {
+			logger.ERROR("Failed to launch k8s fabric network")
+			return err
+		}
+		err = k8s.PodStatusCheck(k8s.Config.K8s.Namespace, clientset)
+		if err != nil {
+			logger.ERROR("Failed to verify fabric K8s pods state")
+			return err
+		}
+		err = k8s.CheckComponentsHealth(k8s.Config, clientset)
+		if err != nil {
+			logger.ERROR("Failed to check fabric K8s pods health")
+			return err
+		}
+		err = k8s.UpdateConnectionProfilesToAddNewPeers(k8s.Config, clientset)
+		if err != nil {
+			logger.ERROR("Failed to generate connection profile")
+			return err
+		}
 	case "down":
 		clientset, err := k8s.buildClientset(kubeconfig)
 		if err != nil {
