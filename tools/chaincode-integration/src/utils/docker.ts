@@ -65,7 +65,7 @@ export class Docker {
     }
 
     public static async exec(container: string, command: string): Promise<string> {
-        return await exec(`docker exec ${container} ${command}`);
+        return await exec(`docker exec -t ${container} ${command}`);
     }
 
     public static async removeContainers(partialName: string) {
