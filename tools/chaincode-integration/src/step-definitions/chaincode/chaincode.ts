@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 import * as assert from 'assert';
 import { TableDefinition } from 'cucumber';
 import { binding } from 'cucumber-tsflow/dist';
-import { TransientMap } from 'fabric-network';
+import { TransientMap } from 'fabric-common';
 import { Contract, Transaction } from 'fabric-network';
 import * as path from 'path';
 import { given, then, when } from '../../decorators/steps';

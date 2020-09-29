@@ -1,7 +1,7 @@
 # Copyright the Hyperledger Fabric contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 @three-org @private-data-collections
-Feature: BasicChecks
+Feature: PrivateChecks
 
     Scenario: I can install and instantiate a private chaincode
         Given Channel "privatechannel" has been created using the profile "channel"
