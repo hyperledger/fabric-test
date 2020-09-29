@@ -16,7 +16,12 @@ function addLogging(type: 'given' | 'then' | 'when', stepPattern: RegExp | strin
         const orginalMethod = descriptor.value;
 
         descriptor.value = function(...args: any[]) {
-            const scenarios = (this.workspace as Workspace).feature.scenarios;
+            const feature = (this.workspace as Workspace).feature;
+            if (!feature) {
+                throw new Error('Missing workspace feature');
+            }
+
+            const scenarios = feature.scenarios;
             const scenario = scenarios[scenarios.length - 1];
 
             const step = scenario.steps.find((scenarioStep) => {
