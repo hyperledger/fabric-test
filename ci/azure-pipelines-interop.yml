@@ -259,6 +259,11 @@ stages:
           - template: templates/install_deps.yml
           - script: ./ci/scripts/interop/common/load-docker-images.sh
             displayName: Load Docker Images
+          - script: ./ci/scripts/interop/publish/docker-images.sh
+            env:
+              ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
+              ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
+            displayName: Publish Docker Images
           - script: ./ci/scripts/interop/publish/fabric-binary.sh
             env:
               ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
@@ -269,11 +274,6 @@ stages:
               ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
               ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
             displayName: Publish Fabric-CA Binaries
-          - script: ./ci/scripts/interop/publish/docker-images.sh
-            env:
-              ARTIFACTORY_USERNAME: $(ARTIFACTORY_USERNAME)
-              ARTIFACTORY_PASSWORD: $(ARTIFACTORY_PASSWORD)
-            displayName: Publish Docker Images
 
 # TODO: Implement testing for the Gateways and Contracts
 
