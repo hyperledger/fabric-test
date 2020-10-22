@@ -2,7 +2,7 @@
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
-import { Gateway, DefaultEventHandlerStrategies, GatewayOptions, Transaction } from 'fabric-network';
+import { Gateway, GatewayOptions, Transaction } from 'fabric-network';
 import * as fs from 'fs-extra';
 import { ChaincodeConfig, Feature, Global, Org } from '../../interfaces/interfaces';
 import { Network } from '../../network/network';
@@ -110,9 +110,6 @@ export class Workspace {
                 },
                 identity: identityName,
                 wallet: org.wallet,
-                eventHandlerOptions: {
-                    strategy: DefaultEventHandlerStrategies.NETWORK_SCOPE_ALLFORTX
-                },
             }
             await gateway.connect(commonConnectionProfile, gatewayOptions);
 

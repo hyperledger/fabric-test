@@ -3,7 +3,7 @@ Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 import * as FabricCAServices from 'fabric-ca-client';
-import { FileSystemWallet, X509WalletMixin } from 'fabric-network';
+import { Wallets, X509Identity } from 'fabric-network';
 import * as fs from 'fs-extra';
 import * as Handlebars from 'handlebars';
 import * as yaml from 'js-yaml';
@@ -132,17 +132,24 @@ export class Network {
             );
 
             const wallet = org.wallet;
-            const adminExists = await wallet.exists('admin');
+            const admin = await wallet.get('admin');
 
-            if (adminExists) {
+            if (admin) {
                 continue;
             }
 
             const enrollment = await ca.enroll({enrollmentID: 'admin', enrollmentSecret: 'adminpw'});
 
-            const identity = X509WalletMixin.createIdentity(org.mspid, enrollment.certificate, enrollment.key.toBytes());
+            const identity: X509Identity = {
+                credentials: {
+                    certificate: enrollment.certificate,
+                    privateKey: enrollment.key.toBytes(),
+                },
+                mspId: org.mspid,
+                type: 'X.509',
+            };
 
-            await wallet.import('admin', identity);
+            await wallet.put('admin', identity);
         }
     }
 
@@ -163,7 +170,7 @@ export class Network {
                 mspid: org.Name + 'MSP',
                 name: org.Name,
                 peers: this.parsePeers(org.Name),
-                wallet: new FileSystemWallet(this.getWalletPath(org.Name)),
+                wallet: await Wallets.newFileSystemWallet(this.getWalletPath(org.Name)),
             };
 
             logger.debug(`Parsed org ${org.Name}`, orgIface);
@@ -195,7 +202,7 @@ export class Network {
                         mspid: org.Name,
                         name,
                         peers: this.parsePeers(name),
-                        wallet: new FileSystemWallet(this.getWalletPath(name)),
+                        wallet: await Wallets.newFileSystemWallet(this.getWalletPath(name)),
                     };
 
                     organisations.push(orgIface);
@@ -373,7 +380,7 @@ export class Network {
     }
 
     private configureEnvVars() {
-        process.env.FABRIC_IMG_TAG = ':2.2';
+        process.env.FABRIC_IMG_TAG = ':2.1';
         process.env.FABRIC_CA_IMG_TAG = ':1.4';
         process.env.FABRIC_COUCHDB_TAG = ':0.4.18';
         process.env.FABRIC_DEBUG = 'info';

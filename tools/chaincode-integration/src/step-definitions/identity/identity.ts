@@ -5,8 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 import { TableDefinition } from 'cucumber';
 import { binding } from 'cucumber-tsflow/dist';
 import * as FabricCAServices from 'fabric-ca-client';
-import { Client, User } from 'fabric-common';
-import { Gateway, Identity as NetworkIdentity, Wallet, X509WalletMixin } from 'fabric-network';
+import { User } from 'fabric-common';
+import { Gateway, Identity as NetworkIdentity, IdentityProvider, Wallet, X509Identity } from 'fabric-network';
 import * as fs from 'fs-extra';
 import { given } from '../../decorators/steps';
 import { Org } from '../../interfaces/interfaces';
@@ -37,12 +37,10 @@ export class Identity {
         const wallet: Wallet = org.wallet;
 
         // Check to see if we've already enrolled the identity
-        const identityExists = await wallet.exists(identityName);
-        if (identityExists) {
+        const identity: NetworkIdentity = await wallet.get(identityName);
+        if (identity) {
             logger.debug(`Identity "${identityName}" already exists for organisation "${orgName}"`);
             return;
-        } else {
-            logger.debug(`Enrolling identity "${identityName}" for organisation "${orgName}"`);
         }
 
         // Create array of attributes
@@ -57,30 +55,38 @@ export class Identity {
             }
         }
 
-        // Check to see if we've already enrolled the admin user.
-        const adminExists = await wallet.exists('admin');
-        if (!adminExists) {
+        // Check to see if we've already enrolled the admin user
+        const admin: NetworkIdentity = await wallet.get('admin');
+        if (!admin) {
             logger.debug(`Missing admin for organisation "${orgName}"`);
             throw new Error(`Missing admin for organisation "${orgName}"`);
         }
 
         // load the network configuration
         const commonConnectionProfilePath: string = org.ccp;
+        const commonConnectionProfile: any = JSON.parse(fs.readFileSync(commonConnectionProfilePath, 'utf8'));
 
+        // Create a new CA client for interacting with the CA
+        const caURL: string = commonConnectionProfile.certificateAuthorities[org.cas[0].name].url;
+        const ca: FabricCAServices = new FabricCAServices(caURL);
+
+        // build a user object for authenticating with the CA
+        const provider: IdentityProvider = wallet.getProviderRegistry().getProvider(admin.type);
+        const adminUser: User = await provider.getUserContext(admin, 'admin');
+
+        // Register the user, enroll the user, and import the new identity into the wallet.
+        const secret: string = await ca.register({ affiliation: '', enrollmentID: identityName, role: 'client', attrs }, adminUser);
+        const enrollment: FabricCAServices.IEnrollResponse = await ca.enroll({ enrollmentID: identityName, enrollmentSecret: secret });
+        const x509Identity: X509Identity = {
+            credentials: {
+                certificate: enrollment.certificate,
+                privateKey: enrollment.key.toBytes(),
+            },
+            mspId: org.mspid,
+            type: 'X.509',
+        };
         try {
-            // Create a new gateway for connecting to our peer node.
-            const gateway = new Gateway();
-            await gateway.connect(commonConnectionProfilePath, { wallet, identity: 'admin', discovery: { enabled: true, asLocalhost: true } });
-
-            // Get the CA client object from the gateway for interacting with the CA.
-            const ca = gateway.getClient().getCertificateAuthority();
-            const adminIdentity = gateway.getCurrentIdentity();
-
-            // Register the user, enroll the user, and import the new identity into the wallet.
-            const secret = await ca.register({ affiliation: '', enrollmentID: identityName, role: 'client', attrs }, adminIdentity);
-            const enrollment = await ca.enroll({ enrollmentID: identityName, enrollmentSecret: secret });
-            const userIdentity = X509WalletMixin.createIdentity(org.mspid, enrollment.certificate, enrollment.key.toBytes());
-            await wallet.import(identityName, userIdentity);
+            await wallet.put(identityName, x509Identity);
         } catch (error) {
             logger.debug(`Error putting identity "${identityName}" into wallet:`, error.message);
             throw error;
