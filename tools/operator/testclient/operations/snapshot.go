@@ -93,7 +93,7 @@ func (s SnapshotUIObject) snapshotCLI(snapshotObject SnapshotUIObject) error {
 				args := []string{
 					"snapshot",
 					"submitrequest",
-					"-C", snapshotObject.ChannelOpt.Name,
+					"-c", snapshotObject.ChannelOpt.Name,
 					"-b", strconv.Itoa(snapshotObject.BlockNumber),
 					"--peerAddress", peerAddress,
 					"--tlsRootCertFile",

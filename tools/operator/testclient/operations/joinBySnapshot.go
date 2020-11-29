@@ -115,13 +115,13 @@ func (j JoinBySnapshotUIObject) joinBySnapshotCLI(joinBySnapshotObject JoinBySna
 					if err != nil {
 						return err
 					}
-					args = append(args, fmt.Sprintf("/var/hyperledger/production/ledgersData/snapshots/completed/%s", joinBySnapshotObject.SnapshotPath))
+					args = append(args, fmt.Sprintf("/var/hyperledger/production/snapshots/completed/%s", joinBySnapshotObject.SnapshotPath))
 				} else {
 					err = j.copySnapshotDirectoryK8s(peerName, joinBySnapshotObject)
 					if err != nil {
 						return err
 					}
-					args = append(args, fmt.Sprintf("/shared/data/ledgersData/snapshots/completed/%s", joinBySnapshotObject.SnapshotPath))
+					args = append(args, fmt.Sprintf("/shared/data/snapshots/completed/%s", joinBySnapshotObject.SnapshotPath))
 				}
 				_, err = networkclient.ExecuteCommand("peer", args, true)
 				if err != nil {
@@ -140,12 +140,12 @@ func (j JoinBySnapshotUIObject) copySnapshotDirectoryDocker(peer string, joinByS
 	if err != nil {
 		return err
 	}
-	content, _, err := cli.CopyFromContainer(ctx, joinBySnapshotObject.SnapshotPeer, fmt.Sprintf("/var/hyperledger/production/ledgersData/snapshots/completed/%s/%s", joinBySnapshotObject.ChannelOpt.Name, joinBySnapshotObject.SnapshotPath))
+	content, _, err := cli.CopyFromContainer(ctx, joinBySnapshotObject.SnapshotPeer, fmt.Sprintf("/var/hyperledger/production/snapshots/completed/%s/%s", joinBySnapshotObject.ChannelOpt.Name, joinBySnapshotObject.SnapshotPath))
 	if err != nil {
 		return err
 	}
 	options := types.CopyToContainerOptions{AllowOverwriteDirWithFile: true, CopyUIDGID: false}
-	err = cli.CopyToContainer(ctx, peer, "/var/hyperledger/production/ledgersData/snapshots/completed/", content, options)
+	err = cli.CopyToContainer(ctx, peer, "/var/hyperledger/production/snapshots/completed/", content, options)
 	if err != nil {
 		return err
 	}
@@ -159,7 +159,7 @@ func (j JoinBySnapshotUIObject) copySnapshotDirectoryK8s(peer string, joinBySnap
 	copyFromArgs := []string{
 		"-n", "fabric-system-test",
 		"cp",
-		fmt.Sprintf("%s-0:/shared/data/ledgersData/snapshots/completed/%s/%s", joinBySnapshotObject.SnapshotPeer, joinBySnapshotObject.ChannelOpt.Name, joinBySnapshotObject.SnapshotPath),
+		fmt.Sprintf("%s-0:/shared/data/snapshots/completed/%s/%s", joinBySnapshotObject.SnapshotPeer, joinBySnapshotObject.ChannelOpt.Name, joinBySnapshotObject.SnapshotPath),
 		fmt.Sprintf("/tmp/%s", joinBySnapshotObject.SnapshotPath),
 		"-c", "peer",
 	}
@@ -171,7 +171,7 @@ func (j JoinBySnapshotUIObject) copySnapshotDirectoryK8s(peer string, joinBySnap
 		"-n", "fabric-system-test",
 		"cp",
 		fmt.Sprintf("/tmp/%s", joinBySnapshotObject.SnapshotPath),
-		fmt.Sprintf("%s-0:/shared/data/ledgersData/snapshots/completed/%s", peer, joinBySnapshotObject.SnapshotPath),
+		fmt.Sprintf("%s-0:/shared/data/snapshots/completed/%s", peer, joinBySnapshotObject.SnapshotPath),
 		"-c", "peer",
 	}
 	_, err = networkclient.ExecuteCommand("kubectl", copyToArgs, true)
