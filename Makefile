@@ -4,15 +4,13 @@
 # -------------------------------------------------------------
 # This makefile defines the following targets
 #
-#   - regression/barebones			- Executes barebones tests
-#   - regression/barebones_caliper		- Executes barebones tests using Caliper
-#   - regression/basicnetwork		- Executes basicnetwork tests
-#   - regression/smoke				- Executes smoke tests
-#   - regression/systemtest			- Executes system tests on k8s cluster
-#   - regression/weekly				- Executes 12hr long running test in k8s environment
-#   - upgrade						- Executes upgrade scenario in weekly from 1.4 to 2.0
-#   - npm-init						- Initializes the PTE NPM modules
-#   - gotools						- Installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
+#   - regression/barebones          - Executes barebones tests
+#   - regression/barebones_caliper  - Executes barebones tests using Caliper
+#   - regression/basicnetwork       - Executes basicnetwork tests
+#   - regression/smoke              - Executes smoke tests
+#   - upgrade                       - Executes upgrade scenario in weekly from 1.4 to 2.0
+#   - npm-init                      - Initializes the PTE NPM modules
+#   - gotools                       - Installs go tools, such as: ginkgo, golint, goimports, gocov and govendor
 #
 # ------------------------------------------------------------------
 
