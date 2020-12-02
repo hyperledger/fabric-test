@@ -15,16 +15,17 @@ import (
 
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
-	//"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 )
 
 type Orderer struct {
-	General    *General           `yaml:"General,omitempty"`
-	FileLedger *FileLedger        `yaml:"FileLedger,omitempty"`
-	Kafka      *Kafka             `yaml:"Kafka,omitempty"`
-	Operations *OrdererOperations `yaml:"Operations,omitempty"`
-	Metrics    *OrdererMetrics    `yaml:"Metrics,omitempty"`
-	Consensus  *OrdererConsensus  `yaml:"OrdererConsensus,omitempty"`
+	General              *General             `yaml:"General,omitempty"`
+	FileLedger           *FileLedger          `yaml:"FileLedger,omitempty"`
+	Kafka                *Kafka               `yaml:"Kafka,omitempty"`
+	Operations           *OrdererOperations   `yaml:"Operations,omitempty"`
+	Metrics              *OrdererMetrics      `yaml:"Metrics,omitempty"`
+	Consensus            *OrdererConsensus    `yaml:"Consensus,omitempty"`
+	ChannelParticipation ChannelParticipation `yaml:"ChannelParticipation,omitempty"`
+	Admin                OrdererAdmin         `yaml:"Admin,omitempty"`
 
 	ExtraProperties map[string]interface{} `yaml:",inline,omitempty"`
 }
@@ -149,6 +150,23 @@ type OrdererConsensus struct {
 	SnapDir string `yaml:"SnapDir,omitempty"`
 }
 
+type ChannelParticipation struct {
+	Enabled            bool   `yaml:"Enabled"`
+	MaxRequestBodySize string `yaml:"MaxRequestBodySize,omitempty"`
+}
+
+type OrdererAdmin struct {
+	ListenAddress string `yaml:"ListenAddress,omitempty"`
+	//TLS				*OrdererTLS	`yaml:"TLS"`
+	TLS struct {
+		Enabled            bool     `yaml:"Enabled"`
+		Certificate        string   `yaml:"Certicate,omitempty"`
+		PrivateKey         string   `yaml:"PrivateKey,omitempty"`
+		ClientAuthRequired bool     `yaml:"ClientAuthRequired"`
+		ClientRootCAs      []string `yaml:"ClientRootCAs"`
+	} `yaml:"TLS,omitempty"`
+}
+
 func OrdererConfig(nsConfig networkspec.Config) (Orderer, error) {
 
 	var ordererConfig Orderer
@@ -175,13 +193,18 @@ func OrdererConfig(nsConfig networkspec.Config) (Orderer, error) {
 	ordererConfig.General.Cluster.ClientPrivateKey = "/etc/hyperledger/fabric/artifacts/tls/server.key"
 	ordererConfig.General.LocalMSPDir = "/etc/hyperledger/fabric/artifacts/msp"
 	ordererConfig.FileLedger.Location = "/shared/data"
+	ordererConfig.Consensus.WALDir = "/shared/data/etcdraft/wal"
+	ordererConfig.Consensus.SnapDir = "/shared/data/etcdraft/snapshot"
+	ordererConfig.ChannelParticipation.Enabled = true
+	ordererConfig.ChannelParticipation.MaxRequestBodySize = "1 MB"
 	ordererConfig.Operations.TLS.Enabled = false
+	ordererConfig.Admin.TLS.Enabled = false
 	ordererConfig.Metrics.Provider = "prometheus"
 	return ordererConfig, nil
 }
 
 //GenerateOrdererConfig --
-func GenerateOrdererConfig(name, orgName, mspID, artifactsLocation string, port int32, metricsPort int32, ordererConfig Orderer) error {
+func GenerateOrdererConfig(name, orgName, mspID, artifactsLocation string, port, metricsPort, adminPort int32, ordererConfig Orderer) error {
 
 	ordererConfig.General.LocalMSPID = mspID
 	var rootCAs []string
@@ -189,6 +212,7 @@ func GenerateOrdererConfig(name, orgName, mspID, artifactsLocation string, port 
 	ordererConfig.General.TLS.RootCAs = append(rootCAs, rootCA)
 	ordererConfig.General.ListenPort = int(port)
 	ordererConfig.Operations.ListenAddress = fmt.Sprintf(":%d", metricsPort)
+	ordererConfig.Admin.ListenAddress = fmt.Sprintf("0.0.0.0:%d", adminPort)
 	d, err := yaml.Marshal(&ordererConfig)
 	if err != nil {
 		return err

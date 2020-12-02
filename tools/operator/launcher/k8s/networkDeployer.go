@@ -408,21 +408,67 @@ func (k8s K8s) verifyContainersAreRunning(ns, podName string, clientset *kuberne
 		resultChan := <-watchPodStatus.ResultChan()
 		if resultChan.Type == watch.Added || resultChan.Type == watch.Modified {
 			pod := resultChan.Object.(*corev1.Pod)
-			if len(pod.Status.ContainerStatuses) == 0 {
-				continue
-			}
-			i := 0
-			for i < len(pod.Spec.Containers) {
-				if pod.Status.ContainerStatuses[i].State.Running != nil {
-					i++
-				} else if pod.Status.ContainerStatuses[i].State.Terminated != nil {
-					return errors.New(fmt.Sprintf("Pod: %s; Container %s; failed to come up with reason: %s, err: %s", podName, pod.Status.ContainerStatuses[i].Name, pod.Status.ContainerStatuses[i].State.Terminated.Reason, pod.Status.ContainerStatuses[i].State.Terminated.Message))
-				} else if pod.Status.ContainerStatuses[i].State.Waiting != nil {
+			if pod.Status.Phase != "Running" {
+				count := 0
+				ticker := time.NewTicker(15 * time.Second)
+				done := make(chan bool, 1)
+				defer ticker.Stop()
+				for {
+					select {
+					case <-ticker.C:
+						podStatus, err := clientset.CoreV1().Pods(ns).Watch(opts)
+						if err != nil {
+							return err
+						}
+						result := <-podStatus.ResultChan()
+						p := result.Object.(*corev1.Pod)
+						count++
+						if count >= 4 {
+							done <- true
+							return errors.New(fmt.Sprintf("Pod: %s; failed to come up with reason: %s, err: %s", podName, p.Status.Conditions[0].Reason, p.Status.Conditions[0].Message))
+						}
+						if p.Status.Phase == "Running" {
+							if len(p.Status.ContainerStatuses) == 0 {
+								continue
+							}
+							i := 0
+							for i < len(p.Spec.Containers) {
+								if p.Status.ContainerStatuses[i].State.Running != nil {
+									i++
+								} else if p.Status.ContainerStatuses[i].State.Terminated != nil {
+									return errors.New(fmt.Sprintf("Pod: %s; Container %s; failed to come up with reason: %s, err: %s", podName, p.Status.ContainerStatuses[i].Name, p.Status.ContainerStatuses[i].State.Terminated.Reason, p.Status.ContainerStatuses[i].State.Terminated.Message))
+								} else if p.Status.ContainerStatuses[i].State.Waiting != nil {
+									break
+								}
+							}
+							if i == len(p.Spec.Containers) {
+								done <- true
+								return nil
+							}
+						} else {
+							continue
+						}
+					case <-done:
+						return nil
+					}
+				}
+			} else {
+				if len(pod.Status.ContainerStatuses) == 0 {
+					continue
+				}
+				i := 0
+				for i < len(pod.Spec.Containers) {
+					if pod.Status.ContainerStatuses[i].State.Running != nil {
+						i++
+					} else if pod.Status.ContainerStatuses[i].State.Terminated != nil {
+						return errors.New(fmt.Sprintf("Pod: %s; Container %s; failed to come up with reason: %s, err: %s", podName, pod.Status.ContainerStatuses[i].Name, pod.Status.ContainerStatuses[i].State.Terminated.Reason, pod.Status.ContainerStatuses[i].State.Terminated.Message))
+					} else if pod.Status.ContainerStatuses[i].State.Waiting != nil {
+						break
+					}
+				}
+				if i == len(pod.Spec.Containers) {
 					break
 				}
-			}
-			if i == len(pod.Spec.Containers) {
-				break
 			}
 		}
 	}

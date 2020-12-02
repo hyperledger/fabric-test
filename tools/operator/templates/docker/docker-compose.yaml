@@ -124,7 +124,7 @@
 #@ end
 
 #@ def orderers(config):
-#@   (ordererUniquerPort, ordererHealthCheckPort) = (30000, 30100)
+#@   (ordererUniquerPort, ordererHealthCheckPort, ordererAdminListenPort) = (30000, 30100, 30200)
 #@   for i in range(0, len(config.ordererOrganizations)):
 #@     org = config.ordererOrganizations[i]
 #@     for j in range(0, org.numOderers):
@@ -147,6 +147,7 @@
 #@       env.append("ORDERER_GENERAL_TLS_ROOTCAS=[/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt]".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.key".format(org.name, j, org.name, org.name))
 #@       env.append("ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/ordererOrganizations/{}/orderers/orderer{}-{}.{}/tls/server.crt".format(org.name, j, org.name, org.name))
+#@       env.append("ORDERER_ADMIN_LISTENADDRESS=0.0.0.0:9443")
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
 #@       volumes.append("{}/backup/orderer{}-{}:/var/hyperledger/production/orderer".format(artifactsLocation, j, org.name))
 #@       container_name = "orderer{}-{}".format(j,org.name)
@@ -156,13 +157,14 @@
 #@       else:
 #@         image = "{}/fabric-orderer:{}".format(config.dockerOrg, config.dockerTag)
 #@       end
-#@       ports = ["{}:{}".format(ordererUniquerPort,ordererUniquerPort), "{}:{}".format(ordererHealthCheckPort,8443)]
+#@       ports = ["{}:{}".format(ordererUniquerPort,ordererUniquerPort), "{}:{}".format(ordererHealthCheckPort,8443), "{}:{}".format(ordererAdminListenPort,9443)]
 #@       services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name}
 #@       if config.orderer.ordererType == "kafka":
 #@         services[container_name] = {"image":image, "environment":env, "working_dir":"/opt/gopath/src/github.com/hyperledger/fabric", "command":"orderer", "volumes":volumes, "ports":ports, "container_name":container_name, "depends_on":kafkaList(config.kafka.numKafka)}
 #@       end
 #@       ordererUniquerPort += 1
 #@       ordererHealthCheckPort += 1
+#@       ordererAdminListenPort += 1
 #@     end
 #@   end
 #@ end
