@@ -14,7 +14,6 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
-	//"github.com/hyperledger/fabric-test/tools/operator/paths"
 )
 
 //K8s -
@@ -143,10 +142,11 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 
 	var ordererPort int32 = 30000
 	var ordererMetricsPort int32 = 32500
+	var ordererAdminListenPort int32 = 32700
 	for i := 0; i < len(nsConfig.OrdererOrganizations); i++ {
 		org := nsConfig.OrdererOrganizations[i]
 		for j := 0; j < org.NumOrderers; j++ {
-			err := fabricconfig.GenerateOrdererConfig(fmt.Sprintf("orderer%d-%s", j, org.Name), org.Name, org.MSPID, nsConfig.ArtifactsLocation, ordererPort, ordererMetricsPort, ordererConfig)
+			err := fabricconfig.GenerateOrdererConfig(fmt.Sprintf("orderer%d-%s", j, org.Name), org.Name, org.MSPID, nsConfig.ArtifactsLocation, ordererPort, ordererMetricsPort, ordererAdminListenPort, ordererConfig)
 			if err != nil {
 				return nil, errors.Wrap(err, "failed to generate orderer configuration file")
 			}
@@ -168,11 +168,12 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				Type:       "orderer",
 				Containers: containers,
 				Volumes:    k8s.volumesList("orderer", org.Name, fmt.Sprintf("orderer%d-%s", j, org.Name), nsConfig.K8s.DataPersistence, nsConfig.EnableNodeOUs),
-				Ports:      []int32{ordererPort, ordererMetricsPort},
+				Ports:      []int32{ordererPort, ordererMetricsPort, ordererAdminListenPort},
 			}
 			launchConfig = append(launchConfig, l)
 			ordererPort++
 			ordererMetricsPort++
+			ordererAdminListenPort++
 		}
 		for m := 0; m < org.NumCA; m++ {
 			l := k8s.caLaunchConfig(m, org.Name, caImage)
