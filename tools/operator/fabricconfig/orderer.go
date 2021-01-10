@@ -11,10 +11,9 @@ import (
 	"io/ioutil"
 	"time"
 
-	"gopkg.in/yaml.v2"
-
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
+	"gopkg.in/yaml.v2"
 )
 
 type Orderer struct {

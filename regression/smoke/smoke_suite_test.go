@@ -1,6 +1,7 @@
 package smoke_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -21,7 +22,12 @@ func TestSmoke(t *testing.T) {
 // Bringing up network using BeforeSuite
 var _ = BeforeSuite(func() {
 	networkSpecPath := "../testdata/smoke-network-spec.yml"
-	err := launcher.Launcher("up", "docker", "", networkSpecPath)
+	env := "docker"
+	config := kubeConfig()
+	if config != "" {
+		env = "k8s"
+	}
+	err := launcher.Launcher("up", env, config, networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
 })
 
@@ -29,7 +35,12 @@ var _ = BeforeSuite(func() {
 // and chaincode container images using AfterSuite
 var _ = AfterSuite(func() {
 	networkSpecPath := "../testdata/smoke-network-spec.yml"
-	err := launcher.Launcher("down", "docker", "", networkSpecPath)
+	env := "docker"
+	config := kubeConfig()
+	if config != "" {
+		env = "k8s"
+	}
+	err := launcher.Launcher("down", env, config, networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
 
 	dockerList := []string{"ps", "-aq", "-f", "status=exited"}
@@ -49,3 +60,12 @@ var _ = AfterSuite(func() {
 		networkclient.ExecuteCommand("docker", imageArgs, true)
 	}
 })
+
+// get kubeConfig from environment variable
+func kubeConfig() string {
+	kubeConfig, set := os.LookupEnv("KUBECONFIG")
+	if set {
+		return kubeConfig
+	}
+	return ""
+}

@@ -4,16 +4,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 	l "github.com/hyperledger/fabric-test/tools/operator/launcher"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
 var _ = Describe("Smoke Test Suite", func() {
 
 	Describe("Running Smoke Test Suite in fabric-test", func() {
 		var (
-			action        string
-			inputSpecPath string
+			action          string
+			inputSpecPath   string
 			networkSpecPath string
 		)
 		It("Running end to end (old cc lifecycle)", func() {
@@ -45,57 +45,42 @@ var _ = Describe("Smoke Test Suite", func() {
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("6) Printing Peer Logs")
-			action = "command"
-			err = testclient.Testclient(action, inputSpecPath)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("7) Sending Queries")
+			By("6) Sending Queries")
 			action = "query"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("8) Snashot the ledger")
+			By("7) Snashot the ledger")
 			action = "snapshot"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("9) Sending Invokes")
+			By("8) Sending Invokes")
 			action = "invoke"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("10) Printing Peer Logs")
-			action = "command"
-			err = testclient.Testclient(action, inputSpecPath)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("11) Adding new peer to the network")
+			By("9) Adding new peer to the network")
 			action = "addPeer"
 			err = l.Launcher(action, "docker", "", networkSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("12) Upgrading Chaincode")
+			By("10) Upgrading Chaincode")
 			action = "upgrade"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("13) Sending Queries")
+			By("11) Sending Queries")
 			action = "query"
 			testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("14) Printing Peer Logs")
-			action = "command"
-			err = testclient.Testclient(action, inputSpecPath)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("15) Join new peers using snapshot")
+			By("12) Join new peers using snapshot")
 			action = "joinBySnapshot"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("16) Sending Invokes")
+			By("13) Sending Invokes")
 			action = "invoke"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())

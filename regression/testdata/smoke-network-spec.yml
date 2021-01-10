@@ -3,7 +3,7 @@
 #! SPDX-License-Identifier: Apache-2.0
 ---
 dockerOrg: hyperledger-fabric.jfrog.io
-dockerTag: amd64-2.3-stable
+dockerTag: amd64-latest
 dockerImages:
   ca: hyperledger/fabric-ca:1.4
 
@@ -107,33 +107,33 @@ k8s:
   resources:
     orderers:
       limits:
-         cpu: "1"
-         memory: 1Gi
+        cpu: "0.1"
+        memory: 100Mi
       requests:
-         cpu: "0.5"
-         memory: 1Gi
+        cpu: "0.1"
+        memory: 100Mi
     peers:
       limits:
-         cpu: "0.5"
-         memory: 2Gi
+        cpu: "0.2"
+        memory: 200Mi
       requests:
-         cpu: "0.5"
-         memory: 2Gi
+        cpu: "0.2"
+        memory: 200Mi
 #! dind will be used to run all chaincode containers of a peer
     dind:
       limits:
-         cpu: "1"
-         memory: 1Gi
+        cpu: "0.5"
+        memory: 250Mi
       requests:
-         cpu: "1"
-         memory: 1Gi
+        cpu: "0.5"
+        memory: 250Mi
     couchdb:
       limits:
-         cpu: "0.2"
-         memory: 1Gi
+        cpu: "0.1"
+        memory: 100Mi
       requests:
-         cpu: "0.1"
-         memory: 1Gi
+        cpu: "0.1"
+        memory: 100Mi
     kafka:
       limits:
          cpu: "0.2"

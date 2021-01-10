@@ -1,0 +1,89 @@
+on: [push, pull_request]
+
+env:
+  FABRIC_CFG_PATH: /home/runner/work/fabric-test/fabric-test/config
+  GO_VER: 1.14.2
+  PATH: /home/runner/work/fabric-test/fabric-test/bin:/opt/go/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+  NODE_VER: 12.15.0
+
+jobs:
+  lint:
+    name: Lint and Unit Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Lint Code
+        run: make lint
+      - name: Run Unit Tests
+        run: make unit-tests
+  smoke:
+    name: Smoke Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc gradle haveged libtool make
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Run Smoke Tests
+        run: make regression/smoke
+  basic:
+    name: Basic Network Test
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc gradle haveged libtool make
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Run Smoke Tests
+        run: make regression/basicnetwork
+  k8s:
+    name: Smoke Test with k8s
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Install Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc gradle haveged libtool make
+          curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s -
+        env:
+          INSTALL_K3S_VERSION: v1.20.2+k3s1
+          K3S_KUBECONFIG_MODE: 777
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Run Smoke Test
+        run: make regression/smoke
+        env:
+          KUBECONFIG: /etc/rancher/k3s/k3s.yaml
