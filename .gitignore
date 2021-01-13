@@ -4,6 +4,7 @@
 *.iml
 *.log
 *.pyc
+*.tgz
 *.tx
 *~
 .#*
@@ -26,14 +27,15 @@ chaincodes/**/build
 feature/node_modules/*
 go-carpet-coverage*
 node-cli/node-cli
+node_modules
 package-lock.json
+pteReport.txt
 regression/systemtest/results_systest_pte.xml
 report.xml
 results.xml
 sdk/node/lib/protos/*
 tags
 tools/PTE/Logs/
-tools/PTE/node_modules
 tools/PTE/runPTE/
 tools/operator/configFiles
 tools/operator/launcher/ytt
