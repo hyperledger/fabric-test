@@ -11,7 +11,7 @@ schedules:
     displayName: InterOp Testing
     branches:
       include:
-        - master
+        - release-2.3
     always: true
 
 variables:
@@ -19,7 +19,7 @@ variables:
   - name: ARTIFACT_DIRECTORY
     value: $(Pipeline.Workspace)
   - name: BRANCH
-    value: master
+    value: release-2.3
   - name: FABRIC_CFG_PATH
     value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
   - name: GO_BIN
