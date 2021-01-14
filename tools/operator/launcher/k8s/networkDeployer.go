@@ -423,7 +423,7 @@ func (k8s K8s) verifyContainersAreRunning(ns, podName string, clientset *kuberne
 						result := <-podStatus.ResultChan()
 						p := result.Object.(*corev1.Pod)
 						count++
-						if count >= 4 {
+						if count >= 20 {
 							done <- true
 							return errors.New(fmt.Sprintf("Pod: %s; failed to come up with reason: %s, err: %s", podName, p.Status.Conditions[0].Reason, p.Status.Conditions[0].Message))
 						}
