@@ -212,7 +212,7 @@
 #@       env.append("CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/artifacts/msp/crypto-config/peerOrganizations/{}/peers/peer{}-{}.{}/tls/ca.crt".format(org.name, j, org.name, org.name))
 #@       container_name = "peer{}-{}".format(j, org.name)
 #@       volumes = ["{}:/etc/hyperledger/fabric/artifacts/msp/".format(artifactsLocation)]
-#@       volumes.append("/var/run/:/host/var/run/")
+#@       volumes.append("/var/run/docker.sock:/host/var/run/docker.sock")
 #@       volumes.append("{}/backup/peer{}-{}:/var/hyperledger/production".format(artifactsLocation,j, org.name))
 #@       image = ""
 #@       if validateAttributeExists(config, "peer"):
