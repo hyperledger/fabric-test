@@ -12,7 +12,6 @@ import (
 
 //CheckNetworkInSync -  to check whether the network is synced based on block height
 func CheckNetworkInSync(config networkspec.Config, kubeConfigPath string) error {
-
 	var artifactsLocation string
 	ordererOrgs := []string{}
 	numOrderersPerOrg := []string{}

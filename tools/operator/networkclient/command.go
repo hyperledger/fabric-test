@@ -40,10 +40,5 @@ func ExecuteCommand(name string, args []string, printLogs bool) (string, error) 
 
 //ExecuteK8sCommand - to execute the k8s commands
 func ExecuteK8sCommand(args []string, printLogs bool) (string, error) {
-
-	output, err := ExecuteCommand("kubectl", args, printLogs)
-	if err != nil {
-		return output, err
-	}
-	return output, nil
+	return ExecuteCommand("kubectl", args, printLogs)
 }
