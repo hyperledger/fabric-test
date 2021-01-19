@@ -132,7 +132,6 @@ type Result struct {
 
 //InvokeQuery -- To perform invoke/query with the objects created
 func (i InvokeQueryUIObject) InvokeQuery(config inputStructs.Config, tls, action string) error {
-
 	var invokeQueryObjects []InvokeQueryUIObject
 	configObjects := config.Invoke
 	if action == "Query" {
@@ -142,16 +141,11 @@ func (i InvokeQueryUIObject) InvokeQuery(config inputStructs.Config, tls, action
 		invkQueryObjects := i.generateInvokeQueryObjects(configObjects[key], config.Organizations, tls, action)
 		invokeQueryObjects = append(invokeQueryObjects, invkQueryObjects...)
 	}
-	err := i.invokeQueryTransactions(invokeQueryObjects)
-	if err != nil {
-		return err
-	}
-	return err
+	return i.invokeQueryTransactions(invokeQueryObjects)
 }
 
 //generateInvokeQueryObjects -- To generate objects for invoke/query
 func (i InvokeQueryUIObject) generateInvokeQueryObjects(invkQueryObject inputStructs.InvokeQuery, organizations []inputStructs.Organization, tls, action string) []InvokeQueryUIObject {
-
 	var invokeQueryObjects []InvokeQueryUIObject
 	orgNames := strings.Split(invkQueryObject.Organizations, ",")
 	invkQueryObjects := i.createInvokeQueryObjectForOrg(orgNames, action, tls, organizations, invkQueryObject)
@@ -161,7 +155,6 @@ func (i InvokeQueryUIObject) generateInvokeQueryObjects(invkQueryObject inputStr
 
 //createInvokeQueryObjectForOrg -- To craete invoke/query objects for an organization
 func (i InvokeQueryUIObject) createInvokeQueryObjectForOrg(orgNames []string, action, tls string, organizations []inputStructs.Organization, invkQueryObject inputStructs.InvokeQuery) []InvokeQueryUIObject {
-
 	var invokeQueryObjects []InvokeQueryUIObject
 	invokeParams := make(map[string]Parameters)
 	invokeCheck := "TRUE"
@@ -294,16 +287,16 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 				checkAndPushError(errCh)
 			}
 			count := 0
-			ticker := time.NewTicker(30 * time.Second)
+			ticker := time.NewTicker(10 * time.Second)
 			done := make(chan bool, 1)
 			defer ticker.Stop()
 			mutex := sync.Mutex{}
 			for {
 				select {
 				case <-ticker.C:
-					if count >= 5 {
+					if count >= 15 {
 						done <- true
-						break
+						continue
 					}
 					channelName := invokeQueryObjects[invokeQueryObjectIndex].ChannelOpt.Name
 					mutex.Lock()
@@ -314,6 +307,11 @@ func (i InvokeQueryUIObject) invokeQueryTransactions(invokeQueryObjects []Invoke
 					if err != nil {
 						logger.ERROR("Failed fetching metrics " + err.Error())
 						checkAndPushError(errCh)
+					}
+					err := validateLedger(channelBlockchainCount[channelName])
+					if err == nil {
+						done <- true
+						continue
 					}
 					count++
 				case <-done:
@@ -367,7 +365,6 @@ func validateLedger(blocks map[int]map[string]BlockchainCount) error {
 }
 
 func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject, channelBlockchainCount map[string]BlockchainCount) (map[string]BlockchainCount, error) {
-
 	connectionProfilePath := invokeQueryObject.ConnProfilePath
 	orgName := invokeQueryObject.ChannelOpt.OrgName
 	channelName := invokeQueryObject.ChannelOpt.Name
@@ -407,8 +404,7 @@ func (i InvokeQueryUIObject) fetchMetrics(invokeQueryObject InvokeQueryUIObject,
 				count, _ := strconv.Atoi(strings.TrimSpace(trxnCount))
 				peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
 				if err != nil {
-					logger.ERROR("Failed to get peer url from connection profile")
-					return nil, err
+					return nil, fmt.Errorf("Failed to get peer url from connection profile")
 				}
 				peerAddress := peerURL.Host
 				blockHash, _ := i.fetchBlockHash(peerAddress, orgName[index], peerName, channelName, connProfilePath, invokeQueryObject.TLS)
