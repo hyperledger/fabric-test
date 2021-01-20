@@ -63,34 +63,34 @@ func (d DockerCompose) VerifyContainersAreRunning() error {
 }
 
 func (d DockerCompose) checkHealth(componentName string, config networkspec.Config) error {
-
 	logger.INFO("Checking health for ", componentName)
-	var nodeIP string
 	portNumber, err := d.GetDockerServicePort(componentName, true)
 	if err != nil {
-		logger.ERROR("Failed to get the port for ", componentName)
-		return err
+		return fmt.Errorf("Failed to get the port for %v", componentName)
 	}
-	nodeIP = d.GetDockerExternalIP()
+	nodeIP := d.GetDockerExternalIP()
 	url := fmt.Sprintf("http://%s:%s/healthz", nodeIP, portNumber)
-	resp, err := http.Get(url)
-	if err != nil {
-		logger.ERROR("Error while hitting the endpoint")
-		return err
+	for i := 0; i < 6; i++ {
+		logger.INFO("Querying /healthz URL: " + url)
+		resp, err := http.Get(url)
+		if err != nil {
+			return fmt.Errorf("Error while hitting the endpoint %s", url)
+		}
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			return err
+		}
+		healthStatus := string(bodyBytes)
+		logger.INFO("Response status: ", strconv.Itoa(resp.StatusCode))
+		logger.INFO("Response body: ", healthStatus)
+		if resp.StatusCode == http.StatusOK {
+			logger.INFO("Health check passed for ", componentName)
+			return nil
+		}
+		time.Sleep(time.Second * 5)
 	}
-	defer resp.Body.Close()
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	healthStatus := string(bodyBytes)
-	logger.INFO("Response status: ", strconv.Itoa(resp.StatusCode))
-	logger.INFO("Response body: ", healthStatus)
-	if resp.StatusCode == http.StatusOK {
-		logger.INFO("Health check passed for ", componentName)
-		return nil
-	}
-	return fmt.Errorf("health check failed for %s; Response status = %d", componentName, resp.StatusCode)
+	return fmt.Errorf("Health check failed for %s", componentName)
 }
 
 func (d DockerCompose) CheckDockerContainersHealth(config networkspec.Config) error {
