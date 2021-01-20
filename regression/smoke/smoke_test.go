@@ -4,16 +4,16 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 	l "github.com/hyperledger/fabric-test/tools/operator/launcher"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
 var _ = Describe("Smoke Test Suite", func() {
 
 	Describe("Running Smoke Test Suite in fabric-test", func() {
 		var (
-			action        string
-			inputSpecPath string
+			action          string
+			inputSpecPath   string
 			networkSpecPath string
 		)
 		It("Running end to end (old cc lifecycle)", func() {
@@ -55,7 +55,7 @@ var _ = Describe("Smoke Test Suite", func() {
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("8) Snashot the ledger")
+			By("8) Snapshot the ledger")
 			action = "snapshot"
 			err = testclient.Testclient(action, inputSpecPath)
 			Expect(err).NotTo(HaveOccurred())

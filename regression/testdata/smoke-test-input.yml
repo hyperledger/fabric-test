@@ -92,8 +92,8 @@ invokes:
   - channelName: testorgschannel0
     name: samplecc
     targetPeers: AllPeers
-    nProcPerOrg: 2
-    nRequest: 50
+    nProcPerOrg: 1
+    nRequest: 5
     runDur: 0
     organizations: org1,org2
     txnOpt:
@@ -125,8 +125,8 @@ queries:
   - channelName: testorgschannel0
     name: samplecc
     targetPeers: OrgAnchor
-    nProcPerOrg: 2
-    nRequest: 10
+    nProcPerOrg: 1
+    nRequest: 5
     runDur: 0
     organizations: org1,org2
     ccOpt:
