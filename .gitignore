@@ -1,47 +1,41 @@
-*.pyc
-.*.sw*
-*.log
-node-cli/node-cli
+*#
+*.block
 *.cov
-/bin
-.idea
 *.iml
+*.log
+*.pyc
+*.tx
+*~
+.#*
+.*-dummy
+.*.sw*
+./build/
 .DS_Store
-tags
+.gradle
+.idea
+.project
+.settings
 .tags
 .vagrant/
-# Emacs backup files
-*~
-*#
-.#*
-# Makefile dummy artifacts
-.*-dummy
-# go-carpet output files
+.vscode
+/bin
+/config
+TESTS*.xml
+bin/
+chaincodes/**/build
+feature/node_modules/*
 go-carpet-coverage*
-# make node-sdk copied files
-sdk/node/lib/protos/*
-# Test result xml files
+node-cli/node-cli
+package-lock.json
+regression/systemtest/results_systest_pte.xml
 report.xml
 results.xml
-TESTS*.xml
-.settings
-.project
-.gradle
-./build/
-chaincodes/**/build
-bin/
-*.tx
-*.block
-# vscode settings
-.vscode
-#node_modules
-feature/node_modules/*
-tools/PTE/node_modules
+sdk/node/lib/protos/*
+tags
 tools/PTE/Logs/
+tools/PTE/node_modules
+tools/PTE/runPTE/
 tools/operator/configFiles
 tools/operator/launcher/ytt
 tools/operator/templates/input.yaml
-regression/systemtest/results_systest_pte.xml
-tools/PTE/runPTE/
-/config
-package-lock.json
+ytt
