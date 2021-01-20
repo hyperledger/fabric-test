@@ -36,13 +36,11 @@ func init() {
 
 //ExternalIP -- To get the externalIP of a fabric component
 func (k8s K8s) ExternalIP(config networkspec.Config, serviceName string, clientset *kubernetes.Clientset) (string, error) {
-
-	var nodeIP string
+	nodeIP := "localhost"
 	if config.K8s.ServiceType == "NodePort" {
 		output, err := k8s.NodeStatus(clientset)
 		if err != nil {
-			logger.ERROR("Failed to get the external IP for k8s using NodePort")
-			return "", err
+			return "", fmt.Errorf("Failed to get the external IP for k8s using NodePort")
 		}
 		for _, ip := range output.Addresses {
 			addr := net.ParseIP(ip.Address)
@@ -56,8 +54,7 @@ func (k8s K8s) ExternalIP(config networkspec.Config, serviceName string, clients
 	} else if config.K8s.ServiceType == "LoadBalancer" {
 		output, err := k8s.ServiceStatus(config.K8s.Namespace, serviceName, clientset)
 		if err != nil {
-			logger.ERROR("Failed to get the external IP for k8s using LoadBalancer")
-			return "", err
+			return "", fmt.Errorf("Failed to get the external IP for k8s using LoadBalancer")
 		}
 		nodeIP = output.Status.LoadBalancer.Ingress[0].IP
 	}
