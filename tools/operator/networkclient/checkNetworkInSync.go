@@ -42,6 +42,7 @@ func CheckNetworkInSync(config networkspec.Config, kubeConfigPath string) error 
 	numPeers := strings.Join(numPeersPerOrg[:], ",")
 	args := []string{kubeConfigPath, config.OrdererOrganizations[0].MSPID, artifactsLocation, ordererOrg, numOrderers, fmt.Sprintf("%d", config.NumChannels), peerOrg, numPeers, peerOrgMSPID}
 	os.Setenv("VALIDATE_BLOCK", "true")
+	logger.INFO("Verfying that the network is synced and all the orderers and the peers are at same block level in their respective channels")
 	_, err := ExecuteCommand("./scripts/validateNetworkInSync.sh", args, true)
 	if err != nil {
 		return err
