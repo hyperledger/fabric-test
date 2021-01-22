@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 
-git clone -b ${BRANCH} https://github.com/hyperledger/fabric-chaincode-node --single-branch "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-node"
+git clone -b release-2.2 https://github.com/hyperledger/fabric-chaincode-node --single-branch "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-node"
 cd "${GOPATH}/src/github.com/hyperledger/fabric-chaincode-node"
 
 # Package source code prior to polluting the directory
