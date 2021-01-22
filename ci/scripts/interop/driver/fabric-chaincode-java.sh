@@ -7,4 +7,4 @@ set -euo pipefail
 cd "${ARTIFACT_DIRECTORY}/javaenv-source"
 tar -xf javaenv-source.tgz
 
-./gradlew build -x getLatestDockerImages -x buildImage
+./gradlew build -x getLatestDockerImages -x buildImage -x checkstyleMain -x checkstyleTest -x dependencyCheckAnalyze -x javadoc
