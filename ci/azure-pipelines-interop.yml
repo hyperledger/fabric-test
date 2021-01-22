@@ -12,6 +12,8 @@ schedules:
     branches:
       include:
         - master
+        - release-2.3
+        - release-2.2
     always: true
 
 variables:
