@@ -11,8 +11,6 @@ schedules:
     displayName: Daily midnight build
     branches:
       include:
-        - master
-        - release-2.*
         - release-1.4
     always: "true"
 
