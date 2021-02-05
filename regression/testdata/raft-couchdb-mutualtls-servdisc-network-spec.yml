@@ -3,7 +3,7 @@
 #! SPDX-License-Identifier: Apache-2.0
 ---
 dockerOrg: hyperledger-fabric.jfrog.io
-dockerTag: amd64-2.3-stable
+dockerTag: amd64-latest
 dockerImages:
   ca: hyperledger/fabric-ca:1.4
 
