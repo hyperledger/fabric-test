@@ -10,6 +10,7 @@ import (
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
 func TestBasicnetwork(t *testing.T) {
@@ -28,8 +29,15 @@ var _ = BeforeSuite(func() {
 // Cleaning up network launched from BeforeSuite and removing all chaincode containers
 // and chaincode container images using AfterSuite
 var _ = AfterSuite(func() {
+
+	// Use input "command" to print peer logs
+	inputSpecPath := "../testdata/basic-test-input.yml"
+	action := "command"
+	err := testclient.Testclient(action, inputSpecPath)
+	Expect(err).NotTo(HaveOccurred())
+
 	networkSpecPath := "../testdata/basic-network-spec.yml"
-	err := launcher.Launcher("down", "docker", "", networkSpecPath)
+	err = launcher.Launcher("down", "docker", "", networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
 
 	dockerList := []string{"ps", "-aq", "-f", "status=exited"}

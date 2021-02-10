@@ -12,7 +12,7 @@ import (
 var _ = Describe("Barebones Test", func() {
 
 	var (
-		inputSpecPath       string
+		inputSpecPath string
 	)
 
 	It("Running barebones Test)", func() {
@@ -51,6 +51,5 @@ var _ = Describe("Barebones Test", func() {
 		action = "query"
 		err = testclient.Testclient(action, inputSpecPath)
 		Expect(err).NotTo(HaveOccurred())
-
 	})
 })

@@ -2,6 +2,7 @@ package networkclient
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -12,6 +13,9 @@ import (
 
 //ExecuteCommand - to execute the cli commands
 func ExecuteCommand(name string, args []string, printLogs bool) (string, error) {
+
+	// Print executed commands (in bold)
+	fmt.Println("\033[1m", ">", name, strings.Join(args, " "), "\033[0m")
 
 	cmd := exec.Command(name, args...)
 	var stdBuffer bytes.Buffer
