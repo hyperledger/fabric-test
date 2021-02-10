@@ -118,16 +118,6 @@ queries:
     args: "get,a1"
 
 command:
-  - name: curl
-    args:
-      - -H 
-      - 'Content-Type: application/json'
-      - -X
-      - PUT
-      - -d
-      - '{"spec":"info"}'
-      - http://127.0.0.1:31100/logspec
-    
   - name: docker
     args:
       - logs

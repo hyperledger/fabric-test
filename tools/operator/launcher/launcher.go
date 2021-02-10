@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/dockercompose"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/k8s"
 	"github.com/hyperledger/fabric-test/tools/operator/launcher/nl"
@@ -33,6 +34,9 @@ func validateArguments(networkSpecPath string, kubeConfigPath string) error {
 }
 
 func doAction(action, env, kubeConfigPath string, config networkspec.Config) error {
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:%s\nInput:\033[0m\n%s\n", action, spew.Sdump(config))
 
 	var err error
 	switch env {
