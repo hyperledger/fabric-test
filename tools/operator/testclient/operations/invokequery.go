@@ -15,6 +15,7 @@ import (
 
 	"github.com/pkg/errors"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -129,6 +130,10 @@ func (i InvokeQueryUIObject) InvokeQuery(config inputStructs.Config, tls, action
 	if action == "Query" {
 		configObjects = config.Query
 	}
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:%s\nInput:\033[0m\n%s\n", action, spew.Sdump(configObjects))
+
 	for key := range configObjects {
 		invkQueryObjects := i.generateInvokeQueryObjects(configObjects[key], config.Organizations, tls, action)
 		invokeQueryObjects = append(invokeQueryObjects, invkQueryObjects...)

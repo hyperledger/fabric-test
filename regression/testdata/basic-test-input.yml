@@ -84,7 +84,7 @@ invokes:
       payLoadMin: 1024
       payLoadMax: 2048
     args: "put,a1,1"
-  
+
   - channelName: testorgschannel0
     name: mapcc
     targetPeers: OrgAnchor
@@ -146,3 +146,9 @@ queries:
           constFreq: 0
           devFreq: 0
     args: "getPrivate,a1"
+
+command:
+  - name: docker
+    args:
+      - logs
+      - peer0-org1

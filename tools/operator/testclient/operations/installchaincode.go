@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -37,6 +38,9 @@ type InstallCCDeployOpt struct {
 
 //InstallCC -- To install chaincode with the chaincode objects created
 func (i InstallCCUIObject) InstallCC(config inputStructs.Config, tls string) error {
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:install\nInput:\033[0m\n%s\n", spew.Sdump(config.InstallCC))
 
 	var installCCObjects []InstallCCUIObject
 	for index := 0; index < len(config.InstallCC); index++ {
