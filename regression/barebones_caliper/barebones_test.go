@@ -57,6 +57,5 @@ var _ = Describe("Barebones Caliper Test", func() {
 			"--caliper-flow-only-test",
 		}
 		networkclient.ExecuteCommand("npx", caliperArgs, true)
-
 	})
 })
