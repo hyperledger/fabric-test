@@ -82,3 +82,9 @@ queries:
           constFreq: 0
           devFreq: 0
     args: "get,a1"
+
+command:
+  - name: docker
+    args:
+      - logs
+      - peer0-org1

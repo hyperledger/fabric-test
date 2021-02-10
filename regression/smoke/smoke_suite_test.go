@@ -10,6 +10,7 @@ import (
 
 	"github.com/hyperledger/fabric-test/tools/operator/launcher"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
+	"github.com/hyperledger/fabric-test/tools/operator/testclient"
 )
 
 func TestSmoke(t *testing.T) {
@@ -20,6 +21,7 @@ func TestSmoke(t *testing.T) {
 
 // Bringing up network using BeforeSuite
 var _ = BeforeSuite(func() {
+
 	networkSpecPath := "../testdata/smoke-network-spec.yml"
 	err := launcher.Launcher("up", "docker", "", networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
@@ -28,8 +30,15 @@ var _ = BeforeSuite(func() {
 // Cleaning up network launched from BeforeSuite and removing all chaincode containers
 // and chaincode container images using AfterSuite
 var _ = AfterSuite(func() {
+
+	// Use input "command" to print peer logs
+	inputSpecPath := "../testdata/smoke-test-input.yml"
+	action := "command"
+	err := testclient.Testclient(action, inputSpecPath)
+	Expect(err).NotTo(HaveOccurred())
+
 	networkSpecPath := "../testdata/smoke-network-spec.yml"
-	err := launcher.Launcher("down", "docker", "", networkSpecPath)
+	err = launcher.Launcher("down", "docker", "", networkSpecPath)
 	Expect(err).NotTo(HaveOccurred())
 
 	dockerList := []string{"ps", "-aq", "-f", "status=exited"}
