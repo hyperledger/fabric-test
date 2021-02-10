@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -24,6 +25,9 @@ type SnapshotUIObject struct {
 
 //Snapshot -- To snapshot channel
 func (s SnapshotUIObject) Snapshot(config inputStructs.Config, tls string) error {
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:snapshot\nInput:\033[0m\n%s\n", spew.Sdump(config.SnapshotChannel))
 
 	var snapshotObjects []SnapshotUIObject
 	for index := 0; index < len(config.SnapshotChannel); index++ {

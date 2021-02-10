@@ -8,8 +8,8 @@ dockerImages:
   ca: hyperledger/fabric-ca:1.4
 
 dbType: couchdb
-peerFabricLoggingSpec: error
-ordererFabricLoggingSpec: error
+peerFabricLoggingSpec: info
+ordererFabricLoggingSpec: info
 tls: true
 metrics: true
 gossipEnable: false

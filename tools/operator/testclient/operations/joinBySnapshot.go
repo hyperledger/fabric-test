@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
@@ -33,6 +34,10 @@ func (j JoinBySnapshotUIObject) JoinBySnapshot(config inputStructs.Config, tls s
 	var joinBySnapshotConfigObjects []interface{}
 	var configObjects []inputStructs.JoinChannelBySnapshot
 	configObjects = config.JoinChannelBySnapshot
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:joinBySnapshot\nInput:\033[0m\n%s\n", spew.Sdump(configObjects))
+
 	for index := 0; index < len(configObjects); index++ {
 		ccObjects := j.createJoinBySnapshotObjects(configObjects[index], config.Organizations, tls)
 		joinBySnapshotObjects = append(joinBySnapshotObjects, ccObjects...)

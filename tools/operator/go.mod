@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/Shopify/sarama v1.26.4 // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/docker/docker v17.12.0-ce-rc1.0.20190628135806-70f67c6240bb+incompatible
 	github.com/fsouza/go-dockerclient v1.6.3
 	github.com/golang/protobuf v1.3.3

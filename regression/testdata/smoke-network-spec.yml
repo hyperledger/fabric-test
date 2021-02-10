@@ -10,9 +10,9 @@ dockerImages:
 #! peer database ledger type (couchdb, goleveldb)
 dbType: couchdb
 #! This parameter is used to define fabric logging spec in peers
-peerFabricLoggingSpec: error
+peerFabricLoggingSpec: info
 #! This parameter is used to define fabric logging spec in orderers
-ordererFabricLoggingSpec: error
+ordererFabricLoggingSpec: info
 #! tls in the network (true, false or mutual(mutualtls))
 tls: true
 #! fabric metrics with prometheus (true/false)
