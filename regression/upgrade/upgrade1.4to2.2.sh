@@ -3,8 +3,8 @@
 Tag14=1.4-stable
 Tag22=2.2-stable
 
-CurrentDirectory=$(cd `dirname $0` && pwd)
-FabricTestDir="$(echo $CurrentDirectory | awk -F'/fabric-test/' '{print $1}')/fabric-test"
+CurrentDirectory=$(cd "$(dirname $0)/../.." && pwd)
+FabricTestDir=$CurrentDirectory
 OperatorDir="$FabricTestDir"/tools/operator
 testdataDir="$FabricTestDir"/regression/testdata
 
