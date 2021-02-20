@@ -1,0 +1,342 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Daily Interop
+
+on:
+  workflow_dispatch:
+  schedule:
+      - '* 3 * *'
+
+env:
+  GO_VER: 1.15.8
+  JAVA_VER: 8
+  NODE_VER: 12.15.0
+
+  FABRIC_CFG_PATH: ${{ github.workspace }}/config
+  GOPATH: /tmp/go
+  PATH: /tmp/go/bin:/bin:${{ github.workspace }}/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+  BRANCH: master
+  RELEASE: 2.4-stable
+
+jobs:
+  build-chaincode-node:
+    name: Build Node Chaincode
+    runs-on: ubuntu-20.04
+    outputs:
+      sha: ${{ steps.build.outputs.sha }}
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric Chaincode Node
+        uses: actions/checkout@v2
+        with:
+          path: fabric-chaincode-node
+          ref: ${{ env.BRANCH }}
+          repository: 'hyperledger/fabric-chaincode-node'
+      - name: Build Chaincode Node
+        id: build
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/build/fabric-chaincode-node.sh
+        working-directory: ${{ github.workspace }}/fabric-chaincode-node
+      - name: Upload Docker Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-nodeenv
+          path: /tmp/docker-nodeenv.tgz
+
+  build-chaincode-java:
+    name: Build Java Chaincode
+    runs-on: ubuntu-20.04
+    outputs:
+      sha: ${{ steps.build.outputs.sha }}
+    steps:
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VER }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric Chaincode Java
+        uses: actions/checkout@v2
+        with:
+          path: fabric-chaincode-java
+          ref: ${{ env.BRANCH }}
+          repository: 'hyperledger/fabric-chaincode-java'
+      - name: Build Chaincode Java
+        id: build
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/build/fabric-chaincode-java.sh
+        working-directory: ${{ github.workspace }}/fabric-chaincode-java
+      - name: Upload Docker Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-javaenv
+          path: /tmp/docker-javaenv.tgz
+
+  build-fabric:
+    name: Build Fabric
+    runs-on: ubuntu-20.04
+    outputs:
+      sha: ${{ steps.build.outputs.sha }}
+    steps:
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric
+        uses: actions/checkout@v2
+        with:
+          path: fabric
+          ref: ${{ env.BRANCH }}
+          repository: 'hyperledger/fabric'
+      - name: Build Fabric
+        id: build
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/build/fabric.sh
+        working-directory: ${{ github.workspace }}/fabric
+      - name: Upload Docker Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-fabric
+          path: /tmp/docker-fabric.tgz
+      - name: Upload Binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-fabric
+          path: /tmp/hyperledger-fabric*.tar.gz
+
+  build-fabric-ca:
+    name: Build Fabric CA
+    runs-on: ubuntu-20.04
+    outputs:
+      sha: ${{ steps.build.outputs.sha }}
+    steps:
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric CA
+        uses: actions/checkout@v2
+        with:
+          path: fabric-ca
+          ref: ${{ env.BRANCH }}
+          repository: 'hyperledger/fabric-ca'
+      - name: Build Fabric CA
+        id: build
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/build/fabric-ca.sh
+        working-directory: ${{ github.workspace }}/fabric-ca
+      - name: Upload Docker Image
+        uses: actions/upload-artifact@v2
+        with:
+          name: docker-fabric-ca
+          path: /tmp/docker-fabric-ca.tgz
+      - name: Upload Binaries
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries-fabric-ca
+          path: /tmp/hyperledger-fabric-ca*.tar.gz
+
+  interop-chaincode-node:
+    name: Interop Node Chaincode
+    needs:
+      - build-chaincode-java
+      - build-chaincode-node
+      - build-fabric
+      - build-fabric-ca
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric Chaincode Node
+        uses: actions/checkout@v2
+        with:
+          path: fabric-chaincode-node
+          ref: ${{ needs.build-chaincode-node.outputs.sha }}
+          repository: 'hyperledger/fabric-chaincode-node'
+      - name: Load Docker Images
+        run: .github/workflows/scripts/interop/common/load-docker-images.sh
+        working-directory: fabric-test
+      - name: Run Integration Tests
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/driver/fabric-chaincode-node.sh
+        working-directory: fabric-chaincode-node
+
+  interop-chaincode-java:
+    name: Interop Java Chaincode
+    needs:
+      - build-chaincode-java
+      - build-chaincode-node
+      - build-fabric
+      - build-fabric-ca
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VER }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric Chaincode Java
+        uses: actions/checkout@v2
+        with:
+          path: fabric-chaincode-java
+          ref: ${{ needs.build-chaincode-java.outputs.sha }}
+          repository: 'hyperledger/fabric-chaincode-java'
+      - name: Load Docker Images
+        run: .github/workflows/scripts/interop/common/load-docker-images.sh
+        working-directory: fabric-test
+      - name: Run Integration Tests
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/driver/fabric-chaincode-java.sh
+        working-directory: fabric-chaincode-java
+
+
+  interop-sdk-node:
+    name: Interop Node SDK
+    needs:
+      - build-chaincode-java
+      - build-chaincode-node
+      - build-fabric
+      - build-fabric-ca
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric SDK Node
+        uses: actions/checkout@v2
+        with:
+          path: fabric-sdk-node
+          ref: ${{ env.BRANCH }}
+          repository: 'hyperledger/fabric-sdk-node'
+      - name: Load Docker Images
+        run: .github/workflows/scripts/interop/common/load-docker-images.sh
+        working-directory: fabric-test
+      - name: Setup SoftHSM
+        run: .github/workflows/scripts/interop/common/install-softhsm.sh
+        working-directory: fabric-test
+      - name: Run Integration Tests
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/driver/fabric-sdk-node.sh
+        working-directory: fabric-sdk-node
+
+  interop-sdk-java:
+    name: Interop Java SDK
+    needs:
+      - build-chaincode-java
+      - build-chaincode-node
+      - build-fabric
+      - build-fabric-ca
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VER }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+        with:
+          path: fabric-test
+      - name: Checkout Fabric SDK Java
+        uses: actions/checkout@v2
+        with:
+          path: fabric-sdk-java
+          ref: ${{ env.BRANCH }}
+          repository: 'hyperledger/fabric-sdk-java'
+      - name: Load Docker Images
+        run: .github/workflows/scripts/interop/common/load-docker-images.sh
+        working-directory: fabric-test
+      - name: Run Integration Tests
+        run: ${{ github.workspace }}/fabric-test/.github/workflows/scripts/interop/driver/fabric-sdk-java.sh
+        working-directory: fabric-sdk-java
+
+  functional:
+    name: Functional Tests
+    needs:
+      - build-chaincode-java
+      - build-chaincode-node
+      - build-fabric
+      - build-fabric-ca
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ env.JAVA_VER }}
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+      - name: Load Docker Images
+        run: .github/workflows/scripts/interop/common/load-docker-images.sh
+      - name: Run Publish Network
+        run: make regression/publish
+
+  publish:
+    name: Publish
+    needs:
+      - functional
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: /tmp
+      - name: Install JFrog CLI
+        uses: jfrog/setup-jfrog-cli@v1
+        env:
+          JF_ARTIFACTORY_TOKEN: ${{ secrets.ARTIFACTORY_TOKEN }}
+      - name: Checkout Fabric Test
+        uses: actions/checkout@v2
+      - name: Load Docker Images
+        run: .github/workflows/scripts/interop/common/load-docker-images.sh
+      - name: Publish Docker Images
+        run: .github/workflows/scripts/interop/publish/docker-images.sh
+      - name: Publish Fabric Binaries
+        run: .github/workflows/scripts/interop/publish/fabric-binary.sh
+      - name: Publish Fabric CA Images
+        run: .github/workflows/scripts/interop/publish/fabric-ca-binary.sh
