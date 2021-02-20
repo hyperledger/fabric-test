@@ -1,0 +1,100 @@
+# Copyright the Hyperledger Fabric contributors. All rights reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: Daily Regression
+
+on:
+  workflow_dispatch:
+  schedule:
+    - "0 3 * * *"
+
+env:
+  GO_VER: 1.15.8
+  NODE_VER: 12.15.0
+
+  FABRIC_CFG_PATH: ${{ github.workspace }}/config
+  GOPATH: /tmp/go
+  PATH: /tmp/go/bin:/bin:${{ github.workspace }}/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+jobs:
+  barebones:
+    name: Barbones Network
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run Barebones Tests
+        run: make regression/barebones
+
+  barebones-caliper:
+    name: Barebones Caliper Network
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '10'
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run Barebones Caliper Tests
+        run: make regression/barebones_caliper
+
+  basic:
+    name: Basic Network
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run Basic Network Tests
+        run: make regression/basicnetwork
+
+  smoke:
+    name: Smoke Network
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ env.NODE_VER }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run Smoke Network Tests
+        run: make regression/smoke
+
+  hsm:
+    name: HSM Network
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VER }}
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Run HSM Tests
+        run: make regression/hsm
