@@ -4,8 +4,10 @@
 ---
 dockerOrg: hyperledger-fabric.jfrog.io
 dockerTag: amd64-latest
-dockerImages:
-  ca: hyperledger/fabric-ca:1.4
+#! dockerImages can provide an override for each of the seven fabric images
+#! for example, the following would override the fabric-ca image to use 1.4
+#! dockerImages:
+#!   ca: hyperledger/fabric-ca:1.4
 
 #! peer database ledger type (couchdb, goleveldb)
 dbType: goleveldb
