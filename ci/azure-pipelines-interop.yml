@@ -6,8 +6,8 @@ name: InterOpLite-$(Date:yyyyMMdd)
 trigger: none
 pr: none
 schedules:
-  # 3 AM UTC
-  - cron: "0 3 * * *"
+  # Midnight UTC
+  - cron: "0 0 * * *"
     displayName: InterOp Testing
     branches:
       include:
