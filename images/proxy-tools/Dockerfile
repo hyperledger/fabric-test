@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 ARG ALPINE_VER=3.12
-ARG BRANCH="master"
+ARG FABRIC_BRANCH="master"
+ARG FABRIC_CA_BRANCH="main"
 ARG GO_LDFLAGS=-"linkmode external -extldflags '-lpthread'"
 ARG GO_TAGS=pkcs11
 ARG GO_VER=1.14.4
@@ -11,7 +12,7 @@ ARG PROXY_VERSION=2032875
 FROM golang:${GO_VER}-alpine${ALPINE_VER} as ca-builder
 
 ARG GO_TAGS
-ARG BRANCH
+ARG FABRIC_CA_BRANCH
 ARG GO_LDFLAGS
 
 RUN apk add --no-cache \
@@ -21,7 +22,7 @@ RUN apk add --no-cache \
 	opensc
 
 RUN mkdir -p ${GOPATH}/src/github.com/hyperledger/fabric-ca
-RUN git clone -b ${BRANCH} \
+RUN git clone -b ${FABRIC_CA_BRANCH} \
     https://github.com/hyperledger/fabric-ca \
     ${GOPATH}/src/github.com/hyperledger/fabric-ca
 
@@ -31,7 +32,7 @@ RUN cd ${GOPATH}/src/github.com/hyperledger/fabric-ca && \
 
 FROM golang:${GO_VER}-alpine${ALPINE_VER} as fabric-builder
 
-ARG BRANCH
+ARG FABRIC_BRANCH
 ARG GO_TAGS
 
 RUN apk add --no-cache \
@@ -42,7 +43,7 @@ RUN apk add --no-cache \
 	musl-dev \
 	opensc
 
-RUN git clone -b ${BRANCH} https://github.com/hyperledger/fabric
+RUN git clone -b ${FABRIC_BRANCH} https://github.com/hyperledger/fabric
 RUN cd fabric && make peer orderer configtxgen GO_TAGS=${GO_TAGS}
 
 FROM alpine:${ALPINE_VER} as pkcs11-builder
