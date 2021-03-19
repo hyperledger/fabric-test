@@ -867,7 +867,7 @@ if [ $NCHAN -gt 0 ]; then
     do
         CHANNEL[$i]=$CHANPREFIX$CHAN0
         # setup ChannelID to match CITest json files
-        # see an example https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/CITest/FAB-12262-4q/marbles02/marbles02-chan1-FAB-12262-4q-TLS.json#L2
+        # see an example https://github.com/hyperledger/fabric-test/blob/main/tools/PTE/CITest/FAB-12262-4q/marbles02/marbles02-chan1-FAB-12262-4q-TLS.json#L2
         CHANNELID[$i]=_ch$CHAN0
         CHAN0=$((CHAN0 + 1))
     done

@@ -19,7 +19,7 @@ printUsage () {
     echo "Description:"
     echo "Execute a task [specified by option -t] simultaneously on a group of remote hosts. The task is a bash test script that has been previously installed in each remote host in path $GOPATH/src/github.com/hyperledger/fabric-test/tools/PTE/CITest/scenarios/<task>"
     echo "Requirements:"
-    echo "1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/README.md#remote-pte on how to setup remote access"
+    echo "1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/main/tools/PTE/README.md#remote-pte on how to setup remote access"
     echo "2. git clone fabric-test under $GOPATH/src/github.com/hyperledger/"
     echo "3. on each remote host, create a bash script in fabric-test/tools/PTE/CITest/scenarios"
     echo

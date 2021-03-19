@@ -23,7 +23,7 @@ $testdataDirDir=$FabricTestDir"/regression/testdata/"
 
 pteReport=$OPDir"/pteReport.txt"
 
-pteInputMaster="$testdataDir/barebones-test-input-master.yml"
+pteInputMaster="$testdataDir/barebones-test-input-main.yml"
 pteInput="$testdataDir/barebones-test-input.yml"
 
 usage () {
