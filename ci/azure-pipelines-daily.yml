@@ -12,7 +12,7 @@ schedules:
     displayName: 'Fabric Test Daily Job'
     branches:
       include:
-        - master
+        - main
         - release-2.*
         - release-1.4
     always: true
