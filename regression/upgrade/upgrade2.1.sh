@@ -61,7 +61,7 @@ echo "Invoking transactions"
 executeAction $testdataDir/smoke-test-input.yml invoke
 
 cd $FabricTestDir
-echo "Checking out to master branch"
+echo "Checking out to main branch"
 fabrictestCheckout release-2.0
 
 echo "Installing node modules"
@@ -96,8 +96,8 @@ echo "Invoking transactions"
 executeAction $testdataDir/basic-test-input.yml invoke
 
 cd $FabricTestDir
-echo "Checking out to master branch"
-fabrictestCheckout master
+echo "Checking out to main branch"
+fabrictestCheckout main
 
 echo "Installing node modules"
 make npm-init

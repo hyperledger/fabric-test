@@ -2,7 +2,7 @@
 
 - A tool to launch fabric network on kubernetes cluster or local machine with a docker-compose
 file. This tool creates the network based on a network specification file, and also creates connection profiles for each peer organization, which can be used by any client. It also can use its own testclient to generate channelTx transaction files, and perform fabric operations defined as "actions" in a test input file, such as creating channels, joining peers to a channel, anchor peer updates, installing, upgrading
-and instantiating chaincodes, and performing invokes and queries, migrating a network from kafka to etcdraft, checking the health of peers and orderers, and upgrading the network. This uses `ytt` 
+and instantiating chaincodes, and performing invokes and queries, migrating a network from kafka to etcdraft, checking the health of peers and orderers, and upgrading the network. This uses `ytt`
 <https://github.com/k14s/ytt/blob/master/README.md> to generate all necessary configuration files 
 and a go program to launch fabric network
 
@@ -31,7 +31,7 @@ Supported input arguments for operator are:
 
 ```go
 -a string
-       Set action(up, down, create, join, anchorpeer, install, instantiate, upgrade, 
+       Set action(up, down, create, join, anchorpeer, install, instantiate, upgrade,
 	   invoke, query, createChannelTxn, migrate, health) (default is up)
 -i string
        Network spec (or) Test input file path (Required)
@@ -99,6 +99,6 @@ To verify if fabric network is launched successfully or not locally:
 - To perform any action specified in the table above(for both the local network and the network launched in the kubernetes), use the below command
 ```go run main.go -i <path/to/test input file> -a <action>```
 - To upgrade a local fabric network, use the below command
-```go run main.go -i <path/to/network spec file> -a upgradeNetwork``` 
+```go run main.go -i <path/to/network spec file> -a upgradeNetwork```
 To upgrade a fabric network launched using kubernetes, use the below command
 ```go run main.go -i <path/to/network spec file> -k <path/to kube config file> -a upgradeNetwork```
