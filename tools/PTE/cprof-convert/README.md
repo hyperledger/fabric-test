@@ -1,6 +1,6 @@
 # Hyperledger Fabric PTE Connection Profile Converter
 
-This is a Node.js script for converting a [Hyperledger Fabric](https://www.hyperledger.org/projects/fabric) blockchain network's connection profile(s) to a JSON configuration file in a format compatible with Fabric's [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE).
+This is a Node.js script for converting a [Hyperledger Fabric](https://www.hyperledger.org/projects/fabric) blockchain network's connection profile(s) to a JSON configuration file in a format compatible with Fabric's [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE).
 
 ## Prerequisites
 

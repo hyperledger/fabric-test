@@ -47,7 +47,7 @@ var _ = Describe("Barebones Caliper Test", func() {
 		caliperArgs := []string{
 			"caliper",
 			"launch",
-			"master",
+			"main",
 			"--caliper-workspace",
 			".",
 			"--caliper-benchconfig",

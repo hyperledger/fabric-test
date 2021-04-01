@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 ARG ALPINE_VER=3.12
-ARG BRANCH="master"
+ARG BRANCH="main"
 ARG GO_LDFLAGS=-"linkmode external -extldflags '-lpthread'"
 ARG GO_TAGS=pkcs11
 ARG GO_VER=1.14.4

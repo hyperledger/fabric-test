@@ -18,7 +18,7 @@ printUsage () {
     echo "Fetch PTE reports from a group of remote hosts and calculate the overall PTE report."
     echo
     echo "Requirements:"
-    echo "1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/README.md#remote-pte on how to setup remote access"
+    echo "1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/main/tools/PTE/README.md#remote-pte on how to setup remote access"
     echo "2. git clone fabric-test under $GOPATH/src/github.com/hyperledger/"
     echo
     echo -e "\nUsage:\t./runRemotePTEReport.sh -r <list of remote hosts>"
