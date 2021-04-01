@@ -3,7 +3,7 @@
 ## Summary
 You have found the home for testing a fabric network in any topology.
 
-We use the [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE)
+We use the [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE)
 as the client driver.
 The script `runPTE.sh` invokes the PTE tool to execute user-selected tests.
 
@@ -20,10 +20,10 @@ For reference, a formatted sample connection profile is provided in the default 
 
 1. Git-clone fabric-test repository, and go to the networktest directory
 
-    For example, to set up fabric-test in latest master branch (*Note*: when testing with a release branch, replace `master` with the branch name, e.g. `release-1.3`):
+    For example, to set up fabric-test in latest main branch (*Note*: when testing with a release branch, replace `main` with the branch name, e.g. `release-1.3`):
 
         cd $GOPATH/src/github.com/hyperledger
-        git clone --single-branch -b master https://github.com/hyperledger/fabric-test.git
+        git clone --single-branch -b main https://github.com/hyperledger/fabric-test.git
 
         cd fabric-test/tools/networktest
 
@@ -93,7 +93,7 @@ at `fabric-test/tools/networktest/Logs/pteReport*.log`
 
         -a, --all       execute all predefined testcases (~3.5 hrs)
 
-Note: see [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/blob/master/tools/PTE)
+Note: see [Performance Traffic Engine (PTE)](https://github.com/hyperledger/fabric-test/blob/main/tools/PTE)
 for txtarget option.
 
 ### Examples:
@@ -106,7 +106,7 @@ for txtarget option.
 
 ### Available predefined testcases:
 
-For an overview of all testcases refer to [CITest](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE/CITest). To find more details to understand a particular testcase, for example FAB-3808, refer to jira for the [description](https://jira.hyperledger.org/browse/FAB-3808). We welcome any new testcase contributions.
+For an overview of all testcases refer to [CITest](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE/CITest). To find more details to understand a particular testcase, for example FAB-3808, refer to jira for the [description](https://jira.hyperledger.org/browse/FAB-3808). We welcome any new testcase contributions.
 
     FAB-3808-2i: sanity, 2 threads X 10000 invokes, samplecc
     FAB-3811-2q: sanity, 2 threads X 10000 queries, samplecc (must follow FAB-3808-2i)

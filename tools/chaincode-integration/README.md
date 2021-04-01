@@ -19,7 +19,7 @@ The Fabric infrastructure is supplied as part of the tool, the Chaincode and Con
 The tool is intended to be provided as an NPM module. Until release you can install it as follows:
 
 ```
-curl -L https://raw.githubusercontent.com/hyperledger/fabric-test/master/tools/chaincode-integration/fabric-chaincode-integration-0.0.1.tgz
+curl -L https://raw.githubusercontent.com/hyperledger/fabric-test/main/tools/chaincode-integration/fabric-chaincode-integration-0.0.1.tgz
 npm install -g fabric-chaincode-integration-0.0.1.tgz
 ```
 
