@@ -86,9 +86,9 @@ PTE can be used with either the stable `fabric-sdk-node` libraries obtained from
     - `cd $GOPATH/src/github.com/hyperledger/fabric-test`
     - if first time:
          - `git submodule update --init --recursive`
-         - `git submodule foreach git pull origin master`
+         - `git submodule foreach git pull origin main`
     - else:
-         - `git submodule foreach git pull origin master`
+         - `git submodule foreach git pull origin main`
     - `cd $GOPATH/src/github.com/hyperledger/fabric-test/scripts and run ./update_go_modules.sh` to update all the go modules for the
       chaincodes in the fabric-test
 
@@ -1225,14 +1225,14 @@ Note that
 
 ## Creating a local Fabric network
 Prerequisite: If you do not yet have the Fabric docker images in your local docker registry, please either build them from Fabric source or download them from dockerhub.
-Create a local netork using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL) tool:
+Create a local netork using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/main/tools/NL) tool:
     - `cd $GOPATH/src/github.com/hyperledger/`
     - `git clone https://github.com/hyperledger/fabric-test`
     - `cd tools/NL`
     - `./networkLauncher.sh -?`
 
 ## CI Test
-A set of predefined tests are designed for CI daily or weekly execution and are available in the directory, [CITest](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE/CITest), under PTE.
+A set of predefined tests are designed for CI daily or weekly execution and are available in the directory, [CITest](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE/CITest), under PTE.
 
 
 ## Remote PTE

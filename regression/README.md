@@ -36,7 +36,7 @@ We love contributors! Anyone may add a new test to an existing test driver scrip
   1. Use this new Jira task to submit a changeset to github, to invoke your testcase from a driver script similar to */path/to/fabric-test/regression/daily/runPteTestSuite.sh. In the comments of the github merge request submission, include the
       - Jira task FAB-nnnnn
       - the testcase title and objective
-  1. Follow the steps below to include the test in a test suite that is executed from the Makefile by a daily test job, and the test will be executed automatically as part of the next running of the CI daily test suite. The results will show up on the daily test suite display board - which can be viewed by following the link at the top of the main [fabric-test/README](https://github.com/hyperledger/fabric-test/blob/master/README.md).
+  1. Follow the steps below to include the test in a test suite that is executed from the Makefile by a daily test job, and the test will be executed automatically as part of the next running of the CI daily test suite. The results will show up on the daily test suite display board - which can be viewed by following the link at the top of the main [fabric-test/README](https://github.com/hyperledger/fabric-test/blob/main/README.md).
 
 #### Why Test Output Format Must Be **xml** and How to Make It So
 

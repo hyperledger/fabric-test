@@ -4,11 +4,11 @@
 ---
 # Introduction
 
-The purpose of this CI test is to automatically execute the predefined tests daily or weekly that any unexpected or undesired code changes may be uncovered as soon as possible and to flexibly incorporate an user supplied chaincode test.  The CI test uses [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) to driver transactions.  The functions of the CI tool include the following:
+The purpose of this CI test is to automatically execute the predefined tests daily or weekly that any unexpected or undesired code changes may be uncovered as soon as possible and to flexibly incorporate an user supplied chaincode test.  The CI test uses [PTE](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE) to driver transactions.  The functions of the CI tool include the following:
 
-- setup PTE environment, see [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE) for detail
+- setup PTE environment, see [PTE](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE) for detail
 
-- create Blockchain network using [Network Launcher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL)
+- create Blockchain network using [Network Launcher](https://github.com/hyperledger/fabric-test/tree/main/tools/NL)
 
 - configure Blockchain network including create/join channels and install/instantiate chaincodes
 
@@ -266,7 +266,7 @@ The script, PTE/CITest/scenarios/runRemoteScenarios.sh, can be used to execute a
 
      Requirements:
 
-     1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/README.md#remote-pte on how to setup remote access
+     1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/main/tools/PTE/README.md#remote-pte on how to setup remote access
      2. git clone fabric-test under /home/ibmadmin/gopath/src/github.com/hyperledger/
      3. on each remote host, create a bash script in fabric-test/tools/PTE/CITest/scenarios
 
@@ -299,7 +299,7 @@ The script, PTE/CITest/scenarios/runRemoteScenarios.sh, can be used to execute a
 The script, PTE/CITest/scenarios/runRemotePTEReport.sh, can be used to Fetch PTE reports from a group of remote hosts and calculate the overall PTE report.
 
      Requirements:
-     1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/master/tools/PTE/README.md#remote-pte on how to setup remote access
+     1. setup remote access, see https://github.com/hyperledger/fabric-test/blob/main/tools/PTE/README.md#remote-pte on how to setup remote access
      2. git clone fabric-test under /home/ibmadmin/gopath/src/github.com/hyperledger/
 
      Usage:
@@ -349,13 +349,13 @@ The script, PTE/CITest/scenarios/runRemotePTEReport.sh, can be used to Fetch PTE
 
 Here are some of the chaincodes available:
 
-- [samplecc chaincode, go, node, java](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/samplecc) in fabric-test
-- [example02 chaincode, go, node](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/example02) in fabric-test
-- [SBE chaincode, go](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/sbe) in fabric-test; for testing State-based-endorsement
-- [mapkeys chaincode, go](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/mapkeys/go) in fabric-test; allows random sizes
-- [marbles chaincode, node](https://github.com/hyperledger/fabric-test/tree/master/chaincodes/marbles/node) in fabric-test
-- [marbles02 chaincode, go, node](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02) in fabric-samples
-- [marbles02_private chaincode, go](https://github.com/hyperledger/fabric-samples/tree/master/chaincode/marbles02_private/go) in fabric-samples - used by PTE tests; includes a sample ../collections_config.json and ./META_INF/ with couchdb index file indexOwner.json, but note the PTE sideDB tests (FAB-10134, FAB-10135, FAB-12262) store their own collections files (e.g. PTE/CITest/FAB-10135-4i/preconfig/marbles02_private/collections_config-chan1.json)
+- [samplecc chaincode, go, node, java](https://github.com/hyperledger/fabric-test/tree/main/chaincodes/samplecc) in fabric-test
+- [example02 chaincode, go, node](https://github.com/hyperledger/fabric-test/tree/main/chaincodes/example02) in fabric-test
+- [SBE chaincode, go](https://github.com/hyperledger/fabric-test/tree/main/chaincodes/sbe) in fabric-test; for testing State-based-endorsement
+- [mapkeys chaincode, go](https://github.com/hyperledger/fabric-test/tree/main/chaincodes/mapkeys/go) in fabric-test; allows random sizes
+- [marbles chaincode, node](https://github.com/hyperledger/fabric-test/tree/main/chaincodes/marbles/node) in fabric-test
+- [marbles02 chaincode, go, node](https://github.com/hyperledger/fabric-samples/tree/main/chaincode/marbles02) in fabric-samples
+- [marbles02_private chaincode, go](https://github.com/hyperledger/fabric-samples/tree/main/chaincode/marbles02_private/go) in fabric-samples - used by PTE tests; includes a sample ../collections_config.json and ./META_INF/ with couchdb index file indexOwner.json, but note the PTE sideDB tests (FAB-10134, FAB-10135, FAB-12262) store their own collections files (e.g. PTE/CITest/FAB-10135-4i/preconfig/marbles02_private/collections_config-chan1.json)
 
 The user can add a chaincode for his test case by following the same directory structure in `preconfig` directory.
 

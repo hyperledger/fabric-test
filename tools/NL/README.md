@@ -210,7 +210,7 @@ The script is used to create a docker-compose.yml and launch the network with sp
 
 # gen_PTEcfg.sh
 
-The script generates the service credential json files of a network to be used as an input to [PTE](https://github.com/hyperledger/fabric-test/tree/master/tools/PTE).
+The script generates the service credential json files of a network to be used as an input to [PTE](https://github.com/hyperledger/fabric-test/tree/main/tools/PTE).
 
 ## Usage
 
