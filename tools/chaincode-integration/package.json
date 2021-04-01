@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hyperledger/fabric-test/tree/master/tools/chaincode-integration"
+    "url": "git+https://github.com/hyperledger/fabric-test/tree/main/tools/chaincode-integration"
   },
   "keywords": [
     "fabric",
@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://jira.hyperledger.org"
   },
-  "homepage": "https://github.com/hyperledger/fabric-test/tree/master/tools/chaincode-integration",
+  "homepage": "https://github.com/hyperledger/fabric-test/tree/main/tools/chaincode-integration",
   "devDependencies": {
     "@types/chai": "^4.2.7",
     "@types/cucumber": "^6.0.0",

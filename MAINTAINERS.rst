@@ -52,4 +52,4 @@ For additional support, refer to the `Fabric Maintainers list`__.
 
 .. Licensed under Creative Commons Attribution 4.0 International License
    https://creativecommons.org/licenses/by/4.0/
-__ https://github.com/hyperledger/fabric/blob/master/MAINTAINERS.md
+__ https://github.com/hyperledger/fabric/blob/main/MAINTAINERS.md

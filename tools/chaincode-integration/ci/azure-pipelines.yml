@@ -5,14 +5,14 @@ name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 trigger:
   branches:
     include:
-      - master
+      - main
   paths:
     include:
       - tools/chaincode-integration/*
 pr:
   branches:
     include:
-      - master
+      - main
   paths:
     include:
       - tools/chaincode-integration/*
@@ -31,7 +31,7 @@ jobs:
         displayName: Run license checking
   - job: NpmUnstablePublish
     dependsOn: Tests
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     displayName: 'Publish unstable'
     steps:
       - script: |
