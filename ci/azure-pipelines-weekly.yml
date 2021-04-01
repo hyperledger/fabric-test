@@ -12,7 +12,7 @@ schedules:
     displayName: 'Fabric Test Weekly Job'
     branches:
       include:
-        - master
+        - main
     always: true
 
 variables:

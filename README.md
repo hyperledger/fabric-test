@@ -1,7 +1,7 @@
 ### Welcome to fabric-test
 -------
 
-[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Test/_apis/build/status/Fabric-Test?branchName=master)](https://dev.azure.com/Hyperledger/Fabric-Test/_build/latest?definitionId=58&branchName=master)
+[![Build Status](https://dev.azure.com/Hyperledger/Fabric-Test/_apis/build/status/Fabric-Test?branchName=main)](https://dev.azure.com/Hyperledger/Fabric-Test/_build/latest?definitionId=58&branchName=main)
 
 You are in the right place if you are interested in testing the Hyperledger Fabric and related repositories.
 
@@ -31,10 +31,10 @@ initialize and populate the submodules. Execute the following:
 ### Update git submodules (Optional)
 The fabric-test repository contains submodules of other Hyperledger Fabric projects that are used in testing.
 Tests may be run with the submodule commit levels saved with the commit-level of fabric-test.
-Or, the git submodules may be updated to run tests with the bleeding edge of development master branches.
+Or, the git submodules may be updated to run tests with the bleeding edge of development main branches.
 If you would like to update the git submodules, use the following command:
 ```
-  git submodule foreach git pull origin master
+  git submodule foreach git pull origin main
 ```
 **Note: When making changes for committing to a submodule (for example, fabric code), then make the change in the actual repository and not here in the submodules. This makes managing changes much easier when working with submodules.**
 
@@ -75,7 +75,7 @@ To update the go version in the repo, follow the below steps
 
   Step 2: Find all files in repo called go.mod. 'cd' into each of those directories. Remove go.mod and go.sum files and execute the following steps
           1. go mod init
-          2. go get -u github.com/hyperledger/fabric-test@master
+          2. go get -u github.com/hyperledger/fabric-test@main
           3. go mod tidy
 
   Step 3: Commit all the go.mod and go.sum files that get changed in those directories
