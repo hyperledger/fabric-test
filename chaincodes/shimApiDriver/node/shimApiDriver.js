@@ -6,7 +6,7 @@
 
 // This chaincode demonstrates the following ChaincodeStubInterface APIs
 // More details can be obtained from the following link:
-// https://github.com/hyperledger/fabric-chaincode-node/blob/master/src/lib/stub.js
+// https://github.com/hyperledger/fabric-chaincode-node/blob/main/src/lib/stub.js
 //
 // getArgs -- arguments intended for the chaincode Init and Invoke
 //            as an array of byte arrays

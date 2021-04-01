@@ -1282,7 +1282,7 @@ Note that
 
 ## Creating a local Fabric network
 Prerequisite: If you do not yet have the Fabric docker images in your local docker registry, please either build them from Fabric source or download them from dockerhub.
-Create a local netork using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/master/tools/NL) tool:
+Create a local netork using the [NetworkLauncher](https://github.com/hyperledger/fabric-test/tree/main/tools/NL) tool:
     - `cd $GOPATH/src/github.com/hyperledger/`
     - `git clone https://github.com/hyperledger/fabric-test`
     - `cd tools/NL`
