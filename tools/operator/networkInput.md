@@ -4,7 +4,7 @@
    files of fabric network and launching it. Many of these values are required;
    those that are optional will default to disabled/false or whatever default
    values used by fabric software. For more information, refer to yaml files in
-   <https://github.com/hyperledger/fabric/tree/master/sampleconfig>. Here is
+   <https://github.com/hyperledger/fabric/tree/main/sampleconfig>. Here is
    a sample network input file:
 
    ```yaml
@@ -198,7 +198,7 @@
          - Description: `absoluteMaxBytes` is used to set absolute maximum number
          of bytes
          allowed for the serialized messages in a batch
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set value for `absoluteMaxBytes`
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set value for `absoluteMaxBytes`
          - Example: `absoluteMaxBytes: 10 MB`
 
          ##### preferredMaxBytes
@@ -206,7 +206,7 @@
          - Description: `preferredMaxBytes` is used to set preferred maximum number
          of bytes
          allowed for the serialized messages in a batch
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set value for `preferredMaxBytes`
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set value for `preferredMaxBytes`
          - Example: `preferredMaxBytes: 2 MB`
 
       #### *batchTimeOut*
@@ -225,35 +225,35 @@
 
          - Description: `tickInterval` is the time interval between two Node.Tick
          invocations
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set tick interval between raft nodes
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set tick interval between raft nodes
          - Example: `tickInterval: 500ms`
 
          ##### electionTick
 
          - Description: `electionTick` is the number of Node.Tick invocations that
          must pass between elections
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set election tick between raft nodes
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set election tick between raft nodes
          - Example: `electionTick: 10`
 
          ##### heartbeatTick
 
          - Description: `heartbeatTick` is the number of Node.Tick invocations that must
          pass between heartbeats
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set heartbeat tick between raft nodes
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set heartbeat tick between raft nodes
          - Example: `heartbeatTick: 1`
 
          ##### maxInflightBlocks
 
          - Description: `maxInflightBlocks` limits the max number of in-flight append
          messages during optimistic replication phase
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set   maximum inflight blocks between raft nodes
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set   maximum inflight blocks between raft nodes
          - Example: `maxInflightBlocks: 5`
 
          ##### snapshotIntervalSize
 
          - Description: `snapshotIntervalSize` defines number of bytes per which a
          snapshot is taken
-         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml> to set   snapshot interval size in raft
+         - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml> to set   snapshot interval size in raft
          - Example: `snapshotIntervalSize: 100 MB`
 
    ### **kafka**
@@ -385,7 +385,7 @@
 
    - Description: `ordererCapabilities` is used to set orderer group capabilities in
    orderer system channel and application channels
-   - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml>
+   - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml>
    to set orderer group capabilities
    - Example:
 
@@ -398,7 +398,7 @@
 
    - Description: `channelCapabilities` is used to set channel group capabilities in
    fabric network
-   - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml>
+   - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml>
    to set channel group capabilities
    - Example:
 
@@ -411,7 +411,7 @@
 
    - Description: `applicationCapabilities` is used to set application group capabilities in
    fabric network
-   - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/master/sampleconfig/configtx.yaml>
+   - Supported Values: Refer to <https://github.com/hyperledger/fabric/blob/main/sampleconfig/configtx.yaml>
    to set application group capabilities
    - Example:
 

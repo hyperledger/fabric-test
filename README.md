@@ -31,10 +31,10 @@ initialize and populate the submodules. Execute the following:
 ### Update git submodules (Optional)
 The fabric-test repository contains submodules of other Hyperledger Fabric projects that are used in testing.
 Tests may be run with the submodule commit levels saved with the commit-level of fabric-test.
-Or, the git submodules may be updated to run tests with the bleeding edge of development master branches.
+Or, the git submodules may be updated to run tests with the bleeding edge of development main branches.
 If you would like to update the git submodules, use the following command:
 ```
-  git submodule foreach git pull origin master
+  git submodule foreach git pull origin main
 ```
 **Note: When making changes for committing to a submodule (for example, fabric code), then make the change in the actual repository and not here in the submodules. This makes managing changes much easier when working with submodules.**
 
@@ -75,7 +75,7 @@ To update the go version in the repo, follow the below steps
 
   Step 2: Find all files in repo called go.mod. 'cd' into each of those directories. Remove go.mod and go.sum files and execute the following steps
           1. go mod init
-          2. go get -u github.com/hyperledger/fabric-test@master
+          2. go get -u github.com/hyperledger/fabric-test@main
           3. go mod tidy
       
   Step 3: Commit all the go.mod and go.sum files that get changed in those directories
@@ -121,7 +121,7 @@ Cello is a Hyperledger Project (https://www.hyperledger.org/projects/cello) with
 It contains the `Cello Ansible Agent`, an easy-to-use tool for
 deploying and managing a fabric network on one or more hosts in the cloud.
 Refer to these instructions
-https://github.com/hyperledger/cello/blob/master/src/agent/ansible/README.md
+https://github.com/hyperledger/cello/blob/main/src/agent/ansible/README.md
 to clone it and set up an ansible controller to deploy a network.
 
 
