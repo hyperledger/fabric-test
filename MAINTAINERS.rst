@@ -8,8 +8,6 @@ This repository is part of the Fabric project.
 +---------------------------+------------------+----------------+-------------------------------------+
 | Name                      | GitHub           | Chat           | email                               |
 +===========================+==================+================+=====================================+
-| Brett Logan               | lindluni         | BrettLogan     | Brett.T.Logan@ibm.com               |
-+---------------------------+------------------+----------------+-------------------------------------+
 | Dave Enyeart              | denyeart         | dave.enyeart   | enyeart@us.ibm.com                  |
 +---------------------------+------------------+----------------+-------------------------------------+
 | Dongming Hwang            | dongmingh        | dongming       | dongming@ibm.com                    |
@@ -25,6 +23,8 @@ This repository is part of the Fabric project.
 | Adnan Choudhury           | adnan-c          | adnanc         | adnan.choudhury@itpeoplecorp.com    |
 +---------------------------+------------------+----------------+-------------------------------------+
 | Barry Mosakowski          | bmos299          | bmos299        | barry_moz@yahoo.com                 |
++---------------------------+------------------+----------------+-------------------------------------+
+| Brett Logan               | lindluni         | BrettLogan     | Brett.T.Logan@ibm.com               |
 +---------------------------+------------------+----------------+-------------------------------------+
 | Christopher Ferris        | christo4ferris   | cbf            | chris.ferris@gmail.com              |
 +---------------------------+------------------+----------------+-------------------------------------+
