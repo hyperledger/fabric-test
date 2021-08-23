@@ -2,10 +2,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-ARG ALPINE_VER=3.12
+ARG ALPINE_VER=3.14
 ARG BRANCH=main
 ARG GO_TAGS=pkcs11
-ARG GO_VER=1.14.4
+ARG GO_VER=1.16.7
 ARG PROXY_VERSION=2032875
 
 FROM golang:${GO_VER}-alpine${ALPINE_VER} as peer-builder
