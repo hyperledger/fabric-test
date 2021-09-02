@@ -52,14 +52,16 @@ modifyConfig(){
 }
 
 configtxlatorUpdate(){
-  configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
+  configtxlator proto_decode --input config_block.pb --type common.Block --output /tmp/output.json
+  cat /tmp/output.json | jq .data.data[0].payload.data.config > config.json
 
   modifyConfig $2 $3
 
   configtxlator proto_encode --input config.json --type common.Config --output config.pb
   configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
   configtxlator compute_update --channel_id $1 --original config.pb --updated modified_config.pb --output modified_update.pb
-  configtxlator proto_decode --input modified_update.pb --type common.ConfigUpdate | jq . > modified_update.json
+  configtxlator proto_decode --input modified_update.pb --type common.ConfigUpdate --output /tmp/output.json
+  cat /tmp/output.json | jq . > modified_update.json
   echo '{"payload":{"header":{"channel_header":{"channel_id":"'$1'", "type":2}},"data":{"config_update":'$(cat modified_update.json)'}}}' | jq . > modified_update_in_envelope.json
   configtxlator proto_encode --input modified_update_in_envelope.json --type common.Envelope --output modified_update_in_envelope.pb
 }
@@ -74,7 +76,7 @@ modifyAndSubmit(){
   GROUP=$7
   PEERORG_MSPID=$8
   PEERORG_NAME=$9
-  
+
   if [ $GROUP == "orderer" ] || [ $GROUP == "channel" ] || [ $GROUP == "application" ]; then
     POLICY=('{"mod_policy":"Admins","value":{"capabilities":{"'$CAPABILITY'":{}}},"version":"0"}')
   elif [ $GROUP == "consortium" ] || [ $GROUP == "organization" ]; then
