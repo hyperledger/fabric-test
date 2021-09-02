@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
 	"github.com/hyperledger/fabric-test/tools/operator/paths"
@@ -45,6 +46,10 @@ func (c ChannelUIObject) ChannelConfigs(config inputStructs.Config, tls, action 
 	case "anchorpeer":
 		configObjects = config.AnchorPeerUpdate
 	}
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:%s\nInput:\033[0m\n%s\n", action, spew.Sdump(configObjects))
+
 	for i := 0; i < len(configObjects); i++ {
 		channelObjects = c.generateChannelUIObjects(configObjects[i], config.Organizations, tls, action, config.OrdererSystemChannel)
 		if len(channelObjects) > 0 {
