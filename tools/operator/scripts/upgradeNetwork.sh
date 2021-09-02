@@ -18,6 +18,7 @@
 # "Usage: ./upgradeNetwork.sh configUpdate $MSPID $NAME $ORG_NAME $ARTIFACTS_LOCATION $NUM_CHANNELS $CAPABILITY $GROUP $PEERORG_MSPID $PEERORG_NAME"
 
 setGlobals(){
+  set -x
   export ORDERER_ADDRESS=127.0.0.1:30000
 
   export CORE_PEER_LOCALMSPID=$1
@@ -28,9 +29,11 @@ setGlobals(){
   elif [ $4 == "peer" ]; then
     export CORE_PEER_MSPCONFIGPATH="$3/crypto-config/peerOrganizations/$2/users/Admin@$2/msp"
   fi
+  { set +x; } 2>/dev/null
 }
 
 modifyConfig(){
+  set -x
   GROUP=$1
   POLICY=$2
 
@@ -49,9 +52,11 @@ modifyConfig(){
   elif [ $GROUP == "acls" ]; then
     jq -s '.[0] * {"channel_group":{"groups":{"Application":{"values": {"ACLs": {"mod_policy": "Admins", "value": {"acls": '$POLICY'}}}}}}}' config.json > modified_config.json
   fi
+  { set +x; } 2>/dev/null
 }
 
 configtxlatorUpdate(){
+  set -x  
   configtxlator proto_decode --input config_block.pb --type common.Block --output /tmp/output.json
   cat /tmp/output.json | jq .data.data[0].payload.data.config > config.json
 
@@ -64,9 +69,11 @@ configtxlatorUpdate(){
   cat /tmp/output.json | jq . > modified_update.json
   echo '{"payload":{"header":{"channel_header":{"channel_id":"'$1'", "type":2}},"data":{"config_update":'$(cat modified_update.json)'}}}' | jq . > modified_update_in_envelope.json
   configtxlator proto_encode --input modified_update_in_envelope.json --type common.Envelope --output modified_update_in_envelope.pb
+  { set +x; } 2>/dev/null
 }
 
 modifyAndSubmit(){
+  set -x
   MSPID=$1
   NAME=$2
   ORG_NAME=$3
@@ -105,9 +112,11 @@ modifyAndSubmit(){
   echo "Submitting channel config update for $CHANNEL_NAME"
   peer channel update -f modified_update_in_envelope.pb -c $CHANNEL_NAME -o $ORDERER_ADDRESS --tls --cafile $CORE_PEER_TLS_ROOTCERT_FILE --ordererTLSHostnameOverride $NAME
   rm *.json *.pb
+  { set +x; } 2>/dev/null
 }
 
 upgradeDB(){
+  set -x
   docker run --name peer-cli --rm \
   -e CORE_PEER_LOCALMSPID=$1 \
   -e CORE_PEER_TLS_ENABLED=true \
@@ -115,9 +124,11 @@ upgradeDB(){
   -v $4/backup/$2/:/var/hyperledger/production/ \
   -v $4/crypto-config/peerOrganizations/$3/:/etc/hyperledger/fabric/artifacts/ \
   hyperledger-fabric.jfrog.io/fabric-peer:amd64-2.0-stable peer node upgrade-dbs
+  { set +x; } 2>/dev/null
 }
 
 configUpdate(){
+  set -x
   sleep 15
   if [ $7 == "orderer" ] || [ $7 == "channel" ] || [ $7 == "consortium" ]; then
     CHANNELS=("orderersystemchannel")
@@ -135,6 +146,7 @@ configUpdate(){
     echo "Calling modifyAndSubmit to update "$7" capability/policy for channel $i"
     modifyAndSubmit $1 $2 $3 $4 $i $6 $7 $8 $9
   done
+  { set +x; } 2>/dev/null
 }
 
 if [ $1 == "upgradeDB" ]; then

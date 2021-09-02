@@ -28,12 +28,13 @@ pullFabricBinaries(){
 }
 
 executeAction (){
+    set -x
     go run main.go -i $1 -a $2
     if [ $? != 0 ]; then
         executeAction $testdataDir/smoke-network-spec.yml down
         exit 1
     fi
-
+    { set +x; } 2>/dev/null
 }
 cd $FabricTestDir
 echo "Executing the upgrade scenario"

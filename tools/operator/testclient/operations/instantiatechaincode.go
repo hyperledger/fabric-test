@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/hyperledger/fabric-test/tools/operator/connectionprofile"
 	"github.com/hyperledger/fabric-test/tools/operator/logger"
 	"github.com/hyperledger/fabric-test/tools/operator/networkclient"
@@ -86,6 +87,10 @@ func (i InstantiateCCUIObject) InstantiateCC(config inputStructs.Config, tls, ac
 	if action == "upgrade" {
 		configObjects = config.UpgradeCC
 	}
+
+	// print action (in bold) and input
+	fmt.Printf("\033[1m\nAction:%s\nInput:\033[0m\n%s\n", action, spew.Sdump(configObjects))
+
 	for index := 0; index < len(configObjects); index++ {
 		ccObjects, err := i.generateInstantiateCCObjects(configObjects[index], config.Organizations, tls, action)
 		if err != nil {
