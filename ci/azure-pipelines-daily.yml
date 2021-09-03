@@ -19,7 +19,7 @@ variables:
   FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
   GO_BIN: $(Agent.BuildDirectory)/go/bin
   GO_PATH: $(Agent.BuildDirectory)/go
-  GO_VER: 1.14.2
+  GO_VER: 1.16.7
   NODE_VER: 12.15.0
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -109,22 +109,6 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'regression/**/results*.xml'
-
-  - stage: Upgrade2_2
-    dependsOn: []
-    displayName: Upgrade Network
-    pool:
-      vmImage: ubuntu-18.04
-    jobs:
-      - job: Upgrade2_2
-        displayName: Run Scenario
-        steps:
-          - checkout: self
-            path: 'go/src/github.com/hyperledger/fabric-test'
-            displayName: Checkout Fabric Test Code
-          - template: templates/install_deps.yml
-          - script: make upgrade2.2
-            displayName: Run Test
 
   - stage: Upgrade1_4to2_2
     dependsOn: []
