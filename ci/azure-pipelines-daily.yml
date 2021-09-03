@@ -112,22 +112,6 @@ stages:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'regression/**/results*.xml'
 
-  - stage: Upgrade2_2
-    dependsOn: []
-    displayName: Upgrade Network
-    pool:
-      vmImage: ubuntu-18.04
-    jobs:
-      - job: Upgrade2_2
-        displayName: Run Scenario
-        steps:
-          - checkout: self
-            path: 'go/src/github.com/hyperledger/fabric-test'
-            displayName: Checkout Fabric Test Code
-          - template: templates/install_deps.yml
-          - script: make upgrade2.2
-            displayName: Run Test
-
   - stage: Upgrade1_4to2_2
     dependsOn: []
     displayName: Upgrade Network From 1.4 Directly to 2.2
