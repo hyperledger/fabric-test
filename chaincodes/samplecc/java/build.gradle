@@ -13,9 +13,7 @@ sourceCompatibility = 1.8
 repositories {
     mavenLocal()
     mavenCentral()
-    maven() {
-        url "https://repository.mulesoft.org/nexus/content/repositories/public/"
-    }
+    maven { url 'https://jitpack.io' }
 }
 dependencies {
     compile group: 'org.hyperledger.fabric-chaincode-java', name: 'fabric-chaincode-shim', version: '1.+'
