@@ -20,7 +20,7 @@ variables:
   GO_BIN: $(Agent.BuildDirectory)/go/bin
   GO_PATH: $(Agent.BuildDirectory)/go
   GO_VER: 1.16.7
-  NODE_VER: 12.15.0
+  NODE_VER: 12.22.6
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 stages:
