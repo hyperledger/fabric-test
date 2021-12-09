@@ -70,6 +70,7 @@ func GenerateConfigtxConfiguration(profile string, networkConfig networkspec.Con
 				ServerTlsCert: serverCertContent,
 			}
 			consenters = append(consenters, consenter)
+			ordererPort++
 		}
 		ordererOrganization := &networkspec.ConfigtxOrganization{
 			Name:   org.Name,

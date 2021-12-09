@@ -20,17 +20,17 @@ import (
 
 //InstantiateCCUIObject --
 type InstantiateCCUIObject struct {
-	SDK             string                   `json:"sdk,omitempty"`
-	TransType       string                   `json:"transType,omitempty"`
-	TLS             string                   `json:"TLS,omitempty"`
-	ChainCodeID     string                   `json:"chaincodeID,omitempty"`
-	ChainCodeVer    string                   `json:"chaincodeVer,omitempty"`
-	ConnProfilePath string                   `json:"ConnProfilePath,omitempty"`
-	ChannelOpt      ChannelOptions           `json:"channelOpt,omitempty"`
-	DeployOpt       InstantiateDeployOptions `json:"deploy,omitempty"`
-	TimeOutOpt      TimeOutOptions           `json:"timeoutOpt,omitempty"`
-	Sequence        string                   `json:"sequence,omitempty"`
-	TargetPeers     []string                 `json:"targetPeers,omitempty"`
+	SDK                 string                      `json:"sdk,omitempty"`
+	TransType           string                      `json:"transType,omitempty"`
+	TLS                 string                      `json:"TLS,omitempty"`
+	ChainCodeID         string                      `json:"chaincodeID,omitempty"`
+	ChainCodeVer        string                      `json:"chaincodeVer,omitempty"`
+	OrgConnProfilePaths []inputStructs.Organization `json:"orgConnProfilePaths,omitempty"`
+	ChannelOpt          ChannelOptions              `json:"channelOpt,omitempty"`
+	DeployOpt           InstantiateDeployOptions    `json:"deploy,omitempty"`
+	TimeOutOpt          TimeOutOptions              `json:"timeoutOpt,omitempty"`
+	Sequence            string                      `json:"sequence,omitempty"`
+	TargetPeers         []string                    `json:"targetPeers,omitempty"`
 }
 
 //InstantiateDeployOptions --
@@ -149,19 +149,19 @@ func (i InstantiateCCUIObject) generateInstantiateCCObjects(ccObject inputStruct
 }
 
 //createInstantiateCCObjects -- To create chaincode objects for instantiation/upgrade per channel
-func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, channelName, tls, action string, organizations []inputStructs.Organization, ccObject inputStructs.InstantiateCC) ([]InstantiateCCUIObject, error) {
+func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, channelName, tls, action string, orgConnectionProfilePaths []inputStructs.Organization, ccObject inputStructs.InstantiateCC) ([]InstantiateCCUIObject, error) {
 
 	var instantiateCCObjects []InstantiateCCUIObject
 	targetPeers := strings.Split(ccObject.TargetPeers, ",")
 	i = InstantiateCCUIObject{
-		SDK:             ccObject.SDK,
-		TransType:       action,
-		TLS:             tls,
-		ConnProfilePath: paths.GetConnProfilePath(orgNames, organizations),
-		ChainCodeID:     ccObject.ChainCodeName,
-		ChainCodeVer:    ccObject.ChainCodeVersion,
-		TargetPeers:     targetPeers,
-		Sequence:        ccObject.Sequence,
+		SDK:                 ccObject.SDK,
+		TransType:           action,
+		TLS:                 tls,
+		OrgConnProfilePaths: orgConnectionProfilePaths,
+		ChainCodeID:         ccObject.ChainCodeName,
+		ChainCodeVer:        ccObject.ChainCodeVersion,
+		TargetPeers:         targetPeers,
+		Sequence:            ccObject.Sequence,
 		ChannelOpt: ChannelOptions{
 			Name:    channelName,
 			OrgName: orgNames,
@@ -180,7 +180,7 @@ func (i InstantiateCCUIObject) createInstantiateCCObjects(orgNames []string, cha
 	}
 	if ccObject.EndorsementPolicy != "" {
 		if ccObject.SDK != "cli" || strings.Contains(ccObject.EndorsementPolicy, "of") {
-			endorsementPolicy, err := i.getEndorsementPolicy(organizations, ccObject.EndorsementPolicy)
+			endorsementPolicy, err := i.getEndorsementPolicy(orgConnectionProfilePaths, ccObject.EndorsementPolicy)
 			if err != nil {
 				logger.ERROR("Failed to get the endorsement policy")
 				return instantiateCCObjects, err
@@ -339,17 +339,17 @@ func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCC
 		if err != nil {
 			return err
 		}
-		var connProfilePath string
-		if strings.Contains(instantiateObject.ConnProfilePath, ".yaml") || strings.Contains(instantiateObject.ConnProfilePath, ".json") {
-			connProfilePath = instantiateObject.ConnProfilePath
-		} else {
-			connProfilePath = fmt.Sprintf("%s/connection_profile_%s.yaml", instantiateObject.ConnProfilePath, orgName)
-		}
+
+		orgName = strings.TrimSpace(orgName)
+		connProfilePath := paths.GetConnProfilePath([]string{orgName}, instantiateObject.OrgConnProfilePaths)
 		connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
 		if err != nil {
 			return err
 		}
 		ordererName, err := fetchOrdererInformation(currentDir)
+		if err != nil {
+			return err
+		}
 		ordererURL, err := url.Parse(connProfConfig.Orderers[ordererName[0]].URL)
 		if err != nil {
 			logger.ERROR("Failed to get orderer url from connection profile")
@@ -373,7 +373,7 @@ func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCC
 		for _, peerName := range instantiateObject.TargetPeers {
 			peerOrgName := strings.Split(peerName, "-")
 			if peerOrgName[1] == orgName {
-				peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
+				peerURL, err := url.Parse(connProfConfig.Peers[strings.TrimSpace(peerName)].URL)
 				if err != nil {
 					logger.ERROR("Failed to get peer url from connection profile")
 					return err
@@ -416,29 +416,28 @@ func (i InstantiateCCUIObject) approveCCusingCLI(instantiateObject InstantiateCC
 
 //commitCCusingCLI -- committing cc using CLI
 func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCUIObject) error {
-
-	orgName := instantiateObject.ChannelOpt.OrgName[0]
-	var connProfilePath string
-	if strings.Contains(instantiateObject.ConnProfilePath, ".yaml") || strings.Contains(instantiateObject.ConnProfilePath, ".json") {
-		connProfilePath = instantiateObject.ConnProfilePath
-	} else {
-		connProfilePath = fmt.Sprintf("%s/connection_profile_%s.yaml", instantiateObject.ConnProfilePath, orgName)
+	ordererOrgName := instantiateObject.ChannelOpt.OrgName[0]
+	ordererOrgName = strings.TrimSpace(ordererOrgName)
+	ordererConnProfilePath := paths.GetConnProfilePath([]string{ordererOrgName}, instantiateObject.OrgConnProfilePaths)
+	ordererConnProfConfig, err := ConnProfileInformationForOrg(ordererConnProfilePath, ordererOrgName)
+	if err != nil {
+		return err
 	}
 	currentDir, err := paths.GetCurrentDir()
 	if err != nil {
 		return err
 	}
-	connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, orgName)
+	ordererName, err := fetchOrdererInformation(currentDir)
 	if err != nil {
 		return err
 	}
-	ordererName, err := fetchOrdererInformation(currentDir)
-	ordererURL, err := url.Parse(connProfConfig.Orderers[ordererName[0]].URL)
+	ordererURL, err := url.Parse(ordererConnProfConfig.Orderers[ordererName[0]].URL)
 	if err != nil {
 		logger.ERROR("Failed to get orderer url from connection profile")
 		return err
 	}
 	ordererAddress := ordererURL.Host
+
 	args := []string{"lifecycle",
 		"chaincode",
 		"commit",
@@ -452,24 +451,25 @@ func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCU
 		// "--connectionProfile",
 		// instantiateObject.ConnProfilePath,
 	}
+
 	for _, peerName := range instantiateObject.TargetPeers {
-		peerOrgName := strings.Split(peerName, "-")
-		if peerOrgName[1] == orgName {
-			peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
-			if err != nil {
-				logger.ERROR("Failed to get peer url from connection profile")
-				return err
-			}
-			peerAddress := peerURL.Host
-			args = append(args,
-				"--peerAddresses", peerAddress,
-				"--tlsRootCertFiles", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/%s.%s/tls/ca.crt", currentDir, orgName, peerName, orgName),
-			)
-			err = SetEnvForCLI(orgName, peerName, connProfilePath, instantiateObject.TLS, currentDir)
-			if err != nil {
-				return err
-			}
+		peerOrgName := strings.Split(peerName, "-")[1]
+
+		connProfilePath := paths.GetConnProfilePath([]string{peerOrgName}, instantiateObject.OrgConnProfilePaths)
+		connProfConfig, err := ConnProfileInformationForOrg(connProfilePath, peerOrgName)
+		if err != nil {
+			return err
 		}
+		peerURL, err := url.Parse(connProfConfig.Peers[peerName].URL)
+		if err != nil {
+			logger.ERROR("Failed to get peer url from connection profile")
+			return err
+		}
+		peerAddress := peerURL.Host
+		args = append(args,
+			"--peerAddresses", peerAddress,
+			"--tlsRootCertFiles", fmt.Sprintf("%s/crypto-config/peerOrganizations/%s/peers/%s.%s/tls/ca.crt", currentDir, peerOrgName, peerName, peerOrgName),
+		)
 	}
 	if instantiateObject.TLS == "clientauth" {
 		args = append(args, "--tls")
@@ -479,6 +479,11 @@ func (i InstantiateCCUIObject) commitCCusingCLI(instantiateObject InstantiateCCU
 	}
 	if instantiateObject.DeployOpt.CollectionsConfigPath != "" {
 		args = append(args, "--collections-config", instantiateObject.DeployOpt.CollectionsConfigPath)
+	}
+
+	err = SetEnvForCLI(ordererOrgName, instantiateObject.TargetPeers[0], ordererConnProfilePath, instantiateObject.TLS, currentDir)
+	if err != nil {
+		return err
 	}
 	_, err = networkclient.ExecuteCommand("peer", args, true)
 	return err
