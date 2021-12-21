@@ -1,0 +1,79 @@
+organizations:
+  - name: org1
+    connProfilePath: ./connection-profile
+  - name: org2
+    connProfilePath: ./connection-profile
+  - name: org3
+    connProfilePath: ./connection-profile
+
+createChannel:
+  - channelPrefix: testorgschannel
+    sdk: cli
+    numChannels: 1
+    channelTxPath: ./channel-artifacts/
+    organizations: org1,org2,org3
+
+joinChannel:
+# joins all peers in listed organziations to all channels based on channelPrefix and numChannels
+  - channelPrefix: testorgschannel
+    numChannels: 1
+    organizations: org1,org2,org3
+
+anchorPeerUpdate:
+  - channelName: testorgschannel0
+    organizations: org1
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org1anchor.tx
+  - channelName: testorgschannel0
+    organizations: org2
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org2anchor.tx
+  - channelName: testorgschannel0
+    organizations: org3
+    anchorPeerUpdateTxPath: ./channel-artifacts/testorgschannel0org3anchor.tx
+
+installChaincode:
+# installs chaincode with specified name on all peers in listed organziations
+  - name: basic
+    version: 1.0
+    sdk: cli
+    targetPeers: peer0-org1,peer1-org1
+    path: chaincodes/chaos/node
+    organizations: org1
+    language: node
+    metadataPath: ""
+
+  - name: basic
+    version: 1.0
+    sdk: cli
+    targetPeers: peer0-org2,peer1-org2
+    path: chaincodes/chaos/node
+    organizations: org2
+    language: node
+    metadataPath: ""
+
+  - name: basic
+    version: 1.0
+    sdk: cli
+    targetPeers: peer0-org3,peer1-org3
+    path: chaincodes/chaos/node
+    organizations: org3
+    language: node
+    metadataPath: ""
+
+
+instantiateChaincode:
+  - channelName: testorgschannel0
+    name: basic
+    sdk: cli
+    version: 1.0
+    sequence: 1
+    targetPeers: peer0-org1,peer0-org2,peer0-org3
+    args: ""
+    organizations: org1,org2,org3
+    endorsementPolicy: "OR(AND('Org1ExampleCom.member','Org2ExampleCom.member'),AND('Org1ExampleCom.member','Org3ExampleCom.member'),AND('Org2ExampleCom.member','Org3ExampleCom.member'))"
+    collectionPath: ""
+
+command:
+  - name: docker
+    args:
+      - logs
+      - peer0-org1
