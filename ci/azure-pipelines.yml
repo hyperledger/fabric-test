@@ -7,14 +7,14 @@ name: $(SourceBranchName)-$(Date:yyyyMMdd)$(Rev:.rrr)
 trigger:
   branches:
     include:
-      - main
+      - release-2.4
   paths:
     exclude:
       - tools/chaincode-integration/*
 pr:
   branches:
     include:
-      - main
+      - release-2.4
   paths:
     exclude:
       - tools/chaincode-integration/*

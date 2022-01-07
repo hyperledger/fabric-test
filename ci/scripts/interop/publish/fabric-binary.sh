@@ -16,8 +16,5 @@ for target in linux-amd64 darwin-amd64; do
     curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
 		  -T "hyperledger-fabric-${target}-${RELEASE}.tar.gz" \
 		  "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-${target}-${RELEASE}.tar.gz"
-		curl -u"${ARTIFACTORY_USERNAME}":"${ARTIFACTORY_PASSWORD}" \
-		  -T "hyperledger-fabric-${target}-${RELEASE}.tar.gz" \
-		  "https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-fabric-${target}-latest.tar.gz"
     popd
 done
