@@ -12,6 +12,7 @@ schedules:
     branches:
       include:
         - main
+        - release-2.4
         - release-2.3
         - release-2.2
     always: true
@@ -35,7 +36,7 @@ variables:
   - name: PATH
     value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   - name: RELEASE
-    value: 2.4-stable
+    value: 2.5-stable
   - name: WORKING_DIRECTORY
     value: $(System.DefaultWorkingDirectory)
 
