@@ -1,0 +1,11 @@
+name: KillAPeerInAllOrgs
+description: Kill and Start a peer in all orgs
+steps:
+  - killpeer org1
+  - killpeer org2
+  - killpeer org3
+  - sleep 10000
+  - restartpeer
+  - restartpeer
+  - restartpeer
+  - sleep 5000

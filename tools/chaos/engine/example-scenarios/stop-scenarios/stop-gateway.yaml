@@ -1,0 +1,7 @@
+name: StopAndRestartGateway
+description: Stop and Restart Gateway
+steps:
+  - stopgateway
+  - sleep 20000
+  - restartgateway
+  - sleep 30000

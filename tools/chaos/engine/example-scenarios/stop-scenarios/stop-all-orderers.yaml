@@ -1,0 +1,7 @@
+name: StopAllOrderers
+description: Stop and Restart all orderers
+steps:
+  - stopallorderers
+  - sleep 20000
+  - restartallorderers
+  - sleep 10000

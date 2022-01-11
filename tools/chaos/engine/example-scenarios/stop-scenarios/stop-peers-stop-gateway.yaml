@@ -1,0 +1,11 @@
+name: StopAllPeersThenGateway
+description: Stop and restart all non gateway peers
+steps:
+  - stopallpeers
+  - sleep 20000
+  - restartallpeers
+  - sleep 5000
+  - stopgateway
+  - sleep 10000
+  - restartgateway
+  - sleep 10000

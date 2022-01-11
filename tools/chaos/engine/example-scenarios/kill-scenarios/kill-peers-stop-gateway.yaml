@@ -1,0 +1,11 @@
+name: KillAllPeersThenGateway
+description: Kill and restart all peers then kill and restart gateway
+steps:
+  - killallpeers
+  - sleep 20000
+  - restartallpeers
+  - sleep 5000
+  - killgateway
+  - sleep 10000
+  - restartgateway
+  - sleep 10000

@@ -1,0 +1,11 @@
+name: KillThreeOrderers
+description: Kill And Restart Three Orderers
+steps:
+  - killorderer
+  - killorderer
+  - killorderer
+  - sleep random[20000,40000]
+  - restartorderer
+  - restartorderer
+  - restartorderer
+  - sleep 20000

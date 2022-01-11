@@ -1,0 +1,11 @@
+name: StopThreeOrderers
+description: Stop And Restart Three Orderers
+steps:
+  - stoporderer
+  - stoporderer
+  - stoporderer
+  - sleep random[20000,40000]
+  - restartorderer
+  - restartorderer
+  - restartorderer
+  - sleep 20000

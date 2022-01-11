@@ -1,0 +1,9 @@
+name: KillRestartOrg23Peer
+description: Kill and Start non gateway peer in Org2 and org3
+steps:
+  - killpeer org2
+  - killpeer org3
+  - sleep 10000
+  - restartpeer
+  - restartpeer
+  - sleep 5000

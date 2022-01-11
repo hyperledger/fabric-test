@@ -1,0 +1,9 @@
+name: StopRestartOrg12Peer
+description: Stop and Start a peer in org1 and org2
+steps:
+  - stoppeer org1
+  - stoppeer org2
+  - sleep 10000
+  - restartpeer
+  - restartpeer
+  - sleep 5000

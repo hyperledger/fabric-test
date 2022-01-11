@@ -1,0 +1,9 @@
+name: StopRestartOrg13Peer
+description: Stop and Start non gateway peer in Org1 and Org3
+steps:
+  - stoppeer org1
+  - stoppeer org3
+  - sleep 10000
+  - restartpeer
+  - restartpeer
+  - sleep 5000
