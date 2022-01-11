@@ -1,0 +1,9 @@
+name: KillTwoOrderers
+description: Kill And Restart Two Orderers
+steps:
+  - killorderer
+  - killorderer
+  - sleep random[20000,40000]
+  - restartorderer
+  - restartorderer
+  - sleep 20000

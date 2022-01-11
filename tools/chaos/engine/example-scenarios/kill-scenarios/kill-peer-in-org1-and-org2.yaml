@@ -1,0 +1,9 @@
+name: KillRestartOrg12Peer
+description: Kill and Start a peer in org1 and org2
+steps:
+  - killpeer org1
+  - killpeer org2
+  - sleep 10000
+  - restartpeer
+  - restartpeer
+  - sleep 5000

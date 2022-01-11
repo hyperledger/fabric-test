@@ -1,0 +1,7 @@
+name: KillAllPeers
+description: Kill and restart all non gateway peers
+steps:
+  - killallpeers
+  - sleep 20000
+  - restartallpeers
+  - sleep 10000

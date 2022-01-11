@@ -1,0 +1,7 @@
+name: KillRestartOrg2
+description: Kill and Restart all peers in Org 2
+steps:
+  - killallpeers org2
+  - sleep 10000
+  - restartallpeers
+  - sleep 5000

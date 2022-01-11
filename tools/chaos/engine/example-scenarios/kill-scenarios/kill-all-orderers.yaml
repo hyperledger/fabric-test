@@ -1,0 +1,7 @@
+name: KillAllOrderers
+description: Kill and Restart all orderers
+steps:
+  - killallorderers
+  - sleep 20000
+  - restartallorderers
+  - sleep 10000

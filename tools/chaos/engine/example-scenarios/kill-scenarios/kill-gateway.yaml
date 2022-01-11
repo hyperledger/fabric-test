@@ -1,0 +1,7 @@
+name: KillAndRestartGateway
+description: Kill and Restart Gateway
+steps:
+  - killgateway
+  - sleep 20000
+  - restartgateway
+  - sleep 30000

@@ -1,0 +1,7 @@
+name: KillOneOrderer
+description: Kill and Restart an Orderer
+steps:
+  - killorderer
+  - sleep random[20000,40000]
+  - restartorderer
+  - sleep 20000

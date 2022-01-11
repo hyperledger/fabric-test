@@ -1,0 +1,7 @@
+name: StopRestartOrg3
+description: Stop and Restart all peers in Org 3
+steps:
+  - stopallpeers org3
+  - sleep 10000
+  - restartallpeers
+  - sleep 5000

@@ -1,0 +1,7 @@
+name: KillRestartOrg1Peer
+description: Kill and Start non gateway peer in Org1
+steps:
+  - killpeer org1
+  - sleep 10000
+  - restartpeer
+  - sleep 5000

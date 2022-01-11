@@ -1,0 +1,13 @@
+name: KillFourOrderers
+description: Kill And Restart Four Orderers
+steps:
+  - killorderer
+  - killorderer
+  - killorderer
+  - killorderer
+  - sleep random[20000,40000]
+  - restartorderer
+  - restartorderer
+  - restartorderer
+  - restartorderer
+  - sleep 20000
