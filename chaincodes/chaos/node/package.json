@@ -1,0 +1,24 @@
+{
+  "name": "chaos-chaincode",
+  "version": "0.0.1",
+  "description": "Chaincode for Chaos testing",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "scripts": {
+    "lint": "tslint -c tslint.json 'src/**/*.ts'",
+    "start": "fabric-chaincode-node start",
+    "build": "tsc"
+  },
+  "engineStrict": true,
+  "author": "John Doe",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "fabric-contract-api": "^2.4.0",
+    "fabric-shim": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.7",
+    "tslint": "^6.1.3",
+    "typescript": "4.4.3"
+  }
+}
