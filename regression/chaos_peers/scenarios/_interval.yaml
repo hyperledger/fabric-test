@@ -1,0 +1,4 @@
+name: _interval
+description: Interval
+steps:
+  - sleep random[1000,5000]
