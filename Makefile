@@ -4,6 +4,7 @@
 # -------------------------------------------------------------
 # This makefile defines the following targets
 #
+#   - regression/chaos_peers        - Executes peer chaos tests
 #   - regression/barebones          - Executes barebones tests
 #   - regression/barebones_caliper  - Executes barebones tests using Caliper
 #   - regression/basicnetwork       - Executes basicnetwork tests
@@ -19,6 +20,9 @@ PATH := $(PATH):$(PWD)/bin
 FABRIC_CFG_PATH := $(PWD)/config
 
 include gotools.mk
+
+regression/chaos_%: pre-reqs chaos-init
+	cd ${@} && ginkgo -v
 
 regression/barebones_caliper: pre-reqs caliper-init
 	cd regression/barebones_caliper && ginkgo -v
@@ -59,6 +63,12 @@ pull-binaries-fabric:
 .PHONY: pull-binaries-fabric-ca
 pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
+
+.PHONY: chaos-init
+chaos-init:
+	cd chaincodes/chaos/node && npm install && npm run build
+	cd tools/chaos/client/node && npm install && npm run build
+	cd tools/chaos/engine && npm install &&  npm run build
 
 .PHONY: caliper-init
 caliper-init:

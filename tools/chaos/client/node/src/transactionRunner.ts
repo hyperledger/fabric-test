@@ -131,12 +131,8 @@ export class TransactionRunner {
 
             logger.logPoint('Committed', `status code: ${status.code}`);
 
-            if (status.code === 0) {
-                const event = await Promise.race([eventPromise, timeout(config.eventTimeout, 'Timed out waiting for event', 'EventReceived')]) as ChaincodeEvent;
-                logger.logPoint('EventReceived', `EventName:${event.eventName},Payload:${Buffer.from(event.payload).toString()}`);
-            } else {
-                logger.logPoint('EventReceived', `No Event will be emitted as status code was ${status.code}`);
-            }
+            const event = await Promise.race([eventPromise, timeout(config.eventTimeout, 'Timed out waiting for chaincode event', 'EventReceived')]) as ChaincodeEvent;
+            logger.logPoint('EventReceived', `EventName:${event.eventName},Payload:${Buffer.from(event.payload).toString()}`);
 
             this.gatewayTransactionStats.successfulSubmits++;
         } catch (error: unknown) {

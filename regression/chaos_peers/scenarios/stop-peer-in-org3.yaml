@@ -1,0 +1,7 @@
+name: StopRestartOrg3Peer
+description: Stop and Start non gateway peer in Org3
+steps:
+  - stoppeer org3
+  - sleep 10000
+  - restartpeer
+  - sleep 5000
