@@ -3,16 +3,17 @@ Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 import * as chalk from 'chalk';
-import { given as tsFlowGiven, then as tsFlowThen, when as tsFlowWhen } from 'cucumber-tsflow/dist';
+import { given as tsFlowGiven, then as tsFlowThen, when as tsFlowWhen } from 'cucumber-tsflow';
 import { Workspace } from '../step-definitions/utils/workspace';
 import { Logger } from '../utils/logger';
 
 const logger = Logger.getLogger('./src/decorators.ts');
 
 function addLogging(type: 'given' | 'then' | 'when', stepPattern: RegExp | string, func: MethodDecorator): MethodDecorator {
+
     // need to use keyword this
     // tslint:disable-next-line: only-arrow-functions
-    return function(target: any, key: string, descriptor: any) {
+    return function(target: any, key?: any, descriptor?: any) {
         const orginalMethod = descriptor.value;
 
         descriptor.value = function(...args: any[]) {
@@ -28,10 +29,10 @@ function addLogging(type: 'given' | 'then' | 'when', stepPattern: RegExp | strin
                 return (stepPattern as RegExp).test(scenarioStep.text) && !scenarioStep.complete;
             });
 
-            step.complete = true;
+            step!.complete = true;
 
             if (logger.level === 'debug') {
-                logger.debug(chalk.yellow(`[${type}] ${step.text}`));
+                logger.debug(chalk.yellow(`[${type}] ${step!.text}`));
             }
 
             return orginalMethod.apply(this, args);

@@ -2,16 +2,15 @@
   "name": "fabric-chaincode-integration",
   "version": "0.5.0",
   "description": "A tool for testing fabric chaincode implementations",
-  "main": "dist/index.js",
   "bin": {
-    "fabric-chaincode-integration": "dist/cli.js"
+    "fabric-chaincode-integration": "run.sh"
   },
   "scripts": {
-    "pretest": "licchk",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "npm run build",
     "build": "tsc",
-    "licchk": "license-check-and-add check"
+    "build:watch": "tsc -w",
+    "lint": "eslint . --ext .ts",
+    "prepare": "npm run build",
+    "test": "cucumber-js -p default --tags '@basic-checks' --fail-fast"
   },
   "repository": {
     "type": "git",
@@ -35,32 +34,33 @@
     "@types/fs-extra": "^8.0.1",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.149",
-    "license-check-and-add": "^3.0.3",
-    "ts-node": "^8.6.2",
-    "tslint": "^5.20.1",
-    "typescript": "^3.7.4"
+    "@typescript-eslint/eslint-plugin": "^5.6.0",
+    "@typescript-eslint/parser": "^5.6.0",
+    "eslint": "^8.4.1",
+    "license-check-and-add": "^3.0.3"
+
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.5.0",
+    "@hyperledger/fabric-gateway": "^1.0.0",
     "@types/yargs": "^15.0.0",
     "ajv": "^6.11.0",
     "assert": "^2.0.0",
     "chai": "^4.2.0",
     "chalk": "^3.0.0",
-    "cucumber": "^6.0.5",
-    "cucumber-tsflow": "^3.2.0",
-    "fabric-ca-client": "^1.4.13",
-    "fabric-common": "^1.4.13",
-    "fabric-network": "^1.4.13",
-    "fabric-shim": "^2.2.0",
+    "cucumber-tsflow": "^4.0.0-rc.1",
     "fast-safe-stringify": "^2.0.7",
     "fs-extra": "^8.1.0",
     "handlebars": "^4.7.6",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
     "nano": "^8.1.0",
-    "protobufjs": "^6.8.8",
-    "util": "^0.12.1",
     "winston": "^3.2.1",
-    "yargs": "^15.1.0"
+    "ts-node": "^8.6.2",
+    "typescript": "~4.5.2",
+    "@cucumber/cucumber": "^7.3.2",
+    "@cucumber/pretty-formatter": "^1.0.0-alpha.1",
+    "@tsconfig/node14": "^1.0.1"
+
   }
 }

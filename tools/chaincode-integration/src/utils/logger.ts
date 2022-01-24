@@ -7,8 +7,9 @@ import * as winston from 'winston';
 import { Global } from '../interfaces/interfaces';
 
 const SPLAT: string = Symbol.for('splat') as any as string; // shh TS hates symbols
-// looks odd, but this is the most efficient way of padding strings in js
-const padding = '                                               ';
+
+// looks odd, but this is an efficient way of padding strings in js
+const padding = '                                 ';
 
 declare const global: Global;
 
@@ -81,10 +82,10 @@ export class Logger {
             winston.format.padLevels(),
             winston.format.printf((info) => {
                 const {timestamp, level, message} = info;
-                const str = (`[cc-integration:${name}]` + padding).substring(0, padding.length);
+                const str = (`[${name}]` + padding).substring(0, padding.length);
                 let out = '';
                 if (info[SPLAT]) {
-                    out = info[SPLAT].map((e) => {
+                    out = info[SPLAT].map((e:any) => {
                         if (e && e.error) {
                             if (e.error.stack) {
                                 return e.error.stack;
@@ -96,7 +97,7 @@ export class Logger {
                         }
                     });
                 }
-                return `${timestamp} ${level} ${str} ${message} ${out} `;
+                return `${padding}${padding} ${str} ${message} ${out}`
             }),
         );
     }

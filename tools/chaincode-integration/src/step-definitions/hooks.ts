@@ -2,9 +2,10 @@
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
-import * as chalk from 'chalk';
+
+import chalk from 'chalk';
 import { HookScenarioResult, pickle, SourceLocation } from 'cucumber';
-import { after, before, binding } from 'cucumber-tsflow/dist';
+import { after, before, binding } from 'cucumber-tsflow';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { Global, Step } from '../interfaces/interfaces';
@@ -22,7 +23,7 @@ interface HookScenario {
 
 @binding([Workspace])
 export class Hooks {
-    private feature = null;
+    private feature: string | undefined;
 
     public constructor(private workspace: Workspace) {
         // constructor
@@ -30,15 +31,18 @@ export class Hooks {
 
     @before()
     public beforeScenario(scenario: HookScenario) {
-        if (this.feature !== scenario.sourceLocation.uri) {
-            this.feature = scenario.sourceLocation.uri;
+
+        
+        // if ((scenario as any).gherkinDocument.uri !== (scenario.pickle as any).uri) {
+            let feature = (scenario as any).gherkinDocument.uri;
             this.workspace.feature = {
-                name: this.feature,
+                name: feature,
                 scenarios: [],
             };
 
-            logger.info(chalk.yellow(`Running feature ${formatFeature(this.feature)}`));
-        }
+            logger.info(chalk.yellow(`Running feature ${formatFeature(feature)}`));
+        // }
+
         logger.info(chalk.yellow(`Running scenario ${scenario.pickle.name}`));
 
         this.workspace.feature.scenarios.push({
@@ -59,13 +63,13 @@ export class Hooks {
         const prefix = `[${scenarioResult.pickle.name}]`;
 
         logger.info(`${prefix} Status: ${scenarioResult.result.status}`);
-        logger.info(`${prefix} Duration: ${formatDuration(scenarioResult.result.duration)}`);
+        logger.info(`${prefix} Duration: ${formatDuration((scenarioResult.result as any).duration)}`);
 
-        if (scenarioResult.result.status !== 'passed') {
-            if (scenarioResult.result.status === 'failed') {
-                logger.error(scenarioResult.result.exception.name);
-                logger.error(scenarioResult.result.exception.message);
-                logger.error(scenarioResult.result.exception.stack);
+        if (scenarioResult.result.status.toLowerCase() !== 'passed') {
+            if (scenarioResult.result.status.toLowerCase()  === 'failed') {
+                logger.error(scenarioResult.result.exception!.name);
+                logger.error(scenarioResult.result.exception!.message);
+                logger.error(scenarioResult.result.exception!.stack!);
             } else if (scenarioResult.result.status === 'undefined') {
                 logger.error('Step(s) found with text that does not match any known step defintion');
 
@@ -81,15 +85,16 @@ export class Hooks {
 
         // Workspace is per scenario so save for other scenarios
         global.CURRENT_NETWORK = this.workspace.network;
-        global.CHAINCODES = this.workspace.chaincodes;
+        // global.CHAINCODES = this.workspace.chaincodes;
         global.CONNECTIONS = this.workspace.connections;
+        global.INFRASTRUCTURE = this.workspace.infrastructureProvider;
 
         logger.info(chalk.yellow(`Finished scenario ${scenarioResult.pickle.name}`));
     }
 }
 
-function formatDuration(nanoseconds: number) {
-    const millseconds = nanoseconds / 1000 / 1000;
+function formatDuration(duration: {seconds:number, nanos: number}) {
+    const millseconds = duration.nanos / 1000 / 1000;
 
     const remainder = millseconds % (60 * 1000);
     let seconds: any = remainder / 1000;
@@ -108,7 +113,7 @@ function formatFeature(file: string) {
     try {
         const fileContents = fs.readFileSync(fullPath, 'utf-8');
         const match = /Feature: (.*)/.exec(fileContents);
-        feature = match[1];
+        feature = match![1];
     } catch (err) {
         logger.error(`Could not get feature from file ${fullPath}`);
     }
