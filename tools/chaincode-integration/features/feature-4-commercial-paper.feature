@@ -1,15 +1,14 @@
 # Copyright the Hyperledger Fabric contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-@single-org @commercial-paper
+@commercial-paper
 Feature: CommercialPaper
 
     Scenario: I can install and instantiate the commercial paper chaincode
         Given Channel "commercialpaperchannel" has been created using the profile "channel"
-        And All peers on channel "commercialpaperchannel" have installed the chaincode "commercialpaper"
+        And All peers on channel "commercialpaperchannel" have deployed the chaincode "commercialpaper"
         And Organisation "Org1" has registered the identity "magnetocorp"
         And Organisation "Org1" has registered the identity "digibank"
         And Organisation "Org1" has registered the identity "hedgematic"
-        And Organisation "Org1" has instantiated the chaincode "commercialpaper" on channel "commercialpaperchannel"
 
     Scenario: I can create a new commercial paper
         When Organisation "Org1" submits against the chaincode "commercialpaper" the transaction "issue" on channel "commercialpaperchannel" as "magnetocorp" with args:
