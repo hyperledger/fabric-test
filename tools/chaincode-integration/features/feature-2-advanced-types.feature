@@ -3,46 +3,91 @@
 @single-org @not-javascript @advanced-types
 Feature: AdvanceTypes
 
-    Scenario: I can install and instantiate an advanced type chaincode
-        Given Channel "advancedchannel" has been created using the profile "channel"
-        And All peers on channel "advancedchannel" have installed the chaincode "advancedtypes"
+    Background: I can install and instantiate a simple chaincode
+      Given Infrastructure provider is "TestNetwork"
+        And Infrastructure created for network "oneorg-v2x" with channel "simplechannel"
+        And All peers on channel "simplechannel" have deployed the chaincode "advancedtypes"
         And Organisation "Org1" has registered the identity "user1"
-        And Organisation "Org1" has instantiated the chaincode "advancedtypes" on channel "advancedchannel"
 
     Scenario: Get numeric responses
-        Then Expecting result "1" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "getInt" on channel "advancedchannel" as "user1"
-        Then Expecting result "1.1" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "getFloat" on channel "advancedchannel" as "user1"
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "advancedtypes" on channel "simplechannel"
+        And  Submits a transaction "getInt"
+        Then The result should be "1"
+        And  Submits a transaction "getFloat"
+        Then The result should be "1.1"
 
     Scenario: Get bool responses
-        Then Expecting result "true" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "getBool" on channel "advancedchannel" as "user1"
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "advancedtypes" on channel "simplechannel"
+        And  Submits a transaction "getBool"
+        Then The result should be "true" 
 
     Scenario: Get basic type array
-        Then Expecting result "[1, 2, 3]" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "getArray" on channel "advancedchannel" as "user1"
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "advancedtypes" on channel "simplechannel"
+        And  Submits a transaction "getArray"
+        Then The JSON result should be "[1, 2, 3]" 
 
     Scenario: Get simple object
-        Then Expecting result '{"id": "OBJECT_1", "value": 100}' organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "getBasicAsset" on channel "advancedchannel" as "user1"
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "advancedtypes" on channel "simplechannel"
+        And  Submits a transaction "getBasicAsset"
+        Then The JSON result should be '{"id": "OBJECT_1", "value": 100}'
+
 
     Scenario: Get complex object
-        Then Expecting result '{"id": "OBJECT_2", "value": 100, "description": {"colour": "red", "owners": ["andy", "matthew"]}}' organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "getComplexAsset" on channel "advancedchannel" as "user1"
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "advancedtypes" on channel "simplechannel"
+        And  Submits a transaction "getComplexAsset"
+        Then The JSON result should be '{"id":"OBJECT_2","value":100,"description":{"colour":"Vermillion","owners":["Alice","Bob"]}}'
+
 
     Scenario: Call with numeric values
-        Then Expecting result "2" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "callAndResponseInt" on channel "advancedchannel" as "user1" with args:
+        When  Acting as Organization "Org1" user "User1"
+         And  Connecting via SDK "defaultgateway"
+         And  Using chaincode "advancedtypes" on channel "simplechannel"
+         And  Submits a transaction "callAndResponseInt" with args:
             | 2 |
-        Then Expecting result "2.1" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "callAndResponseFloat" on channel "advancedchannel" as "user1" with args:
-            | 2.1 |
-    
-    Scenario: Call with bool value
-        Then Expecting result "false" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "callAndResponseBool" on channel "advancedchannel" as "user1" with args:
-            | false |
+        Then  The result should be "3"
 
-    Scenario: Call with basic type array value
-        Then Expecting result "[false, true]" organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "callAndResponseArray" on channel "advancedchannel" as "user1" with args:
-            | [false, true] |
+    Scenario: Call with boolean values
+        When  Acting as Organization "Org1" user "User1"
+         And  Connecting via SDK "defaultgateway"
+         And  Using chaincode "advancedtypes" on channel "simplechannel"
+         And  Submits a transaction "callAndResponseBool" with args:
+            | false |
+        Then  The result should be "true"
+         And  Submits a transaction "callAndResponseBool" with args:
+            | true |
+        Then  The result should be "false"
+
+# TO FIX   
+    # Scenario: Call with boolean values
+    #     When  Acting as Organization "Org1" user "User1"
+    #      And  Connecting via SDK "defaultgateway"
+    #      And  Using chaincode "advancedtypes" on channel "simplechannel"
+    #      And  Submits a transaction "callAndResponseArray" with args:
+    #             | "[\"alice\",\"bob\",\"charlie\"]" |
+    #     Then  The JSON result should be '["charlie","bob","alice"]'
 
     Scenario: Call with simple object
-        Then Expecting result '{"id": "OBJECT_3", "value": 200}' organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "callAndResponseBasicAsset" on channel "advancedchannel" as "user1" with args:
-            | {"id": "OBJECT_3", "value": 200} |
+        When  Acting as Organization "Org1" user "User1"
+         And  Connecting via SDK "defaultgateway"
+         And  Using chaincode "advancedtypes" on channel "simplechannel"
+         And  Submits a transaction "callAndResponseBasicAsset" with args:    
+              | {"id": "OBJECT_3", "value": 200} |
+        Then  The JSON result should be '{"id": "OBJECT_3", "value": 200}'
 
     Scenario: Call with complex object
-        Then Expecting result '{"id": "OBJECT_4", "value": 200, "description": {"colour": "red", "owners": ["andy", "matthew"]}}' organisation "Org1" evaluates against the chaincode "advancedtypes" the transaction "callAndResponseComplexAsset" on channel "advancedchannel" as "user1" with args:
-            | {"id": "OBJECT_4", "value": 200, "description": {"colour": "red", "owners": ["andy", "matthew"]}} |
+        When  Acting as Organization "Org1" user "User1"
+         And  Connecting via SDK "defaultgateway"
+         And  Using chaincode "advancedtypes" on channel "simplechannel"
+         And Submits a transaction "callAndResponseComplexAsset" with args:
+               | {"id": "OBJECT_4", "value": 200, "description": {"colour": "red", "owners": ["andy", "matthew"]}} |
+        Then The JSON result should be '{"id": "OBJECT_4", "value": 200, "description": {"colour": "red", "owners": ["andy", "matthew"]}}'

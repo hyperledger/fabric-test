@@ -1,13 +1,12 @@
 # Copyright the Hyperledger Fabric contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-@single-org @transaction-hooks
+@transaction-hooks
 Feature: TransactionHooks
     
     Scenario: I can install and instantiate a transaction hooks chaincode
         Given Channel "hookschannel" has been created using the profile "channel"
-        And All peers on channel "hookschannel" have installed the chaincode "transactionhooks"
+        And All peers on channel "hookschannel" have deployed the chaincode "transactionhooks"
         And Organisation "Org1" has registered the identity "user1"
-        And Organisation "Org1" has instantiated the chaincode "transactionhooks" on channel "hookschannel"
 
     Scenario: Before transaction fails
         Given Organisation "Org1" has created transaction "writeBeforeValue" for chaincode "transactionhooks" on channel "hookschannel" as "user1"

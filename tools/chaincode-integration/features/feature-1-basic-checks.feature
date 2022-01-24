@@ -3,29 +3,39 @@
 @single-org @basic-checks
 Feature: BasicChecks
 
-    Scenario: I can install and instantiate a simple chaincode
-        Given Channel "simplechannel" has been created using the profile "channel"
-        And All peers on channel "simplechannel" have installed the chaincode "simple"
+    Background: I can install and instantiate a simple chaincode
+      Given Infrastructure provider is "TestNetwork"
+        And Infrastructure created for network "oneorg-v2x" with channel "simplechannel"
+        And All peers on channel "simplechannel" have deployed the chaincode "simple"
         And Organisation "Org1" has registered the identity "user1"
-        And Organisation "Org1" has instantiated the chaincode "simple" on channel "simplechannel"
 
     Scenario: Gets a string response
-        Then Expecting result "Hello World" organisation "Org1" evaluates against the chaincode "simple" the transaction "helloWorld" on channel "simplechannel" as "user1"
-
-    Scenario: Call with a string
-        Then Expecting result "Ping" organisation "Org1" evaluates against the chaincode "simple" the transaction "callAndResponse" on channel "simplechannel" as "user1" with args:
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "simple" on channel "simplechannel"
+        And  Submits a transaction "helloWorld"
+        Then The result should be "Hello World"
+        
+    Scenario: Send and get back same data
+        And  Acting as Organization "Org1" user "User1"
+        And  Connecting via SDK "defaultgateway"
+        And  Using chaincode "simple" on channel "simplechannel"
+        And  Submits a transaction "callAndResponse" with args:
             | Ping |
+        Then The result should be "Ping"    
 
-    Scenario: Put a key value pair to the world state
-        When Organisation "Org1" submits against the chaincode "simple" the transaction "putState" on channel "simplechannel" as "user1" with args:
+    Scenario: Put and Read a key value pair to the world state
+        And Acting as Organization "Org1" user "User1"
+        And Connecting via SDK "defaultgateway"
+        And Using chaincode "simple" on channel "simplechannel"
+        And Submits a transaction "putState" with args:
             | KEY_1 | VALUE_1 |
-        Then The world state for the chaincode "simple" on channel "simplechannel" should contain "VALUE_1" for key "KEY_1"
-
-    Scenario: Read a key value pair from the world state
-        Then Expecting result "VALUE_1" organisation "Org1" evaluates against the chaincode "simple" the transaction "getState" on channel "simplechannel" as "user1" with args:
-            | KEY_1 |
+        Then Transaction "getState" should return "VALUE_1" for key "KEY_1"
 
     Scenario: Delete a key from the world state
-        When Organisation "Org1" submits against the chaincode "simple" the transaction "deleteState" on channel "simplechannel" as "user1" with args:
+        And Acting as Organization "Org1" user "User1"
+        And Connecting via SDK "defaultgateway"
+        And Using chaincode "simple" on channel "simplechannel"
+        And Submits a transaction "deleteState" with args:
             | KEY_1 |
-        Then The world state for the chaincode "simple" on channel "simplechannel" should not have key "KEY_1"
+        Then Transaction "existsState" should return "false" for key "KEY_1"
