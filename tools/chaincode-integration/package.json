@@ -3,14 +3,15 @@
   "version": "0.5.0",
   "description": "A tool for testing fabric chaincode implementations",
   "bin": {
-    "fabric-chaincode-integration": "run.sh"
+    "fabric-chaincode-integration": "dist/run.js"
   },
   "scripts": {
-    "build": "tsc",
-    "build:watch": "tsc -w",
-    "lint": "eslint . --ext .ts",
-    "prepare": "npm run build",
-    "test": "cucumber-js -p default --tags '@basic-checks' --fail-fast"
+    "clean": "rimraf lib",
+    "format": "prettier --write \"{src,test}/**/*.ts\"",
+    "build": "npm run format && npm run clean && npm run lint && echo Using TypeScript && tsc --version && tsc --pretty  && npm pack",
+    "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
+    "licchk": "license-check-and-add check",
+    "test": "cucumber-js -p dev --tags '@basic-checks or @advanced-types or @metadata-checks' --fail-fast"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,6 @@
     "chaincode",
     "cucumber"
   ],
-  "author": "ampretia",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://jira.hyperledger.org"
@@ -34,16 +34,22 @@
     "@types/fs-extra": "^8.0.1",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.149",
-    "@typescript-eslint/eslint-plugin": "^5.6.0",
-    "@typescript-eslint/parser": "^5.6.0",
-    "eslint": "^8.4.1",
-    "license-check-and-add": "^3.0.3"
-
+    "license-check-and-add": "^3.0.3",
+    "@typescript-eslint/eslint-plugin": "^4.28.1",
+    "@typescript-eslint/parser": "^4.28.1",
+    "eslint": "^7.29.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "prettier": "^2.3.2",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.5.0",
-    "@hyperledger/fabric-gateway": "^1.0.0",
-    "@types/yargs": "^15.0.0",
+    "@cucumber/cucumber": "^7.3.2",
+    "@cucumber/pretty-formatter": "^1.0.0-alpha.1",
+    "@grpc/grpc-js": "^1.5.7",
+    "@hyperledger/fabric-gateway": "^1.0.1",
+    "@tsconfig/node14": "^1.0.1",
+    "@types/yargs": "^17.0.9",
     "ajv": "^6.11.0",
     "assert": "^2.0.0",
     "chai": "^4.2.0",
@@ -51,16 +57,12 @@
     "cucumber-tsflow": "^4.0.0-rc.1",
     "fast-safe-stringify": "^2.0.7",
     "fs-extra": "^8.1.0",
-    "handlebars": "^4.7.6",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
     "nano": "^8.1.0",
-    "winston": "^3.2.1",
     "ts-node": "^8.6.2",
     "typescript": "~4.5.2",
-    "@cucumber/cucumber": "^7.3.2",
-    "@cucumber/pretty-formatter": "^1.0.0-alpha.1",
-    "@tsconfig/node14": "^1.0.1"
-
+    "winston": "^3.2.1",
+    "yargs": "^17.3.1"
   }
 }

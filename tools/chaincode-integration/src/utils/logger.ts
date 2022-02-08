@@ -19,9 +19,7 @@ export class Logger {
             exitOnError: false,
             format: Logger.formatter(name),
             level,
-            transports: [
-                Logger.getTransport(),
-            ],
+            transports: [Logger.getTransport()],
         });
     }
 
@@ -40,13 +38,13 @@ export class Logger {
         return logger;
     }
 
-    public static refreshLoggers() {
+    public static refreshLoggers(): void {
         Object.keys(Logger.loggers).forEach((key) => {
             Logger.getLogger(key);
         });
     }
 
-    private static loggers: {[s: string]: winston.Logger} = {};
+    private static loggers: { [s: string]: winston.Logger } = {};
     private static transport: winston.transports.ConsoleTransportInstance;
 
     private static getLogLevel(): string {
@@ -69,7 +67,7 @@ export class Logger {
 
     private static getTransport(): winston.transports.ConsoleTransportInstance {
         if (!Logger.transport) {
-            Logger.transport = new winston.transports.Console({handleExceptions: false});
+            Logger.transport = new winston.transports.Console({ handleExceptions: false });
         }
         return Logger.transport;
     }
@@ -77,15 +75,15 @@ export class Logger {
     private static formatter(name: string) {
         return winston.format.combine(
             winston.format.timestamp(),
-            winston.format.metadata({fillExcept: ['message', 'level', 'timestamp', 'label']}),
+            winston.format.metadata({ fillExcept: ['message', 'level', 'timestamp', 'label'] }),
             winston.format.colorize(),
             winston.format.padLevels(),
             winston.format.printf((info) => {
-                const {timestamp, level, message} = info;
+                const { timestamp, level, message } = info;
                 const str = (`[${name}]` + padding).substring(0, padding.length);
                 let out = '';
                 if (info[SPLAT]) {
-                    out = info[SPLAT].map((e:any) => {
+                    out = info[SPLAT].map((e: any) => {
                         if (e && e.error) {
                             if (e.error.stack) {
                                 return e.error.stack;
@@ -97,7 +95,7 @@ export class Logger {
                         }
                     });
                 }
-                return `${padding}${padding} ${str} ${message} ${out}`
+                return `${padding}${padding} ${str} ${message} ${out}`;
             }),
         );
     }

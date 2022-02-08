@@ -21,6 +21,12 @@ interface HookScenario {
     pickle: pickle.Pickle;
 }
 
+// Note the API changed for the cucumber/gherkin interface. This code was originally written to the old
+// interface and has been updated to the new one; however it may not be most efficient way of
+// doing it with the new interface.
+
+// These hooks were added to give more informative debug information that cucumber-js provides by default
+// such they could be removed and the tests still test.
 @binding([Workspace])
 export class Hooks {
     private feature: string | undefined;
@@ -30,19 +36,14 @@ export class Hooks {
     }
 
     @before()
-    public beforeScenario(scenario: HookScenario) {
+    public beforeScenario(scenario: HookScenario): void {
+        const feature = (scenario as any).gherkinDocument.uri;
+        this.workspace.feature = {
+            name: feature,
+            scenarios: [],
+        };
 
-        
-        // if ((scenario as any).gherkinDocument.uri !== (scenario.pickle as any).uri) {
-            let feature = (scenario as any).gherkinDocument.uri;
-            this.workspace.feature = {
-                name: feature,
-                scenarios: [],
-            };
-
-            logger.info(chalk.yellow(`Running feature ${formatFeature(feature)}`));
-        // }
-
+        logger.info(chalk.yellow(`Running feature ${formatFeature(feature)}`));
         logger.info(chalk.yellow(`Running scenario ${scenario.pickle.name}`));
 
         this.workspace.feature.scenarios.push({
@@ -59,17 +60,21 @@ export class Hooks {
     }
 
     @after()
-    public afterScenario(scenarioResult: HookScenarioResult) {
+    public afterScenario(scenarioResult: HookScenarioResult): void {
         const prefix = `[${scenarioResult.pickle.name}]`;
 
         logger.info(`${prefix} Status: ${scenarioResult.result.status}`);
         logger.info(`${prefix} Duration: ${formatDuration((scenarioResult.result as any).duration)}`);
 
         if (scenarioResult.result.status.toLowerCase() !== 'passed') {
-            if (scenarioResult.result.status.toLowerCase()  === 'failed') {
-                logger.error(scenarioResult.result.exception!.name);
-                logger.error(scenarioResult.result.exception!.message);
-                logger.error(scenarioResult.result.exception!.stack!);
+            if (scenarioResult.result.status.toLowerCase() === 'failed') {
+                if (scenarioResult.result.exception) {
+                    logger.error(scenarioResult.result.exception.name ?? '');
+                    logger.error(scenarioResult.result.exception.message ?? '');
+                    logger.error(scenarioResult.result.exception.stack ?? '');
+                } else {
+                    logger.error('No exception defined in the scenario result');
+                }
             } else if (scenarioResult.result.status === 'undefined') {
                 logger.error('Step(s) found with text that does not match any known step defintion');
 
@@ -85,7 +90,6 @@ export class Hooks {
 
         // Workspace is per scenario so save for other scenarios
         global.CURRENT_NETWORK = this.workspace.network;
-        // global.CHAINCODES = this.workspace.chaincodes;
         global.CONNECTIONS = this.workspace.connections;
         global.INFRASTRUCTURE = this.workspace.infrastructureProvider;
 
@@ -93,20 +97,20 @@ export class Hooks {
     }
 }
 
-function formatDuration(duration: {seconds:number, nanos: number}) {
+function formatDuration(duration: { seconds: number; nanos: number }): string {
     const millseconds = duration.nanos / 1000 / 1000;
 
     const remainder = millseconds % (60 * 1000);
     let seconds: any = remainder / 1000;
     let mins: any = (millseconds - remainder) / (60 * 1000);
 
-    seconds = (mins < 10) ? '0' + mins : mins;
-    mins = (mins < 10) ? '0' + mins : mins;
+    seconds = mins < 10 ? '0' + mins : mins;
+    mins = mins < 10 ? '0' + mins : mins;
 
     return mins + 'm' + seconds + 's';
 }
 
-function formatFeature(file: string) {
+function formatFeature(file: string): string {
     let feature = 'Unknown';
     const fullPath = path.resolve(__dirname, '../..', file);
 

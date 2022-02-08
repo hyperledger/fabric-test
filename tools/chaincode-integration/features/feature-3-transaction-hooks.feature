@@ -1,6 +1,6 @@
 # Copyright the Hyperledger Fabric contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-@transaction-hooks
+@transaction-hooks  @notsupportedyet
 Feature: TransactionHooks
     
     Scenario: I can install and instantiate a transaction hooks chaincode

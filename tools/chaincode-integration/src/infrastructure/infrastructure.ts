@@ -15,5 +15,3 @@ export interface Infrastructure {
     getName(): string;
     startCCAAS(workspace: Workspace, chaincodeName: string): Promise<void>;
 }
-
-

@@ -1,6 +1,6 @@
 # Copyright the Hyperledger Fabric contributors. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
-@three-org @private-data-collections
+@three-org @private-data-collections @notsupportedyet
 Feature: PrivateChecks
 
     Scenario: I can install and instantiate a private chaincode
