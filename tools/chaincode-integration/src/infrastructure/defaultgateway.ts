@@ -1,40 +1,41 @@
-
+/*
+Copyright the Hyperledger Fabric contributors. All rights reserved.
+SPDX-License-Identifier: Apache-2.0
+*/
 
 import * as grpc from '@grpc/grpc-js';
 import * as crypto from 'crypto';
 import * as path from 'path';
 import { connect, Identity, Signer, signers } from '@hyperledger/fabric-gateway';
 import * as fs from 'fs-extra';
-import { Workspace } from "../step-definitions/utils/workspace";
-import { ClientSDKProxy, Transaction } from "./clientsdkproxy";
+import { Workspace } from '../step-definitions/utils/workspace';
+import { ClientSDKProxy, Transaction } from './clientsdkproxy';
 import { TextDecoder } from 'util';
 import { Logger } from '../utils/logger';
 
-
 const utf8Decoder = new TextDecoder();
-export default class DefaultGateway implements ClientSDKProxy{
-    
+export default class DefaultGateway implements ClientSDKProxy {
     private cryptoPath!: string;
 
     async setup(config: any, workspace: Workspace): Promise<ClientSDKProxy> {
-        let LOG = Logger.getLogger('clientproxy');
+        const LOG = Logger.getLogger('clientproxy');
 
-        this.cryptoPath = config[workspace.infrastructureProvider.getName()]['cryptoPath']
-        LOG.info(`crypto path = ${this.cryptoPath}`)
+        this.cryptoPath = config[workspace.infrastructureProvider.getName()]['cryptoPath'];
+        LOG.info(`crypto path = ${this.cryptoPath}`);
 
-        workspace.grpcClient = await this.newGrpcConnection(config[workspace.infrastructureProvider.getName()]);     
+        workspace.grpcClient = await this.newGrpcConnection(config[workspace.infrastructureProvider.getName()]);
         return this;
     }
 
-    async sendTransaction(workspace:Workspace, tx: Transaction): Promise<string> {
-        let LOG = Logger.getLogger('clientproxy');
-        LOG.info(`Submitting transaction ${tx.txname}`)
-        let orgMSPID = `${workspace.actingOrg}MSP`;
+    async sendTransaction(workspace: Workspace, tx: Transaction): Promise<string> {
+        const LOG = Logger.getLogger('clientproxy');
+        LOG.info(`Submitting transaction ${tx.txname}`);
+        const orgMSPID = `${workspace.actingOrg}MSP`;
 
         const gateway = connect({
             client: workspace.grpcClient,
-            identity: await this.newIdentity(workspace.actingOrg,orgMSPID,workspace.actingUser),
-            signer: await this.newSigner(workspace.actingOrg,workspace.actingUser),
+            identity: await this.newIdentity(workspace.actingOrg, orgMSPID, workspace.actingUser),
+            signer: await this.newSigner(workspace.actingOrg, workspace.actingUser),
 
             // Default timeouts for different gRPC calls
             evaluateOptions: () => {
@@ -56,27 +57,25 @@ export default class DefaultGateway implements ClientSDKProxy{
 
             // Get the smart contract from the network.
             const contractInstance = network.getContract(workspace.actingChaincode);
-    
+
             let resultBytes;
-            if (tx.args === undefined){
-                if (tx.shouldSubmit){
+            if (tx.args === undefined) {
+                if (tx.shouldSubmit) {
                     resultBytes = await contractInstance.submitTransaction(tx.txname);
                 } else {
-                    resultBytes = await contractInstance.evaluateTransaction(tx.txname);    
+                    resultBytes = await contractInstance.evaluateTransaction(tx.txname);
                 }
             } else {
-                if (tx.shouldSubmit){
-                    resultBytes = await contractInstance.submitTransaction(tx.txname,...tx.args);
+                if (tx.shouldSubmit) {
+                    resultBytes = await contractInstance.submitTransaction(tx.txname, ...tx.args);
                 } else {
-                    resultBytes = await contractInstance.evaluateTransaction(tx.txname,...tx.args);    
+                    resultBytes = await contractInstance.evaluateTransaction(tx.txname, ...tx.args);
                 }
             }
 
-            let result =  utf8Decoder.decode(resultBytes);
-            console.log(result);
+            const result = utf8Decoder.decode(resultBytes);
             return result;
-        } catch (e){
-            console.log(e)
+        } catch (e) {
             LOG.error((e as Error).toString());
             throw e;
         } finally {
@@ -84,11 +83,9 @@ export default class DefaultGateway implements ClientSDKProxy{
         }
     }
 
-
-
-    private async newGrpcConnection(config:any): Promise<grpc.Client> {
+    private async newGrpcConnection(config: any): Promise<grpc.Client> {
         const tlsCertPath = path.resolve(this.cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-        let peerEndpoint= config['peerEndpoint'];
+        const peerEndpoint = config['peerEndpoint'];
         const tlsRootCert = await fs.readFile(tlsCertPath);
         const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
         return new grpc.Client(peerEndpoint, tlsCredentials, {
@@ -96,18 +93,29 @@ export default class DefaultGateway implements ClientSDKProxy{
         });
     }
 
-    async newIdentity(org:string, orgMSP:string, identity: string): Promise<Identity> {
-
+    async newIdentity(org: string, orgMSP: string, identity: string): Promise<Identity> {
         // Path to user certificate.
-        const certPath = path.resolve(this.cryptoPath, 'users', `${identity}@${org.toLowerCase()}.example.com`, 'msp', 'signcerts', 'cert.pem');
+        const certPath = path.resolve(
+            this.cryptoPath,
+            'users',
+            `${identity}@${org.toLowerCase()}.example.com`,
+            'msp',
+            'signcerts',
+            'cert.pem',
+        );
         const credentials = await fs.readFile(certPath);
-        return { mspId:orgMSP, credentials };
+        return { mspId: orgMSP, credentials };
     }
-    
-    async newSigner(org:string, identity: string): Promise<Signer> {
 
+    async newSigner(org: string, identity: string): Promise<Signer> {
         // Path to user private key directory.
-        const keyDirectoryPath = path.resolve(this.cryptoPath, 'users', `${identity}@${org.toLowerCase()}.example.com`, 'msp', 'keystore');
+        const keyDirectoryPath = path.resolve(
+            this.cryptoPath,
+            'users',
+            `${identity}@${org.toLowerCase()}.example.com`,
+            'msp',
+            'keystore',
+        );
 
         const files = await fs.readdir(keyDirectoryPath);
         const keyPath = path.resolve(keyDirectoryPath, files[0]);

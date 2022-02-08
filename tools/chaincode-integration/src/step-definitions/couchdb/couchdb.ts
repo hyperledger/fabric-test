@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /*
 Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
@@ -5,7 +6,6 @@ SPDX-License-Identifier: Apache-2.0
 import * as assert from 'assert';
 import { TableDefinition } from 'cucumber';
 import { binding } from 'cucumber-tsflow/dist';
-;
 import * as fs from 'fs-extra';
 import nano from 'nano';
 import { then } from '../../decorators/steps';
@@ -16,56 +16,76 @@ import { Workspace } from '../utils/workspace';
 
 const logger = Logger.getLogger('./src/step-definitions/couchdb/couchdb.ts');
 
+// NOTE these functions where originally used to validate updates to the world state; in the rework
+// the current feature tests don't use these functions, but the skelton has been kept for potential
+// future use
+
 @binding([Workspace])
 export class CouchDB {
-
     public constructor(private workspace: Workspace) {
         // construct
     }
 
-    @then(/The world state for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for key ['"](.*)['"]/)
-    public async readWorldState(chaincodeName: string, channelName: string, value: string, key: string) {
-        // await this.checkWorldState(chaincodeName, channelName, value, key);
+    @then(
+        /The world state for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for key ['"](.*)['"]/,
+    )
+    public async readWorldState(chaincodeName: string, channelName: string, value: string, key: string): Promise<void> {
+        throw new Error('Not implemented');
     }
 
-    @then(/The world state for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for composite key composed of:$/)
-    public async readWorldStateCompositeKey(chaincodeName: string, channelName: string, value: string, keyParts: TableDefinition) {
-        // const key = this.buildKey(keyParts);
-        // await this.checkWorldState(chaincodeName, channelName, value, key);
+    @then(
+        /The world state for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for composite key composed of:$/,
+    )
+    public async readWorldStateCompositeKey(
+        chaincodeName: string,
+        channelName: string,
+        value: string,
+        keyParts: TableDefinition,
+    ): Promise<void> {
+        throw new Error('Not implemented');
     }
 
     @then(/The world state for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should not have key ['"](.*)['"]/)
-    public async isDeletedFromWorldState(chaincodeName: string, channelName: string, key: string) {
-        // for (const org of this.workspace.network.getOrganisations()) {
-        //     if (!org.db) {
-        //         continue;
-        //     }
-
-        //     await this.checkKeyDeletedFromCollection(org, this.buildWorldStateName(channelName, chaincodeName), key);
-        // }
+    public async isDeletedFromWorldState(chaincodeName: string, channelName: string, key: string): Promise<void> {
+        throw new Error('Not implemented');
     }
 
-    @then(/The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should not have key ['"](.*)['"]/)
-    public async isDeletedFromPrivateCollection(collectionName: string, chaincodeName: string, channelName: string, key: string) {
-        // const collection = await this.getCollection(channelName, chaincodeName, collectionName);
-        // const orgs = this.getOrgsInCollection(collection);
-
-        // for (const org of orgs) {
-        //     await this.checkKeyDeletedFromCollection(org, this.buildPrivateCollectionName(channelName, chaincodeName, collectionName), key);
-        // }
+    @then(
+        /The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should not have key ['"](.*)['"]/,
+    )
+    public async isDeletedFromPrivateCollection(
+        collectionName: string,
+        chaincodeName: string,
+        channelName: string,
+        key: string,
+    ): Promise<void> {
+        throw new Error('Not implemented');
     }
 
-    @then(/The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for key ['"](.*)['"]/)
-    public async readPrivateCollectionState(collectionName: string, chaincodeName: string, channelName: string, value: string, key: string) {
-        // await this.checkPrivateCollectionState(collectionName, chaincodeName, channelName, value, key);
+    @then(
+        /The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for key ['"](.*)['"]/,
+    )
+    public async readPrivateCollectionState(
+        collectionName: string,
+        chaincodeName: string,
+        channelName: string,
+        value: string,
+        key: string,
+    ): Promise<void> {
+        throw new Error('Not implemented');
     }
 
-    @then(/The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for composite key composed of:$/)
+    @then(
+        /The private data collection ['"](.*)['"] for the chaincode ['"](.*)['"] on channel ['"](.*)['"] should contain ['"](.*)['"] for composite key composed of:$/,
+    )
     public async readPrivateCollectionStateCompositeKey(
-        collectionName: string, chaincodeName: string, channelName: string, value: string, keyParts: TableDefinition,
-    ) {
-        // const key = this.buildKey(keyParts);
-        // await this.checkPrivateCollectionState(collectionName, chaincodeName, channelName, value, key);
+        collectionName: string,
+        chaincodeName: string,
+        channelName: string,
+        value: string,
+        keyParts: TableDefinition,
+    ): Promise<void> {
+        throw new Error('Not implemented');
     }
 
     private buildKey(keyParts: TableDefinition) {
@@ -78,7 +98,7 @@ export class CouchDB {
 
         return this.createCompositeKey(objectType, attrs);
     }
-    
+
     createCompositeKey(objectType: string, attrs: string[]): string {
         throw new Error('Method not implemented.');
     }
@@ -95,7 +115,13 @@ export class CouchDB {
         }
     }
 
-    private async checkPrivateCollectionState(collectionName: string, chaincodeName: string, channelName: string, value: string, key: string) {
+    private async checkPrivateCollectionState(
+        collectionName: string,
+        chaincodeName: string,
+        channelName: string,
+        value: string,
+        key: string,
+    ) {
         const collection = await this.getCollection(channelName, chaincodeName, collectionName);
         const orgs = this.getOrgsInCollection(collection);
 
@@ -104,7 +130,10 @@ export class CouchDB {
                 logger.debug(`Reading private collection ${collectionName} for ${org.name}`);
 
                 await this.checkKeyInCollection(
-                    org, this.buildPrivateCollectionName(channelName, chaincodeName, collectionName), key, value,
+                    org,
+                    this.buildPrivateCollectionName(channelName, chaincodeName, collectionName),
+                    key,
+                    value,
                 );
             }
         }
@@ -134,7 +163,6 @@ export class CouchDB {
             if (!jsonResponseEqual(JSON.stringify(response), value)) {
                 throw new Error(`Objects not equal expected ${value} got ${JSON.stringify(response)}`);
             }
-
         }
     }
 
@@ -163,7 +191,7 @@ export class CouchDB {
         const config: any[] = await fs.readJSON(collectionFile);
 
         const collection = config.find((el) => {
-            return collectionName = el.name;
+            return (collectionName = el.name);
         });
 
         if (!collection) {
@@ -190,6 +218,9 @@ export class CouchDB {
     }
 
     private buildPrivateCollectionName(channelName: string, chaincodeName: string, collectionName: string): string {
-        return `${channelName}_${chaincodeName}$$p$${collectionName.split(/(?=[A-Z])/).join('$').toLowerCase()}`;
+        return `${channelName}_${chaincodeName}$$p$${collectionName
+            .split(/(?=[A-Z])/)
+            .join('$')
+            .toLowerCase()}`;
     }
 }

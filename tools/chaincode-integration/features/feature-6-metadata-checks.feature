@@ -22,14 +22,12 @@ Feature: MetadataChecks
              | getInt | getFloat | getBool | getArray | getBasicAsset | getComplexAsset | callAndResponseInt | callAndResponseFloat | callAndResponseBool | callAndResponseArray | callAndResponseBasicAsset | callAndResponseComplexAsset |
         And The metadata for the transaction "callAndResponseInt" in contract "AdvancedTypesContract" should contain the parameters:
             | name  | schema                                 |
-            | sent  |    {"type":"number"}                   |
-            # | sent  | {"type": "integer", "format": "int64"} |
-        And The metadata for the transaction "callAndResponseInt" in contract "AdvancedTypesContract" should contain the return schema '{"type": "number"}'
-        # And The metadata for the transaction "callAndResponseInt" in contract "AdvancedTypesContract" should contain the return schema '{"type": "integer", "format": "int64"}'
+            | sent  | {"type": "integer", "format": "int64"} |
+        And The metadata for the transaction "callAndResponseInt" in contract "AdvancedTypesContract" should contain the return schema '{"type": "integer", "format": "int64"}'
         And The metadata for the transaction "callAndResponseFloat" in contract "AdvancedTypesContract" should contain the parameters:
             | name  | schema                                 |
-            | sent  | {"type": "number"} |
-        And The metadata for the transaction "callAndResponseFloat" in contract "AdvancedTypesContract" should contain the return schema '{"type": "number"}'
+            | sent  |  {"type":"number","format":"double"}   |
+        And The metadata for the transaction "callAndResponseFloat" in contract "AdvancedTypesContract" should contain the return schema ' {"type":"number","format":"double"}'
         And The metadata for the transaction "callAndResponseBool" in contract "AdvancedTypesContract" should contain the parameters:
             | name  | schema              |
             | sent  | {"type": "boolean"} |
@@ -40,21 +38,19 @@ Feature: MetadataChecks
         And The metadata for the transaction "callAndResponseArray" in contract "AdvancedTypesContract" should contain the return schema '{"type": "array", "items": {"type":  "string"}}'
         And The metadata for the transaction "callAndResponseBasicAsset" in contract "AdvancedTypesContract" should contain the parameters:
             | name  | schema                                      |
-            | sent  | {"$ref": "#/components/schemas/Asset"} |
-        And The metadata for the transaction "callAndResponseBasicAsset" in contract "AdvancedTypesContract" should contain the return schema '{"$ref": "#/components/schemas/Asset"}'
-        And The metadata for the component "Asset" should have the properties:
+            | sent  | {"$ref": "#/components/schemas/BasicAsset"} |
+        And The metadata for the transaction "callAndResponseBasicAsset" in contract "AdvancedTypesContract" should contain the return schema '{"$ref": "#/components/schemas/BasicAsset"}'
+        And The metadata for the component "BasicAsset" should have the properties:
             | property | schema                                 | required |
             | id       | {"type": "string"}                     | true     |
-            # | value    | {"type": "integer", "format": "int64"} | true     |
-            | value    | {"type": "number"} | true     |            
+            | value    | {"type": "integer", "format": "int64"} | true     |      
         And The metadata for the transaction "callAndResponseComplexAsset" in contract "AdvancedTypesContract" should contain the parameters:
             | name  | schema                                      |
-            | sent  | {"$ref": "#/components/schemas/Complex"} |
-        And The metadata for the transaction "callAndResponseBasicAsset" in contract "AdvancedTypesContract" should contain the return schema '{"$ref": "#/components/schemas/Asset"}'
+            | sent  | {"$ref": "#/components/schemas/ComplexAsset"} |
         And The metadata for the component "ComplexAsset" should have the properties:
             | property    | schema                                 | required |
             | id          | {"type": "string"}                     | true     |
-            | value       | {"type": "number"} | true     |
+            | value       |  {"type":"integer","format":"int64"}   | true     |
             | description | {"$ref": "Description"}                | true     |
         And  The metadata for the component "Description" should have the properties:
             | property    | schema                                         | required |

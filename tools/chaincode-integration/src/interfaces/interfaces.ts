@@ -4,7 +4,6 @@ SPDX-License-Identifier: Apache-2.0
 */
 
 import { Gateway } from '@hyperledger/fabric-gateway';
-import { CommandModule as YargsCommandModule } from 'yargs';
 import { Infrastructure } from '../infrastructure/infrastructure';
 import { Network } from '../network/network';
 
@@ -14,7 +13,6 @@ export interface Org {
     mspid: string;
     peers: Peer[];
     cas: CA[];
-    // wallet: Wallet;
     ccp: string;
     db: DB;
 }
@@ -26,8 +24,7 @@ export interface BaseComponent {
 }
 
 // tslint:disable-next-line: no-empty-interface
-export interface Orderer extends BaseComponent {
-}
+export type Orderer = BaseComponent;
 
 export interface Profile {
     organisations: Org[];
@@ -44,30 +41,31 @@ export interface CollectionConfig {
 export interface ChaincodeConfig {
     policy: string;
     collection: CollectionConfig | undefined;
-    metadata: {[s: string]: any};
+    metadata: { [s: string]: any };
+    language: Languages;
 }
 
 export interface Global extends NodeJS.Global {
     CHAINCODE_LANGUAGE: Languages;
     CURRENT_NETWORK: Network;
     LOGGING_LEVEL: LogLevels;
-  
+
     CONNECTIONS: Map<string, Map<string, Gateway>>;
-    INFRASTRUCTURE: Infrastructure
+    INFRASTRUCTURE: Infrastructure;
 }
 
 export interface Channel {
     name: string;
     organisations: Org[];
-    chaincodes: Map<string, ChaincodeConfig>
+    chaincodes: Map<string, ChaincodeConfig>;
 }
 
 // tslint:disable-next-line: no-empty-interface
 export interface Peer extends BaseComponent {
     eventPort: number;
     externalEventPort: number;
-    tlsCertPath : string;
-    peerEndpoint : string;
+    tlsCertPath: string;
+    peerEndpoint: string;
 }
 
 // tslint:disable-next-line: no-empty-interface
@@ -92,9 +90,4 @@ export interface Scenario {
 export interface Feature {
     name: string;
     scenarios: Scenario[];
-}
-
-
-export interface FabricNetworkConfig {
-
 }

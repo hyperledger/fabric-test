@@ -7,16 +7,23 @@ import { given as tsFlowGiven, then as tsFlowThen, when as tsFlowWhen } from 'cu
 import { Workspace } from '../step-definitions/utils/workspace';
 import { Logger } from '../utils/logger';
 
-const logger = Logger.getLogger('./src/decorators.ts');
+const logger = Logger.getLogger('decorators.ts');
 
-function addLogging(type: 'given' | 'then' | 'when', stepPattern: RegExp | string, func: MethodDecorator): MethodDecorator {
+/**
+ * Add additional logging for each cucumber task
+ */
 
+function addLogging(
+    type: 'given' | 'then' | 'when',
+    stepPattern: RegExp | string,
+    func: MethodDecorator,
+): MethodDecorator {
     // need to use keyword this
     // tslint:disable-next-line: only-arrow-functions
-    return function(target: any, key?: any, descriptor?: any) {
+    return function (target: any, key?: any, descriptor?: any) {
         const orginalMethod = descriptor.value;
 
-        descriptor.value = function(...args: any[]) {
+        descriptor.value = function (...args: any[]) {
             const feature = (this.workspace as Workspace).feature;
             if (!feature) {
                 throw new Error('Missing workspace feature');
