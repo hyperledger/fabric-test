@@ -20,8 +20,8 @@ pr:
 jobs:
   - job: Tests
     pool:
-      vmImage: 'ubuntu-16.04'
-    container: 'node:10'
+      vmImage: 'ubuntu-20.04'
+    container: 'node:16'
     steps:
       - script: npm install
         workingDirectory: tools/chaincode-integration

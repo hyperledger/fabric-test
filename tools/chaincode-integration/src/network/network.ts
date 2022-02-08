@@ -3,71 +3,77 @@ Copyright the Hyperledger Fabric contributors. All rights reserved.
 SPDX-License-Identifier: Apache-2.0
 */
 
-import {
-  ChaincodeConfig,
-  Channel,
-  Orderer,
-  Org,
-  Profile,
-} from "../interfaces/interfaces";
-import { Logger } from "../utils/logger";
+import { ChaincodeConfig, Channel, Languages, Orderer, Org, Profile } from '../interfaces/interfaces';
+import { Logger } from '../utils/logger';
 
-const logger = Logger.getLogger("network.ts");
+const logger = Logger.getLogger('network.ts');
 
 export interface NetworkDetails {
-  resourceFolder: string;
-  tag: string;
+    resourceFolder: string;
+    tag: string;
 }
 
 export interface NetworkConfiguration {
-  organisations: Org[];
-  orderers: Orderer[];
-  profiles: Map<string, Profile>;
+    organisations: Org[];
+    orderers: Orderer[];
+    profiles: Map<string, Profile>;
 }
+
 export class Network {
-  private name: string;
-  private channels: Map<string, Channel>;
+    private name: string;
+    private channels: Map<string, Channel>;
 
-  public constructor(type: string) {
-    this.name = type;
-    this.channels = new Map<string, Channel>();
-  }
+    public constructor(type: string) {
+        this.name = type;
+        this.channels = new Map<string, Channel>();
+    }
 
-  public getOrganisations(): Org[] {
-    return []; // return this.config.organisations;
-  }
+    public getOrganisations(): Org[] {
+        // TODO: Implemenet this fully
+        return []; // return this.config.organisations;
+    }
 
+    public addChannel(name: string): Channel {
+        const c: Channel = { name, organisations: [], chaincodes: new Map() };
+        this.channels.set(name, c);
+        return c;
+    }
 
+    public getChannel(name: string): Channel {
+        const c = this.channels.get(name);
+        if (!c) {
+            throw new Error(`Unable to find channel '${name}'`);
+        }
+        return this.channels.get(name)!;
+    }
 
-  public addChannel(name: string): Channel {
-    let c: Channel = { name, organisations: [], chaincodes: new Map() };
-    this.channels.set(name,c);
-    return c;
-  }
+    public addChaincode(name: string, chaincodeCfg: ChaincodeConfig, channelName: string): void {
+        const c = this.channels.get(channelName);
+        c?.chaincodes.set(name, chaincodeCfg);
 
-  public getChannel(name: string): Channel {
-      return this.channels.get(name)!;
-  }
+        // is this needed?
+        this.channels.set(channelName, c!);
+    }
 
-  public addChaincode(name: string,chaincodeCfg:ChaincodeConfig, channelName: string){
-      let c = this.channels.get(channelName);
-      c?.chaincodes.set(name,chaincodeCfg);
-      this.channels.set(channelName,c!);
-  }
+    public getChaincode(contract: string, channelName: string): ChaincodeConfig {
+        const c = this.channels.get(channelName);
+        if (!c) {
+            throw new Error(`Unable to find channel '${channelName}'`);
+        }
 
-  public hasChaincode(name:string, channelName:string): boolean {
-      let c = this.channels.get(channelName);
-      return c?.chaincodes.has(name)!
-  }
+        const chaincodeCfg = c?.chaincodes.get(contract);
+        if (!chaincodeCfg) {
+            throw new Error(`Unable to find chaincodeCfg for contract '${contract}'`);
+        }
+        return chaincodeCfg;
+    }
 
-}
-
-function orgToSmall(orgName: string) {
-  if (orgName.toUpperCase() === orgName) {
-    return orgName.toLowerCase();
-  }
-
-  return orgName
-    .replace(/(?:^|\.?)([A-Z])/g, (x, y: string) => "-" + y.toLowerCase())
-    .replace(/^-/, "");
+    public hasChaincode(name: string, channelName: string): boolean {
+        const c = this.channels.get(channelName);
+        if (c) {
+            return c.chaincodes.has(name);
+        } else {
+            return false;
+        }
+    }
 }
