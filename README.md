@@ -13,8 +13,8 @@ using the Operator tool
 
 While Fabric-Test provides a utility for installing most of its dependencies, you do need a few basic
 tools to get started:
-- Go 1.14 or later
-- Node 1.12.0 or later
+- Go 1.16 or later
+- Node 16 or later
 - Java 8 or later (if using Java chaincode)
 - Docker
 - Docker-Compose
@@ -22,6 +22,15 @@ tools to get started:
 
 Once you've installed these simple dependencies you simply execute `make pre-reqs` from the root of the
 repo and Fabric-Test will bootstrap the rest of the dependencies and install the required NPM packages.
+
+## Environment variables
+
+Make sure `$GOPATH/bin` (if GOPATH is set) or `$HOME/go/bin` is in your `$PATH` so that the go tools can be found.
+
+If you run the `make` targets from the project root directory,
+`fabric-test/bin` with the Fabric binaries will get added to `PATH` and
+`fabric-test/config` with Fabric node config files will get added to `FABRIC_CFG_PATH`.
+If you run the tests directly (outside of `make`) you will need to set these variables yourself.
 
 ## Running Test Suites with Make
 

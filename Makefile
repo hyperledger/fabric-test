@@ -14,6 +14,10 @@
 #
 # ------------------------------------------------------------------
 
+# Set PATH for Fabric binaries and FABRIC_CFG_PATH for config
+PATH := $(PATH):$(PWD)/bin
+FABRIC_CFG_PATH := $(PWD)/config
+
 include gotools.mk
 
 regression/barebones_caliper: pre-reqs caliper-init
