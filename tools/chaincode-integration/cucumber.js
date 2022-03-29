@@ -25,6 +25,11 @@ const config = {
     cryptoPath : path.resolve(TEST_NETWORK_DIR, 'organizations', 'peerOrganizations', 'org1.example.com'),
     env: "",   // environment string to be used... eg... env: "CONTAINER_CLI=podman"
     peerEndpoint : 'localhost:7051',
+  },
+  TestOperator: {
+    rootDir:'/home/matthew/github.com/hyperledger/fabric-test/tools/chaincode-integration/resources/testoperator',
+    binary:'/home/matthew/github.com/hyperledger/fabric-test/tools/operator/operator',
+    env: ""
   }
 }
 
@@ -45,6 +50,7 @@ let dev = [
   '--publish-quiet'
 ].join(' ');
 
+console.log(process.cwd())
 // This should be in used in all other circumstances
 const installDir = path.resolve(process.cwd(),'node_modules','fabric-chaincode-integration');
 

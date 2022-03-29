@@ -11,6 +11,8 @@ import { Network } from '../../network/network';
 import { Logger } from '../../utils/logger';
 import { Infrastructure } from '../../infrastructure/infrastructure';
 import TestNetworkProvider from '../../infrastructure/testNetworkProvider';
+import TestOperatorProvider from '../../infrastructure/testOperatorProvider';
+import { BeforeAll } from 'cucumber';
 
 const logger = Logger.getLogger('./src/step-definitions/utils/workspace.ts');
 
@@ -102,8 +104,9 @@ export class Workspace {
             switch (name) {
                 // case 'ansible':
                 //     return new AnsibleProvider();
-                // case 'microfab':
-                //     return new MicrofabProvider();
+                case 'TestOperator':
+                    this.infrastructureProvider= new TestOperatorProvider(config['TestOperator']);
+                    break;
                 case 'TestNetwork':
                     this.infrastructureProvider = new TestNetworkProvider(config['TestNetwork']);
                     break;
