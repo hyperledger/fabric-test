@@ -790,6 +790,7 @@ async function createOrUpdateOneChannel(client, channelOrgName) {
                         break
                     } catch (err) {
                         if ( retry < maxWaitForFetchChannelBlock ) {
+                            logger.warn('[createOrUpdateOneChannel] Orderer system channel %s is not yet ready, retrying for genesis block in one second', channelName);
                             await sleep(1000);
                             retry++
                         } else {
@@ -910,6 +911,7 @@ async function joinChannel(channel, client, org) {
                     break
                 } catch (err) {
                     if ( retry < maxWaitForFetchChannelBlock ) {
+                        logger.warn('[joinChannel] Channel %s is not yet ready, retrying for genesis block in one second', channelName);
                         await sleep(1000);
                         retry++
                     } else {
