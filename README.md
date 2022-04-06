@@ -13,7 +13,7 @@ using the Operator tool
 
 While Fabric-Test provides a utility for installing most of its dependencies, you do need a few basic
 tools to get started:
-- Go 1.16 or later
+- Go 1.17 or later
 - Node 16 or later
 - Java 8 or later (if using Java chaincode)
 - Docker

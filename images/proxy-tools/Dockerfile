@@ -6,7 +6,7 @@ ARG FABRIC_BRANCH="main"
 ARG FABRIC_CA_BRANCH="main"
 ARG GO_LDFLAGS=-"linkmode external -extldflags '-lpthread'"
 ARG GO_TAGS=pkcs11
-ARG GO_VER=1.16.7
+ARG GO_VER=1.17.8
 ARG PROXY_VERSION=2032875
 
 FROM golang:${GO_VER}-alpine${ALPINE_VER} as ca-builder
