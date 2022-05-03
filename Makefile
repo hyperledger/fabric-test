@@ -15,6 +15,7 @@
 # ------------------------------------------------------------------
 
 # Set PATH for Fabric binaries and FABRIC_CFG_PATH for config
+# CI test
 PATH := $(PATH):$(PWD)/bin
 FABRIC_CFG_PATH := $(PWD)/config
 
