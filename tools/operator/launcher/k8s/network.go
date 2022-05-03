@@ -100,7 +100,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				container = corev1.Container{
 					Name:            "couchdb",
 					Resources:       k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:           "couchdb:3.1",
+					Image:           "couchdb:3.2",
 					ImagePullPolicy: corev1.PullPolicy("Always"),
 					Env: []corev1.EnvVar{
 						{

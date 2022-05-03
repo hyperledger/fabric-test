@@ -77,7 +77,7 @@ func (k8s K8s) extendLaunchObject(nsConfig networkspec.Config) ([]LaunchConfig, 
 					container = corev1.Container{
 						Name:            "couchdb",
 						Resources:       k8s.resources(nsConfig.K8s.Resources.Couchdb),
-						Image:           "couchdb:3.1",
+						Image:           "couchdb:3.2",
 						ImagePullPolicy: corev1.PullPolicy("Always"),
 						Env: []corev1.EnvVar{
 							{
