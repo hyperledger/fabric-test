@@ -12,8 +12,6 @@ This repository is part of the Fabric project.
 +---------------------------+------------------+----------------+-------------------------------------+
 | Dongming Hwang            | dongmingh        | dongming       | dongming@ibm.com                    |
 +---------------------------+------------------+----------------+-------------------------------------+
-| Surya Lanka               | suryalnvs        | slanka         | slanka@us.ibm.com                   |
-+---------------------------+------------------+----------------+-------------------------------------+
 
 **Retired Maintainers**
 
@@ -33,6 +31,8 @@ This repository is part of the Fabric project.
 | Latitia Haskins           | lhaskins         | latitiah       | latitia.haskins@gmail.com           |
 +---------------------------+------------------+----------------+-------------------------------------+
 | Scott Zwierzynski         | scottz64         | scottz         | scottz@us.ibm.com                   |
++---------------------------+------------------+----------------+-------------------------------------+
+| Surya Lanka               | suryalnvs        | slanka         | slanka@us.ibm.com                   |
 +---------------------------+------------------+----------------+-------------------------------------+
 
 For additional support, refer to the `Fabric Maintainers list`__.
