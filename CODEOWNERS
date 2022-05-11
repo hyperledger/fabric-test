@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Fabric Test Maintainers
-*	@fabric-test-maintainers
-/tools/chaincode-integration    @fabric-test-toolchain-maintainers
+*	@hyperledger/fabric-test-maintainers
+/tools/chaincode-integration    @hyperledger/fabric-test-toolchain-maintainers
