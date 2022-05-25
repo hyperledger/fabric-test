@@ -10,7 +10,9 @@ This repository is part of the Fabric project.
 +===========================+==================+================+=====================================+
 | Dave Enyeart              | denyeart         | dave.enyeart   | enyeart@us.ibm.com                  |
 +---------------------------+------------------+----------------+-------------------------------------+
-| Dongming Hwang            | dongmingh        | dongming       | dongming@ibm.com                    |
+| David Kelsey              | davidkel         | davidkel       | d_kelsey@uk.ibm.com                 |
++---------------------------+------------------+----------------+-------------------------------------+
+| Matthew B White           | mbwhite          | mbwhite        | whitemat@uk.ibm.com                 |
 +---------------------------+------------------+----------------+-------------------------------------+
 
 **Retired Maintainers**
@@ -25,6 +27,8 @@ This repository is part of the Fabric project.
 | Brett Logan               | lindluni         | BrettLogan     | Brett.T.Logan@ibm.com               |
 +---------------------------+------------------+----------------+-------------------------------------+
 | Christopher Ferris        | christo4ferris   | cbf            | chris.ferris@gmail.com              |
++---------------------------+------------------+----------------+-------------------------------------+
+| Dongming Hwang            | dongmingh        | dongming       | dongming@ibm.com                    |
 +---------------------------+------------------+----------------+-------------------------------------+
 | Gari Singh                | mastersingh24    | mastersingh24  | gari.r.singh@gmail.com              |
 +---------------------------+------------------+----------------+-------------------------------------+
