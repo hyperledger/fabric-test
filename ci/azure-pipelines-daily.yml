@@ -19,8 +19,13 @@ variables:
   FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
   GO_BIN: $(Agent.BuildDirectory)/go/bin
   GO_PATH: $(Agent.BuildDirectory)/go
+<<<<<<< HEAD
   GO_VER: 1.17.5
   NODE_VER: 12.22.6
+=======
+  GO_VER: 1.18.2
+  NODE_VER: 16.4.0
+>>>>>>> 44a5f3d9 (Bump Go to 1.18.2.)
   PATH: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
 stages:
