@@ -6,14 +6,6 @@
 name: Fabric-Test-Daily-$(Date:yyyyMMdd)
 trigger: none
 pr: none
-schedules:
-  # 3 AM UTC/10 PM EST
-  - cron: "0 3 * * *"
-    displayName: 'Fabric Test Daily Job'
-    branches:
-      include:
-        - release-2.3
-    always: true
 
 variables:
   FABRIC_CFG_PATH: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
