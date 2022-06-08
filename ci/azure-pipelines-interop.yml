@@ -5,14 +5,6 @@
 name: InterOpLite-$(Date:yyyyMMdd)
 trigger: none
 pr: none
-schedules:
-  # Midnight UTC
-  - cron: "0 0 * * *"
-    displayName: InterOp Testing
-    branches:
-      include:
-        - release-2.3
-    always: true
 
 variables:
   - group: artifactory
