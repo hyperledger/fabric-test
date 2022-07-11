@@ -1,6 +1,7 @@
 name: fabric-chaincode-integration
 
 on:
+  workflow-dispatch:
   pull_request:
     branches: [ main ]
 
