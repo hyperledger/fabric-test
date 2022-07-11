@@ -1,7 +1,7 @@
 name: fabric-chaincode-integration
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
   pull_request:
     branches: [ main ]
 
@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x]
+        node-version: [16.x]
 
     defaults:
       run:

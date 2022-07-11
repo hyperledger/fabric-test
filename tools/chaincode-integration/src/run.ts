@@ -10,6 +10,15 @@ import { Cli } from '@cucumber/cucumber';
 import { resolve, join } from 'path';
 import { copyFileSync, existsSync } from 'fs-extra';
 
+// const validateCucmuber= (): void=>{
+//     const cucumberjs = join(process.cwd(),'cucmber.js');
+//     if (!existsSync(cucumberjs)){
+//         throw new Error("cucumber.js not found in current working directory")
+//     }
+
+//     const cucumber = require(cucumberjs);
+// }
+
 yargs
     .command(
         'init',
@@ -51,7 +60,10 @@ yargs
             const runArgs = ['-p', argv['profile'], '--tags', argv['tags'], '--fail-fast'];
             const cliArgs = { argv: runArgs, cwd: process.cwd(), stdout: process.stdout };
             const cli = new Cli(cliArgs);
-            await cli.run();
+            const result = await cli.run();
+            if (result.shouldExitImmediately || !result.success) {
+                process.exit(1);
+            }
         },
     )
     .help()

@@ -78,8 +78,12 @@ export default class TestNetworkProvider implements Infrastructure {
         );
     }
 
-    registerUser(workspace: Workspace, identityName: string, orgName: string): Promise<void> {
-        throw new Error('Method not implemented.');
+    async registerUser(workspace: Workspace, identityName: string, orgName: string): Promise<void> {
+        if (identityName !== 'User1') {
+            throw new Error('Method not implemented.');
+        }
+
+        // otherwise it's already there
     }
 
     getName(): string {

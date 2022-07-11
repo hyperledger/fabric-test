@@ -48,4 +48,9 @@ export class Channel {
     public async deployCCAAS(channelName: string, chaincodeName: string): Promise<void> {
         await this.workspace.infrastructureProvider.deployCC(this.workspace, channelName, `${chaincodeName}-ccaas`);
     }
+
+    @given(/Organisation ['"](.*)['"] has registered the identity ['"](.*)['"]/, '', TIMEOUT)
+    public async registerUser(orgName: string, idName: string): Promise<void> {
+        await this.workspace.infrastructureProvider.registerUser(this.workspace, idName, orgName);
+    }
 }
