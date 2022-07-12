@@ -1,7 +1,7 @@
 name: fabric-chaincode-integration
 
 on:
-  workflow-dispatch:
+  workflow_dispatch:
   pull_request:
     branches: [ main ]
 
@@ -12,18 +12,27 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x]
+        node-version: [16.x]
 
     defaults:
       run:
         working-directory: ./tools/chaincode-integration
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm test 
+      - name: Build
+        run: |
+          npm ci
+          npm run build --if-present
+      - name: Test
+        run: |
+          curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh | bash -s -- samples binary docker
+          npm test
+        env:
+          TEST_NETWORK_DIR: ${{ github.workspace }}/tools/chaincode-integration/fabric-samples/test-network
+          TEST_CHAINCODE_DIR: ${{ github.workspace }}/tools/chaincode-integration/resources/chaincode

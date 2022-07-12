@@ -6,15 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 import * as grpc from '@grpc/grpc-js';
 import { connect } from '@hyperledger/fabric-gateway';
 import { Transaction, Gateway } from '@hyperledger/fabric-gateway';
-import { Feature, Global, Org } from '../../interfaces/interfaces';
+import { Feature, Org } from '../../interfaces/interfaces';
 import { Network } from '../../network/network';
 import { Logger } from '../../utils/logger';
 import { Infrastructure } from '../../infrastructure/infrastructure';
 import TestNetworkProvider from '../../infrastructure/testNetworkProvider';
 
 const logger = Logger.getLogger('./src/step-definitions/utils/workspace.ts');
-
-declare const global: Global;
 
 export class Workspace {
     [x: string]: any;

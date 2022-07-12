@@ -45,11 +45,12 @@ export interface ChaincodeConfig {
     language: Languages;
 }
 
-export interface Global extends NodeJS.Global {
+type NodeJSGlobal = typeof global;
+
+export interface Global extends NodeJSGlobal {
     CHAINCODE_LANGUAGE: Languages;
     CURRENT_NETWORK: Network;
     LOGGING_LEVEL: LogLevels;
-
     CONNECTIONS: Map<string, Map<string, Gateway>>;
     INFRASTRUCTURE: Infrastructure;
 }

@@ -11,7 +11,7 @@
     "build": "npm run format && npm run clean && npm run lint && echo Using TypeScript && tsc --version && tsc --pretty  && npm pack",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "licchk": "license-check-and-add check",
-    "test": "cucumber-js -p dev --tags '@basic-checks or @advanced-types or @metadata-checks' --fail-fast"
+    "test": "cucumber-js -p dev --tags '@basic-checks' --fail-fast"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,12 @@
     "url": "https://jira.hyperledger.org"
   },
   "homepage": "https://github.com/hyperledger/fabric-test/tree/main/tools/chaincode-integration",
+  "engines" : { 
+    "npm" : ">=7.0.0",
+    "node" : ">=16.0.0"
+  },
   "devDependencies": {
+    "@tsconfig/node16": "^1.0.3",
     "@types/chai": "^4.2.7",
     "@types/cucumber": "^6.0.0",
     "@types/fs-extra": "^8.0.1",

@@ -8,11 +8,9 @@ import { HookScenarioResult, pickle, SourceLocation } from 'cucumber';
 import { after, before, binding } from 'cucumber-tsflow';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { Global, Step } from '../interfaces/interfaces';
+import { Step } from '../interfaces/interfaces';
 import { Logger } from '../utils/logger';
 import { Workspace } from './utils/workspace';
-
-declare const global: Global;
 
 const logger = Logger.getLogger('./src/step-definitions/hooks.ts');
 

@@ -11,16 +11,16 @@ const path = require('path');
 // -----------------------------------------
 // Fabric-Samples Test-Network configuration.
 
-// EDIT this to the location of the test-network scripts
-const TEST_NETWORK_DIR='/github.com/hyperledger/fabric-samples/test-network'
+const TEST_NETWORK_DIR = path.resolve(process.env['TEST_NETWORK_DIR'])
+const TEST_CHAINCODE_DIR = path.resolve(process.env['TEST_CHAINCODE_DIR'])
 
 // EDIT the location of the chaincodes to approriate directories
 const config = {
   TestNetwork: {
     rootDir: TEST_NETWORK_DIR,
     chaincodes: {
-      simple: { path: '/github.com/fabric-chaincode-node/integrationtest/contracts/simple-v220-node', lang: "javascript" },
-      advancedtypes: { path: '/github.com/fabric-chaincode-node/integrationtest/contracts/advancedtypes-typescript', lang: "typescript"}
+      simple: { path: path.resolve(TEST_CHAINCODE_DIR, 'simple-go'), lang: 'golang' }
+      // advancedtypes: { path: path.resolve(CHAINCODE_DIR, 'chaincode', 'advancedtypes-go'), lang: 'golang'}
     },
     cryptoPath : path.resolve(TEST_NETWORK_DIR, 'organizations', 'peerOrganizations', 'org1.example.com'),
     env: "",   // environment string to be used... eg... env: "CONTAINER_CLI=podman"

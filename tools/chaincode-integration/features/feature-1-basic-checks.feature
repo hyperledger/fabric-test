@@ -7,7 +7,7 @@ Feature: BasicChecks
       Given Infrastructure provider is "TestNetwork"
         And Infrastructure created for network "oneorg-v2x" with channel "simplechannel"
         And All peers on channel "simplechannel" have deployed the chaincode "simple"
-        And Organisation "Org1" has registered the identity "user1"
+        And Organisation "Org1" has registered the identity "User1"
 
     Scenario: Gets a string response
         And  Acting as Organization "Org1" user "User1"

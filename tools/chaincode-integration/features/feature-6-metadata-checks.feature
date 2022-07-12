@@ -9,7 +9,7 @@ Feature: MetadataChecks
         And Infrastructure created for network "oneorg-v2x" with channel "simplechannel"
         And All peers on channel "simplechannel" have deployed the chaincode "advancedtypes"
         And All peers on channel "simplechannel" have deployed the chaincode "simple"
-        And Organisation "Org1" has registered the identity "user1"
+        And Organisation "Org1" has registered the identity "User1"
         And Acting as Organization "Org1" user "User1"
         And Connecting via SDK "defaultgateway"
 
