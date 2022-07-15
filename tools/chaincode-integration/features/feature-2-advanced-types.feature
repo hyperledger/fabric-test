@@ -7,7 +7,7 @@ Feature: AdvanceTypes
       Given Infrastructure provider is "TestNetwork"
         And Infrastructure created for network "oneorg-v2x" with channel "simplechannel"
         And All peers on channel "simplechannel" have deployed the chaincode "advancedtypes"
-        And Organisation "Org1" has registered the identity "user1"
+        And Organisation "Org1" has registered the identity "User1"
 
     Scenario: Get numeric responses
         And  Acting as Organization "Org1" user "User1"

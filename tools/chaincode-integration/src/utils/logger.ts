@@ -4,14 +4,11 @@ SPDX-License-Identifier: Apache-2.0
 */
 import * as safeStringify from 'fast-safe-stringify';
 import * as winston from 'winston';
-import { Global } from '../interfaces/interfaces';
 
 const SPLAT: string = Symbol.for('splat') as any as string; // shh TS hates symbols
 
 // looks odd, but this is an efficient way of padding strings in js
 const padding = '                                 ';
-
-declare const global: Global;
 
 export class Logger {
     public static createLogger(level: string, name: string): winston.Logger {

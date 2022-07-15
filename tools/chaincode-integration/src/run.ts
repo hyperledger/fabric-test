@@ -51,7 +51,10 @@ yargs
             const runArgs = ['-p', argv['profile'], '--tags', argv['tags'], '--fail-fast'];
             const cliArgs = { argv: runArgs, cwd: process.cwd(), stdout: process.stdout };
             const cli = new Cli(cliArgs);
-            await cli.run();
+            const result = await cli.run();
+            if (result.shouldExitImmediately || !result.success) {
+                process.exit(1);
+            }
         },
     )
     .help()

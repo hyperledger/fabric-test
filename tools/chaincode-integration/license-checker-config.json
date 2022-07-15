@@ -1,7 +1,7 @@
 {
     "$schema": "https://raw.githubusercontent.com/awjh/license-check-and-add/master/config-schema.json",
     "license": "license.txt",
-    "ignore": ["**/.gitkeep", "**/*.md",".*"],
+    "ignore": ["**/.gitkeep", "**/*.md", ".*", "**/*.mod", "**/*.sum"],
     "licenseFormats": {
         "feature|yaml|yml": {
             "eachLine": {

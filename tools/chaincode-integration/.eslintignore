@@ -10,3 +10,6 @@ coverage
 facade-14
 
 ci
+
+# don't lint other repos
+github.com

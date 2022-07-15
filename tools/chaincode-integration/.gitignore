@@ -10,4 +10,4 @@ connection-profiles
 wallets
 !resources/networks/shared/connection-profiles
 resources/chaincode/*
-!resources/chaincode/.gitkeep
+!resources/chaincode/simple-go

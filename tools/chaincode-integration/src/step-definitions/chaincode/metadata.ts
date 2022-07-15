@@ -10,11 +10,9 @@ import * as fs from 'fs-extra';
 import _ from 'lodash';
 import * as path from 'path';
 import { then } from '../../decorators/steps';
-import { Global, Languages } from '../../interfaces/interfaces';
+import { Languages } from '../../interfaces/interfaces';
 
 import { Workspace } from '../utils/workspace';
-
-declare const global: Global;
 
 @binding([Workspace])
 export class Metadata {

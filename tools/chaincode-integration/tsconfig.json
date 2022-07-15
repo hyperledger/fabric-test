@@ -1,5 +1,5 @@
 {
-    "extends":"@tsconfig/node14/tsconfig.json",
+    "extends":"@tsconfig/node16/tsconfig.json",
     "compilerOptions": {
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
@@ -15,5 +15,8 @@
     ],
     "exclude": [
         "./src/**/*.spec.ts"
-    ]
+    ],
+    "ts-node": {
+        "files": true
+    }
  }
