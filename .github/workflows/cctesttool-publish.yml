@@ -13,13 +13,17 @@ jobs:
       run:
         working-directory: ./tools/chaincode-integration      
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Setup .npmrc file to publish to GitHub Packages
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '16.x'
           registry-url: 'https://npm.pkg.github.com'
-      - run: npm install
-      - run: npm publish
+      - name: Build
+        run: |
+          npm ci
+          npm run build --if-present
+      - name: Publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
