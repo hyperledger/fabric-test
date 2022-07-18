@@ -1,5 +1,5 @@
 {
-  "name": "fabric-chaincode-integration",
+  "name": "@hyperledger/fabric-chaincode-integration",
   "version": "0.5.0",
   "description": "A tool for testing fabric chaincode implementations",
   "bin": {
