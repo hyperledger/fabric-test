@@ -13,5 +13,5 @@ node common/scripts/install-run-rush.js update
 node common/scripts/install-run-rush.js publish --include-all --pack --release-folder ./build --publish
 node common/scripts/install-run-rush.js start-fabric
 node common/scripts/install-run-rush.js start-verdaccio
-node common/scripts/install-run-rush.js test:fv
-node common/scripts/install-run-rush.js test:e2e
+node common/scripts/install-run-rush.js test:fv --verbose
+node common/scripts/install-run-rush.js test:e2e --verbose
