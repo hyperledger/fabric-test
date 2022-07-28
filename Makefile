@@ -5,7 +5,6 @@
 # This makefile defines the following targets
 #
 #   - regression/barebones          - Executes barebones tests
-#   - regression/barebones_caliper  - Executes barebones tests using Caliper
 #   - regression/basicnetwork       - Executes basicnetwork tests
 #   - regression/smoke              - Executes smoke tests
 #   - upgrade                       - Executes upgrade scenario in weekly from 1.4 to 2.0
@@ -16,8 +15,13 @@
 
 include gotools.mk
 
+<<<<<<< HEAD
 regression/barebones_caliper: pre-reqs caliper-init
 	cd regression/barebones_caliper && ginkgo -v
+=======
+regression/chaos_%: pre-reqs chaos-init
+	cd ${@} && ginkgo -v
+>>>>>>> b64477cd (Remove caliper daily test as it's broken anyway)
 
 regression/%: pre-reqs
 	cd ${@} && ginkgo -v
@@ -56,11 +60,19 @@ pull-binaries-fabric:
 pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
 
+<<<<<<< HEAD
 .PHONY: caliper-init
 caliper-init:
 	cd regression/barebones_caliper && npm init -y
 	cd regression/barebones_caliper && npm install --only=prod @hyperledger/caliper-cli@0.3.1
 	cd regression/barebones_caliper && npx caliper bind --caliper-bind-sut fabric:latest
+=======
+.PHONY: chaos-init
+chaos-init:
+	cd chaincodes/chaos/node && npm install && npm run build
+	cd tools/chaos/client/node && npm install && npm run build
+	cd tools/chaos/engine && npm install &&  npm run build
+>>>>>>> b64477cd (Remove caliper daily test as it's broken anyway)
 
 docker: docker-ca docker-orderer docker-peer docker-proxy-tools docker-proxy
 docker-ca: docker-image-ca

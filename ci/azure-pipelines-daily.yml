@@ -46,28 +46,6 @@ stages:
             testResultsFormat: 'JUnit'
             testResultsFiles: 'regression/**/results*.xml'
 
-  - stage: Barebones_Caliper
-    dependsOn: []
-    displayName: Barebones Network Using Caliper
-    pool:
-      vmImage: ubuntu-18.04
-    jobs:
-      - job:
-        displayName: Run Scenario
-        timeoutInMinutes: 360
-        steps:
-          - checkout: self
-            path: 'go/src/github.com/hyperledger/fabric-test'
-            displayName: Checkout Fabric Test Code
-          - template: templates/install_deps_caliper.yml
-          - script: make regression/barebones_caliper
-            displayName: Run Test
-          - task: PublishTestResults@2
-            condition: always()
-            inputs:
-              testResultsFormat: 'JUnit'
-              testResultsFiles: 'regression/**/results*.xml'
-
   - stage: BasicNetwork
     dependsOn: []
     displayName: Basic Network
