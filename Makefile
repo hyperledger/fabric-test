@@ -6,7 +6,6 @@
 #
 #   - regression/chaos_peers        - Executes peer chaos tests
 #   - regression/barebones          - Executes barebones tests
-#   - regression/barebones_caliper  - Executes barebones tests using Caliper
 #   - regression/basicnetwork       - Executes basicnetwork tests
 #   - regression/smoke              - Executes smoke tests
 #   - upgrade                       - Executes upgrade scenario in weekly from 1.4 to 2.0
@@ -23,9 +22,6 @@ include gotools.mk
 
 regression/chaos_%: pre-reqs chaos-init
 	cd ${@} && ginkgo -v
-
-regression/barebones_caliper: pre-reqs caliper-init
-	cd regression/barebones_caliper && ginkgo -v
 
 regression/%: pre-reqs
 	cd ${@} && ginkgo -v
@@ -69,12 +65,6 @@ chaos-init:
 	cd chaincodes/chaos/node && npm install && npm run build
 	cd tools/chaos/client/node && npm install && npm run build
 	cd tools/chaos/engine && npm install &&  npm run build
-
-.PHONY: caliper-init
-caliper-init:
-	cd regression/barebones_caliper && npm init -y
-	cd regression/barebones_caliper && npm install --only=prod @hyperledger/caliper-cli@0.3.1
-	cd regression/barebones_caliper && npx caliper bind --caliper-bind-sut fabric:latest
 
 docker: docker-ca docker-orderer docker-peer docker-proxy-tools docker-proxy
 docker-ca: docker-image-ca
