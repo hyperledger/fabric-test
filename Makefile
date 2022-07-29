@@ -5,7 +5,6 @@
 # This makefile defines the following targets
 #
 #   - regression/barebones			- Executes barebones tests
-#   - regression/barebones_caliper		- Executes barebones tests using Caliper
 #   - regression/basicnetwork		- Executes basicnetwork tests
 #   - regression/smoke				- Executes smoke tests
 #   - regression/systemtest			- Executes system tests on k8s cluster
@@ -17,9 +16,6 @@
 # ------------------------------------------------------------------
 
 include gotools.mk
-
-regression/barebones_caliper: pre-reqs caliper-init
-	cd regression/barebones_caliper && ginkgo -v
 
 regression/%: pre-reqs
 	cd ${@} && ginkgo -v
@@ -53,12 +49,6 @@ pull-binaries-fabric:
 .PHONY: pull-binaries-fabric-ca
 pull-binaries-fabric-ca:
 	./scripts/pullBinaries.sh latest fabric-ca
-
-.PHONY: caliper-init
-caliper-init:
-	cd regression/barebones_caliper && npm init -y
-	cd regression/barebones_caliper && npm install --only=prod @hyperledger/caliper-cli@0.3.1
-	cd regression/barebones_caliper && npx caliper bind --caliper-bind-sut fabric:latest
 
 build/%:
 	./ci/scripts/interop/${@}.sh
