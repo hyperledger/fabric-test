@@ -29,7 +29,11 @@ variables:
   - name: GO_VER
     value: 1.18.2
   - name: NODE_VER
+<<<<<<< HEAD
     value: 12.22.6
+=======
+    value: 16.17.0
+>>>>>>> cbdd0992 ([Main] Update node (and npm) to latest release)
   - name: PATH
     value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   - name: RELEASE
