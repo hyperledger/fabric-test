@@ -54,12 +54,6 @@ export class Chaincode {
         this.workspace.actingChaincode = chaincode;
     }
 
-    @when(/Using chaincode-as-a-service ['"](.*)['"] on channel ['"](.*)['"]$/, '', TIMEOUT)
-    public async setActingChaincodeAASChannel(chaincode: string, channel: string): Promise<void> {
-        this.workspace.actingChannel = channel;
-        this.workspace.actingChaincode = `${chaincode}-ccaas`;
-    }
-
     @when(/Connecting via SDK ['"](.*)['"]$/, '', TIMEOUT)
     public async setActingSDK(sdk: string): Promise<void> {
         this.workspace.actingSDK = sdk;

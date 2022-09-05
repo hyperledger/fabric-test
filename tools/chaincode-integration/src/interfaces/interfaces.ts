@@ -31,7 +31,7 @@ export interface Profile {
 }
 
 export type LogLevels = 'info' | 'debug';
-export type Languages = 'golang' | 'java' | 'node';
+export type Languages = 'ccaas' | 'golang' | 'java' | 'node';
 
 export interface CollectionConfig {
     docker: string;

@@ -6,15 +6,15 @@ Feature: MetadataChecks
 
     Background: I can install and instantiate a simple chaincode
       Given Infrastructure provider is "TestNetwork"
-        And Infrastructure created for network "oneorg-v2x" with channel "simplechannel"
-        And All peers on channel "simplechannel" have deployed the chaincode "advancedtypes"
-        And All peers on channel "simplechannel" have deployed the chaincode "simple"
+        And Infrastructure created for network "oneorg-v2x" with channel "metadatachannel"
+        And All peers on channel "metadatachannel" have deployed the chaincode "advancedtypes"
+        And All peers on channel "metadatachannel" have deployed the chaincode "simple"
         And Organisation "Org1" has registered the identity "User1"
         And Acting as Organization "Org1" user "User1"
         And Connecting via SDK "defaultgateway"
 
     Scenario: The metadata I retrieve meets the schema
-        Given I have retrieved the metadata for chaincode "advancedtypes" on channel "simplechannel"
+        Given I have retrieved the metadata for chaincode "advancedtypes" on channel "metadatachannel"
         Then The metadata for the chaincode must meet the schema
          And The metadata should contain the contracts:
             | AdvancedTypesContract |

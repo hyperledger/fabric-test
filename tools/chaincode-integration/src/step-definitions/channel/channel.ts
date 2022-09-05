@@ -39,16 +39,6 @@ export class Channel {
         await this.workspace.infrastructureProvider.deployCC(this.workspace, channelName, chaincodeName);
     }
 
-    @given(/Chaincode ['"](.*)['"] has been started in server mode$/, '', TIMEOUT)
-    public async startCCAAS(chaincodeName: string): Promise<void> {
-        await this.workspace.infrastructureProvider.startCCAAS(this.workspace, chaincodeName);
-    }
-
-    @given(/All peers on channel ['"](.*)['"] have deployed the chaincode-as-a-service ['"](.*)['"]$/, '', TIMEOUT)
-    public async deployCCAAS(channelName: string, chaincodeName: string): Promise<void> {
-        await this.workspace.infrastructureProvider.deployCC(this.workspace, channelName, `${chaincodeName}-ccaas`);
-    }
-
     @given(/Organisation ['"](.*)['"] has registered the identity ['"](.*)['"]/, '', TIMEOUT)
     public async registerUser(orgName: string, idName: string): Promise<void> {
         await this.workspace.infrastructureProvider.registerUser(this.workspace, idName, orgName);

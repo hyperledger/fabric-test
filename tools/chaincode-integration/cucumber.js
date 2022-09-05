@@ -19,8 +19,8 @@ const config = {
   TestNetwork: {
     rootDir: TEST_NETWORK_DIR,
     chaincodes: {
-      simple: { path: path.resolve(TEST_CHAINCODE_DIR, 'simple-go'), lang: 'golang' }
-      // advancedtypes: { path: path.resolve(CHAINCODE_DIR, 'chaincode', 'advancedtypes-go'), lang: 'golang'}
+      simple: { path: path.resolve(TEST_CHAINCODE_DIR, 'simple-go'), lang: 'golang' },
+      ccaas: { path: path.resolve(TEST_CHAINCODE_DIR, 'simple-go'), lang: 'ccaas' }
     },
     cryptoPath : path.resolve(TEST_NETWORK_DIR, 'organizations', 'peerOrganizations', 'org1.example.com'),
     env: "",   // environment string to be used... eg... env: "CONTAINER_CLI=podman"
