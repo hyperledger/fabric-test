@@ -11,7 +11,7 @@
     "build": "npm run format && npm run clean && npm run lint && echo Using TypeScript && tsc --version && tsc --pretty  && npm pack",
     "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix",
     "licchk": "license-check-and-add check",
-    "test": "cucumber-js -p dev --tags '@basic-checks' --fail-fast"
+    "test": "cucumber-js -p dev --tags '@basic-checks or @ccaas-checks' --fail-fast"
   },
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "@types/fs-extra": "^8.0.1",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.14.149",
-    "license-check-and-add": "^3.0.3",
+    "license-check-and-add": "^4.0.5",
     "@typescript-eslint/eslint-plugin": "^4.28.1",
     "@typescript-eslint/parser": "^4.28.1",
     "eslint": "^7.29.0",

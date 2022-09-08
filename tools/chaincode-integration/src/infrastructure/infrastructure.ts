@@ -13,5 +13,4 @@ export interface Infrastructure {
     deployCC(workspace: Workspace, channelName: string, chaincodeName: string): Promise<void>;
     registerUser(workspace: Workspace, identityName: string, orgName: string): Promise<void>;
     getName(): string;
-    startCCAAS(workspace: Workspace, chaincodeName: string): Promise<void>;
 }

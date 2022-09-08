@@ -3,7 +3,7 @@
     "license": "license.txt",
     "ignore": ["**/.gitkeep", "**/*.md", ".*", "**/*.mod", "**/*.sum"],
     "licenseFormats": {
-        "feature|yaml|yml": {
+        "feature|yaml|yml|^Dockerfile": {
             "eachLine": {
                 "prepend": "# "
             }

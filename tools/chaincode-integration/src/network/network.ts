@@ -47,6 +47,10 @@ export class Network {
         return this.channels.get(name)!;
     }
 
+    public channelExists(name: string): boolean {
+        return this.channels.has(name);
+    }
+
     public addChaincode(name: string, chaincodeCfg: ChaincodeConfig, channelName: string): void {
         const c = this.channels.get(channelName);
         c?.chaincodes.set(name, chaincodeCfg);
