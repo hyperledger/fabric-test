@@ -43,8 +43,8 @@ The tool itself has been tested with Node16; over and above this you will need:
 The tool is intended to be provided as an NPM module. Until release you can install it as follows:
 
 ```
-curl -L https://raw.githubusercontent.com/hyperledger/fabric-test/main/tools/chaincode-integration/fabric-chaincode-integration-0.5.0.tgz
-npm init -y && npm install -s fabric-chaincode-integration-0.5.0.tgz
+curl -L https://raw.githubusercontent.com/hyperledger/fabric-test/main/tools/chaincode-integration/fabric-chaincode-integration-0.6.0.tgz
+npm init -y && npm install -s fabric-chaincode-integration-0.6.0.tgz
 ```
 
 Check that the tool is working by getting the help text
@@ -72,7 +72,7 @@ The default action is to run the tests, reading the cucumber-js config file `cuc
 
 On first usage, run `$(npm bin)/fabric-chaincode-integration init` to copy to the current directory the configuration file `cucumber.js`. It is required that the `cucumber.js` file will be updated. 
 
-Update the configuration, and then rerun the same command. This will run the default set of tags `@basic-checks or @advanced-types or @metadata-checks`
+Update the configuration, and then rerun the same command. This will run the default set of tags `@basic-checks or @advanced-types or @metadata-checks or @ccaas`
 To change which tags are used, set environment variable `SCENARIO_TAGS`. You can limit which of these are run by specifying a [cucumber tag expression](https://cucumber.io/docs/cucumber/api/#tag-expressions). Check the list of tests for the tags available.
 
 
