@@ -1,6 +1,6 @@
 {
   "name": "@hyperledger/fabric-chaincode-integration",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A tool for testing fabric chaincode implementations",
   "bin": {
     "fabric-chaincode-integration": "dist/run.js"
