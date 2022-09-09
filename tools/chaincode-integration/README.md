@@ -64,7 +64,7 @@ Options:
       --version  Show version number                                   [boolean]
       --help     Show help                                             [boolean]
   -p, --profile                                                [default: "prod"]
-  -t, --tags   [default: "@basic-checks or @advanced-types or @metadata-checks"]
+  -t, --tags   [default: "@basic-checks or @advanced-types or @metadata-checks or @ccaas-checks"]
 
 ```
 
@@ -72,7 +72,7 @@ The default action is to run the tests, reading the cucumber-js config file `cuc
 
 On first usage, run `$(npm bin)/fabric-chaincode-integration init` to copy to the current directory the configuration file `cucumber.js`. It is required that the `cucumber.js` file will be updated. 
 
-Update the configuration, and then rerun the same command. This will run the default set of tags `@basic-checks or @advanced-types or @metadata-checks or @ccaas`
+Update the configuration, and then rerun the same command. This will run the default set of tags `@basic-checks or @advanced-types or @metadata-checks or @ccaas-checks`
 To change which tags are used, set environment variable `SCENARIO_TAGS`. You can limit which of these are run by specifying a [cucumber tag expression](https://cucumber.io/docs/cucumber/api/#tag-expressions). Check the list of tests for the tags available.
 
 

@@ -44,7 +44,7 @@ yargs
                 .option('t', {
                     alias: 'tags',
                     describe: 'tags defined in the feature files',
-                    default: '@basic-checks or @advanced-types or @metadata-checks or @ccaas',
+                    default: '@basic-checks or @advanced-types or @metadata-checks or @ccaas-checks',
                 });
         },
         async (argv: any) => {
