@@ -11,7 +11,7 @@ schedules:
     displayName: InterOp Testing
     branches:
       include:
-        - release-2.4
+        - release-2.5
     always: true
 
 variables:
@@ -19,7 +19,7 @@ variables:
   - name: ARTIFACT_DIRECTORY
     value: $(Pipeline.Workspace)
   - name: BRANCH
-    value: release-2.4
+    value: release-2.5
   - name: FABRIC_CFG_PATH
     value: $(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/config/
   - name: GO_BIN
@@ -33,7 +33,7 @@ variables:
   - name: PATH
     value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
   - name: RELEASE
-    value: 2.4-stable
+    value: 2.5-stable
   - name: WORKING_DIRECTORY
     value: $(System.DefaultWorkingDirectory)
 
