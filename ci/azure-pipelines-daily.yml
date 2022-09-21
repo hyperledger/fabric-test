@@ -12,7 +12,7 @@ schedules:
     displayName: 'Fabric Test Daily Job'
     branches:
       include:
-        - release-2.4
+        - release-2.5
     always: true
 
 variables:
