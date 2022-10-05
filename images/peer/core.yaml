@@ -512,7 +512,7 @@ chaincode:
     name:
 
   # Generic builder environment, suitable for most chaincode types
-  builder: hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-2.2-stable
+  builder: hyperledger-fabric.jfrog.io/fabric-ccenv:amd64-2.4-stable
 
   # Enables/disables force pulling of the base docker images (listed below)
   # during user chaincode instantiation.
@@ -521,7 +521,7 @@ chaincode:
 
   golang:
     # golang will never need more than baseos
-    runtime: hyperledger-fabric.jfrog.io/fabric-baseos:amd64-2.2-stable
+    runtime: hyperledger-fabric.jfrog.io/fabric-baseos:amd64-2.4-stable
 
     # whether or not golang chaincode should be linked dynamically
     dynamicLink: false
@@ -531,11 +531,11 @@ chaincode:
     # tools added for java shim layer packaging.
     # This image is packed with shim layer libraries that are necessary
     # for Java chaincode runtime.
-    runtime: hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-2.2-stable
+    runtime: hyperledger-fabric.jfrog.io/fabric-javaenv:amd64-2.4-stable
 
   node:
     # This is an image based on node:$(NODE_VER)-alpine
-    runtime: hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-2.2-stable
+    runtime: hyperledger-fabric.jfrog.io/fabric-nodeenv:amd64-2.4-stable
 
   # List of directories to treat as external builders and launchers for
   # chaincode. The external builder detection processing will iterate over the
