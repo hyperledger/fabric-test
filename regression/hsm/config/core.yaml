@@ -163,15 +163,15 @@ chaincode:
     id:
         path:
         name:
-    builder: hyperledger/fabric-ccenv:2.1
+    builder: hyperledger/fabric-ccenv:2.4
     pull: false
     golang:
-        runtime: hyperledger/fabric-baseos:2.1
+        runtime: hyperledger/fabric-baseos:2.4
         dynamicLink: false
     java:
         runtime: $(DOCKER_NS)/fabric-javaenv:$(TWO_DIGIT_VERSION)
     node:
-        runtime: $(DOCKER_NS)/fabric-nodeenv:2.1
+        runtime: $(DOCKER_NS)/fabric-nodeenv:2.4
     externalBuilders: []
     installTimeout: 300s
     startuptimeout: 300s
