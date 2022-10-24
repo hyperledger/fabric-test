@@ -27,7 +27,7 @@ variables:
   - name: GO_PATH
     value: $(Agent.BuildDirectory)/go
   - name: GO_VER
-    value: 1.18.2
+    value: 1.18.7
   - name: NODE_VER
     value: 16.17.0
   - name: PATH
