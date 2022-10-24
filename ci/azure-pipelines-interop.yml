@@ -27,7 +27,7 @@ variables:
   - name: GO_PATH
     value: $(Agent.BuildDirectory)/go
   - name: GO_VER
-    value: 1.18.2
+    value: 1.18.7
   - name: NODE_VER # OVERRIDE NODE VERSION IN BuildChaincodeNode AND TestNodeChaincode JOBS (BELOW) IN RELEASE-2.2 SINCE NODE CHAINCODE V2.2 DOESN'T SUPPORT MORE RECENT NODE VERSIONS
     value: 16.17.0
   - name: PATH
