@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ARG SOFTHSM_VERSION=2.6.1
 
-FROM alpine:3.16
+FROM alpine:3.14
 
 ARG SOFTHSM_VERSION
 
