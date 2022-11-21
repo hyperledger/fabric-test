@@ -28,7 +28,7 @@ variables:
     value: $(Agent.BuildDirectory)/go
   - name: GO_VER
     value: 1.18.2
-  - name: NODE_VER # OVERRIDE NODE VERSION IN TestNodeChaincode JOB (BELOW) IN RELEASE-2.2 SINCE NODE CHAINCODE V2.2 DOESN'T SUPPORT MORE RECENT NODE VERSIONS
+  - name: NODE_VER # OVERRIDE NODE VERSION IN BuildChaincodeNode AND TestNodeChaincode JOBS (BELOW) IN RELEASE-2.2 SINCE NODE CHAINCODE V2.2 DOESN'T SUPPORT MORE RECENT NODE VERSIONS
     value: 16.17.0
   - name: PATH
     value: $(Agent.BuildDirectory)/go/bin:$(Agent.BuildDirectory)/go/src/github.com/hyperledger/fabric-test/bin:/bin:/usr/bin:/sbin:/usr/sbin:/usr/local/bin:/usr/local/sbin
@@ -71,6 +71,9 @@ stages:
       - job: BuildChaincodeNode
         pool:
           vmImage: ubuntu-18.04
+        variables:
+          - name: NODE_VER # OVERRIDE NODE VERSION IN RELEASE-2.2 SINCE NODE CHAINCODE V2.2 DOESN'T SUPPORT MORE RECENT NODE VERSIONS
+            value: 12.22.6
         steps:
           - template: templates/install_deps.yml
           - script: mkdir -p $(GO_BIN)
