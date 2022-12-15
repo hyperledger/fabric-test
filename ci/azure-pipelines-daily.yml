@@ -31,7 +31,7 @@ stages:
     dependsOn: []
     displayName: Barebones Network
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job:
         displayName: Run Scenario
@@ -53,7 +53,7 @@ stages:
     dependsOn: []
     displayName: Basic Network
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job:
         displayName: Run Scenario
@@ -74,7 +74,7 @@ stages:
     dependsOn: []
     displayName: Smoke Network
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job:
         displayName: Run Scenario
@@ -95,7 +95,7 @@ stages:
     dependsOn: []
     displayName: Upgrade Network From 1.4 Directly to 2.2
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job: Upgrade1_4to2_2
         displayName: Run Scenario
@@ -111,7 +111,7 @@ stages:
     dependsOn: []
     displayName: HSM Network
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job:
         displayName: Run Scenario
