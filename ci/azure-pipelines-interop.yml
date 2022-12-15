@@ -46,11 +46,11 @@ stages:
     dependsOn: []
     displayName: Package Source Code
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job: PackageFabricSource
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - script: |
               git clone -b "${BRANCH}" https://github.com/hyperledger/fabric --single-branch fabric
@@ -66,11 +66,11 @@ stages:
       - FabricSource
     displayName: Build Images
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job: BuildChaincodeNode
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - template: templates/install_deps.yml
           - script: mkdir -p $(GO_BIN)
@@ -86,7 +86,7 @@ stages:
 
       - job: BuildChaincodeJava
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - template: templates/install_deps.yml
           - script: mkdir -p $(GO_BIN)
@@ -102,7 +102,7 @@ stages:
 
       - job: BuildFabric
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         strategy:
           matrix:
             BaseOS:
@@ -133,7 +133,7 @@ stages:
 
       - job: BuildFabricCA
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - template: templates/install_deps.yml
           - script: mkdir -p $(GO_BIN)
@@ -152,11 +152,11 @@ stages:
       - BuildImages
     displayName: Interop Testing
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job: TestNodeChaincode
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - download: current
             patterns: '*-docker.tgz'
@@ -172,7 +172,7 @@ stages:
 
       - job: TestJavaChaincode
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - download: current
             patterns: '*-docker.tgz'
@@ -188,7 +188,7 @@ stages:
 
       - job: TestNodeSDK
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - download: current
             patterns: '*-docker.tgz'
@@ -219,11 +219,11 @@ stages:
       - BuildImages
     displayName: Functional Testing
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job: FunctionalTests
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - download: current
             patterns: '*-docker.tgz'
@@ -244,11 +244,11 @@ stages:
       - Functional
     displayName: Publish
     pool:
-      vmImage: ubuntu-18.04
+      vmImage: ubuntu-20.04
     jobs:
       - job: PublishArtifacts
         pool:
-          vmImage: ubuntu-18.04
+          vmImage: ubuntu-20.04
         steps:
           - download: current
             patterns: '*-docker.tgz'
@@ -279,7 +279,7 @@ stages:
 
 #      - job: TestGateway
 #        pool:
-#          vmImage: ubuntu-18.04
+#          vmImage: ubuntu-20.04
 #        steps:
 #          - download: current
 #            patterns: '*-docker.tgz'
@@ -288,7 +288,7 @@ stages:
 #
 #      - job: TestContractAPIGo
 #        pool:
-#          vmImage: ubuntu-18.04
+#          vmImage: ubuntu-20.04
 #        steps:
 #          - download: current
 #            patterns: '*-docker.tgz'
