@@ -9,7 +9,8 @@ cd "${GOPATH}/src/github.com/hyperledger/fabric-ca"
 cp "${ARTIFACT_DIRECTORY}/ca-source/ca-source.tgz" .
 tar -xzf ca-source.tgz
 
-for target in linux-amd64 darwin-amd64; do
+# Until cross-compiling gets fixed, just build on linux-amd64 for now
+for target in linux-amd64; do
 	make "release/${target}"
 	pushd "release/${target}"
 	tar -czvf "hyperledger-fabric-ca-${target}-${RELEASE}.tar.gz" bin
