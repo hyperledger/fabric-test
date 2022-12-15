@@ -28,9 +28,7 @@ printf "\nDownloading fabric-%s binaries from Artifactory\n" "${ARCH}"
 REPOS=("$@")
 mkdir -p "${WD}/bin"
 for repo in "${REPOS[@]}"; do
-	#Temporarily pull from '2.5-stable' instead of 'latest'
-	#ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
-	ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-2.5-stable.tar.gz
+	ARTIFACTORY_URL=https://hyperledger.jfrog.io/hyperledger/fabric-binaries/hyperledger-${repo}-${ARCH}-${RELEASE_VERSION}.tar.gz
 	curl -sS "${ARTIFACTORY_URL}" -o binaries.tgz
 	tar -xf binaries.tgz
 	rm -rf binaries.tgz
