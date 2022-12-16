@@ -3,7 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 ARG SOFTHSM_VERSION=2.6.1
 
-FROM alpine:3.16
+# NOTE - 1.18.2-alpine3.14 is the last version we can build pkcs11 on without changes.
+# Need to investigate what is needed to move up to later Alpine versions.
+# Go 1.18.2 is latest Go version available on Alpine 3.14 images.
+
+FROM alpine:3.14
 
 ARG SOFTHSM_VERSION
 
