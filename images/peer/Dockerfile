@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-ARG ALPINE_VER=3.14
+ARG ALPINE_VER=3.16
 ARG BRANCH=release-2.4
 ARG GO_TAGS=pkcs11
 ARG GO_VER=1.18.2
