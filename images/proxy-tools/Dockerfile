@@ -1,12 +1,16 @@
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
-ARG ALPINE_VER=3.16
+
+# NOTE - 1.18.2-alpine3.14 is the last version we can build pkcs11 on without changes.
+# Need to investigate what is needed to move up to later Alpine versions.
+# Go 1.18.2 is latest Go version available on Alpine 3.14 images.
+ARG ALPINE_VER=3.14
 ARG FABRIC_BRANCH="release-2.5"
 ARG FABRIC_CA_BRANCH="main"
 ARG GO_LDFLAGS=-"linkmode external -extldflags '-lpthread'"
 ARG GO_TAGS=pkcs11
-ARG GO_VER=1.18.7
+ARG GO_VER=1.18.2
 ARG PROXY_VERSION=2032875
 
 FROM golang:${GO_VER}-alpine${ALPINE_VER} as ca-builder
