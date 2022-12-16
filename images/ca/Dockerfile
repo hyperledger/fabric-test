@@ -1,7 +1,7 @@
 # Copyright IBM Corp. All Rights Reserved.
 #
 # SPDX-License-Identifier: Apache-2.0
-ARG ALPINE_VER=3.14
+ARG ALPINE_VER=3.16
 ARG BRANCH="main"
 ARG GO_LDFLAGS=-"linkmode external -extldflags '-lpthread'"
 ARG GO_TAGS=pkcs11
