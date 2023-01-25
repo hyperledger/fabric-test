@@ -20,5 +20,9 @@ export GITHUB_WORKSPACE=$(pwd)
 curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh | bash -s -- binary
 npm install -g @hyperledger-labs/weft  
 
+export PATH=$(pwd)/bin:$PATH
+export FABRIC_CFG_PATH=$(pwd)/config
+
+peer version
 
 ./gradlew :fabric-chaincode-integration-test:build -xdependencyCheckAnalyze 
