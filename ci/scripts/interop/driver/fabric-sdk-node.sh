@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 set -euo pipefail
 
-git clone -b release-2.2 https://github.com/hyperledger/fabric-sdk-node --single-branch "${ARTIFACT_DIRECTORY}/fabric-sdk-node"
+git clone -b main https://github.com/hyperledger/fabric-sdk-node --single-branch "${ARTIFACT_DIRECTORY}/fabric-sdk-node"
 cd "${ARTIFACT_DIRECTORY}/fabric-sdk-node"
 
 npm install
