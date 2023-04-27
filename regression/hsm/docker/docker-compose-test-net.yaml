@@ -47,7 +47,11 @@ services:
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
+<<<<<<< HEAD
     image: couchdb:3.1
+=======
+    image: couchdb:3.3.2
+>>>>>>> 2213953a (Bump CouchDB to 3.3.2)
     networks:
       test:
 
@@ -101,7 +105,11 @@ services:
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
+<<<<<<< HEAD
     image: couchdb:3.1
+=======
+    image: couchdb:3.3.2
+>>>>>>> 2213953a (Bump CouchDB to 3.3.2)
     networks:
       test:
 

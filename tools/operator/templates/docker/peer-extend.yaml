@@ -23,7 +23,11 @@
 #@       j = j + config.peerOrganizations[k].numPeers
 #@       container_name = "couchdb-peer{}-{}".format(j, org.name)
 #@       env = ["COUCHDB_USER=admin", "COUCHDB_PASSWORD=adminpw"]
+<<<<<<< HEAD
 #@       services[container_name] = {"container_name":container_name, "environment":env, "image":"couchdb:3.1", "ports":["{}:5984".format(couchDBUniquePort)]}
+=======
+#@       services[container_name] = {"container_name":container_name, "environment":env, "image":"couchdb:3.3.2", "ports":["{}:5984".format(couchDBUniquePort)]}
+>>>>>>> 2213953a (Bump CouchDB to 3.3.2)
 #@       couchDBUniquePort += 1
 #@     end
 #@     end
