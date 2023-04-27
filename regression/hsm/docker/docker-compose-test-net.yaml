@@ -47,7 +47,7 @@ services:
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
-    image: couchdb:3.2
+    image: couchdb:3.3.2
     networks:
       test:
 
@@ -101,7 +101,7 @@ services:
     environment:
       - COUCHDB_USER=admin
       - COUCHDB_PASSWORD=adminpw
-    image: couchdb:3.2
+    image: couchdb:3.3.2
     networks:
       test:
 
