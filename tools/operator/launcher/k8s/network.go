@@ -16,7 +16,7 @@ import (
 	"github.com/hyperledger/fabric-test/tools/operator/networkspec"
 )
 
-//K8s -
+// K8s -
 type K8s struct {
 	KubeConfigPath string
 	Action         string
@@ -25,7 +25,7 @@ type K8s struct {
 	Launch         []LaunchConfig
 }
 
-//LaunchConfig --
+// LaunchConfig --
 type LaunchConfig struct {
 	Name       string
 	Type       string
@@ -100,7 +100,7 @@ func (k8s K8s) launchObject(nsConfig networkspec.Config) ([]LaunchConfig, error)
 				container = corev1.Container{
 					Name:            "couchdb",
 					Resources:       k8s.resources(nsConfig.K8s.Resources.Couchdb),
-					Image:           "couchdb:3.1",
+					Image:           "couchdb:3.3.2",
 					ImagePullPolicy: corev1.PullPolicy("Always"),
 					Env: []corev1.EnvVar{
 						{
@@ -406,7 +406,7 @@ func (k8s K8s) volumesList(componentType, orgName, name, dataPersistence string,
 	return volumes
 }
 
-//GenerateConfigurationFiles - to generate all the configuration files
+// GenerateConfigurationFiles - to generate all the configuration files
 func (k8s K8s) GenerateConfigurationFiles(upgrade bool) error {
 
 	network := nl.Network{}
@@ -449,7 +449,7 @@ func (k8s K8s) buildClientset(kubeconfig *string) (*kubernetes.Clientset, error)
 	return clientset, nil
 }
 
-//Network --
+// Network --
 func (k8s K8s) Network(action string) error {
 
 	var err error
