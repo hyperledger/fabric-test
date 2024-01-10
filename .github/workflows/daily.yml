@@ -9,9 +9,18 @@ on:
 jobs:
     test_schedule:
         runs-on: ubuntu-20.04
+        strategy:
+            fail-fast: false
+            matrix:
+              branch:
+                - "main"
+                - "release-2.5"
+                - "release-2.4"        
         steps:
-            - uses: actions/checkout@v4
-            - name: HSM
-              run: make regression/hsm
+          - uses: actions/checkout@v4
+            with:
+              ref: ${{ matrix.branch }}
+          - name: HSM
+            run: make regression/hsm
 
 
