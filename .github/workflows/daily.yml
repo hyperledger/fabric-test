@@ -1,0 +1,17 @@
+name: Daily Tests
+
+on:
+    workflow_dispatch:
+    schedule:
+        # Midnight UTC
+        - cron: "0 0 * * *"
+  
+jobs:
+    test_schedule:
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v4
+            - name: HSM
+              run: make regression/hsm
+
+
