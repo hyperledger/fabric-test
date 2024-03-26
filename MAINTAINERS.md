@@ -11,7 +11,6 @@ See [the documentation on Maintainers](https://hyperledger-fabric.readthedocs.io
 | Name             | Github                | LFID             |
 | ---------------- | --------------------- | ---------------- |
 | Dave Enyeart     | [denyeart][denyeart]  | denyeart         |
-| David Kelsey     | [davidkel][davidkel]  | davidkel         |
 | Matthew B White  | [mbwhite][mbwhite]    | calanais         |
 
 ## Retired Maintainers
@@ -27,6 +26,7 @@ See [the documentation on Maintainers](https://hyperledger-fabric.readthedocs.io
 | Latitia Haskins           | lhaskins         |
 | Scott Zwierzynski         | scottz64         |
 | Surya Lanka               | suryalnvs        |
+| David Kelsey              | davidkel         |
 
 For additional support, refer to the [Fabric Maintainers list](https://github.com/hyperledger/fabric/blob/main/MAINTAINERS.md).
 
