@@ -51,7 +51,7 @@
   "dependencies": {
     "@cucumber/cucumber": "^7.3.2",
     "@cucumber/pretty-formatter": "^1.0.0-alpha.1",
-    "@grpc/grpc-js": "^1.5.7",
+    "@grpc/grpc-js": "^1.10.9",
     "@hyperledger/fabric-gateway": "^1.0.1",
     "@tsconfig/node14": "^1.0.1",
     "@types/yargs": "^17.0.9",
