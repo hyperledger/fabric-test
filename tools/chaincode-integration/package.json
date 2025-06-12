@@ -49,7 +49,7 @@
     "rimraf": "^3.0.2"
   },
   "dependencies": {
-    "@cucumber/cucumber": "^7.3.2",
+    "@cucumber/cucumber": "^10.3.2",
     "@cucumber/pretty-formatter": "^1.0.0-alpha.1",
     "@grpc/grpc-js": "^1.10.9",
     "@hyperledger/fabric-gateway": "^1.0.1",
