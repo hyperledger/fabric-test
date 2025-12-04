@@ -8,10 +8,10 @@ See [the documentation on Maintainers](https://hyperledger-fabric.readthedocs.io
 
 ## Active Maintainers
 
-| Name             | Github                | LFID             |
-| ---------------- | --------------------- | ---------------- |
-| Dave Enyeart     | [denyeart][denyeart]  | denyeart         |
-| Matthew B White  | [mbwhite][mbwhite]    | calanais         |
+| Name             | Github                       | Email                |
+| ---------------- | ---------------------------- | -------------------- |
+| Dave Enyeart     | [denyeart][denyeart]         | enyeart@us.ibm.com   |
+| Thomas Leung     | [Thomas-Leung][Thomas-Leung] | thomas.leung@ibm.com |
 
 ## Retired Maintainers
 
@@ -27,9 +27,9 @@ See [the documentation on Maintainers](https://hyperledger-fabric.readthedocs.io
 | Scott Zwierzynski         | scottz64         |
 | Surya Lanka               | suryalnvs        |
 | David Kelsey              | davidkel         |
+| Matthew B White           | mbwhite          |
 
 For additional support, refer to the [Fabric Maintainers list](https://github.com/hyperledger/fabric/blob/main/MAINTAINERS.md).
 
 [denyeart]: https://github.com/denyeart
-[davidkel]: https://github.com/davidkel
-[mbwhite]: https://github.com/mbwhite
+[Thomas-Leung]: https://github.com/Thomas-Leung
